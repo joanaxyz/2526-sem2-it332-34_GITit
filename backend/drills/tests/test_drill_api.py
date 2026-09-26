@@ -4,7 +4,7 @@ from django.core.management import call_command
 from rest_framework.test import APIClient
 
 from adventures.models import AdventureLevel
-from drills.models import DrillProgress, DrillRun
+from drills.models import DrillProgress
 from drills.selectors import drill_card_keys
 from players.services import get_or_create_player
 
@@ -105,9 +105,7 @@ def test_best_accuracy_keeps_the_high_water_mark(db, django_user_model):
     url = f"/api/adventure-levels/{level.id}/drill/results/"
 
     client.post(url, result_body(answers_total=10, answers_correct=9), format="json")
-    response = client.post(
-        url, result_body(answers_total=10, answers_correct=4), format="json"
-    )
+    response = client.post(url, result_body(answers_total=10, answers_correct=4), format="json")
 
     progress = response.json()["progress"]
     assert progress["best_accuracy"] == 90
@@ -201,9 +199,7 @@ def test_the_chapter_overview_reports_drill_state_per_level(db, django_user_mode
     call_command("seed_drills")
     client, _player = make_client(django_user_model)
     level = first_drillable_level()
-    client.post(
-        f"/api/adventure-levels/{level.id}/drill/results/", result_body(), format="json"
-    )
+    client.post(f"/api/adventure-levels/{level.id}/drill/results/", result_body(), format="json")
 
     overview = client.get(f"/api/chapters/{level.chapter_id}/overview/").json()
 

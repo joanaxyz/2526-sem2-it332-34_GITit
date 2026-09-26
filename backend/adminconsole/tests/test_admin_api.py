@@ -284,7 +284,6 @@ def test_staff_can_create_and_edit_story(django_user_model):
             "slug": "new-spire",
             "title": "New Spire",
             "summary": "An admin-authored campaign.",
-            "price": 125,
             "world_slug": "arcane-spire",
             "difficulty": "intermediate",
             "sort_order": 12,
@@ -336,7 +335,6 @@ def test_staff_can_create_and_edit_story(django_user_model):
         {
             "title": "The New Spire",
             "summary": "Updated campaign.",
-            "price": 150,
             "world_slug": "frostbound-citadel",
             "difficulty": "advanced",
             "sort_order": 13,
@@ -349,7 +347,6 @@ def test_staff_can_create_and_edit_story(django_user_model):
     chapter = Chapter.objects.get(id=chapter_id)
     assert story.is_published is True
     assert story.title == "The New Spire"
-    assert story.price == 150
     assert story.management_source == MANAGEMENT_SOURCE_ADMIN
     assert chapter.number == 2
     assert chapter.title == "Reliable Foundations"
@@ -468,7 +465,6 @@ def test_seed_owned_curriculum_row_transfers_whole_row_to_admin(django_user_mode
         {
             "title": "Admin Arcane Spire",
             "summary": "Admin-owned complete row.",
-            "price": 25,
             "difficulty": "intermediate",
             "sort_order": 9,
         },
@@ -675,6 +671,8 @@ def test_staff_analytics_returns_shape(django_user_model):
         "scr": {"value": None, "numerator": 0, "denominator": 0},
         "car": {"value": None, "numerator": 0, "denominator": 0},
         "hlcr": {"value": None, "numerator": 0, "denominator": 0},
+        "rta": {"value": None, "numerator": 0, "denominator": 0},
+        "retry_success_rate": {"value": None, "numerator": 0, "denominator": 0},
         "rtr": {"value": None, "numerator": 0, "denominator": 0},
         "arc": {"value": None, "numerator": 0, "denominator": 0},
     }

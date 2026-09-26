@@ -12,9 +12,10 @@ from challenges.models import ChallengeRun
 from curriculum.models import Story
 from progress.selectors import total_adventure_level_completions, total_challenge_trial_completions
 from progress.services import MetricsService
+from progress.services.kpi_range import ALL_TIME, KpiRange
 
 
-def admin_analytics_payload(*, now=None) -> dict:
+def admin_analytics_payload(*, now=None, kpi_range: KpiRange = ALL_TIME) -> dict:
     """Return run, completion, learner, and per-story analytics."""
 
     now = now or timezone.now()
@@ -112,5 +113,12 @@ def admin_analytics_payload(*, now=None) -> dict:
         "per_story": per_story,
         # Staff-only system diagnostics. The MetricsService remains the sole
         # formula owner for these replay-excluded Runebound measures.
-        "runebound_performance": MetricsService().all_player_performance_summary(),
+        # KPI sections exclude staff accounts and honour the optional date
+        # range; the run/completion totals above are unscoped activity counts.
+        "kpi_range": kpi_range.payload(),
+        "runebound_performance": MetricsService().all_player_performance_summary(
+            kpi_range=kpi_range
+        ),
+        # Per-SO CAR, keyed by official SO code (see progress.objectives).
+        "objectives": MetricsService().all_player_objective_car(kpi_range=kpi_range),
     }

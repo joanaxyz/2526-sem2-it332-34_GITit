@@ -3,7 +3,7 @@ import { deriveAchievements, type Achievement } from '@/features/home/utils/achi
 import type { SkillAxis, StatsSummary, TrendPoint } from '@/features/stats/types'
 import { activityWindowOption, type ActivityWindow } from '@/features/stats/utils/activityWindow'
 
-export type HomeActivityPoint = {
+type HomeActivityPoint = {
   date: string
   /** Axis tick: "Jun 9" for a day bucket, "Jun" for a month of them. */
   label: string

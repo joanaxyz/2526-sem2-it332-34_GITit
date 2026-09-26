@@ -149,6 +149,10 @@ jobs:
         run: npm ci
       - name: Generated target replay guard
         run: python scripts/check_generated_targets_current.py
+      # The default pytest job has no Node, so these replays skip there.
+      - name: Module 4 variant solution replays
+        working-directory: backend
+        run: pytest -q curriculum/tests/test_module_4_variants.py
 
   # Proves a clean PostgreSQL database migrates from zero, audits Python
   # dependencies, verifies committed migration history, and runs the backend

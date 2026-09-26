@@ -3,7 +3,13 @@ from collections.abc import Mapping
 from rest_framework import serializers
 
 from curriculum.models import Story
-from progress.serializers import PerformanceSummaryResponseSerializer
+from progress.serializers import (
+    PerformanceKpiSetSerializer,
+    PerformanceModuleSerializer,
+    PerformanceSummaryResponseSerializer,
+    RateMetricSerializer,
+)
+from progress.services.kpi_range import KpiRange
 
 
 class StrictSerializer(serializers.Serializer):
@@ -44,6 +50,34 @@ class AdminUserListResponseSerializer(serializers.Serializer):
 
 class AdminUserListQuerySerializer(serializers.Serializer):
     q = serializers.CharField(required=False, allow_blank=True, max_length=255)
+
+
+class AdminKpiRangeQuerySerializer(serializers.Serializer):
+    """Optional KPI date range, as whole days in Philippine time (Asia/Manila).
+
+    Both bounds are inclusive local dates; either may be omitted.
+    """
+
+    start_date = serializers.DateField(required=False)
+    end_date = serializers.DateField(required=False)
+
+    def validate(self, attrs):
+        start, end = attrs.get("start_date"), attrs.get("end_date")
+        if start and end and start > end:
+            raise serializers.ValidationError(
+                {"end_date": "End date must not be before start date."}
+            )
+        return attrs
+
+    def kpi_range(self) -> KpiRange:
+        data = self.validated_data
+        return KpiRange(start_date=data.get("start_date"), end_date=data.get("end_date"))
+
+
+class AdminKpiRangeSerializer(serializers.Serializer):
+    start_date = serializers.DateField(allow_null=True)
+    end_date = serializers.DateField(allow_null=True)
+    timezone = serializers.CharField()
 
 
 class AdminUserActionRequestSerializer(StrictSerializer):
@@ -214,6 +248,19 @@ class AdminAnalyticsResponseSerializer(serializers.Serializer):
     active_learners_30d = serializers.IntegerField(min_value=0)
     per_story = AdminStoryAnalyticsSerializer(many=True)
     runebound_performance = PerformanceSummaryResponseSerializer()
+    kpi_range = AdminKpiRangeSerializer(
+        help_text="Date range the KPI sections cover; null bounds mean all time."
+    )
+    objectives = serializers.DictField(
+        child=RateMetricSerializer(),
+        help_text="Per-SO Command Accuracy Rate keyed by official SO code, e.g. 'SO 1.1'.",
+    )
+
+
+class AdminUserKpisResponseSerializer(serializers.Serializer):
+    has_data = serializers.BooleanField()
+    kpis = PerformanceKpiSetSerializer(allow_null=True)
+    modules = PerformanceModuleSerializer(many=True)
 
 
 class AdminModerationContentSerializer(serializers.Serializer):

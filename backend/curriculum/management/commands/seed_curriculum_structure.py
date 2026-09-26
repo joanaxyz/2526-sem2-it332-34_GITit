@@ -144,9 +144,7 @@ class SeedCurriculumStructureMixin:
         # owned by this seed. The separately imported Runebound Turret story is
         # present in STORIES for catalog visibility, but its Module 0-4 chapters
         # are owned by seed_legacy_modules and must survive a canonical reseed.
-        managed_story_slugs = {
-            spec.get("story", "arcane-spire") for spec in CHAPTERS
-        }
+        managed_story_slugs = {spec.get("story", "arcane-spire") for spec in CHAPTERS}
         Chapter.objects.filter(
             management_source=MANAGEMENT_SOURCE_SEED,
             story__slug__in=managed_story_slugs,

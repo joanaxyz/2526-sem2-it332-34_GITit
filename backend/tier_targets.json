@@ -31377,5 +31377,5231 @@
       "c4",
       "c5"
     ]
+  },
+  "re6": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Initial commit",
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "readme-v0"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "README.md": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Add config module",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v0",
+          "config.py": "config-v1"
+        },
+        "changes": {
+          "config.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "config-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "config.py": "added"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Risky config change",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v0",
+          "config.py": "config-v2-risky"
+        },
+        "changes": {
+          "config.py": {
+            "change_type": "modified",
+            "before": "config-v1",
+            "after": "config-v2-risky"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "config.py": "modified"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Unrelated follow-up",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v0",
+          "config.py": "config-v2-risky",
+          "notes.md": "notes-v1"
+        },
+        "changes": {
+          "notes.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "notes-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "notes.md": "added"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Revert \"Unrelated follow-up\"",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v0",
+          "config.py": "config-v2-risky"
+        },
+        "changes": {
+          "notes.md": {
+            "change_type": "deleted",
+            "before": "notes-v1",
+            "after": null
+          }
+        },
+        "files": {
+          "notes.md": "deleted"
+        },
+        "author": "GIT it",
+        "order": 4,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c4"
+    },
+    "head": {
+      "type": "branch",
+      "name": "main",
+      "target": "c4"
+    },
+    "remotes": {
+      "origin": "https://example.test/backend-service.git"
+    },
+    "remote_branches": {
+      "origin/main": "c4"
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c4",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{1}",
+        "target": "c4",
+        "message": "revert: c3"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_revert_source": "c3",
+      "last_revert_created_commit": "c4",
+      "last_revert_no_edit": false,
+      "last_push_remote": "origin",
+      "last_push_branch": "main",
+      "last_push_remote_branch": "origin/main",
+      "last_push_commit": "c4",
+      "force_with_lease": false,
+      "force_push_with_lease": false
+    },
+    "last_revert_source": "c3",
+    "last_revert_created_commit": "c4",
+    "last_revert_no_edit": false,
+    "last_push_remote": "origin",
+    "last_push_branch": "main",
+    "last_push_remote_branch": "origin/main",
+    "last_push_commit": "c4",
+    "force_with_lease": false,
+    "force_push_with_lease": false
+  },
+  "re7": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Initial site",
+        "parents": [],
+        "tree": {
+          "index.html": "home-v1",
+          "README.md": "site-readme"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "site-readme"
+          },
+          "index.html": {
+            "change_type": "added",
+            "before": null,
+            "after": "home-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "README.md": "added",
+          "index.html": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Add pricing page",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "index.html": "home-v1",
+          "README.md": "site-readme",
+          "pricing.html": "pricing-v1"
+        },
+        "changes": {
+          "pricing.html": {
+            "change_type": "added",
+            "before": null,
+            "after": "pricing-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "pricing.html": "added"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Add promo banner to homepage",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "index.html": "home-v2-banner",
+          "README.md": "site-readme",
+          "pricing.html": "pricing-v1"
+        },
+        "changes": {
+          "index.html": {
+            "change_type": "modified",
+            "before": "home-v1",
+            "after": "home-v2-banner"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "index.html": "modified"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Revert \"Add promo banner to homepage\"",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "index.html": "home-v1",
+          "README.md": "site-readme",
+          "pricing.html": "pricing-v1"
+        },
+        "changes": {
+          "index.html": {
+            "change_type": "modified",
+            "before": "home-v2-banner",
+            "after": "home-v1"
+          }
+        },
+        "files": {
+          "index.html": "modified"
+        },
+        "author": "GIT it",
+        "order": 3,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c3"
+    },
+    "head": {
+      "type": "branch",
+      "name": "main",
+      "target": "c3"
+    },
+    "remotes": {
+      "origin": "https://example.test/agency-site.git"
+    },
+    "remote_branches": {
+      "origin/main": "c3"
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c3",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{1}",
+        "target": "c3",
+        "message": "revert: c2"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_revert_source": "c2",
+      "last_revert_created_commit": "c3",
+      "last_revert_no_edit": false,
+      "last_push_remote": "origin",
+      "last_push_branch": "main",
+      "last_push_remote_branch": "origin/main",
+      "last_push_commit": "c3",
+      "force_with_lease": false,
+      "force_push_with_lease": false
+    },
+    "last_revert_source": "c2",
+    "last_revert_created_commit": "c3",
+    "last_revert_no_edit": false,
+    "last_push_remote": "origin",
+    "last_push_branch": "main",
+    "last_push_remote_branch": "origin/main",
+    "last_push_commit": "c3",
+    "force_with_lease": false,
+    "force_push_with_lease": false
+  },
+  "re8": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Initial service",
+        "parents": [],
+        "tree": {
+          "src/server.js": "server-v1",
+          "config/timeouts.json": "timeouts-v1-30s"
+        },
+        "changes": {
+          "config/timeouts.json": {
+            "change_type": "added",
+            "before": null,
+            "after": "timeouts-v1-30s"
+          },
+          "src/server.js": {
+            "change_type": "added",
+            "before": null,
+            "after": "server-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "config/timeouts.json": "added",
+          "src/server.js": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Add health endpoint",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/server.js": "server-v1",
+          "config/timeouts.json": "timeouts-v1-30s",
+          "src/health.js": "health-v1"
+        },
+        "changes": {
+          "src/health.js": {
+            "change_type": "added",
+            "before": null,
+            "after": "health-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/health.js": "added"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Add request logging",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/server.js": "server-v1",
+          "config/timeouts.json": "timeouts-v1-30s",
+          "src/health.js": "health-v1",
+          "src/logger.js": "logger-v1"
+        },
+        "changes": {
+          "src/logger.js": {
+            "change_type": "added",
+            "before": null,
+            "after": "logger-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/logger.js": "added"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Log slow queries",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "src/server.js": "server-v1",
+          "config/timeouts.json": "timeouts-v1-30s",
+          "src/health.js": "health-v1",
+          "src/logger.js": "logger-v2"
+        },
+        "changes": {
+          "src/logger.js": {
+            "change_type": "modified",
+            "before": "logger-v1",
+            "after": "logger-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/logger.js": "modified"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Lower API timeout to 1s",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "src/server.js": "server-v1",
+          "config/timeouts.json": "timeouts-v2-1s",
+          "src/health.js": "health-v1",
+          "src/logger.js": "logger-v2"
+        },
+        "changes": {
+          "config/timeouts.json": {
+            "change_type": "modified",
+            "before": "timeouts-v1-30s",
+            "after": "timeouts-v2-1s"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "config/timeouts.json": "modified"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Revert \"Lower API timeout to 1s\"",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "src/server.js": "server-v1",
+          "config/timeouts.json": "timeouts-v1-30s",
+          "src/health.js": "health-v1",
+          "src/logger.js": "logger-v2"
+        },
+        "changes": {
+          "config/timeouts.json": {
+            "change_type": "modified",
+            "before": "timeouts-v2-1s",
+            "after": "timeouts-v1-30s"
+          }
+        },
+        "files": {
+          "config/timeouts.json": "modified"
+        },
+        "author": "GIT it",
+        "order": 5,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c5"
+    },
+    "head": {
+      "type": "branch",
+      "name": "main",
+      "target": "c5"
+    },
+    "remotes": {
+      "origin": "https://example.test/payments-api.git"
+    },
+    "remote_branches": {
+      "origin/main": "c5"
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c5",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{1}",
+        "target": "c5",
+        "message": "revert: c4"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_revert_source": "c4",
+      "last_revert_created_commit": "c5",
+      "last_revert_no_edit": false,
+      "last_push_remote": "origin",
+      "last_push_branch": "main",
+      "last_push_remote_branch": "origin/main",
+      "last_push_commit": "c5",
+      "force_with_lease": false,
+      "force_push_with_lease": false
+    },
+    "last_revert_source": "c4",
+    "last_revert_created_commit": "c5",
+    "last_revert_no_edit": false,
+    "last_push_remote": "origin",
+    "last_push_branch": "main",
+    "last_push_remote_branch": "origin/main",
+    "last_push_commit": "c5",
+    "force_with_lease": false,
+    "force_push_with_lease": false
+  },
+  "rm6": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Initial payroll service",
+        "parents": [],
+        "tree": {
+          "payroll/tax.py": "tax-v1-progressive",
+          "payroll/export.py": "export-v1",
+          "README.md": "payroll-readme-v1"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "payroll-readme-v1"
+          },
+          "payroll/export.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "export-v1"
+          },
+          "payroll/tax.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "tax-v1-progressive"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "README.md": "added",
+          "payroll/export.py": "added",
+          "payroll/tax.py": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Add holiday calendar",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "payroll/tax.py": "tax-v1-progressive",
+          "payroll/export.py": "export-v1",
+          "README.md": "payroll-readme-v1",
+          "payroll/holidays.py": "holidays-v1"
+        },
+        "changes": {
+          "payroll/holidays.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "holidays-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "payroll/holidays.py": "added"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Switch withholding to a flat 30% rate",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "payroll/tax.py": "tax-v2-flat-30",
+          "payroll/export.py": "export-v1",
+          "README.md": "payroll-readme-v1",
+          "payroll/holidays.py": "holidays-v1"
+        },
+        "changes": {
+          "payroll/tax.py": {
+            "change_type": "modified",
+            "before": "tax-v1-progressive",
+            "after": "tax-v2-flat-30"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "payroll/tax.py": "modified"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Add bank file export",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "payroll/tax.py": "tax-v2-flat-30",
+          "payroll/export.py": "export-v2-bank",
+          "README.md": "payroll-readme-v1",
+          "payroll/holidays.py": "holidays-v1"
+        },
+        "changes": {
+          "payroll/export.py": {
+            "change_type": "modified",
+            "before": "export-v1",
+            "after": "export-v2-bank"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "payroll/export.py": "modified"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Document payroll cut-off",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "payroll/tax.py": "tax-v2-flat-30",
+          "payroll/export.py": "export-v2-bank",
+          "README.md": "payroll-readme-v2",
+          "payroll/holidays.py": "holidays-v1"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "modified",
+            "before": "payroll-readme-v1",
+            "after": "payroll-readme-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "README.md": "modified"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Revert \"Switch withholding to a flat 30% rate\"",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "payroll/tax.py": "tax-v1-progressive",
+          "payroll/export.py": "export-v2-bank",
+          "README.md": "payroll-readme-v2",
+          "payroll/holidays.py": "holidays-v1"
+        },
+        "changes": {
+          "payroll/tax.py": {
+            "change_type": "modified",
+            "before": "tax-v2-flat-30",
+            "after": "tax-v1-progressive"
+          }
+        },
+        "files": {
+          "payroll/tax.py": "modified"
+        },
+        "author": "GIT it",
+        "order": 5,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c5"
+    },
+    "head": {
+      "type": "branch",
+      "name": "main",
+      "target": "c5"
+    },
+    "remotes": {
+      "origin": "https://example.test/payroll.git"
+    },
+    "remote_branches": {
+      "origin/main": "c5"
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c5",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{1}",
+        "target": "c5",
+        "message": "revert: c2"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_revert_source": "c2",
+      "last_revert_created_commit": "c5",
+      "last_revert_no_edit": false,
+      "last_push_remote": "origin",
+      "last_push_branch": "main",
+      "last_push_remote_branch": "origin/main",
+      "last_push_commit": "c5",
+      "force_with_lease": false,
+      "force_push_with_lease": false
+    },
+    "last_revert_source": "c2",
+    "last_revert_created_commit": "c5",
+    "last_revert_no_edit": false,
+    "last_push_remote": "origin",
+    "last_push_branch": "main",
+    "last_push_remote_branch": "origin/main",
+    "last_push_commit": "c5",
+    "force_with_lease": false,
+    "force_push_with_lease": false
+  },
+  "rm7": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Initial notification service",
+        "parents": [],
+        "tree": {
+          "notify/push.py": "push-v1-batched",
+          "app/settings.py": "settings-v1"
+        },
+        "changes": {
+          "app/settings.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "settings-v1"
+          },
+          "notify/push.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "push-v1-batched"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "app/settings.py": "added",
+          "notify/push.py": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Add notification templates",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "notify/push.py": "push-v1-batched",
+          "app/settings.py": "settings-v1",
+          "notify/templates.py": "templates-v1"
+        },
+        "changes": {
+          "notify/templates.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "templates-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "notify/templates.py": "added"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Send push notifications every minute",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "notify/push.py": "push-v2-every-minute",
+          "app/settings.py": "settings-v1",
+          "notify/templates.py": "templates-v1"
+        },
+        "changes": {
+          "notify/push.py": {
+            "change_type": "modified",
+            "before": "push-v1-batched",
+            "after": "push-v2-every-minute"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "notify/push.py": "modified"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Add quiet hours",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "notify/push.py": "push-v2-every-minute",
+          "app/settings.py": "settings-v1",
+          "notify/templates.py": "templates-v1",
+          "notify/quiet_hours.py": "quiet-v1"
+        },
+        "changes": {
+          "notify/quiet_hours.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "quiet-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "notify/quiet_hours.py": "added"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Add a settings toggle for sounds",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "notify/push.py": "push-v2-every-minute",
+          "app/settings.py": "settings-v2",
+          "notify/templates.py": "templates-v1",
+          "notify/quiet_hours.py": "quiet-v1"
+        },
+        "changes": {
+          "app/settings.py": {
+            "change_type": "modified",
+            "before": "settings-v1",
+            "after": "settings-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "app/settings.py": "modified"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Document notification settings",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "notify/push.py": "push-v2-every-minute",
+          "app/settings.py": "settings-v2",
+          "notify/templates.py": "templates-v1",
+          "notify/quiet_hours.py": "quiet-v1",
+          "docs/notify.md": "notify-doc-v1"
+        },
+        "changes": {
+          "docs/notify.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "notify-doc-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "docs/notify.md": "added"
+        },
+        "order": 5
+      },
+      {
+        "id": "c6",
+        "message": "Revert \"Send push notifications every minute\"",
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "notify/push.py": "push-v1-batched",
+          "app/settings.py": "settings-v2",
+          "notify/templates.py": "templates-v1",
+          "notify/quiet_hours.py": "quiet-v1",
+          "docs/notify.md": "notify-doc-v1"
+        },
+        "changes": {
+          "notify/push.py": {
+            "change_type": "modified",
+            "before": "push-v2-every-minute",
+            "after": "push-v1-batched"
+          }
+        },
+        "files": {
+          "notify/push.py": "modified"
+        },
+        "author": "GIT it",
+        "order": 6,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c6"
+    },
+    "head": {
+      "type": "branch",
+      "name": "main",
+      "target": "c6"
+    },
+    "remotes": {
+      "origin": "https://example.test/notify.git"
+    },
+    "remote_branches": {
+      "origin/main": "c6"
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c6",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{1}",
+        "target": "c6",
+        "message": "revert: c2"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_revert_source": "c2",
+      "last_revert_created_commit": "c6",
+      "last_revert_no_edit": false,
+      "last_push_remote": "origin",
+      "last_push_branch": "main",
+      "last_push_remote_branch": "origin/main",
+      "last_push_commit": "c6",
+      "force_with_lease": false,
+      "force_push_with_lease": false
+    },
+    "last_revert_source": "c2",
+    "last_revert_created_commit": "c6",
+    "last_revert_no_edit": false,
+    "last_push_remote": "origin",
+    "last_push_branch": "main",
+    "last_push_remote_branch": "origin/main",
+    "last_push_commit": "c6",
+    "force_with_lease": false,
+    "force_push_with_lease": false
+  },
+  "rm8": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Initial docs portal",
+        "parents": [],
+        "tree": {
+          "search/ranking.py": "ranking-v1-relevance",
+          "search/index.py": "index-v1",
+          "ui/results.html": "results-v1"
+        },
+        "changes": {
+          "search/index.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "index-v1"
+          },
+          "search/ranking.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "ranking-v1-relevance"
+          },
+          "ui/results.html": {
+            "change_type": "added",
+            "before": null,
+            "after": "results-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "search/index.py": "added",
+          "search/ranking.py": "added",
+          "ui/results.html": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Sort search results by upload date",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "search/ranking.py": "ranking-v2-by-date",
+          "search/index.py": "index-v1",
+          "ui/results.html": "results-v1"
+        },
+        "changes": {
+          "search/ranking.py": {
+            "change_type": "modified",
+            "before": "ranking-v1-relevance",
+            "after": "ranking-v2-by-date"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "search/ranking.py": "modified"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Add synonym list",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "search/ranking.py": "ranking-v2-by-date",
+          "search/index.py": "index-v1",
+          "ui/results.html": "results-v1",
+          "search/synonyms.py": "synonyms-v1"
+        },
+        "changes": {
+          "search/synonyms.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "synonyms-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "search/synonyms.py": "added"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Paginate the results page",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "search/ranking.py": "ranking-v2-by-date",
+          "search/index.py": "index-v1",
+          "ui/results.html": "results-v2",
+          "search/synonyms.py": "synonyms-v1"
+        },
+        "changes": {
+          "ui/results.html": {
+            "change_type": "modified",
+            "before": "results-v1",
+            "after": "results-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "ui/results.html": "modified"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Document search tips",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "search/ranking.py": "ranking-v2-by-date",
+          "search/index.py": "index-v1",
+          "ui/results.html": "results-v2",
+          "search/synonyms.py": "synonyms-v1",
+          "docs/search.md": "search-doc-v1"
+        },
+        "changes": {
+          "docs/search.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "search-doc-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "docs/search.md": "added"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Revert \"Sort search results by upload date\"",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "search/ranking.py": "ranking-v1-relevance",
+          "search/index.py": "index-v1",
+          "ui/results.html": "results-v2",
+          "search/synonyms.py": "synonyms-v1",
+          "docs/search.md": "search-doc-v1"
+        },
+        "changes": {
+          "search/ranking.py": {
+            "change_type": "modified",
+            "before": "ranking-v2-by-date",
+            "after": "ranking-v1-relevance"
+          }
+        },
+        "files": {
+          "search/ranking.py": "modified"
+        },
+        "author": "GIT it",
+        "order": 5,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c5"
+    },
+    "head": {
+      "type": "branch",
+      "name": "main",
+      "target": "c5"
+    },
+    "remotes": {
+      "origin": "https://example.test/docs-portal.git"
+    },
+    "remote_branches": {
+      "origin/main": "c5"
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c5",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{1}",
+        "target": "c5",
+        "message": "revert: c1"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_revert_source": "c1",
+      "last_revert_created_commit": "c5",
+      "last_revert_no_edit": false,
+      "last_push_remote": "origin",
+      "last_push_branch": "main",
+      "last_push_remote_branch": "origin/main",
+      "last_push_commit": "c5",
+      "force_with_lease": false,
+      "force_push_with_lease": false
+    },
+    "last_revert_source": "c1",
+    "last_revert_created_commit": "c5",
+    "last_revert_no_edit": false,
+    "last_push_remote": "origin",
+    "last_push_branch": "main",
+    "last_push_remote_branch": "origin/main",
+    "last_push_commit": "c5",
+    "force_with_lease": false,
+    "force_push_with_lease": false
+  },
+  "rh6": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Initial checkout flow",
+        "parents": [],
+        "tree": {
+          "flags/checkout.json": "checkout-flag-v1-beta-only",
+          "app/coupons.py": "coupons-v1",
+          "app/tax.py": "tax-v1"
+        },
+        "changes": {
+          "app/coupons.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "coupons-v1"
+          },
+          "app/tax.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "tax-v1"
+          },
+          "flags/checkout.json": {
+            "change_type": "added",
+            "before": null,
+            "after": "checkout-flag-v1-beta-only"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "app/coupons.py": "added",
+          "app/tax.py": "added",
+          "flags/checkout.json": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Enable beta checkout for all users",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "flags/checkout.json": "checkout-flag-v2-all-users",
+          "app/coupons.py": "coupons-v1",
+          "app/tax.py": "tax-v1"
+        },
+        "changes": {
+          "flags/checkout.json": {
+            "change_type": "modified",
+            "before": "checkout-flag-v1-beta-only",
+            "after": "checkout-flag-v2-all-users"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "flags/checkout.json": "modified"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Add order summary email",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "flags/checkout.json": "checkout-flag-v2-all-users",
+          "app/coupons.py": "coupons-v1",
+          "app/tax.py": "tax-v1",
+          "app/email.py": "email-v1"
+        },
+        "changes": {
+          "app/email.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "email-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "app/email.py": "added"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Apply coupon discounts twice",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "flags/checkout.json": "checkout-flag-v2-all-users",
+          "app/coupons.py": "coupons-v2-double",
+          "app/tax.py": "tax-v1",
+          "app/email.py": "email-v1"
+        },
+        "changes": {
+          "app/coupons.py": {
+            "change_type": "modified",
+            "before": "coupons-v1",
+            "after": "coupons-v2-double"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "app/coupons.py": "modified"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Add checkout metrics",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "flags/checkout.json": "checkout-flag-v2-all-users",
+          "app/coupons.py": "coupons-v2-double",
+          "app/tax.py": "tax-v1",
+          "app/email.py": "email-v1",
+          "metrics/checkout.py": "metrics-v1"
+        },
+        "changes": {
+          "metrics/checkout.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "metrics-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "metrics/checkout.py": "added"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Revert \"Apply coupon discounts twice\"",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "flags/checkout.json": "checkout-flag-v2-all-users",
+          "app/coupons.py": "coupons-v1",
+          "app/tax.py": "tax-v1",
+          "app/email.py": "email-v1",
+          "metrics/checkout.py": "metrics-v1"
+        },
+        "changes": {
+          "app/coupons.py": {
+            "change_type": "modified",
+            "before": "coupons-v2-double",
+            "after": "coupons-v1"
+          }
+        },
+        "files": {
+          "app/coupons.py": "modified"
+        },
+        "author": "GIT it",
+        "order": 5,
+        "is_merge": false
+      },
+      {
+        "id": "c6",
+        "message": "Revert \"Enable beta checkout for all users\"",
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "flags/checkout.json": "checkout-flag-v1-beta-only",
+          "app/coupons.py": "coupons-v1",
+          "app/tax.py": "tax-v1",
+          "app/email.py": "email-v1",
+          "metrics/checkout.py": "metrics-v1"
+        },
+        "changes": {
+          "flags/checkout.json": {
+            "change_type": "modified",
+            "before": "checkout-flag-v2-all-users",
+            "after": "checkout-flag-v1-beta-only"
+          }
+        },
+        "files": {
+          "flags/checkout.json": "modified"
+        },
+        "author": "GIT it",
+        "order": 6,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c6"
+    },
+    "head": {
+      "type": "branch",
+      "name": "main",
+      "target": "c6"
+    },
+    "remotes": {
+      "origin": "https://example.test/shop.git"
+    },
+    "remote_branches": {
+      "origin/main": "c6"
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c5",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{1}",
+        "target": "c5",
+        "message": "revert: c3"
+      },
+      {
+        "ref": "HEAD@{2}",
+        "target": "c6",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{3}",
+        "target": "c6",
+        "message": "revert: c1"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_revert_source": "c1",
+      "last_revert_created_commit": "c6",
+      "last_revert_no_edit": false,
+      "last_push_remote": "origin",
+      "last_push_branch": "main",
+      "last_push_remote_branch": "origin/main",
+      "last_push_commit": "c6",
+      "force_with_lease": false,
+      "force_push_with_lease": false
+    },
+    "last_revert_source": "c1",
+    "last_revert_created_commit": "c6",
+    "last_revert_no_edit": false,
+    "last_push_remote": "origin",
+    "last_push_branch": "main",
+    "last_push_remote_branch": "origin/main",
+    "last_push_commit": "c6",
+    "force_with_lease": false,
+    "force_push_with_lease": false
+  },
+  "rh7": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Initial auth service",
+        "parents": [],
+        "tree": {
+          "auth/session.py": "session-v1-8h",
+          "auth/cache.py": "cache-v1-15m",
+          "auth/audit.py": "audit-v1"
+        },
+        "changes": {
+          "auth/audit.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "audit-v1"
+          },
+          "auth/cache.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "cache-v1-15m"
+          },
+          "auth/session.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "session-v1-8h"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/audit.py": "added",
+          "auth/cache.py": "added",
+          "auth/session.py": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Extend sessions to 30 days",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "auth/session.py": "session-v2-30d",
+          "auth/cache.py": "cache-v1-15m",
+          "auth/audit.py": "audit-v1"
+        },
+        "changes": {
+          "auth/session.py": {
+            "change_type": "modified",
+            "before": "session-v1-8h",
+            "after": "session-v2-30d"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/session.py": "modified"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Add login audit fields",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "auth/session.py": "session-v2-30d",
+          "auth/cache.py": "cache-v1-15m",
+          "auth/audit.py": "audit-v2"
+        },
+        "changes": {
+          "auth/audit.py": {
+            "change_type": "modified",
+            "before": "audit-v1",
+            "after": "audit-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/audit.py": "modified"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Cache sessions for 24 hours",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "auth/session.py": "session-v2-30d",
+          "auth/cache.py": "cache-v2-24h",
+          "auth/audit.py": "audit-v2"
+        },
+        "changes": {
+          "auth/cache.py": {
+            "change_type": "modified",
+            "before": "cache-v1-15m",
+            "after": "cache-v2-24h"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/cache.py": "modified"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Revert \"Cache sessions for 24 hours\"",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "auth/session.py": "session-v2-30d",
+          "auth/cache.py": "cache-v1-15m",
+          "auth/audit.py": "audit-v2"
+        },
+        "changes": {
+          "auth/cache.py": {
+            "change_type": "modified",
+            "before": "cache-v2-24h",
+            "after": "cache-v1-15m"
+          }
+        },
+        "files": {
+          "auth/cache.py": "modified"
+        },
+        "author": "GIT it",
+        "order": 4,
+        "is_merge": false
+      },
+      {
+        "id": "c5",
+        "message": "Revert \"Extend sessions to 30 days\"",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "auth/session.py": "session-v1-8h",
+          "auth/cache.py": "cache-v1-15m",
+          "auth/audit.py": "audit-v2"
+        },
+        "changes": {
+          "auth/session.py": {
+            "change_type": "modified",
+            "before": "session-v2-30d",
+            "after": "session-v1-8h"
+          }
+        },
+        "files": {
+          "auth/session.py": "modified"
+        },
+        "author": "GIT it",
+        "order": 5,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c5"
+    },
+    "head": {
+      "type": "branch",
+      "name": "main",
+      "target": "c5"
+    },
+    "remotes": {
+      "origin": "https://example.test/auth-service.git"
+    },
+    "remote_branches": {
+      "origin/main": "c5"
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c4",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{1}",
+        "target": "c4",
+        "message": "revert: c3"
+      },
+      {
+        "ref": "HEAD@{2}",
+        "target": "c5",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{3}",
+        "target": "c5",
+        "message": "revert: c1"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_revert_source": "c1",
+      "last_revert_created_commit": "c5",
+      "last_revert_no_edit": false,
+      "last_push_remote": "origin",
+      "last_push_branch": "main",
+      "last_push_remote_branch": "origin/main",
+      "last_push_commit": "c5",
+      "force_with_lease": false,
+      "force_push_with_lease": false
+    },
+    "last_revert_source": "c1",
+    "last_revert_created_commit": "c5",
+    "last_revert_no_edit": false,
+    "last_push_remote": "origin",
+    "last_push_branch": "main",
+    "last_push_remote_branch": "origin/main",
+    "last_push_commit": "c5",
+    "force_with_lease": false,
+    "force_push_with_lease": false
+  },
+  "rh8": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Initial public site",
+        "parents": [],
+        "tree": {
+          "site/nav.html": "nav-v1",
+          "site/robots.txt": "robots-v1-allow",
+          "site/analytics.js": "analytics-v1-anon"
+        },
+        "changes": {
+          "site/analytics.js": {
+            "change_type": "added",
+            "before": null,
+            "after": "analytics-v1-anon"
+          },
+          "site/nav.html": {
+            "change_type": "added",
+            "before": null,
+            "after": "nav-v1"
+          },
+          "site/robots.txt": {
+            "change_type": "added",
+            "before": null,
+            "after": "robots-v1-allow"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/analytics.js": "added",
+          "site/nav.html": "added",
+          "site/robots.txt": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Add pricing page",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "site/nav.html": "nav-v1",
+          "site/robots.txt": "robots-v1-allow",
+          "site/analytics.js": "analytics-v1-anon",
+          "site/pricing.html": "pricing-v1"
+        },
+        "changes": {
+          "site/pricing.html": {
+            "change_type": "added",
+            "before": null,
+            "after": "pricing-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/pricing.html": "added"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Block search engines in robots.txt",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "site/nav.html": "nav-v1",
+          "site/robots.txt": "robots-v2-disallow-all",
+          "site/analytics.js": "analytics-v1-anon",
+          "site/pricing.html": "pricing-v1"
+        },
+        "changes": {
+          "site/robots.txt": {
+            "change_type": "modified",
+            "before": "robots-v1-allow",
+            "after": "robots-v2-disallow-all"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/robots.txt": "modified"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Add changelog page",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "site/nav.html": "nav-v1",
+          "site/robots.txt": "robots-v2-disallow-all",
+          "site/analytics.js": "analytics-v1-anon",
+          "site/pricing.html": "pricing-v1",
+          "site/changelog.html": "changelog-v1"
+        },
+        "changes": {
+          "site/changelog.html": {
+            "change_type": "added",
+            "before": null,
+            "after": "changelog-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/changelog.html": "added"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Log full visitor IP addresses",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "site/nav.html": "nav-v1",
+          "site/robots.txt": "robots-v2-disallow-all",
+          "site/analytics.js": "analytics-v2-full-ip",
+          "site/pricing.html": "pricing-v1",
+          "site/changelog.html": "changelog-v1"
+        },
+        "changes": {
+          "site/analytics.js": {
+            "change_type": "modified",
+            "before": "analytics-v1-anon",
+            "after": "analytics-v2-full-ip"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/analytics.js": "modified"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Fix footer typo",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "site/nav.html": "nav-v2",
+          "site/robots.txt": "robots-v2-disallow-all",
+          "site/analytics.js": "analytics-v2-full-ip",
+          "site/pricing.html": "pricing-v1",
+          "site/changelog.html": "changelog-v1"
+        },
+        "changes": {
+          "site/nav.html": {
+            "change_type": "modified",
+            "before": "nav-v1",
+            "after": "nav-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/nav.html": "modified"
+        },
+        "order": 5
+      },
+      {
+        "id": "c6",
+        "message": "Revert \"Log full visitor IP addresses\"",
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "site/nav.html": "nav-v2",
+          "site/robots.txt": "robots-v2-disallow-all",
+          "site/analytics.js": "analytics-v1-anon",
+          "site/pricing.html": "pricing-v1",
+          "site/changelog.html": "changelog-v1"
+        },
+        "changes": {
+          "site/analytics.js": {
+            "change_type": "modified",
+            "before": "analytics-v2-full-ip",
+            "after": "analytics-v1-anon"
+          }
+        },
+        "files": {
+          "site/analytics.js": "modified"
+        },
+        "author": "GIT it",
+        "order": 6,
+        "is_merge": false
+      },
+      {
+        "id": "c7",
+        "message": "Revert \"Block search engines in robots.txt\"",
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "site/nav.html": "nav-v2",
+          "site/robots.txt": "robots-v1-allow",
+          "site/analytics.js": "analytics-v1-anon",
+          "site/pricing.html": "pricing-v1",
+          "site/changelog.html": "changelog-v1"
+        },
+        "changes": {
+          "site/robots.txt": {
+            "change_type": "modified",
+            "before": "robots-v2-disallow-all",
+            "after": "robots-v1-allow"
+          }
+        },
+        "files": {
+          "site/robots.txt": "modified"
+        },
+        "author": "GIT it",
+        "order": 7,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c7"
+    },
+    "head": {
+      "type": "branch",
+      "name": "main",
+      "target": "c7"
+    },
+    "remotes": {
+      "origin": "https://example.test/public-site.git"
+    },
+    "remote_branches": {
+      "origin/main": "c7"
+    },
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c6",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{1}",
+        "target": "c6",
+        "message": "revert: c4"
+      },
+      {
+        "ref": "HEAD@{2}",
+        "target": "c7",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{3}",
+        "target": "c7",
+        "message": "revert: c2"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_revert_source": "c2",
+      "last_revert_created_commit": "c7",
+      "last_revert_no_edit": false,
+      "last_push_remote": "origin",
+      "last_push_branch": "main",
+      "last_push_remote_branch": "origin/main",
+      "last_push_commit": "c7",
+      "force_with_lease": false,
+      "force_push_with_lease": false
+    },
+    "last_revert_source": "c2",
+    "last_revert_created_commit": "c7",
+    "last_revert_no_edit": false,
+    "last_push_remote": "origin",
+    "last_push_branch": "main",
+    "last_push_remote_branch": "origin/main",
+    "last_push_commit": "c7",
+    "force_with_lease": false,
+    "force_push_with_lease": false
+  },
+  "be6": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Common base",
+        "parents": [],
+        "tree": {
+          "src/app.ts": "app-base",
+          "src/feature.ts": "feature-base"
+        },
+        "changes": {
+          "src/app.ts": {
+            "change_type": "added",
+            "before": null,
+            "after": "app-base"
+          },
+          "src/feature.ts": {
+            "change_type": "added",
+            "before": null,
+            "after": "feature-base"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/app.ts": "added",
+          "src/feature.ts": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Main update",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/app.ts": "app-v2",
+          "src/feature.ts": "feature-base"
+        },
+        "changes": {
+          "src/app.ts": {
+            "change_type": "modified",
+            "before": "app-base",
+            "after": "app-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/app.ts": "modified"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Feature work part 1",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/app.ts": "app-base",
+          "src/feature.ts": "feature-v2"
+        },
+        "changes": {
+          "src/feature.ts": {
+            "change_type": "modified",
+            "before": "feature-base",
+            "after": "feature-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/feature.ts": "modified"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Feature work part 2",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "src/app.ts": "app-base",
+          "src/feature.ts": "feature-v3"
+        },
+        "changes": {
+          "src/feature.ts": {
+            "change_type": "modified",
+            "before": "feature-v2",
+            "after": "feature-v3"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/feature.ts": "modified"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Feature work part 1",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/app.ts": "app-v2",
+          "src/feature.ts": "feature-v2"
+        },
+        "changes": {
+          "src/feature.ts": {
+            "change_type": "modified",
+            "before": "feature-base",
+            "after": "feature-v2"
+          }
+        },
+        "files": {
+          "src/feature.ts": "modified"
+        },
+        "author": "GIT it",
+        "order": 4,
+        "is_merge": false
+      },
+      {
+        "id": "c5",
+        "message": "Feature work part 2",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "src/app.ts": "app-v2",
+          "src/feature.ts": "feature-v3"
+        },
+        "changes": {
+          "src/feature.ts": {
+            "change_type": "modified",
+            "before": "feature-v2",
+            "after": "feature-v3"
+          }
+        },
+        "files": {
+          "src/feature.ts": "modified"
+        },
+        "author": "GIT it",
+        "order": 5,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c1",
+      "feature/recovery": "c5"
+    },
+    "head": {
+      "type": "branch",
+      "name": "feature/recovery",
+      "target": "c5"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "remotes": {},
+    "remote_branches": {},
+    "upstream_tracking": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c5",
+        "message": "move HEAD"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_rebase_target": "main",
+      "last_rebase_onto": null,
+      "last_rebase_upstream": "c1",
+      "last_rebase_new_head": "c5",
+      "last_rebase_interactive": false,
+      "last_rebase_replayed_commits": [
+        "c4",
+        "c5"
+      ]
+    },
+    "last_rebase_target": "main",
+    "last_rebase_onto": null,
+    "last_rebase_upstream": "c1",
+    "last_rebase_new_head": "c5",
+    "last_rebase_interactive": false,
+    "last_rebase_replayed_commits": [
+      "c4",
+      "c5"
+    ]
+  },
+  "be7": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Common base",
+        "parents": [],
+        "tree": {
+          "src/search.ts": "search-v1",
+          "src/shell.ts": "shell-v1"
+        },
+        "changes": {
+          "src/search.ts": {
+            "change_type": "added",
+            "before": null,
+            "after": "search-v1"
+          },
+          "src/shell.ts": {
+            "change_type": "added",
+            "before": null,
+            "after": "shell-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/search.ts": "added",
+          "src/shell.ts": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Update app shell",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/search.ts": "search-v1",
+          "src/shell.ts": "shell-v2"
+        },
+        "changes": {
+          "src/shell.ts": {
+            "change_type": "modified",
+            "before": "shell-v1",
+            "after": "shell-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/shell.ts": "modified"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Add filter model",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/search.ts": "search-v1",
+          "src/shell.ts": "shell-v1",
+          "src/filters.ts": "filters-v1"
+        },
+        "changes": {
+          "src/filters.ts": {
+            "change_type": "added",
+            "before": null,
+            "after": "filters-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/filters.ts": "added"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Wire filters into search",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "src/search.ts": "search-v2",
+          "src/shell.ts": "shell-v1",
+          "src/filters.ts": "filters-v1"
+        },
+        "changes": {
+          "src/search.ts": {
+            "change_type": "modified",
+            "before": "search-v1",
+            "after": "search-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/search.ts": "modified"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Add filter model",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/search.ts": "search-v1",
+          "src/shell.ts": "shell-v2",
+          "src/filters.ts": "filters-v1"
+        },
+        "changes": {
+          "src/filters.ts": {
+            "change_type": "added",
+            "before": null,
+            "after": "filters-v1"
+          }
+        },
+        "files": {
+          "src/filters.ts": "added"
+        },
+        "author": "GIT it",
+        "order": 4,
+        "is_merge": false
+      },
+      {
+        "id": "c5",
+        "message": "Wire filters into search",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "src/search.ts": "search-v2",
+          "src/shell.ts": "shell-v2",
+          "src/filters.ts": "filters-v1"
+        },
+        "changes": {
+          "src/search.ts": {
+            "change_type": "modified",
+            "before": "search-v1",
+            "after": "search-v2"
+          }
+        },
+        "files": {
+          "src/search.ts": "modified"
+        },
+        "author": "GIT it",
+        "order": 5,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c1",
+      "feature/search-filters": "c5"
+    },
+    "head": {
+      "type": "branch",
+      "name": "feature/search-filters",
+      "target": "c5"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "remotes": {},
+    "remote_branches": {},
+    "upstream_tracking": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c5",
+        "message": "move HEAD"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_rebase_target": "main",
+      "last_rebase_onto": null,
+      "last_rebase_upstream": "c1",
+      "last_rebase_new_head": "c5",
+      "last_rebase_interactive": false,
+      "last_rebase_replayed_commits": [
+        "c4",
+        "c5"
+      ]
+    },
+    "last_rebase_target": "main",
+    "last_rebase_onto": null,
+    "last_rebase_upstream": "c1",
+    "last_rebase_new_head": "c5",
+    "last_rebase_interactive": false,
+    "last_rebase_replayed_commits": [
+      "c4",
+      "c5"
+    ]
+  },
+  "be8": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Common base",
+        "parents": [],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v1"
+        },
+        "changes": {
+          "cli/main.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "main-v1"
+          },
+          "docs/usage.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "usage-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "cli/main.py": "added",
+          "docs/usage.md": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Fix typo in usage docs",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2"
+        },
+        "changes": {
+          "docs/usage.md": {
+            "change_type": "modified",
+            "before": "usage-v1",
+            "after": "usage-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "docs/usage.md": "modified"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Bump version to 1.1",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2",
+          "VERSION": "1.1"
+        },
+        "changes": {
+          "VERSION": {
+            "change_type": "added",
+            "before": null,
+            "after": "1.1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "VERSION": "added"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Parse --verbose flag",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v1",
+          "cli/flags.py": "flags-v1"
+        },
+        "changes": {
+          "cli/flags.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "flags-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "cli/flags.py": "added"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Parse --quiet flag",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v1",
+          "cli/flags.py": "flags-v2"
+        },
+        "changes": {
+          "cli/flags.py": {
+            "change_type": "modified",
+            "before": "flags-v1",
+            "after": "flags-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "cli/flags.py": "modified"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Use flags in main",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "cli/main.py": "main-v2",
+          "docs/usage.md": "usage-v1",
+          "cli/flags.py": "flags-v2"
+        },
+        "changes": {
+          "cli/main.py": {
+            "change_type": "modified",
+            "before": "main-v1",
+            "after": "main-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "cli/main.py": "modified"
+        },
+        "order": 5
+      },
+      {
+        "id": "c6",
+        "message": "Parse --verbose flag",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2",
+          "VERSION": "1.1",
+          "cli/flags.py": "flags-v1"
+        },
+        "changes": {
+          "cli/flags.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "flags-v1"
+          }
+        },
+        "files": {
+          "cli/flags.py": "added"
+        },
+        "author": "GIT it",
+        "order": 6,
+        "is_merge": false
+      },
+      {
+        "id": "c7",
+        "message": "Parse --quiet flag",
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2",
+          "VERSION": "1.1",
+          "cli/flags.py": "flags-v2"
+        },
+        "changes": {
+          "cli/flags.py": {
+            "change_type": "modified",
+            "before": "flags-v1",
+            "after": "flags-v2"
+          }
+        },
+        "files": {
+          "cli/flags.py": "modified"
+        },
+        "author": "GIT it",
+        "order": 7,
+        "is_merge": false
+      },
+      {
+        "id": "c8",
+        "message": "Use flags in main",
+        "parents": [
+          "c7"
+        ],
+        "tree": {
+          "cli/main.py": "main-v2",
+          "docs/usage.md": "usage-v2",
+          "VERSION": "1.1",
+          "cli/flags.py": "flags-v2"
+        },
+        "changes": {
+          "cli/main.py": {
+            "change_type": "modified",
+            "before": "main-v1",
+            "after": "main-v2"
+          }
+        },
+        "files": {
+          "cli/main.py": "modified"
+        },
+        "author": "GIT it",
+        "order": 8,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c2",
+      "feature/cli-flags": "c8"
+    },
+    "head": {
+      "type": "branch",
+      "name": "feature/cli-flags",
+      "target": "c8"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "remotes": {},
+    "remote_branches": {},
+    "upstream_tracking": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c8",
+        "message": "move HEAD"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_rebase_target": "main",
+      "last_rebase_onto": null,
+      "last_rebase_upstream": "c2",
+      "last_rebase_new_head": "c8",
+      "last_rebase_interactive": false,
+      "last_rebase_replayed_commits": [
+        "c6",
+        "c7",
+        "c8"
+      ]
+    },
+    "last_rebase_target": "main",
+    "last_rebase_onto": null,
+    "last_rebase_upstream": "c2",
+    "last_rebase_new_head": "c8",
+    "last_rebase_interactive": false,
+    "last_rebase_replayed_commits": [
+      "c6",
+      "c7",
+      "c8"
+    ]
+  },
+  "bm6": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Common base",
+        "parents": [],
+        "tree": {
+          "site/footer.html": "footer-v1",
+          "site/checkout.html": "checkout-v1"
+        },
+        "changes": {
+          "site/checkout.html": {
+            "change_type": "added",
+            "before": null,
+            "after": "checkout-v1"
+          },
+          "site/footer.html": {
+            "change_type": "added",
+            "before": null,
+            "after": "footer-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/checkout.html": "added",
+          "site/footer.html": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Update privacy link",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "site/footer.html": "footer-v1",
+          "site/checkout.html": "checkout-v1",
+          "site/privacy.html": "privacy-v2"
+        },
+        "changes": {
+          "site/privacy.html": {
+            "change_type": "added",
+            "before": null,
+            "after": "privacy-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/privacy.html": "added"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Redesign checkout layout",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "site/footer.html": "footer-v1",
+          "site/checkout.html": "checkout-v2-redesign"
+        },
+        "changes": {
+          "site/checkout.html": {
+            "change_type": "modified",
+            "before": "checkout-v1",
+            "after": "checkout-v2-redesign"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/checkout.html": "modified"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Add checkout animations",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "site/footer.html": "footer-v1",
+          "site/checkout.html": "checkout-v2-redesign",
+          "site/checkout.css": "checkout-anim-v1"
+        },
+        "changes": {
+          "site/checkout.css": {
+            "change_type": "added",
+            "before": null,
+            "after": "checkout-anim-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/checkout.css": "added"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Fix footer typo",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "site/footer.html": "footer-v2-typo-fixed",
+          "site/checkout.html": "checkout-v2-redesign",
+          "site/checkout.css": "checkout-anim-v1"
+        },
+        "changes": {
+          "site/footer.html": {
+            "change_type": "modified",
+            "before": "footer-v1",
+            "after": "footer-v2-typo-fixed"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/footer.html": "modified"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Fix footer year",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "site/footer.html": "footer-v2-typo-fixed",
+          "site/checkout.html": "checkout-v2-redesign",
+          "site/checkout.css": "checkout-anim-v1",
+          "site/footer_year.txt": "year-2026"
+        },
+        "changes": {
+          "site/footer_year.txt": {
+            "change_type": "added",
+            "before": null,
+            "after": "year-2026"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "site/footer_year.txt": "added"
+        },
+        "order": 5
+      },
+      {
+        "id": "c6",
+        "message": "Fix footer typo",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "site/footer.html": "footer-v2-typo-fixed",
+          "site/checkout.html": "checkout-v1",
+          "site/privacy.html": "privacy-v2"
+        },
+        "changes": {
+          "site/footer.html": {
+            "change_type": "modified",
+            "before": "footer-v1",
+            "after": "footer-v2-typo-fixed"
+          }
+        },
+        "files": {
+          "site/footer.html": "modified"
+        },
+        "author": "GIT it",
+        "order": 6,
+        "is_merge": false
+      },
+      {
+        "id": "c7",
+        "message": "Fix footer year",
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "site/footer.html": "footer-v2-typo-fixed",
+          "site/checkout.html": "checkout-v1",
+          "site/privacy.html": "privacy-v2",
+          "site/footer_year.txt": "year-2026"
+        },
+        "changes": {
+          "site/footer_year.txt": {
+            "change_type": "added",
+            "before": null,
+            "after": "year-2026"
+          }
+        },
+        "files": {
+          "site/footer_year.txt": "added"
+        },
+        "author": "GIT it",
+        "order": 7,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c1",
+      "feature/checkout-redesign": "c3",
+      "fix/footer-typo": "c7"
+    },
+    "head": {
+      "type": "branch",
+      "name": "fix/footer-typo",
+      "target": "c7"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "remotes": {},
+    "remote_branches": {},
+    "upstream_tracking": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c7",
+        "message": "move HEAD"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_rebase_target": "main",
+      "last_rebase_onto": "c1",
+      "last_rebase_upstream": "c3",
+      "last_rebase_new_head": "c7",
+      "last_rebase_interactive": false,
+      "last_rebase_replayed_commits": [
+        "c6",
+        "c7"
+      ]
+    },
+    "last_rebase_target": "main",
+    "last_rebase_onto": "c1",
+    "last_rebase_upstream": "c3",
+    "last_rebase_new_head": "c7",
+    "last_rebase_interactive": false,
+    "last_rebase_replayed_commits": [
+      "c6",
+      "c7"
+    ]
+  },
+  "bm7": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Common base",
+        "parents": [],
+        "tree": {
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v1"
+        },
+        "changes": {
+          "auth/login.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "login-v1"
+          },
+          "auth/session.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "session-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/login.py": "added",
+          "auth/session.py": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Harden password reset",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v1",
+          "auth/reset.py": "reset-v2"
+        },
+        "changes": {
+          "auth/reset.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "reset-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/reset.py": "added"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Update security contacts",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v1",
+          "auth/reset.py": "reset-v2",
+          "SECURITY.md": "security-v2"
+        },
+        "changes": {
+          "SECURITY.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "security-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "SECURITY.md": "added"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Beta: new session store",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v2-beta"
+        },
+        "changes": {
+          "auth/session.py": {
+            "change_type": "modified",
+            "before": "session-v1",
+            "after": "session-v2-beta"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/session.py": "modified"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Beta: passkey prototype",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v2-beta",
+          "auth/passkeys.py": "passkeys-beta"
+        },
+        "changes": {
+          "auth/passkeys.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "passkeys-beta"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/passkeys.py": "added"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Beta: telemetry hooks",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v2-beta",
+          "auth/passkeys.py": "passkeys-beta",
+          "auth/telemetry.py": "telemetry-beta"
+        },
+        "changes": {
+          "auth/telemetry.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "telemetry-beta"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/telemetry.py": "added"
+        },
+        "order": 5
+      },
+      {
+        "id": "c6",
+        "message": "Raise login timeout to 30s",
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "auth/login.py": "login-v2-timeout-30s",
+          "auth/session.py": "session-v2-beta",
+          "auth/passkeys.py": "passkeys-beta",
+          "auth/telemetry.py": "telemetry-beta"
+        },
+        "changes": {
+          "auth/login.py": {
+            "change_type": "modified",
+            "before": "login-v1",
+            "after": "login-v2-timeout-30s"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/login.py": "modified"
+        },
+        "order": 6
+      },
+      {
+        "id": "c7",
+        "message": "Log login timeouts",
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "auth/login.py": "login-v2-timeout-30s",
+          "auth/session.py": "session-v2-beta",
+          "auth/passkeys.py": "passkeys-beta",
+          "auth/telemetry.py": "telemetry-beta",
+          "auth/login_log.py": "login-log-v1"
+        },
+        "changes": {
+          "auth/login_log.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "login-log-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "auth/login_log.py": "added"
+        },
+        "order": 7
+      },
+      {
+        "id": "c8",
+        "message": "Raise login timeout to 30s",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "auth/login.py": "login-v2-timeout-30s",
+          "auth/session.py": "session-v1",
+          "auth/reset.py": "reset-v2",
+          "SECURITY.md": "security-v2"
+        },
+        "changes": {
+          "auth/login.py": {
+            "change_type": "modified",
+            "before": "login-v1",
+            "after": "login-v2-timeout-30s"
+          }
+        },
+        "files": {
+          "auth/login.py": "modified"
+        },
+        "author": "GIT it",
+        "order": 8,
+        "is_merge": false
+      },
+      {
+        "id": "c9",
+        "message": "Log login timeouts",
+        "parents": [
+          "c8"
+        ],
+        "tree": {
+          "auth/login.py": "login-v2-timeout-30s",
+          "auth/session.py": "session-v1",
+          "auth/reset.py": "reset-v2",
+          "SECURITY.md": "security-v2",
+          "auth/login_log.py": "login-log-v1"
+        },
+        "changes": {
+          "auth/login_log.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "login-log-v1"
+          }
+        },
+        "files": {
+          "auth/login_log.py": "added"
+        },
+        "author": "GIT it",
+        "order": 9,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c2",
+      "release/2.0-beta": "c5",
+      "hotfix/login-timeout": "c9"
+    },
+    "head": {
+      "type": "branch",
+      "name": "hotfix/login-timeout",
+      "target": "c9"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "remotes": {},
+    "remote_branches": {},
+    "upstream_tracking": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c9",
+        "message": "move HEAD"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_rebase_target": "main",
+      "last_rebase_onto": "c2",
+      "last_rebase_upstream": "c5",
+      "last_rebase_new_head": "c9",
+      "last_rebase_interactive": false,
+      "last_rebase_replayed_commits": [
+        "c8",
+        "c9"
+      ]
+    },
+    "last_rebase_target": "main",
+    "last_rebase_onto": "c2",
+    "last_rebase_upstream": "c5",
+    "last_rebase_new_head": "c9",
+    "last_rebase_interactive": false,
+    "last_rebase_replayed_commits": [
+      "c8",
+      "c9"
+    ]
+  },
+  "bm8": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Common base",
+        "parents": [],
+        "tree": {
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v1"
+        },
+        "changes": {
+          "render/engine.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "engine-v1"
+          },
+          "reports/export.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "export-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "render/engine.py": "added",
+          "reports/export.py": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Add CSV export",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v1",
+          "reports/csv.py": "csv-v1"
+        },
+        "changes": {
+          "reports/csv.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "csv-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "reports/csv.py": "added"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Spike: swap rendering engine",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v2-spike"
+        },
+        "changes": {
+          "render/engine.py": {
+            "change_type": "modified",
+            "before": "engine-v1",
+            "after": "engine-v2-spike"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "render/engine.py": "modified"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Add PDF export",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v2-spike",
+          "reports/pdf.py": "pdf-v1"
+        },
+        "changes": {
+          "reports/pdf.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "pdf-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "reports/pdf.py": "added"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Add PDF page numbers",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v2-spike",
+          "reports/pdf.py": "pdf-v1",
+          "reports/pdf_pages.py": "pdf-pages-v1"
+        },
+        "changes": {
+          "reports/pdf_pages.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "pdf-pages-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "reports/pdf_pages.py": "added"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Wire PDF into the export menu",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "reports/export.py": "export-v2-pdf",
+          "render/engine.py": "engine-v2-spike",
+          "reports/pdf.py": "pdf-v1",
+          "reports/pdf_pages.py": "pdf-pages-v1"
+        },
+        "changes": {
+          "reports/export.py": {
+            "change_type": "modified",
+            "before": "export-v1",
+            "after": "export-v2-pdf"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "reports/export.py": "modified"
+        },
+        "order": 5
+      },
+      {
+        "id": "c6",
+        "message": "Add PDF export",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/pdf.py": "pdf-v1"
+        },
+        "changes": {
+          "reports/pdf.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "pdf-v1"
+          }
+        },
+        "files": {
+          "reports/pdf.py": "added"
+        },
+        "author": "GIT it",
+        "order": 6,
+        "is_merge": false
+      },
+      {
+        "id": "c7",
+        "message": "Add PDF page numbers",
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "reports/export.py": "export-v1",
+          "render/engine.py": "engine-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/pdf.py": "pdf-v1",
+          "reports/pdf_pages.py": "pdf-pages-v1"
+        },
+        "changes": {
+          "reports/pdf_pages.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "pdf-pages-v1"
+          }
+        },
+        "files": {
+          "reports/pdf_pages.py": "added"
+        },
+        "author": "GIT it",
+        "order": 7,
+        "is_merge": false
+      },
+      {
+        "id": "c8",
+        "message": "Wire PDF into the export menu",
+        "parents": [
+          "c7"
+        ],
+        "tree": {
+          "reports/export.py": "export-v2-pdf",
+          "render/engine.py": "engine-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/pdf.py": "pdf-v1",
+          "reports/pdf_pages.py": "pdf-pages-v1"
+        },
+        "changes": {
+          "reports/export.py": {
+            "change_type": "modified",
+            "before": "export-v1",
+            "after": "export-v2-pdf"
+          }
+        },
+        "files": {
+          "reports/export.py": "modified"
+        },
+        "author": "GIT it",
+        "order": 8,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c1",
+      "spike/new-renderer": "c2",
+      "feature/export-pdf": "c8"
+    },
+    "head": {
+      "type": "branch",
+      "name": "feature/export-pdf",
+      "target": "c8"
+    },
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "conflict_details": {},
+    "remotes": {},
+    "remote_branches": {},
+    "upstream_tracking": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "reflog": [
+      {
+        "ref": "HEAD@{0}",
+        "target": "c8",
+        "message": "move HEAD"
+      }
+    ],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_rebase_target": "main",
+      "last_rebase_onto": "c1",
+      "last_rebase_upstream": "c2",
+      "last_rebase_new_head": "c8",
+      "last_rebase_interactive": false,
+      "last_rebase_replayed_commits": [
+        "c6",
+        "c7",
+        "c8"
+      ]
+    },
+    "last_rebase_target": "main",
+    "last_rebase_onto": "c1",
+    "last_rebase_upstream": "c2",
+    "last_rebase_new_head": "c8",
+    "last_rebase_interactive": false,
+    "last_rebase_replayed_commits": [
+      "c6",
+      "c7",
+      "c8"
+    ]
+  },
+  "bh6": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Common base",
+        "parents": [],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v1"
+        },
+        "changes": {
+          "cli/main.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "main-v1"
+          },
+          "docs/usage.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "usage-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "cli/main.py": "added",
+          "docs/usage.md": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Fix typo in usage docs",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2"
+        },
+        "changes": {
+          "docs/usage.md": {
+            "change_type": "modified",
+            "before": "usage-v1",
+            "after": "usage-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "docs/usage.md": "modified"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Parse --verbose flag",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v1",
+          "cli/flags.py": "flags-v1-verbose"
+        },
+        "changes": {
+          "cli/flags.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "flags-v1-verbose"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "cli/flags.py": "added"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Parse --quiet flag",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v1",
+          "cli/flags.py": "flags-v1-verbose",
+          "cli/quiet.py": "quiet-v1"
+        },
+        "changes": {
+          "cli/quiet.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "quiet-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "cli/quiet.py": "added"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Use flags in main",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "cli/main.py": "main-v2",
+          "docs/usage.md": "usage-v1",
+          "cli/flags.py": "flags-v1-verbose",
+          "cli/quiet.py": "quiet-v1"
+        },
+        "changes": {
+          "cli/main.py": {
+            "change_type": "modified",
+            "before": "main-v1",
+            "after": "main-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "cli/main.py": "modified"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Parse --verbose flag",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2",
+          "cli/flags.py": "flags-v1-verbose"
+        },
+        "changes": {
+          "cli/flags.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "flags-v1-verbose"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "cli/flags.py": "added"
+        },
+        "order": 5
+      },
+      {
+        "id": "c6",
+        "message": "Use flags in main",
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "cli/main.py": "main-v2",
+          "docs/usage.md": "usage-v2",
+          "cli/flags.py": "flags-v1-verbose"
+        },
+        "changes": {
+          "cli/main.py": {
+            "change_type": "modified",
+            "before": "main-v1",
+            "after": "main-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "cli/main.py": "modified"
+        },
+        "order": 6
+      },
+      {
+        "id": "c7",
+        "message": "Parse --verbose flag",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2",
+          "cli/flags.py": "flags-v1-verbose"
+        },
+        "changes": {
+          "cli/flags.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "flags-v1-verbose"
+          }
+        },
+        "files": {
+          "cli/flags.py": "added"
+        },
+        "author": "GIT it",
+        "order": 7,
+        "is_merge": false
+      },
+      {
+        "id": "c8",
+        "message": "Parse --quiet flag",
+        "parents": [
+          "c7"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2",
+          "cli/flags.py": "flags-v1-verbose",
+          "cli/quiet.py": "quiet-v1"
+        },
+        "changes": {
+          "cli/quiet.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "quiet-v1"
+          }
+        },
+        "files": {
+          "cli/quiet.py": "added"
+        },
+        "author": "GIT it",
+        "order": 8,
+        "is_merge": false
+      },
+      {
+        "id": "c9",
+        "message": "Use flags in main",
+        "parents": [
+          "c8"
+        ],
+        "tree": {
+          "cli/main.py": "main-v2",
+          "docs/usage.md": "usage-v2",
+          "cli/flags.py": "flags-v1-verbose",
+          "cli/quiet.py": "quiet-v1"
+        },
+        "changes": {
+          "cli/main.py": {
+            "change_type": "modified",
+            "before": "main-v1",
+            "after": "main-v2"
+          }
+        },
+        "files": {
+          "cli/main.py": "modified"
+        },
+        "author": "GIT it",
+        "order": 9,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c1",
+      "feature/cli-flags": "c9"
+    },
+    "head": {
+      "type": "branch",
+      "name": "feature/cli-flags",
+      "target": "c9"
+    },
+    "reflog": [
+      {
+        "ref": "feature/cli-flags",
+        "commit": "c4",
+        "action": "commit: Use flags in main"
+      },
+      {
+        "ref": "feature/cli-flags",
+        "commit": "c6",
+        "action": "rebase (finish): refs/heads/feature/cli-flags onto c1"
+      },
+      {
+        "ref": "HEAD@{2}",
+        "target": "c4",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{3}",
+        "target": "c4",
+        "message": "reset: moving to c4"
+      },
+      {
+        "ref": "HEAD@{4}",
+        "target": "c9",
+        "message": "move HEAD"
+      }
+    ],
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "remotes": {},
+    "remote_branches": {},
+    "upstream_tracking": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_reset_mode": "hard",
+      "last_reset_target": "c4",
+      "last_reset_target_expr": "c4",
+      "last_reset_previous_head": "c6",
+      "last_rebase_target": "main",
+      "last_rebase_onto": null,
+      "last_rebase_upstream": "c1",
+      "last_rebase_new_head": "c9",
+      "last_rebase_interactive": false,
+      "last_rebase_replayed_commits": [
+        "c7",
+        "c8",
+        "c9"
+      ]
+    },
+    "merge_abort_state": {
+      "repository_initialized": true,
+      "commits": [
+        {
+          "id": "c0",
+          "message": "Common base",
+          "parents": [],
+          "tree": {
+            "cli/main.py": "main-v1",
+            "docs/usage.md": "usage-v1"
+          },
+          "changes": {
+            "cli/main.py": {
+              "change_type": "added",
+              "before": null,
+              "after": "main-v1"
+            },
+            "docs/usage.md": {
+              "change_type": "added",
+              "before": null,
+              "after": "usage-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "cli/main.py": "added",
+            "docs/usage.md": "added"
+          },
+          "order": 0
+        },
+        {
+          "id": "c1",
+          "message": "Fix typo in usage docs",
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "cli/main.py": "main-v1",
+            "docs/usage.md": "usage-v2"
+          },
+          "changes": {
+            "docs/usage.md": {
+              "change_type": "modified",
+              "before": "usage-v1",
+              "after": "usage-v2"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "docs/usage.md": "modified"
+          },
+          "order": 1
+        },
+        {
+          "id": "c2",
+          "message": "Parse --verbose flag",
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "cli/main.py": "main-v1",
+            "docs/usage.md": "usage-v1",
+            "cli/flags.py": "flags-v1-verbose"
+          },
+          "changes": {
+            "cli/flags.py": {
+              "change_type": "added",
+              "before": null,
+              "after": "flags-v1-verbose"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "cli/flags.py": "added"
+          },
+          "order": 2
+        },
+        {
+          "id": "c3",
+          "message": "Parse --quiet flag",
+          "parents": [
+            "c2"
+          ],
+          "tree": {
+            "cli/main.py": "main-v1",
+            "docs/usage.md": "usage-v1",
+            "cli/flags.py": "flags-v1-verbose",
+            "cli/quiet.py": "quiet-v1"
+          },
+          "changes": {
+            "cli/quiet.py": {
+              "change_type": "added",
+              "before": null,
+              "after": "quiet-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "cli/quiet.py": "added"
+          },
+          "order": 3
+        },
+        {
+          "id": "c4",
+          "message": "Use flags in main",
+          "parents": [
+            "c3"
+          ],
+          "tree": {
+            "cli/main.py": "main-v2",
+            "docs/usage.md": "usage-v1",
+            "cli/flags.py": "flags-v1-verbose",
+            "cli/quiet.py": "quiet-v1"
+          },
+          "changes": {
+            "cli/main.py": {
+              "change_type": "modified",
+              "before": "main-v1",
+              "after": "main-v2"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "cli/main.py": "modified"
+          },
+          "order": 4
+        },
+        {
+          "id": "c5",
+          "message": "Parse --verbose flag",
+          "parents": [
+            "c1"
+          ],
+          "tree": {
+            "cli/main.py": "main-v1",
+            "docs/usage.md": "usage-v2",
+            "cli/flags.py": "flags-v1-verbose"
+          },
+          "changes": {
+            "cli/flags.py": {
+              "change_type": "added",
+              "before": null,
+              "after": "flags-v1-verbose"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "cli/flags.py": "added"
+          },
+          "order": 5
+        },
+        {
+          "id": "c6",
+          "message": "Use flags in main",
+          "parents": [
+            "c5"
+          ],
+          "tree": {
+            "cli/main.py": "main-v2",
+            "docs/usage.md": "usage-v2",
+            "cli/flags.py": "flags-v1-verbose"
+          },
+          "changes": {
+            "cli/main.py": {
+              "change_type": "modified",
+              "before": "main-v1",
+              "after": "main-v2"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "cli/main.py": "modified"
+          },
+          "order": 6
+        }
+      ],
+      "branches": {
+        "main": "c1",
+        "feature/cli-flags": "c6"
+      },
+      "head": {
+        "type": "branch",
+        "name": "feature/cli-flags",
+        "target": "c6"
+      },
+      "reflog": [
+        {
+          "ref": "feature/cli-flags",
+          "commit": "c4",
+          "action": "commit: Use flags in main"
+        },
+        {
+          "ref": "feature/cli-flags",
+          "commit": "c6",
+          "action": "rebase (finish): refs/heads/feature/cli-flags onto c1"
+        }
+      ],
+      "staging": {},
+      "working_tree": {},
+      "conflicts": [],
+      "conflict_details": {},
+      "remotes": {},
+      "remote_branches": {},
+      "upstream_tracking": {},
+      "tags": {},
+      "remote_tags": {},
+      "stash_stack": [],
+      "partial_hunks": {},
+      "replaced_commits": {},
+      "operation_metadata": {}
+    },
+    "last_reset_mode": "hard",
+    "last_reset_target": "c4",
+    "last_reset_target_expr": "c4",
+    "last_reset_previous_head": "c6",
+    "conflict_details": {},
+    "last_rebase_target": "main",
+    "last_rebase_onto": null,
+    "last_rebase_upstream": "c1",
+    "last_rebase_new_head": "c9",
+    "last_rebase_interactive": false,
+    "last_rebase_replayed_commits": [
+      "c7",
+      "c8",
+      "c9"
+    ]
+  },
+  "bh7": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Common base",
+        "parents": [],
+        "tree": {
+          "reports/pdf.py": "pdf-v1",
+          "CHANGELOG.md": "changelog-v1"
+        },
+        "changes": {
+          "CHANGELOG.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "changelog-v1"
+          },
+          "reports/pdf.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "pdf-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "CHANGELOG.md": "added",
+          "reports/pdf.py": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Speed up PDF reports",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "reports/pdf.py": "pdf-v2",
+          "CHANGELOG.md": "changelog-v1"
+        },
+        "changes": {
+          "reports/pdf.py": {
+            "change_type": "modified",
+            "before": "pdf-v1",
+            "after": "pdf-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "reports/pdf.py": "modified"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Update changelog",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "reports/pdf.py": "pdf-v2",
+          "CHANGELOG.md": "changelog-v2"
+        },
+        "changes": {
+          "CHANGELOG.md": {
+            "change_type": "modified",
+            "before": "changelog-v1",
+            "after": "changelog-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "CHANGELOG.md": "modified"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Add CSV export",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "reports/pdf.py": "pdf-v1",
+          "CHANGELOG.md": "changelog-v1",
+          "reports/csv.py": "csv-v1"
+        },
+        "changes": {
+          "reports/csv.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "csv-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "reports/csv.py": "added"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Test CSV export",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "reports/pdf.py": "pdf-v1",
+          "CHANGELOG.md": "changelog-v1",
+          "reports/csv.py": "csv-v1",
+          "tests/test_csv.py": "test-csv-v1"
+        },
+        "changes": {
+          "tests/test_csv.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "test-csv-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "tests/test_csv.py": "added"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Add CSV column headers",
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "reports/pdf.py": "pdf-v1",
+          "CHANGELOG.md": "changelog-v1",
+          "reports/csv.py": "csv-v1",
+          "tests/test_csv.py": "test-csv-v1",
+          "reports/csv_headers.py": "headers-v1"
+        },
+        "changes": {
+          "reports/csv_headers.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "headers-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "reports/csv_headers.py": "added"
+        },
+        "order": 5
+      },
+      {
+        "id": "c6",
+        "message": "Add CSV export",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "reports/pdf.py": "pdf-v2",
+          "CHANGELOG.md": "changelog-v2",
+          "reports/csv.py": "csv-v1"
+        },
+        "changes": {
+          "reports/csv.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "csv-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "reports/csv.py": "added"
+        },
+        "order": 6
+      },
+      {
+        "id": "c7",
+        "message": "Add CSV column headers",
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "reports/pdf.py": "pdf-v2",
+          "CHANGELOG.md": "changelog-v2",
+          "reports/csv.py": "csv-v1",
+          "reports/csv_headers.py": "headers-v1"
+        },
+        "changes": {
+          "reports/csv_headers.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "headers-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "reports/csv_headers.py": "added"
+        },
+        "order": 7
+      },
+      {
+        "id": "c8",
+        "message": "Add CSV export",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "reports/pdf.py": "pdf-v2",
+          "CHANGELOG.md": "changelog-v2",
+          "reports/csv.py": "csv-v1"
+        },
+        "changes": {
+          "reports/csv.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "csv-v1"
+          }
+        },
+        "files": {
+          "reports/csv.py": "added"
+        },
+        "author": "GIT it",
+        "order": 8,
+        "is_merge": false
+      },
+      {
+        "id": "c9",
+        "message": "Test CSV export",
+        "parents": [
+          "c8"
+        ],
+        "tree": {
+          "reports/pdf.py": "pdf-v2",
+          "CHANGELOG.md": "changelog-v2",
+          "reports/csv.py": "csv-v1",
+          "tests/test_csv.py": "test-csv-v1"
+        },
+        "changes": {
+          "tests/test_csv.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "test-csv-v1"
+          }
+        },
+        "files": {
+          "tests/test_csv.py": "added"
+        },
+        "author": "GIT it",
+        "order": 9,
+        "is_merge": false
+      },
+      {
+        "id": "c10",
+        "message": "Add CSV column headers",
+        "parents": [
+          "c9"
+        ],
+        "tree": {
+          "reports/pdf.py": "pdf-v2",
+          "CHANGELOG.md": "changelog-v2",
+          "reports/csv.py": "csv-v1",
+          "tests/test_csv.py": "test-csv-v1",
+          "reports/csv_headers.py": "headers-v1"
+        },
+        "changes": {
+          "reports/csv_headers.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "headers-v1"
+          }
+        },
+        "files": {
+          "reports/csv_headers.py": "added"
+        },
+        "author": "GIT it",
+        "order": 10,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c2",
+      "hotfix/export-csv": "c10"
+    },
+    "head": {
+      "type": "branch",
+      "name": "hotfix/export-csv",
+      "target": "c10"
+    },
+    "reflog": [
+      {
+        "ref": "hotfix/export-csv",
+        "commit": "c5",
+        "action": "commit: Add CSV column headers"
+      },
+      {
+        "ref": "hotfix/export-csv",
+        "commit": "c7",
+        "action": "rebase (finish): refs/heads/hotfix/export-csv onto c2"
+      },
+      {
+        "ref": "HEAD@{2}",
+        "target": "c5",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{3}",
+        "target": "c5",
+        "message": "reset: moving to c5"
+      },
+      {
+        "ref": "HEAD@{4}",
+        "target": "c10",
+        "message": "move HEAD"
+      }
+    ],
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "remotes": {},
+    "remote_branches": {},
+    "upstream_tracking": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_reset_mode": "hard",
+      "last_reset_target": "c5",
+      "last_reset_target_expr": "c5",
+      "last_reset_previous_head": "c7",
+      "last_rebase_target": "main",
+      "last_rebase_onto": null,
+      "last_rebase_upstream": "c2",
+      "last_rebase_new_head": "c10",
+      "last_rebase_interactive": false,
+      "last_rebase_replayed_commits": [
+        "c8",
+        "c9",
+        "c10"
+      ]
+    },
+    "merge_abort_state": {
+      "repository_initialized": true,
+      "commits": [
+        {
+          "id": "c0",
+          "message": "Common base",
+          "parents": [],
+          "tree": {
+            "reports/pdf.py": "pdf-v1",
+            "CHANGELOG.md": "changelog-v1"
+          },
+          "changes": {
+            "CHANGELOG.md": {
+              "change_type": "added",
+              "before": null,
+              "after": "changelog-v1"
+            },
+            "reports/pdf.py": {
+              "change_type": "added",
+              "before": null,
+              "after": "pdf-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "CHANGELOG.md": "added",
+            "reports/pdf.py": "added"
+          },
+          "order": 0
+        },
+        {
+          "id": "c1",
+          "message": "Speed up PDF reports",
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "reports/pdf.py": "pdf-v2",
+            "CHANGELOG.md": "changelog-v1"
+          },
+          "changes": {
+            "reports/pdf.py": {
+              "change_type": "modified",
+              "before": "pdf-v1",
+              "after": "pdf-v2"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "reports/pdf.py": "modified"
+          },
+          "order": 1
+        },
+        {
+          "id": "c2",
+          "message": "Update changelog",
+          "parents": [
+            "c1"
+          ],
+          "tree": {
+            "reports/pdf.py": "pdf-v2",
+            "CHANGELOG.md": "changelog-v2"
+          },
+          "changes": {
+            "CHANGELOG.md": {
+              "change_type": "modified",
+              "before": "changelog-v1",
+              "after": "changelog-v2"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "CHANGELOG.md": "modified"
+          },
+          "order": 2
+        },
+        {
+          "id": "c3",
+          "message": "Add CSV export",
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "reports/pdf.py": "pdf-v1",
+            "CHANGELOG.md": "changelog-v1",
+            "reports/csv.py": "csv-v1"
+          },
+          "changes": {
+            "reports/csv.py": {
+              "change_type": "added",
+              "before": null,
+              "after": "csv-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "reports/csv.py": "added"
+          },
+          "order": 3
+        },
+        {
+          "id": "c4",
+          "message": "Test CSV export",
+          "parents": [
+            "c3"
+          ],
+          "tree": {
+            "reports/pdf.py": "pdf-v1",
+            "CHANGELOG.md": "changelog-v1",
+            "reports/csv.py": "csv-v1",
+            "tests/test_csv.py": "test-csv-v1"
+          },
+          "changes": {
+            "tests/test_csv.py": {
+              "change_type": "added",
+              "before": null,
+              "after": "test-csv-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "tests/test_csv.py": "added"
+          },
+          "order": 4
+        },
+        {
+          "id": "c5",
+          "message": "Add CSV column headers",
+          "parents": [
+            "c4"
+          ],
+          "tree": {
+            "reports/pdf.py": "pdf-v1",
+            "CHANGELOG.md": "changelog-v1",
+            "reports/csv.py": "csv-v1",
+            "tests/test_csv.py": "test-csv-v1",
+            "reports/csv_headers.py": "headers-v1"
+          },
+          "changes": {
+            "reports/csv_headers.py": {
+              "change_type": "added",
+              "before": null,
+              "after": "headers-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "reports/csv_headers.py": "added"
+          },
+          "order": 5
+        },
+        {
+          "id": "c6",
+          "message": "Add CSV export",
+          "parents": [
+            "c2"
+          ],
+          "tree": {
+            "reports/pdf.py": "pdf-v2",
+            "CHANGELOG.md": "changelog-v2",
+            "reports/csv.py": "csv-v1"
+          },
+          "changes": {
+            "reports/csv.py": {
+              "change_type": "added",
+              "before": null,
+              "after": "csv-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "reports/csv.py": "added"
+          },
+          "order": 6
+        },
+        {
+          "id": "c7",
+          "message": "Add CSV column headers",
+          "parents": [
+            "c6"
+          ],
+          "tree": {
+            "reports/pdf.py": "pdf-v2",
+            "CHANGELOG.md": "changelog-v2",
+            "reports/csv.py": "csv-v1",
+            "reports/csv_headers.py": "headers-v1"
+          },
+          "changes": {
+            "reports/csv_headers.py": {
+              "change_type": "added",
+              "before": null,
+              "after": "headers-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "reports/csv_headers.py": "added"
+          },
+          "order": 7
+        }
+      ],
+      "branches": {
+        "main": "c2",
+        "hotfix/export-csv": "c7"
+      },
+      "head": {
+        "type": "branch",
+        "name": "hotfix/export-csv",
+        "target": "c7"
+      },
+      "reflog": [
+        {
+          "ref": "hotfix/export-csv",
+          "commit": "c5",
+          "action": "commit: Add CSV column headers"
+        },
+        {
+          "ref": "hotfix/export-csv",
+          "commit": "c7",
+          "action": "rebase (finish): refs/heads/hotfix/export-csv onto c2"
+        }
+      ],
+      "staging": {},
+      "working_tree": {},
+      "conflicts": [],
+      "conflict_details": {},
+      "remotes": {},
+      "remote_branches": {},
+      "upstream_tracking": {},
+      "tags": {},
+      "remote_tags": {},
+      "stash_stack": [],
+      "partial_hunks": {},
+      "replaced_commits": {},
+      "operation_metadata": {}
+    },
+    "last_reset_mode": "hard",
+    "last_reset_target": "c5",
+    "last_reset_target_expr": "c5",
+    "last_reset_previous_head": "c7",
+    "conflict_details": {},
+    "last_rebase_target": "main",
+    "last_rebase_onto": null,
+    "last_rebase_upstream": "c2",
+    "last_rebase_new_head": "c10",
+    "last_rebase_interactive": false,
+    "last_rebase_replayed_commits": [
+      "c8",
+      "c9",
+      "c10"
+    ]
+  },
+  "bh8": {
+    "repository_initialized": true,
+    "commits": [
+      {
+        "id": "c0",
+        "message": "Common base",
+        "parents": [],
+        "tree": {
+          "server/app.go": "app-v1",
+          "docs/README.md": "docs-v1"
+        },
+        "changes": {
+          "docs/README.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "docs-v1"
+          },
+          "server/app.go": {
+            "change_type": "added",
+            "before": null,
+            "after": "app-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "docs/README.md": "added",
+          "server/app.go": "added"
+        },
+        "order": 0
+      },
+      {
+        "id": "c1",
+        "message": "Add graceful shutdown",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "server/app.go": "app-v2",
+          "docs/README.md": "docs-v1"
+        },
+        "changes": {
+          "server/app.go": {
+            "change_type": "modified",
+            "before": "app-v1",
+            "after": "app-v2"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "server/app.go": "modified"
+        },
+        "order": 1
+      },
+      {
+        "id": "c2",
+        "message": "Add rate limiter",
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "server/app.go": "app-v1",
+          "docs/README.md": "docs-v1",
+          "server/limits.go": "limits-v1"
+        },
+        "changes": {
+          "server/limits.go": {
+            "change_type": "added",
+            "before": null,
+            "after": "limits-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "server/limits.go": "added"
+        },
+        "order": 2
+      },
+      {
+        "id": "c3",
+        "message": "Test rate limiter",
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "server/app.go": "app-v1",
+          "docs/README.md": "docs-v1",
+          "server/limits.go": "limits-v1",
+          "server/limits_test.go": "limits-test-v1"
+        },
+        "changes": {
+          "server/limits_test.go": {
+            "change_type": "added",
+            "before": null,
+            "after": "limits-test-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "server/limits_test.go": "added"
+        },
+        "order": 3
+      },
+      {
+        "id": "c4",
+        "message": "Document rate limits",
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "server/app.go": "app-v1",
+          "docs/README.md": "docs-v1",
+          "server/limits.go": "limits-v1",
+          "server/limits_test.go": "limits-test-v1",
+          "docs/limits.md": "limits-doc-v1"
+        },
+        "changes": {
+          "docs/limits.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "limits-doc-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "docs/limits.md": "added"
+        },
+        "order": 4
+      },
+      {
+        "id": "c5",
+        "message": "Test rate limiter",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "server/app.go": "app-v2",
+          "docs/README.md": "docs-v1",
+          "server/limits_test.go": "limits-test-v1"
+        },
+        "changes": {
+          "server/limits_test.go": {
+            "change_type": "added",
+            "before": null,
+            "after": "limits-test-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "server/limits_test.go": "added"
+        },
+        "order": 5
+      },
+      {
+        "id": "c6",
+        "message": "Document rate limits",
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "server/app.go": "app-v2",
+          "docs/README.md": "docs-v1",
+          "server/limits_test.go": "limits-test-v1",
+          "docs/limits.md": "limits-doc-v1"
+        },
+        "changes": {
+          "docs/limits.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "limits-doc-v1"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "docs/limits.md": "added"
+        },
+        "order": 6
+      },
+      {
+        "id": "c7",
+        "message": "Add rate limiter",
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "server/app.go": "app-v2",
+          "docs/README.md": "docs-v1",
+          "server/limits.go": "limits-v1"
+        },
+        "changes": {
+          "server/limits.go": {
+            "change_type": "added",
+            "before": null,
+            "after": "limits-v1"
+          }
+        },
+        "files": {
+          "server/limits.go": "added"
+        },
+        "author": "GIT it",
+        "order": 7,
+        "is_merge": false
+      },
+      {
+        "id": "c8",
+        "message": "Test rate limiter",
+        "parents": [
+          "c7"
+        ],
+        "tree": {
+          "server/app.go": "app-v2",
+          "docs/README.md": "docs-v1",
+          "server/limits.go": "limits-v1",
+          "server/limits_test.go": "limits-test-v1"
+        },
+        "changes": {
+          "server/limits_test.go": {
+            "change_type": "added",
+            "before": null,
+            "after": "limits-test-v1"
+          }
+        },
+        "files": {
+          "server/limits_test.go": "added"
+        },
+        "author": "GIT it",
+        "order": 8,
+        "is_merge": false
+      },
+      {
+        "id": "c9",
+        "message": "Document rate limits",
+        "parents": [
+          "c8"
+        ],
+        "tree": {
+          "server/app.go": "app-v2",
+          "docs/README.md": "docs-v1",
+          "server/limits.go": "limits-v1",
+          "server/limits_test.go": "limits-test-v1",
+          "docs/limits.md": "limits-doc-v1"
+        },
+        "changes": {
+          "docs/limits.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "limits-doc-v1"
+          }
+        },
+        "files": {
+          "docs/limits.md": "added"
+        },
+        "author": "GIT it",
+        "order": 9,
+        "is_merge": false
+      }
+    ],
+    "branches": {
+      "main": "c1",
+      "feature/rate-limits": "c9"
+    },
+    "head": {
+      "type": "branch",
+      "name": "feature/rate-limits",
+      "target": "c9"
+    },
+    "reflog": [
+      {
+        "ref": "feature/rate-limits",
+        "commit": "c4",
+        "action": "commit: Document rate limits"
+      },
+      {
+        "ref": "feature/rate-limits",
+        "commit": "c6",
+        "action": "rebase (finish): refs/heads/feature/rate-limits onto c1"
+      },
+      {
+        "ref": "HEAD@{2}",
+        "target": "c4",
+        "message": "move HEAD"
+      },
+      {
+        "ref": "HEAD@{3}",
+        "target": "c4",
+        "message": "reset: moving to c4"
+      },
+      {
+        "ref": "HEAD@{4}",
+        "target": "c9",
+        "message": "move HEAD"
+      }
+    ],
+    "staging": {},
+    "working_tree": {},
+    "conflicts": [],
+    "remotes": {},
+    "remote_branches": {},
+    "upstream_tracking": {},
+    "tags": {},
+    "remote_tags": {},
+    "stash_stack": [],
+    "partial_hunks": {},
+    "replaced_commits": {},
+    "operation_metadata": {
+      "last_reset_mode": "hard",
+      "last_reset_target": "c4",
+      "last_reset_target_expr": "c4",
+      "last_reset_previous_head": "c6",
+      "last_rebase_target": "main",
+      "last_rebase_onto": null,
+      "last_rebase_upstream": "c1",
+      "last_rebase_new_head": "c9",
+      "last_rebase_interactive": false,
+      "last_rebase_replayed_commits": [
+        "c7",
+        "c8",
+        "c9"
+      ]
+    },
+    "merge_abort_state": {
+      "repository_initialized": true,
+      "commits": [
+        {
+          "id": "c0",
+          "message": "Common base",
+          "parents": [],
+          "tree": {
+            "server/app.go": "app-v1",
+            "docs/README.md": "docs-v1"
+          },
+          "changes": {
+            "docs/README.md": {
+              "change_type": "added",
+              "before": null,
+              "after": "docs-v1"
+            },
+            "server/app.go": {
+              "change_type": "added",
+              "before": null,
+              "after": "app-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "docs/README.md": "added",
+            "server/app.go": "added"
+          },
+          "order": 0
+        },
+        {
+          "id": "c1",
+          "message": "Add graceful shutdown",
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "server/app.go": "app-v2",
+            "docs/README.md": "docs-v1"
+          },
+          "changes": {
+            "server/app.go": {
+              "change_type": "modified",
+              "before": "app-v1",
+              "after": "app-v2"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "server/app.go": "modified"
+          },
+          "order": 1
+        },
+        {
+          "id": "c2",
+          "message": "Add rate limiter",
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "server/app.go": "app-v1",
+            "docs/README.md": "docs-v1",
+            "server/limits.go": "limits-v1"
+          },
+          "changes": {
+            "server/limits.go": {
+              "change_type": "added",
+              "before": null,
+              "after": "limits-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "server/limits.go": "added"
+          },
+          "order": 2
+        },
+        {
+          "id": "c3",
+          "message": "Test rate limiter",
+          "parents": [
+            "c2"
+          ],
+          "tree": {
+            "server/app.go": "app-v1",
+            "docs/README.md": "docs-v1",
+            "server/limits.go": "limits-v1",
+            "server/limits_test.go": "limits-test-v1"
+          },
+          "changes": {
+            "server/limits_test.go": {
+              "change_type": "added",
+              "before": null,
+              "after": "limits-test-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "server/limits_test.go": "added"
+          },
+          "order": 3
+        },
+        {
+          "id": "c4",
+          "message": "Document rate limits",
+          "parents": [
+            "c3"
+          ],
+          "tree": {
+            "server/app.go": "app-v1",
+            "docs/README.md": "docs-v1",
+            "server/limits.go": "limits-v1",
+            "server/limits_test.go": "limits-test-v1",
+            "docs/limits.md": "limits-doc-v1"
+          },
+          "changes": {
+            "docs/limits.md": {
+              "change_type": "added",
+              "before": null,
+              "after": "limits-doc-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "docs/limits.md": "added"
+          },
+          "order": 4
+        },
+        {
+          "id": "c5",
+          "message": "Test rate limiter",
+          "parents": [
+            "c1"
+          ],
+          "tree": {
+            "server/app.go": "app-v2",
+            "docs/README.md": "docs-v1",
+            "server/limits_test.go": "limits-test-v1"
+          },
+          "changes": {
+            "server/limits_test.go": {
+              "change_type": "added",
+              "before": null,
+              "after": "limits-test-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "server/limits_test.go": "added"
+          },
+          "order": 5
+        },
+        {
+          "id": "c6",
+          "message": "Document rate limits",
+          "parents": [
+            "c5"
+          ],
+          "tree": {
+            "server/app.go": "app-v2",
+            "docs/README.md": "docs-v1",
+            "server/limits_test.go": "limits-test-v1",
+            "docs/limits.md": "limits-doc-v1"
+          },
+          "changes": {
+            "docs/limits.md": {
+              "change_type": "added",
+              "before": null,
+              "after": "limits-doc-v1"
+            }
+          },
+          "is_merge": false,
+          "files": {
+            "docs/limits.md": "added"
+          },
+          "order": 6
+        }
+      ],
+      "branches": {
+        "main": "c1",
+        "feature/rate-limits": "c6"
+      },
+      "head": {
+        "type": "branch",
+        "name": "feature/rate-limits",
+        "target": "c6"
+      },
+      "reflog": [
+        {
+          "ref": "feature/rate-limits",
+          "commit": "c4",
+          "action": "commit: Document rate limits"
+        },
+        {
+          "ref": "feature/rate-limits",
+          "commit": "c6",
+          "action": "rebase (finish): refs/heads/feature/rate-limits onto c1"
+        }
+      ],
+      "staging": {},
+      "working_tree": {},
+      "conflicts": [],
+      "conflict_details": {},
+      "remotes": {},
+      "remote_branches": {},
+      "upstream_tracking": {},
+      "tags": {},
+      "remote_tags": {},
+      "stash_stack": [],
+      "partial_hunks": {},
+      "replaced_commits": {},
+      "operation_metadata": {}
+    },
+    "last_reset_mode": "hard",
+    "last_reset_target": "c4",
+    "last_reset_target_expr": "c4",
+    "last_reset_previous_head": "c6",
+    "conflict_details": {},
+    "last_rebase_target": "main",
+    "last_rebase_onto": null,
+    "last_rebase_upstream": "c1",
+    "last_rebase_new_head": "c9",
+    "last_rebase_interactive": false,
+    "last_rebase_replayed_commits": [
+      "c7",
+      "c8",
+      "c9"
+    ]
   }
 }
