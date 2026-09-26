@@ -1,7 +1,11 @@
 from django.db import models
 from django.db.models import Q
 
-from common.constants import SESSION_STATUS_ABANDONED, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
+from common.constants import (
+    SESSION_STATUS_ABANDONED,
+    SESSION_STATUS_COMPLETED,
+    SESSION_STATUS_STARTED,
+)
 
 
 class LevelDrill(models.Model):
@@ -73,7 +77,9 @@ class LevelDrillCard(models.Model):
     class Meta:
         ordering = ["drill_id", "sort_order", "id"]
         constraints = [
-            models.UniqueConstraint(fields=["drill", "form_key"], name="unique_drill_card_form_key"),
+            models.UniqueConstraint(
+                fields=["drill", "form_key"], name="unique_drill_card_form_key"
+            ),
         ]
         indexes = [
             models.Index(fields=["drill", "sort_order"], name="drill_card_order_idx"),
@@ -108,9 +114,7 @@ class DrillRun(models.Model):
     adventure_level = models.ForeignKey(
         "adventures.AdventureLevel", on_delete=models.CASCADE, related_name="drill_runs"
     )
-    status = models.CharField(
-        max_length=16, choices=Status.choices, default=SESSION_STATUS_STARTED
-    )
+    status = models.CharField(max_length=16, choices=Status.choices, default=SESSION_STATUS_STARTED)
     # The client's queue: per-card ladder position, clears, misses, and the
     # pending ask order. Opaque to the backend beyond shape validation.
     queue_state = models.JSONField(default=dict, blank=True)

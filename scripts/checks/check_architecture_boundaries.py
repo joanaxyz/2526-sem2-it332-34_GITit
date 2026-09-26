@@ -1265,7 +1265,12 @@ def home_overview_source_violations(
             "StatsSummary",
             "buildHomeStatsModel",
             *{
-                "progress": ("GitCommandIcon", "SkillProfileBars", "deriveAchievements", "useState"),
+                "progress": (
+                    "GitCommandIcon",
+                    "SkillProfileBars",
+                    "deriveAchievements",
+                    "useState",
+                ),
                 # The skills band keeps one piece of local UI state: which row the
                 # pointer is on, which is what lights the matching radar vertex.
                 "skills": ("ActivityTrendChart", "deriveAchievements"),
@@ -1375,7 +1380,11 @@ def home_overview_source_violations(
             "MasteryRadar",
             "home-overview-mastery-orb",
         ),
-        "results": ("home-overview-kpi-row", "home-overview-modules", "useModulePerformance"),
+        "results": (
+            "home-overview-kpi-row",
+            "home-overview-modules",
+            "useModulePerformance",
+        ),
         "gallery": (
             "useState",
             "ACHIEVEMENT_FILTERS",

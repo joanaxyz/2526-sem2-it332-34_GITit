@@ -16,7 +16,7 @@ import type { DrillAnswer, DrillCard, DrillRung, DrillVerdict } from '@/features
  * `"message"` - insisting on the placeholder spelling would test typing,
  * not Git.
  */
-export function normalizeCommand(value: string): string {
+function normalizeCommand(value: string): string {
   return value
     .trim()
     .replace(/\s+/g, ' ')

@@ -1,7 +1,6 @@
 import type { ApiSchemas } from '@/shared/api/generated/apiTypes'
 
 export type DrillChoice = ApiSchemas['DrillChoice']
-export type DrillBlank = ApiSchemas['DrillBlank']
 export type DrillCard = ApiSchemas['DrillCard']
 export type DrillSequence = ApiSchemas['DrillSequence']
 export type DrillProgress = ApiSchemas['DrillProgress']
@@ -15,10 +14,6 @@ export type DrillResume = ApiSchemas['DrillResume']
  * from the first to the second, so the ladder is the feature.
  */
 export type DrillRung = 'recognise' | 'read' | 'complete' | 'forge'
-
-export type DrillAsk =
-  | { kind: 'card'; cardKey: string; rung: DrillRung }
-  | { kind: 'sequence' }
 
 /** What the learner has committed to, before it is graded. */
 export type DrillAnswer =

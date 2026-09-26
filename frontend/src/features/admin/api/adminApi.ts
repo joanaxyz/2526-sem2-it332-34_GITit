@@ -1,4 +1,5 @@
-import { apiOperationRequest, apiRequest } from '@/shared/api/httpClient'
+import type { KpiDateRange } from '@/features/admin/types'
+import { apiOperationRequest } from '@/shared/api/httpClient'
 import type {
   ApiRequestBody,
   ApiSchemas,
@@ -16,6 +17,14 @@ type StoryUpdatePayload = ApiRequestBody<'admin_stories_partial_update'>
 type ChapterUpdatePayload = ApiRequestBody<'admin_chapters_partial_update'>
 type ModerationUnpublishPayload = ApiRequestBody<'admin_moderation_unpublish_create'>
 type FeatureFlagUpdatePayload = ApiRequestBody<'admin_settings_create'>
+
+function kpiRangeQuery(range?: KpiDateRange) {
+  const params = new URLSearchParams()
+  if (range?.startDate) params.set('start_date', range.startDate)
+  if (range?.endDate) params.set('end_date', range.endDate)
+  const query = params.toString()
+  return query ? `?${query}` : ''
+}
 
 export const adminApi = {
   overview() {
@@ -72,8 +81,8 @@ export const adminApi = {
     const suffix = kind ? `?kind=${kind}` : ''
     return apiOperationRequest('admin_content_retrieve', `/admin/content/${suffix}`)
   },
-  analytics() {
-    return apiOperationRequest('admin_analytics_retrieve', '/admin/analytics/')
+  analytics(range?: KpiDateRange) {
+    return apiOperationRequest('admin_analytics_retrieve', `/admin/analytics/${kpiRangeQuery(range)}`)
   },
   moderation() {
     return apiOperationRequest('admin_moderation_retrieve', '/admin/moderation/')
@@ -91,29 +100,14 @@ export const adminApi = {
   saveFlag(payload: FeatureFlagUpdatePayload) {
     return apiOperationRequest('admin_settings_create', '/admin/settings/', { body: payload })
   },
-  userKpis(id: number) {
-    return apiRequest<UserKpisResponse>(`/admin/users/${id}/kpis/`)
+  userKpis(id: number, range?: KpiDateRange) {
+    return apiOperationRequest(
+      'admin_users_kpis_retrieve',
+      `/admin/users/${id}/kpis/${kpiRangeQuery(range)}`,
+    )
   },
 }
 
-export type KpiRate = { value: number | null; numerator: number; denominator: number }
+export type KpiRate = ApiSchemas['RateMetric']
 
-export type UserKpisResponse = {
-  has_data: boolean
-  kpis: {
-    scr: KpiRate
-    car: KpiRate
-    hlcr: KpiRate
-    rtr: KpiRate
-    arc: KpiRate
-    rta: KpiRate
-  } | null
-  modules: Array<{
-    number: number
-    title: string
-    scr: KpiRate
-    hlcr: KpiRate
-    rtr: KpiRate
-    arc: KpiRate
-  }>
-}
+export type UserKpisResponse = ApiSchemas['AdminUserKpisResponse']

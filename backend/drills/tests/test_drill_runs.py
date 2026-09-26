@@ -38,7 +38,15 @@ def seeded_level() -> AdventureLevel:
 def state_for(level, *, extra_keys=()):
     keys = sorted(drill_card_keys(level_id=level.id))
     cards = {
-        key: {"key": key, "ladder": ["recognise"], "rung": 0, "cleared": 1, "asks": 1, "missed": False, "retired": False}
+        key: {
+            "key": key,
+            "ladder": ["recognise"],
+            "rung": 0,
+            "cleared": 1,
+            "asks": 1,
+            "missed": False,
+            "retired": False,
+        }
         for key in list(keys) + list(extra_keys)
     }
     return {
@@ -124,9 +132,7 @@ def test_more_correct_than_answered_is_refused(db, django_user_model):
     state = state_for(level)
     state["correct"] = 99
 
-    response = client.put(
-        f"/api/adventure-levels/{level.id}/drill/run/", state, format="json"
-    )
+    response = client.put(f"/api/adventure-levels/{level.id}/drill/run/", state, format="json")
 
     assert response.status_code == 400
     assert not DrillRun.objects.exists()

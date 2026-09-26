@@ -6,21 +6,22 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 
 from adminconsole.selectors import (
+    admin_user_kpis_payload,
     admin_user_list_payload,
     find_admin_user,
     user_detail,
 )
 from adminconsole.serializers import (
+    AdminKpiRangeQuerySerializer,
     AdminUserActionRequestSerializer,
     AdminUserDetailSerializer,
+    AdminUserKpisResponseSerializer,
     AdminUserListQuerySerializer,
     AdminUserListResponseSerializer,
 )
 from adminconsole.services import AdminEconomyService, AdminUserActionService
 from common.permissions import IsStaff
-from players.models import Player
 from players.services import get_or_create_player
-from progress.services import MetricsService
 
 
 def _require_user(user_id):
@@ -100,51 +101,13 @@ class AdminUserKpisAPIView(APIView):
 
     permission_classes = [IsStaff]
 
+    @extend_schema(
+        parameters=[AdminKpiRangeQuerySerializer],
+        responses={200: AdminUserKpisResponseSerializer},
+    )
     def get(self, request, user_id: int):
-        user = _require_user(user_id)
-        player = Player.objects.filter(user=user).first()
-        if player is None:
-            return Response({"has_data": False, "kpis": None, "modules": []})
-
-        summary = MetricsService().performance_summary(player=player)
-        kpis = summary["kpis"]
-        modules = summary["modules"]
-
-        # RTA: retry sessions where changed-variant first attempt succeeded.
-        # A changed-variant retry is a run where prior_run is set and the
-        # variant differs from the prior run's variant. A successful one
-        # completes on the first attempt of that retry session (retry_index==1
-        # means one retry was started, i.e. this IS the first retry attempt).
-        from adventures.models import AdventureLevelTierRun
-        from common.constants import SESSION_STATUS_COMPLETED
-
-        rta_qs = AdventureLevelTierRun.objects.filter(
-            player=player,
-            is_replay=False,
-            prior_run__isnull=False,
-            tier__adventure_level__chapter__story__slug=MetricsService.PERFORMANCE_STORY_SLUG,
-            tier__adventure_level__chapter__number__in=MetricsService.PERFORMANCE_MODULE_NUMBERS,
+        query = AdminKpiRangeQuerySerializer(data=request.query_params)
+        query.is_valid(raise_exception=True)
+        return Response(
+            admin_user_kpis_payload(_require_user(user_id), kpi_range=query.kpi_range())
         )
-        eligible = rta_qs.count()
-        successful = rta_qs.filter(
-            status=SESSION_STATUS_COMPLETED,
-            retry_index=1,
-        ).count()
-        rta = {
-            "value": round(successful / eligible * 100, 1) if eligible else None,
-            "numerator": successful,
-            "denominator": eligible,
-        }
-
-        return Response({
-            "has_data": summary["completed_sessions"] > 0 or eligible > 0,
-            "kpis": {
-                "scr": kpis["scr"],
-                "car": kpis["car"],
-                "hlcr": kpis["hlcr"],
-                "rtr": kpis["rtr"],
-                "arc": kpis["arc"],
-                "rta": rta,
-            },
-            "modules": modules,
-        })

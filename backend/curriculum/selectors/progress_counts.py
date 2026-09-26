@@ -40,8 +40,7 @@ def chapter_completion_count_map(*, player, chapter_ids: list[int]) -> dict[int,
         completed_levels_by_chapter[chapter_id].add(level_id)
 
     completion_by_chapter = {
-        chapter_id: len(level_ids)
-        for chapter_id, level_ids in completed_levels_by_chapter.items()
+        chapter_id: len(level_ids) for chapter_id, level_ids in completed_levels_by_chapter.items()
     }
 
     for chapter_id, _trial_id in (

@@ -17,11 +17,11 @@ import type { DrillCard, DrillRung } from '@/features/drills/types'
  */
 
 /** Ask gap after a miss: near enough to still be warm, far enough to recall. */
-export const MISS_REINSERT_GAP = 2
+const MISS_REINSERT_GAP = 2
 /** A ceiling so a card nobody can get right cannot trap the session. */
 export const MAX_ASKS_PER_CARD = 7
 
-export type DrillCardState = {
+type DrillCardState = {
   key: string
   ladder: DrillRung[]
   /** Index into `ladder`: the rung this card is asked at next. */

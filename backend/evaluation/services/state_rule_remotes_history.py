@@ -14,6 +14,7 @@ SUPPORTED_RULE_TYPES = frozenset(
         "operation_metadata_not_equals",
         "pull_moved_local_to_upstream",
         "push_moved_remote_to_local_tip",
+        "rebase_not_in_progress",
         "reflog_contains",
         "remote_exists",
         "remote_tracking_updated",
@@ -141,6 +142,14 @@ def check_remote_history_state_rule(
             else f"Stash pop did not restore: {missing}.",
         )
 
+    if rule_type == "rebase_not_in_progress":
+        # A stopped rebase keeps rebase_state (remaining commits, abort point)
+        # until --continue finishes it or --abort drops it.
+        passed = not state.get("rebase_state")
+        return (
+            passed,
+            "No rebase is in progress." if passed else "A rebase is still in progress.",
+        )
     if rule_type == "reflog_contains":
         passed = self._reflog_contains(state, rule.get("expected"))
         return (
