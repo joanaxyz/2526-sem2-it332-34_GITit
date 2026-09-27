@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { TierDagAnimationController } from '@/features/story-map/hooks/useTierDagAnimation'
@@ -68,7 +68,7 @@ describe('TierDiagramStage', () => {
 })
 
 describe('TierTerminalStage', () => {
-  function renderStage(onShowCommandGuide?: () => void) {
+  function renderStage() {
     render(
       <TierTerminalStage
         run={{ ...makeRun(false), status: 'started' } as TierRun}
@@ -83,19 +83,11 @@ describe('TierTerminalStage', () => {
         onKeyboardTerminalPaneResize={vi.fn()}
         onResetTerminalPaneResize={vi.fn()}
         onCommand={vi.fn()}
-        onShowCommandGuide={onShowCommandGuide}
       />,
     )
   }
 
-  it('offers a hidden command guide back from the terminal title bar', () => {
-    const reopen = vi.fn()
-    renderStage(reopen)
-    fireEvent.click(screen.getByRole('button', { name: 'Command guide' }))
-    expect(reopen).toHaveBeenCalledOnce()
-  })
-
-  it('shows no guide control when no guide is hidden', () => {
+  it('keeps command-guide navigation out of the terminal title bar', () => {
     renderStage()
     expect(screen.queryByRole('button', { name: 'Command guide' })).not.toBeInTheDocument()
   })

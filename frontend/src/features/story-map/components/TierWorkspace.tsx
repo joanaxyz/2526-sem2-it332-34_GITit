@@ -12,6 +12,7 @@ import { TierWorkspaceMain } from '@/features/story-map/components/TierWorkspace
 import { TierWorkspaceTour } from '@/features/story-map/components/TierWorkspaceTour'
 import { CommandIntroductionPanel } from '@/features/story-map/components/CommandIntroductionPanel'
 import { useTierCommandSubmission } from '@/features/story-map/hooks/useTierCommandSubmission'
+import { useCommandGuideHistory } from '@/features/story-map/hooks/useCommandGuideHistory'
 import { useTierWorkspaceMutations } from '@/features/story-map/hooks/useTierWorkspaceMutations'
 import { createTierWorkspaceCommandHandler } from '@/features/story-map/utils/tierWorkspaceCommand'
 import { useLeaveAbandonedRun } from '@/features/story-map/hooks/useLeaveAbandonedRun'
@@ -74,6 +75,8 @@ export function TierWorkspace() {
   const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
   // A hidden guide stays hidden for its lesson (across commands) until reopened.
   const [hiddenGuideKey, setHiddenGuideKey] = useState<string | null>(null)
+  const [selectedGuideKey, setSelectedGuideKey] = useState<string | null>(null)
+  const commandGuides = useCommandGuideHistory(runId, run?.tutor)
   const user = useAuthStore((state) => state.user)
   const [exitNavigationRunId, setExitNavigationRunId] = useState<number | null>(null)
   const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
@@ -158,6 +161,18 @@ export function TierWorkspace() {
   const introductionOpen = Boolean(run.tutor && !tourOpen
     && !mutation.isPending && !dagAnimation.animating && !battleDirector.animating
     && !guideHidden)
+  const replayGuide = selectedGuideKey
+    ? commandGuides.find((guide) => guide.teaching_key === selectedGuideKey) ?? null
+    : null
+
+  const openCommandGuide = (teachingKey: string) => {
+    if (run.tutor?.teaching_key === teachingKey && run.tutor.phase === 'introduction') {
+      setSelectedGuideKey(null)
+      setHiddenGuideKey(null)
+      return
+    }
+    setSelectedGuideKey(teachingKey)
+  }
 
   const submit = createTierWorkspaceCommandHandler({
     runId,
@@ -176,7 +191,7 @@ export function TierWorkspace() {
 
   const isReplaying = retryMutation.isPending || replayMutation.isPending
   const outcomeModalOpen =
-    !introductionOpen &&
+    !introductionOpen && !replayGuide &&
     !exitNavigationPending &&
     (run.status === 'completed' || run.status === 'failed') &&
     !mutation.isPending &&
@@ -198,10 +213,13 @@ export function TierWorkspace() {
         onRetry={() => retryMutation.mutate()}
         onStartOver={() => setStartOverConfirmOpen(true)}
         onReplay={() => replayMutation.mutate(run.tier.id)}
+        commandGuides={run.status === 'started' && !tourOpen ? commandGuides : []}
+        currentCommandGuideKey={run.tutor?.teaching_key}
+        commandGuideOpen={introductionOpen || Boolean(replayGuide)}
+        onSelectCommandGuide={openCommandGuide}
       />
       <TierWorkspaceMain
         teachingActive={introductionOpen}
-        onShowCommandGuide={guideHidden && run.status === 'started' ? () => setHiddenGuideKey(null) : undefined}
         run={run}
         lines={lines}
         shellPrompt={shellPrompt}
@@ -247,6 +265,15 @@ export function TierWorkspace() {
       {introductionOpen && run.tutor ? (
         <CommandIntroductionPanel key={`${run.id}:${run.tutor.context_id}`} run={run} tutor={run.tutor}
           onDismiss={() => setHiddenGuideKey(run.tutor?.teaching_key ?? null)} />
+      ) : null}
+      {!introductionOpen && replayGuide ? (
+        <CommandIntroductionPanel
+          key={`${run.id}:replay:${replayGuide.teaching_key}`}
+          run={run}
+          tutor={replayGuide}
+          replay
+          onDismiss={() => setSelectedGuideKey(null)}
+        />
       ) : null}
       <TierOutcomeModal
         open={outcomeModalOpen}

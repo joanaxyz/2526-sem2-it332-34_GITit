@@ -26,17 +26,18 @@ const FEEDBACK_REGIONS = [...CONTEXT_REGIONS, '[data-tour-target="terminal"]']
  *
  * It explains the command part by part, shows what it will change as a
  * diagram, and defines new words the first times they come up. Wide screens
- * give the explanation and the change their own cards; narrower screens use
- * tabs in one card.
+ * show the guide as one frame holding the explanation and the change as their
+ * own cards, each resized on its own; narrower screens use tabs in one card.
  *
  * Before a command it has no buttons: it stays beside the terminal while the
  * learner types and turns into feedback once the command runs. Hiding it (×)
- * is the only way to put it away; the terminal title bar can bring it back.
+ * is the only way to put it away; the command-bar book can bring it back.
  * After a command, "Got it" records the guide (and its new words) as done.
  */
-export function CommandIntroductionPanel({ run, tutor, onDismiss }: {
+export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss }: {
   run: TierRun
   tutor: CommandIntroduction
+  replay?: boolean
   onDismiss: () => void
 }) {
   const lesson = useCommandIntroduction(run, tutor)
@@ -51,8 +52,8 @@ export function CommandIntroductionPanel({ run, tutor, onDismiss }: {
     requestAnimationFrame(() => document.querySelector<HTMLInputElement>('[data-command-input]')?.focus())
   }
   useEffect(() => {
-    if (introduction) focusTerminal()
-  }, [introduction])
+    if (introduction && !replay) focusTerminal()
+  }, [introduction, replay])
 
   const error = lesson.error ? <p className="command-intro__error" role="alert">{lesson.error}</p> : null
   const changeTitle = 'What changes'
@@ -134,13 +135,16 @@ export function CommandIntroductionPanel({ run, tutor, onDismiss }: {
       finishLabel={lesson.pending ? 'Saving…' : 'Got it'}
       finishDisabled={lesson.pending}
       cardClassName="command-intro"
-      skipLabel="Hide command guide"
+      skipLabel={replay ? 'Close command guide' : 'Hide command guide'}
       skipIconOnly
-      showSkip={introduction}
-      showActions={!introduction}
-      focusCard={!introduction}
+      showSkip={replay || introduction}
+      showActions={!replay && !introduction}
+      focusCard={replay || !introduction}
       showProgress={false}
+      transformable
+      paneLabels={{ main: 'command card', aside: `${changeTitle.toLowerCase()} card` }}
       reveal={introduction ? CONTEXT_REGIONS : FEEDBACK_REGIONS}
+      collapseTarget="[data-command-guide-launcher]"
       aside={split ? (
         <section className="command-intro__aside" aria-label={changeTitle}>
           <h3 className="command-intro__aside-title">{changeTitle}</h3>
@@ -148,6 +152,11 @@ export function CommandIntroductionPanel({ run, tutor, onDismiss }: {
         </section>
       ) : undefined}
       onClose={(reason) => {
+        if (replay) {
+          onDismiss()
+          focusTerminal()
+          return
+        }
         if (reason === 'skip') {
           onDismiss()
           focusTerminal()

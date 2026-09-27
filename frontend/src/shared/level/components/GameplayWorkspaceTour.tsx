@@ -1,7 +1,7 @@
-import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react'
+import { ArrowLeft, ArrowRight, Check, GripHorizontal, MoveDiagonal2, RotateCcw, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
-import type { CSSProperties, ReactNode } from 'react'
+import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
+import type { CSSProperties, KeyboardEvent as ReactKeyboardEvent, PointerEvent as ReactPointerEvent, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 import { Button } from '@/shared/components/Button'
@@ -9,10 +9,12 @@ import {
   DEFAULT_CARD_HEIGHT,
   DESKTOP_CARD_WIDTH,
   HEADER_CLEARANCE,
+  connectorPathFor,
   layoutFor,
   prefersReducedMotion,
   spotlightRect,
   VIEWPORT_GAP,
+  type RectSnapshot,
   type TourLayout,
   type WorkspaceTourPlacement,
 } from './gameplayWorkspaceTourLayout'
@@ -29,6 +31,42 @@ export type WorkspaceTourStep = {
 
 export type WorkspaceTourCloseReason = 'finish' | 'skip'
 
+type CollapseVector = {
+  x: number
+  y: number
+  scale: number
+}
+
+/** A card inside the guide: the main card, and (wide screens) the one beside it. */
+type Pane = 'main' | 'aside'
+
+type Size = { width: number; height: number }
+
+type Position = { left: number; top: number }
+
+type PaneBounds = { size: Size; minimum: Size; maximum: Size }
+
+type TransformMode = 'move' | 'resize'
+
+type TransformSession = {
+  mode: 'move'
+  pane: Pane
+  pointerId: number
+  startX: number
+  startY: number
+  frame: RectSnapshot
+} | {
+  mode: 'resize'
+  pane: Pane
+  pointerId: number
+  startX: number
+  startY: number
+  bounds: PaneBounds
+}
+
+/** Layout, plus the main card's measured size when the cards float separately. */
+type MeasuredLayout = TourLayout & { mainSize?: Size }
+
 type ResolvedWorkspaceTourStep = {
   step: WorkspaceTourStep
   target: HTMLElement
@@ -36,6 +74,56 @@ type ResolvedWorkspaceTourStep = {
 
 const TARGET_GAP = 18
 const ASIDE_GAP = 12
+const TRANSFORM_BREAKPOINT = 600
+const PANE_MINIMUMS: Record<Pane, Size> = {
+  main: { width: 304, height: 220 },
+  aside: { width: 240, height: 160 },
+}
+const KEYBOARD_TRANSFORM_STEP = 16
+
+function frameAt(position: Position, size: Size): RectSnapshot {
+  return {
+    left: position.left,
+    top: position.top,
+    right: position.left + size.width,
+    bottom: position.top + size.height,
+    width: size.width,
+    height: size.height,
+  }
+}
+
+function clampPosition(position: Position, size: Size): Position {
+  return {
+    left: Math.min(
+      Math.max(position.left, VIEWPORT_GAP),
+      Math.max(VIEWPORT_GAP, window.innerWidth - size.width - VIEWPORT_GAP),
+    ),
+    top: Math.min(
+      Math.max(position.top, VIEWPORT_GAP),
+      Math.max(VIEWPORT_GAP, window.innerHeight - size.height - VIEWPORT_GAP),
+    ),
+  }
+}
+
+function clampSize(size: Size, { minimum, maximum }: PaneBounds): Size {
+  const clamp = (value: number, low: number, high: number) => Math.min(Math.max(value, Math.min(low, high)), high)
+  return {
+    width: clamp(size.width, minimum.width, maximum.width),
+    height: clamp(size.height, minimum.height, maximum.height),
+  }
+}
+
+/** Arrow keys as a step, farther with Shift; null for any other key. */
+function arrowDelta(event: ReactKeyboardEvent) {
+  const step = event.shiftKey ? KEYBOARD_TRANSFORM_STEP * 3 : KEYBOARD_TRANSFORM_STEP
+  switch (event.key) {
+    case 'ArrowLeft': return { dx: -step, dy: 0 }
+    case 'ArrowRight': return { dx: step, dy: 0 }
+    case 'ArrowUp': return { dx: 0, dy: -step }
+    case 'ArrowDown': return { dx: 0, dy: step }
+    default: return null
+  }
+}
 
 function isVisible(element: HTMLElement) {
   const rect = element.getBoundingClientRect()
@@ -80,8 +168,11 @@ export function GameplayWorkspaceTour({
   reveal,
   aside,
   asideWidth = 336,
+  paneLabels = { main: 'main card', aside: 'side card' },
   steps,
   refreshKey,
+  collapseTarget,
+  transformable = false,
   onClose,
 }: {
   label: string
@@ -99,11 +190,21 @@ export function GameplayWorkspaceTour({
   cardClassName?: string
   /** Selectors of regions to keep undimmed (the scenario, project files...). */
   reveal?: readonly string[]
-  /** A second card shown beside the main one, for wide screens. */
+  /**
+   * A second card shown beside the main one, for wide screens. The guide then
+   * becomes a frame holding both cards under one header, and each card sizes
+   * on its own.
+   */
   aside?: ReactNode
   asideWidth?: number
+  /** Names of the two cards for their resize controls, e.g. "command card". */
+  paneLabels?: Record<Pane, string>
   steps: readonly WorkspaceTourStep[]
   refreshKey?: string | number
+  /** Animate the guide card into this control before closing. */
+  collapseTarget?: string
+  /** Let the learner move the guide and resize each card while keeping them in the viewport. */
+  transformable?: boolean
   onClose: (reason: WorkspaceTourCloseReason) => void
 }) {
   const markerId = `workspace-tour-arrow-${useId().replace(/:/g, '')}`
@@ -111,11 +212,271 @@ export function GameplayWorkspaceTour({
   const previousFocusRef = useRef<HTMLElement | null>(null)
   const [availableSteps, setAvailableSteps] = useState<readonly ResolvedWorkspaceTourStep[]>([])
   const [activeIndex, setActiveIndex] = useState(0)
-  const [layout, setLayout] = useState<TourLayout | null>(null)
+  const [layout, setLayout] = useState<MeasuredLayout | null>(null)
+  const [collapseVector, setCollapseVector] = useState<CollapseVector | null>(null)
+  const [panePositions, setPanePositions] = useState<Partial<Record<Pane, Position>>>({})
+  const [paneSizes, setPaneSizes] = useState<Partial<Record<Pane, Size>>>({})
+  const [frontPane, setFrontPane] = useState<Pane>('main')
+  const [transformMode, setTransformMode] = useState<TransformMode | null>(null)
+  const transformSessionRef = useRef<TransformSession | null>(null)
+  const closeTimerRef = useRef<number | null>(null)
   const activeResolvedStep = availableSteps[activeIndex]
   const activeStep = activeResolvedStep?.step
   const activeTarget = activeResolvedStep?.target
   const layoutReady = layout !== null
+  // With a second card, each card floats on its own: the learner can pull
+  // them apart, move either one, and size either one.
+  const separate = Boolean(aside)
+  const transformed = Object.values(panePositions).some(Boolean) || Object.values(paneSizes).some(Boolean)
+
+  const resetTransform = useCallback(() => {
+    setPanePositions({})
+    setPaneSizes({})
+  }, [])
+
+  const resetPane = useCallback((pane: Pane) => {
+    setPanePositions((positions) => ({ ...positions, [pane]: undefined }))
+    setPaneSizes((sizes) => ({ ...sizes, [pane]: undefined }))
+  }, [])
+
+  const paneElement = useCallback((pane: Pane) => (
+    separate
+      ? cardElement?.querySelector<HTMLElement>(`[data-tour-pane="${pane}"]`) ?? null
+      : cardElement
+  ), [cardElement, separate])
+
+  /** Where a card sits: pinned once moved or resized, else wherever layout put it. */
+  const paneFrame = useCallback((pane: Pane): RectSnapshot | null => {
+    const rect = paneElement(pane)?.getBoundingClientRect()
+    if (!rect) return null
+    return frameAt(panePositions[pane] ?? rect, paneSizes[pane] ?? rect)
+  }, [paneElement, panePositions, paneSizes])
+
+  /**
+   * The first move or resize pins every card where it is, so from then on
+   * each card only changes when the learner changes it.
+   */
+  const pinPanes = useCallback(() => {
+    const pinned: Partial<Record<Pane, Position>> = {}
+    for (const pane of separate ? ['main', 'aside'] as const : ['main'] as const) {
+      const frame = paneFrame(pane)
+      if (frame) pinned[pane] = { left: frame.left, top: frame.top }
+    }
+    setPanePositions((positions) => ({ ...pinned, ...positions }))
+  }, [paneFrame, separate])
+
+  /** A card grows right and down from where it sits, up to the viewport edge. */
+  const paneBounds = useCallback((pane: Pane): PaneBounds | null => {
+    const frame = paneFrame(pane)
+    if (!frame) return null
+    return {
+      size: { width: frame.width, height: frame.height },
+      minimum: PANE_MINIMUMS[pane],
+      maximum: {
+        width: Math.max(1, window.innerWidth - VIEWPORT_GAP - frame.left),
+        height: Math.max(1, window.innerHeight - VIEWPORT_GAP - frame.top),
+      },
+    }
+  }, [paneFrame])
+
+  const beginMove = useCallback((pane: Pane, event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (!transformable || window.innerWidth <= TRANSFORM_BREAKPOINT) return
+    const frame = paneFrame(pane)
+    if (!frame) return
+    event.preventDefault()
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+    transformSessionRef.current = {
+      mode: 'move',
+      pane,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      frame,
+    }
+    pinPanes()
+    setPanePositions((positions) => ({ ...positions, [pane]: clampPosition(frame, frame) }))
+    setFrontPane(pane)
+    setTransformMode('move')
+  }, [paneFrame, pinPanes, transformable])
+
+  const beginResize = useCallback((pane: Pane, event: ReactPointerEvent<HTMLButtonElement>) => {
+    if (!transformable || window.innerWidth <= TRANSFORM_BREAKPOINT) return
+    const bounds = paneBounds(pane)
+    if (!bounds) return
+    event.preventDefault()
+    event.currentTarget.setPointerCapture?.(event.pointerId)
+    transformSessionRef.current = {
+      mode: 'resize',
+      pane,
+      pointerId: event.pointerId,
+      startX: event.clientX,
+      startY: event.clientY,
+      bounds,
+    }
+    pinPanes()
+    setFrontPane(pane)
+    setTransformMode('resize')
+  }, [paneBounds, pinPanes, transformable])
+
+  const moveWithKeyboard = useCallback((pane: Pane, event: ReactKeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'Home') {
+      event.preventDefault()
+      event.stopPropagation()
+      resetPane(pane)
+      return
+    }
+    const delta = arrowDelta(event)
+    const frame = paneFrame(pane)
+    if (!delta || !frame) return
+    event.preventDefault()
+    event.stopPropagation()
+    pinPanes()
+    setPanePositions((positions) => ({
+      ...positions,
+      [pane]: clampPosition({ left: frame.left + delta.dx, top: frame.top + delta.dy }, frame),
+    }))
+    setFrontPane(pane)
+  }, [paneFrame, pinPanes, resetPane])
+
+  const resizeWithKeyboard = useCallback((pane: Pane, event: ReactKeyboardEvent<HTMLButtonElement>) => {
+    if (event.key === 'Home') {
+      event.preventDefault()
+      event.stopPropagation()
+      setPaneSizes((sizes) => ({ ...sizes, [pane]: undefined }))
+      return
+    }
+    const delta = arrowDelta(event)
+    const bounds = paneBounds(pane)
+    if (!delta || !bounds) return
+    event.preventDefault()
+    event.stopPropagation()
+    pinPanes()
+    setPaneSizes((sizes) => ({
+      ...sizes,
+      [pane]: clampSize({ width: bounds.size.width + delta.dx, height: bounds.size.height + delta.dy }, bounds),
+    }))
+    setFrontPane(pane)
+  }, [paneBounds, pinPanes])
+
+  const close = useCallback((reason: WorkspaceTourCloseReason) => {
+    if (collapseVector) return
+    const destination = collapseTarget
+      ? document.querySelector<HTMLElement>(collapseTarget)
+      : null
+    if (!destination || !cardElement || prefersReducedMotion()) {
+      onClose(reason)
+      return
+    }
+
+    const cardRect = cardElement.getBoundingClientRect()
+    const destinationRect = destination.getBoundingClientRect()
+    if (!cardRect.width || !cardRect.height || !destinationRect.width || !destinationRect.height) {
+      onClose(reason)
+      return
+    }
+
+    setCollapseVector({
+      x: destinationRect.left + destinationRect.width / 2 - (cardRect.left + cardRect.width / 2),
+      y: destinationRect.top + destinationRect.height / 2 - (cardRect.top + cardRect.height / 2),
+      scale: Math.max(0.08, Math.min(destinationRect.width / cardRect.width, destinationRect.height / cardRect.height)),
+    })
+    destination.classList.add('is-tour-destination')
+    closeTimerRef.current = window.setTimeout(() => {
+      destination.classList.remove('is-tour-destination')
+      onClose(reason)
+    }, 340)
+  }, [cardElement, collapseTarget, collapseVector, onClose])
+
+  useEffect(() => () => {
+    if (closeTimerRef.current !== null) window.clearTimeout(closeTimerRef.current)
+    if (collapseTarget) {
+      document.querySelector<HTMLElement>(collapseTarget)?.classList.remove('is-tour-destination')
+    }
+  }, [collapseTarget])
+
+  useEffect(() => {
+    if (!transformable) return
+
+    const handlePointerMove = (event: PointerEvent) => {
+      const session = transformSessionRef.current
+      if (!session || event.pointerId !== session.pointerId) return
+      const dx = event.clientX - session.startX
+      const dy = event.clientY - session.startY
+      if (session.mode === 'move') {
+        const { pane, frame } = session
+        setPanePositions((positions) => ({
+          ...positions,
+          [pane]: clampPosition({ left: frame.left + dx, top: frame.top + dy }, frame),
+        }))
+        return
+      }
+      const { pane, bounds } = session
+      setPaneSizes((sizes) => ({
+        ...sizes,
+        [pane]: clampSize({ width: bounds.size.width + dx, height: bounds.size.height + dy }, bounds),
+      }))
+    }
+    const finishTransform = (event: PointerEvent) => {
+      if (event.pointerId !== transformSessionRef.current?.pointerId) return
+      transformSessionRef.current = null
+      setTransformMode(null)
+    }
+
+    window.addEventListener('pointermove', handlePointerMove)
+    window.addEventListener('pointerup', finishTransform)
+    window.addEventListener('pointercancel', finishTransform)
+    return () => {
+      transformSessionRef.current = null
+      window.removeEventListener('pointermove', handlePointerMove)
+      window.removeEventListener('pointerup', finishTransform)
+      window.removeEventListener('pointercancel', finishTransform)
+    }
+  }, [transformable])
+
+  useEffect(() => {
+    if (!transformable) return
+    // A smaller window shrinks resized cards to fit and keeps every card in view.
+    const keepCardsVisible = () => {
+      if (window.innerWidth <= TRANSFORM_BREAKPOINT) {
+        resetTransform()
+        return
+      }
+      const available = {
+        width: Math.max(1, window.innerWidth - VIEWPORT_GAP * 2),
+        height: Math.max(1, window.innerHeight - VIEWPORT_GAP * 2),
+      }
+      const frames = { main: paneFrame('main'), aside: separate ? paneFrame('aside') : null }
+      const fit = (size: Size) => ({
+        width: Math.min(size.width, available.width),
+        height: Math.min(size.height, available.height),
+      })
+      setPaneSizes((sizes) => {
+        const next = { ...sizes }
+        for (const pane of ['main', 'aside'] as const) {
+          const size = next[pane]
+          if (size) next[pane] = fit(size)
+        }
+        return next
+      })
+      setPanePositions((positions) => {
+        const next = { ...positions }
+        for (const pane of ['main', 'aside'] as const) {
+          const position = next[pane]
+          const frame = frames[pane]
+          if (position && frame) next[pane] = clampPosition(position, fit(frame))
+        }
+        return next
+      })
+    }
+    window.addEventListener('resize', keepCardsVisible)
+    return () => window.removeEventListener('resize', keepCardsVisible)
+  }, [paneFrame, resetTransform, separate, transformable])
+
+  useEffect(() => {
+    resetTransform()
+    transformSessionRef.current = null
+    setTransformMode(null)
+  }, [activeStep?.id, refreshKey, resetTransform])
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement as HTMLElement | null
@@ -176,7 +537,14 @@ export function GameplayWorkspaceTour({
 
     const measureNow = () => {
       const rect = target.getBoundingClientRect()
-      const cardHeight = cardElement?.getBoundingClientRect().height || DEFAULT_CARD_HEIGHT
+      // Separate cards: the section spans the viewport, so measure the cards themselves.
+      const panes = aside
+        ? [...(cardElement?.querySelectorAll<HTMLElement>('[data-tour-pane]') ?? [])]
+        : []
+      const mainPane = panes.find((pane) => pane.dataset.tourPane === 'main')?.getBoundingClientRect()
+      const cardHeight = (aside
+        ? Math.max(0, ...panes.map((pane) => pane.getBoundingClientRect().height))
+        : cardElement?.getBoundingClientRect().height) || DEFAULT_CARD_HEIGHT
       const narrow = window.innerWidth <= 900
       const needsScroll =
         rect.top < HEADER_CLEARANCE ||
@@ -194,6 +562,7 @@ export function GameplayWorkspaceTour({
         return
       }
 
+      // Separate cards are placed side by side, as one box, until the learner moves them.
       const width = aside ? DESKTOP_CARD_WIDTH + ASIDE_GAP + asideWidth : DESKTOP_CARD_WIDTH
       const reveals = (reveal ?? [])
         .map((selector) => document.querySelector<HTMLElement>(selector))
@@ -201,7 +570,11 @@ export function GameplayWorkspaceTour({
         .map((box) => ({
           top: box.top, right: box.right, bottom: box.bottom, left: box.left, width: box.width, height: box.height,
         }))
-      setLayout({ ...layoutFor(rect, activeStep.placement ?? 'bottom', cardHeight, width), reveals })
+      setLayout({
+        ...layoutFor(rect, activeStep.placement ?? 'bottom', cardHeight, width),
+        reveals,
+        ...(mainPane ? { mainSize: { width: mainPane.width, height: mainPane.height } } : {}),
+      })
     }
 
     const measure = () => {
@@ -216,7 +589,10 @@ export function GameplayWorkspaceTour({
     measureNow()
     const observer = new ResizeObserver(measure)
     observer.observe(target)
-    if (cardElement) observer.observe(cardElement)
+    if (cardElement) {
+      observer.observe(cardElement)
+      cardElement.querySelectorAll('[data-tour-pane]').forEach((pane) => observer.observe(pane))
+    }
     for (const selector of reveal ?? []) {
       const element = document.querySelector(selector)
       if (element) observer.observe(element)
@@ -244,7 +620,7 @@ export function GameplayWorkspaceTour({
       if (availableSteps.length === 0) return
       if (event.key === 'Escape' && showSkip) {
         event.preventDefault()
-        onClose('skip')
+        close('skip')
         return
       }
       if (!event.altKey) return
@@ -260,12 +636,24 @@ export function GameplayWorkspaceTour({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [activeIndex, availableSteps.length, onClose, showSkip])
+  }, [activeIndex, availableSteps.length, close, showSkip])
 
   if (!activeStep || !layout || typeof document === 'undefined') return null
 
   const viewportWidth = window.innerWidth
   const viewportHeight = window.innerHeight
+  // Until the learner moves one, the cards sit side by side where layout put them.
+  const mainWidth = paneSizes.main?.width ?? (separate ? DESKTOP_CARD_WIDTH : layout.card.width)
+  const autoPositions: Record<Pane, Position> = {
+    main: layout.card,
+    aside: { left: layout.card.left + mainWidth + ASIDE_GAP, top: layout.card.top },
+  }
+  const positionOf = (pane: Pane) => panePositions[pane] ?? autoPositions[pane]
+  const mainFrame = frameAt(positionOf('main'), paneSizes.main ?? layout.mainSize ?? layout.card)
+  // The connector leaves the card that explains the target: the main one.
+  const arrowPath = transformed
+    ? connectorPathFor(mainFrame, layout.target)
+    : layout.arrowPath
   const targetVisible = layout.target.bottom > HEADER_CLEARANCE
     && layout.target.top < viewportHeight - VIEWPORT_GAP
     && layout.target.right > 0 && layout.target.left < viewportWidth
@@ -285,12 +673,53 @@ export function GameplayWorkspaceTour({
   const titleId = `${markerId}-title`
   const bodyId = `${markerId}-body`
   const cardStyle = {
-    left: layout.card.left,
-    top: layout.card.top,
-    width: layout.card.width,
-    ...(aside ? { '--workspace-tour-aside-width': `${asideWidth}px` } : {}),
-    ...(layout.room ? { '--workspace-tour-room': `${layout.room}px` } : {}),
+    ...(separate ? {} : {
+      left: mainFrame.left,
+      top: mainFrame.top,
+      width: mainFrame.width,
+      ...(paneSizes.main ? { height: paneSizes.main.height, maxHeight: paneSizes.main.height } : {}),
+    }),
+    ...(!transformed && layout.room ? { '--workspace-tour-room': `${layout.room}px` } : {}),
+    ...(collapseVector ? {
+      '--workspace-tour-collapse-x': `${collapseVector.x}px`,
+      '--workspace-tour-collapse-y': `${collapseVector.y}px`,
+      '--workspace-tour-collapse-scale': collapseVector.scale,
+    } : {}),
   } as CSSProperties
+  const paneStyle = (pane: Pane, defaultWidth: number): CSSProperties => {
+    const size = paneSizes[pane]
+    const position = positionOf(pane)
+    return {
+      left: position.left,
+      top: position.top,
+      ...(size ? { width: size.width, height: size.height, maxHeight: 'none' } : { width: defaultWidth }),
+    }
+  }
+  const cardName = (pane: Pane) => (separate ? paneLabels[pane] : label.toLowerCase())
+  const moveHandle = (pane: Pane, className = '') => transformable ? (
+    <button
+      type="button"
+      className={`workspace-tour__transform-control is-move${className}`}
+      aria-label={`Move ${cardName(pane)}`}
+      title="Drag to move. Arrow keys move; Shift moves farther; Home resets."
+      onPointerDown={(event) => beginMove(pane, event)}
+      onKeyDown={(event) => moveWithKeyboard(pane, event)}
+    >
+      <GripHorizontal aria-hidden="true" />
+    </button>
+  ) : null
+  const resizeHandle = (pane: Pane) => transformable ? (
+    <button
+      type="button"
+      className="workspace-tour__resize-handle"
+      aria-label={`Resize ${cardName(pane)}`}
+      title="Drag to resize. Arrow keys resize; Shift resizes farther; Home resets."
+      onPointerDown={(event) => beginResize(pane, event)}
+      onKeyDown={(event) => resizeWithKeyboard(pane, event)}
+    >
+      <MoveDiagonal2 aria-hidden="true" />
+    </button>
+  ) : null
 
   const content = (
     <>
@@ -303,16 +732,28 @@ export function GameplayWorkspaceTour({
             </span>
           ) : null}
         </div>
-        {showSkip ? <button
-          type="button"
-          className={`workspace-tour__skip${skipIconOnly ? ' is-icon-only' : ''}`}
-          aria-label={skipIconOnly ? skipLabel : undefined}
-          title={skipIconOnly ? skipLabel : undefined}
-          onClick={() => onClose('skip')}
-        >
-          {skipIconOnly ? null : skipLabel}
-          <X aria-hidden="true" />
-        </button> : null}
+        {transformable || showSkip ? <div className="workspace-tour__header-actions">
+          {moveHandle('main')}
+          {transformable && transformed ? <button
+            type="button"
+            className="workspace-tour__transform-control"
+            aria-label={`Reset ${label.toLowerCase()} size and position`}
+            title="Reset size and position"
+            onClick={resetTransform}
+          >
+            <RotateCcw aria-hidden="true" />
+          </button> : null}
+          {showSkip ? <button
+            type="button"
+            className={`workspace-tour__skip${skipIconOnly ? ' is-icon-only' : ''}`}
+            aria-label={skipIconOnly ? skipLabel : undefined}
+            title={skipIconOnly ? skipLabel : undefined}
+            onClick={() => close('skip')}
+          >
+            {skipIconOnly ? null : skipLabel}
+            <X aria-hidden="true" />
+          </button> : null}
+        </div> : null}
       </header>
 
       <div className="workspace-tour__message" aria-live="polite">
@@ -359,7 +800,7 @@ export function GameplayWorkspaceTour({
           className="workspace-tour__next"
           disabled={finishDisabled}
           onClick={() => {
-            if (finalStep) onClose('finish')
+            if (finalStep) close('finish')
             else setActiveIndex((index) => index + 1)
           }}
         >
@@ -372,7 +813,12 @@ export function GameplayWorkspaceTour({
   )
 
   return createPortal(
-    <div className="workspace-tour" data-testid="workspace-tour">
+    <div
+      className="workspace-tour"
+      data-closing={collapseVector ? 'true' : undefined}
+      data-transforming={transformMode ?? undefined}
+      data-testid="workspace-tour"
+    >
       {/* One dimming layer with cut-outs: the spotlit target plus any revealed
           regions stay readable, since tours explain them rather than hide them. */}
       <svg
@@ -426,17 +872,17 @@ export function GameplayWorkspaceTour({
             <path d="M0,0 L0,8 L9,4 z" />
           </marker>
         </defs>
-        <path className="workspace-tour__connector-glow" d={layout.arrowPath} />
+        <path className="workspace-tour__connector-glow" d={arrowPath} />
         <path
           className="workspace-tour__connector-line"
-          d={layout.arrowPath}
+          d={arrowPath}
           markerEnd={`url(#${markerId})`}
         />
       </svg></> : null}
 
       <section
         ref={setCardElement}
-        className={`workspace-tour__card${aside ? ' has-aside' : ''}${cardClassName ? ` ${cardClassName}` : ''}`}
+        className={`workspace-tour__card${separate ? ' has-aside' : ''}${transformable ? ' is-transformable' : ''}${transformed ? ' is-transformed' : ''}${collapseVector ? ' is-collapsing' : ''}${cardClassName ? ` ${cardClassName}` : ''}`}
         key={activeStep.id}
         style={cardStyle}
         role="dialog"
@@ -446,12 +892,35 @@ export function GameplayWorkspaceTour({
         aria-describedby={bodyId}
         tabIndex={-1}
       >
-        {aside ? (
+        {separate ? (
+          // No frame around the cards: each one floats, moves, and sizes on its own.
           <>
-            <div className="workspace-tour__main">{content}</div>
-            <aside className="workspace-tour__aside">{aside}</aside>
+            <div
+              className={`workspace-tour__pane workspace-tour__main${frontPane === 'main' ? ' is-front' : ''}`}
+              data-tour-pane="main"
+              style={paneStyle('main', DESKTOP_CARD_WIDTH)}
+              onPointerDown={() => setFrontPane('main')}
+            >
+              {content}
+              {resizeHandle('main')}
+            </div>
+            <aside
+              className={`workspace-tour__pane workspace-tour__aside${frontPane === 'aside' ? ' is-front' : ''}`}
+              data-tour-pane="aside"
+              style={paneStyle('aside', asideWidth)}
+              onPointerDown={() => setFrontPane('aside')}
+            >
+              {moveHandle('aside', ' workspace-tour__pane-move')}
+              <div className="workspace-tour__pane-scroll">{aside}</div>
+              {resizeHandle('aside')}
+            </aside>
           </>
-        ) : content}
+        ) : (
+          <>
+            {content}
+            {resizeHandle('main')}
+          </>
+        )}
       </section>
     </div>,
     document.body,

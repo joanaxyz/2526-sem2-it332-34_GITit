@@ -145,6 +145,16 @@ function connectorPoints(card: RectSnapshot, target: RectSnapshot): { start: Poi
   }
 }
 
+/** Reconnect a manually positioned card to the target it still explains. */
+export function connectorPathFor(card: RectSnapshot, target: RectSnapshot) {
+  const { start, end } = connectorPoints(card, target)
+  const control = {
+    x: start.x + (end.x - start.x) * 0.54,
+    y: start.y + (end.y - start.y) * 0.38,
+  }
+  return `M ${start.x} ${start.y} Q ${control.x} ${control.y} ${end.x} ${end.y}`
+}
+
 export function layoutFor(
   targetRect: DOMRect,
   preferredPlacement: WorkspaceTourPlacement,
@@ -206,16 +216,10 @@ export function layoutFor(
     })
     .reduce((best, option) => (option.cost < best.cost ? option : best)).card
 
-  const { start, end } = connectorPoints(card, target)
-  const control = {
-    x: start.x + (end.x - start.x) * 0.54,
-    y: start.y + (end.y - start.y) * 0.38,
-  }
-
   return {
     target,
     card,
-    arrowPath: `M ${start.x} ${start.y} Q ${control.x} ${control.y} ${end.x} ${end.y}`,
+    arrowPath: connectorPathFor(card, target),
     room,
   }
 }
