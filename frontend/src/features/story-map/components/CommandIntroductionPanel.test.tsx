@@ -53,7 +53,7 @@ function target(tag: 'input' | 'div', attribute: string, value: string, top: num
   document.body.appendChild(element)
 }
 
-function setup(lesson = tutor) {
+function setup(lesson = tutor, replay = false) {
   target('input', 'data-command-input', '', 650)
   target('div', 'data-tour-target', 'live-dag', 160)
   const run = { id: 1, status: 'started', tutor: lesson, steps: [],
@@ -64,7 +64,7 @@ function setup(lesson = tutor) {
   client.setQueryData(queryKeys.adventureTierRun(run.id), run)
   const onDismiss = vi.fn()
   render(<QueryClientProvider client={client}>
-    <CommandIntroductionPanel run={run} tutor={lesson} onDismiss={onDismiss} />
+    <CommandIntroductionPanel run={run} tutor={lesson} replay={replay} onDismiss={onDismiss} />
   </QueryClientProvider>)
   return { client, run, onDismiss }
 }
@@ -84,6 +84,8 @@ describe('terminal-led command introduction', () => {
     expect(screen.getByText('Command guide')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-tour-spotlight')).toBeInTheDocument()
     expect(screen.getByRole('dialog', { name: 'Create and switch' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Move command guide' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Resize command guide' })).toBeInTheDocument()
     expect(screen.getAllByRole('textbox')).toHaveLength(1)
     expect(screen.getByText(tutor.command_form.summary)).toBeInTheDocument()
     // Absolute beginners: what a command is, and what each part means.
@@ -134,6 +136,15 @@ describe('terminal-led command introduction', () => {
   it('does not mark a hidden introduction completed', async () => {
     const { onDismiss } = setup()
     fireEvent.click(await screen.findByRole('button', { name: 'Hide command guide' }))
+    expect(onDismiss).toHaveBeenCalledOnce()
+    expect(commandIntroductionsApi.complete).not.toHaveBeenCalled()
+  })
+
+  it('reopens a saved guide as read-only reference', async () => {
+    const { onDismiss } = setup(feedback, true)
+    expect(await screen.findByText('git switch -c feature')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Got it' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Close command guide' }))
     expect(onDismiss).toHaveBeenCalledOnce()
     expect(commandIntroductionsApi.complete).not.toHaveBeenCalled()
   })

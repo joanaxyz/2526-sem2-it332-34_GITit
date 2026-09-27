@@ -12,6 +12,13 @@
   position: fixed;
   inset: 0;
   fill: rgba(2, 7, 17, 0.74);
+  transition: opacity 220ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.workspace-tour[data-closing='true'] .workspace-tour__veil,
+.workspace-tour[data-closing='true'] .workspace-tour__spotlight,
+.workspace-tour[data-closing='true'] .workspace-tour__connector {
+  opacity: 0;
 }
 
 .workspace-tour__spotlight {
@@ -22,6 +29,7 @@
     0 0 0 3px rgba(var(--theme-primary-rgb), 0.14),
     0 0 22px rgba(var(--theme-primary-rgb), 0.38),
     inset 0 0 18px rgba(var(--theme-primary-rgb), 0.07);
+  transition: opacity 140ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .workspace-tour__spotlight::before,
@@ -66,6 +74,7 @@
   width: 100%;
   height: 100%;
   overflow: visible;
+  transition: opacity 140ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .workspace-tour__connector-glow,
@@ -105,30 +114,11 @@
   animation: workspace-tour-card-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* A main card with a second card beside it (wide screens only). The section
-   itself becomes an invisible grid; each column is its own surface. */
-.workspace-tour__card.has-aside {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) var(--workspace-tour-aside-width, 21rem);
-  align-items: start;
-  gap: 0.75rem;
-  overflow: visible;
-  background: transparent;
-  box-shadow: none;
-}
-
-.workspace-tour__main,
-.workspace-tour__aside {
-  min-width: 0;
-  max-height: min(calc(100vh - 2rem), var(--workspace-tour-room, 100vh));
-  overflow: auto;
-  border-radius: var(--radius-lg);
-  background: hsl(var(--card));
-  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.48);
-}
-
-.workspace-tour__aside {
-  animation: workspace-tour-aside-enter 260ms 60ms cubic-bezier(0.16, 1, 0.3, 1) both;
+.workspace-tour__card.is-collapsing {
+  overflow: hidden;
+  pointer-events: none;
+  transform-origin: center;
+  animation: workspace-tour-card-collapse 320ms cubic-bezier(0.55, 0, 1, 0.45) both;
 }
 
 .workspace-tour__header {
@@ -144,6 +134,13 @@
   min-width: 0;
   align-items: center;
   gap: 0.55rem;
+}
+
+.workspace-tour__header-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 0.15rem;
 }
 
 .workspace-tour__eyebrow {
@@ -356,14 +353,19 @@
   }
 }
 
-@keyframes workspace-tour-aside-enter {
-  from {
-    opacity: 0;
-    transform: translateX(-6px);
-  }
-  to {
+@keyframes workspace-tour-card-collapse {
+  0% {
     opacity: 1;
-    transform: none;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  72% {
+    opacity: 0.72;
+  }
+  100% {
+    opacity: 0;
+    transform:
+      translate3d(var(--workspace-tour-collapse-x), var(--workspace-tour-collapse-y), 0)
+      scale(var(--workspace-tour-collapse-scale));
   }
 }
 
@@ -402,14 +404,16 @@
 
 @media (prefers-reduced-motion: reduce) {
   .workspace-tour__card,
-  .workspace-tour__aside,
   .workspace-tour__beacon,
   .workspace-tour__connector-line {
     animation: none;
   }
 
   .workspace-tour__skip,
-  .workspace-tour__progress button span {
+  .workspace-tour__progress button span,
+  .workspace-tour__veil,
+  .workspace-tour__spotlight,
+  .workspace-tour__connector {
     transition: none;
   }
 }

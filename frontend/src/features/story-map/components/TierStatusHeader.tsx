@@ -1,6 +1,8 @@
 import { RefreshCcw, X } from 'lucide-react'
 
 import gitLogoImage from '@/assets/images/GIT_logo.webp'
+import type { CommandIntroduction } from '@/features/story-map/api/commandIntroductionsApi'
+import { CommandGuideLauncher } from '@/features/story-map/components/CommandGuideLauncher'
 import { AudioControls } from '@/shared/audio/AudioControls'
 import { WorkspaceHeaderAccount } from '@/shared/level/components/WorkspaceHeaderAccount'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
@@ -14,6 +16,10 @@ export function TierStatusHeader({
   onRetry,
   onStartOver,
   onReplay,
+  commandGuides = [],
+  currentCommandGuideKey,
+  commandGuideOpen = false,
+  onSelectCommandGuide,
 }: {
   run: TierRun
   isExiting?: boolean
@@ -22,6 +28,10 @@ export function TierStatusHeader({
   onRetry?: () => void
   onStartOver?: () => void
   onReplay?: () => void
+  commandGuides?: readonly CommandIntroduction[]
+  currentCommandGuideKey?: string | null
+  commandGuideOpen?: boolean
+  onSelectCommandGuide?: (teachingKey: string) => void
 }) {
   const exitLabel = run.status === 'started' ? 'Exit' : 'Back'
   const canRetry = !run.replay && run.status === 'failed' && !!onRetry
@@ -60,6 +70,13 @@ export function TierStatusHeader({
       <AudioControls
         className="gameplay-header-audio-controls"
         buttonClassName="gameplay-header-button gameplay-header-icon-button gameplay-header-audio"
+      />
+
+      <CommandGuideLauncher
+        guides={commandGuides}
+        currentGuideKey={currentCommandGuideKey}
+        guideOpen={commandGuideOpen}
+        onSelectGuide={onSelectCommandGuide ?? (() => undefined)}
       />
 
       {canRetry ? (

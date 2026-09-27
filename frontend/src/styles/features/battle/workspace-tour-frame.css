@@ -1,0 +1,153 @@
+/* Workspace tour cards the learner can move and resize. A guide with a
+   second card shows the two as separate cards, each moved and sized alone. */
+
+.workspace-tour[data-transforming] .workspace-tour__card {
+  user-select: none;
+}
+
+.workspace-tour[data-transforming='move'] .workspace-tour__card {
+  cursor: grabbing;
+}
+
+.workspace-tour[data-transforming='resize'] .workspace-tour__card {
+  cursor: nwse-resize;
+}
+
+/* A guide with a second card (wide screens only). There is no frame: the
+   section is an invisible layer over the viewport, and each card floats on
+   it, so the learner can pull the cards apart, move, and size each one. */
+.workspace-tour__card.has-aside {
+  inset: 0;
+  max-height: none;
+  overflow: visible;
+  border-radius: 0;
+  background: none;
+  box-shadow: none;
+  pointer-events: none;
+}
+
+.workspace-tour__card.has-aside:not(.is-collapsing) {
+  animation: none;
+}
+
+.workspace-tour__pane {
+  position: absolute;
+  display: flex;
+  min-width: 0;
+  max-height: min(calc(100vh - 2rem), var(--workspace-tour-room, 100vh));
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: var(--radius-lg);
+  background: hsl(var(--card));
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.48);
+  pointer-events: auto;
+  animation: workspace-tour-card-enter 220ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* The card last moved or resized sits on top when the two overlap. */
+.workspace-tour__pane.is-front {
+  z-index: 1;
+}
+
+/* Only the reading area scrolls, so the grips and actions stay put. */
+.workspace-tour__main > .workspace-tour__message,
+.workspace-tour__pane-scroll {
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.workspace-tour__main > .workspace-tour__header,
+.workspace-tour__main > .workspace-tour__progress,
+.workspace-tour__main > .workspace-tour__actions {
+  flex: 0 0 auto;
+}
+
+.workspace-tour__pane-move {
+  position: absolute;
+  top: 0.6rem;
+  right: 0.6rem;
+  z-index: 2;
+}
+
+.workspace-tour__aside {
+  animation: workspace-tour-aside-enter 260ms 60ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.workspace-tour__transform-control,
+.workspace-tour__resize-handle {
+  display: inline-grid;
+  width: 2rem;
+  height: 2rem;
+  place-items: center;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+  touch-action: none;
+  transition:
+    color 160ms cubic-bezier(0.16, 1, 0.3, 1),
+    background-color 160ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.workspace-tour__transform-control.is-move {
+  cursor: grab;
+}
+
+.workspace-tour__transform-control svg,
+.workspace-tour__resize-handle svg {
+  width: 0.95rem;
+  height: 0.95rem;
+}
+
+.workspace-tour__transform-control:hover,
+.workspace-tour__resize-handle:hover {
+  background: rgba(var(--theme-primary-rgb), 0.1);
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.workspace-tour__transform-control:focus-visible,
+.workspace-tour__resize-handle:focus-visible {
+  outline: 2px solid rgb(var(--theme-primary-rgb));
+  outline-offset: 2px;
+}
+
+.workspace-tour__resize-handle {
+  position: absolute;
+  right: 0.15rem;
+  bottom: 0.15rem;
+  z-index: 2;
+  border-radius: 0 0 var(--radius-lg) 0;
+  cursor: nwse-resize;
+}
+
+@keyframes workspace-tour-aside-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+@media (max-width: 600px) {
+  .workspace-tour__transform-control,
+  .workspace-tour__resize-handle {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .workspace-tour__aside {
+    animation: none;
+  }
+
+  .workspace-tour__transform-control,
+  .workspace-tour__resize-handle {
+    transition: none;
+  }
+}

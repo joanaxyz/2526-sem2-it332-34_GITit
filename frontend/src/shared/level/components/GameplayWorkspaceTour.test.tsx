@@ -337,6 +337,114 @@ describe('GameplayWorkspaceTour', () => {
     expect(finish.parentElement).toHaveClass('is-compact')
   })
 
+  it('moves, resizes, and resets a transformable guide', async () => {
+    addTarget('first')
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.classList.contains('workspace-tour__card')) {
+        return rect({ left: 420, top: 220, width: 352, height: 240 })
+      }
+      return rect()
+    })
+
+    render(
+      <GameplayWorkspaceTour
+        label="Command guide"
+        steps={[step('first')]}
+        transformable
+        onClose={vi.fn()}
+      />,
+    )
+
+    const dialog = await screen.findByRole('dialog', { name: 'first title' })
+    const move = screen.getByRole('button', { name: 'Move command guide' })
+    fireEvent.pointerDown(move, { clientX: 100, clientY: 100, pointerId: 1 })
+    fireEvent.pointerMove(window, { clientX: 140, clientY: 130, pointerId: 1 })
+    fireEvent.pointerUp(window, { pointerId: 1 })
+    expect(dialog).toHaveStyle({ left: '460px', top: '250px' })
+
+    const resize = screen.getByRole('button', { name: 'Resize command guide' })
+    fireEvent.keyDown(resize, { key: 'ArrowRight' })
+    expect(dialog).toHaveStyle({ width: '368px' })
+    fireEvent.keyDown(resize, { key: 'ArrowDown', shiftKey: true })
+    expect(dialog).toHaveStyle({ height: '288px' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reset command guide size and position' }))
+    expect(screen.queryByRole('button', { name: 'Reset command guide size and position' })).not.toBeInTheDocument()
+  })
+
+  it('shows a second card as its own card, moved and resized apart from the first', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 })
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 })
+    addTarget('first')
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.dataset.tourPane === 'main') return rect({ left: 220, top: 120, width: 352, height: 300 })
+      if (this.dataset.tourPane === 'aside') return rect({ left: 584, top: 120, width: 336, height: 200 })
+      return rect()
+    })
+
+    render(
+      <GameplayWorkspaceTour
+        label="Command guide"
+        steps={[step('first')]}
+        aside={<p>What changes</p>}
+        paneLabels={{ main: 'command card', aside: 'what changes card' }}
+        transformable
+        onClose={vi.fn()}
+      />,
+    )
+
+    await screen.findByRole('dialog', { name: 'first title' })
+    const card = (name: string) => screen.getByRole('button', { name }).closest<HTMLElement>('[data-tour-pane]')!
+    const main = card('Move command card')
+    const aside = card('Move what changes card')
+    // Two separate cards: each has its own move and resize controls, and
+    // nothing moves or sizes them as one unit.
+    expect(main).not.toBe(aside)
+    expect(card('Resize command card')).toBe(main)
+    expect(card('Resize what changes card')).toBe(aside)
+    expect(screen.queryByRole('button', { name: 'Move command guide' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Resize command guide' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('separator')).not.toBeInTheDocument()
+
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Resize command card' }), { key: 'ArrowRight' })
+    expect(main).toHaveStyle({ left: '220px', top: '120px', width: '368px', height: '300px' })
+    expect(aside).toHaveStyle({ left: '584px', top: '120px', width: '336px' })
+    expect(aside.style.height).toBe('')
+
+    // Pull the change card away, below the command card.
+    const moveAside = screen.getByRole('button', { name: 'Move what changes card' })
+    fireEvent.pointerDown(moveAside, { clientX: 900, clientY: 130, pointerId: 2 })
+    fireEvent.pointerMove(window, { clientX: 850, clientY: 400, pointerId: 2 })
+    fireEvent.pointerUp(window, { pointerId: 2 })
+    expect(aside).toHaveStyle({ left: '534px', top: '390px' })
+    expect(aside).toHaveClass('is-front')
+    expect(main).toHaveStyle({ left: '220px', top: '120px', width: '368px' })
+
+    const resizeAside = screen.getByRole('button', { name: 'Resize what changes card' })
+    fireEvent.pointerDown(resizeAside, { clientX: 900, clientY: 580, pointerId: 3 })
+    fireEvent.pointerMove(window, { clientX: 940, clientY: 620, pointerId: 3 })
+    expect(aside).toHaveStyle({ width: '376px', height: '240px' })
+    // A card stops at the viewport edge.
+    fireEvent.pointerMove(window, { clientX: 3000, clientY: 3000, pointerId: 3 })
+    expect(aside).toHaveStyle({ width: '730px', height: '394px' })
+    fireEvent.pointerUp(window, { pointerId: 3 })
+    expect(main).toHaveStyle({ width: '368px', height: '300px' })
+
+    // Home on a card's grip resets that card alone.
+    fireEvent.keyDown(moveAside, { key: 'Home' })
+    expect(aside).toHaveStyle({ width: '336px' })
+    expect(aside.style.height).toBe('')
+    expect(main).toHaveStyle({ left: '220px', top: '120px', width: '368px' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reset command guide size and position' }))
+    expect(main).toHaveStyle({ width: '352px' })
+    expect(main.style.height).toBe('')
+  })
+
   it('treats Skip as dismissal and restores focus to the launch control', async () => {
     addTarget('first')
     const onClose = vi.fn()
@@ -352,5 +460,43 @@ describe('GameplayWorkspaceTour', () => {
 
     expect(onClose).toHaveBeenCalledWith('skip')
     await waitFor(() => expect(launcher).toHaveFocus())
+  })
+
+  it('collapses into a supplied launcher before closing', async () => {
+    addTarget('first')
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.classList.contains('workspace-tour__card')) {
+        return rect({ left: 420, top: 220, width: 352, height: 240 })
+      }
+      return rect()
+    })
+    const launcher = document.createElement('button')
+    launcher.dataset.testTourLauncher = ''
+    Object.defineProperty(launcher, 'getBoundingClientRect', {
+      configurable: true,
+      value: () => rect({ left: 900, top: 16, width: 132, height: 36 }),
+    })
+    document.body.appendChild(launcher)
+    const onClose = vi.fn()
+
+    render(
+      <GameplayWorkspaceTour
+        label="Gameplay guide"
+        steps={[step('first')]}
+        collapseTarget="[data-test-tour-launcher]"
+        onClose={onClose}
+      />,
+    )
+
+    await screen.findByRole('heading', { name: 'first title' })
+    fireEvent.click(screen.getByRole('button', { name: 'Skip tour' }))
+
+    expect(screen.getByTestId('workspace-tour')).toHaveAttribute('data-closing', 'true')
+    expect(launcher).toHaveClass('is-tour-destination')
+    expect(onClose).not.toHaveBeenCalled()
+    await waitFor(() => expect(onClose).toHaveBeenCalledWith('skip'), { timeout: 1_000 })
+    launcher.remove()
   })
 })
