@@ -61,7 +61,7 @@ describe('TierDiagramStage', () => {
     render(<TierDiagramStage run={makeRun(true)} animation={animation} />)
 
     expect(screen.getByTestId('tier-dag-stage')).toBeInTheDocument()
-    expect(screen.getByTestId('expected-dag-stage')).toHaveTextContent('Expected State · Target')
+    expect(screen.getByTestId('expected-dag-stage')).toHaveTextContent('Expected State')
     expect(document.querySelector('.tier-repository-view')).toHaveClass('has-target')
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
   })

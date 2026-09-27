@@ -12,7 +12,7 @@ import { TerminalPanel } from '@/shared/level/components/TerminalPanel'
 import { terminalPrompt } from '@/shared/level/terminalPrompt'
 import type { RepositorySnapshot, TerminalLine } from '@/shared/level/types'
 
-const PREVIEW_PROMPT = terminalPrompt({ username: 'student', repo: 'practice' })
+const PREVIEW_PROMPT = terminalPrompt('student')
 
 const HOTSPOT_EXPLANATIONS: Record<string, string> = {
   narrative: 'Read the objective and constraints before running commands.',

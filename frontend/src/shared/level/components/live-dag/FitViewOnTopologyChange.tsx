@@ -74,7 +74,9 @@ export function FitViewOnTopologyChange({
 }
 
 function flowTopologySignature(nodes: Node[], edges: Edge[]): string {
-  if (nodes.length === 1 && nodes[0]?.id === '__empty__') return 'empty'
+  if (nodes.length === 1 && nodes[0]?.id === '__empty__') {
+    return nodes[0].data.initialized === false ? 'folder' : 'empty'
+  }
   const nodeIds = nodes.map((node) => node.id).sort().join(',')
   const connections = edges.map((edge) => `${edge.source}->${edge.target}`).sort().join(',')
   return `${nodeIds}|${connections}`

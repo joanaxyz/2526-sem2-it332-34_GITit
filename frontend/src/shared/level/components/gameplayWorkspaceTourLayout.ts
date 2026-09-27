@@ -23,6 +23,8 @@ const TARGET_PADDING = 9
 export const HEADER_CLEARANCE = 76
 export const DEFAULT_CARD_HEIGHT = 236
 const DESKTOP_CARD_WIDTH = 352
+const NARROW_VIEWPORT = 420
+const OVERLAP_PENALTY = 100000
 
 function rectSnapshot(rect: DOMRect): RectSnapshot {
   return {
@@ -78,6 +80,37 @@ function cardRect(left: number, top: number, width: number, height: number): Rec
   return { left, top, right: left + width, bottom: top + height, width, height }
 }
 
+function clampIntoViewport(
+  left: number,
+  top: number,
+  width: number,
+  height: number,
+  viewportWidth: number,
+  viewportHeight: number,
+): RectSnapshot {
+  const maxLeft = Math.max(VIEWPORT_GAP, viewportWidth - width - VIEWPORT_GAP)
+  const maxTop = Math.max(VIEWPORT_GAP, viewportHeight - height - VIEWPORT_GAP)
+  return cardRect(
+    Math.min(Math.max(left, VIEWPORT_GAP), maxLeft),
+    Math.min(Math.max(top, VIEWPORT_GAP), maxTop),
+    width,
+    height,
+  )
+}
+
+/** Distance from the target, penalising placements that cover it. */
+function placementCost(card: RectSnapshot, target: RectSnapshot) {
+  const covers = !(
+    card.right <= target.left ||
+    card.left >= target.right ||
+    card.bottom <= target.top ||
+    card.top >= target.bottom
+  )
+  const dx = card.left + card.width / 2 - (target.left + target.width / 2)
+  const dy = card.top + card.height / 2 - (target.top + target.height / 2)
+  return Math.hypot(dx, dy) + (covers ? OVERLAP_PENALTY : 0)
+}
+
 function connectorPoints(card: RectSnapshot, target: RectSnapshot): { start: Point; end: Point } {
   const cardCenter = { x: card.left + card.width / 2, y: card.top + card.height / 2 }
   const targetCenter = { x: target.left + target.width / 2, y: target.top + target.height / 2 }
@@ -113,14 +146,17 @@ export function layoutFor(
 ): TourLayout {
   const viewportWidth = window.innerWidth
   const viewportHeight = window.innerHeight
-  const cardWidth = Math.min(DESKTOP_CARD_WIDTH, viewportWidth - VIEWPORT_GAP * 2)
+  const available = viewportWidth - VIEWPORT_GAP * 2
+  // On phones the card takes the full gutter width so it sits symmetrically
+  // rather than being clamped against one edge.
+  const cardWidth = available <= NARROW_VIEWPORT ? available : DESKTOP_CARD_WIDTH
   const cardHeight = Math.min(measuredCardHeight || DEFAULT_CARD_HEIGHT, viewportHeight - VIEWPORT_GAP * 2)
   const target = rectSnapshot(targetRect)
   const placements = [preferredPlacement, 'bottom', 'top', 'right', 'left'].filter(
     (placement, index, items) => items.indexOf(placement) === index,
   ) as WorkspaceTourPlacement[]
 
-  let card = cardRect(VIEWPORT_GAP, HEADER_CLEARANCE, cardWidth, cardHeight)
+  let card: RectSnapshot | null = null
   for (const placement of placements) {
     const candidate = candidateFor(placement, target, cardWidth, cardHeight)
     const nextCard = cardRect(candidate.left, candidate.top, cardWidth, cardHeight)
@@ -130,19 +166,24 @@ export function layoutFor(
     }
   }
 
-  if (!cardFits(card, target, viewportWidth, viewportHeight)) {
-    const placeAbove = target.top > viewportHeight - target.bottom
-    const fallbackTop = placeAbove
-      ? target.top - cardHeight - TARGET_GAP
-      : target.bottom + TARGET_GAP
-    const fallbackLeft = target.left + target.width / 2 - cardWidth / 2
-    card = cardRect(
-      Math.min(Math.max(fallbackLeft, VIEWPORT_GAP), viewportWidth - cardWidth - VIEWPORT_GAP),
-      Math.min(Math.max(fallbackTop, VIEWPORT_GAP), viewportHeight - cardHeight - VIEWPORT_GAP),
-      cardWidth,
-      cardHeight,
-    )
-  }
+  // Nothing fits outright - a short viewport, or a card taller than the space
+  // beside its target. Clamp each placement into view and keep the one nearest
+  // the target, so the card stays beside what it explains instead of landing in
+  // a corner and dragging the connector across the whole workspace.
+  card ??= placements
+    .map((placement) => {
+      const candidate = candidateFor(placement, target, cardWidth, cardHeight)
+      const clamped = clampIntoViewport(
+        candidate.left,
+        candidate.top,
+        cardWidth,
+        cardHeight,
+        viewportWidth,
+        viewportHeight,
+      )
+      return { card: clamped, cost: placementCost(clamped, target) }
+    })
+    .reduce((best, option) => (option.cost < best.cost ? option : best)).card
 
   const { start, end } = connectorPoints(card, target)
   const control = {

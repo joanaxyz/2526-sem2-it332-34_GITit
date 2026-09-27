@@ -1,13 +1,54 @@
-from common.constants import DIFFICULTY_EASY, DIFFICULTY_MEDIUM
+"""The one owner of the fading-scaffold ladder.
+
+Support fades with tier difficulty, and the ladder is a constant here - never
+authored per variant and never re-derived in a payload or command processor.
+The live DAG is always available; the target diagram goes first, then the
+per-command contextual feedback.
+"""
+
+from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
+
+SCAFFOLDING_LADDER = {
+    DIFFICULTY_EASY: {
+        "live_dag": True,
+        "expected_state": True,
+        "contextual_feedback": True,
+    },
+    DIFFICULTY_MEDIUM: {
+        "live_dag": True,
+        "expected_state": False,
+        "contextual_feedback": True,
+    },
+    DIFFICULTY_HARD: {
+        "live_dag": True,
+        "expected_state": False,
+        "contextual_feedback": False,
+    },
+}
+
+# Guided adventure runs walk waves instead of difficulty tiers, so they sit
+# outside the ladder: a live DAG plus the objective checklist, nothing that
+# fades.
+GUIDED_SUPPORTS = {
+    "live_dag": True,
+    "expected_state": False,
+    "contextual_feedback": False,
+}
 
 
 class ScaffoldingService:
     def supports_for(self, difficulty: str) -> dict:
-        return {
-            "live_dag": True,
-            "expected_state": difficulty in (DIFFICULTY_EASY, DIFFICULTY_MEDIUM),
-            "contextual_feedback": difficulty == DIFFICULTY_EASY,
-        }
+        """Support flags for a tier. Unknown difficulty gets the least support."""
+        return dict(SCAFFOLDING_LADDER.get(difficulty, SCAFFOLDING_LADDER[DIFFICULTY_HARD]))
+
+    def guided_supports(self) -> dict:
+        return dict(GUIDED_SUPPORTS)
+
+    def shows_expected_state(self, difficulty: str) -> bool:
+        return self.supports_for(difficulty)["expected_state"]
+
+    def shows_contextual_feedback(self, difficulty: str) -> bool:
+        return self.supports_for(difficulty)["contextual_feedback"]
 
 
 class FeedbackGenerationService:

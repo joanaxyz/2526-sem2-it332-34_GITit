@@ -25,7 +25,6 @@ case "${DJANGO_SEED_ON_STARTUP:-false}" in
   true|True|TRUE|1|yes|Yes|YES|on|On|ON)
     python manage.py seed
     python manage.py seed_legacy_modules
-    python manage.py backfill_tier_target_states
     ;;
   false|False|FALSE|0|no|No|NO|off|Off|OFF)
     ;;

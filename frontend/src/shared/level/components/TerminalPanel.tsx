@@ -1,13 +1,22 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useMemo, useRef } from 'react'
 
-import type { TerminalPrompt } from '@/shared/level/terminalPrompt'
 import type { TerminalLine } from '@/shared/level/types'
 import { cn } from '@/shared/utils/cn'
 import { CommandInput } from './CommandInput'
 
+/** Lines after the most recent `clear`, like a real terminal's visible screen. */
+function linesAfterClear(lines: TerminalLine[]) {
+  for (let index = lines.length - 1; index >= 0; index -= 1) {
+    const line = lines[index]
+    if (line.kind === 'input' && line.text.trim() === 'clear') return lines.slice(index + 1)
+  }
+  return lines
+}
+
 export function TerminalPanel({
   lines,
   prompt,
+  cwd,
   disabled,
   runDisabled,
   processing,
@@ -16,7 +25,9 @@ export function TerminalPanel({
   className,
 }: {
   lines: TerminalLine[]
-  prompt: TerminalPrompt
+  prompt: string
+  /** Terminal working directory relative to the project root (`''` at the root). */
+  cwd?: string
   disabled?: boolean
   runDisabled?: boolean
   processing?: boolean
@@ -25,12 +36,13 @@ export function TerminalPanel({
   className?: string
 }) {
   const outputRef = useRef<HTMLDivElement>(null)
+  const visibleLines = useMemo(() => linesAfterClear(lines), [lines])
 
   useEffect(() => {
     const container = outputRef.current
     if (!container) return
     container.scrollTop = container.scrollHeight
-  }, [lines])
+  }, [visibleLines])
 
   // Clicking anywhere in the scrollback focuses the prompt, like a real shell
   // (but never steal an in-progress text selection).
@@ -44,7 +56,7 @@ export function TerminalPanel({
       aria-label={title}
       className={cn('terminal-panel', className)}
     >
-      <div className="terminal-titlebar">
+      <div className="terminal-titlebar workspace-panel-header">
         <span className="panel-eyebrow">{title}</span>
       </div>
 
@@ -57,21 +69,14 @@ export function TerminalPanel({
         aria-relevant="additions text"
         onClick={focusPrompt}
       >
-        {lines.length === 0 ? (
-          <div className="terminal-line terminal-line--hint">
-            The repository is ready. Type a git command to begin.
-          </div>
-        ) : null}
-        {lines.map((line) => (
+        {visibleLines.map((line) => (
           <div
             key={line.id}
             className={cn('terminal-line', `terminal-line--${line.kind}`)}
           >
             {line.kind === 'input' ? (
               <span className="terminal-prompt" aria-hidden="true">
-                <span>{prompt.user}@{prompt.host}</span>
-                <small>:</small>
-                <b>{prompt.cwd}</b>
+                <span>{prompt}</span>
                 <small>$ </small>
               </span>
             ) : null}
@@ -80,6 +85,7 @@ export function TerminalPanel({
         ))}
         <CommandInput
           prompt={prompt}
+          cwd={cwd}
           disabled={disabled}
           runDisabled={runDisabled}
           processing={processing}

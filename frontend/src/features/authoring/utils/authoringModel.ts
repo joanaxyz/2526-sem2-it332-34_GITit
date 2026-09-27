@@ -11,7 +11,7 @@
 import type { BattleStageConfig, ContentKind, Visibility } from '@/features/authoring/types'
 import { DEFAULT_BATTLE_STAGE } from '@/features/authoring/utils/authoring-model/options'
 import type { AuthoredLevel, AuthoredProblem, AuthoringForm, BookBlock } from '@/features/authoring/utils/authoring-model/types'
-import { computeTargetState } from '@/shared/git/simulator/engine'
+import { computeTargetState, replaySolution } from '@/shared/git/simulator/engine'
 import type { MutableRepositoryState } from '@/shared/git/simulator/types'
 
 export type { AuthoredLevel, AuthoredProblem,  AuthoringForm, BookBlock, BookPage } from '@/features/authoring/utils/authoring-model/types'
@@ -74,6 +74,7 @@ function problemToDefinition(problem: AuthoredProblem, kind: ContentKind): Recor
     // here by replaying the solution; the backend persists/hashes it instead of
     // re-running the (removed) Python engine.
     target_state: computeTargetState(initialState as MutableRepositoryState, solutionCommands),
+    solution_replay: replaySolution(initialState as MutableRepositoryState, solutionCommands),
     evaluation_spec: { completion_policy: { mode: problem.evaluationMode } },
     command_budget: {
       min_counted_commands: problem.minCountedCommands,
@@ -98,6 +99,7 @@ function problemToDefinition(problem: AuthoredProblem, kind: ContentKind): Recor
         initial_state: variantInitial,
         solution_commands: variantSolution,
         target_state: computeTargetState(variantInitial as MutableRepositoryState, variantSolution),
+        solution_replay: replaySolution(variantInitial as MutableRepositoryState, variantSolution),
       }
     })
   }

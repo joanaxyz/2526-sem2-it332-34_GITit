@@ -2,7 +2,8 @@
 
 This package contains generated artifacts only.
 
-`generated_targets.py` is produced by:
+`generated_targets.py` (final repository states) and `generated_trajectories.py`
+(repository fingerprints in front of every solution command) are produced by:
 
 ```bash
 cd backend

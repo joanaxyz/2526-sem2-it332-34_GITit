@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { executeGitCommand } from '@/shared/git/simulator/engine'
+import { executeGitCommand, executeTerminalCommand } from '@/shared/git/simulator/engine'
 import { normalizeState } from '@/shared/git/simulator/state'
 import type { MutableRepositoryState } from '@/shared/git/simulator/types'
 
@@ -151,7 +151,7 @@ describe('executeGitCommand', () => {
     expect(result.next_state.commits).toEqual([])
   })
 
-  it('accepts cd as a diagnostic no-op without changing repository state', () => {
+  it('treats cd into the project folder itself as a diagnostic no-op', () => {
     const state = baseState({
       commits: [{ id: 'c0', message: 'base', parents: [], tree: { 'README.md': 'x' } }],
       branches: { main: 'c0' },
@@ -169,23 +169,27 @@ describe('executeGitCommand', () => {
     expect(Object.keys(result.next_state.working_tree)).toEqual(['README.md'])
   })
 
-  it('accepts cd before a repository exists', () => {
-    const result = executeGitCommand(
-      {
-        repository_initialized: false,
-        commits: [],
-        branches: {},
-        head: { type: 'none' },
-        staging: {},
-        working_tree: {},
-        conflicts: [],
-        conflict_details: {},
-      } as unknown as MutableRepositoryState,
-      'cd new-folder',
-    )
+  it('runs shell folder commands before a repository exists', () => {
+    const folder = {
+      repository_initialized: false,
+      commits: [],
+      branches: {},
+      head: { type: 'none' },
+      staging: {},
+      working_tree: {},
+      conflicts: [],
+      conflict_details: {},
+    } as unknown as MutableRepositoryState
 
-    expect(result.processed).toBe(true)
-    expect(result.exit_code).toBe(0)
+    const missing = executeTerminalCommand(folder, 'cd new-folder')
+    expect(missing.execution.processed).toBe(true)
+    expect(missing.execution.exit_code).toBe(1)
+    expect(missing.execution.output).toBe('cd: new-folder: No such file or directory')
+
+    const created = executeTerminalCommand(folder, 'mkdir new-folder')
+    const entered = executeTerminalCommand(created.execution.next_state, 'cd new-folder')
+    expect(entered.execution.exit_code).toBe(0)
+    expect(entered.cwd).toBe('new-folder')
   })
 
   it('pull --rebase replays local-only commits on top of a diverged remote instead of dropping them', () => {

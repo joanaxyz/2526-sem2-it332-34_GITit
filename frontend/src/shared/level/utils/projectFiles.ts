@@ -47,25 +47,57 @@ export function buildProjectTree(snapshot: RepositorySnapshot): ProjectTreeNode[
         children: [],
       }
       current.children.push(node)
-      current.children.sort((left, right) => {
-        if (left.type === right.type) return left.name.localeCompare(right.name)
-        return left.type === 'directory' ? -1 : 1
-      })
+      current.children.sort(compareTreeNodes)
       current = node
     })
   }
 
+  // The tree shows what is on disk: a deleted file is gone even while
+  // `git status` still reports it, unless it is part of a conflict to resolve.
+  const onDisk = (path: string, value: RepositoryValue) =>
+    statusLabel(value) !== 'deleted' || conflictPaths.has(path)
+
   const visibleTree = snapshot.project_tree ?? snapshot.visible_tree
   if (visibleTree && Object.keys(visibleTree).length > 0) {
     Object.entries(visibleTree).forEach(([path, value]) => {
-      addPath(path, value, sourceLabel(value))
+      if (onDisk(path, value)) addPath(path, value, sourceLabel(value))
     })
   } else {
-    Object.entries(snapshot.staging).forEach(([path, status]) => addPath(path, status, 'staging'))
-    Object.entries(snapshot.working_tree).forEach(([path, status]) => addPath(path, status, 'working_tree'))
+    Object.entries(snapshot.staging).forEach(([path, status]) => {
+      if (onDisk(path, status)) addPath(path, status, 'staging')
+    })
+    Object.entries(snapshot.working_tree).forEach(([path, status]) => {
+      if (onDisk(path, status)) addPath(path, status, 'working_tree')
+    })
   }
+  emptyDirectories(snapshot).forEach((path) => addDirectory(root, path))
 
   return root.children
+}
+
+/** Folders with no files inside (`directories` in the repository state). */
+function emptyDirectories(snapshot: RepositorySnapshot) {
+  const value = (snapshot as RepositorySnapshot & { directories?: unknown }).directories
+  return Array.isArray(value) ? value.filter((path): path is string => typeof path === 'string' && path.length > 0) : []
+}
+
+function addDirectory(root: ProjectTreeNode, directoryPath: string) {
+  let current = root
+  directoryPath.split('/').forEach((part, index, parts) => {
+    const fullPath = parts.slice(0, index + 1).join('/')
+    let node = current.children.find((child) => child.name === part && child.type === 'directory')
+    if (!node) {
+      node = { name: part, path: fullPath, type: 'directory', conflict: false, children: [] }
+      current.children.push(node)
+      current.children.sort(compareTreeNodes)
+    }
+    current = node
+  })
+}
+
+function compareTreeNodes(left: ProjectTreeNode, right: ProjectTreeNode) {
+  if (left.type === right.type) return left.name.localeCompare(right.name)
+  return left.type === 'directory' ? -1 : 1
 }
 
 export function flattenProjectFiles(nodes: ProjectTreeNode[]) {

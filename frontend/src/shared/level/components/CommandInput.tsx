@@ -2,17 +2,18 @@ import { Check, ClipboardPaste } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, KeyboardEvent } from 'react'
 
-import type { TerminalPrompt } from '@/shared/level/terminalPrompt'
-
 // A bare prompt line, like the reference mock: Enter submits, no button chrome.
 export function CommandInput({
   prompt,
+  cwd,
   disabled,
   runDisabled,
   processing,
   onSubmit,
 }: {
-  prompt: TerminalPrompt
+  prompt: string
+  /** Working directory shown after the user, as `~/<folder>` (`~` is the project root). */
+  cwd?: string
   disabled?: boolean
   runDisabled?: boolean
   processing?: boolean
@@ -124,22 +125,21 @@ export function CommandInput({
       onSubmit={submit}
     >
       <span className="command-input-prompt" aria-hidden="true">
-        <span>{prompt.user}@{prompt.host}</span>
-        <small>:</small>
-        <b>{prompt.cwd}</b>
+        <span>{prompt}</span>
+        {cwd ? <em className="command-input-cwd">~/{cwd}</em> : null}
         <small>$ </small>
       </span>
       <input
         ref={inputRef}
         data-command-input
-        aria-label="Git command"
+        aria-label={cwd ? `Git command in ~/${cwd}` : 'Git command'}
         className="command-input-field"
         value={value}
         onChange={(event) => setValue(event.target.value)}
         onKeyDown={handleKeyDown}
         disabled={disabled}
         autoFocus
-        placeholder={processing ? 'Processing command' : 'Type a git command'}
+        placeholder={processing ? 'Processing command' : 'Type a git or shell command'}
       />
       <button
         type="button"

@@ -10,6 +10,7 @@ import { TierOutcomeModal } from '@/features/story-map/components/TierOutcomeMod
 import { TierStartOverConfirmModal } from '@/features/story-map/components/TierStartOverConfirmModal'
 import { TierWorkspaceMain } from '@/features/story-map/components/TierWorkspaceMain'
 import { TierWorkspaceTour } from '@/features/story-map/components/TierWorkspaceTour'
+import { CommandIntroductionPanel } from '@/features/story-map/components/CommandIntroductionPanel'
 import { useTierCommandSubmission } from '@/features/story-map/hooks/useTierCommandSubmission'
 import { useTierWorkspaceMutations } from '@/features/story-map/hooks/useTierWorkspaceMutations'
 import { createTierWorkspaceCommandHandler } from '@/features/story-map/utils/tierWorkspaceCommand'
@@ -71,6 +72,7 @@ export function TierWorkspace() {
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
   const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
   const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
+  const [dismissedIntroduction, setDismissedIntroduction] = useState<string | null>(null)
   const user = useAuthStore((state) => state.user)
   const [exitNavigationRunId, setExitNavigationRunId] = useState<number | null>(null)
   const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
@@ -147,10 +149,13 @@ export function TierWorkspace() {
   if (query.isError) return <ErrorState title="Could not load adventure workspace" description={query.error.message} />
   if (!run) return <ErrorState title="Could not load adventure workspace" description="The API returned no run data." />
 
-  const shellPrompt = terminalPrompt({ username: undefined, repo: run.tier.adventure_level_slug })
+  const shellPrompt = terminalPrompt(user?.username)
   const tourKey = `${user?.id ?? 'guest'}:tier`
   const tourOpen =
     run.status === 'started' && dismissedTourKey !== tourKey && !hasSeenLevelTour(user?.id, 'tier')
+  const introductionOpen = Boolean(run.tutor && !tourOpen
+    && !mutation.isPending && !dagAnimation.animating && !battleDirector.animating
+    && run.tutor.context_id !== dismissedIntroduction)
 
   const submit = createTierWorkspaceCommandHandler({
     runId,
@@ -159,7 +164,9 @@ export function TierWorkspace() {
     battleDirector,
     queryClient,
     clearToast,
-    evaluateAndNotify,
+    evaluateAndNotify: (updatedRun, classification) => {
+      if (!updatedRun.tutor) evaluateAndNotify(updatedRun, classification)
+    },
     setExitConfirmOpen,
     setWorkspaceEditorPath,
     queueOutcomeAnimation,
@@ -167,6 +174,7 @@ export function TierWorkspace() {
 
   const isReplaying = retryMutation.isPending || replayMutation.isPending
   const outcomeModalOpen =
+    !introductionOpen &&
     !exitNavigationPending &&
     (run.status === 'completed' || run.status === 'failed') &&
     !mutation.isPending &&
@@ -190,6 +198,7 @@ export function TierWorkspace() {
         onReplay={() => replayMutation.mutate(run.tier.id)}
       />
       <TierWorkspaceMain
+        teachingActive={introductionOpen}
         run={run}
         lines={lines}
         shellPrompt={shellPrompt}
@@ -232,6 +241,10 @@ export function TierWorkspace() {
         onCloseEditor={() => setWorkspaceEditorPath(null)}
         onWriteFile={(input) => writeFileMutation.mutateAsync(input)}
       />
+      {introductionOpen && run.tutor ? (
+        <CommandIntroductionPanel key={`${run.id}:${run.tutor.context_id}`} run={run} tutor={run.tutor}
+          onDismiss={() => setDismissedIntroduction(run.tutor?.context_id ?? null)} />
+      ) : null}
       <TierOutcomeModal
         open={outcomeModalOpen}
         run={run}

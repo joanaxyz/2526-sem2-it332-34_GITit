@@ -1,10 +1,7 @@
 /* Mock chrome: a plain eyebrow header, no faux window dressing. */
+/* Layout and height come from .workspace-panel-header; this adds the chrome. */
 .terminal-titlebar {
-  display: flex;
-  flex: 0 0 auto;
-  align-items: center;
   border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.16);
-  padding: 0.62rem 0.85rem;
   background: rgba(var(--theme-primary-rgb), 0.035);
 }
 
@@ -27,11 +24,6 @@
   color: hsl(var(--foreground) / 0.72);
 }
 
-.terminal-line--hint {
-  color: hsl(var(--muted-foreground));
-  font-style: italic;
-}
-
 .terminal-line--system,
 .terminal-line--warning {
   color: rgb(243, 210, 122);
@@ -52,10 +44,10 @@
   font-size: inherit;
 }
 
-.terminal-prompt b,
-.command-input-prompt b {
-  color: hsl(var(--primary));
-  font-weight: 800;
+.command-input-prompt .command-input-cwd {
+  margin-left: 1ch;
+  color: rgba(218, 229, 247, 0.78);
+  font-style: normal;
 }
 
 /* The live prompt is just the next line of the scrollback stream. */

@@ -33,7 +33,7 @@ A wave should define:
 - stable slug
 - learner-facing title/story/task
 - two variants
-- solution commands
+- solution commands (git, plus terminal shell commands such as `mkdir`, `cd`, `touch`, or `echo "x" > file` when the task is about files; replay keeps the working directory between them)
 - objective checks, when the wave is guided
 - prerequisites, when order matters
 
@@ -51,8 +51,25 @@ Each challenge should have:
 - two variants per trial
 - a new scenario not copied from adventures
 - a repository-state transition that changes the DAG or refs
-- fading scaffold from easy to hard
 - evaluation specs that verify final state instead of command text alone
+
+## Scaffolding
+
+Support is not authored. `practice/services/scaffolding.py` owns one constant
+ladder keyed by tier difficulty, and every gameplay surface reads it from there:
+
+| Difficulty | Live DAG | Expected State | Contextual feedback |
+| --- | --- | --- | --- |
+| easy | yes | yes | yes |
+| medium | yes | no | yes |
+| hard | yes | no | no |
+
+Guided adventure runs walk waves instead of difficulty tiers, so they sit
+outside the ladder: live DAG plus the objective checklist, nothing that fades.
+
+The Expected State panel needs both the ladder flag and a populated
+`target_state`, so a variant with an empty target silently loses its easy-tier
+diagram. Targets come from `python manage.py generate_targets` - never by hand.
 
 ## Objective Checks
 
@@ -83,7 +100,9 @@ Generated targets live in:
 backend/curriculum/seed_data/generated/generated_targets.py
 ```
 
-Do not edit generated targets directly. After changing initial state, solution commands, or workspace edits, run:
+`generated_trajectories.py` sits next to it: fingerprints of the repository in front of each solution command. The command-introduction tutor uses them to find the next move a learner needs, so a solution's command order is also its teaching order. Diagnostic commands (status, log, show) in a solution are never introduced.
+
+Do not edit generated targets or trajectories directly. After changing initial state, solution commands, or workspace edits, run:
 
 ```bash
 cd backend

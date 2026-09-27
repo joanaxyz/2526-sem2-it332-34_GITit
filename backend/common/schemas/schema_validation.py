@@ -47,6 +47,7 @@ REPOSITORY_LIST_KEYS = {
     "reflog",
     "conflict_files",
     "merge_conflict_files",
+    "directories",
 }
 
 JSON_SCALAR_TYPES = (str, int, float, bool, type(None))
@@ -103,6 +104,8 @@ def validate_repository_state_payload(value: Any, *, field_name: str = "reposito
         _validate_commits(value.get("commits"), field_name=f"{field_name}.commits")
     if "conflicts" in value:
         _validate_string_list(value.get("conflicts"), field_name=f"{field_name}.conflicts")
+    if "directories" in value:
+        _validate_string_list(value.get("directories"), field_name=f"{field_name}.directories")
     if "reflog" in value:
         _validate_reflog(value.get("reflog"), field_name=f"{field_name}.reflog")
     if "stash_stack" in value:

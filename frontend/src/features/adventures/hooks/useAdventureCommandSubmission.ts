@@ -85,6 +85,7 @@ export function useAdventureCommandSubmission(runId: number | null) {
         repositoryState: attempt.repository_state as MutableRepositoryState,
         revision: attempt.counts.command_count,
         steps: attempt.steps ?? [],
+        projectName: run.selected_level?.slug,
       }
     },
     applyOptimisticState,

@@ -95,13 +95,13 @@ class StaticLevelVariantBuilder:
             evaluation_spec=evaluation_spec,
             target_state=target_state,
             solution_commands=solution_commands,
+            # Fingerprints are not templated: they come from the same replay
+            # that produced target_state and are copied as generated.
+            solution_trajectory=template.get("solution_trajectory_template") or {},
             case_id=case_id,
             semantic_key=self.semantic_key(level=level, template=template, case_id=case_id),
             parameter_context=context,
             scenario_context=scenario_context,
-            scaffold_policy=dict(
-                self.materializer.render(template.get("scaffold_policy_template", {}), context)
-            ),
             is_published=True,
         )
         level_slug = getattr(level, "slug", "<unknown-level>")

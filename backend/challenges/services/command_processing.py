@@ -4,8 +4,6 @@ from django.utils import timezone
 from challenges.models import ChallengeRun
 from common.constants import (
     COMMAND_COUNTED,
-    DIFFICULTY_EASY,
-    DIFFICULTY_MEDIUM,
     RESULT_INVALID,
     RESULT_TARGET_MATCHED,
     RESULT_UNPROCESSABLE,
@@ -28,7 +26,7 @@ from common.services.performance import timing
 from curriculum.services import ChapterChestService
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from practice.models import CommandStep
-from practice.services.scaffolding import FeedbackGenerationService
+from practice.services.scaffolding import FeedbackGenerationService, ScaffoldingService
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import ChallengeLevelCompletion, ChallengeTrialCompletion
 from progress.services import StreakService
@@ -337,10 +335,10 @@ class ChallengeCommandProcessingService:
 
 
 def _uses_contextual_feedback(run: ChallengeRun) -> bool:
-    return run.difficulty == DIFFICULTY_EASY
+    return ScaffoldingService().shows_contextual_feedback(run.difficulty)
 
 
 def _visible_target_state(run: ChallengeRun) -> dict | None:
-    if run.difficulty in (DIFFICULTY_EASY, DIFFICULTY_MEDIUM):
+    if ScaffoldingService().shows_expected_state(run.difficulty):
         return run.selected_variant.target_state
     return None

@@ -34,7 +34,12 @@ export function useTierCommandSubmission(runId: number) {
   const key = queryKeys.adventureTierRun(runId)
   return useOptimisticGitCommand<TierRun, TierStepLog, TierCommandResponse>({
     queryKey: key,
-    readSession: (run) => ({ repositoryState: run.repository_state as MutableRepositoryState, revision: run.counts.total_attempts, steps: run.steps }),
+    readSession: (run) => ({
+      repositoryState: run.repository_state as MutableRepositoryState,
+      revision: run.counts.total_attempts,
+      steps: run.steps,
+      projectName: run.tier.adventure_level_slug,
+    }),
     applyOptimisticState,
     replaceSteps,
     createPendingStep,

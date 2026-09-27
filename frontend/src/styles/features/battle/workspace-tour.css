@@ -209,13 +209,17 @@
   text-wrap: balance;
 }
 
-.workspace-tour__message p {
+.workspace-tour__body {
+  min-width: 0;
   margin: 0.38rem 0 0;
   color: #a8bdc9;
   font-size: var(--text-sm);
   line-height: 1.55;
   text-wrap: pretty;
 }
+
+.workspace-tour__body p { margin: 0.38rem 0 0; }
+.workspace-tour__body p:first-child { margin-top: 0; }
 
 .workspace-tour__progress {
   display: flex;

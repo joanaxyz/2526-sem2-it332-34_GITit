@@ -32,10 +32,10 @@ Two content shapes are ported:
 The old target_rule (declarative pass/fail conditions) is ported into
 evaluation_spec.state_requirements, matching how the current, already-working
 arcane-spire content encodes rule-based validation (see
-curriculum/seed_data/spec_helpers.py:ev()). target_state is intentionally left
-empty ({}): the working new-system content computes it with a separate
-generate_targets pipeline (replaying solution_commands against initial_state),
-which is out of scope for this data port.
+curriculum/seed_data/spec_helpers.py:ev()). target_state comes from the same
+generate_targets pipeline as the rest of the curriculum (replaying
+solution_commands against initial_state through the frontend git engine), read
+here out of generated/generated_targets.py - never hand-written or backfilled.
 """
 
 from __future__ import annotations
@@ -63,6 +63,8 @@ from curriculum.models import (
     Story,
 )
 from curriculum.seed_data.command_catalog import COMMAND_CATALOG
+from curriculum.seed_data.generated.generated_targets import TARGET_STATES
+from curriculum.seed_data.generated.generated_trajectories import SOLUTION_TRAJECTORIES
 from curriculum.seed_data.spec_helpers import required_commit_message_details
 
 LEGACY_STORY_SLUG = "git-it-legacy"
@@ -12732,6 +12734,16 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
     },
 ]
 
+# Every legacy module level in seed order. `generate_targets` walks this to
+# replay each tier case's solution, so a tier variant gets its target_state
+# from the same generated pipeline as every other variant.
+LEGACY_MODULE_LEVELS: list[dict[str, Any]] = [
+    *MODULE_1_LEVELS,
+    *MODULE_2_LEVELS,
+    *MODULE_3_LEVELS,
+    *MODULE_4_LEVELS,
+]
+
 
 class Command(BaseCommand):
     help = "Seed the archived Module 0-4 content into a new Story/Chapter/Adventure tree."
@@ -12975,9 +12987,13 @@ class Command(BaseCommand):
                         case["state_requirements"],
                         required=case.get("required_commands", []),
                     ),
-                    "target_state": committed_tier_targets().get(case["case_id"], {}),
+                    "target_state": committed_tier_targets().get(
+                        case["case_id"],
+                        TARGET_STATES.get(case["case_id"], {}),
+                    ),
                     "solution_commands": case["solution_commands"],
                     "solution_workspace_files": case.get("solution_workspace_files", []),
+                    "solution_trajectory": SOLUTION_TRAJECTORIES.get(case["case_id"], {}),
                     "case_id": case["case_id"],
                     "semantic_key": case["case_id"],
                     "parameter_context": {},
@@ -12990,7 +13006,6 @@ class Command(BaseCommand):
                             *required_case_details(case),
                         ],
                     },
-                    "scaffold_policy": {},
                     "is_published": True,
                 },
             )

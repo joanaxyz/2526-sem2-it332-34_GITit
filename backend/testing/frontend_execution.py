@@ -15,6 +15,7 @@ def frontend_execution_payload(
     command_family: str | None = None,
     diagnostic_metadata: list[str] | None = None,
     client_run_revision: int | None = None,
+    cwd: str | None = None,
 ) -> dict:
     """Build the command execution payload the browser now submits."""
 
@@ -38,6 +39,8 @@ def frontend_execution_payload(
     }
     if client_run_revision is not None:
         payload["client_run_revision"] = client_run_revision
+    if cwd:
+        payload["cwd"] = cwd
     return payload
 
 

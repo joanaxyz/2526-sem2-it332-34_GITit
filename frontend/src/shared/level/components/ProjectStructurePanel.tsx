@@ -64,10 +64,6 @@ function joinProjectPath(parentPath: string, value: string) {
   return parentPath ? `${parentPath}/${clean}` : clean
 }
 
-function placeholderPathForFolder(folderPath: string) {
-  return `${folderPath}/.gitkeep`
-}
-
 function draftError(error: unknown, fallback: string) {
   return workspaceFileErrorMessage(error, fallback)
 }
@@ -158,7 +154,9 @@ export function ProjectStructurePanel({
       if (draft.mode === 'create') {
         if (!onCreateFile) return
         const targetPath = joinProjectPath(draft.parentPath, nextName)
-        const filePath = draft.kind === 'folder' ? placeholderPathForFolder(targetPath) : targetPath
+        // A trailing slash asks the backend for a real empty folder. Git
+        // ignores it until a file is added, just like on disk.
+        const filePath = draft.kind === 'folder' ? `${targetPath}/` : targetPath
         await onCreateFile({ path: filePath, content: '' })
       } else {
         if (!onRenameFile) return
@@ -220,7 +218,7 @@ export function ProjectStructurePanel({
       style={{ borderTop: '1.5px solid rgba(var(--theme-primary-rgb),0.42)' }}
     >
       <CardHeader
-        className="flex-row items-center justify-between gap-2 px-4 py-3"
+        className="workspace-panel-header"
         style={{ background: 'rgba(var(--theme-primary-rgb),0.025)' }}
       >
         <CardTitle className="panel-eyebrow">Project Files</CardTitle>

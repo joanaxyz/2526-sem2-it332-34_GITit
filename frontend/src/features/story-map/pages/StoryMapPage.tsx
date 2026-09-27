@@ -89,7 +89,11 @@ export function StoryMapPage() {
   const [leftRailOpen, setLeftRailOpen] = useState(false)
   const [rightRailOpen, setRightRailOpen] = useState(false)
   const compactStoryMap = useCompactStoryMap()
-  const orientationRequested = orientationPhaseActive && !orientationComplete
+  // A story only runs orientation if it actually has a Module 0. Without this
+  // guard the disabled lessons query stays `isPending` forever, and the map
+  // below never leaves its loading state.
+  const orientationRequested =
+    orientationPhaseActive && Boolean(orientationChapter) && !orientationComplete
 
   useEffect(() => {
     if (!chapters.length || (orientationRequested && orientationLessonsQuery.isPending)) return
@@ -126,6 +130,14 @@ export function StoryMapPage() {
     userSelectedChapterId.current = null
     setActiveChapterId(firstOpenChapter(chapters, true)?.id ?? null)
   }, [chapters, onboarding, orientationComplete])
+
+  useEffect(() => {
+    // This story has no Module 0 to run, so move the journey on rather than
+    // stalling in a phase it cannot serve - the welcome tour only runs from
+    // "stories", so the player would otherwise get no tutorial at all.
+    if (onboarding?.phase !== 'orientation' || !chapters.length || orientationChapter) return
+    onboarding.setPhase('stories')
+  }, [chapters.length, onboarding, orientationChapter])
 
   useEffect(() => {
     setLeftRailOpen(false)

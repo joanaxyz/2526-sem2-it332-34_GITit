@@ -37,11 +37,11 @@ export default defineConfig(({ mode }) => ({
         ? [
             {
               find: /^@\/assets\/.*$/,
-              replacement: path.resolve(__dirname, './src/test/assetStub.ts'),
+              replacement: path.resolve(import.meta.dirname, './src/test/assetStub.ts'),
             },
           ]
         : []),
-      { find: '@', replacement: path.resolve(__dirname, './src') },
+      { find: '@', replacement: path.resolve(import.meta.dirname, './src') },
     ],
   },
   build: {

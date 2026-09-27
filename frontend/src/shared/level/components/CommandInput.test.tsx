@@ -1,10 +1,9 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import type { TerminalPrompt } from '@/shared/level/terminalPrompt'
 import { CommandInput } from '@/shared/level/components/CommandInput'
 
-const prompt: TerminalPrompt = { user: 'blue', host: 'arcane-spire', cwd: '~/repo' }
+const prompt = 'blue'
 const originalClipboard = navigator.clipboard
 
 function mockClipboard(readText: () => Promise<string>) {

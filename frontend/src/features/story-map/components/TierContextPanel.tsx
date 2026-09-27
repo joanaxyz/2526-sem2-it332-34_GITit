@@ -3,7 +3,6 @@ import { Smile, Target, TerminalSquare } from 'lucide-react'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import {
   DifficultyChip,
-  type LevelContextTag,
   type LevelFact,
   LevelStoryCard,
   StarTriplet,
@@ -48,27 +47,11 @@ export function TierContextPanel({ run }: { run: TierRun }) {
     },
   ]
 
-  const tags: LevelContextTag[] = [
-    ...(run.chapter ? [{ label: `Module ${run.chapter.number}`, variant: 'blue' as const }] : []),
-    ...(run.difficulty
-      ? [
-          {
-            label: run.difficulty.charAt(0).toUpperCase() + run.difficulty.slice(1),
-            variant: 'default' as const,
-          },
-        ]
-      : []),
-    ...(run.variant.changed_variant
-      ? [{ label: 'Changed variant', variant: 'warning' as const }]
-      : []),
-  ]
-
   return (
     <LevelStoryCard
       title={run.tier.adventure_level_title}
       context={context}
       facts={facts}
-      tags={tags}
       labels={{
         story: 'Scenario',
         task: 'Objective',

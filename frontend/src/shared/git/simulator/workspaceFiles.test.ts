@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  createWorkspaceDirectory,
   createWorkspaceFile,
   deleteWorkspaceFile,
   renameWorkspaceFile,
@@ -8,6 +9,7 @@ import {
   WorkspaceFileError,
 } from '@/shared/git/simulator/workspaceFiles'
 import type { MutableRepositoryState } from '@/shared/git/simulator/types'
+import { directoryEntries, pathKind } from '@/shared/git/simulator/workspaceTree'
 
 function baseState(overrides: Partial<MutableRepositoryState> = {}): MutableRepositoryState {
   return {
@@ -92,5 +94,80 @@ describe('workspace file state helpers', () => {
     })
     expect(nextState.operation_metadata?.last_workspace_file_renamed_from).toBe('src')
     expect(nextState.operation_metadata?.last_workspace_file_renamed_to).toBe('lib')
+  })
+
+  it('creates a real empty folder instead of a placeholder file', () => {
+    const nextState = createWorkspaceFile(baseState(), { path: 'docs/', content: '' })
+
+    expect(nextState.directories).toEqual(['docs'])
+    expect(nextState.working_tree).toEqual({})
+    expect(pathKind(nextState, 'docs')).toBe('directory')
+    expect(directoryEntries(nextState, 'docs')).toEqual([])
+  })
+
+  it('drops the folder from the empty-folder list once it holds a file', () => {
+    const folder = createWorkspaceDirectory(baseState(), { path: 'docs/guides' })
+    const withFile = createWorkspaceFile(folder, { path: 'docs/guides/intro.md', content: '' })
+
+    expect(withFile.directories).toBeUndefined()
+    expect(pathKind(withFile, 'docs/guides')).toBe('directory')
+  })
+
+  it('keeps a folder on disk after its last file is deleted', () => {
+    const nextState = deleteWorkspaceFile(baseState(), { path: 'src/app.ts' })
+
+    expect(nextState.working_tree['src/app.ts']).toBe('deleted')
+    expect(nextState.directories).toEqual(['src'])
+    expect(pathKind(nextState, 'src')).toBe('directory')
+    expect(directoryEntries(nextState, 'src')).toEqual([])
+  })
+
+  it('removes a deleted folder completely, including empty subfolders', () => {
+    const nested = createWorkspaceDirectory(baseState(), { path: 'src/empty' })
+    const nextState = deleteWorkspaceFile(nested, { path: 'src' })
+
+    expect(pathKind(nextState, 'src')).toBeNull()
+    expect(nextState.directories).toBeUndefined()
+    expect(directoryEntries(nextState, '').map((entry) => entry.name)).toEqual(['README.md'])
+  })
+
+  it('recreates a deleted tracked file as a modification', () => {
+    const deleted = deleteWorkspaceFile(baseState(), { path: 'README.md' })
+    const recreated = createWorkspaceFile(deleted, { path: 'README.md', content: 'fresh' })
+
+    expect(recreated.working_tree['README.md']).toEqual({ status: 'modified', content: 'fresh' })
+  })
+
+  it('renames a folder that still contains a deleted tracked file', () => {
+    const state = baseState({
+      commits: [
+        {
+          id: 'c0',
+          message: 'base',
+          parents: [],
+          tree: { 'src/app.ts': 'app', 'src/old.ts': 'old' },
+        },
+      ],
+    })
+    const deleted = deleteWorkspaceFile(state, { path: 'src/old.ts' })
+    const renamed = renameWorkspaceFile(deleted, { path: 'src', newPath: 'lib' })
+
+    expect(renamed.working_tree['lib/app.ts']).toEqual({ status: 'untracked', content: 'app' })
+    expect(renamed.working_tree['lib/old.ts']).toBeUndefined()
+    expect(pathKind(renamed, 'src')).toBeNull()
+  })
+
+  it('moves empty subfolders along with a renamed folder', () => {
+    const nested = createWorkspaceDirectory(baseState(), { path: 'src/empty' })
+    const renamed = renameWorkspaceFile(nested, { path: 'src', newPath: 'lib' })
+
+    expect(renamed.directories).toEqual(['lib/empty'])
+    expect(pathKind(renamed, 'src')).toBeNull()
+  })
+
+  it('refuses to rename onto an existing folder', () => {
+    const folder = createWorkspaceDirectory(baseState(), { path: 'lib' })
+
+    expect(() => renameWorkspaceFile(folder, { path: 'src', newPath: 'lib' })).toThrow('lib is already a folder.')
   })
 })

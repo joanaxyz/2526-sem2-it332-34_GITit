@@ -11,10 +11,12 @@ from curriculum.stage_config import merged_battle_stage, stage_payload
 from evaluation.checklist import ObjectiveChecklistEvaluator
 from practice.models import CommandStep
 from practice.services.context import ScenarioContextNormalizer
+from practice.services.scaffolding import ScaffoldingService
 from progress.selectors import completed_adventure_level_count
 from simulator.services import RepositorySnapshotService
 
 _snapshotter = RepositorySnapshotService()
+_scaffolding_service = ScaffoldingService()
 
 
 def _live_objective_checks(
@@ -164,13 +166,7 @@ def attempt_payload(
             if executed_commands is not None or include_steps
             else [],
         ),
-        "scaffolding": {
-            "live_dag": bool((variant.scaffold_policy or {}).get("live_dag", False)),
-            "expected_state": False,
-            "contextual_feedback": bool(
-                (variant.scaffold_policy or {}).get("contextual_feedback", False)
-            ),
-        },
+        "scaffolding": _scaffolding_service.guided_supports(),
         "command_budget": {
             "min_counted_commands": budget_owner.min_counted_commands if budget_owner else 1,
             "max_counted_commands": budget_owner.max_counted_commands if budget_owner else 4,
