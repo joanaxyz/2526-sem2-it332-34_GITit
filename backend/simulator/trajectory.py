@@ -203,25 +203,31 @@ def _ref_target(value: object) -> object:
 # --- change descriptions ------------------------------------------------------
 
 
-def describe_transition(before: dict, after: dict) -> list[dict[str, str]]:
-    """What changed between two repository states, as ``{kind, text}`` entries.
+def describe_transition(before: dict, after: dict) -> list[dict]:
+    """What changed between two repository states, one entry per change.
 
     ``kind`` names the part of the repository that changed (``repository``,
     ``commit``, ``branch``, ``head``, ``staging``, ``working_tree``,
-    ``conflict``, ``tag``, ``remote``, ``config``, ``stash``, ``operation``) so a
-    client can mark each line without parsing prose.
+    ``conflict``, ``tag``, ``remote``, ``config``, ``stash``, ``operation``),
+    ``action`` what happened to it (``create``, ``delete``, ``move``, ``add``,
+    ``remove``, ``set``, ``start``, ``finish``), and ``subjects`` the files or
+    names involved, so a client can draw the change without parsing ``text``.
+    ``ref`` names the branch a new commit lands on.
     """
 
     normalizer = RepositoryStateNormalizer()
     before = normalizer.normalize(before)
     after = normalizer.normalize(after)
-    changes: list[dict[str, str]] = []
+    changes: list[dict] = []
 
-    def add(kind: str, text: str) -> None:
-        changes.append({"kind": kind, "text": text})
+    def add(kind: str, text: str, action: str, subjects=(), ref: str | None = None) -> None:
+        change = {"kind": kind, "text": text, "action": action, "subjects": sorted(subjects)}
+        if ref:
+            change["ref"] = ref
+        changes.append(change)
 
     if not before.get("repository_initialized", True) and after.get("repository_initialized", True):
-        add("repository", "The folder becomes a Git repository.")
+        add("repository", "The folder becomes a Git repository.", "create")
 
     before_ids = {commit.get("id") for commit in before.get("commits") or []}
     new_commits = [commit for commit in after.get("commits") or [] if commit.get("id") not in before_ids]
@@ -233,48 +239,51 @@ def describe_transition(before: dict, after: dict) -> list[dict[str, str]]:
         where = f" on {head_branch}" if head_branch else ""
         subject = "New commit" if len(new_commits) == 1 else f"{len(new_commits)} new commits"
         saved = f", saving {_join(committed_paths)}" if committed_paths else ""
-        add("commit", f"{subject}{where}{saved}.")
+        add("commit", f"{subject}{where}{saved}.", "create", committed_paths, head_branch)
 
     before_branches = dict(_mapping(before, "branches"))
     after_branches = dict(_mapping(after, "branches"))
     for name in sorted(set(after_branches) - set(before_branches)):
-        add("branch", f"Branch {name} is created.")
+        add("branch", f"Branch {name} is created.", "create", [name])
     for name in sorted(set(before_branches) - set(after_branches)):
-        add("branch", f"Branch {name} is deleted.")
+        add("branch", f"Branch {name} is deleted.", "delete", [name])
     for name in sorted(set(before_branches) & set(after_branches)):
         if before_branches[name] != after_branches[name] and not (new_commits and name == head_branch):
-            add("branch", f"Branch {name} moves to another commit.")
+            add("branch", f"Branch {name} moves to another commit.", "move", [name])
 
     before_head, after_head = before.get("head") or {}, after.get("head") or {}
     if (before_head.get("type"), before_head.get("name")) != (after_head.get("type"), after_head.get("name")):
         if after_head.get("type") == "branch":
-            add("head", f"HEAD moves to {after_head.get('name')}.")
+            add("head", f"HEAD moves to {after_head.get('name')}.", "move", [after_head.get("name")])
         else:
-            add("head", "HEAD is detached at a commit.")
+            add("head", "HEAD is detached at a commit.", "move")
     elif after_head.get("type") != "branch" and before_head.get("target") != after_head.get("target"):
-        add("head", "The detached HEAD moves to another commit.")
+        add("head", "The detached HEAD moves to another commit.", "move")
 
     before_working = set(_mapping_keys(before.get("working_tree")))
     after_working = set(_mapping_keys(after.get("working_tree")))
     newly_staged = after_staged - before_staged
     unstaged = before_staged - after_staged - committed_paths
     if newly_staged:
-        add("staging", f"{_join(newly_staged)} {_verb(newly_staged, 'is', 'are')} staged.")
+        add("staging", f"{_join(newly_staged)} {_verb(newly_staged, 'is', 'are')} staged.", "add", newly_staged)
     if unstaged:
-        add("staging", f"{_join(unstaged)} {_verb(unstaged, 'is', 'are')} unstaged.")
+        add("staging", f"{_join(unstaged)} {_verb(unstaged, 'is', 'are')} unstaged.", "remove", unstaged)
     # Staging moves a file out of the working tree; that is one change, not two.
     new_edits = after_working - before_working - unstaged
     cleaned = before_working - after_working - newly_staged
     if new_edits:
-        add("working_tree", f"{_join(new_edits)} {_verb(new_edits, 'has', 'have')} uncommitted edits.")
+        add("working_tree", f"{_join(new_edits)} {_verb(new_edits, 'has', 'have')} uncommitted edits.", "add",
+            new_edits)
     if cleaned:
-        add("working_tree", f"Edits to {_join(cleaned)} are discarded or saved elsewhere.")
+        add("working_tree", f"Edits to {_join(cleaned)} are discarded or saved elsewhere.", "remove", cleaned)
 
     before_conflicts, after_conflicts = set(_paths(before.get("conflicts"))), set(_paths(after.get("conflicts")))
     if after_conflicts - before_conflicts:
-        add("conflict", f"Conflict to resolve in {_join(after_conflicts - before_conflicts)}.")
+        opened = after_conflicts - before_conflicts
+        add("conflict", f"Conflict to resolve in {_join(opened)}.", "add", opened)
     if before_conflicts - after_conflicts:
-        add("conflict", f"Conflict resolved in {_join(before_conflicts - after_conflicts)}.")
+        resolved = before_conflicts - after_conflicts
+        add("conflict", f"Conflict resolved in {_join(resolved)}.", "remove", resolved)
 
     _describe_names(add, before, after, "tags", "tag", "Tag {name} is created.", "Tag {name} is deleted.")
     _describe_names(add, before, after, "remotes", "remote", "Remote {name} is added.", "Remote {name} is removed.")
@@ -283,36 +292,37 @@ def describe_transition(before: dict, after: dict) -> list[dict[str, str]]:
         name for name in after_remote if name not in before_remote or before_remote[name] != after_remote[name]
     )
     if updated:
-        add("remote", f"{_join(updated)} {_verb(updated, 'is', 'are')} updated.")
+        add("remote", f"{_join(updated)} {_verb(updated, 'is', 'are')} updated.", "move", updated)
     removed_remote = sorted(set(before_remote) - set(after_remote))
     if removed_remote:
-        add("remote", f"{_join(removed_remote)} {_verb(removed_remote, 'is', 'are')} removed.")
+        add("remote", f"{_join(removed_remote)} {_verb(removed_remote, 'is', 'are')} removed.", "delete",
+            removed_remote)
 
     before_config, after_config = dict(_mapping(before, "config")), dict(_mapping(after, "config"))
     for key in sorted(after_config):
         if before_config.get(key) != after_config[key]:
-            add("config", f"{key} is set.")
+            add("config", f"{key} is set.", "set", [key])
 
     before_stash, after_stash = len(before.get("stash_stack") or []), len(after.get("stash_stack") or [])
     if after_stash > before_stash:
-        add("stash", "Work is set aside in the stash.")
+        add("stash", "Work is set aside in the stash.", "add")
     elif after_stash < before_stash:
-        add("stash", "A stash entry is applied or dropped.")
+        add("stash", "A stash entry is applied or dropped.", "remove")
 
     before_ops, after_ops = set(in_progress_operations(before)), set(in_progress_operations(after))
     for operation in sorted(after_ops - before_ops):
-        add("operation", f"A {operation} is in progress.")
+        add("operation", f"A {operation} is in progress.", "start", [operation])
     for operation in sorted(before_ops - after_ops):
-        add("operation", f"The {operation} is finished.")
+        add("operation", f"The {operation} is finished.", "finish", [operation])
     return changes
 
 
 def _describe_names(add, before, after, key, kind, added: str, removed: str) -> None:
     before_names, after_names = set(dict(_mapping(before, key))), set(dict(_mapping(after, key)))
     for name in sorted(after_names - before_names):
-        add(kind, added.format(name=name))
+        add(kind, added.format(name=name), "create", [name])
     for name in sorted(before_names - after_names):
-        add(kind, removed.format(name=name))
+        add(kind, removed.format(name=name), "delete", [name])
 
 
 def _join(items: Iterable[str]) -> str:

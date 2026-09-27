@@ -14,6 +14,23 @@ class RepositoryChangeSerializer(serializers.Serializer):
         "tag", "remote", "config", "stash", "operation",
     ])
     text = serializers.CharField()
+    # Absent on changes recorded before these fields existed.
+    action = serializers.ChoiceField(
+        choices=["create", "delete", "move", "add", "remove", "set", "start", "finish"], required=False,
+    )
+    subjects = serializers.ListField(child=serializers.CharField(), required=False)
+    ref = serializers.CharField(required=False)
+
+
+class SyntaxPartSerializer(serializers.Serializer):
+    token = serializers.CharField()
+    text = serializers.CharField()
+
+
+class ConceptSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    title = serializers.CharField()
+    text = serializers.CharField()
 
 
 class CommandIntroductionResponseSerializer(serializers.Serializer):
@@ -29,6 +46,8 @@ class CommandIntroductionResponseSerializer(serializers.Serializer):
     example_command = serializers.CharField(allow_null=True)
     completion_token = serializers.CharField(allow_null=True)
     command_form = CommandIntroductionFormSerializer()
+    anatomy = SyntaxPartSerializer(many=True)
+    concepts = ConceptSerializer(many=True)
 
 
 class IntroductionCompleteResponseSerializer(serializers.Serializer):

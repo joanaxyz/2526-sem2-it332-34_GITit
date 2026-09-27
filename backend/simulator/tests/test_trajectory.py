@@ -143,13 +143,13 @@ def test_describe_transition_speaks_about_repository_meaning():
                  staging={"a.txt": "modified"})
     # Staging moves a file out of the working tree: one change, not two.
     assert describe_transition(before, after) == [
-        {"kind": "branch", "text": "Branch feature is created."},
-        {"kind": "head", "text": "HEAD moves to feature."},
-        {"kind": "staging", "text": "a.txt is staged."},
+        {"kind": "branch", "text": "Branch feature is created.", "action": "create", "subjects": ["feature"]},
+        {"kind": "head", "text": "HEAD moves to feature.", "action": "move", "subjects": ["feature"]},
+        {"kind": "staging", "text": "a.txt is staged.", "action": "add", "subjects": ["a.txt"]},
     ]
     uninitialized = repo(repository_initialized=False, commits=[], branches={})
     assert describe_transition(uninitialized, repo(commits=[], branches={"main": None}))[0] == {
-        "kind": "repository", "text": "The folder becomes a Git repository.",
+        "kind": "repository", "text": "The folder becomes a Git repository.", "action": "create", "subjects": [],
     }
 
 
@@ -162,4 +162,7 @@ def test_a_commit_names_what_it_saved_instead_of_listing_unstaging():
         ],
         branches={"main": "c1"},
     )
-    assert describe_transition(before, after) == [{"kind": "commit", "text": "New commit on main, saving a.txt."}]
+    assert describe_transition(before, after) == [{
+        "kind": "commit", "text": "New commit on main, saving a.txt.", "action": "create",
+        "subjects": ["a.txt"], "ref": "main",
+    }]

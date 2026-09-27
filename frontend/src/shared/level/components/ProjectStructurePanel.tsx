@@ -19,6 +19,7 @@ import {
   workspaceFileErrorMessage,
 } from '@/shared/level/utils/projectFiles'
 import type { ProjectTreeNode } from '@/shared/level/utils/projectFiles'
+import { buildGitDirectory, repositoryFolderName } from '@/shared/level/utils/gitDirectory'
 import { Button } from '@/shared/components/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@/shared/components/Card'
 import {
@@ -34,11 +35,15 @@ import {
   ProjectTreeItem,
 } from '@/shared/level/components/project-structure/ProjectTreeItem'
 import type { ProjectTreeDraft } from '@/shared/level/components/project-structure/ProjectTreeItem'
+import { GitDirectoryItem } from '@/shared/level/components/project-structure/GitDirectoryItem'
 import { cn } from '@/shared/utils/cn'
 
 type ProjectStructurePanelProps = {
   snapshot: RepositorySnapshot
-  /** Repo folder shown as the tree's synthetic root (the level's slug). */
+  /**
+   * Project folder shown as the tree's root (the level's slug). A named
+   * `git clone <url> <dir>` / `git init <dir>` destination replaces it.
+   */
   rootName?: string
   className?: string
   selectedPath?: string | null
@@ -85,6 +90,8 @@ export function ProjectStructurePanel({
   const files = useMemo(() => flattenProjectFiles(tree), [tree])
   const filePaths = useMemo(() => new Set(files.map((file) => file.path)), [files])
   const hasFiles = tree.length > 0
+  const gitDirectory = useMemo(() => buildGitDirectory(snapshot), [snapshot])
+  const folderName = repositoryFolderName(snapshot, rootName || 'repo')
   const [draft, setDraft] = useState<ProjectTreeDraft | null>(null)
   const [menu, setMenu] = useState<ProjectTreeContextMenuState | null>(null)
   const [panelError, setPanelError] = useState('')
@@ -293,9 +300,10 @@ export function ProjectStructurePanel({
               >
                 <ChevronDown className="size-3 shrink-0 text-muted-foreground" />
                 <FolderOpen className="size-3.5 shrink-0 text-primary" />
-                <span className="min-w-0 flex-1 truncate">{rootName || 'repo'}</span>
+                <span className="min-w-0 flex-1 truncate">{folderName}</span>
               </div>
               <div className="tree-children">
+                {gitDirectory ? <GitDirectoryItem node={gitDirectory} /> : null}
                 {rootCreateDraft ? (
                   <ProjectTreeCreateDraftRow
                     draft={rootCreateDraft}
@@ -325,7 +333,9 @@ export function ProjectStructurePanel({
                     />
                   ))
                 ) : rootCreateDraft ? null : (
-                  <p className="px-2 py-1 text-xs text-muted-foreground">No project files yet.</p>
+                  <p className="px-2 py-1 text-xs text-muted-foreground">
+                    {snapshot.repository_initialized ? 'No project files yet.' : 'Empty folder. Not a Git repository yet.'}
+                  </p>
                 )}
               </div>
               {panelError ? (

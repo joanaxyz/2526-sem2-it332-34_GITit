@@ -40,7 +40,9 @@ def test_wrong_terminal_command_reveals_and_keeps_normal_penalty(client, teachin
         result = complete(client, teaching_run, tutor["completion_token"])
         assert result.status_code == 200, result.data
         assert result.data["tutor"] is None
-    assert PlayerCommandIntroduction.objects.count() == 1
+    keys = set(PlayerCommandIntroduction.objects.values_list("teaching_key", flat=True))
+    # The guide, plus the beginner concepts it explained (never shown again).
+    assert keys == {"git-init/current-directory", "concept:commands", "concept:repository"}
 
 
 def test_successful_init_explains_the_change_then_introduces_the_next_form(client, teaching_run):
@@ -49,23 +51,56 @@ def test_successful_init_explains_the_change_then_introduces_the_next_form(clien
     tutor = response.data["run"]["tutor"]
     assert tutor["verdict"] == "correct"
     assert tutor["explanation"] == "That's the right command."
-    assert tutor["changes"][0] == {"kind": "repository", "text": "The folder becomes a Git repository."}
+    assert tutor["changes"][0]["text"] == "The folder becomes a Git repository."
+    assert tutor["changes"][0]["action"] == "create"
     result = complete(client, teaching_run, tutor["completion_token"])
     assert result.status_code == 200
-    assert result.data["tutor"]["teaching_key"] == "git-add/file"
-    assert result.data["tutor"]["command_form"]["usage_form"] == "git add <file>"
+    assert result.data["tutor"]["teaching_key"] == "form:git add <path>..."
+    assert result.data["tutor"]["command_form"]["usage_form"] == "git add <path>..."
+
+
+def at_first_add(run):
+    states, _ = solution_states(run.selected_variant.initial_state)
+    run.repository_state = states[1]
+    run.save(update_fields=["repository_state"])
+    return states
 
 
 def test_same_form_on_another_route_is_praised_without_claiming_the_route(client, teaching_run):
-    states, _ = solution_states(teaching_run.selected_variant.initial_state)
-    teaching_run.repository_state = states[1]
-    teaching_run.save(update_fields=["repository_state"])
-    response = submit(client, teaching_run, "git add app.py", staged(states[1], "app.py"))
+    states = at_first_add(teaching_run)
+    after = staged(staged(states[1], "app.py"), "draft.txt")
+    response = submit(client, teaching_run, "git add app.py draft.txt", after)
     assert response.status_code == 200, response.data
     tutor = response.data["run"]["tutor"]
     assert tutor["verdict"] == "correct"
     assert tutor["explanation"].startswith("That worked.")
-    assert {"kind": "staging", "text": "app.py is staged."} in tutor["changes"]
+    assert {"kind": "staging", "text": "app.py and draft.txt are staged.", "action": "add",
+            "subjects": ["app.py", "draft.txt"]} in tutor["changes"]
+
+
+def test_the_combined_command_completes_both_steps(client, teaching_run):
+    states = at_first_add(teaching_run)
+    response = submit(client, teaching_run, "git add README.md app.py", states[3])
+    assert response.status_code == 200, response.data
+    tutor = response.data["run"]["tutor"]
+    assert tutor["verdict"] == "correct"
+    assert tutor["explanation"] == "That's the right command."
+
+
+def test_a_miss_reveals_the_combined_command(client, teaching_run):
+    at_first_add(teaching_run)
+    response = submit(client, teaching_run, "git ad README.md", teaching_run.repository_state,
+                      processed=False, exit_code=1)
+    assert response.data["run"]["tutor"]["example_command"] == "git add README.md app.py"
+
+
+def test_one_file_at_a_time_is_left_alone(client, teaching_run):
+    states = at_first_add(teaching_run)
+    response = submit(client, teaching_run, "git add README.md", states[2])
+    assert response.status_code == 200, response.data
+    # Not the technique being introduced, and the remaining single add is a
+    # command the learner just used - no guide either way.
+    assert response.data["run"]["tutor"] is None
 
 
 def test_mutating_wrong_route_never_reveals_an_obsolete_example(client, teaching_run):
@@ -95,7 +130,7 @@ def test_next_terminal_command_preserves_unacknowledged_feedback(client, teachin
     assert complete(client, teaching_run, old_token).status_code == 409
     result = complete(client, teaching_run, tutor["completion_token"])
     assert result.status_code == 200
-    assert result.data["tutor"]["teaching_key"] == "git-add/file"
+    assert result.data["tutor"]["teaching_key"] == "form:git add <path>..."
 
 
 def test_terminal_correction_updates_pending_wrong_feedback(client, teaching_run):

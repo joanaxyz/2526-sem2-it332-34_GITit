@@ -1413,12 +1413,29 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "https://example.test/training/docs-portal.git",
-                                "default_branch": "main",
-                                "head": "r10",
-                                "tree": {
-                                    "README.md": "docs-readme-v1",
-                                    "docs/intro.md": "docs-intro-v1",
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r10",
                                 },
+                                "commits": [
+                                    {
+                                        "id": "r9",
+                                        "message": "Create docs portal",
+                                        "parents": [],
+                                        "tree": {
+                                            "README.md": "# Docs Portal\n\nSource for the team documentation site.\nEdit pages under docs/ and open a pull request.\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r10",
+                                        "message": "Add getting-started page",
+                                        "parents": ["r9"],
+                                        "tree": {
+                                            "README.md": "# Docs Portal\n\nSource for the team documentation site.\nEdit pages under docs/ and open a pull request.\n",
+                                            "docs/intro.md": "# Getting Started\n\nWelcome! This guide walks you through setting up your environment.\n",
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": [
@@ -1450,12 +1467,29 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "https://example.test/training/api-lab.git",
-                                "default_branch": "main",
-                                "head": "r11",
-                                "tree": {
-                                    "README.md": "api-readme-v1",
-                                    "api/routes.py": "api-routes-v1",
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r11",
                                 },
+                                "commits": [
+                                    {
+                                        "id": "r10",
+                                        "message": "Create API lab",
+                                        "parents": [],
+                                        "tree": {
+                                            "README.md": "# API Lab\n\nBackend API for the onboarding workshop.\nRun `flask --app api.routes run` to start it.\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r11",
+                                        "message": "Add health check route",
+                                        "parents": ["r10"],
+                                        "tree": {
+                                            "README.md": "# API Lab\n\nBackend API for the onboarding workshop.\nRun `flask --app api.routes run` to start it.\n",
+                                            "api/routes.py": 'from flask import Flask\n\napp = Flask(__name__)\n\n\n@app.get("/health")\ndef health():\n    return {"status": "ok"}\n',
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": [
@@ -1494,14 +1528,32 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "https://example.test/training/profile-site.git",
-                                "default_branch": "main",
-                                "head": "r13",
-                                "branches": {"origin/main": "r12", "origin/starter": "r13"},
-                                "tree": {
-                                    "index.html": "profile-index-v2",
-                                    "styles/site.css": "profile-css-v1",
-                                    "starter-notes.md": "starter-notes-v1",
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r12",
+                                    "origin/starter": "r13",
                                 },
+                                "commits": [
+                                    {
+                                        "id": "r12",
+                                        "message": "Publish profile homepage",
+                                        "parents": [],
+                                        "tree": {
+                                            "index.html": "<!doctype html>\n<title>My Profile</title>\n<h1>Hi, I'm a developer.</h1>\n",
+                                            "styles/site.css": "body {\n  font-family: system-ui, sans-serif;\n  margin: 2rem auto;\n  max-width: 40rem;\n}\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r13",
+                                        "message": "Prepare starter template",
+                                        "parents": ["r12"],
+                                        "tree": {
+                                            "index.html": '<!doctype html>\n<title>My Profile</title>\n<link rel="stylesheet" href="styles/site.css">\n<h1>Your name here</h1>\n<p>Replace this intro.</p>\n',
+                                            "styles/site.css": "body {\n  font-family: system-ui, sans-serif;\n  margin: 2rem auto;\n  max-width: 40rem;\n}\n",
+                                            "starter-notes.md": "# Starter notes\n\nEdit index.html with your name and intro, then commit.\n",
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": [
@@ -1533,12 +1585,29 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "git@github.com:open-dev/oss-toolkit.git",
-                                "default_branch": "main",
-                                "head": "r40",
-                                "tree": {
-                                    "README.md": "oss-readme-v1",
-                                    "src/toolkit.py": "toolkit-v1",
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r40",
                                 },
+                                "commits": [
+                                    {
+                                        "id": "r39",
+                                        "message": "Create oss-toolkit",
+                                        "parents": [],
+                                        "tree": {
+                                            "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r40",
+                                        "message": "Add slugify helper",
+                                        "parents": ["r39"],
+                                        "tree": {
+                                            "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n",
+                                            "src/toolkit.py": 'def slugify(text):\n    return text.strip().lower().replace(" ", "-")\n',
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": ["git clone git@github.com:open-dev/oss-toolkit.git"],
@@ -1568,9 +1637,38 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "https://git.corp.example/it/audit-logs.git",
-                                "default_branch": "main",
-                                "head": "r41",
-                                "tree": {"README.md": "audit-readme-v1", "logs/q1.csv": "q1-v1"},
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r41",
+                                },
+                                "commits": [
+                                    {
+                                        "id": "r39",
+                                        "message": "Create audit-logs repository",
+                                        "parents": [],
+                                        "tree": {
+                                            "README.md": "# Audit Logs\n\nQuarterly access-audit exports for IT compliance.\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r40",
+                                        "message": "Export Q1 access log",
+                                        "parents": ["r39"],
+                                        "tree": {
+                                            "README.md": "# Audit Logs\n\nQuarterly access-audit exports for IT compliance.\n",
+                                            "logs/q1.csv": "timestamp,user,action,resource\n2026-01-08T09:14:00Z,jdoe,login,vpn\n2026-02-11T16:02:00Z,asmith,grant,payroll-db\n2026-03-27T08:45:00Z,jdoe,revoke,payroll-db\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r41",
+                                        "message": "Document CSV columns",
+                                        "parents": ["r40"],
+                                        "tree": {
+                                            "README.md": "# Audit Logs\n\nQuarterly access-audit exports for IT compliance.\n\nColumns: timestamp, user, action, resource.\nDo not edit exported rows by hand.\n",
+                                            "logs/q1.csv": "timestamp,user,action,resource\n2026-01-08T09:14:00Z,jdoe,login,vpn\n2026-02-11T16:02:00Z,asmith,grant,payroll-db\n2026-03-27T08:45:00Z,jdoe,revoke,payroll-db\n",
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": [
@@ -1617,11 +1715,32 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "https://github.com/acme-startup/backend-api.git",
-                                "default_branch": "main",
-                                "default_head": "r49",
-                                "head": "r50",
-                                "branches": {"origin/main": "r49", "origin/feature/auth": "r50"},
-                                "tree": {"README.md": "api-readme-v1", "src/auth.py": "auth-v1"},
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r49",
+                                    "origin/feature/auth": "r50",
+                                },
+                                "commits": [
+                                    {
+                                        "id": "r49",
+                                        "message": "Create backend API",
+                                        "parents": [],
+                                        "tree": {
+                                            "README.md": "# Backend API\n\nREST service for the Acme mobile app.\n",
+                                            "src/server.py": "from app import create_app\n\napp = create_app()\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r50",
+                                        "message": "Start login flow",
+                                        "parents": ["r49"],
+                                        "tree": {
+                                            "README.md": "# Backend API\n\nREST service for the Acme mobile app.\n",
+                                            "src/server.py": "from app import create_app\n\napp = create_app()\n",
+                                            "src/auth.py": 'def login(username, password):\n    """Check credentials and return a session token."""\n    raise NotImplementedError("feature/auth: in progress")\n',
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": [
@@ -1650,13 +1769,39 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "git@example.test:training/analytics-lab.git",
-                                "default_branch": "main",
-                                "head": "r30",
-                                "tree": {
-                                    "README.md": "analytics-readme-v3",
-                                    "metrics/report.md": "metrics-report-v2",
-                                    "src/summary.py": "summary-v1",
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r30",
                                 },
+                                "commits": [
+                                    {
+                                        "id": "r28",
+                                        "message": "Create analytics lab",
+                                        "parents": [],
+                                        "tree": {
+                                            "README.md": "# Analytics Lab\n\nWeekly product metrics and the scripts that build them.\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r29",
+                                        "message": "Add weekly summary script",
+                                        "parents": ["r28"],
+                                        "tree": {
+                                            "README.md": "# Analytics Lab\n\nWeekly product metrics and the scripts that build them.\n",
+                                            "src/summary.py": "def weekly_total(rows):\n    return sum(row['count'] for row in rows)\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r30",
+                                        "message": "Publish week 12 report",
+                                        "parents": ["r29"],
+                                        "tree": {
+                                            "README.md": "# Analytics Lab\n\nWeekly product metrics and the scripts that build them.\n",
+                                            "metrics/report.md": "# Weekly Report\n\n| Metric | Value |\n| --- | --- |\n| Sign-ups | 412 |\n| Active users | 3,180 |\n",
+                                            "src/summary.py": "def weekly_total(rows):\n    return sum(row['count'] for row in rows)\n",
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": [
@@ -1692,15 +1837,32 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "https://example.test/tools/cli-tool.git",
-                                "default_branch": "main",
-                                "default_head": "r19",
-                                "head": "r20",
-                                "branches": {"origin/main": "r19", "origin/starter": "r20"},
-                                "tree": {
-                                    "README.md": "cli-readme-v2",
-                                    "src/parser.py": "cli-parser-v2",
-                                    "starter.md": "cli-starter-v1",
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r19",
+                                    "origin/starter": "r20",
                                 },
+                                "commits": [
+                                    {
+                                        "id": "r19",
+                                        "message": "Create cli-tool parser",
+                                        "parents": [],
+                                        "tree": {
+                                            "README.md": "# cli-tool\n\nA tiny argument parser for internal scripts.\n",
+                                            "src/parser.py": 'import sys\n\n\ndef parse(argv=None):\n    args = sys.argv[1:] if argv is None else argv\n    return {arg.lstrip("-"): True for arg in args if arg.startswith("--")}\n',
+                                        },
+                                    },
+                                    {
+                                        "id": "r20",
+                                        "message": "Add contributor starter tasks",
+                                        "parents": ["r19"],
+                                        "tree": {
+                                            "README.md": "# cli-tool\n\nA tiny argument parser for internal scripts.\n",
+                                            "src/parser.py": 'import sys\n\n\ndef parse(argv=None):\n    args = sys.argv[1:] if argv is None else argv\n    return {arg.lstrip("-"): True for arg in args if arg.startswith("--")}\n',
+                                            "starter.md": "# Starter tasks\n\n1. Add a `--help` flag to parse().\n2. Write a test for it.\n",
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": [
@@ -1736,12 +1898,38 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "https://example.test/frontend/css-kit.git",
-                                "default_branch": "main",
-                                "head": "r22",
-                                "tree": {
-                                    "README.md": "css-readme-v2",
-                                    "styles/tokens.css": "tokens-v2",
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r22",
                                 },
+                                "commits": [
+                                    {
+                                        "id": "r20",
+                                        "message": "Create css-kit",
+                                        "parents": [],
+                                        "tree": {
+                                            "README.md": "# css-kit\n\nShared design tokens for company front ends.\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r21",
+                                        "message": "Add color tokens",
+                                        "parents": ["r20"],
+                                        "tree": {
+                                            "README.md": "# css-kit\n\nShared design tokens for company front ends.\n",
+                                            "styles/tokens.css": ":root {\n  --color-primary: #2563eb;\n}\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r22",
+                                        "message": "Add spacing tokens",
+                                        "parents": ["r21"],
+                                        "tree": {
+                                            "README.md": "# css-kit\n\nShared design tokens for company front ends.\n",
+                                            "styles/tokens.css": ":root {\n  --color-primary: #2563eb;\n  --space-1: 4px;\n  --space-2: 8px;\n}\n",
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": [
@@ -1785,13 +1973,38 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "git@github.com:open-dev/oss-toolkit.git",
-                                "default_branch": "main",
-                                "default_head": "r59",
-                                "head": "r60",
-                                "tree": {
-                                    "README.md": "oss-readme-v2",
-                                    "src/toolkit.py": "toolkit-v2",
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r60",
                                 },
+                                "commits": [
+                                    {
+                                        "id": "r58",
+                                        "message": "Create oss-toolkit",
+                                        "parents": [],
+                                        "tree": {
+                                            "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r59",
+                                        "message": "Add slugify helper",
+                                        "parents": ["r58"],
+                                        "tree": {
+                                            "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n",
+                                            "src/toolkit.py": 'def slugify(text):\n    return text.strip().lower().replace(" ", "-")\n',
+                                        },
+                                    },
+                                    {
+                                        "id": "r60",
+                                        "message": "Add title_case and contributing guide",
+                                        "parents": ["r59"],
+                                        "tree": {
+                                            "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n\n## Contributing\n\nFork the repo, branch from main, and open a pull request.\n",
+                                            "src/toolkit.py": 'def slugify(text):\n    return text.strip().lower().replace(" ", "-")\n\n\ndef title_case(text):\n    return " ".join(word.capitalize() for word in text.split())\n',
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": [
@@ -1832,15 +2045,42 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "https://example.test/frontend/mobile-ui.git",
-                                "default_branch": "main",
-                                "default_head": "r23",
-                                "head": "r31",
-                                "branches": {"origin/main": "r23", "origin/starter": "r31"},
-                                "tree": {
-                                    "README.md": "mobile-readme-v2",
-                                    "screens/home.tsx": "home-v1",
-                                    "styles/mobile.css": "mobile-css-v1",
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r23",
+                                    "origin/starter": "r31",
                                 },
+                                "commits": [
+                                    {
+                                        "id": "r22",
+                                        "message": "Create mobile-ui",
+                                        "parents": [],
+                                        "tree": {
+                                            "README.md": "# mobile-ui\n\nScreens and styles for the mobile app.\n",
+                                            "styles/mobile.css": ".screen {\n  padding: 16px;\n}\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r23",
+                                        "message": "Add home screen",
+                                        "parents": ["r22"],
+                                        "tree": {
+                                            "README.md": "# mobile-ui\n\nScreens and styles for the mobile app.\n",
+                                            "screens/home.tsx": "export function Home() {\n  return <h1>Home</h1>\n}\n",
+                                            "styles/mobile.css": ".screen {\n  padding: 16px;\n}\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r31",
+                                        "message": "Reset home screen for starter",
+                                        "parents": ["r23"],
+                                        "tree": {
+                                            "README.md": "# mobile-ui\n\nScreens and styles for the mobile app.\n",
+                                            "screens/home.tsx": "export function Home() {\n  // TODO: build the home screen from the starter design\n  return <h1>Welcome</h1>\n}\n",
+                                            "styles/mobile.css": ".screen {\n  padding: 16px;\n}\n",
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": [
@@ -1881,15 +2121,40 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "https://example.test/docs/lab-notebook.git",
-                                "default_branch": "main",
-                                "default_head": "r24",
-                                "head": "r32",
-                                "branches": {"origin/main": "r24", "origin/review": "r32"},
-                                "tree": {
-                                    "README.md": "notebook-readme-v2",
-                                    "entries/day-1.md": "day1-v1",
-                                    "entries/day-2.md": "day2-v1",
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r24",
+                                    "origin/review": "r32",
                                 },
+                                "commits": [
+                                    {
+                                        "id": "r23",
+                                        "message": "Create lab notebook",
+                                        "parents": [],
+                                        "tree": {
+                                            "README.md": "# Lab Notebook\n\nDaily entries from the materials lab.\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r24",
+                                        "message": "Log day 1",
+                                        "parents": ["r23"],
+                                        "tree": {
+                                            "README.md": "# Lab Notebook\n\nDaily entries from the materials lab.\n",
+                                            "entries/day-1.md": "# Day 1\n\nCalibrated the scale. Baseline mass: 12.004 g.\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r32",
+                                        "message": "Log day 2 for review",
+                                        "parents": ["r24"],
+                                        "tree": {
+                                            "README.md": "# Lab Notebook\n\nDaily entries from the materials lab.\n",
+                                            "entries/day-1.md": "# Day 1\n\nCalibrated the scale. Baseline mass: 12.004 g.\n",
+                                            "entries/day-2.md": "# Day 2\n\nSample B cracked at 340 N. Needs review before publishing.\n",
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": [
@@ -1930,14 +2195,31 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
                             "conflicts": [],
                             "remote_fixtures": {
                                 "url": "git@example.test:docs/research-log.git",
-                                "default_branch": "main",
-                                "default_head": "r33",
-                                "head": "r34",
-                                "tree": {
-                                    "README.md": "research-readme-v2",
-                                    "notes/week-1.md": "week1-v1",
-                                    "notes/week-2.md": "week2-v1",
+                                "default_branch": "origin/main",
+                                "branches": {
+                                    "origin/main": "r34",
                                 },
+                                "commits": [
+                                    {
+                                        "id": "r33",
+                                        "message": "Log week 1 interviews",
+                                        "parents": [],
+                                        "tree": {
+                                            "README.md": "# Research Log\n\nWeekly notes from the user-research team.\n",
+                                            "notes/week-1.md": "# Week 1\n\n5 interviews. Main pain point: onboarding takes too long.\n",
+                                        },
+                                    },
+                                    {
+                                        "id": "r34",
+                                        "message": "Log week 2 usability test",
+                                        "parents": ["r33"],
+                                        "tree": {
+                                            "README.md": "# Research Log\n\nWeekly notes from the user-research team.\n",
+                                            "notes/week-1.md": "# Week 1\n\n5 interviews. Main pain point: onboarding takes too long.\n",
+                                            "notes/week-2.md": "# Week 2\n\nTested the shorter sign-up flow. 4 of 5 finished without help.\n",
+                                        },
+                                    },
+                                ],
                             },
                         },
                         "solution_commands": [

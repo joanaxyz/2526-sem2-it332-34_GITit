@@ -8,7 +8,6 @@ export type JsonObject = { [key: string]: JsonValue }
 
 export type ApiSchemas = {
   "AccessTokenResponse": { "access": string }
-  "ActionEnum": "grant_coins" | "set_staff" | "set_active"
   "ActivityWindowEnum": "month" | "week" | "year"
   "AdminAnalyticsResponse": { "active_learners_30d": number; "completions": ApiSchemas["AdminCompletions"]; "kpi_range": ApiSchemas["AdminKpiRange"]; "objectives": { [key: string]: ApiSchemas["RateMetric"] }; "per_story": Array<ApiSchemas["AdminStoryAnalytics"]>; "runebound_performance": ApiSchemas["PerformanceSummaryResponse"]; "runs": ApiSchemas["AdminRuns"] }
   "AdminChapter": { "battle_stage": { [key: string]: JsonValue }; "description": string; "id": number; "is_playable": boolean; "is_published": boolean; "management_source": string; "number": number; "slug": string; "sort_order": number; "story_id": number | null; "title": string }
@@ -44,7 +43,8 @@ export type ApiSchemas = {
   "AdminStoryPrerequisite": { "id": number; "slug": string; "title": string }
   "AdminTransaction": { "amount": number; "created_at": string; "id": number; "reason": string; "user_id": number; "username": string }
   "AdminTransactionListResponse": { "results": Array<ApiSchemas["AdminTransaction"]> }
-  "AdminUserActionRequest": { "action": ApiSchemas["ActionEnum"]; "amount"?: number; "reason"?: string; "request_id"?: string; "value"?: boolean }
+  "AdminUserActionRequest": { "action": ApiSchemas["AdminUserActionRequestActionEnum"]; "amount"?: number; "reason"?: string; "request_id"?: string; "value"?: boolean }
+  "AdminUserActionRequestActionEnum": "grant_coins" | "set_staff" | "set_active"
   "AdminUserBrief": { "date_joined": string; "email": string; "id": number; "is_active": boolean; "is_staff": boolean; "username": string }
   "AdminUserDetail": { "date_joined": string; "email": string; "entitlement_count": number; "id": number; "is_active": boolean; "is_staff": boolean; "last_login": string | null; "username": string; "wallet": ApiSchemas["WalletSummary"] }
   "AdminUserKpisResponse": { "has_data": boolean; "kpis": ApiSchemas["PerformanceKpiSet"] | null; "modules": Array<ApiSchemas["PerformanceModule"]> }
@@ -77,8 +77,9 @@ export type ApiSchemas = {
   "CommandFormPreviewResponse": { "command_preview": { [key: string]: JsonValue }; "id": number; "is_playable": boolean; "label": string; "skill": ApiSchemas["CommandFormPreviewSkillResponse"]; "slug": string; "summary": string; "usage_form": string }
   "CommandFormPreviewSkillResponse": { "base_command": string; "id": number; "slug": string; "title": string }
   "CommandIntroductionForm": { "label": string; "summary": string; "teaching_key": string; "usage_form": string }
-  "CommandIntroductionResponse": { "changes": Array<ApiSchemas["RepositoryChange"]>; "command_form": ApiSchemas["CommandIntroductionForm"]; "completion_token": string | null; "context_id": string; "example_command": string | null; "explanation": string | null; "needs": Array<ApiSchemas["RepositoryChange"]>; "phase": ApiSchemas["PhaseEnum"]; "run_revision": number; "teaching_key": string; "title": string; "verdict": ApiSchemas["VerdictEnum"] | ApiSchemas["NullEnum"] | null }
+  "CommandIntroductionResponse": { "anatomy": Array<ApiSchemas["SyntaxPart"]>; "changes": Array<ApiSchemas["RepositoryChange"]>; "command_form": ApiSchemas["CommandIntroductionForm"]; "completion_token": string | null; "concepts": Array<ApiSchemas["Concept"]>; "context_id": string; "example_command": string | null; "explanation": string | null; "needs": Array<ApiSchemas["RepositoryChange"]>; "phase": ApiSchemas["PhaseEnum"]; "run_revision": number; "teaching_key": string; "title": string; "verdict": ApiSchemas["VerdictEnum"] | ApiSchemas["NullEnum"] | null }
   "CommandSubmit": { "command": string; "execution": ApiSchemas["ClientCommandExecution"] }
+  "Concept": { "key": string; "text": string; "title": string }
   "ContentDefinition": { "chapter_id": number | null; "command_family": string; "created_at": string; "definition": { [key: string]: JsonValue }; "difficulty": string; "id": number; "kind": ApiSchemas["KindA5eEnum"]; "official_chapter_id": number | null; "owner_id": number | null; "published_at": string | null; "slug": string; "source_definition_id": number | null; "status": ApiSchemas["StatusEnum"]; "summary": string; "tags": Array<string>; "title": string; "updated_at": string; "validation_errors": Array<ApiSchemas["ValidationErrorRow"]>; "visibility": ApiSchemas["VisibilityEnum"] }
   "ContentDefinitionCreateRequest": { "chapter"?: number | null; "command_family"?: string; "definition"?: { [key: string]: JsonValue }; "difficulty"?: string; "kind": ApiSchemas["KindA5eEnum"]; "official_chapter"?: number | null; "slug": string; "summary"?: string; "tags"?: Array<string>; "title": string; "visibility"?: ApiSchemas["VisibilityEnum"] }
   "ContentDefinitionListResponse": { "results": Array<ApiSchemas["ContentDefinitionSummary"]> }
@@ -131,7 +132,8 @@ export type ApiSchemas = {
   "RateMetric": { "denominator": number; "numerator": number; "value": number | null }
   "Register": { "email": string; "password": string; "password_confirm": string; "username": string }
   "RegisterResponse": { "user": ApiSchemas["User"] }
-  "RepositoryChange": { "kind": ApiSchemas["RepositoryChangeKindEnum"]; "text": string }
+  "RepositoryChange": { "action"?: ApiSchemas["RepositoryChangeActionEnum"]; "kind": ApiSchemas["RepositoryChangeKindEnum"]; "ref"?: string; "subjects"?: Array<string>; "text": string }
+  "RepositoryChangeActionEnum": "create" | "delete" | "move" | "add" | "remove" | "set" | "start" | "finish"
   "RepositoryChangeKindEnum": "repository" | "commit" | "branch" | "head" | "staging" | "working_tree" | "conflict" | "tag" | "remote" | "config" | "stash" | "operation"
   "RuntimeStepResponse": { "command_text": string; "id": number; "result_category": string; "terminal_output": string }
   "SessionResponse": { "access": string; "user": ApiSchemas["User"] }
@@ -150,6 +152,7 @@ export type ApiSchemas = {
   "StatusEnum": "draft" | "testable" | "published" | "archived"
   "Story": { "completed": boolean; "difficulty": ApiSchemas["DifficultyEnum"]; "id": number; "is_published": boolean; "lock_reason": string; "locked": boolean; "prerequisite_story": ApiSchemas["StoryPrerequisite"] | null; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }
   "StoryPrerequisite": { "completed": boolean; "slug": string; "title": string }
+  "SyntaxPart": { "text": string; "token": string }
   "User": { "email": string; "id": number; "is_staff": boolean; "username": string }
   "ValidationErrorRow": { "field": string; "message": string }
   "VerdictEnum": "correct" | "incorrect"

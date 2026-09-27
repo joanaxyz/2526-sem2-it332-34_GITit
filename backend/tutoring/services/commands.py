@@ -2,7 +2,7 @@
 
 from simulator.trajectory import describe_transition, route_position
 from tutoring.models import PendingCommandIntroduction
-from tutoring.services.forms import command_matches_form
+from tutoring.services.anatomy import anatomy
 from tutoring.services.introductions import context_hash
 
 
@@ -19,7 +19,7 @@ def used_introduced_form(candidate, execution) -> bool:
         candidate is not None
         and result.processed
         and not result.exit_code
-        and command_matches_form(result.normalized_command, candidate.form.usage_form)
+        and candidate.form.used_by(result.normalized_command, execution.previous_state)
     )
 
 
@@ -93,6 +93,8 @@ def introduction_copy(candidate) -> dict:
         # What the repository needs from this move, as structured changes.
         "needs": [dict(change) for change in candidate.step_effect if isinstance(change, dict)],
         "command_form": form.payload(),
+        "anatomy": anatomy(form.usage_form),
+        "concepts": [dict(concept) for concept in candidate.concepts],
     }
 
 
@@ -103,4 +105,4 @@ def _advanced_route(run, candidate, execution) -> bool:
     if not history or history[-1] != execution.result.normalized_command:
         history.append(execution.result.normalized_command)
     position = route_position(run.selected_variant.solution_trajectory, execution.next_state, history)
-    return position is not None and position > candidate.step_index
+    return position is not None and position > candidate.last_step_index

@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { TierDagAnimationController } from '@/features/story-map/hooks/useTierDagAnimation'
@@ -12,7 +12,7 @@ vi.mock('@/shared/level/components/LiveDagPanel', () => ({
   LiveDagPanel: ({ title }: { title: string }) => <div data-testid="expected-dag-stage">{title}</div>,
 }))
 
-import { TierDiagramStage } from './TierWorkspacePanels'
+import { TierDiagramStage, TierTerminalStage } from './TierWorkspacePanels'
 
 const animation = {
   activity: 'idle',
@@ -64,5 +64,39 @@ describe('TierDiagramStage', () => {
     expect(screen.getByTestId('expected-dag-stage')).toHaveTextContent('Expected State')
     expect(document.querySelector('.tier-repository-view')).toHaveClass('has-target')
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
+  })
+})
+
+describe('TierTerminalStage', () => {
+  function renderStage(onShowCommandGuide?: () => void) {
+    render(
+      <TierTerminalStage
+        run={{ ...makeRun(false), status: 'started' } as TierRun}
+        lines={[]}
+        prompt="learner"
+        terminalGridRef={{ current: null }}
+        terminalGridStyle={{}}
+        mutationPending={false}
+        dagAnimating={false}
+        battleAnimating={false}
+        onBeginTerminalPaneResize={vi.fn()}
+        onKeyboardTerminalPaneResize={vi.fn()}
+        onResetTerminalPaneResize={vi.fn()}
+        onCommand={vi.fn()}
+        onShowCommandGuide={onShowCommandGuide}
+      />,
+    )
+  }
+
+  it('offers a hidden command guide back from the terminal title bar', () => {
+    const reopen = vi.fn()
+    renderStage(reopen)
+    fireEvent.click(screen.getByRole('button', { name: 'Command guide' }))
+    expect(reopen).toHaveBeenCalledOnce()
+  })
+
+  it('shows no guide control when no guide is hidden', () => {
+    renderStage()
+    expect(screen.queryByRole('button', { name: 'Command guide' })).not.toBeInTheDocument()
   })
 })

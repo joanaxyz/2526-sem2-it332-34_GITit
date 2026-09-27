@@ -7,6 +7,7 @@ import { createPortal } from 'react-dom'
 import { Button } from '@/shared/components/Button'
 import {
   DEFAULT_CARD_HEIGHT,
+  DESKTOP_CARD_WIDTH,
   HEADER_CLEARANCE,
   layoutFor,
   prefersReducedMotion,
@@ -34,21 +35,22 @@ type ResolvedWorkspaceTourStep = {
 }
 
 const TARGET_GAP = 18
+const ASIDE_GAP = 12
 
-function targetFor(step: WorkspaceTourStep) {
-  const element = document.querySelector<HTMLElement>(step.selector)
-  if (!element) return null
+function isVisible(element: HTMLElement) {
   const rect = element.getBoundingClientRect()
   const style = window.getComputedStyle(element)
-  if (
+  return !(
     rect.width <= 0 ||
     rect.height <= 0 ||
     style.display === 'none' ||
     style.visibility === 'hidden'
-  ) {
-    return null
-  }
-  return element
+  )
+}
+
+function targetFor(step: WorkspaceTourStep) {
+  const element = document.querySelector<HTMLElement>(step.selector)
+  return element && isVisible(element) ? element : null
 }
 
 function sameResolvedSteps(
@@ -69,10 +71,15 @@ export function GameplayWorkspaceTour({
   finishLabel = 'Start playing',
   skipLabel = 'Skip tour',
   showSkip = true,
+  skipIconOnly = false,
   showProgress = true,
+  showActions = true,
+  focusCard = true,
   finishDisabled = false,
-  finishIcon: FinishIcon = Check,
   cardClassName,
+  reveal,
+  aside,
+  asideWidth = 336,
   steps,
   refreshKey,
   onClose,
@@ -81,11 +88,20 @@ export function GameplayWorkspaceTour({
   finishLabel?: string
   skipLabel?: string
   showSkip?: boolean
+  /** Render the skip control as a bare close icon; `skipLabel` becomes its accessible name. */
+  skipIconOnly?: boolean
   showProgress?: boolean
+  /** Hide the footer for cards that update themselves instead of being stepped through. */
+  showActions?: boolean
+  /** Move focus into the card when it opens. Off for cards that sit beside an active input. */
+  focusCard?: boolean
   finishDisabled?: boolean
-  /** Icon for the final action; defaults to a check mark. */
-  finishIcon?: LucideIcon
   cardClassName?: string
+  /** Selectors of regions to keep undimmed (the scenario, project files...). */
+  reveal?: readonly string[]
+  /** A second card shown beside the main one, for wide screens. */
+  aside?: ReactNode
+  asideWidth?: number
   steps: readonly WorkspaceTourStep[]
   refreshKey?: string | number
   onClose: (reason: WorkspaceTourCloseReason) => void
@@ -178,7 +194,14 @@ export function GameplayWorkspaceTour({
         return
       }
 
-      setLayout(layoutFor(rect, activeStep.placement ?? 'bottom', cardHeight))
+      const width = aside ? DESKTOP_CARD_WIDTH + ASIDE_GAP + asideWidth : DESKTOP_CARD_WIDTH
+      const reveals = (reveal ?? [])
+        .map((selector) => document.querySelector<HTMLElement>(selector))
+        .flatMap((element) => (element && isVisible(element) ? [element.getBoundingClientRect()] : []))
+        .map((box) => ({
+          top: box.top, right: box.right, bottom: box.bottom, left: box.left, width: box.width, height: box.height,
+        }))
+      setLayout({ ...layoutFor(rect, activeStep.placement ?? 'bottom', cardHeight, width), reveals })
     }
 
     const measure = () => {
@@ -194,6 +217,10 @@ export function GameplayWorkspaceTour({
     const observer = new ResizeObserver(measure)
     observer.observe(target)
     if (cardElement) observer.observe(cardElement)
+    for (const selector of reveal ?? []) {
+      const element = document.querySelector(selector)
+      if (element) observer.observe(element)
+    }
     window.addEventListener('resize', measure)
     window.addEventListener('scroll', measure, true)
     return () => {
@@ -204,13 +231,13 @@ export function GameplayWorkspaceTour({
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
     }
-  }, [activeStep, activeTarget, cardElement])
+  }, [activeStep, activeTarget, aside, asideWidth, cardElement, reveal])
 
   useEffect(() => {
-    if (!activeStep || !layoutReady) return
+    if (!focusCard || !activeStep || !layoutReady) return
     const frameId = window.requestAnimationFrame(() => cardElement?.focus())
     return () => window.cancelAnimationFrame(frameId)
-  }, [activeStep, cardElement, layoutReady])
+  }, [activeStep, cardElement, focusCard, layoutReady])
 
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
@@ -243,7 +270,14 @@ export function GameplayWorkspaceTour({
     && layout.target.top < viewportHeight - VIEWPORT_GAP
     && layout.target.right > 0 && layout.target.left < viewportWidth
   const spotlight = spotlightRect(layout.target, viewportWidth, viewportHeight)
-  const Icon = activeStep.icon
+  const holes = [
+    ...(targetVisible ? [spotlight] : []),
+    ...(layout.reveals ?? []).map((box) => spotlightRect(box, viewportWidth, viewportHeight, 3)),
+  ]
+  // Resolved steps keep the objects they were matched with; render the latest
+  // content for the same step so a step can update in place (tabs, feedback).
+  const shownStep = steps.find((step) => step.id === activeStep.id) ?? activeStep
+  const Icon = shownStep.icon
   const finalStep = activeIndex === availableSteps.length - 1
   // A long final CTA has priority over the optional keyboard hint. Keeping all
   // three footer items in this fixed-width card can push the action offscreen.
@@ -254,30 +288,119 @@ export function GameplayWorkspaceTour({
     left: layout.card.left,
     top: layout.card.top,
     width: layout.card.width,
+    ...(aside ? { '--workspace-tour-aside-width': `${asideWidth}px` } : {}),
+    ...(layout.room ? { '--workspace-tour-room': `${layout.room}px` } : {}),
   } as CSSProperties
+
+  const content = (
+    <>
+      <header className="workspace-tour__header">
+        <div className="workspace-tour__meta">
+          <span className="workspace-tour__eyebrow">{label}</span>
+          {availableSteps.length > 1 ? (
+            <span className="workspace-tour__count">
+              {activeIndex + 1} / {availableSteps.length}
+            </span>
+          ) : null}
+        </div>
+        {showSkip ? <button
+          type="button"
+          className={`workspace-tour__skip${skipIconOnly ? ' is-icon-only' : ''}`}
+          aria-label={skipIconOnly ? skipLabel : undefined}
+          title={skipIconOnly ? skipLabel : undefined}
+          onClick={() => onClose('skip')}
+        >
+          {skipIconOnly ? null : skipLabel}
+          <X aria-hidden="true" />
+        </button> : null}
+      </header>
+
+      <div className="workspace-tour__message" aria-live="polite">
+        <span className="workspace-tour__icon" aria-hidden="true">
+          <Icon />
+        </span>
+        <div>
+          <h2 id={titleId}>{shownStep.title}</h2>
+          <div id={bodyId} className="workspace-tour__body">{shownStep.body}</div>
+        </div>
+      </div>
+
+      {showProgress ? <nav className="workspace-tour__progress" aria-label={`${label} steps`}>
+        {availableSteps.map(({ step }, index) => (
+          <button
+            type="button"
+            key={step.id}
+            className={index <= activeIndex ? 'is-complete' : undefined}
+            aria-current={index === activeIndex ? 'step' : undefined}
+            aria-label={`Go to step ${index + 1}: ${step.title}`}
+            onClick={() => setActiveIndex(index)}
+          >
+            <span aria-hidden="true" />
+          </button>
+        ))}
+      </nav> : null}
+
+      {showActions ? <footer className={`workspace-tour__actions${compactActions ? ' is-compact' : ''}`}>
+        {showProgress ? <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="workspace-tour__back"
+          disabled={activeIndex === 0}
+          onClick={() => setActiveIndex((index) => Math.max(0, index - 1))}
+        >
+          <ArrowLeft aria-hidden="true" />
+          Back
+        </Button> : null}
+        {showProgress ? <span className="workspace-tour__shortcut">Alt + arrows</span> : null}
+        <Button
+          type="button"
+          size="sm"
+          className="workspace-tour__next"
+          disabled={finishDisabled}
+          onClick={() => {
+            if (finalStep) onClose('finish')
+            else setActiveIndex((index) => index + 1)
+          }}
+        >
+          {finalStep ? <Check aria-hidden="true" /> : null}
+          {finalStep ? finishLabel : 'Next'}
+          {finalStep ? null : <ArrowRight aria-hidden="true" />}
+        </Button>
+      </footer> : null}
+    </>
+  )
 
   return createPortal(
     <div className="workspace-tour" data-testid="workspace-tour">
-      {targetVisible ? <><div className="workspace-tour__scrim" style={{ left: 0, top: 0, width: '100%', height: spotlight.top }} />
-      <div
-        className="workspace-tour__scrim"
-        style={{ left: 0, top: spotlight.bottom, width: '100%', height: viewportHeight - spotlight.bottom }}
-      />
-      <div
-        className="workspace-tour__scrim"
-        style={{ left: 0, top: spotlight.top, width: spotlight.left, height: spotlight.height }}
-      />
-      <div
-        className="workspace-tour__scrim"
-        style={{
-          left: spotlight.right,
-          top: spotlight.top,
-          width: viewportWidth - spotlight.right,
-          height: spotlight.height,
-        }}
-      />
+      {/* One dimming layer with cut-outs: the spotlit target plus any revealed
+          regions stay readable, since tours explain them rather than hide them. */}
+      <svg
+        className="workspace-tour__veil"
+        width={viewportWidth}
+        height={viewportHeight}
+        aria-hidden="true"
+      >
+        <defs>
+          <mask id={`${markerId}-veil`} maskUnits="userSpaceOnUse" x="0" y="0" width={viewportWidth} height={viewportHeight}>
+            <rect width={viewportWidth} height={viewportHeight} fill="white" />
+            {holes.map((hole, index) => (
+              <rect
+                key={index}
+                x={hole.left}
+                y={hole.top}
+                width={hole.width}
+                height={hole.height}
+                rx="10"
+                fill="black"
+              />
+            ))}
+          </mask>
+        </defs>
+        <rect width={viewportWidth} height={viewportHeight} mask={`url(#${markerId}-veil)`} />
+      </svg>
 
-      <div
+      {targetVisible ? <><div
         className="workspace-tour__spotlight"
         data-testid="workspace-tour-spotlight"
         style={{
@@ -309,11 +432,11 @@ export function GameplayWorkspaceTour({
           d={layout.arrowPath}
           markerEnd={`url(#${markerId})`}
         />
-      </svg></> : <div className="workspace-tour__scrim" style={{ inset: 0 }} />}
+      </svg></> : null}
 
       <section
         ref={setCardElement}
-        className={`workspace-tour__card${cardClassName ? ` ${cardClassName}` : ''}`}
+        className={`workspace-tour__card${aside ? ' has-aside' : ''}${cardClassName ? ` ${cardClassName}` : ''}`}
         key={activeStep.id}
         style={cardStyle}
         role="dialog"
@@ -323,78 +446,12 @@ export function GameplayWorkspaceTour({
         aria-describedby={bodyId}
         tabIndex={-1}
       >
-        <header className="workspace-tour__header">
-          <div className="workspace-tour__meta">
-            <span className="workspace-tour__eyebrow">{label}</span>
-            {availableSteps.length > 1 ? (
-              <span className="workspace-tour__count">
-                {activeIndex + 1} / {availableSteps.length}
-              </span>
-            ) : null}
-          </div>
-          {showSkip ? <button
-            type="button"
-            className="workspace-tour__skip"
-            onClick={() => onClose('skip')}
-          >
-            {skipLabel}
-            <X aria-hidden="true" />
-          </button> : null}
-        </header>
-
-        <div className="workspace-tour__message" aria-live="polite">
-          <span className="workspace-tour__icon" aria-hidden="true">
-            <Icon />
-          </span>
-          <div>
-            <h2 id={titleId}>{activeStep.title}</h2>
-            <div id={bodyId} className="workspace-tour__body">{activeStep.body}</div>
-          </div>
-        </div>
-
-        {showProgress ? <nav className="workspace-tour__progress" aria-label={`${label} steps`}>
-          {availableSteps.map(({ step }, index) => (
-            <button
-              type="button"
-              key={step.id}
-              className={index <= activeIndex ? 'is-complete' : undefined}
-              aria-current={index === activeIndex ? 'step' : undefined}
-              aria-label={`Go to step ${index + 1}: ${step.title}`}
-              onClick={() => setActiveIndex(index)}
-            >
-              <span aria-hidden="true" />
-            </button>
-          ))}
-        </nav> : null}
-
-        <footer className={`workspace-tour__actions${compactActions ? ' is-compact' : ''}`}>
-          {showProgress ? <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="workspace-tour__back"
-            disabled={activeIndex === 0}
-            onClick={() => setActiveIndex((index) => Math.max(0, index - 1))}
-          >
-            <ArrowLeft aria-hidden="true" />
-            Back
-          </Button> : null}
-          {showProgress ? <span className="workspace-tour__shortcut">Alt + arrows</span> : null}
-          <Button
-            type="button"
-            size="sm"
-            className="workspace-tour__next"
-            disabled={finishDisabled}
-            onClick={() => {
-              if (finalStep) onClose('finish')
-              else setActiveIndex((index) => index + 1)
-            }}
-          >
-            {finalStep ? <FinishIcon aria-hidden="true" /> : null}
-            {finalStep ? finishLabel : 'Next'}
-            {finalStep ? null : <ArrowRight aria-hidden="true" />}
-          </Button>
-        </footer>
+        {aside ? (
+          <>
+            <div className="workspace-tour__main">{content}</div>
+            <aside className="workspace-tour__aside">{aside}</aside>
+          </>
+        ) : content}
       </section>
     </div>,
     document.body,

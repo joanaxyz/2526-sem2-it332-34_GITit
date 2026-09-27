@@ -1,0 +1,298 @@
+/* Command guide diagram: a before/after sketch of the next move. Stone areas
+   with file chips; what moves glows (arrive) or fades dashed (leave), so the
+   difference never rests on colour alone. */
+
+.change-diagram {
+  margin: 0;
+  padding: 0.7rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-md);
+  background: #080c14;
+}
+
+.change-diagram__row {
+  display: flex;
+  align-items: stretch;
+  gap: 0.35rem;
+}
+
+.change-diagram__area {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 0;
+  flex-direction: column;
+  gap: 0.4rem;
+  padding: 0.5rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-sm);
+  background: hsl(var(--card));
+}
+
+.change-diagram__area.is-target {
+  border-color: rgba(var(--theme-primary-rgb), 0.45);
+  box-shadow: inset 0 0 14px rgba(var(--theme-primary-rgb), 0.08);
+}
+
+.change-diagram__area-title {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
+  color: #b3c6d1;
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.change-diagram__area-title svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  flex: 0 0 auto;
+}
+
+.change-diagram__arrow {
+  width: 0.95rem;
+  height: 0.95rem;
+  flex: 0 0 auto;
+  align-self: center;
+  color: #3b4d60;
+}
+
+.change-diagram__arrow.is-active {
+  color: rgb(var(--theme-primary-rgb));
+  filter: drop-shadow(0 0 4px rgba(var(--theme-primary-rgb), 0.5));
+}
+
+.change-diagram__arrow.is-reverse { transform: scaleX(-1); }
+
+/* Stacked areas: a name column and a wrapping row of chips, arrows pointing down. */
+.change-diagram__row.is-stacked {
+  flex-direction: column;
+  gap: 0.2rem;
+}
+
+.change-diagram__row.is-stacked .change-diagram__area {
+  display: grid;
+  grid-template-columns: 5.4rem minmax(0, 1fr);
+  align-items: start;
+  gap: 0.5rem;
+}
+
+.change-diagram__row.is-stacked .change-diagram__chips {
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.change-diagram__row.is-stacked .change-diagram__area > :nth-child(3) {
+  grid-column: 2;
+}
+
+.change-diagram__row.is-stacked .change-diagram__arrow { transform: rotate(90deg); }
+.change-diagram__row.is-stacked .change-diagram__arrow.is-reverse { transform: rotate(-90deg); }
+
+.change-diagram__chips {
+  display: flex;
+  margin: 0;
+  padding: 0;
+  flex-direction: column;
+  gap: 0.25rem;
+  list-style: none;
+}
+
+.change-diagram__chip {
+  max-width: 100%;
+  padding: 0.12rem 0.35rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: 0.3rem;
+  color: #c3d4dd;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  line-height: 1.35;
+  /* File names are the point of the picture: wrap them, never cut them. */
+  overflow-wrap: anywhere;
+}
+
+.change-diagram__chip.is-arrive {
+  border-color: rgba(var(--theme-primary-rgb), 0.7);
+  background: rgba(var(--theme-primary-rgb), 0.14);
+  color: hsl(var(--foreground));
+  font-weight: 700;
+  box-shadow: 0 0 10px rgba(var(--theme-primary-rgb), 0.22);
+}
+
+.change-diagram__chip.is-leave {
+  border-style: dashed;
+  color: #6f8698;
+  text-decoration: line-through;
+  text-decoration-color: rgba(111, 134, 152, 0.6);
+}
+
+.change-diagram__more,
+.change-diagram__empty {
+  margin: 0;
+  color: #7f96a6;
+  font-size: var(--text-2xs);
+  line-height: 1.35;
+  list-style: none;
+}
+
+/* History: commits as dots on a line, oldest first. */
+.change-diagram__commits {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.3rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.change-diagram__commit {
+  width: 0.7rem;
+  height: 0.7rem;
+  border: 2px solid #5a7184;
+  border-radius: var(--radius-pill);
+  background: #1a2638;
+}
+
+.change-diagram__commit.is-arrive {
+  border-color: rgb(var(--theme-primary-rgb));
+  background: rgba(var(--theme-primary-rgb), 0.4);
+  box-shadow: 0 0 10px rgba(var(--theme-primary-rgb), 0.55);
+}
+
+.change-diagram__commits.is-line {
+  position: relative;
+  gap: 1.2rem;
+  padding: 0.25rem 0.1rem;
+}
+
+.change-diagram__commits.is-line::before {
+  position: absolute;
+  top: 50%;
+  right: 0.3rem;
+  left: 0.3rem;
+  height: 2px;
+  background: #2b394a;
+  content: '';
+}
+
+.change-diagram__commits.is-line .change-diagram__commit { position: relative; }
+
+.change-diagram__ref {
+  margin: 0;
+  color: rgb(var(--theme-primary-rgb));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+}
+
+/* Branch and HEAD pointers on the current commit. */
+.change-diagram__pointers {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.change-diagram__labels {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.change-diagram__label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid hsl(var(--border));
+  border-radius: var(--radius-pill);
+  color: #c3d4dd;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+}
+
+.change-diagram__label.is-arrive {
+  border-color: rgba(var(--theme-primary-rgb), 0.7);
+  background: rgba(var(--theme-primary-rgb), 0.14);
+  color: hsl(var(--foreground));
+  font-weight: 700;
+}
+
+.change-diagram__label.is-leave {
+  border-style: dashed;
+  color: #6f8698;
+  text-decoration: line-through;
+}
+
+.change-diagram__head {
+  padding: 0 0.3rem;
+  border-radius: 0.25rem;
+  font-size: 0.625rem;
+  font-weight: 800;
+  line-height: 1.5;
+}
+
+.change-diagram__head.is-arrive {
+  background: rgb(var(--theme-primary-rgb));
+  color: #04101c;
+}
+
+.change-diagram__head.is-leave {
+  border: 1px dashed #6f8698;
+  color: #6f8698;
+}
+
+.change-diagram__legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem 0.8rem;
+  margin-top: 0.55rem;
+  color: #7f96a6;
+  font-size: var(--text-2xs);
+}
+
+.change-diagram__key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+.change-diagram__key::before {
+  width: 0.7rem;
+  height: 0.55rem;
+  border: 1px solid;
+  border-radius: 0.2rem;
+  content: '';
+}
+
+.change-diagram__key.is-arrive::before {
+  border-color: rgba(var(--theme-primary-rgb), 0.7);
+  background: rgba(var(--theme-primary-rgb), 0.18);
+}
+
+.change-diagram__key.is-leave::before {
+  border-style: dashed;
+  border-color: #6f8698;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .change-diagram__chip.is-arrive,
+  .change-diagram__commit.is-arrive,
+  .change-diagram__label.is-arrive {
+    animation: change-diagram-arrive 420ms 160ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+}
+
+@keyframes change-diagram-arrive {
+  from {
+    opacity: 0;
+    transform: translateX(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}

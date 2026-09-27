@@ -15,6 +15,10 @@ export type TourLayout = {
   target: RectSnapshot
   card: RectSnapshot
   arrowPath: string
+  /** Extra regions left undimmed so the learner can still read them. */
+  reveals?: RectSnapshot[]
+  /** Height the card must stay within to sit beside its target without covering it. */
+  room?: number | null
 }
 
 export const VIEWPORT_GAP = 16
@@ -22,9 +26,11 @@ const TARGET_GAP = 18
 const TARGET_PADDING = 9
 export const HEADER_CLEARANCE = 76
 export const DEFAULT_CARD_HEIGHT = 236
-const DESKTOP_CARD_WIDTH = 352
+export const DESKTOP_CARD_WIDTH = 352
 const NARROW_VIEWPORT = 420
 const OVERLAP_PENALTY = 100000
+// Below this, capping the card would leave too little to read; let placement fall back.
+const MIN_ROOM = 200
 
 function rectSnapshot(rect: DOMRect): RectSnapshot {
   return {
@@ -143,15 +149,30 @@ export function layoutFor(
   targetRect: DOMRect,
   preferredPlacement: WorkspaceTourPlacement,
   measuredCardHeight: number,
+  preferredWidth: number = DESKTOP_CARD_WIDTH,
 ): TourLayout {
   const viewportWidth = window.innerWidth
   const viewportHeight = window.innerHeight
   const available = viewportWidth - VIEWPORT_GAP * 2
   // On phones the card takes the full gutter width so it sits symmetrically
   // rather than being clamped against one edge.
-  const cardWidth = available <= NARROW_VIEWPORT ? available : DESKTOP_CARD_WIDTH
-  const cardHeight = Math.min(measuredCardHeight || DEFAULT_CARD_HEIGHT, viewportHeight - VIEWPORT_GAP * 2)
+  const cardWidth = available <= NARROW_VIEWPORT ? available : Math.min(preferredWidth, available)
   const target = rectSnapshot(targetRect)
+  // Above or below the target, a tall card is capped to the space there (its
+  // content scrolls) instead of being pushed over the thing it explains. The
+  // cap depends only on the target, so re-measuring the capped card is stable.
+  const space =
+    preferredPlacement === 'top'
+      ? target.top - TARGET_GAP - VIEWPORT_GAP
+      : preferredPlacement === 'bottom'
+        ? viewportHeight - target.bottom - TARGET_GAP - VIEWPORT_GAP
+        : null
+  const room = space !== null && space >= MIN_ROOM ? Math.floor(space) : null
+  const cardHeight = Math.min(
+    measuredCardHeight || DEFAULT_CARD_HEIGHT,
+    room ?? Number.POSITIVE_INFINITY,
+    viewportHeight - VIEWPORT_GAP * 2,
+  )
   const placements = [preferredPlacement, 'bottom', 'top', 'right', 'left'].filter(
     (placement, index, items) => items.indexOf(placement) === index,
   ) as WorkspaceTourPlacement[]
@@ -195,14 +216,20 @@ export function layoutFor(
     target,
     card,
     arrowPath: `M ${start.x} ${start.y} Q ${control.x} ${control.y} ${end.x} ${end.y}`,
+    room,
   }
 }
 
-export function spotlightRect(target: RectSnapshot, viewportWidth: number, viewportHeight: number) {
-  const left = Math.max(0, target.left - TARGET_PADDING)
-  const top = Math.max(0, target.top - TARGET_PADDING)
-  const right = Math.min(viewportWidth, target.right + TARGET_PADDING)
-  const bottom = Math.min(viewportHeight, target.bottom + TARGET_PADDING)
+export function spotlightRect(
+  target: RectSnapshot,
+  viewportWidth: number,
+  viewportHeight: number,
+  padding = TARGET_PADDING,
+) {
+  const left = Math.max(0, target.left - padding)
+  const top = Math.max(0, target.top - padding)
+  const right = Math.min(viewportWidth, target.right + padding)
+  const bottom = Math.min(viewportHeight, target.bottom + padding)
   return { left, top, right, bottom, width: right - left, height: bottom - top }
 }
 

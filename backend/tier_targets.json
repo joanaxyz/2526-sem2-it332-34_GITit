@@ -487,14 +487,47 @@
     "repository_initialized": true,
     "commits": [
       {
-        "id": "r11",
-        "message": "Remote commit r11",
+        "id": "r10",
+        "message": "Create API lab",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# API Lab\n\nBackend API for the onboarding workshop.\nRun `flask --app api.routes run` to start it.\n"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# API Lab\n\nBackend API for the onboarding workshop.\nRun `flask --app api.routes run` to start it.\n"
+          }
+        },
         "is_merge": false,
+        "files": {
+          "README.md": "added"
+        },
         "order": 0
+      },
+      {
+        "id": "r11",
+        "message": "Add health check route",
+        "parents": [
+          "r10"
+        ],
+        "tree": {
+          "README.md": "# API Lab\n\nBackend API for the onboarding workshop.\nRun `flask --app api.routes run` to start it.\n",
+          "api/routes.py": "from flask import Flask\n\napp = Flask(__name__)\n\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"ok\"}\n"
+        },
+        "changes": {
+          "api/routes.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "from flask import Flask\n\napp = Flask(__name__)\n\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"ok\"}\n"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "api/routes.py": "added"
+        },
+        "order": 1
       }
     ],
     "branches": {
@@ -510,22 +543,41 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "https://example.test/training/api-lab.git",
-      "default_branch": "main",
-      "head": "r11",
-      "tree": {
-        "README.md": "api-readme-v1",
-        "api/routes.py": "api-routes-v1"
-      }
+      "default_branch": "origin/main",
+      "branches": {
+        "origin/main": "r11"
+      },
+      "commits": [
+        {
+          "id": "r10",
+          "message": "Create API lab",
+          "parents": [],
+          "tree": {
+            "README.md": "# API Lab\n\nBackend API for the onboarding workshop.\nRun `flask --app api.routes run` to start it.\n"
+          }
+        },
+        {
+          "id": "r11",
+          "message": "Add health check route",
+          "parents": [
+            "r10"
+          ],
+          "tree": {
+            "README.md": "# API Lab\n\nBackend API for the onboarding workshop.\nRun `flask --app api.routes run` to start it.\n",
+            "api/routes.py": "from flask import Flask\n\napp = Flask(__name__)\n\n\n@app.get(\"/health\")\ndef health():\n    return {\"status\": \"ok\"}\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
       "origin": "https://example.test/training/api-lab.git"
     },
     "remote_branches": {
-      "main": "r11"
+      "origin/main": "r11"
     },
     "upstream_tracking": {
-      "main": "main"
+      "main": "origin/main"
     },
     "tags": {},
     "remote_tags": {},
@@ -552,14 +604,70 @@
     "repository_initialized": true,
     "commits": [
       {
-        "id": "r41",
-        "message": "Remote commit r41",
+        "id": "r39",
+        "message": "Create audit-logs repository",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# Audit Logs\n\nQuarterly access-audit exports for IT compliance.\n"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# Audit Logs\n\nQuarterly access-audit exports for IT compliance.\n"
+          }
+        },
         "is_merge": false,
+        "files": {
+          "README.md": "added"
+        },
         "order": 0
+      },
+      {
+        "id": "r40",
+        "message": "Export Q1 access log",
+        "parents": [
+          "r39"
+        ],
+        "tree": {
+          "README.md": "# Audit Logs\n\nQuarterly access-audit exports for IT compliance.\n",
+          "logs/q1.csv": "timestamp,user,action,resource\n2026-01-08T09:14:00Z,jdoe,login,vpn\n2026-02-11T16:02:00Z,asmith,grant,payroll-db\n2026-03-27T08:45:00Z,jdoe,revoke,payroll-db\n"
+        },
+        "changes": {
+          "logs/q1.csv": {
+            "change_type": "added",
+            "before": null,
+            "after": "timestamp,user,action,resource\n2026-01-08T09:14:00Z,jdoe,login,vpn\n2026-02-11T16:02:00Z,asmith,grant,payroll-db\n2026-03-27T08:45:00Z,jdoe,revoke,payroll-db\n"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "logs/q1.csv": "added"
+        },
+        "order": 1
+      },
+      {
+        "id": "r41",
+        "message": "Document CSV columns",
+        "parents": [
+          "r40"
+        ],
+        "tree": {
+          "README.md": "# Audit Logs\n\nQuarterly access-audit exports for IT compliance.\n\nColumns: timestamp, user, action, resource.\nDo not edit exported rows by hand.\n",
+          "logs/q1.csv": "timestamp,user,action,resource\n2026-01-08T09:14:00Z,jdoe,login,vpn\n2026-02-11T16:02:00Z,asmith,grant,payroll-db\n2026-03-27T08:45:00Z,jdoe,revoke,payroll-db\n"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "modified",
+            "before": "# Audit Logs\n\nQuarterly access-audit exports for IT compliance.\n",
+            "after": "# Audit Logs\n\nQuarterly access-audit exports for IT compliance.\n\nColumns: timestamp, user, action, resource.\nDo not edit exported rows by hand.\n"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "README.md": "modified"
+        },
+        "order": 2
       }
     ],
     "branches": {
@@ -575,22 +683,52 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "https://git.corp.example/it/audit-logs.git",
-      "default_branch": "main",
-      "head": "r41",
-      "tree": {
-        "README.md": "audit-readme-v1",
-        "logs/q1.csv": "q1-v1"
-      }
+      "default_branch": "origin/main",
+      "branches": {
+        "origin/main": "r41"
+      },
+      "commits": [
+        {
+          "id": "r39",
+          "message": "Create audit-logs repository",
+          "parents": [],
+          "tree": {
+            "README.md": "# Audit Logs\n\nQuarterly access-audit exports for IT compliance.\n"
+          }
+        },
+        {
+          "id": "r40",
+          "message": "Export Q1 access log",
+          "parents": [
+            "r39"
+          ],
+          "tree": {
+            "README.md": "# Audit Logs\n\nQuarterly access-audit exports for IT compliance.\n",
+            "logs/q1.csv": "timestamp,user,action,resource\n2026-01-08T09:14:00Z,jdoe,login,vpn\n2026-02-11T16:02:00Z,asmith,grant,payroll-db\n2026-03-27T08:45:00Z,jdoe,revoke,payroll-db\n"
+          }
+        },
+        {
+          "id": "r41",
+          "message": "Document CSV columns",
+          "parents": [
+            "r40"
+          ],
+          "tree": {
+            "README.md": "# Audit Logs\n\nQuarterly access-audit exports for IT compliance.\n\nColumns: timestamp, user, action, resource.\nDo not edit exported rows by hand.\n",
+            "logs/q1.csv": "timestamp,user,action,resource\n2026-01-08T09:14:00Z,jdoe,login,vpn\n2026-02-11T16:02:00Z,asmith,grant,payroll-db\n2026-03-27T08:45:00Z,jdoe,revoke,payroll-db\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
       "origin": "https://git.corp.example/it/audit-logs.git"
     },
     "remote_branches": {
-      "main": "r41"
+      "origin/main": "r41"
     },
     "upstream_tracking": {
-      "main": "main"
+      "main": "origin/main"
     },
     "tags": {},
     "remote_tags": {},
@@ -617,14 +755,47 @@
     "repository_initialized": true,
     "commits": [
       {
-        "id": "r10",
-        "message": "Remote commit r10",
+        "id": "r9",
+        "message": "Create docs portal",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# Docs Portal\n\nSource for the team documentation site.\nEdit pages under docs/ and open a pull request.\n"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# Docs Portal\n\nSource for the team documentation site.\nEdit pages under docs/ and open a pull request.\n"
+          }
+        },
         "is_merge": false,
+        "files": {
+          "README.md": "added"
+        },
         "order": 0
+      },
+      {
+        "id": "r10",
+        "message": "Add getting-started page",
+        "parents": [
+          "r9"
+        ],
+        "tree": {
+          "README.md": "# Docs Portal\n\nSource for the team documentation site.\nEdit pages under docs/ and open a pull request.\n",
+          "docs/intro.md": "# Getting Started\n\nWelcome! This guide walks you through setting up your environment.\n"
+        },
+        "changes": {
+          "docs/intro.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# Getting Started\n\nWelcome! This guide walks you through setting up your environment.\n"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "docs/intro.md": "added"
+        },
+        "order": 1
       }
     ],
     "branches": {
@@ -640,22 +811,41 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "https://example.test/training/docs-portal.git",
-      "default_branch": "main",
-      "head": "r10",
-      "tree": {
-        "README.md": "docs-readme-v1",
-        "docs/intro.md": "docs-intro-v1"
-      }
+      "default_branch": "origin/main",
+      "branches": {
+        "origin/main": "r10"
+      },
+      "commits": [
+        {
+          "id": "r9",
+          "message": "Create docs portal",
+          "parents": [],
+          "tree": {
+            "README.md": "# Docs Portal\n\nSource for the team documentation site.\nEdit pages under docs/ and open a pull request.\n"
+          }
+        },
+        {
+          "id": "r10",
+          "message": "Add getting-started page",
+          "parents": [
+            "r9"
+          ],
+          "tree": {
+            "README.md": "# Docs Portal\n\nSource for the team documentation site.\nEdit pages under docs/ and open a pull request.\n",
+            "docs/intro.md": "# Getting Started\n\nWelcome! This guide walks you through setting up your environment.\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
       "origin": "https://example.test/training/docs-portal.git"
     },
     "remote_branches": {
-      "main": "r10"
+      "origin/main": "r10"
     },
     "upstream_tracking": {
-      "main": "main"
+      "main": "origin/main"
     },
     "tags": {},
     "remote_tags": {},
@@ -682,14 +872,47 @@
     "repository_initialized": true,
     "commits": [
       {
-        "id": "r40",
-        "message": "Remote commit r40",
+        "id": "r39",
+        "message": "Create oss-toolkit",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n"
+          }
+        },
         "is_merge": false,
+        "files": {
+          "README.md": "added"
+        },
         "order": 0
+      },
+      {
+        "id": "r40",
+        "message": "Add slugify helper",
+        "parents": [
+          "r39"
+        ],
+        "tree": {
+          "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n",
+          "src/toolkit.py": "def slugify(text):\n    return text.strip().lower().replace(\" \", \"-\")\n"
+        },
+        "changes": {
+          "src/toolkit.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "def slugify(text):\n    return text.strip().lower().replace(\" \", \"-\")\n"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/toolkit.py": "added"
+        },
+        "order": 1
       }
     ],
     "branches": {
@@ -705,22 +928,41 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "git@github.com:open-dev/oss-toolkit.git",
-      "default_branch": "main",
-      "head": "r40",
-      "tree": {
-        "README.md": "oss-readme-v1",
-        "src/toolkit.py": "toolkit-v1"
-      }
+      "default_branch": "origin/main",
+      "branches": {
+        "origin/main": "r40"
+      },
+      "commits": [
+        {
+          "id": "r39",
+          "message": "Create oss-toolkit",
+          "parents": [],
+          "tree": {
+            "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n"
+          }
+        },
+        {
+          "id": "r40",
+          "message": "Add slugify helper",
+          "parents": [
+            "r39"
+          ],
+          "tree": {
+            "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n",
+            "src/toolkit.py": "def slugify(text):\n    return text.strip().lower().replace(\" \", \"-\")\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
       "origin": "git@github.com:open-dev/oss-toolkit.git"
     },
     "remote_branches": {
-      "main": "r40"
+      "origin/main": "r40"
     },
     "upstream_tracking": {
-      "main": "main"
+      "main": "origin/main"
     },
     "tags": {},
     "remote_tags": {},
@@ -748,24 +990,59 @@
     "commits": [
       {
         "id": "r12",
-        "message": "Remote commit r12",
+        "message": "Publish profile homepage",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "index.html": "<!doctype html>\n<title>My Profile</title>\n<h1>Hi, I'm a developer.</h1>\n",
+          "styles/site.css": "body {\n  font-family: system-ui, sans-serif;\n  margin: 2rem auto;\n  max-width: 40rem;\n}\n"
+        },
+        "changes": {
+          "index.html": {
+            "change_type": "added",
+            "before": null,
+            "after": "<!doctype html>\n<title>My Profile</title>\n<h1>Hi, I'm a developer.</h1>\n"
+          },
+          "styles/site.css": {
+            "change_type": "added",
+            "before": null,
+            "after": "body {\n  font-family: system-ui, sans-serif;\n  margin: 2rem auto;\n  max-width: 40rem;\n}\n"
+          }
+        },
         "is_merge": false,
+        "files": {
+          "index.html": "added",
+          "styles/site.css": "added"
+        },
         "order": 0
       },
       {
         "id": "r13",
-        "message": "Remote commit r13",
+        "message": "Prepare starter template",
         "parents": [
           "r12"
         ],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "index.html": "<!doctype html>\n<title>My Profile</title>\n<link rel=\"stylesheet\" href=\"styles/site.css\">\n<h1>Your name here</h1>\n<p>Replace this intro.</p>\n",
+          "styles/site.css": "body {\n  font-family: system-ui, sans-serif;\n  margin: 2rem auto;\n  max-width: 40rem;\n}\n",
+          "starter-notes.md": "# Starter notes\n\nEdit index.html with your name and intro, then commit.\n"
+        },
+        "changes": {
+          "index.html": {
+            "change_type": "modified",
+            "before": "<!doctype html>\n<title>My Profile</title>\n<h1>Hi, I'm a developer.</h1>\n",
+            "after": "<!doctype html>\n<title>My Profile</title>\n<link rel=\"stylesheet\" href=\"styles/site.css\">\n<h1>Your name here</h1>\n<p>Replace this intro.</p>\n"
+          },
+          "starter-notes.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# Starter notes\n\nEdit index.html with your name and intro, then commit.\n"
+          }
+        },
         "is_merge": false,
+        "files": {
+          "index.html": "modified",
+          "starter-notes.md": "added"
+        },
         "order": 1
       }
     ],
@@ -782,17 +1059,34 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "https://example.test/training/profile-site.git",
-      "default_branch": "main",
-      "head": "r13",
+      "default_branch": "origin/main",
       "branches": {
         "origin/main": "r12",
         "origin/starter": "r13"
       },
-      "tree": {
-        "index.html": "profile-index-v2",
-        "styles/site.css": "profile-css-v1",
-        "starter-notes.md": "starter-notes-v1"
-      }
+      "commits": [
+        {
+          "id": "r12",
+          "message": "Publish profile homepage",
+          "parents": [],
+          "tree": {
+            "index.html": "<!doctype html>\n<title>My Profile</title>\n<h1>Hi, I'm a developer.</h1>\n",
+            "styles/site.css": "body {\n  font-family: system-ui, sans-serif;\n  margin: 2rem auto;\n  max-width: 40rem;\n}\n"
+          }
+        },
+        {
+          "id": "r13",
+          "message": "Prepare starter template",
+          "parents": [
+            "r12"
+          ],
+          "tree": {
+            "index.html": "<!doctype html>\n<title>My Profile</title>\n<link rel=\"stylesheet\" href=\"styles/site.css\">\n<h1>Your name here</h1>\n<p>Replace this intro.</p>\n",
+            "styles/site.css": "body {\n  font-family: system-ui, sans-serif;\n  margin: 2rem auto;\n  max-width: 40rem;\n}\n",
+            "starter-notes.md": "# Starter notes\n\nEdit index.html with your name and intro, then commit.\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
@@ -800,8 +1094,7 @@
     },
     "remote_branches": {
       "origin/main": "r12",
-      "origin/starter": "r13",
-      "main": "r13"
+      "origin/starter": "r13"
     },
     "upstream_tracking": {
       "starter": "origin/starter"
@@ -832,24 +1125,53 @@
     "commits": [
       {
         "id": "r49",
-        "message": "Remote commit r49",
+        "message": "Create backend API",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# Backend API\n\nREST service for the Acme mobile app.\n",
+          "src/server.py": "from app import create_app\n\napp = create_app()\n"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# Backend API\n\nREST service for the Acme mobile app.\n"
+          },
+          "src/server.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "from app import create_app\n\napp = create_app()\n"
+          }
+        },
         "is_merge": false,
+        "files": {
+          "README.md": "added",
+          "src/server.py": "added"
+        },
         "order": 0
       },
       {
         "id": "r50",
-        "message": "Remote commit r50",
+        "message": "Start login flow",
         "parents": [
           "r49"
         ],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# Backend API\n\nREST service for the Acme mobile app.\n",
+          "src/server.py": "from app import create_app\n\napp = create_app()\n",
+          "src/auth.py": "def login(username, password):\n    \"\"\"Check credentials and return a session token.\"\"\"\n    raise NotImplementedError(\"feature/auth: in progress\")\n"
+        },
+        "changes": {
+          "src/auth.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "def login(username, password):\n    \"\"\"Check credentials and return a session token.\"\"\"\n    raise NotImplementedError(\"feature/auth: in progress\")\n"
+          }
+        },
         "is_merge": false,
+        "files": {
+          "src/auth.py": "added"
+        },
         "order": 1
       }
     ],
@@ -866,17 +1188,34 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "https://github.com/acme-startup/backend-api.git",
-      "default_branch": "main",
-      "default_head": "r49",
-      "head": "r50",
+      "default_branch": "origin/main",
       "branches": {
         "origin/main": "r49",
         "origin/feature/auth": "r50"
       },
-      "tree": {
-        "README.md": "api-readme-v1",
-        "src/auth.py": "auth-v1"
-      }
+      "commits": [
+        {
+          "id": "r49",
+          "message": "Create backend API",
+          "parents": [],
+          "tree": {
+            "README.md": "# Backend API\n\nREST service for the Acme mobile app.\n",
+            "src/server.py": "from app import create_app\n\napp = create_app()\n"
+          }
+        },
+        {
+          "id": "r50",
+          "message": "Start login flow",
+          "parents": [
+            "r49"
+          ],
+          "tree": {
+            "README.md": "# Backend API\n\nREST service for the Acme mobile app.\n",
+            "src/server.py": "from app import create_app\n\napp = create_app()\n",
+            "src/auth.py": "def login(username, password):\n    \"\"\"Check credentials and return a session token.\"\"\"\n    raise NotImplementedError(\"feature/auth: in progress\")\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
@@ -884,8 +1223,7 @@
     },
     "remote_branches": {
       "origin/main": "r49",
-      "origin/feature/auth": "r50",
-      "main": "r50"
+      "origin/feature/auth": "r50"
     },
     "upstream_tracking": {
       "feature/auth": "origin/feature/auth"
@@ -915,14 +1253,71 @@
     "repository_initialized": true,
     "commits": [
       {
-        "id": "r30",
-        "message": "Remote commit r30",
+        "id": "r28",
+        "message": "Create analytics lab",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# Analytics Lab\n\nWeekly product metrics and the scripts that build them.\n"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# Analytics Lab\n\nWeekly product metrics and the scripts that build them.\n"
+          }
+        },
         "is_merge": false,
+        "files": {
+          "README.md": "added"
+        },
         "order": 0
+      },
+      {
+        "id": "r29",
+        "message": "Add weekly summary script",
+        "parents": [
+          "r28"
+        ],
+        "tree": {
+          "README.md": "# Analytics Lab\n\nWeekly product metrics and the scripts that build them.\n",
+          "src/summary.py": "def weekly_total(rows):\n    return sum(row['count'] for row in rows)\n"
+        },
+        "changes": {
+          "src/summary.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "def weekly_total(rows):\n    return sum(row['count'] for row in rows)\n"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "src/summary.py": "added"
+        },
+        "order": 1
+      },
+      {
+        "id": "r30",
+        "message": "Publish week 12 report",
+        "parents": [
+          "r29"
+        ],
+        "tree": {
+          "README.md": "# Analytics Lab\n\nWeekly product metrics and the scripts that build them.\n",
+          "metrics/report.md": "# Weekly Report\n\n| Metric | Value |\n| --- | --- |\n| Sign-ups | 412 |\n| Active users | 3,180 |\n",
+          "src/summary.py": "def weekly_total(rows):\n    return sum(row['count'] for row in rows)\n"
+        },
+        "changes": {
+          "metrics/report.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# Weekly Report\n\n| Metric | Value |\n| --- | --- |\n| Sign-ups | 412 |\n| Active users | 3,180 |\n"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "metrics/report.md": "added"
+        },
+        "order": 2
       }
     ],
     "branches": {
@@ -938,23 +1333,53 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "git@example.test:training/analytics-lab.git",
-      "default_branch": "main",
-      "head": "r30",
-      "tree": {
-        "README.md": "analytics-readme-v3",
-        "metrics/report.md": "metrics-report-v2",
-        "src/summary.py": "summary-v1"
-      }
+      "default_branch": "origin/main",
+      "branches": {
+        "origin/main": "r30"
+      },
+      "commits": [
+        {
+          "id": "r28",
+          "message": "Create analytics lab",
+          "parents": [],
+          "tree": {
+            "README.md": "# Analytics Lab\n\nWeekly product metrics and the scripts that build them.\n"
+          }
+        },
+        {
+          "id": "r29",
+          "message": "Add weekly summary script",
+          "parents": [
+            "r28"
+          ],
+          "tree": {
+            "README.md": "# Analytics Lab\n\nWeekly product metrics and the scripts that build them.\n",
+            "src/summary.py": "def weekly_total(rows):\n    return sum(row['count'] for row in rows)\n"
+          }
+        },
+        {
+          "id": "r30",
+          "message": "Publish week 12 report",
+          "parents": [
+            "r29"
+          ],
+          "tree": {
+            "README.md": "# Analytics Lab\n\nWeekly product metrics and the scripts that build them.\n",
+            "metrics/report.md": "# Weekly Report\n\n| Metric | Value |\n| --- | --- |\n| Sign-ups | 412 |\n| Active users | 3,180 |\n",
+            "src/summary.py": "def weekly_total(rows):\n    return sum(row['count'] for row in rows)\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
       "origin": "git@example.test:training/analytics-lab.git"
     },
     "remote_branches": {
-      "main": "r30"
+      "origin/main": "r30"
     },
     "upstream_tracking": {
-      "main": "main"
+      "main": "origin/main"
     },
     "tags": {},
     "remote_tags": {},
@@ -982,24 +1407,53 @@
     "commits": [
       {
         "id": "r19",
-        "message": "Remote commit r19",
+        "message": "Create cli-tool parser",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# cli-tool\n\nA tiny argument parser for internal scripts.\n",
+          "src/parser.py": "import sys\n\n\ndef parse(argv=None):\n    args = sys.argv[1:] if argv is None else argv\n    return {arg.lstrip(\"-\"): True for arg in args if arg.startswith(\"--\")}\n"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# cli-tool\n\nA tiny argument parser for internal scripts.\n"
+          },
+          "src/parser.py": {
+            "change_type": "added",
+            "before": null,
+            "after": "import sys\n\n\ndef parse(argv=None):\n    args = sys.argv[1:] if argv is None else argv\n    return {arg.lstrip(\"-\"): True for arg in args if arg.startswith(\"--\")}\n"
+          }
+        },
         "is_merge": false,
+        "files": {
+          "README.md": "added",
+          "src/parser.py": "added"
+        },
         "order": 0
       },
       {
         "id": "r20",
-        "message": "Remote commit r20",
+        "message": "Add contributor starter tasks",
         "parents": [
           "r19"
         ],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# cli-tool\n\nA tiny argument parser for internal scripts.\n",
+          "src/parser.py": "import sys\n\n\ndef parse(argv=None):\n    args = sys.argv[1:] if argv is None else argv\n    return {arg.lstrip(\"-\"): True for arg in args if arg.startswith(\"--\")}\n",
+          "starter.md": "# Starter tasks\n\n1. Add a `--help` flag to parse().\n2. Write a test for it.\n"
+        },
+        "changes": {
+          "starter.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# Starter tasks\n\n1. Add a `--help` flag to parse().\n2. Write a test for it.\n"
+          }
+        },
         "is_merge": false,
+        "files": {
+          "starter.md": "added"
+        },
         "order": 1
       }
     ],
@@ -1016,18 +1470,34 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "https://example.test/tools/cli-tool.git",
-      "default_branch": "main",
-      "default_head": "r19",
-      "head": "r20",
+      "default_branch": "origin/main",
       "branches": {
         "origin/main": "r19",
         "origin/starter": "r20"
       },
-      "tree": {
-        "README.md": "cli-readme-v2",
-        "src/parser.py": "cli-parser-v2",
-        "starter.md": "cli-starter-v1"
-      }
+      "commits": [
+        {
+          "id": "r19",
+          "message": "Create cli-tool parser",
+          "parents": [],
+          "tree": {
+            "README.md": "# cli-tool\n\nA tiny argument parser for internal scripts.\n",
+            "src/parser.py": "import sys\n\n\ndef parse(argv=None):\n    args = sys.argv[1:] if argv is None else argv\n    return {arg.lstrip(\"-\"): True for arg in args if arg.startswith(\"--\")}\n"
+          }
+        },
+        {
+          "id": "r20",
+          "message": "Add contributor starter tasks",
+          "parents": [
+            "r19"
+          ],
+          "tree": {
+            "README.md": "# cli-tool\n\nA tiny argument parser for internal scripts.\n",
+            "src/parser.py": "import sys\n\n\ndef parse(argv=None):\n    args = sys.argv[1:] if argv is None else argv\n    return {arg.lstrip(\"-\"): True for arg in args if arg.startswith(\"--\")}\n",
+            "starter.md": "# Starter tasks\n\n1. Add a `--help` flag to parse().\n2. Write a test for it.\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
@@ -1035,8 +1505,7 @@
     },
     "remote_branches": {
       "origin/main": "r19",
-      "origin/starter": "r20",
-      "main": "r20"
+      "origin/starter": "r20"
     },
     "upstream_tracking": {
       "starter": "origin/starter"
@@ -1067,13 +1536,24 @@
     "commits": [
       {
         "id": "r22",
-        "message": "Remote commit r22",
+        "message": "Add spacing tokens",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# css-kit\n\nShared design tokens for company front ends.\n",
+          "styles/tokens.css": ":root {\n  --color-primary: #2563eb;\n  --space-1: 4px;\n  --space-2: 8px;\n}\n"
+        },
+        "changes": {
+          "styles/tokens.css": {
+            "change_type": "modified",
+            "before": ":root {\n  --color-primary: #2563eb;\n}\n",
+            "after": ":root {\n  --color-primary: #2563eb;\n  --space-1: 4px;\n  --space-2: 8px;\n}\n"
+          }
+        },
         "is_merge": false,
-        "order": 0
+        "files": {
+          "styles/tokens.css": "modified"
+        },
+        "order": 2
       }
     ],
     "branches": {
@@ -1089,22 +1569,52 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "https://example.test/frontend/css-kit.git",
-      "default_branch": "main",
-      "head": "r22",
-      "tree": {
-        "README.md": "css-readme-v2",
-        "styles/tokens.css": "tokens-v2"
-      }
+      "default_branch": "origin/main",
+      "branches": {
+        "origin/main": "r22"
+      },
+      "commits": [
+        {
+          "id": "r20",
+          "message": "Create css-kit",
+          "parents": [],
+          "tree": {
+            "README.md": "# css-kit\n\nShared design tokens for company front ends.\n"
+          }
+        },
+        {
+          "id": "r21",
+          "message": "Add color tokens",
+          "parents": [
+            "r20"
+          ],
+          "tree": {
+            "README.md": "# css-kit\n\nShared design tokens for company front ends.\n",
+            "styles/tokens.css": ":root {\n  --color-primary: #2563eb;\n}\n"
+          }
+        },
+        {
+          "id": "r22",
+          "message": "Add spacing tokens",
+          "parents": [
+            "r21"
+          ],
+          "tree": {
+            "README.md": "# css-kit\n\nShared design tokens for company front ends.\n",
+            "styles/tokens.css": ":root {\n  --color-primary: #2563eb;\n  --space-1: 4px;\n  --space-2: 8px;\n}\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
       "origin": "https://example.test/frontend/css-kit.git"
     },
     "remote_branches": {
-      "main": "r22"
+      "origin/main": "r22"
     },
     "upstream_tracking": {
-      "main": "main"
+      "main": "origin/main"
     },
     "tags": {},
     "remote_tags": {},
@@ -1132,13 +1642,25 @@
     "commits": [
       {
         "id": "r32",
-        "message": "Remote commit r32",
+        "message": "Log day 2 for review",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# Lab Notebook\n\nDaily entries from the materials lab.\n",
+          "entries/day-1.md": "# Day 1\n\nCalibrated the scale. Baseline mass: 12.004 g.\n",
+          "entries/day-2.md": "# Day 2\n\nSample B cracked at 340 N. Needs review before publishing.\n"
+        },
+        "changes": {
+          "entries/day-2.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# Day 2\n\nSample B cracked at 340 N. Needs review before publishing.\n"
+          }
+        },
         "is_merge": false,
-        "order": 1
+        "files": {
+          "entries/day-2.md": "added"
+        },
+        "order": 2
       }
     ],
     "branches": {
@@ -1154,18 +1676,44 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "https://example.test/docs/lab-notebook.git",
-      "default_branch": "main",
-      "default_head": "r24",
-      "head": "r32",
+      "default_branch": "origin/main",
       "branches": {
         "origin/main": "r24",
         "origin/review": "r32"
       },
-      "tree": {
-        "README.md": "notebook-readme-v2",
-        "entries/day-1.md": "day1-v1",
-        "entries/day-2.md": "day2-v1"
-      }
+      "commits": [
+        {
+          "id": "r23",
+          "message": "Create lab notebook",
+          "parents": [],
+          "tree": {
+            "README.md": "# Lab Notebook\n\nDaily entries from the materials lab.\n"
+          }
+        },
+        {
+          "id": "r24",
+          "message": "Log day 1",
+          "parents": [
+            "r23"
+          ],
+          "tree": {
+            "README.md": "# Lab Notebook\n\nDaily entries from the materials lab.\n",
+            "entries/day-1.md": "# Day 1\n\nCalibrated the scale. Baseline mass: 12.004 g.\n"
+          }
+        },
+        {
+          "id": "r32",
+          "message": "Log day 2 for review",
+          "parents": [
+            "r24"
+          ],
+          "tree": {
+            "README.md": "# Lab Notebook\n\nDaily entries from the materials lab.\n",
+            "entries/day-1.md": "# Day 1\n\nCalibrated the scale. Baseline mass: 12.004 g.\n",
+            "entries/day-2.md": "# Day 2\n\nSample B cracked at 340 N. Needs review before publishing.\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
@@ -1173,8 +1721,7 @@
     },
     "remote_branches": {
       "origin/main": "r24",
-      "origin/review": "r32",
-      "main": "r32"
+      "origin/review": "r32"
     },
     "upstream_tracking": {
       "review": "origin/review"
@@ -1205,13 +1752,25 @@
     "commits": [
       {
         "id": "r31",
-        "message": "Remote commit r31",
+        "message": "Reset home screen for starter",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# mobile-ui\n\nScreens and styles for the mobile app.\n",
+          "screens/home.tsx": "export function Home() {\n  // TODO: build the home screen from the starter design\n  return <h1>Welcome</h1>\n}\n",
+          "styles/mobile.css": ".screen {\n  padding: 16px;\n}\n"
+        },
+        "changes": {
+          "screens/home.tsx": {
+            "change_type": "modified",
+            "before": "export function Home() {\n  return <h1>Home</h1>\n}\n",
+            "after": "export function Home() {\n  // TODO: build the home screen from the starter design\n  return <h1>Welcome</h1>\n}\n"
+          }
+        },
         "is_merge": false,
-        "order": 1
+        "files": {
+          "screens/home.tsx": "modified"
+        },
+        "order": 2
       }
     ],
     "branches": {
@@ -1227,18 +1786,46 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "https://example.test/frontend/mobile-ui.git",
-      "default_branch": "main",
-      "default_head": "r23",
-      "head": "r31",
+      "default_branch": "origin/main",
       "branches": {
         "origin/main": "r23",
         "origin/starter": "r31"
       },
-      "tree": {
-        "README.md": "mobile-readme-v2",
-        "screens/home.tsx": "home-v1",
-        "styles/mobile.css": "mobile-css-v1"
-      }
+      "commits": [
+        {
+          "id": "r22",
+          "message": "Create mobile-ui",
+          "parents": [],
+          "tree": {
+            "README.md": "# mobile-ui\n\nScreens and styles for the mobile app.\n",
+            "styles/mobile.css": ".screen {\n  padding: 16px;\n}\n"
+          }
+        },
+        {
+          "id": "r23",
+          "message": "Add home screen",
+          "parents": [
+            "r22"
+          ],
+          "tree": {
+            "README.md": "# mobile-ui\n\nScreens and styles for the mobile app.\n",
+            "screens/home.tsx": "export function Home() {\n  return <h1>Home</h1>\n}\n",
+            "styles/mobile.css": ".screen {\n  padding: 16px;\n}\n"
+          }
+        },
+        {
+          "id": "r31",
+          "message": "Reset home screen for starter",
+          "parents": [
+            "r23"
+          ],
+          "tree": {
+            "README.md": "# mobile-ui\n\nScreens and styles for the mobile app.\n",
+            "screens/home.tsx": "export function Home() {\n  // TODO: build the home screen from the starter design\n  return <h1>Welcome</h1>\n}\n",
+            "styles/mobile.css": ".screen {\n  padding: 16px;\n}\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
@@ -1246,8 +1833,7 @@
     },
     "remote_branches": {
       "origin/main": "r23",
-      "origin/starter": "r31",
-      "main": "r31"
+      "origin/starter": "r31"
     },
     "upstream_tracking": {
       "starter": "origin/starter"
@@ -1277,14 +1863,55 @@
     "repository_initialized": true,
     "commits": [
       {
-        "id": "r34",
-        "message": "Remote commit r34",
+        "id": "r33",
+        "message": "Log week 1 interviews",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# Research Log\n\nWeekly notes from the user-research team.\n",
+          "notes/week-1.md": "# Week 1\n\n5 interviews. Main pain point: onboarding takes too long.\n"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# Research Log\n\nWeekly notes from the user-research team.\n"
+          },
+          "notes/week-1.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# Week 1\n\n5 interviews. Main pain point: onboarding takes too long.\n"
+          }
+        },
         "is_merge": false,
+        "files": {
+          "README.md": "added",
+          "notes/week-1.md": "added"
+        },
         "order": 0
+      },
+      {
+        "id": "r34",
+        "message": "Log week 2 usability test",
+        "parents": [
+          "r33"
+        ],
+        "tree": {
+          "README.md": "# Research Log\n\nWeekly notes from the user-research team.\n",
+          "notes/week-1.md": "# Week 1\n\n5 interviews. Main pain point: onboarding takes too long.\n",
+          "notes/week-2.md": "# Week 2\n\nTested the shorter sign-up flow. 4 of 5 finished without help.\n"
+        },
+        "changes": {
+          "notes/week-2.md": {
+            "change_type": "added",
+            "before": null,
+            "after": "# Week 2\n\nTested the shorter sign-up flow. 4 of 5 finished without help.\n"
+          }
+        },
+        "is_merge": false,
+        "files": {
+          "notes/week-2.md": "added"
+        },
+        "order": 1
       }
     ],
     "branches": {
@@ -1300,24 +1927,43 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "git@example.test:docs/research-log.git",
-      "default_branch": "main",
-      "default_head": "r33",
-      "head": "r34",
-      "tree": {
-        "README.md": "research-readme-v2",
-        "notes/week-1.md": "week1-v1",
-        "notes/week-2.md": "week2-v1"
-      }
+      "default_branch": "origin/main",
+      "branches": {
+        "origin/main": "r34"
+      },
+      "commits": [
+        {
+          "id": "r33",
+          "message": "Log week 1 interviews",
+          "parents": [],
+          "tree": {
+            "README.md": "# Research Log\n\nWeekly notes from the user-research team.\n",
+            "notes/week-1.md": "# Week 1\n\n5 interviews. Main pain point: onboarding takes too long.\n"
+          }
+        },
+        {
+          "id": "r34",
+          "message": "Log week 2 usability test",
+          "parents": [
+            "r33"
+          ],
+          "tree": {
+            "README.md": "# Research Log\n\nWeekly notes from the user-research team.\n",
+            "notes/week-1.md": "# Week 1\n\n5 interviews. Main pain point: onboarding takes too long.\n",
+            "notes/week-2.md": "# Week 2\n\nTested the shorter sign-up flow. 4 of 5 finished without help.\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
       "origin": "git@example.test:docs/research-log.git"
     },
     "remote_branches": {
-      "main": "r34"
+      "origin/main": "r34"
     },
     "upstream_tracking": {
-      "main": "main"
+      "main": "origin/main"
     },
     "tags": {},
     "remote_tags": {},
@@ -1345,13 +1991,30 @@
     "commits": [
       {
         "id": "r60",
-        "message": "Remote commit r60",
+        "message": "Add title_case and contributing guide",
         "parents": [],
-        "tree": {},
-        "changes": {},
-        "files": {},
+        "tree": {
+          "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n\n## Contributing\n\nFork the repo, branch from main, and open a pull request.\n",
+          "src/toolkit.py": "def slugify(text):\n    return text.strip().lower().replace(\" \", \"-\")\n\n\ndef title_case(text):\n    return \" \".join(word.capitalize() for word in text.split())\n"
+        },
+        "changes": {
+          "README.md": {
+            "change_type": "modified",
+            "before": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n",
+            "after": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n\n## Contributing\n\nFork the repo, branch from main, and open a pull request.\n"
+          },
+          "src/toolkit.py": {
+            "change_type": "modified",
+            "before": "def slugify(text):\n    return text.strip().lower().replace(\" \", \"-\")\n",
+            "after": "def slugify(text):\n    return text.strip().lower().replace(\" \", \"-\")\n\n\ndef title_case(text):\n    return \" \".join(word.capitalize() for word in text.split())\n"
+          }
+        },
         "is_merge": false,
-        "order": 0
+        "files": {
+          "README.md": "modified",
+          "src/toolkit.py": "modified"
+        },
+        "order": 2
       }
     ],
     "branches": {
@@ -1367,23 +2030,52 @@
     "conflicts": [],
     "remote_fixtures": {
       "url": "git@github.com:open-dev/oss-toolkit.git",
-      "default_branch": "main",
-      "default_head": "r59",
-      "head": "r60",
-      "tree": {
-        "README.md": "oss-readme-v2",
-        "src/toolkit.py": "toolkit-v2"
-      }
+      "default_branch": "origin/main",
+      "branches": {
+        "origin/main": "r60"
+      },
+      "commits": [
+        {
+          "id": "r58",
+          "message": "Create oss-toolkit",
+          "parents": [],
+          "tree": {
+            "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n"
+          }
+        },
+        {
+          "id": "r59",
+          "message": "Add slugify helper",
+          "parents": [
+            "r58"
+          ],
+          "tree": {
+            "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n",
+            "src/toolkit.py": "def slugify(text):\n    return text.strip().lower().replace(\" \", \"-\")\n"
+          }
+        },
+        {
+          "id": "r60",
+          "message": "Add title_case and contributing guide",
+          "parents": [
+            "r59"
+          ],
+          "tree": {
+            "README.md": "# oss-toolkit\n\nSmall command-line helpers for open-source maintainers.\n\n## Contributing\n\nFork the repo, branch from main, and open a pull request.\n",
+            "src/toolkit.py": "def slugify(text):\n    return text.strip().lower().replace(\" \", \"-\")\n\n\ndef title_case(text):\n    return \" \".join(word.capitalize() for word in text.split())\n"
+          }
+        }
+      ]
     },
     "conflict_details": {},
     "remotes": {
       "origin": "git@github.com:open-dev/oss-toolkit.git"
     },
     "remote_branches": {
-      "main": "r60"
+      "origin/main": "r60"
     },
     "upstream_tracking": {
-      "main": "main"
+      "main": "origin/main"
     },
     "tags": {},
     "remote_tags": {},

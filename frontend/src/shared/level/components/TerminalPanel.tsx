@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useRef } from 'react'
+import type { ReactNode } from 'react'
 
 import type { TerminalLine } from '@/shared/level/types'
 import { cn } from '@/shared/utils/cn'
@@ -22,6 +23,7 @@ export function TerminalPanel({
   processing,
   onCommand,
   title = 'Terminal',
+  headerAction,
   className,
 }: {
   lines: TerminalLine[]
@@ -33,6 +35,8 @@ export function TerminalPanel({
   processing?: boolean
   onCommand: (command: string) => void
   title?: string
+  /** An optional control on the right of the title bar. */
+  headerAction?: ReactNode
   className?: string
 }) {
   const outputRef = useRef<HTMLDivElement>(null)
@@ -58,6 +62,7 @@ export function TerminalPanel({
     >
       <div className="terminal-titlebar workspace-panel-header">
         <span className="panel-eyebrow">{title}</span>
+        {headerAction}
       </div>
 
       {/* The prompt is the last line of the stream, not a separate bar. */}

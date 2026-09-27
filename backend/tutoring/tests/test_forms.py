@@ -62,5 +62,6 @@ def test_uncatalogued_commands_get_a_syntax_shape(db):
 
 def test_legacy_teaching_keys_are_kept_for_existing_completions():
     assert teaching_key_for_usage("git  init") == "git-init/current-directory"
-    assert teaching_key_for_usage("git add <path>...") == "git-add/file"
+    # One-or-more is its own lesson, not the one-file form.
+    assert teaching_key_for_usage("git add <path>...") == "form:git add <path>..."
     assert teaching_key_for_usage("git switch <branch>") == "form:git switch <branch>"

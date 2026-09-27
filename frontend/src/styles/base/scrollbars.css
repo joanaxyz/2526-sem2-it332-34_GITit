@@ -8,22 +8,22 @@
   --scrollbar-thumb-hover: rgba(var(--theme-primary-rgb), 0.68);
 }
 
-:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *) {
+:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *) {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
-:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *)::-webkit-scrollbar {
+:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *)::-webkit-scrollbar {
   width: var(--scrollbar-size);
   height: var(--scrollbar-size);
 }
 
-:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *)::-webkit-scrollbar-track {
+:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *)::-webkit-scrollbar-track {
   border-radius: 999px;
   background: var(--scrollbar-track);
 }
 
-:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *)::-webkit-scrollbar-thumb {
+:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *)::-webkit-scrollbar-thumb {
   min-height: 2.5rem;
   border: 0.1rem solid transparent;
   border-radius: 999px;
@@ -31,7 +31,7 @@
   background-clip: padding-box;
 }
 
-:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *)::-webkit-scrollbar-thumb:hover {
+:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *)::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
   background-clip: padding-box;
 }

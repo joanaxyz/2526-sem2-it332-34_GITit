@@ -72,7 +72,8 @@ export function TierWorkspace() {
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
   const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
   const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
-  const [dismissedIntroduction, setDismissedIntroduction] = useState<string | null>(null)
+  // A hidden guide stays hidden for its lesson (across commands) until reopened.
+  const [hiddenGuideKey, setHiddenGuideKey] = useState<string | null>(null)
   const user = useAuthStore((state) => state.user)
   const [exitNavigationRunId, setExitNavigationRunId] = useState<number | null>(null)
   const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
@@ -153,9 +154,10 @@ export function TierWorkspace() {
   const tourKey = `${user?.id ?? 'guest'}:tier`
   const tourOpen =
     run.status === 'started' && dismissedTourKey !== tourKey && !hasSeenLevelTour(user?.id, 'tier')
+  const guideHidden = run.tutor?.phase === 'introduction' && run.tutor.teaching_key === hiddenGuideKey
   const introductionOpen = Boolean(run.tutor && !tourOpen
     && !mutation.isPending && !dagAnimation.animating && !battleDirector.animating
-    && run.tutor.context_id !== dismissedIntroduction)
+    && !guideHidden)
 
   const submit = createTierWorkspaceCommandHandler({
     runId,
@@ -199,6 +201,7 @@ export function TierWorkspace() {
       />
       <TierWorkspaceMain
         teachingActive={introductionOpen}
+        onShowCommandGuide={guideHidden && run.status === 'started' ? () => setHiddenGuideKey(null) : undefined}
         run={run}
         lines={lines}
         shellPrompt={shellPrompt}
@@ -243,7 +246,7 @@ export function TierWorkspace() {
       />
       {introductionOpen && run.tutor ? (
         <CommandIntroductionPanel key={`${run.id}:${run.tutor.context_id}`} run={run} tutor={run.tutor}
-          onDismiss={() => setDismissedIntroduction(run.tutor?.context_id ?? null)} />
+          onDismiss={() => setHiddenGuideKey(run.tutor?.teaching_key ?? null)} />
       ) : null}
       <TierOutcomeModal
         open={outcomeModalOpen}
