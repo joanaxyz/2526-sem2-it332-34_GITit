@@ -64,6 +64,32 @@
   line-height: 1.25;
 }
 
+/* Git's own folder: present but quieter than the learner's files. */
+.project-tree-git {
+  color: hsl(var(--muted-foreground));
+}
+
+.project-tree-git__content {
+  margin: 0.1rem 0 0.3rem 1.4rem;
+  border: 1px solid hsl(var(--border) / 0.55);
+  border-radius: var(--radius-sm);
+  padding: 0.3rem 0.45rem;
+  background: hsl(var(--muted) / 0.35);
+  color: hsl(var(--foreground) / 0.86);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  line-height: 1.4;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.project-tree-git__note {
+  padding: 0.1rem 0.25rem;
+  color: hsl(var(--muted-foreground) / 0.8);
+  font-size: var(--text-2xs);
+  font-style: italic;
+}
+
 .project-tree-draft-row {
   display: flex;
   align-items: start;

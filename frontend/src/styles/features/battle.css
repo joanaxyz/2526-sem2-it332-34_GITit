@@ -3,4 +3,5 @@
 @import './battle/context-panel.css';
 @import './battle/workspace-tour.css';
 @import './battle/command-introduction.css';
+@import './battle/command-guide-figure.css';
 @import './battle/repository-state-map.css';

@@ -16,10 +16,20 @@ const tutor: CommandIntroduction = {
   context_id: 'snapshot-1', teaching_key: 'form:git switch -c <branch>',
   run_revision: 0, phase: 'introduction', title: 'Create and switch',
   needs: [
-    { kind: 'branch', text: 'Branch feature is created.' },
-    { kind: 'head', text: 'HEAD moves to feature.' },
+    { kind: 'branch', text: 'Branch feature is created.', action: 'create', subjects: ['feature'] },
+    { kind: 'head', text: 'HEAD moves to feature.', action: 'move', subjects: ['feature'] },
   ],
   changes: [],
+  anatomy: [
+    { token: 'git', text: 'runs Git' },
+    { token: 'switch', text: 'the Git command to run' },
+    { token: '-c', text: 'create the branch first, then switch to it' },
+    { token: '<branch>', text: 'you fill this in: the branch name' },
+  ],
+  concepts: [
+    { key: 'commands', title: 'Commands', text: 'You type a command in the terminal and press Enter.' },
+    { key: 'branch', title: 'Branch', text: 'A name that points at a commit.' },
+  ],
   verdict: null, explanation: null, example_command: null, completion_token: null,
   command_form: {
     teaching_key: 'form:git switch -c <branch>', usage_form: 'git switch -c <branch>',
@@ -76,13 +86,23 @@ describe('terminal-led command introduction', () => {
     expect(screen.getByRole('dialog', { name: 'Create and switch' })).toBeInTheDocument()
     expect(screen.getAllByRole('textbox')).toHaveLength(1)
     expect(screen.getByText(tutor.command_form.summary)).toBeInTheDocument()
+    // Absolute beginners: what a command is, and what each part means.
+    expect(screen.getByText(/You type a command in the terminal/)).toBeInTheDocument()
+    const parts = within(screen.getByLabelText('What each part means'))
+    expect(parts.getByText('create the branch first, then switch to it')).toBeInTheDocument()
+    // The concrete solution command is only revealed after a miss.
+    expect(screen.queryByText('git switch -c feature')).not.toBeInTheDocument()
+    // Nothing to click through: the guide stays while the learner types. On a
+    // narrow screen the change sits in its own tab of the same card.
+    expect(screen.getByRole('button', { name: 'Hide command guide' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Got it' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: 'What changes' }))
     const needs = within(screen.getByRole('region', { name: 'Your repository needs' }))
     expect(needs.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
       'Branch feature is created.', 'HEAD moves to feature.',
     ])
-    // The concrete solution command is only revealed after a miss.
-    expect(screen.queryByText('git switch -c feature')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Try it' })).toBeInTheDocument()
+    expect(within(screen.getByRole('region', { name: 'Words to know' })).getByText('Branch')).toBeInTheDocument()
+    await waitFor(() => expect(document.activeElement).toHaveAttribute('data-command-input'))
   })
 
   it('confirms a correct move with what changed, not colour alone', async () => {
@@ -100,8 +120,9 @@ describe('terminal-led command introduction', () => {
     const { client, run } = setup(feedback)
     expect(await screen.findByText('git switch -c feature')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-tour-spotlight')).toHaveStyle({ top: '151px' })
-    expect(screen.queryByRole('button', { name: 'Not now' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Hide command guide' })).not.toBeInTheDocument()
     expect(screen.getByRole('status')).toHaveTextContent("That wasn't the command this step needs.")
+    fireEvent.click(screen.getByRole('tab', { name: 'What changes' }))
     expect(screen.getByRole('region', { name: 'It will' })).toBeInTheDocument()
     expect(commandIntroductionsApi.complete).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }))
@@ -112,7 +133,7 @@ describe('terminal-led command introduction', () => {
 
   it('does not mark a hidden introduction completed', async () => {
     const { onDismiss } = setup()
-    fireEvent.click(await screen.findByRole('button', { name: 'Not now' }))
+    fireEvent.click(await screen.findByRole('button', { name: 'Hide command guide' }))
     expect(onDismiss).toHaveBeenCalledOnce()
     expect(commandIntroductionsApi.complete).not.toHaveBeenCalled()
   })

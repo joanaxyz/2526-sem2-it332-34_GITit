@@ -21,6 +21,8 @@ def tutor_payload(run):
             "teaching_key": pending.teaching_key,
             "run_revision": run.total_attempts,
             "phase": "feedback",
+            "anatomy": [],
+            "concepts": [],
             **pending.payload,
             "completion_token": issue_token(run, pending.teaching_key, "feedback"),
         }

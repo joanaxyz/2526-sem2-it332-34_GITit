@@ -169,4 +169,22 @@ describe('workspace shell', () => {
     expect(cloned.executions.map((execution) => execution.exit_code)).toEqual([0, 0])
     expect(cloned.last.output).toBe('/workspace/demo')
   })
+
+  it('names the working directory after a named clone destination', () => {
+    const empty = repo({
+      repository_initialized: false,
+      commits: [],
+      branches: {},
+      head: { type: 'branch', name: 'main', target: null },
+      remote_fixtures: {
+        default_branch: 'origin/main',
+        branches: { 'origin/main': 'r1' },
+        commits: [{ id: 'r1', message: 'Create logs', parents: [], tree: { 'README.md': 'logs\n' } }],
+      },
+    })
+    const cloned = session(['git clone https://git.corp.example/it/audit-logs.git audit-logs-local', 'cd audit-logs-local', 'pwd', 'ls -a'], empty)
+    expect(cloned.executions.map((execution) => execution.exit_code)).toEqual([0, 0, 0, 0])
+    expect(cloned.executions[2].output).toBe('/workspace/audit-logs-local')
+    expect(cloned.last.output).toBe('./  ../  .git/  README.md')
+  })
 })

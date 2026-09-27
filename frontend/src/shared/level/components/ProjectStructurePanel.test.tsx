@@ -330,4 +330,44 @@ describe('ProjectStructurePanel', () => {
     expect(screen.getByRole('alert')).toHaveTextContent('Name is required.')
     expect(onCreateFile).not.toHaveBeenCalled()
   })
+
+  it('shows an empty, non-repository folder before git clone', () => {
+    render(
+      <ProjectStructurePanel
+        rootName="cloning-a-remote-repository"
+        snapshot={{ ...baseSnapshot, repository_initialized: false }}
+      />
+    )
+
+    expect(screen.getByText('cloning-a-remote-repository')).toBeInTheDocument()
+    expect(screen.getByText('Empty folder. Not a Git repository yet.')).toBeInTheDocument()
+    expect(screen.queryByText('.git')).not.toBeInTheDocument()
+  })
+
+  it('names the root after the clone destination and shows a read-only .git folder', () => {
+    render(
+      <ProjectStructurePanel
+        rootName="cloning-a-remote-repository"
+        onDeleteFile={vi.fn()}
+        snapshot={{
+          ...baseSnapshot,
+          branches: { main: 'r41' },
+          head: { type: 'branch', name: 'main', target: 'r41' },
+          remotes: { origin: 'https://git.corp.example/it/audit-logs.git' },
+          remote_branches: { 'origin/main': 'r41' },
+          operation_metadata: { last_clone_directory: 'audit-logs-local' },
+          project_tree: { 'README.md': { status: 'clean', source: 'head', content: '# Audit Logs' } },
+        }}
+      />
+    )
+
+    expect(screen.getByText('audit-logs-local')).toBeInTheDocument()
+    expect(screen.queryByText('cloning-a-remote-repository')).not.toBeInTheDocument()
+    expect(screen.queryByText('HEAD')).not.toBeInTheDocument()
+    expect(screen.queryByLabelText('Delete .git')).not.toBeInTheDocument()
+
+    fireEvent.click(screen.getByText('.git'))
+    fireEvent.click(screen.getByRole('button', { name: 'Show .git/HEAD' }))
+    expect(screen.getByText('ref: refs/heads/main')).toBeInTheDocument()
+  })
 })

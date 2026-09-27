@@ -90,12 +90,16 @@ def teaching_run(db, django_user_model):
     wave = AdventureLevelTierWave.objects.create(
         tier=tier, slug="teaching", max_counted_commands=12, required_successful_attempts=2,
     )
+    skills = {}
     for slug, form, usage_form, label in [
         ("git-init", "current-directory", "git init", "Start a repository here"),
         ("git-add", "file", "git add <file>", "Stage one file"),
+        ("git-add", "paths", "git add <path>...", "Stage selected paths"),
         ("git-commit", "message", "git commit -m <message>", "Commit with a message"),
     ]:
-        skill = CommandSkill.objects.create(slug=slug, title=slug, base_command=slug.replace("-", " "))
+        if slug not in skills:
+            skills[slug] = CommandSkill.objects.create(slug=slug, title=slug, base_command=slug.replace("-", " "))
+        skill = skills[slug]
         wave.command_forms.add(CommandForm.objects.create(
             command_skill=skill, chapter=chapter, slug=form, usage_form=usage_form,
             label=label,

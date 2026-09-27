@@ -3477,15 +3477,6 @@
                     "access"
                 ]
             },
-            "ActionEnum": {
-                "enum": [
-                    "grant_coins",
-                    "set_staff",
-                    "set_active"
-                ],
-                "type": "string",
-                "description": "* `grant_coins` - grant_coins\n* `set_staff` - set_staff\n* `set_active` - set_active"
-            },
             "ActivityWindowEnum": {
                 "enum": [
                     "month",
@@ -4401,7 +4392,7 @@
                 "description": "Reject misspelled or stale fields instead of silently ignoring them.",
                 "properties": {
                     "action": {
-                        "$ref": "#/components/schemas/ActionEnum"
+                        "$ref": "#/components/schemas/AdminUserActionRequestActionEnum"
                     },
                     "amount": {
                         "type": "integer"
@@ -4421,6 +4412,15 @@
                 "required": [
                     "action"
                 ]
+            },
+            "AdminUserActionRequestActionEnum": {
+                "enum": [
+                    "grant_coins",
+                    "set_staff",
+                    "set_active"
+                ],
+                "type": "string",
+                "description": "* `grant_coins` - grant_coins\n* `set_staff` - set_staff\n* `set_active` - set_active"
             },
             "AdminUserBrief": {
                 "type": "object",
@@ -5931,12 +5931,26 @@
                     },
                     "command_form": {
                         "$ref": "#/components/schemas/CommandIntroductionForm"
+                    },
+                    "anatomy": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/SyntaxPart"
+                        }
+                    },
+                    "concepts": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Concept"
+                        }
                     }
                 },
                 "required": [
+                    "anatomy",
                     "changes",
                     "command_form",
                     "completion_token",
+                    "concepts",
                     "context_id",
                     "example_command",
                     "explanation",
@@ -5963,6 +5977,25 @@
                 "required": [
                     "command",
                     "execution"
+                ]
+            },
+            "Concept": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key",
+                    "text",
+                    "title"
                 ]
             },
             "ContentDefinition": {
@@ -7376,12 +7409,38 @@
                     },
                     "text": {
                         "type": "string"
+                    },
+                    "action": {
+                        "$ref": "#/components/schemas/RepositoryChangeActionEnum"
+                    },
+                    "subjects": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "ref": {
+                        "type": "string"
                     }
                 },
                 "required": [
                     "kind",
                     "text"
                 ]
+            },
+            "RepositoryChangeActionEnum": {
+                "enum": [
+                    "create",
+                    "delete",
+                    "move",
+                    "add",
+                    "remove",
+                    "set",
+                    "start",
+                    "finish"
+                ],
+                "type": "string",
+                "description": "* `create` - create\n* `delete` - delete\n* `move` - move\n* `add` - add\n* `remove` - remove\n* `set` - set\n* `start` - start\n* `finish` - finish"
             },
             "RepositoryChangeKindEnum": {
                 "enum": [
@@ -7805,6 +7864,21 @@
                     "completed",
                     "slug",
                     "title"
+                ]
+            },
+            "SyntaxPart": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "text",
+                    "token"
                 ]
             },
             "User": {

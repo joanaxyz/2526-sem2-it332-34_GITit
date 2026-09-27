@@ -20,6 +20,7 @@ import { WORKSPACE_BATTLE_STAGE_ROW } from '@/shared/level/workspaceLayout'
 
 export function TierWorkspaceMain({
   teachingActive,
+  onShowCommandGuide,
   run,
   lines,
   shellPrompt,
@@ -45,6 +46,7 @@ export function TierWorkspaceMain({
   onWriteFile,
 }: {
   teachingActive?: boolean
+  onShowCommandGuide?: () => void
   run: TierRun
   lines: TerminalLine[]
   shellPrompt: string
@@ -89,6 +91,7 @@ export function TierWorkspaceMain({
         <TierBattlePanel run={run} director={battleDirector} />
         <TierTerminalStage
           teachingActive={teachingActive}
+          onShowCommandGuide={onShowCommandGuide}
           run={run}
           lines={lines}
           prompt={shellPrompt}

@@ -1,3 +1,4 @@
+import { BookOpen } from 'lucide-react'
 import type { CSSProperties, PointerEvent, RefObject } from 'react'
 
 import { TierContextPanel } from '@/features/story-map/components/TierContextPanel'
@@ -125,6 +126,7 @@ export function TierDiagramStage({
 
 export function TierTerminalStage({
   teachingActive = false,
+  onShowCommandGuide,
   run,
   lines,
   prompt,
@@ -139,6 +141,8 @@ export function TierTerminalStage({
   onCommand,
 }: {
   teachingActive?: boolean
+  /** Set while a command guide is hidden: brings it back from the terminal title bar. */
+  onShowCommandGuide?: () => void
   run: TierRun
   lines: TerminalLine[]
   prompt: string
@@ -173,6 +177,12 @@ export function TierTerminalStage({
           processing={mutationPending}
           className="h-full"
           onCommand={onCommand}
+          headerAction={onShowCommandGuide ? (
+            <button type="button" className="command-guide-reopen" onClick={onShowCommandGuide}>
+              <BookOpen aria-hidden="true" />
+              Command guide
+            </button>
+          ) : null}
         />
       </div>
       {!teachingActive && run.scaffolding.contextual_feedback ? (

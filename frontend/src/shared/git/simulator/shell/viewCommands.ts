@@ -7,6 +7,7 @@ import {
   type ShellRun,
 } from '@/shared/git/simulator/shell/context'
 import { redirectOutput } from '@/shared/git/simulator/shell/fileCommands'
+import { repositoryFolderName } from '@/shared/level/utils/gitDirectory'
 
 /** Read-only shell commands, plus `cd`, which only moves the terminal. */
 
@@ -15,7 +16,9 @@ function workingDirectoryLabel(projectName: string, cwd: string) {
 }
 
 export function pwd(run: ShellRun) {
-  run.out.push(workingDirectoryLabel(run.projectName, run.cwd))
+  // Same folder the Project Files root shows: a named clone/init destination
+  // replaces the level's project folder.
+  run.out.push(workingDirectoryLabel(repositoryFolderName(run.state, run.projectName), run.cwd))
 }
 
 export function cd(run: ShellRun, args: string[], enterableNames: string[]) {

@@ -9,7 +9,8 @@ from curriculum.models import CommandForm
 from simulator.services import normalize_command
 
 _PLACEHOLDER = re.compile(r"(<[^>]+>|\{[^}]+\})")
-_VARIADIC_PLACEHOLDER = re.compile(r"<[^>]+\.\.\.>")
+# "One or more": authored both as <paths...> and as <path>...
+_VARIADIC_PLACEHOLDER = re.compile(r"<[^>]+\.\.\.>|<[^>]+>\.\.\.")
 
 # Git accepts several common long/short spellings.  Command-form matching is
 # teaching identity, not grading, so normalize only spelling aliases that keep
@@ -45,20 +46,33 @@ _SUBCOMMAND_FAMILIES = frozenset({
 _LEGACY_KEYS = {
     "git init": "git-init/current-directory",
     "git add <file>": "git-add/file",
-    "git add <path>...": "git-add/file",
     "git commit -m <message>": "git-commit/message",
 }
 
 
 @dataclass(frozen=True)
 class FormGuide:
-    """One command form, identified by its syntax rather than a seed slug."""
+    """One lesson: a command form, or a technique (see ``techniques.py``).
+
+    Forms are identified by their syntax rather than a seed slug. A technique
+    lesson carries its technique key and is recognised by that detector.
+    """
 
     teaching_key: str
     family: str
     usage_form: str
     label: str
     summary: str
+    technique: str | None = None
+
+    def used_by(self, command: str, state: dict | None = None) -> bool:
+        """Whether an executed command actually exercised this lesson."""
+
+        if self.technique is not None:
+            from tutoring.services.techniques import technique_used
+
+            return technique_used(self.technique, command, state)
+        return command_uses_form(command, self.usage_form)
 
     def payload(self) -> dict:
         return {
@@ -143,11 +157,47 @@ def command_matches_form(command: str, usage_form: str) -> bool:
     return _match_tokens(actual, pattern, 0, 0)
 
 
+def command_uses_form(command: str, usage_form: str) -> bool:
+    """Stricter than matching: a one-or-more form is only *used* with several
+    operands, so `git add a` never counts as having learned `git add <path>...`."""
+
+    if not command_matches_form(command, usage_form):
+        return False
+    if _VARIADIC_PLACEHOLDER.search(usage_form):
+        single = _VARIADIC_PLACEHOLDER.sub(lambda match: match.group(0).replace("...", ""), usage_form)
+        return not command_matches_form(command, single)
+    return True
+
+
+def is_variadic(usage_form: str) -> bool:
+    return any(_VARIADIC_PLACEHOLDER.fullmatch(token) for token in _tokens(usage_form))
+
+
+def widened_usage(usage_form: str) -> str | None:
+    """`git add <file>` -> `git add <file>...`: the one-or-more form of a
+    usage that ends in a single placeholder, or ``None`` when it does not."""
+
+    tokens = _tokens(usage_form)
+    if not tokens or not re.fullmatch(r"<[^>.]+>", tokens[-1]):
+        return None
+    return " ".join([*tokens[:-1], f"{tokens[-1]}..."])
+
+
+def same_shape(left: str, right: str) -> bool:
+    """Same syntax ignoring placeholder names and one-or-more markers:
+    `git add <file>` and `git add <path>...` share a shape."""
+
+    def shape(usage: str) -> str:
+        return re.sub(r"<[^>]+>", "<>", " ".join(usage.split()).replace("...", ""))
+
+    return shape(left) == shape(right)
+
+
 def _specificity(usage_form: str) -> tuple[int, int, int]:
     tokens = _canonical_tokens(usage_form, pattern=True)
     literal = sum(1 for value, optional in tokens if not optional and not _PLACEHOLDER.search(value))
     optional = sum(1 for _, is_optional in tokens if is_optional)
-    variadic = sum(1 for value, _ in tokens if _VARIADIC_PLACEHOLDER.search(value))
+    variadic = sum(1 for value, _ in tokens if _VARIADIC_PLACEHOLDER.fullmatch(value))
     return literal, -optional, -variadic
 
 
@@ -162,7 +212,9 @@ def _command_shape(command: str) -> str:
             shape.append(token.split("=", 1)[0])
         elif token == "--":
             shape.append(token)
-        elif not shape or shape[-1] != "<value>":
+        elif shape and shape[-1] in {"<value>", "<value>..."}:
+            shape[-1] = "<value>..."  # several operands in a row: one or more
+        else:
             shape.append("<value>")
     return " ".join(shape)
 
