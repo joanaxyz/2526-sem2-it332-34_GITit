@@ -95,7 +95,7 @@ export function buildGraph(
           id: '__empty__',
           type: 'emptyRepository',
           position: { x: point.x - 64, y: point.y - 52 },
-          data: { branchName, variant },
+          data: { branchName, variant, initialized: snapshot.repository_initialized !== false },
         },
       ],
       edges: [],
@@ -167,6 +167,7 @@ export function normalizeSnapshot(snapshot: RepositorySnapshot): RepositorySnaps
     head.target = branches[head.name ?? ''] ?? null
   }
   return {
+    ...snapshot,
     repository_initialized: snapshot.repository_initialized ?? true,
     commits: snapshot.commits ?? [],
     branches,

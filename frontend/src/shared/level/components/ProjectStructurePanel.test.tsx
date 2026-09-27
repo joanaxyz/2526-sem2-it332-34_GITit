@@ -41,6 +41,42 @@ describe('ProjectStructurePanel', () => {
     expect(screen.getByText('untracked')).toBeInTheDocument()
   })
 
+  it('shows only what is on disk: empty folders appear, deleted files do not', () => {
+    render(
+      <ProjectStructurePanel
+        snapshot={{
+          ...baseSnapshot,
+          directories: ['docs/drafts'],
+          project_tree: {
+            'README.md': { status: 'clean', source: 'head', content: 'readme' },
+            'old/legacy.py': { status: 'deleted', source: 'working_tree', content: null },
+          },
+        } as RepositorySnapshot}
+      />
+    )
+
+    expect(screen.getByText('docs')).toBeInTheDocument()
+    expect(screen.getByText('drafts')).toBeInTheDocument()
+    expect(screen.queryByText('old')).not.toBeInTheDocument()
+    expect(screen.queryByText('legacy.py')).not.toBeInTheDocument()
+  })
+
+  it('keeps a deleted file visible while it is part of a merge conflict', () => {
+    render(
+      <ProjectStructurePanel
+        snapshot={{
+          ...baseSnapshot,
+          conflicts: ['app.py'],
+          project_tree: {
+            'app.py': { status: 'deleted', source: 'working_tree', content: null },
+          },
+        }}
+      />
+    )
+
+    expect(screen.getByText('app.py')).toBeInTheDocument()
+  })
+
   it('shows the empty state for truly empty repositories', () => {
     render(<ProjectStructurePanel snapshot={baseSnapshot} />)
 
@@ -168,7 +204,7 @@ describe('ProjectStructurePanel', () => {
     })
   })
 
-  it('creates a folder using a gitkeep placeholder file', async () => {
+  it('creates a real empty folder without a placeholder file', async () => {
     const onCreateFile = vi.fn().mockResolvedValue(undefined)
 
     render(<ProjectStructurePanel snapshot={baseSnapshot} onCreateFile={onCreateFile} />)
@@ -179,7 +215,7 @@ describe('ProjectStructurePanel', () => {
     fireEvent.keyDown(nameInput, { key: 'Enter' })
 
     await waitFor(() => {
-      expect(onCreateFile).toHaveBeenCalledWith({ path: 'docs/.gitkeep', content: '' })
+      expect(onCreateFile).toHaveBeenCalledWith({ path: 'docs/', content: '' })
     })
   })
 

@@ -148,6 +148,9 @@ export function CommitDetailsPanel({ data }: { data: CommitNodeData | null }) {
 
 export function EmptyRepositoryNode({ data }: NodeProps<EmptyRepositoryNodeData>) {
   const colors = VARIANT_COLORS[data.variant]
+  if (!data.initialized) {
+    return <div className="repository-folder-node"><strong>Project folder</strong><span>Git is not initialized</span></div>
+  }
   return (
     <div className="flex w-32 flex-col items-center gap-2">
       <div className={cn('dag-commit-seal is-head font-mono text-xs font-semibold', colors.emptyHead)}>
@@ -158,7 +161,7 @@ export function EmptyRepositoryNode({ data }: NodeProps<EmptyRepositoryNodeData>
         {data.branchName}
       </span>
       <div className="mt-0.5 rounded border border-dashed border-muted-foreground/20 px-2.5 py-1.5 text-center">
-        <span className="text-[11px] font-medium leading-none text-muted-foreground/55">No commits yet</span>
+        <span className="text-[11px] font-medium leading-none text-muted-foreground">No commits yet</span>
       </div>
     </div>
   )

@@ -6,7 +6,8 @@ needs stable, precomputed repository targets. This guard keeps that generated
 artifact honest without running the full TypeScript replay engine on every CI
 job:
 
-* every authored variant ``case_id`` must have exactly one generated target;
+* every authored variant ``case_id`` - including the legacy module tier cases -
+  must have exactly one generated target;
 * no generated target may exist without an authored variant;
 * every generated target must keep the repository-state containers that the
   backend evaluator expects.
@@ -18,6 +19,7 @@ When a variant solution changes, run:
 
 from __future__ import annotations
 
+import os
 import sys
 from pathlib import Path
 from typing import Any
@@ -50,17 +52,31 @@ REPOSITORY_DICT_KEYS = {
 REPOSITORY_LIST_KEYS = {"commits", "conflicts", "stash_stack", "reflog"}
 
 
-def _load_seed_modules() -> tuple[list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]]:
+def _load_seed_modules() -> tuple[
+    list[dict[str, Any]], list[dict[str, Any]], list[dict[str, Any]], dict[str, Any]
+]:
     sys.path.insert(0, str(BACKEND))
+    # The legacy module specs live in a management command module that imports
+    # Django models at import time, so the app registry has to be ready first.
+    os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
+    import django  # noqa: PLC0415
+
+    django.setup()
+
+    from curriculum.management.commands.seed_legacy_modules import (  # noqa: PLC0415
+        LEGACY_MODULE_LEVELS,
+    )
     from curriculum.seed_data.adventure_levels import ADVENTURE_LEVELS  # noqa: PLC0415
     from curriculum.seed_data.challenges import CHALLENGES  # noqa: PLC0415
     from curriculum.seed_data.generated.generated_targets import TARGET_STATES  # noqa: PLC0415
 
-    return ADVENTURE_LEVELS, CHALLENGES, TARGET_STATES
+    return ADVENTURE_LEVELS, CHALLENGES, LEGACY_MODULE_LEVELS, TARGET_STATES
 
 
 def _collect_case_ids(
-    adventure_levels: list[dict[str, Any]], challenges: list[dict[str, Any]]
+    adventure_levels: list[dict[str, Any]],
+    challenges: list[dict[str, Any]],
+    legacy_module_levels: list[dict[str, Any]],
 ) -> set[str]:
     case_ids: set[str] = set()
     duplicates: set[str] = set()
@@ -82,6 +98,11 @@ def _collect_case_ids(
         for level in challenge.get("levels", []):
             for variant in level.get("variants", []):
                 add(variant.get("case_id"))
+
+    for level in legacy_module_levels:
+        for tier in level.get("tiers", {}).values():
+            for case in tier.get("cases", []):
+                add(case.get("case_id"))
 
     if duplicates:
         raise ValueError(f"duplicate variant case_id(s): {', '.join(sorted(duplicates))}")
@@ -152,8 +173,10 @@ def main() -> int:
         return 1
 
     try:
-        adventure_levels, challenges, targets = _load_seed_modules()
-        authored_case_ids = _collect_case_ids(adventure_levels, challenges)
+        adventure_levels, challenges, legacy_module_levels, targets = _load_seed_modules()
+        authored_case_ids = _collect_case_ids(
+            adventure_levels, challenges, legacy_module_levels
+        )
     except Exception as exc:  # noqa: BLE001 - CI guard should print actionable failures.
         print(f"Could not load seed data: {exc}", file=sys.stderr)
         return 1

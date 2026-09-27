@@ -5,6 +5,7 @@
     "src/main.tsx",
     "src/test/setup.ts",
     "src/test/assetStub.ts",
+    "diagram-review.config.ts",
     "eslint.config.js",
     "vite.config.ts"
   ],

@@ -12,6 +12,7 @@ from practice.services.scaffolding import ScaffoldingService
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import AdventureLevelTierCompletion
 from simulator.services import RepositorySnapshotService
+from tutoring.payloads import tutor_payload
 
 
 def prefetch_run_payload_context(run: AdventureLevelTierRun) -> None:
@@ -66,6 +67,7 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
     steps = list(run.steps.order_by("id")) if include_steps else []
     return {
         "id": run.id,
+        "tutor": tutor_payload(run),
         "replay": run.is_replay,
         "stars": run.stars,
         "status": run.status,
@@ -118,6 +120,7 @@ def command_run_payload(
 ) -> dict:
     payload = {
         "id": run.id,
+        "tutor": tutor_payload(run),
         "replay": run.is_replay,
         "stars": run.stars,
         "status": run.status,

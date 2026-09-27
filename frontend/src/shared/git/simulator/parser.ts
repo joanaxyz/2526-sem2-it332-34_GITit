@@ -4,14 +4,14 @@ import {
   type ParsedGitCommand,
 } from '@/shared/git/simulator/types'
 
-const COMMAND_ALIASES: Record<string, string> = {
+export const COMMAND_ALIASES: Record<string, string> = {
   st: 'status',
   ci: 'commit',
   co: 'checkout',
   br: 'branch',
 }
 
-function shellJoin(parts: string[]) {
+export function shellJoin(parts: string[]) {
   return parts.map((part) => (needsQuote(part) ? quote(part) : part)).join(' ')
 }
 
@@ -52,7 +52,7 @@ export class GitCommandParser {
   }
 }
 
-function splitSafely(command: string) {
+export function splitSafely(command: string) {
   const tokens: string[] = []
   let current = ''
   let quote: '"' | "'" | null = null

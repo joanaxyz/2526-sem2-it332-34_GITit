@@ -45,10 +45,10 @@ class SeedCurriculumHelperMixin:
             "evaluation_spec",
             "target_state",
             "solution_commands",
+            "solution_trajectory",
             "case_id",
             "parameter_context",
             "scenario_context",
-            "scaffold_policy",
             "is_published",
         ]
         rows = []
@@ -67,11 +67,11 @@ class SeedCurriculumHelperMixin:
                             "evaluation_spec": variant.evaluation_spec,
                             "target_state": variant.target_state,
                             "solution_commands": variant.solution_commands,
+                            "solution_trajectory": variant.solution_trajectory,
                             "case_id": variant.case_id,
                             "semantic_key": variant.semantic_key,
                             "parameter_context": variant.parameter_context,
                             "scenario_context": variant.scenario_context,
-                            "scaffold_policy": variant.scaffold_policy,
                             "is_published": True,
                         },
                     )

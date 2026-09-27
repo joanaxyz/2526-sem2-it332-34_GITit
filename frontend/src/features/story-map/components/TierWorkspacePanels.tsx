@@ -11,7 +11,8 @@ import { LiveDagPanel } from '@/shared/level/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/shared/level/components/ProjectStructurePanel'
 import { ResizeHandle } from '@/shared/level/components/ResizeHandle'
 import { TerminalPanel } from '@/shared/level/components/TerminalPanel'
-import type { TerminalPrompt } from '@/shared/level/terminalPrompt'
+import { queryKeys } from '@/shared/api/queryKeys'
+import { useTerminalCwd } from '@/shared/level-runtime/terminalCwd'
 import type { TerminalLine } from '@/shared/level/types'
 import type {
   WorkspaceFileInput,
@@ -106,7 +107,7 @@ export function TierDiagramStage({
         {hasTargetDiagram ? (
           <div className="gameplay-pane" data-tour-target="expected-state">
             <LiveDagPanel
-              title="Expected State · Target"
+              title="Expected State"
               snapshot={run.expected_state!}
               className="flex h-full min-h-0 flex-col"
               contentClassName="h-full min-h-0 flex-1"
@@ -123,6 +124,7 @@ export function TierDiagramStage({
 }
 
 export function TierTerminalStage({
+  teachingActive = false,
   run,
   lines,
   prompt,
@@ -136,9 +138,10 @@ export function TierTerminalStage({
   onResetTerminalPaneResize,
   onCommand,
 }: {
+  teachingActive?: boolean
   run: TierRun
   lines: TerminalLine[]
-  prompt: TerminalPrompt
+  prompt: string
   terminalGridRef: RefObject<HTMLDivElement | null>
   terminalGridStyle: CSSProperties
   mutationPending: boolean
@@ -149,13 +152,14 @@ export function TierTerminalStage({
   onResetTerminalPaneResize: () => void
   onCommand: (command: string) => void
 }) {
+  const cwd = useTerminalCwd(queryKeys.adventureTierRun(run.id), run.repository_state)
   return (
     <div
       ref={terminalGridRef}
       data-testid="terminal-feedback-grid"
       className={cn(
         'gameplay-terminal-grid',
-        run.scaffolding.contextual_feedback && 'has-feedback',
+        (!teachingActive && run.scaffolding.contextual_feedback) && 'has-feedback',
       )}
       style={terminalGridStyle}
     >
@@ -163,6 +167,7 @@ export function TierTerminalStage({
         <TerminalPanel
           lines={lines}
           prompt={prompt}
+          cwd={cwd}
           disabled={run.status !== 'started'}
           runDisabled={mutationPending || dagAnimating || battleAnimating}
           processing={mutationPending}
@@ -170,7 +175,7 @@ export function TierTerminalStage({
           onCommand={onCommand}
         />
       </div>
-      {run.scaffolding.contextual_feedback ? (
+      {!teachingActive && run.scaffolding.contextual_feedback ? (
         <ResizeHandle
           label="Resize terminal and feedback"
           orientation="vertical"
@@ -180,7 +185,7 @@ export function TierTerminalStage({
           onReset={onResetTerminalPaneResize}
         />
       ) : null}
-      {run.scaffolding.contextual_feedback ? (
+      {!teachingActive && run.scaffolding.contextual_feedback ? (
         <div className="gameplay-pane" data-tour-target="feedback">
           <TierContextualFeedbackPanel run={run} />
         </div>

@@ -119,6 +119,11 @@
   --text-2xl: 1.875rem;    /* 30px - page titles */
   --text-3xl: 2.25rem;     /* 36px - hero / display ceiling */
 
+  /* Every workspace pane opens with one eyebrow band of this height, so the
+     terminal, diagram, feedback and project headers line up across the grid. */
+  --workspace-panel-header-height: 2.5rem;
+  --workspace-panel-header-inline: 1rem;
+
   /* Spacing scale (4px base). */
   --space-1: 0.25rem;
   --space-2: 0.5rem;

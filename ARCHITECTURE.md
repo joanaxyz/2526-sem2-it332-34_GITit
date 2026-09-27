@@ -138,6 +138,14 @@ backend awards or rejects persisted progress
 
 This keeps command submission responsive while preventing forged reward-affecting state.
 
+### Workspace Terminal Shell
+
+The terminal also runs a small shell (`frontend/src/shared/git/simulator/shell/`): `pwd ls cd tree cat echo clear` are read-only diagnostics, and `touch mkdir rmdir rm mv cp` plus `echo`/`cat` with `>`/`>>` change the working copy. Shell commands never spend the command budget. File-changing ones are replayed by `backend/common/git/shell_commands.py` from the persisted state through the same `workspace_files` helpers as the Project Files endpoints; the backend's replay, not the browser's `next_state`, becomes the run state.
+
+- The working directory belongs to the terminal, not the repository: it is stored per run on the frontend (`level-runtime/terminalCwd.ts`) and sent as `execution.cwd`. It never enters `repository_state`, so `cd` cannot affect evaluation such as `repository_state_unchanged`.
+- Git reads pathspecs relative to that directory. `gitPathspecs.ts` and `backend/common/git/git_pathspecs.py` rewrite them to project-root paths before simulation and transition verification.
+- Folders with no files live in the optional `directories` list of `repository_state` (omitted when empty). Git ignores them; the Project Files tree shows them, and it hides deleted files unless they are conflicted. A folder emptied by deleting its last file stays on disk.
+
 ## API Contract
 
 The committed API contract lives in:
@@ -267,6 +275,8 @@ database honestly has none rather than synthesising it per request.
 
 `backend/curriculum/seed_data/generated/generated_targets.py` is committed generated output. It exists so normal curriculum seeding can compare repository states without replaying every authored solution at runtime.
 
+`generated_trajectories.py` comes from the same replay. For every solution command it stores fingerprints of the repository in front of that command (`simulator/trajectory.py`), seeded onto each variant as `solution_trajectory`. Fingerprints describe repository meaning (trees, ancestry, refs, index, working tree, conflicts, stash, in-progress operations), not generated commit ids or `last_*` bookkeeping; an `exact` strength also covers file contents and commit messages, a `coarse` strength does not. Authored content gets the same field from the editor's browser replay (`solution_replay`).
+
 Rules:
 
 - Humans edit authored source modules under `backend/curriculum/seed_data/source/` when changing shared fixtures, routing, adventure levels, challenges, and blueprint overlays. Public modules such as `seed_data/adventure_levels.py`, `seed_data/challenges.py`, and `seed_data/blueprint_overlay.py` are compatibility wrappers only.
@@ -275,9 +285,13 @@ Rules:
   - `source/challenge_specs/` composes current blueprint challenges and legacy challenge batches.
   - `source/blueprint/` stores blueprint adventure ledgers in smaller adventure-family modules.
 - Humans do not edit files under `backend/curriculum/seed_data/generated/` directly.
-- After changing a variant initial state, solution commands, or workspace-file edits, run `cd backend && python manage.py generate_targets`.
+- After changing a variant initial state, solution commands, or workspace-file edits, run `cd backend && python manage.py generate_targets`. It rewrites both generated targets and trajectories.
 - `scripts/check_seed_targets.py` is the cheap structural guard.
 - `scripts/check_generated_targets_current.py` is the full replay guard and requires `frontend/node_modules`. CI runs it in a dedicated Python + Node job.
+
+## Command Introductions
+
+`backend/tutoring` introduces a command form the first time a problem needs it. The planner locates the learner's repository on the variant's `solution_trajectory` (learner history resolves routes that revisit a state), takes the next non-diagnostic solution command, and resolves it to one command form: wave forms first, then the published catalog, else a shape derived from the command. Lesson identity is the form's syntax (`form:<usage>`), so the same syntax is one lesson across seeds. A form is not introduced when the player has completed its introduction, solved with it (`SkillMastery.solves`), or run it successfully in any run. Off-route repositories get no lesson. Tier runs expose the result as the nullable `tutor` payload; acknowledgement goes through `POST /api/adventure-tier-runs/{id}/introduction/complete/`.
 
 ## Testing Strategy
 

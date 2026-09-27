@@ -5,6 +5,8 @@ import { AdventureContextPanel } from '@/features/adventures/components/Adventur
 import type { AdventureAttempt, AdventureRun } from '@/features/adventures/types'
 import { ProjectStructurePanel } from '@/shared/level/components/ProjectStructurePanel'
 import { TerminalPanel } from '@/shared/level/components/TerminalPanel'
+import { queryKeys } from '@/shared/api/queryKeys'
+import { useTerminalCwd } from '@/shared/level-runtime/terminalCwd'
 import { WorkspaceEditorOverlay } from '@/shared/level/components/WorkspaceEditorOverlay'
 import { terminalPrompt } from '@/shared/level/terminalPrompt'
 import type { TerminalLine } from '@/shared/level/types'
@@ -59,6 +61,7 @@ export function AdventureWorkspaceMain({
   onCloseEditor: () => void
   onWriteFile: (input: WorkspaceFileInput) => Promise<AdventureRun>
 }) {
+  const cwd = useTerminalCwd(queryKeys.adventureRun(run.id), attempt.repository_state)
   return (
     <main className="gameplay-workspace">
       <aside
@@ -103,11 +106,8 @@ export function AdventureWorkspaceMain({
           <div className="gameplay-pane" data-tour-target="terminal">
             <TerminalPanel
               lines={workspaceLines}
-              prompt={terminalPrompt({
-                username,
-                host: run.story?.slug,
-                repo: repoSlug,
-              })}
+              prompt={terminalPrompt(username)}
+              cwd={cwd}
               disabled={run.status !== 'started'}
               processing={commandPending}
               runDisabled={run.status !== 'started' || commandPending}

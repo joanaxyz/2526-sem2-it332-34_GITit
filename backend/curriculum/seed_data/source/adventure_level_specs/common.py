@@ -6,6 +6,7 @@ import copy
 
 from curriculum.seed_data.blueprint_overlay import BLUEPRINT_ADVENTURE_LEVELS
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
+from curriculum.seed_data.generated.generated_trajectories import SOLUTION_TRAJECTORIES
 from curriculum.seed_data.source.adventure_fixtures import (
     BASE,
     BASE_TREE,
@@ -204,9 +205,9 @@ def v(
         # is caught downstream (builders + seed_curriculum reject an empty target).
         "target_state_template": TARGET_STATES.get(case_id, {}),
         "solution_commands_template": solution,
+        "solution_trajectory_template": SOLUTION_TRAJECTORIES.get(case_id, {}),
         "solution_workspace_files_template": workspace_files or [],
         "evaluation_spec_template": evaluation,
-        "scaffold_policy_template": {},
         # Consumed by `_variant_with_context` (popped, never persisted): the
         # hard-to-retype literals unique to this variant (URL/branch/commit).
         "detail_overrides": details or [],

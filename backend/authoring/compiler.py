@@ -29,6 +29,7 @@ from curriculum.models import (
     CommandSkill,
 )
 from simulator.services import RepositoryStateSimulator
+from simulator.trajectory import build_solution_trajectory
 
 HIDDEN_CHAPTER_NUMBER_BASE = 900_000
 GROUPED_CHAPTER_NUMBER_BASE = 800_000
@@ -459,13 +460,13 @@ class ContentRuntimeCompiler:
                 or {"completion_policy": {"mode": "state_hash"}},
                 "target_state": target_state,
                 "solution_commands": solution_commands,
+                "solution_trajectory": self._solution_trajectory(source),
                 "case_id": case_id,
                 "semantic_key": self._semantic_key(self._parent_key(parent), semantic_source),
                 "parameter_context": source.get("parameter_context") or {},
                 "scenario_context": source.get("scenario_context")
                 or base.get("scenario_context")
                 or {},
-                "scaffold_policy": source.get("scaffold_policy") or {},
                 "is_published": True,
             },
         )[0]
@@ -504,6 +505,19 @@ class ContentRuntimeCompiler:
             candidate = f"{base}-{suffix}"
             suffix += 1
         return candidate
+
+    @staticmethod
+    def _solution_trajectory(authored: dict[str, Any]) -> dict:
+        # The editor replays the solution in the browser engine (like
+        # generate_targets does for seeds). The trajectory only steers tutoring,
+        # so a missing or malformed replay leaves the tutor silent, not broken.
+        replay = authored.get("solution_replay")
+        if not isinstance(replay, dict) or not isinstance(replay.get("steps"), list):
+            return {}
+        try:
+            return build_solution_trajectory(replay)
+        except (AttributeError, TypeError, ValueError):
+            return {}
 
     def _target_state(self, initial_state: dict, authored: dict[str, Any]) -> dict:
         authored_target = authored.get("target_state")

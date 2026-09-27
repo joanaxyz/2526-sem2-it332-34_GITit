@@ -75,8 +75,6 @@ function StoryMap({ ready = true, compact = false }) {
       onStartOrientation={() => undefined}
       onSkipOrientation={() => undefined}
     />
-    <Link to="/shop">Shop tab</Link>
-    <Link to="/home">Home tab</Link>
   </>
 }
 
@@ -87,9 +85,11 @@ function renderJourney(userId: number, entry = '/stories/arcane-spire', ready = 
   return render(<QueryClientProvider client={client}>
     <MemoryRouter initialEntries={[entry]}>
       <OnboardingProvider key={userId} userId={userId}>
-        {/* The wallet chip lives in the app shell topbar on every route, which
-            is where the Shop tour points at the player's balance. */}
+        {/* The wallet chip and nav tabs live in the app shell on every route; the
+            Shop tour points at the wallet chip for the player's balance. */}
         <div data-onboarding="wallet-balance" />
+        <Link to="/shop">Shop tab</Link>
+        <Link to="/home">Home tab</Link>
         <Routes>
           <Route path="/stories/:storySlug" element={<StoryMap ready={ready} compact={compact} />} />
           <Route path="/shop" element={<ShopPage />} />
@@ -207,8 +207,22 @@ describe('first-visit onboarding journey', () => {
     renderJourney(userId, '/shop')
     expect(await screen.findByRole('button', { name: 'Continue without buying' })).toBeEnabled()
     fireEvent.click(screen.getByRole('button', { name: 'Skip setup' }))
-    expect(localStorage.getItem(onboardingStorageKey(userId))).toBe('done')
+    // Skipping the Shop step leaves the Home tour ahead of the player.
+    expect(localStorage.getItem(onboardingStorageKey(userId))).toBe('home')
+    expect(screen.queryByRole('button', { name: 'Continue without buying' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('link', { name: 'Home tab' }))
+    await screen.findByRole('heading', { name: 'Home is one dropdown' })
     expect(shopApi.purchase).not.toHaveBeenCalled()
+  })
+
+  it('keeps the Home tour after the Shop tour is dismissed', async () => {
+    writeOnboardingPhase(311, 'shop')
+    renderJourney(311, '/shop')
+    await screen.findByRole('heading', { name: 'Check your GitCoins' })
+    fireEvent.keyDown(window, { key: 'Escape' })
+    await waitFor(() => expect(localStorage.getItem(onboardingStorageKey(311))).toBe('home'))
+    fireEvent.click(screen.getByRole('link', { name: 'Home tab' }))
+    await screen.findByRole('heading', { name: 'Home is one dropdown' })
   })
 
   it('follows normal navigation, and keeps skip/replay isolated per account even without storage', async () => {

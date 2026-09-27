@@ -8,6 +8,7 @@ import { writePreference } from '@/shared/utils/persistentState'
 import { cn } from '@/shared/utils/cn'
 
 import { CommitActivationContext } from './live-dag/activation'
+import { RepositoryStateMap } from './live-dag/RepositoryStateMap'
 import { MAX_DAG_ZOOM, MIN_DAG_ZOOM, NO_DELTA, VARIANT_COLORS } from './live-dag/constants'
 import { FitViewOnTopologyChange } from './live-dag/FitViewOnTopologyChange'
 import { buildGraph, layoutPositionsCache, normalizeSnapshot, rememberLayoutPositions, snapshotDelta } from './live-dag/graph'
@@ -196,7 +197,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
       )}
       style={{ borderTop: `1.5px solid ${colors.border}` }}
     >
-      <CardHeader className="p-3" style={{ background: colors.headerBg }}>
+      <CardHeader className="workspace-panel-header" style={{ background: colors.headerBg }}>
         <span className={cn('panel-eyebrow', colors.titleClass)}>{title}</span>
         {activity !== 'idle' ? (
           <span className="sr-only" role="status" aria-live="polite">
@@ -204,8 +205,13 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
           </span>
         ) : null}
       </CardHeader>
-      <CardContent className={cn('p-0', contentClassName)}>
-        <div className="relative h-full min-h-0">
+      <CardContent className={cn('p-0 repository-diagram-content', contentClassName)}>
+        <details className="repository-diagram-details app-scrollbar">
+          <summary>Repository details</summary>
+          <RepositoryStateMap snapshot={normalizedSnapshot} />
+          {showRepositoryDetails ? <RepositoryDetails snapshot={normalizedSnapshot} /> : null}
+        </details>
+        <div className="relative repository-history-canvas">
           <div
             className="pointer-events-none absolute inset-0 z-0"
             style={{
@@ -254,7 +260,6 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
           </CommitActivationContext.Provider>
           <CommitDetailsPanel data={activeCommitData ?? null} />
         </div>
-        {showRepositoryDetails ? <RepositoryDetails snapshot={normalizedSnapshot} /> : null}
       </CardContent>
     </Card>
   )

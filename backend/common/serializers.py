@@ -54,6 +54,13 @@ class ClientCommandExecutionSerializer(serializers.Serializer):
         allow_null=True,
         min_value=0,
     )
+    cwd = serializers.CharField(
+        required=False,
+        allow_blank=True,
+        trim_whitespace=False,
+        max_length=240,
+        help_text="Terminal working directory the command ran in, relative to the project root.",
+    )
 
     def validate_next_state(self, value: dict) -> dict:
         encoded = json.dumps(value, separators=(",", ":"), default=str).encode("utf-8")
@@ -70,7 +77,10 @@ class CommandSubmitSerializer(serializers.Serializer):
 
 
 class WorkspaceFileSerializer(serializers.Serializer):
-    """Shared create/write contract for a run workspace file."""
+    """Shared create/write contract for a run workspace file.
+
+    On create, a ``path`` ending in ``/`` makes an empty folder instead of a file.
+    """
 
     path = serializers.CharField(max_length=240)
     content = serializers.CharField(

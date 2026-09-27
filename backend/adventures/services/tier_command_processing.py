@@ -28,7 +28,7 @@ from curriculum.models import CommandForm
 from curriculum.services import ChapterChestService
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from practice.models import CommandStep
-from practice.services.scaffolding import FeedbackGenerationService
+from practice.services.scaffolding import FeedbackGenerationService, ScaffoldingService
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import AdventureLevelTierCompletion
 from progress.wallet import WalletService
@@ -36,6 +36,8 @@ from simulator.services import (
     RepositorySnapshotService,
     RepositoryStateSimulator,
 )
+from tutoring.services.commands import current_feedback, record_command_feedback
+from tutoring.services.planner import plan_introduction
 
 from .selectors import form_solve_targets
 from .tier_history import TierCommandHistoryCache
@@ -81,6 +83,8 @@ class AdventureLevelTierCommandProcessingService:
             expected_client_revision=run.total_attempts,
         )
         previous_state = execution.previous_state
+        introduction = plan_introduction(run)
+        previous_introduction_feedback = current_feedback(run)
         next_state = execution.next_state
         command_result = execution.result
         classification, increment = execution.classification, execution.increment
@@ -222,6 +226,7 @@ class AdventureLevelTierCommandProcessingService:
 
         with span("run_save"):
             run.save(update_fields=sorted(update_fields))
+        record_command_feedback(run, introduction, execution, previous_introduction_feedback)
         with span("response_snapshot"):
             repository_snapshot = repository_response_snapshot(
                 self.snapshotter,
@@ -374,12 +379,10 @@ class AdventureLevelTierCommandProcessingService:
 
 
 def _uses_contextual_feedback(run: AdventureLevelTierRun) -> bool:
-    return run.tier.difficulty == DIFFICULTY_EASY
+    return ScaffoldingService().shows_contextual_feedback(run.tier.difficulty)
 
 
 def _visible_target_state(run: AdventureLevelTierRun) -> dict | None:
-    from common.constants import DIFFICULTY_MEDIUM
-
-    if run.tier.difficulty in (DIFFICULTY_EASY, DIFFICULTY_MEDIUM):
+    if ScaffoldingService().shows_expected_state(run.tier.difficulty):
         return run.selected_variant.target_state
     return None

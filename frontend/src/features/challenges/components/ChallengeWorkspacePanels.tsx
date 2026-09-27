@@ -11,7 +11,8 @@ import { LiveDagPanel } from '@/shared/level/components/LiveDagPanel'
 import { ProjectStructurePanel } from '@/shared/level/components/ProjectStructurePanel'
 import { ResizeHandle } from '@/shared/level/components/ResizeHandle'
 import { TerminalPanel } from '@/shared/level/components/TerminalPanel'
-import type { TerminalPrompt } from '@/shared/level/terminalPrompt'
+import { queryKeys } from '@/shared/api/queryKeys'
+import { useTerminalCwd } from '@/shared/level-runtime/terminalCwd'
 import type { TerminalLine } from '@/shared/level/types'
 import type {
   WorkspaceFileInput,
@@ -159,7 +160,7 @@ export function ChallengeTerminalStage({
 }: {
   run: ChallengeRun
   lines: TerminalLine[]
-  prompt: TerminalPrompt
+  prompt: string
   terminalGridRef: RefObject<HTMLDivElement | null>
   terminalGridStyle: CSSProperties
   mutationPending: boolean
@@ -169,6 +170,7 @@ export function ChallengeTerminalStage({
   onResetTerminalPaneResize: () => void
   onCommand: (command: string) => void
 }) {
+  const cwd = useTerminalCwd(queryKeys.challengeRun(run.id), run.repository_state)
   return (
     <div
       ref={terminalGridRef}
@@ -183,6 +185,7 @@ export function ChallengeTerminalStage({
         <TerminalPanel
           lines={lines}
           prompt={prompt}
+          cwd={cwd}
           disabled={run.status !== 'started'}
           runDisabled={mutationPending || dagAnimating}
           processing={mutationPending}

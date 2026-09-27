@@ -34,7 +34,12 @@ export function useChallengeCommandSubmission(runId: number) {
   const key = queryKeys.challengeRun(runId)
   return useOptimisticGitCommand<ChallengeRun, ChallengeStepLog, ChallengeCommandResponse>({
     queryKey: key,
-    readSession: (run) => ({ repositoryState: run.repository_state as MutableRepositoryState, revision: run.counts.total_attempts, steps: run.steps }),
+    readSession: (run) => ({
+      repositoryState: run.repository_state as MutableRepositoryState,
+      revision: run.counts.total_attempts,
+      steps: run.steps,
+      projectName: run.challenge.slug,
+    }),
     applyOptimisticState,
     replaceSteps,
     createPendingStep,

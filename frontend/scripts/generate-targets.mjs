@@ -2,7 +2,9 @@
 //
 // Replays each authored solution through the SAME browser git engine the learner
 // runs, rejects unprocessable or over-budget routes, and writes
-// {case_id: target_state} to `outputPath`. Driven by
+// {targets: {case_id: target_state}, replays: {case_id: replay}} to `outputPath`.
+// A replay records the state in front of every solution command; the backend
+// fingerprints it into the variant's solution trajectory. Driven by
 // `python manage.py generate_targets` — do not run by hand.
 //
 // The engine is TypeScript with a `@` path alias, so we load it through a Vite
@@ -25,7 +27,8 @@ const server = await createServer({
 })
 
 try {
-  const { executeGitCommand } = await server.ssrLoadModule('/src/shared/git/simulator/engine.ts')
+  const { executeTerminalCommand } = await server.ssrLoadModule('/src/shared/git/simulator/engine.ts')
+  const { shellProgram } = await server.ssrLoadModule('/src/shared/git/simulator/shell/index.ts')
   const { normalizeState } = await server.ssrLoadModule('/src/shared/git/simulator/state.ts')
   const { createWorkspaceFile, writeWorkspaceFile } = await server.ssrLoadModule(
     '/src/shared/git/simulator/workspaceFiles.ts',
@@ -52,6 +55,7 @@ try {
 
   const cases = JSON.parse(readFileSync(inputPath, 'utf8'))
   const targets = {}
+  const replays = {}
 
   for (const [caseId, spec] of Object.entries(cases)) {
     let state = normalizeState(spec.initial_state ?? {})
@@ -79,18 +83,40 @@ try {
       filesByIndex.get(index).push(file)
     }
 
+    const steps = []
+    let finalBeforeEdits = null
+    // The state before authored edits is only worth recording when edits exist:
+    // the learner stands there until they make the edit themselves.
+    const applyEdits = (index) => {
+      const files = filesByIndex.get(index) ?? []
+      const beforeEdits = files.length ? normalizeState(state) : null
+      for (const file of files) state = applyFile(state, file)
+      return beforeEdits
+    }
     try {
       let countedCommands = 0
+      // Shell commands (`cd src`, `mkdir docs`) run in the terminal's working
+      // directory, which carries over between commands like in a real shell.
+      let cwd = ''
       for (let i = 0; i < commands.length; i += 1) {
-        for (const file of filesByIndex.get(i) ?? []) state = applyFile(state, file)
-        const execution = executeGitCommand(state, commands[i])
+        const beforeEdits = applyEdits(i)
+        const terminal = executeTerminalCommand(state, commands[i], { cwd })
+        const execution = terminal.execution
+        cwd = terminal.cwd
+        steps.push({
+          command: commands[i],
+          diagnostic: Boolean(execution.diagnostic),
+          before_edits: beforeEdits,
+          ready: normalizeState(state),
+        })
         if (!execution.processed) {
           throw new Error(
             `solution command ${i + 1}/${commands.length} was rejected: ${JSON.stringify(commands[i])}` +
               ` (${execution.output || `exit ${execution.exit_code}`})`,
           )
         }
-        if (!execution.diagnostic) countedCommands += 1
+        // Shell commands are free at runtime, file-changing ones included.
+        if (!execution.diagnostic && !shellProgram(commands[i])) countedCommands += 1
         if (countedCommands > maxCountedCommands) {
           throw new Error(
             `solution exceeds its ${maxCountedCommands}-command budget at command ` +
@@ -99,7 +125,7 @@ try {
         }
         state = execution.next_state
       }
-      for (const file of filesByIndex.get(commands.length) ?? []) state = applyFile(state, file)
+      finalBeforeEdits = applyEdits(commands.length)
     } catch (error) {
       console.error(`Failed to replay case '${caseId}': ${error?.message ?? error}`)
       process.exitCode = 1
@@ -109,9 +135,10 @@ try {
     // as `next_state`), not a presentation snapshot - so a target matches the
     // learner's normalized final state key-for-key (incl. read-only scenarios).
     targets[caseId] = normalizeState(state)
+    replays[caseId] = { steps, final: targets[caseId], final_before_edits: finalBeforeEdits }
   }
 
-  writeFileSync(outputPath, JSON.stringify(targets))
+  writeFileSync(outputPath, JSON.stringify({ targets, replays }))
 } finally {
   await server.close()
 }

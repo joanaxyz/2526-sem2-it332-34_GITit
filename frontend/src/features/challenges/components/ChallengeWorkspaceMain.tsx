@@ -9,7 +9,6 @@ import {
 import type { ChallengeRun } from '@/features/challenges/types'
 import { ResizeHandle } from '@/shared/level/components/ResizeHandle'
 import { WorkspaceEditorOverlay } from '@/shared/level/components/WorkspaceEditorOverlay'
-import type { TerminalPrompt } from '@/shared/level/terminalPrompt'
 import type { TerminalLine } from '@/shared/level/types'
 import type {
   WorkspaceFileInput,
@@ -54,7 +53,7 @@ export function ChallengeWorkspaceMain({
 }: {
   run: ChallengeRun
   lines: TerminalLine[]
-  shellPrompt: TerminalPrompt
+  shellPrompt: string
   projectFilesOpen: boolean
   workspaceEditorPath: string | null
   createDisabled: boolean

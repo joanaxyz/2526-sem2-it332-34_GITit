@@ -53,9 +53,9 @@ export type ApiSchemas = {
   "AdventureCommandRunResponse": ApiSchemas["AdventureRunResponse"] | ApiSchemas["AdventureRunPatchResponse"]
   "AdventureLevelLibraryResponse": { "book": { [key: string]: JsonValue }; "run": ApiSchemas["AdventureRunResponse"] }
   "AdventureLevelTierCommandResponse": { "command_family": string; "command_outcome": { [key: string]: JsonValue }; "diagnostic_metadata": Array<string>; "exit_code": number; "run": ApiSchemas["AdventureLevelTierCommandRunResponse"]; "stderr": string; "stdout": string; "step": ApiSchemas["AdventureLevelTierCommandStepResponse"] }
-  "AdventureLevelTierCommandRunResponse": { "completed_at": string | null; "completion"?: { [key: string]: JsonValue } | null; "counts": { [key: string]: JsonValue }; "failure_reason": string | null; "id": number; "next_difficulty"?: { [key: string]: JsonValue } | null; "progress"?: { [key: string]: JsonValue }; "replay": boolean; "repository_state": { [key: string]: JsonValue }; "rewards"?: { [key: string]: JsonValue } | null; "stars": number; "status": ApiSchemas["GameplayRunStatus"]; "visualization": { [key: string]: JsonValue } }
+  "AdventureLevelTierCommandRunResponse": { "completed_at": string | null; "completion"?: { [key: string]: JsonValue } | null; "counts": { [key: string]: JsonValue }; "failure_reason": string | null; "id": number; "next_difficulty"?: { [key: string]: JsonValue } | null; "progress"?: { [key: string]: JsonValue }; "replay": boolean; "repository_state": { [key: string]: JsonValue }; "rewards"?: { [key: string]: JsonValue } | null; "stars": number; "status": ApiSchemas["GameplayRunStatus"]; "tutor": ApiSchemas["CommandIntroductionResponse"] | null; "visualization": { [key: string]: JsonValue } }
   "AdventureLevelTierCommandStepResponse": { "command_classification": string; "command_text": string; "contextual_feedback": string; "created_at": string; "evaluation_result": string; "id": number; "result_category": string; "terminal_output": string; "visualization_snapshot": { [key: string]: JsonValue } }
-  "AdventureLevelTierRunResponse": { "chapter": { [key: string]: JsonValue } | null; "completed_at": string | null; "completion": { [key: string]: JsonValue } | null; "counts": { [key: string]: JsonValue }; "difficulty": string | null; "expected_state": { [key: string]: JsonValue } | null; "failure_reason": string | null; "id": number; "next_difficulty": { [key: string]: JsonValue } | null; "policy": { [key: string]: JsonValue }; "progress": { [key: string]: JsonValue }; "replay": boolean; "repository_state": { [key: string]: JsonValue }; "scaffolding": { [key: string]: JsonValue }; "scenario_context": { [key: string]: JsonValue }; "stars": number; "status": ApiSchemas["GameplayRunStatus"]; "steps": Array<ApiSchemas["AdventureLevelTierRunStepResponse"]>; "story": { [key: string]: JsonValue } | null; "tier": { [key: string]: JsonValue }; "variant": { [key: string]: JsonValue }; "visualization": { [key: string]: JsonValue } }
+  "AdventureLevelTierRunResponse": { "chapter": { [key: string]: JsonValue } | null; "completed_at": string | null; "completion": { [key: string]: JsonValue } | null; "counts": { [key: string]: JsonValue }; "difficulty": string | null; "expected_state": { [key: string]: JsonValue } | null; "failure_reason": string | null; "id": number; "next_difficulty": { [key: string]: JsonValue } | null; "policy": { [key: string]: JsonValue }; "progress": { [key: string]: JsonValue }; "replay": boolean; "repository_state": { [key: string]: JsonValue }; "scaffolding": { [key: string]: JsonValue }; "scenario_context": { [key: string]: JsonValue }; "stars": number; "status": ApiSchemas["GameplayRunStatus"]; "steps": Array<ApiSchemas["AdventureLevelTierRunStepResponse"]>; "story": { [key: string]: JsonValue } | null; "tier": { [key: string]: JsonValue }; "tutor": ApiSchemas["CommandIntroductionResponse"] | null; "variant": { [key: string]: JsonValue }; "visualization": { [key: string]: JsonValue } }
   "AdventureLevelTierRunStart": { "prior_run_id"?: number | null; "replay"?: boolean; "source_entry_point"?: ApiSchemas["SourceEntryPointEnum"] }
   "AdventureLevelTierRunStepResponse": { "command_classification": string; "command_text": string; "contextual_feedback": string; "created_at": string; "id": number; "result_category": string; "terminal_output": string; "visualization_snapshot": { [key: string]: JsonValue } }
   "AdventureRunPatchResponse": { "current_attempt": { [key: string]: JsonValue }; "id": number; "partial": ApiSchemas["PartialEnum"]; "status": ApiSchemas["GameplayRunStatus"] }
@@ -73,9 +73,11 @@ export type ApiSchemas = {
   "ChapterOrientationLessonDetail": { "content_html": string; "highest_step_seen": number; "id": number; "interaction_steps": JsonValue; "is_complete": boolean; "scoped_css": string; "slug": string; "sort_order": number; "subtitle": string; "title": string }
   "ChapterOrientationLessonList": { "id": number; "is_complete": boolean; "slug": string; "sort_order": number; "subtitle": string; "title": string }
   "ChapterStory": { "id": number; "slug": string; "title": string; "world_slug": string }
-  "ClientCommandExecution": { "client_run_revision"?: number | null; "command_family": string; "diagnostic": boolean; "diagnostic_metadata": Array<string>; "exit_code": number; "next_state": { [key: string]: JsonValue }; "normalized_command": string; "output": string; "processed": boolean; "stderr": string; "stdout": string }
+  "ClientCommandExecution": { "client_run_revision"?: number | null; "command_family": string; "cwd"?: string; "diagnostic": boolean; "diagnostic_metadata": Array<string>; "exit_code": number; "next_state": { [key: string]: JsonValue }; "normalized_command": string; "output": string; "processed": boolean; "stderr": string; "stdout": string }
   "CommandFormPreviewResponse": { "command_preview": { [key: string]: JsonValue }; "id": number; "is_playable": boolean; "label": string; "skill": ApiSchemas["CommandFormPreviewSkillResponse"]; "slug": string; "summary": string; "usage_form": string }
   "CommandFormPreviewSkillResponse": { "base_command": string; "id": number; "slug": string; "title": string }
+  "CommandIntroductionForm": { "label": string; "summary": string; "teaching_key": string; "usage_form": string }
+  "CommandIntroductionResponse": { "changes": Array<ApiSchemas["RepositoryChange"]>; "command_form": ApiSchemas["CommandIntroductionForm"]; "completion_token": string | null; "context_id": string; "example_command": string | null; "explanation": string | null; "needs": Array<ApiSchemas["RepositoryChange"]>; "phase": ApiSchemas["PhaseEnum"]; "run_revision": number; "teaching_key": string; "title": string; "verdict": ApiSchemas["VerdictEnum"] | ApiSchemas["NullEnum"] | null }
   "CommandSubmit": { "command": string; "execution": ApiSchemas["ClientCommandExecution"] }
   "ContentDefinition": { "chapter_id": number | null; "command_family": string; "created_at": string; "definition": { [key: string]: JsonValue }; "difficulty": string; "id": number; "kind": ApiSchemas["KindA5eEnum"]; "official_chapter_id": number | null; "owner_id": number | null; "published_at": string | null; "slug": string; "source_definition_id": number | null; "status": ApiSchemas["StatusEnum"]; "summary": string; "tags": Array<string>; "title": string; "updated_at": string; "validation_errors": Array<ApiSchemas["ValidationErrorRow"]>; "visibility": ApiSchemas["VisibilityEnum"] }
   "ContentDefinitionCreateRequest": { "chapter"?: number | null; "command_family"?: string; "definition"?: { [key: string]: JsonValue }; "difficulty"?: string; "kind": ApiSchemas["KindA5eEnum"]; "official_chapter"?: number | null; "slug": string; "summary"?: string; "tags"?: Array<string>; "title": string; "visibility"?: ApiSchemas["VisibilityEnum"] }
@@ -102,6 +104,8 @@ export type ApiSchemas = {
   "DrillRunStateResponse": { "resume": ApiSchemas["DrillResume"] | null }
   "DrillSequence": { "label": string; "steps": Array<string>; "task": string }
   "GameplayRunStatus": "started" | "completed" | "failed" | "abandoned"
+  "IntroductionComplete": { "token": string }
+  "IntroductionCompleteResponse": { "tutor": ApiSchemas["CommandIntroductionResponse"] | null }
   "KeyEnum": "shop-purchases"
   "KindA5eEnum": "adventure" | "challenge" | "lesson"
   "LearnedSkillResponse": { "base_command": string; "chapter_id"?: number | null; "chapter_number": number; "chapter_title": string; "id": number; "slug": string; "summary": string; "title": string }
@@ -109,6 +113,7 @@ export type ApiSchemas = {
   "LevelDrillPlanResponse": { "available": boolean; "cards": Array<ApiSchemas["DrillCard"]>; "level": ApiSchemas["DrillLevel"]; "progress": ApiSchemas["DrillProgress"]; "resume": ApiSchemas["DrillResume"] | null; "sequence": ApiSchemas["DrillSequence"] | null }
   "Login": { "identifier": string; "password": string }
   "MotionModeEnum": "system" | "reduced" | "full"
+  "NullEnum": null
   "OnboardingPhaseEnum": "welcome" | "orientation" | "stories" | "shop" | "purchase" | "home" | "equip" | "done"
   "PartialEnum": true
   "PasswordChange": { "current_password": string; "password": string; "password_confirm": string }
@@ -121,10 +126,13 @@ export type ApiSchemas = {
   "PerformanceKpiSet": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"] }
   "PerformanceModule": { "arc": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "number": number; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"]; "title": string }
   "PerformanceSummaryResponse": { "completed_sessions": number; "kpis": ApiSchemas["PerformanceKpiSet"]; "modules": Array<ApiSchemas["PerformanceModule"]> }
+  "PhaseEnum": "introduction" | "feedback"
   "PlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
   "RateMetric": { "denominator": number; "numerator": number; "value": number | null }
   "Register": { "email": string; "password": string; "password_confirm": string; "username": string }
   "RegisterResponse": { "user": ApiSchemas["User"] }
+  "RepositoryChange": { "kind": ApiSchemas["RepositoryChangeKindEnum"]; "text": string }
+  "RepositoryChangeKindEnum": "repository" | "commit" | "branch" | "head" | "staging" | "working_tree" | "conflict" | "tag" | "remote" | "config" | "stash" | "operation"
   "RuntimeStepResponse": { "command_text": string; "id": number; "result_category": string; "terminal_output": string }
   "SessionResponse": { "access": string; "user": ApiSchemas["User"] }
   "ShopEquipResponse": { "active_companion": string | null; "shop": ApiSchemas["ShopResponse"] }
@@ -144,6 +152,7 @@ export type ApiSchemas = {
   "StoryPrerequisite": { "completed": boolean; "slug": string; "title": string }
   "User": { "email": string; "id": number; "is_staff": boolean; "username": string }
   "ValidationErrorRow": { "field": string; "message": string }
+  "VerdictEnum": "correct" | "incorrect"
   "VisibilityEnum": "private" | "public"
   "WalletSummary": { "balance": number }
   "WalletSummaryResponse": { "balance": number }
@@ -179,6 +188,7 @@ export type ApiPath =
   | "/api/adventure-runs/{run_id}/submit-command/"
   | "/api/adventure-tier-runs/{run_id}/"
   | "/api/adventure-tier-runs/{run_id}/files/"
+  | "/api/adventure-tier-runs/{run_id}/introduction/complete/"
   | "/api/adventure-tier-runs/{run_id}/retry/"
   | "/api/adventure-tier-runs/{run_id}/submit-command/"
   | "/api/adventures/{adventure_slug}/runs/"
@@ -258,6 +268,7 @@ export type ApiMethodByPath = {
   "/api/adventure-runs/{run_id}/submit-command/": "POST"
   "/api/adventure-tier-runs/{run_id}/": "DELETE" | "GET"
   "/api/adventure-tier-runs/{run_id}/files/": "DELETE" | "PATCH" | "POST" | "PUT"
+  "/api/adventure-tier-runs/{run_id}/introduction/complete/": "POST"
   "/api/adventure-tier-runs/{run_id}/retry/": "POST"
   "/api/adventure-tier-runs/{run_id}/submit-command/": "POST"
   "/api/adventures/{adventure_slug}/runs/": "POST"
@@ -348,6 +359,7 @@ export const apiOperations = {
   adventure_tier_runs_files_partial_update: { method: "PATCH", path: "/api/adventure-tier-runs/{run_id}/files/", operationId: "adventure_tier_runs_files_partial_update", tags: ["adventure-tier-runs"] },
   adventure_tier_runs_files_create: { method: "POST", path: "/api/adventure-tier-runs/{run_id}/files/", operationId: "adventure_tier_runs_files_create", tags: ["adventure-tier-runs"] },
   adventure_tier_runs_files_update: { method: "PUT", path: "/api/adventure-tier-runs/{run_id}/files/", operationId: "adventure_tier_runs_files_update", tags: ["adventure-tier-runs"] },
+  command_introduction_complete: { method: "POST", path: "/api/adventure-tier-runs/{run_id}/introduction/complete/", operationId: "command_introduction_complete", tags: ["adventure-tier-runs"] },
   adventure_tier_runs_retry_create: { method: "POST", path: "/api/adventure-tier-runs/{run_id}/retry/", operationId: "adventure_tier_runs_retry_create", tags: ["adventure-tier-runs"] },
   adventure_tier_runs_submit_command_create: { method: "POST", path: "/api/adventure-tier-runs/{run_id}/submit-command/", operationId: "adventure_tier_runs_submit_command_create", tags: ["adventure-tier-runs"] },
   adventures_runs_create: { method: "POST", path: "/api/adventures/{adventure_slug}/runs/", operationId: "adventures_runs_create", tags: ["adventures"] },
@@ -450,6 +462,7 @@ export type ApiRequestBodyByOperation = {
   adventure_tier_runs_files_partial_update: ApiSchemas["WorkspaceFile"]
   adventure_tier_runs_files_create: ApiSchemas["WorkspaceFile"]
   adventure_tier_runs_files_update: ApiSchemas["WorkspaceFileRename"]
+  command_introduction_complete: ApiSchemas["IntroductionComplete"]
   adventure_tier_runs_retry_create: null
   adventure_tier_runs_submit_command_create: ApiSchemas["CommandSubmit"]
   adventures_runs_create: null
@@ -549,6 +562,7 @@ export type ApiResponseBodyByOperation = {
   adventure_tier_runs_files_partial_update: ApiSchemas["AdventureLevelTierRunResponse"]
   adventure_tier_runs_files_create: ApiSchemas["AdventureLevelTierRunResponse"]
   adventure_tier_runs_files_update: ApiSchemas["AdventureLevelTierRunResponse"]
+  command_introduction_complete: ApiSchemas["IntroductionCompleteResponse"]
   adventure_tier_runs_retry_create: ApiSchemas["AdventureLevelTierRunResponse"]
   adventure_tier_runs_submit_command_create: ApiSchemas["AdventureLevelTierCommandResponse"]
   adventures_runs_create: ApiSchemas["AdventureRunResponse"]

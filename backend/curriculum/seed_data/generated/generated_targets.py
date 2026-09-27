@@ -193,6 +193,1516 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
+  "amend-easy-forgot": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/login.py": {
+            "after": "src/login.py-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/login.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add auth module",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/login.py": "src/login.py-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/login.py": {
+            "after": "src/login.py-committed-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/logout.py": {
+            "after": "logout-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/login.py": "added",
+          "src/logout.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Add auth module",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/login.py": "src/login.py-committed-v1",
+          "src/logout.py": "logout-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "amend-easy-login-copy-message": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/login.js": {
+            "after": "src/login.js-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/login.js": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Update text",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/login.js": "src/login.js-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/login.js": {
+            "after": "src/login.js-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/login.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Clarify login copy",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/login.js": "src/login.js-committed-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "amend-easy-navbar-message": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "styles/navbar.css": {
+            "after": "styles/navbar.css-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "styles/navbar.css": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "CSS updates",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "styles/navbar.css": "styles/navbar.css-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "styles/navbar.css": {
+            "after": "styles/navbar.css-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "styles/navbar.css": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Adjust navbar spacing",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "styles/navbar.css": "styles/navbar.css-committed-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "amend-easy-readme-message": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "README.md-committed-v1",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Update README",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "README.md-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "README.md": {
+            "after": "README.md-committed-v1",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Clarify setup requirements",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "README.md-committed-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "amend-easy-typo": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "main.py": {
+            "after": "main.py-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "main.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Initiall commit",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "main.py": "main.py-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "main.py": {
+            "after": "main.py-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "main.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "main.py": "main.py-committed-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "amend-hard-auth-message-and-test": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "src/auth.py-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Auth changes",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "src/auth.py-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.py": {
+            "after": "src/auth.py-committed-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "tests/test_auth.py": {
+            "after": "auth-test-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added",
+          "tests/test_auth.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Add auth validation coverage",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "src/auth.py-committed-v1",
+          "tests/test_auth.py": "auth-test-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "amend-hard-convention": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "terraform/staging.tf": {
+            "after": "terraform/staging.tf-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "terraform/staging.tf": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "terraform configs have been updated for staging env",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "terraform/staging.tf": "terraform/staging.tf-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "terraform/staging.tf": {
+            "after": "terraform/staging.tf-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "terraform/staging.tf": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Update Terraform staging environment configuration",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "terraform/staging.tf": "terraform/staging.tf-committed-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "amend-hard-export-message-and-doc": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/export.py": {
+            "after": "src/export.py-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/export.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Export update",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/export.py": "src/export.py-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "docs/export.md": {
+            "after": "export-docs-v3",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/export.py": {
+            "after": "src/export.py-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/export.md": "added",
+          "src/export.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Document export validation behavior",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/export.md": "export-docs-v3",
+          "src/export.py": "src/export.py-committed-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "amend-hard-profile-message-and-layout": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/profile-card.js": {
+            "after": "src/profile-card.js-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/profile-card.js": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Update profile stuff",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/profile-card.js": "src/profile-card.js-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/profile-card.js": {
+            "after": "src/profile-card.js-committed-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/profile-layout.css": {
+            "after": "profile-layout-css-v3",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/profile-card.js": "added",
+          "styles/profile-layout.css": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Polish profile card layout",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/profile-card.js": "src/profile-card.js-committed-v1",
+          "styles/profile-layout.css": "profile-layout-css-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "amend-med-both": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "src/parser.py-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "update stuff",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "src/parser.py-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "docs/CHANGELOG.md": {
+            "after": "changelog-v2",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/parser.py": {
+            "after": "src/parser.py-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/CHANGELOG.md": "added",
+          "src/parser.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Add parser feature and update changelog",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/CHANGELOG.md": "changelog-v2",
+          "src/parser.py": "src/parser.py-committed-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "amend-medium-export-doc": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/export.py": {
+            "after": "src/export.py-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/export.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Document export flow update",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/export.py": "src/export.py-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "docs/export.md": {
+            "after": "export-docs-v2",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/export.py": {
+            "after": "src/export.py-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/export.md": "added",
+          "src/export.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Document export flow update",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/export.md": "export-docs-v2",
+          "src/export.py": "src/export.py-committed-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "amend-medium-profile-missing-css": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/profile-card.js": {
+            "after": "src/profile-card.js-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/profile-card.js": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Update profile card layout",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/profile-card.js": "src/profile-card.js-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/profile-card.js": {
+            "after": "src/profile-card.js-committed-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/profile-card.css": {
+            "after": "profile-css-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/profile-card.js": "added",
+          "styles/profile-card.css": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Update profile card layout",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/profile-card.js": "src/profile-card.js-committed-v1",
+          "styles/profile-card.css": "profile-css-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "amend-medium-search-template": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/search.js": {
+            "after": "src/search.js-committed-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/search.js": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Refine search results view",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.js": "src/search.js-committed-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/search.js": {
+            "after": "src/search.js-committed-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "templates/search.html": {
+            "after": "search-template-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/search.js": "added",
+          "templates/search.html": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Refine search results view",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.js": "src/search.js-committed-v1",
+          "templates/search.html": "search-template-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c0",
+    "last_amend_replaced_commit": "c2",
+    "operation_metadata": {
+      "last_amend_created_commit": "c0",
+      "last_amend_replaced_commit": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      },
+      {
+        "message": "commit --amend: replaced c2",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {
+      "c2": "c0"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
   "amend-message-copy": {
     "branches": {
       "main": "c2"
@@ -537,6 +2047,4316 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {
       "c1": "c2"
     },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bc-easy-capstone-db": {
+    "branches": {
+      "feature/database-models": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/database-models",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "feature/database-models",
+    "last_switch_branch": "feature/database-models",
+    "last_switched_to": "feature/database-models",
+    "operation_metadata": {
+      "last_branch_created": "feature/database-models",
+      "last_switch_branch": "feature/database-models",
+      "last_switched_to": "feature/database-models"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bc-easy-corp-hotfix": {
+    "branches": {
+      "hotfix/session-timeout": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "hotfix/session-timeout",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "hotfix/session-timeout",
+    "last_switch_branch": "hotfix/session-timeout",
+    "last_switched_to": "hotfix/session-timeout",
+    "operation_metadata": {
+      "last_branch_created": "hotfix/session-timeout",
+      "last_switch_branch": "hotfix/session-timeout",
+      "last_switched_to": "hotfix/session-timeout"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bc-hard-review-snap": {
+    "branches": {
+      "main": "c2",
+      "review/v1-snapshot": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial release snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "modified",
+          "src/app.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Latest main work",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_branch_created": "review/v1-snapshot",
+    "last_switch_branch": "main",
+    "last_switched_to": "main",
+    "operation_metadata": {
+      "last_branch_created": "review/v1-snapshot",
+      "last_switch_branch": "main",
+      "last_switched_to": "main"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bc-med-oss-develop": {
+    "branches": {
+      "develop": "c2",
+      "feature/docs-update": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap OSS project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/core.py": {
+            "after": "core-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/core.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Refactor core",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/core.py": "core-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/docs-update",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_branch_created": "feature/docs-update",
+    "last_switch_branch": "feature/docs-update",
+    "last_switched_to": "feature/docs-update",
+    "operation_metadata": {
+      "last_branch_created": "feature/docs-update",
+      "last_switch_branch": "feature/docs-update",
+      "last_switched_to": "feature/docs-update"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "be6": {
+    "branches": {
+      "feature/recovery": "c5",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "app-base",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/feature.ts": {
+            "after": "feature-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/app.ts": "added",
+          "src/feature.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/app.ts": "app-base",
+          "src/feature.ts": "feature-base"
+        }
+      },
+      {
+        "changes": {
+          "src/app.ts": {
+            "after": "app-v2",
+            "before": "app-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/app.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/app.ts": "app-v2",
+          "src/feature.ts": "feature-base"
+        }
+      },
+      {
+        "changes": {
+          "src/feature.ts": {
+            "after": "feature-v2",
+            "before": "feature-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/feature.ts": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature work part 1",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/app.ts": "app-base",
+          "src/feature.ts": "feature-v2"
+        }
+      },
+      {
+        "changes": {
+          "src/feature.ts": {
+            "after": "feature-v3",
+            "before": "feature-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/feature.ts": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Feature work part 2",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "src/app.ts": "app-base",
+          "src/feature.ts": "feature-v3"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/feature.ts": {
+            "after": "feature-v2",
+            "before": "feature-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/feature.ts": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Feature work part 1",
+        "order": 4,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/app.ts": "app-v2",
+          "src/feature.ts": "feature-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/feature.ts": {
+            "after": "feature-v3",
+            "before": "feature-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/feature.ts": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Feature work part 2",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "src/app.ts": "app-v2",
+          "src/feature.ts": "feature-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/recovery",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c5",
+    "last_rebase_onto": null,
+    "last_rebase_replayed_commits": [
+      "c4",
+      "c5"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c1",
+    "operation_metadata": {
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c5",
+      "last_rebase_onto": null,
+      "last_rebase_replayed_commits": [
+        "c4",
+        "c5"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "be7": {
+    "branches": {
+      "feature/search-filters": "c5",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/search.ts": {
+            "after": "search-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/shell.ts": {
+            "after": "shell-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/search.ts": "added",
+          "src/shell.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/search.ts": "search-v1",
+          "src/shell.ts": "shell-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/shell.ts": {
+            "after": "shell-v2",
+            "before": "shell-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/shell.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Update app shell",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/search.ts": "search-v1",
+          "src/shell.ts": "shell-v2"
+        }
+      },
+      {
+        "changes": {
+          "src/filters.ts": {
+            "after": "filters-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/filters.ts": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add filter model",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/filters.ts": "filters-v1",
+          "src/search.ts": "search-v1",
+          "src/shell.ts": "shell-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/search.ts": {
+            "after": "search-v2",
+            "before": "search-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.ts": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Wire filters into search",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "src/filters.ts": "filters-v1",
+          "src/search.ts": "search-v2",
+          "src/shell.ts": "shell-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/filters.ts": {
+            "after": "filters-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/filters.ts": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Add filter model",
+        "order": 4,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/filters.ts": "filters-v1",
+          "src/search.ts": "search-v1",
+          "src/shell.ts": "shell-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/search.ts": {
+            "after": "search-v2",
+            "before": "search-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.ts": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Wire filters into search",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "src/filters.ts": "filters-v1",
+          "src/search.ts": "search-v2",
+          "src/shell.ts": "shell-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/search-filters",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c5",
+    "last_rebase_onto": null,
+    "last_rebase_replayed_commits": [
+      "c4",
+      "c5"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c1",
+    "operation_metadata": {
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c5",
+      "last_rebase_onto": null,
+      "last_rebase_replayed_commits": [
+        "c4",
+        "c5"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "be8": {
+    "branches": {
+      "feature/cli-flags": "c8",
+      "main": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "cli/main.py": {
+            "after": "main-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "docs/usage.md": {
+            "after": "usage-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "cli/main.py": "added",
+          "docs/usage.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v1"
+        }
+      },
+      {
+        "changes": {
+          "docs/usage.md": {
+            "after": "usage-v2",
+            "before": "usage-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "docs/usage.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix typo in usage docs",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2"
+        }
+      },
+      {
+        "changes": {
+          "VERSION": {
+            "after": "1.1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "VERSION": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Bump version to 1.1",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "VERSION": "1.1",
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2"
+        }
+      },
+      {
+        "changes": {
+          "cli/flags.py": {
+            "after": "flags-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "cli/flags.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Parse --verbose flag",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "cli/flags.py": "flags-v1",
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v1"
+        }
+      },
+      {
+        "changes": {
+          "cli/flags.py": {
+            "after": "flags-v2",
+            "before": "flags-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "cli/flags.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Parse --quiet flag",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "cli/flags.py": "flags-v2",
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v1"
+        }
+      },
+      {
+        "changes": {
+          "cli/main.py": {
+            "after": "main-v2",
+            "before": "main-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "cli/main.py": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Use flags in main",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "cli/flags.py": "flags-v2",
+          "cli/main.py": "main-v2",
+          "docs/usage.md": "usage-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "cli/flags.py": {
+            "after": "flags-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "cli/flags.py": "added"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Parse --verbose flag",
+        "order": 6,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "VERSION": "1.1",
+          "cli/flags.py": "flags-v1",
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "cli/flags.py": {
+            "after": "flags-v2",
+            "before": "flags-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "cli/flags.py": "modified"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Parse --quiet flag",
+        "order": 7,
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "VERSION": "1.1",
+          "cli/flags.py": "flags-v2",
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "cli/main.py": {
+            "after": "main-v2",
+            "before": "main-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "cli/main.py": "modified"
+        },
+        "id": "c8",
+        "is_merge": false,
+        "message": "Use flags in main",
+        "order": 8,
+        "parents": [
+          "c7"
+        ],
+        "tree": {
+          "VERSION": "1.1",
+          "cli/flags.py": "flags-v2",
+          "cli/main.py": "main-v2",
+          "docs/usage.md": "usage-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/cli-flags",
+      "target": "c8",
+      "type": "branch"
+    },
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c8",
+    "last_rebase_onto": null,
+    "last_rebase_replayed_commits": [
+      "c6",
+      "c7",
+      "c8"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c2",
+    "operation_metadata": {
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c8",
+      "last_rebase_onto": null,
+      "last_rebase_replayed_commits": [
+        "c6",
+        "c7",
+        "c8"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c8"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bh6": {
+    "branches": {
+      "feature/cli-flags": "c9",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "cli/main.py": {
+            "after": "main-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "docs/usage.md": {
+            "after": "usage-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "cli/main.py": "added",
+          "docs/usage.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v1"
+        }
+      },
+      {
+        "changes": {
+          "docs/usage.md": {
+            "after": "usage-v2",
+            "before": "usage-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "docs/usage.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix typo in usage docs",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2"
+        }
+      },
+      {
+        "changes": {
+          "cli/flags.py": {
+            "after": "flags-v1-verbose",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "cli/flags.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Parse --verbose flag",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "cli/flags.py": "flags-v1-verbose",
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v1"
+        }
+      },
+      {
+        "changes": {
+          "cli/quiet.py": {
+            "after": "quiet-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "cli/quiet.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Parse --quiet flag",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "cli/flags.py": "flags-v1-verbose",
+          "cli/main.py": "main-v1",
+          "cli/quiet.py": "quiet-v1",
+          "docs/usage.md": "usage-v1"
+        }
+      },
+      {
+        "changes": {
+          "cli/main.py": {
+            "after": "main-v2",
+            "before": "main-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "cli/main.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Use flags in main",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "cli/flags.py": "flags-v1-verbose",
+          "cli/main.py": "main-v2",
+          "cli/quiet.py": "quiet-v1",
+          "docs/usage.md": "usage-v1"
+        }
+      },
+      {
+        "changes": {
+          "cli/flags.py": {
+            "after": "flags-v1-verbose",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "cli/flags.py": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Parse --verbose flag",
+        "order": 5,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "cli/flags.py": "flags-v1-verbose",
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2"
+        }
+      },
+      {
+        "changes": {
+          "cli/main.py": {
+            "after": "main-v2",
+            "before": "main-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "cli/main.py": "modified"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Use flags in main",
+        "order": 6,
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "cli/flags.py": "flags-v1-verbose",
+          "cli/main.py": "main-v2",
+          "docs/usage.md": "usage-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "cli/flags.py": {
+            "after": "flags-v1-verbose",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "cli/flags.py": "added"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Parse --verbose flag",
+        "order": 7,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "cli/flags.py": "flags-v1-verbose",
+          "cli/main.py": "main-v1",
+          "docs/usage.md": "usage-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "cli/quiet.py": {
+            "after": "quiet-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "cli/quiet.py": "added"
+        },
+        "id": "c8",
+        "is_merge": false,
+        "message": "Parse --quiet flag",
+        "order": 8,
+        "parents": [
+          "c7"
+        ],
+        "tree": {
+          "cli/flags.py": "flags-v1-verbose",
+          "cli/main.py": "main-v1",
+          "cli/quiet.py": "quiet-v1",
+          "docs/usage.md": "usage-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "cli/main.py": {
+            "after": "main-v2",
+            "before": "main-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "cli/main.py": "modified"
+        },
+        "id": "c9",
+        "is_merge": false,
+        "message": "Use flags in main",
+        "order": 9,
+        "parents": [
+          "c8"
+        ],
+        "tree": {
+          "cli/flags.py": "flags-v1-verbose",
+          "cli/main.py": "main-v2",
+          "cli/quiet.py": "quiet-v1",
+          "docs/usage.md": "usage-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/cli-flags",
+      "target": "c9",
+      "type": "branch"
+    },
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c9",
+    "last_rebase_onto": null,
+    "last_rebase_replayed_commits": [
+      "c7",
+      "c8",
+      "c9"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c1",
+    "last_reset_mode": "hard",
+    "last_reset_previous_head": "c6",
+    "last_reset_target": "c4",
+    "last_reset_target_expr": "c4",
+    "merge_abort_state": {
+      "branches": {
+        "feature/cli-flags": "c6",
+        "main": "c1"
+      },
+      "commits": [
+        {
+          "changes": {
+            "cli/main.py": {
+              "after": "main-v1",
+              "before": null,
+              "change_type": "added"
+            },
+            "docs/usage.md": {
+              "after": "usage-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "cli/main.py": "added",
+            "docs/usage.md": "added"
+          },
+          "id": "c0",
+          "is_merge": false,
+          "message": "Common base",
+          "order": 0,
+          "parents": [],
+          "tree": {
+            "cli/main.py": "main-v1",
+            "docs/usage.md": "usage-v1"
+          }
+        },
+        {
+          "changes": {
+            "docs/usage.md": {
+              "after": "usage-v2",
+              "before": "usage-v1",
+              "change_type": "modified"
+            }
+          },
+          "files": {
+            "docs/usage.md": "modified"
+          },
+          "id": "c1",
+          "is_merge": false,
+          "message": "Fix typo in usage docs",
+          "order": 1,
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "cli/main.py": "main-v1",
+            "docs/usage.md": "usage-v2"
+          }
+        },
+        {
+          "changes": {
+            "cli/flags.py": {
+              "after": "flags-v1-verbose",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "cli/flags.py": "added"
+          },
+          "id": "c2",
+          "is_merge": false,
+          "message": "Parse --verbose flag",
+          "order": 2,
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "cli/flags.py": "flags-v1-verbose",
+            "cli/main.py": "main-v1",
+            "docs/usage.md": "usage-v1"
+          }
+        },
+        {
+          "changes": {
+            "cli/quiet.py": {
+              "after": "quiet-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "cli/quiet.py": "added"
+          },
+          "id": "c3",
+          "is_merge": false,
+          "message": "Parse --quiet flag",
+          "order": 3,
+          "parents": [
+            "c2"
+          ],
+          "tree": {
+            "cli/flags.py": "flags-v1-verbose",
+            "cli/main.py": "main-v1",
+            "cli/quiet.py": "quiet-v1",
+            "docs/usage.md": "usage-v1"
+          }
+        },
+        {
+          "changes": {
+            "cli/main.py": {
+              "after": "main-v2",
+              "before": "main-v1",
+              "change_type": "modified"
+            }
+          },
+          "files": {
+            "cli/main.py": "modified"
+          },
+          "id": "c4",
+          "is_merge": false,
+          "message": "Use flags in main",
+          "order": 4,
+          "parents": [
+            "c3"
+          ],
+          "tree": {
+            "cli/flags.py": "flags-v1-verbose",
+            "cli/main.py": "main-v2",
+            "cli/quiet.py": "quiet-v1",
+            "docs/usage.md": "usage-v1"
+          }
+        },
+        {
+          "changes": {
+            "cli/flags.py": {
+              "after": "flags-v1-verbose",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "cli/flags.py": "added"
+          },
+          "id": "c5",
+          "is_merge": false,
+          "message": "Parse --verbose flag",
+          "order": 5,
+          "parents": [
+            "c1"
+          ],
+          "tree": {
+            "cli/flags.py": "flags-v1-verbose",
+            "cli/main.py": "main-v1",
+            "docs/usage.md": "usage-v2"
+          }
+        },
+        {
+          "changes": {
+            "cli/main.py": {
+              "after": "main-v2",
+              "before": "main-v1",
+              "change_type": "modified"
+            }
+          },
+          "files": {
+            "cli/main.py": "modified"
+          },
+          "id": "c6",
+          "is_merge": false,
+          "message": "Use flags in main",
+          "order": 6,
+          "parents": [
+            "c5"
+          ],
+          "tree": {
+            "cli/flags.py": "flags-v1-verbose",
+            "cli/main.py": "main-v2",
+            "docs/usage.md": "usage-v2"
+          }
+        }
+      ],
+      "conflict_details": {},
+      "conflicts": [],
+      "head": {
+        "name": "feature/cli-flags",
+        "target": "c6",
+        "type": "branch"
+      },
+      "operation_metadata": {},
+      "partial_hunks": {},
+      "reflog": [
+        {
+          "action": "commit: Use flags in main",
+          "commit": "c4",
+          "ref": "feature/cli-flags"
+        },
+        {
+          "action": "rebase (finish): refs/heads/feature/cli-flags onto c1",
+          "commit": "c6",
+          "ref": "feature/cli-flags"
+        }
+      ],
+      "remote_branches": {},
+      "remote_tags": {},
+      "remotes": {},
+      "replaced_commits": {},
+      "repository_initialized": true,
+      "staging": {},
+      "stash_stack": [],
+      "tags": {},
+      "upstream_tracking": {},
+      "working_tree": {}
+    },
+    "operation_metadata": {
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c9",
+      "last_rebase_onto": null,
+      "last_rebase_replayed_commits": [
+        "c7",
+        "c8",
+        "c9"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c1",
+      "last_reset_mode": "hard",
+      "last_reset_previous_head": "c6",
+      "last_reset_target": "c4",
+      "last_reset_target_expr": "c4"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit: Use flags in main",
+        "commit": "c4",
+        "ref": "feature/cli-flags"
+      },
+      {
+        "action": "rebase (finish): refs/heads/feature/cli-flags onto c1",
+        "commit": "c6",
+        "ref": "feature/cli-flags"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c4"
+      },
+      {
+        "message": "reset: moving to c4",
+        "ref": "HEAD@{3}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{4}",
+        "target": "c9"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bh7": {
+    "branches": {
+      "hotfix/export-csv": "c10",
+      "main": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "CHANGELOG.md": {
+            "after": "changelog-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "reports/pdf.py": {
+            "after": "pdf-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "CHANGELOG.md": "added",
+          "reports/pdf.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "CHANGELOG.md": "changelog-v1",
+          "reports/pdf.py": "pdf-v1"
+        }
+      },
+      {
+        "changes": {
+          "reports/pdf.py": {
+            "after": "pdf-v2",
+            "before": "pdf-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "reports/pdf.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Speed up PDF reports",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v1",
+          "reports/pdf.py": "pdf-v2"
+        }
+      },
+      {
+        "changes": {
+          "CHANGELOG.md": {
+            "after": "changelog-v2",
+            "before": "changelog-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "CHANGELOG.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Update changelog",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v2",
+          "reports/pdf.py": "pdf-v2"
+        }
+      },
+      {
+        "changes": {
+          "reports/csv.py": {
+            "after": "csv-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "reports/csv.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add CSV export",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/pdf.py": "pdf-v1"
+        }
+      },
+      {
+        "changes": {
+          "tests/test_csv.py": {
+            "after": "test-csv-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "tests/test_csv.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Test CSV export",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/pdf.py": "pdf-v1",
+          "tests/test_csv.py": "test-csv-v1"
+        }
+      },
+      {
+        "changes": {
+          "reports/csv_headers.py": {
+            "after": "headers-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "reports/csv_headers.py": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Add CSV column headers",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/csv_headers.py": "headers-v1",
+          "reports/pdf.py": "pdf-v1",
+          "tests/test_csv.py": "test-csv-v1"
+        }
+      },
+      {
+        "changes": {
+          "reports/csv.py": {
+            "after": "csv-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "reports/csv.py": "added"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Add CSV export",
+        "order": 6,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v2",
+          "reports/csv.py": "csv-v1",
+          "reports/pdf.py": "pdf-v2"
+        }
+      },
+      {
+        "changes": {
+          "reports/csv_headers.py": {
+            "after": "headers-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "reports/csv_headers.py": "added"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Add CSV column headers",
+        "order": 7,
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v2",
+          "reports/csv.py": "csv-v1",
+          "reports/csv_headers.py": "headers-v1",
+          "reports/pdf.py": "pdf-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "reports/csv.py": {
+            "after": "csv-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "reports/csv.py": "added"
+        },
+        "id": "c8",
+        "is_merge": false,
+        "message": "Add CSV export",
+        "order": 8,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v2",
+          "reports/csv.py": "csv-v1",
+          "reports/pdf.py": "pdf-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "tests/test_csv.py": {
+            "after": "test-csv-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "tests/test_csv.py": "added"
+        },
+        "id": "c9",
+        "is_merge": false,
+        "message": "Test CSV export",
+        "order": 9,
+        "parents": [
+          "c8"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v2",
+          "reports/csv.py": "csv-v1",
+          "reports/pdf.py": "pdf-v2",
+          "tests/test_csv.py": "test-csv-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "reports/csv_headers.py": {
+            "after": "headers-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "reports/csv_headers.py": "added"
+        },
+        "id": "c10",
+        "is_merge": false,
+        "message": "Add CSV column headers",
+        "order": 10,
+        "parents": [
+          "c9"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v2",
+          "reports/csv.py": "csv-v1",
+          "reports/csv_headers.py": "headers-v1",
+          "reports/pdf.py": "pdf-v2",
+          "tests/test_csv.py": "test-csv-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "hotfix/export-csv",
+      "target": "c10",
+      "type": "branch"
+    },
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c10",
+    "last_rebase_onto": null,
+    "last_rebase_replayed_commits": [
+      "c8",
+      "c9",
+      "c10"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c2",
+    "last_reset_mode": "hard",
+    "last_reset_previous_head": "c7",
+    "last_reset_target": "c5",
+    "last_reset_target_expr": "c5",
+    "merge_abort_state": {
+      "branches": {
+        "hotfix/export-csv": "c7",
+        "main": "c2"
+      },
+      "commits": [
+        {
+          "changes": {
+            "CHANGELOG.md": {
+              "after": "changelog-v1",
+              "before": null,
+              "change_type": "added"
+            },
+            "reports/pdf.py": {
+              "after": "pdf-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "CHANGELOG.md": "added",
+            "reports/pdf.py": "added"
+          },
+          "id": "c0",
+          "is_merge": false,
+          "message": "Common base",
+          "order": 0,
+          "parents": [],
+          "tree": {
+            "CHANGELOG.md": "changelog-v1",
+            "reports/pdf.py": "pdf-v1"
+          }
+        },
+        {
+          "changes": {
+            "reports/pdf.py": {
+              "after": "pdf-v2",
+              "before": "pdf-v1",
+              "change_type": "modified"
+            }
+          },
+          "files": {
+            "reports/pdf.py": "modified"
+          },
+          "id": "c1",
+          "is_merge": false,
+          "message": "Speed up PDF reports",
+          "order": 1,
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "CHANGELOG.md": "changelog-v1",
+            "reports/pdf.py": "pdf-v2"
+          }
+        },
+        {
+          "changes": {
+            "CHANGELOG.md": {
+              "after": "changelog-v2",
+              "before": "changelog-v1",
+              "change_type": "modified"
+            }
+          },
+          "files": {
+            "CHANGELOG.md": "modified"
+          },
+          "id": "c2",
+          "is_merge": false,
+          "message": "Update changelog",
+          "order": 2,
+          "parents": [
+            "c1"
+          ],
+          "tree": {
+            "CHANGELOG.md": "changelog-v2",
+            "reports/pdf.py": "pdf-v2"
+          }
+        },
+        {
+          "changes": {
+            "reports/csv.py": {
+              "after": "csv-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "reports/csv.py": "added"
+          },
+          "id": "c3",
+          "is_merge": false,
+          "message": "Add CSV export",
+          "order": 3,
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "CHANGELOG.md": "changelog-v1",
+            "reports/csv.py": "csv-v1",
+            "reports/pdf.py": "pdf-v1"
+          }
+        },
+        {
+          "changes": {
+            "tests/test_csv.py": {
+              "after": "test-csv-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "tests/test_csv.py": "added"
+          },
+          "id": "c4",
+          "is_merge": false,
+          "message": "Test CSV export",
+          "order": 4,
+          "parents": [
+            "c3"
+          ],
+          "tree": {
+            "CHANGELOG.md": "changelog-v1",
+            "reports/csv.py": "csv-v1",
+            "reports/pdf.py": "pdf-v1",
+            "tests/test_csv.py": "test-csv-v1"
+          }
+        },
+        {
+          "changes": {
+            "reports/csv_headers.py": {
+              "after": "headers-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "reports/csv_headers.py": "added"
+          },
+          "id": "c5",
+          "is_merge": false,
+          "message": "Add CSV column headers",
+          "order": 5,
+          "parents": [
+            "c4"
+          ],
+          "tree": {
+            "CHANGELOG.md": "changelog-v1",
+            "reports/csv.py": "csv-v1",
+            "reports/csv_headers.py": "headers-v1",
+            "reports/pdf.py": "pdf-v1",
+            "tests/test_csv.py": "test-csv-v1"
+          }
+        },
+        {
+          "changes": {
+            "reports/csv.py": {
+              "after": "csv-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "reports/csv.py": "added"
+          },
+          "id": "c6",
+          "is_merge": false,
+          "message": "Add CSV export",
+          "order": 6,
+          "parents": [
+            "c2"
+          ],
+          "tree": {
+            "CHANGELOG.md": "changelog-v2",
+            "reports/csv.py": "csv-v1",
+            "reports/pdf.py": "pdf-v2"
+          }
+        },
+        {
+          "changes": {
+            "reports/csv_headers.py": {
+              "after": "headers-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "reports/csv_headers.py": "added"
+          },
+          "id": "c7",
+          "is_merge": false,
+          "message": "Add CSV column headers",
+          "order": 7,
+          "parents": [
+            "c6"
+          ],
+          "tree": {
+            "CHANGELOG.md": "changelog-v2",
+            "reports/csv.py": "csv-v1",
+            "reports/csv_headers.py": "headers-v1",
+            "reports/pdf.py": "pdf-v2"
+          }
+        }
+      ],
+      "conflict_details": {},
+      "conflicts": [],
+      "head": {
+        "name": "hotfix/export-csv",
+        "target": "c7",
+        "type": "branch"
+      },
+      "operation_metadata": {},
+      "partial_hunks": {},
+      "reflog": [
+        {
+          "action": "commit: Add CSV column headers",
+          "commit": "c5",
+          "ref": "hotfix/export-csv"
+        },
+        {
+          "action": "rebase (finish): refs/heads/hotfix/export-csv onto c2",
+          "commit": "c7",
+          "ref": "hotfix/export-csv"
+        }
+      ],
+      "remote_branches": {},
+      "remote_tags": {},
+      "remotes": {},
+      "replaced_commits": {},
+      "repository_initialized": true,
+      "staging": {},
+      "stash_stack": [],
+      "tags": {},
+      "upstream_tracking": {},
+      "working_tree": {}
+    },
+    "operation_metadata": {
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c10",
+      "last_rebase_onto": null,
+      "last_rebase_replayed_commits": [
+        "c8",
+        "c9",
+        "c10"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c2",
+      "last_reset_mode": "hard",
+      "last_reset_previous_head": "c7",
+      "last_reset_target": "c5",
+      "last_reset_target_expr": "c5"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit: Add CSV column headers",
+        "commit": "c5",
+        "ref": "hotfix/export-csv"
+      },
+      {
+        "action": "rebase (finish): refs/heads/hotfix/export-csv onto c2",
+        "commit": "c7",
+        "ref": "hotfix/export-csv"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c5"
+      },
+      {
+        "message": "reset: moving to c5",
+        "ref": "HEAD@{3}",
+        "target": "c5"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{4}",
+        "target": "c10"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bh8": {
+    "branches": {
+      "feature/rate-limits": "c9",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "docs/README.md": {
+            "after": "docs-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "server/app.go": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/README.md": "added",
+          "server/app.go": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "docs/README.md": "docs-v1",
+          "server/app.go": "app-v1"
+        }
+      },
+      {
+        "changes": {
+          "server/app.go": {
+            "after": "app-v2",
+            "before": "app-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "server/app.go": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add graceful shutdown",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "docs/README.md": "docs-v1",
+          "server/app.go": "app-v2"
+        }
+      },
+      {
+        "changes": {
+          "server/limits.go": {
+            "after": "limits-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "server/limits.go": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add rate limiter",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "docs/README.md": "docs-v1",
+          "server/app.go": "app-v1",
+          "server/limits.go": "limits-v1"
+        }
+      },
+      {
+        "changes": {
+          "server/limits_test.go": {
+            "after": "limits-test-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "server/limits_test.go": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Test rate limiter",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "docs/README.md": "docs-v1",
+          "server/app.go": "app-v1",
+          "server/limits.go": "limits-v1",
+          "server/limits_test.go": "limits-test-v1"
+        }
+      },
+      {
+        "changes": {
+          "docs/limits.md": {
+            "after": "limits-doc-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/limits.md": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Document rate limits",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "docs/README.md": "docs-v1",
+          "docs/limits.md": "limits-doc-v1",
+          "server/app.go": "app-v1",
+          "server/limits.go": "limits-v1",
+          "server/limits_test.go": "limits-test-v1"
+        }
+      },
+      {
+        "changes": {
+          "server/limits_test.go": {
+            "after": "limits-test-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "server/limits_test.go": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Test rate limiter",
+        "order": 5,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "docs/README.md": "docs-v1",
+          "server/app.go": "app-v2",
+          "server/limits_test.go": "limits-test-v1"
+        }
+      },
+      {
+        "changes": {
+          "docs/limits.md": {
+            "after": "limits-doc-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/limits.md": "added"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Document rate limits",
+        "order": 6,
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "docs/README.md": "docs-v1",
+          "docs/limits.md": "limits-doc-v1",
+          "server/app.go": "app-v2",
+          "server/limits_test.go": "limits-test-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "server/limits.go": {
+            "after": "limits-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "server/limits.go": "added"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Add rate limiter",
+        "order": 7,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "docs/README.md": "docs-v1",
+          "server/app.go": "app-v2",
+          "server/limits.go": "limits-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "server/limits_test.go": {
+            "after": "limits-test-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "server/limits_test.go": "added"
+        },
+        "id": "c8",
+        "is_merge": false,
+        "message": "Test rate limiter",
+        "order": 8,
+        "parents": [
+          "c7"
+        ],
+        "tree": {
+          "docs/README.md": "docs-v1",
+          "server/app.go": "app-v2",
+          "server/limits.go": "limits-v1",
+          "server/limits_test.go": "limits-test-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "docs/limits.md": {
+            "after": "limits-doc-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/limits.md": "added"
+        },
+        "id": "c9",
+        "is_merge": false,
+        "message": "Document rate limits",
+        "order": 9,
+        "parents": [
+          "c8"
+        ],
+        "tree": {
+          "docs/README.md": "docs-v1",
+          "docs/limits.md": "limits-doc-v1",
+          "server/app.go": "app-v2",
+          "server/limits.go": "limits-v1",
+          "server/limits_test.go": "limits-test-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/rate-limits",
+      "target": "c9",
+      "type": "branch"
+    },
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c9",
+    "last_rebase_onto": null,
+    "last_rebase_replayed_commits": [
+      "c7",
+      "c8",
+      "c9"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c1",
+    "last_reset_mode": "hard",
+    "last_reset_previous_head": "c6",
+    "last_reset_target": "c4",
+    "last_reset_target_expr": "c4",
+    "merge_abort_state": {
+      "branches": {
+        "feature/rate-limits": "c6",
+        "main": "c1"
+      },
+      "commits": [
+        {
+          "changes": {
+            "docs/README.md": {
+              "after": "docs-v1",
+              "before": null,
+              "change_type": "added"
+            },
+            "server/app.go": {
+              "after": "app-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "docs/README.md": "added",
+            "server/app.go": "added"
+          },
+          "id": "c0",
+          "is_merge": false,
+          "message": "Common base",
+          "order": 0,
+          "parents": [],
+          "tree": {
+            "docs/README.md": "docs-v1",
+            "server/app.go": "app-v1"
+          }
+        },
+        {
+          "changes": {
+            "server/app.go": {
+              "after": "app-v2",
+              "before": "app-v1",
+              "change_type": "modified"
+            }
+          },
+          "files": {
+            "server/app.go": "modified"
+          },
+          "id": "c1",
+          "is_merge": false,
+          "message": "Add graceful shutdown",
+          "order": 1,
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "docs/README.md": "docs-v1",
+            "server/app.go": "app-v2"
+          }
+        },
+        {
+          "changes": {
+            "server/limits.go": {
+              "after": "limits-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "server/limits.go": "added"
+          },
+          "id": "c2",
+          "is_merge": false,
+          "message": "Add rate limiter",
+          "order": 2,
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "docs/README.md": "docs-v1",
+            "server/app.go": "app-v1",
+            "server/limits.go": "limits-v1"
+          }
+        },
+        {
+          "changes": {
+            "server/limits_test.go": {
+              "after": "limits-test-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "server/limits_test.go": "added"
+          },
+          "id": "c3",
+          "is_merge": false,
+          "message": "Test rate limiter",
+          "order": 3,
+          "parents": [
+            "c2"
+          ],
+          "tree": {
+            "docs/README.md": "docs-v1",
+            "server/app.go": "app-v1",
+            "server/limits.go": "limits-v1",
+            "server/limits_test.go": "limits-test-v1"
+          }
+        },
+        {
+          "changes": {
+            "docs/limits.md": {
+              "after": "limits-doc-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "docs/limits.md": "added"
+          },
+          "id": "c4",
+          "is_merge": false,
+          "message": "Document rate limits",
+          "order": 4,
+          "parents": [
+            "c3"
+          ],
+          "tree": {
+            "docs/README.md": "docs-v1",
+            "docs/limits.md": "limits-doc-v1",
+            "server/app.go": "app-v1",
+            "server/limits.go": "limits-v1",
+            "server/limits_test.go": "limits-test-v1"
+          }
+        },
+        {
+          "changes": {
+            "server/limits_test.go": {
+              "after": "limits-test-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "server/limits_test.go": "added"
+          },
+          "id": "c5",
+          "is_merge": false,
+          "message": "Test rate limiter",
+          "order": 5,
+          "parents": [
+            "c1"
+          ],
+          "tree": {
+            "docs/README.md": "docs-v1",
+            "server/app.go": "app-v2",
+            "server/limits_test.go": "limits-test-v1"
+          }
+        },
+        {
+          "changes": {
+            "docs/limits.md": {
+              "after": "limits-doc-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "docs/limits.md": "added"
+          },
+          "id": "c6",
+          "is_merge": false,
+          "message": "Document rate limits",
+          "order": 6,
+          "parents": [
+            "c5"
+          ],
+          "tree": {
+            "docs/README.md": "docs-v1",
+            "docs/limits.md": "limits-doc-v1",
+            "server/app.go": "app-v2",
+            "server/limits_test.go": "limits-test-v1"
+          }
+        }
+      ],
+      "conflict_details": {},
+      "conflicts": [],
+      "head": {
+        "name": "feature/rate-limits",
+        "target": "c6",
+        "type": "branch"
+      },
+      "operation_metadata": {},
+      "partial_hunks": {},
+      "reflog": [
+        {
+          "action": "commit: Document rate limits",
+          "commit": "c4",
+          "ref": "feature/rate-limits"
+        },
+        {
+          "action": "rebase (finish): refs/heads/feature/rate-limits onto c1",
+          "commit": "c6",
+          "ref": "feature/rate-limits"
+        }
+      ],
+      "remote_branches": {},
+      "remote_tags": {},
+      "remotes": {},
+      "replaced_commits": {},
+      "repository_initialized": true,
+      "staging": {},
+      "stash_stack": [],
+      "tags": {},
+      "upstream_tracking": {},
+      "working_tree": {}
+    },
+    "operation_metadata": {
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c9",
+      "last_rebase_onto": null,
+      "last_rebase_replayed_commits": [
+        "c7",
+        "c8",
+        "c9"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c1",
+      "last_reset_mode": "hard",
+      "last_reset_previous_head": "c6",
+      "last_reset_target": "c4",
+      "last_reset_target_expr": "c4"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit: Document rate limits",
+        "commit": "c4",
+        "ref": "feature/rate-limits"
+      },
+      {
+        "action": "rebase (finish): refs/heads/feature/rate-limits onto c1",
+        "commit": "c6",
+        "ref": "feature/rate-limits"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c4"
+      },
+      {
+        "message": "reset: moving to c4",
+        "ref": "HEAD@{3}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{4}",
+        "target": "c9"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bm6": {
+    "branches": {
+      "feature/checkout-redesign": "c3",
+      "fix/footer-typo": "c7",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "site/checkout.html": {
+            "after": "checkout-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "site/footer.html": {
+            "after": "footer-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "site/checkout.html": "added",
+          "site/footer.html": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "site/checkout.html": "checkout-v1",
+          "site/footer.html": "footer-v1"
+        }
+      },
+      {
+        "changes": {
+          "site/privacy.html": {
+            "after": "privacy-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "site/privacy.html": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Update privacy link",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "site/checkout.html": "checkout-v1",
+          "site/footer.html": "footer-v1",
+          "site/privacy.html": "privacy-v2"
+        }
+      },
+      {
+        "changes": {
+          "site/checkout.html": {
+            "after": "checkout-v2-redesign",
+            "before": "checkout-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "site/checkout.html": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Redesign checkout layout",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "site/checkout.html": "checkout-v2-redesign",
+          "site/footer.html": "footer-v1"
+        }
+      },
+      {
+        "changes": {
+          "site/checkout.css": {
+            "after": "checkout-anim-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "site/checkout.css": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add checkout animations",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "site/checkout.css": "checkout-anim-v1",
+          "site/checkout.html": "checkout-v2-redesign",
+          "site/footer.html": "footer-v1"
+        }
+      },
+      {
+        "changes": {
+          "site/footer.html": {
+            "after": "footer-v2-typo-fixed",
+            "before": "footer-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "site/footer.html": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix footer typo",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "site/checkout.css": "checkout-anim-v1",
+          "site/checkout.html": "checkout-v2-redesign",
+          "site/footer.html": "footer-v2-typo-fixed"
+        }
+      },
+      {
+        "changes": {
+          "site/footer_year.txt": {
+            "after": "year-2026",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "site/footer_year.txt": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Fix footer year",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "site/checkout.css": "checkout-anim-v1",
+          "site/checkout.html": "checkout-v2-redesign",
+          "site/footer.html": "footer-v2-typo-fixed",
+          "site/footer_year.txt": "year-2026"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "site/footer.html": {
+            "after": "footer-v2-typo-fixed",
+            "before": "footer-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "site/footer.html": "modified"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Fix footer typo",
+        "order": 6,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "site/checkout.html": "checkout-v1",
+          "site/footer.html": "footer-v2-typo-fixed",
+          "site/privacy.html": "privacy-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "site/footer_year.txt": {
+            "after": "year-2026",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "site/footer_year.txt": "added"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Fix footer year",
+        "order": 7,
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "site/checkout.html": "checkout-v1",
+          "site/footer.html": "footer-v2-typo-fixed",
+          "site/footer_year.txt": "year-2026",
+          "site/privacy.html": "privacy-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "fix/footer-typo",
+      "target": "c7",
+      "type": "branch"
+    },
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c7",
+    "last_rebase_onto": "c1",
+    "last_rebase_replayed_commits": [
+      "c6",
+      "c7"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c3",
+    "operation_metadata": {
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c7",
+      "last_rebase_onto": "c1",
+      "last_rebase_replayed_commits": [
+        "c6",
+        "c7"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c3"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c7"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bm7": {
+    "branches": {
+      "hotfix/login-timeout": "c9",
+      "main": "c2",
+      "release/2.0-beta": "c5"
+    },
+    "commits": [
+      {
+        "changes": {
+          "auth/login.py": {
+            "after": "login-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "auth/session.py": {
+            "after": "session-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "auth/login.py": "added",
+          "auth/session.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v1"
+        }
+      },
+      {
+        "changes": {
+          "auth/reset.py": {
+            "after": "reset-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "auth/reset.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Harden password reset",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "auth/login.py": "login-v1",
+          "auth/reset.py": "reset-v2",
+          "auth/session.py": "session-v1"
+        }
+      },
+      {
+        "changes": {
+          "SECURITY.md": {
+            "after": "security-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "SECURITY.md": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Update security contacts",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "SECURITY.md": "security-v2",
+          "auth/login.py": "login-v1",
+          "auth/reset.py": "reset-v2",
+          "auth/session.py": "session-v1"
+        }
+      },
+      {
+        "changes": {
+          "auth/session.py": {
+            "after": "session-v2-beta",
+            "before": "session-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "auth/session.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Beta: new session store",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "auth/login.py": "login-v1",
+          "auth/session.py": "session-v2-beta"
+        }
+      },
+      {
+        "changes": {
+          "auth/passkeys.py": {
+            "after": "passkeys-beta",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "auth/passkeys.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Beta: passkey prototype",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "auth/login.py": "login-v1",
+          "auth/passkeys.py": "passkeys-beta",
+          "auth/session.py": "session-v2-beta"
+        }
+      },
+      {
+        "changes": {
+          "auth/telemetry.py": {
+            "after": "telemetry-beta",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "auth/telemetry.py": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Beta: telemetry hooks",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "auth/login.py": "login-v1",
+          "auth/passkeys.py": "passkeys-beta",
+          "auth/session.py": "session-v2-beta",
+          "auth/telemetry.py": "telemetry-beta"
+        }
+      },
+      {
+        "changes": {
+          "auth/login.py": {
+            "after": "login-v2-timeout-30s",
+            "before": "login-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "auth/login.py": "modified"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Raise login timeout to 30s",
+        "order": 6,
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "auth/login.py": "login-v2-timeout-30s",
+          "auth/passkeys.py": "passkeys-beta",
+          "auth/session.py": "session-v2-beta",
+          "auth/telemetry.py": "telemetry-beta"
+        }
+      },
+      {
+        "changes": {
+          "auth/login_log.py": {
+            "after": "login-log-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "auth/login_log.py": "added"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Log login timeouts",
+        "order": 7,
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "auth/login.py": "login-v2-timeout-30s",
+          "auth/login_log.py": "login-log-v1",
+          "auth/passkeys.py": "passkeys-beta",
+          "auth/session.py": "session-v2-beta",
+          "auth/telemetry.py": "telemetry-beta"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "auth/login.py": {
+            "after": "login-v2-timeout-30s",
+            "before": "login-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "auth/login.py": "modified"
+        },
+        "id": "c8",
+        "is_merge": false,
+        "message": "Raise login timeout to 30s",
+        "order": 8,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "SECURITY.md": "security-v2",
+          "auth/login.py": "login-v2-timeout-30s",
+          "auth/reset.py": "reset-v2",
+          "auth/session.py": "session-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "auth/login_log.py": {
+            "after": "login-log-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "auth/login_log.py": "added"
+        },
+        "id": "c9",
+        "is_merge": false,
+        "message": "Log login timeouts",
+        "order": 9,
+        "parents": [
+          "c8"
+        ],
+        "tree": {
+          "SECURITY.md": "security-v2",
+          "auth/login.py": "login-v2-timeout-30s",
+          "auth/login_log.py": "login-log-v1",
+          "auth/reset.py": "reset-v2",
+          "auth/session.py": "session-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "hotfix/login-timeout",
+      "target": "c9",
+      "type": "branch"
+    },
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c9",
+    "last_rebase_onto": "c2",
+    "last_rebase_replayed_commits": [
+      "c8",
+      "c9"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c5",
+    "operation_metadata": {
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c9",
+      "last_rebase_onto": "c2",
+      "last_rebase_replayed_commits": [
+        "c8",
+        "c9"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c5"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c9"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bm8": {
+    "branches": {
+      "feature/export-pdf": "c8",
+      "main": "c1",
+      "spike/new-renderer": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "render/engine.py": {
+            "after": "engine-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "reports/export.py": {
+            "after": "export-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "render/engine.py": "added",
+          "reports/export.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "render/engine.py": "engine-v1",
+          "reports/export.py": "export-v1"
+        }
+      },
+      {
+        "changes": {
+          "reports/csv.py": {
+            "after": "csv-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "reports/csv.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add CSV export",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "render/engine.py": "engine-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/export.py": "export-v1"
+        }
+      },
+      {
+        "changes": {
+          "render/engine.py": {
+            "after": "engine-v2-spike",
+            "before": "engine-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "render/engine.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Spike: swap rendering engine",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "render/engine.py": "engine-v2-spike",
+          "reports/export.py": "export-v1"
+        }
+      },
+      {
+        "changes": {
+          "reports/pdf.py": {
+            "after": "pdf-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "reports/pdf.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add PDF export",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "render/engine.py": "engine-v2-spike",
+          "reports/export.py": "export-v1",
+          "reports/pdf.py": "pdf-v1"
+        }
+      },
+      {
+        "changes": {
+          "reports/pdf_pages.py": {
+            "after": "pdf-pages-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "reports/pdf_pages.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Add PDF page numbers",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "render/engine.py": "engine-v2-spike",
+          "reports/export.py": "export-v1",
+          "reports/pdf.py": "pdf-v1",
+          "reports/pdf_pages.py": "pdf-pages-v1"
+        }
+      },
+      {
+        "changes": {
+          "reports/export.py": {
+            "after": "export-v2-pdf",
+            "before": "export-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "reports/export.py": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Wire PDF into the export menu",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "render/engine.py": "engine-v2-spike",
+          "reports/export.py": "export-v2-pdf",
+          "reports/pdf.py": "pdf-v1",
+          "reports/pdf_pages.py": "pdf-pages-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "reports/pdf.py": {
+            "after": "pdf-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "reports/pdf.py": "added"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Add PDF export",
+        "order": 6,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "render/engine.py": "engine-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/export.py": "export-v1",
+          "reports/pdf.py": "pdf-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "reports/pdf_pages.py": {
+            "after": "pdf-pages-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "reports/pdf_pages.py": "added"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Add PDF page numbers",
+        "order": 7,
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "render/engine.py": "engine-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/export.py": "export-v1",
+          "reports/pdf.py": "pdf-v1",
+          "reports/pdf_pages.py": "pdf-pages-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "reports/export.py": {
+            "after": "export-v2-pdf",
+            "before": "export-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "reports/export.py": "modified"
+        },
+        "id": "c8",
+        "is_merge": false,
+        "message": "Wire PDF into the export menu",
+        "order": 8,
+        "parents": [
+          "c7"
+        ],
+        "tree": {
+          "render/engine.py": "engine-v1",
+          "reports/csv.py": "csv-v1",
+          "reports/export.py": "export-v2-pdf",
+          "reports/pdf.py": "pdf-v1",
+          "reports/pdf_pages.py": "pdf-pages-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/export-pdf",
+      "target": "c8",
+      "type": "branch"
+    },
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c8",
+    "last_rebase_onto": "c1",
+    "last_rebase_replayed_commits": [
+      "c6",
+      "c7",
+      "c8"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c2",
+    "operation_metadata": {
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c8",
+      "last_rebase_onto": "c1",
+      "last_rebase_replayed_commits": [
+        "c6",
+        "c7",
+        "c8"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c8"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-easy-cap-initials": {
+    "branches": {
+      "feature/jm/database-models": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/jm/database-models",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "feature/jm/database-models",
+    "last_switch_branch": "feature/jm/database-models",
+    "last_switched_to": "feature/jm/database-models",
+    "operation_metadata": {
+      "last_branch_created": "feature/jm/database-models",
+      "last_switch_branch": "feature/jm/database-models",
+      "last_switched_to": "feature/jm/database-models"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-easy-corp-jira": {
+    "branches": {
+      "PROJ-418/password-reset": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "PROJ-418/password-reset",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "PROJ-418/password-reset",
+    "last_switch_branch": "PROJ-418/password-reset",
+    "last_switched_to": "PROJ-418/password-reset",
+    "operation_metadata": {
+      "last_branch_created": "PROJ-418/password-reset",
+      "last_switch_branch": "PROJ-418/password-reset",
+      "last_switched_to": "PROJ-418/password-reset"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-easy-free-client": {
+    "branches": {
+      "client/55-contact-form-redesign": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "client/55-contact-form-redesign",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "client/55-contact-form-redesign",
+    "last_switch_branch": "client/55-contact-form-redesign",
+    "last_switched_to": "client/55-contact-form-redesign",
+    "operation_metadata": {
+      "last_branch_created": "client/55-contact-form-redesign",
+      "last_switch_branch": "client/55-contact-form-redesign",
+      "last_switched_to": "client/55-contact-form-redesign"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-easy-oss-user": {
+    "branches": {
+      "jdelacruz/fix-parser-edge-case": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "jdelacruz/fix-parser-edge-case",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "jdelacruz/fix-parser-edge-case",
+    "last_switch_branch": "jdelacruz/fix-parser-edge-case",
+    "last_switched_to": "jdelacruz/fix-parser-edge-case",
+    "operation_metadata": {
+      "last_branch_created": "jdelacruz/fix-parser-edge-case",
+      "last_switch_branch": "jdelacruz/fix-parser-edge-case",
+      "last_switched_to": "jdelacruz/fix-parser-edge-case"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-easy-startup-feat": {
+    "branches": {
+      "feature/shopping-cart": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/shopping-cart",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "feature/shopping-cart",
+    "last_switch_branch": "feature/shopping-cart",
+    "last_switched_to": "feature/shopping-cart",
+    "operation_metadata": {
+      "last_branch_created": "feature/shopping-cart",
+      "last_switch_branch": "feature/shopping-cart",
+      "last_switched_to": "feature/shopping-cart"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-hard-corp-rename": {
+    "branches": {
+      "PROJ-301/auth-module-update": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/auth.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "PROJ-301/auth-module-update",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "PROJ-301/auth-module-update",
+    "last_branch_deleted": "auth-update",
+    "last_switch_branch": "PROJ-301/auth-module-update",
+    "last_switched_to": "PROJ-301/auth-module-update",
+    "operation_metadata": {
+      "last_branch_created": "PROJ-301/auth-module-update",
+      "last_branch_deleted": "auth-update",
+      "last_switch_branch": "PROJ-301/auth-module-update",
+      "last_switched_to": "PROJ-301/auth-module-update"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-hard-oss-rename": {
+    "branches": {
+      "fix/renderer-memory-leak": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/renderer.py": {
+            "after": "rend-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/renderer.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap OSS project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/renderer.py": "rend-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "fix/renderer-memory-leak",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "fix/renderer-memory-leak",
+    "last_branch_deleted": "myFix",
+    "last_switch_branch": "fix/renderer-memory-leak",
+    "last_switched_to": "fix/renderer-memory-leak",
+    "operation_metadata": {
+      "last_branch_created": "fix/renderer-memory-leak",
+      "last_branch_deleted": "myFix",
+      "last_switch_branch": "fix/renderer-memory-leak",
+      "last_switched_to": "fix/renderer-memory-leak"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-hard-qa-camel": {
+    "branches": {
+      "main": "c1",
+      "test/login-flow": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "tests/login.py": {
+            "after": "test-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "tests/login.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap QA suite",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "tests/login.py": "test-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "test/login-flow",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "test/login-flow",
+    "last_branch_deleted": "test/LoginFlow",
+    "last_switch_branch": "test/login-flow",
+    "last_switched_to": "test/login-flow",
+    "operation_metadata": {
+      "last_branch_created": "test/login-flow",
+      "last_branch_deleted": "test/LoginFlow",
+      "last_switch_branch": "test/login-flow",
+      "last_switched_to": "test/login-flow"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-hard-startup-prefix": {
+    "branches": {
+      "bugfix/cart-total": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/cart.py": {
+            "after": "cart-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/cart.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap e-commerce app",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/cart.py": "cart-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "bugfix/cart-total",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "bugfix/cart-total",
+    "last_branch_deleted": "fix/cart-total",
+    "last_switch_branch": "bugfix/cart-total",
+    "last_switched_to": "bugfix/cart-total",
+    "operation_metadata": {
+      "last_branch_created": "bugfix/cart-total",
+      "last_branch_deleted": "fix/cart-total",
+      "last_switch_branch": "bugfix/cart-total",
+      "last_switched_to": "bugfix/cart-total"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-med-corp-notif": {
+    "branches": {
+      "PROJ-512/email-notification": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "PROJ-512/email-notification",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "PROJ-512/email-notification",
+    "last_switch_branch": "PROJ-512/email-notification",
+    "last_switched_to": "PROJ-512/email-notification",
+    "operation_metadata": {
+      "last_branch_created": "PROJ-512/email-notification",
+      "last_switch_branch": "PROJ-512/email-notification",
+      "last_switched_to": "PROJ-512/email-notification"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-med-devops-scope": {
+    "branches": {
+      "infra/api-gateway/log-rotation": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "infra/api-gateway/log-rotation",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "infra/api-gateway/log-rotation",
+    "last_switch_branch": "infra/api-gateway/log-rotation",
+    "last_switched_to": "infra/api-gateway/log-rotation",
+    "operation_metadata": {
+      "last_branch_created": "infra/api-gateway/log-rotation",
+      "last_switch_branch": "infra/api-gateway/log-rotation",
+      "last_switched_to": "infra/api-gateway/log-rotation"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-med-oss-infer": {
+    "branches": {
+      "fix/tokenizer-crash": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "fix/tokenizer-crash",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "fix/tokenizer-crash",
+    "last_switch_branch": "fix/tokenizer-crash",
+    "last_switched_to": "fix/tokenizer-crash",
+    "operation_metadata": {
+      "last_branch_created": "fix/tokenizer-crash",
+      "last_switch_branch": "fix/tokenizer-crash",
+      "last_switched_to": "fix/tokenizer-crash"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feat/dark-mode": "c1",
+      "origin/feat/keyboard-shortcuts": "c1",
+      "origin/fix/lexer-null-check": "c1",
+      "origin/fix/parser-overflow": "c1"
+    },
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "bn-med-startup-bugfix": {
+    "branches": {
+      "bugfix/login-redirect": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "bugfix/login-redirect",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "bugfix/login-redirect",
+    "last_switch_branch": "bugfix/login-redirect",
+    "last_switched_to": "bugfix/login-redirect",
+    "operation_metadata": {
+      "last_branch_created": "bugfix/login-redirect",
+      "last_switch_branch": "bugfix/login-redirect",
+      "last_switched_to": "bugfix/login-redirect"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
     "repository_initialized": true,
     "staging": {},
     "stash_stack": [],
@@ -91739,6 +97559,1794 @@ TARGET_STATES = json.loads(r"""
       }
     }
   },
+  "cherry-easy-export-null": {
+    "branches": {
+      "main": "c2",
+      "release-2.0": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/export.ts": {
+            "after": "export-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/export.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/export.ts": "export-base"
+        }
+      },
+      {
+        "changes": {
+          "src/export.ts": {
+            "after": "null-export-fix",
+            "before": "export-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/export.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix null export",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/export.ts": "null-export-fix"
+        }
+      },
+      {
+        "changes": {
+          "src/other.ts": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.ts": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/export.ts": "null-export-fix",
+          "src/other.ts": "other-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Release branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/export.ts": "export-base"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/export.ts": {
+            "after": "null-export-fix",
+            "before": "export-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/export.ts": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix null export",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "src/export.ts": "null-export-fix"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-2.0",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c1",
+    "operation_metadata": {
+      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "cherry-easy-invoice-rounding": {
+    "branches": {
+      "main": "c2",
+      "release-1.1": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/invoice.py": {
+            "after": "invoice-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/invoice.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/invoice.py": "invoice-base"
+        }
+      },
+      {
+        "changes": {
+          "src/invoice.py": {
+            "after": "rounding-fix-v1",
+            "before": "invoice-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/invoice.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix rounding",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/invoice.py": "rounding-fix-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/other.py": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/invoice.py": "rounding-fix-v1",
+          "src/other.py": "other-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Release branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/invoice.py": "invoice-base"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/invoice.py": {
+            "after": "rounding-fix-v1",
+            "before": "invoice-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/invoice.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix rounding",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "src/invoice.py": "rounding-fix-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-1.1",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c1",
+    "operation_metadata": {
+      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "cherry-easy-login-timeout": {
+    "branches": {
+      "main": "c2",
+      "release-1.0": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/login.js": {
+            "after": "login-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/login.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/login.js": "login-base"
+        }
+      },
+      {
+        "changes": {
+          "src/login.js": {
+            "after": "timeout-fix-v1",
+            "before": "login-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/login.js": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix login timeout",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/login.js": "timeout-fix-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/other.js": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.js": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/login.js": "timeout-fix-v1",
+          "src/other.js": "other-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Release branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/login.js": "login-base"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/login.js": {
+            "after": "timeout-fix-v1",
+            "before": "login-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/login.js": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix login timeout",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "src/login.js": "timeout-fix-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-1.0",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c1",
+    "operation_metadata": {
+      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "cherry-easy-null-check": {
+    "branches": {
+      "main": "c2",
+      "release-2.1": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/parser.ts": {
+            "after": "parser-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/parser.ts": "parser-base"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.ts": {
+            "after": "null-check-fix-v1",
+            "before": "parser-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/parser.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix null check",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/parser.ts": "null-check-fix-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/other.ts": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.ts": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/other.ts": "other-v1",
+          "src/parser.ts": "null-check-fix-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Release branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/parser.ts": "parser-base"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/parser.ts": {
+            "after": "null-check-fix-v1",
+            "before": "parser-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/parser.ts": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix null check",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "src/parser.ts": "null-check-fix-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-2.1",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c1",
+    "operation_metadata": {
+      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "cherry-easy-rate-limit": {
+    "branches": {
+      "main": "c2",
+      "release-1.2": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/ratelimit.py": {
+            "after": "ratelimit-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/ratelimit.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/ratelimit.py": "ratelimit-base"
+        }
+      },
+      {
+        "changes": {
+          "src/ratelimit.py": {
+            "after": "rate-limit-fix-v1",
+            "before": "ratelimit-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/ratelimit.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix rate limit",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/ratelimit.py": "rate-limit-fix-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/other.py": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/other.py": "other-v1",
+          "src/ratelimit.py": "rate-limit-fix-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Release branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/ratelimit.py": "ratelimit-base"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/ratelimit.py": {
+            "after": "rate-limit-fix-v1",
+            "before": "ratelimit-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/ratelimit.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix rate limit",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "src/ratelimit.py": "rate-limit-fix-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-1.2",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c1",
+    "operation_metadata": {
+      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "cherry-hard-abort": {
+    "branches": {
+      "main": "c2",
+      "release-abort": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/search.ts": {
+            "after": "search-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/search.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/search.ts": "search-base"
+        }
+      },
+      {
+        "changes": {
+          "src/search.ts": {
+            "after": "search-hotfix",
+            "before": "search-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix search hotfix",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/search.ts": "search-hotfix"
+        }
+      },
+      {
+        "changes": {
+          "src/other.ts": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.ts": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/other.ts": "other-v1",
+          "src/search.ts": "search-hotfix"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Abort branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/search.ts": "search-base"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-abort",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_cherry_pick_aborted": true,
+    "operation_metadata": {
+      "last_cherry_pick_aborted": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "cherry-hard-export-null": {
+    "branches": {
+      "main": "c2",
+      "release-2.0": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/export.ts": {
+            "after": "export-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/export.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/export.ts": "export-base"
+        }
+      },
+      {
+        "changes": {
+          "src/export.ts": {
+            "after": "null-export-fix",
+            "before": "export-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/export.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix null export",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/export.ts": "null-export-fix"
+        }
+      },
+      {
+        "changes": {
+          "src/other.ts": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.ts": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/export.ts": "null-export-fix",
+          "src/other.ts": "other-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Release branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/export.ts": "export-base"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/export.ts": {
+            "after": "null-export-fix",
+            "before": "export-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/export.ts": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix null export",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "src/export.ts": "null-export-fix"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-2.0",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c1",
+    "operation_metadata": {
+      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "cherry-hard-queue-finalize": {
+    "branches": {
+      "main": "c2",
+      "release-finalize": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/queue.ts": {
+            "after": "queue-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/queue.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/queue.ts": "queue-base"
+        }
+      },
+      {
+        "changes": {
+          "src/queue.ts": {
+            "after": "queue-hotfix",
+            "before": "queue-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/queue.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix queue hotfix",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/queue.ts": "queue-hotfix"
+        }
+      },
+      {
+        "changes": {
+          "src/other.ts": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.ts": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/other.ts": "other-v1",
+          "src/queue.ts": "queue-hotfix"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Finalize branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/queue.ts": "queue-base"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/queue.ts": {
+            "after": "queue-hotfix",
+            "before": "queue-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/queue.ts": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix queue hotfix",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "src/queue.ts": "queue-hotfix"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-finalize",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c1",
+    "operation_metadata": {
+      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "cherry-hard-rate-limit": {
+    "branches": {
+      "main": "c2",
+      "release-1.2": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/ratelimit.py": {
+            "after": "ratelimit-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/ratelimit.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/ratelimit.py": "ratelimit-base"
+        }
+      },
+      {
+        "changes": {
+          "src/ratelimit.py": {
+            "after": "rate-limit-fix-v1",
+            "before": "ratelimit-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/ratelimit.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix rate limit",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/ratelimit.py": "rate-limit-fix-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/other.py": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/other.py": "other-v1",
+          "src/ratelimit.py": "rate-limit-fix-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Release branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/ratelimit.py": "ratelimit-base"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/ratelimit.py": {
+            "after": "rate-limit-fix-v1",
+            "before": "ratelimit-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/ratelimit.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix rate limit",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "src/ratelimit.py": "rate-limit-fix-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-1.2",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c1",
+    "operation_metadata": {
+      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "cherry-medium-invoice-rounding": {
+    "branches": {
+      "main": "c2",
+      "release-1.1": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/invoice.py": {
+            "after": "invoice-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/invoice.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/invoice.py": "invoice-base"
+        }
+      },
+      {
+        "changes": {
+          "src/invoice.py": {
+            "after": "rounding-fix-v1",
+            "before": "invoice-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/invoice.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix rounding",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/invoice.py": "rounding-fix-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/other.py": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/invoice.py": "rounding-fix-v1",
+          "src/other.py": "other-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Release branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/invoice.py": "invoice-base"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/invoice.py": {
+            "after": "rounding-fix-v1",
+            "before": "invoice-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/invoice.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix rounding",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "src/invoice.py": "rounding-fix-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-1.1",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c1",
+    "operation_metadata": {
+      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "cherry-medium-login-timeout": {
+    "branches": {
+      "main": "c2",
+      "release-1.0": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/login.js": {
+            "after": "login-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/login.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/login.js": "login-base"
+        }
+      },
+      {
+        "changes": {
+          "src/login.js": {
+            "after": "timeout-fix-v1",
+            "before": "login-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/login.js": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix login timeout",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/login.js": "timeout-fix-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/other.js": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.js": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/login.js": "timeout-fix-v1",
+          "src/other.js": "other-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Release branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/login.js": "login-base"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/login.js": {
+            "after": "timeout-fix-v1",
+            "before": "login-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/login.js": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix login timeout",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "src/login.js": "timeout-fix-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-1.0",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c1",
+    "operation_metadata": {
+      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "cherry-medium-no-commit": {
+    "branches": {
+      "main": "c2",
+      "release-review": "c3"
+    },
+    "cherry_pick_in_progress": true,
+    "cherry_pick_original_head": "c3",
+    "commits": [
+      {
+        "changes": {
+          "src/report.ts": {
+            "after": "report-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/report.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/report.ts": "report-base"
+        }
+      },
+      {
+        "changes": {
+          "src/report.ts": {
+            "after": "report-hotfix",
+            "before": "report-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/report.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix report hotfix",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/report.ts": "report-hotfix"
+        }
+      },
+      {
+        "changes": {
+          "src/other.ts": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.ts": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/other.ts": "other-v1",
+          "src/report.ts": "report-hotfix"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Review branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/report.ts": "report-base"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-review",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_cherry_pick_no_commit": true,
+    "last_cherry_pick_source": "c1",
+    "operation_metadata": {
+      "cherry_pick_in_progress": true,
+      "cherry_pick_original_head": "c3",
+      "last_cherry_pick_no_commit": true,
+      "last_cherry_pick_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {
+      "src/report.ts": {
+        "content": "report-hotfix",
+        "status": "modified"
+      }
+    },
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "cherry-medium-staged-review": {
+    "branches": {
+      "main": "c2",
+      "release-staged": "c3"
+    },
+    "cherry_pick_in_progress": true,
+    "cherry_pick_original_head": "c3",
+    "commits": [
+      {
+        "changes": {
+          "src/cache.py": {
+            "after": "cache-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/cache.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/cache.py": "cache-base"
+        }
+      },
+      {
+        "changes": {
+          "src/cache.py": {
+            "after": "cache-hotfix",
+            "before": "cache-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/cache.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix cache hotfix",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/cache.py": "cache-hotfix"
+        }
+      },
+      {
+        "changes": {
+          "src/other.py": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/cache.py": "cache-hotfix",
+          "src/other.py": "other-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c3",
+        "is_merge": false,
+        "message": "Staged branch base",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/cache.py": "cache-base"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release-staged",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_cherry_pick_no_commit": true,
+    "last_cherry_pick_source": "c1",
+    "operation_metadata": {
+      "cherry_pick_in_progress": true,
+      "cherry_pick_original_head": "c3",
+      "last_cherry_pick_no_commit": true,
+      "last_cherry_pick_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {
+      "src/cache.py": {
+        "content": "cache-hotfix",
+        "status": "modified"
+      }
+    },
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
   "cherry-pick-abort": {
     "branches": {
       "hotfix/auth-guard": "c2",
@@ -92448,6 +100056,929 @@ TARGET_STATES = json.loads(r"""
     },
     "working_tree": {}
   },
+  "clone-easy-api-lab": {
+    "branches": {
+      "main": "r11"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r11",
+        "is_merge": false,
+        "message": "Remote commit r11",
+        "order": 0,
+        "parents": [],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "r11",
+      "type": "branch"
+    },
+    "last_clone_branch": "main",
+    "last_clone_depth": null,
+    "last_clone_destination": "api-workshop",
+    "last_clone_directory": "api-workshop",
+    "last_clone_shallow": false,
+    "last_clone_url": "https://example.test/training/api-lab.git",
+    "operation_metadata": {
+      "last_clone_branch": "main",
+      "last_clone_depth": null,
+      "last_clone_destination": "api-workshop",
+      "last_clone_directory": "api-workshop",
+      "last_clone_shallow": false,
+      "last_clone_url": "https://example.test/training/api-lab.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r11"
+    },
+    "remote_fixtures": {
+      "default_branch": "main",
+      "head": "r11",
+      "tree": {
+        "README.md": "api-readme-v1",
+        "api/routes.py": "api-routes-v1"
+      },
+      "url": "https://example.test/training/api-lab.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/training/api-lab.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "main"
+    },
+    "working_tree": {}
+  },
+  "clone-easy-corp": {
+    "branches": {
+      "main": "r41"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r41",
+        "is_merge": false,
+        "message": "Remote commit r41",
+        "order": 0,
+        "parents": [],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "r41",
+      "type": "branch"
+    },
+    "last_clone_branch": "main",
+    "last_clone_depth": null,
+    "last_clone_destination": "audit-logs-local",
+    "last_clone_directory": "audit-logs-local",
+    "last_clone_shallow": false,
+    "last_clone_url": "https://git.corp.example/it/audit-logs.git",
+    "operation_metadata": {
+      "last_clone_branch": "main",
+      "last_clone_depth": null,
+      "last_clone_destination": "audit-logs-local",
+      "last_clone_directory": "audit-logs-local",
+      "last_clone_shallow": false,
+      "last_clone_url": "https://git.corp.example/it/audit-logs.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r41"
+    },
+    "remote_fixtures": {
+      "default_branch": "main",
+      "head": "r41",
+      "tree": {
+        "README.md": "audit-readme-v1",
+        "logs/q1.csv": "q1-v1"
+      },
+      "url": "https://git.corp.example/it/audit-logs.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://git.corp.example/it/audit-logs.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "main"
+    },
+    "working_tree": {}
+  },
+  "clone-easy-docs-portal": {
+    "branches": {
+      "main": "r10"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r10",
+        "is_merge": false,
+        "message": "Remote commit r10",
+        "order": 0,
+        "parents": [],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "r10",
+      "type": "branch"
+    },
+    "last_clone_branch": "main",
+    "last_clone_depth": null,
+    "last_clone_destination": "docs-portal",
+    "last_clone_directory": "docs-portal",
+    "last_clone_shallow": false,
+    "last_clone_url": "https://example.test/training/docs-portal.git",
+    "operation_metadata": {
+      "last_clone_branch": "main",
+      "last_clone_depth": null,
+      "last_clone_destination": "docs-portal",
+      "last_clone_directory": "docs-portal",
+      "last_clone_shallow": false,
+      "last_clone_url": "https://example.test/training/docs-portal.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r10"
+    },
+    "remote_fixtures": {
+      "default_branch": "main",
+      "head": "r10",
+      "tree": {
+        "README.md": "docs-readme-v1",
+        "docs/intro.md": "docs-intro-v1"
+      },
+      "url": "https://example.test/training/docs-portal.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/training/docs-portal.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "main"
+    },
+    "working_tree": {}
+  },
+  "clone-easy-oss-ssh": {
+    "branches": {
+      "main": "r40"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r40",
+        "is_merge": false,
+        "message": "Remote commit r40",
+        "order": 0,
+        "parents": [],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "r40",
+      "type": "branch"
+    },
+    "last_clone_branch": "main",
+    "last_clone_depth": null,
+    "last_clone_destination": "oss-toolkit",
+    "last_clone_directory": "oss-toolkit",
+    "last_clone_shallow": false,
+    "last_clone_url": "git@github.com:open-dev/oss-toolkit.git",
+    "operation_metadata": {
+      "last_clone_branch": "main",
+      "last_clone_depth": null,
+      "last_clone_destination": "oss-toolkit",
+      "last_clone_directory": "oss-toolkit",
+      "last_clone_shallow": false,
+      "last_clone_url": "git@github.com:open-dev/oss-toolkit.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r40"
+    },
+    "remote_fixtures": {
+      "default_branch": "main",
+      "head": "r40",
+      "tree": {
+        "README.md": "oss-readme-v1",
+        "src/toolkit.py": "toolkit-v1"
+      },
+      "url": "git@github.com:open-dev/oss-toolkit.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "git@github.com:open-dev/oss-toolkit.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "main"
+    },
+    "working_tree": {}
+  },
+  "clone-easy-profile-starter": {
+    "branches": {
+      "starter": "r13"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r12",
+        "is_merge": false,
+        "message": "Remote commit r12",
+        "order": 0,
+        "parents": [],
+        "tree": {}
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "r13",
+        "is_merge": false,
+        "message": "Remote commit r13",
+        "order": 1,
+        "parents": [
+          "r12"
+        ],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "starter",
+      "target": "r13",
+      "type": "branch"
+    },
+    "last_clone_branch": "starter",
+    "last_clone_depth": null,
+    "last_clone_destination": "profile-site",
+    "last_clone_directory": "profile-site",
+    "last_clone_shallow": false,
+    "last_clone_url": "https://example.test/training/profile-site.git",
+    "operation_metadata": {
+      "last_clone_branch": "starter",
+      "last_clone_depth": null,
+      "last_clone_destination": "profile-site",
+      "last_clone_directory": "profile-site",
+      "last_clone_shallow": false,
+      "last_clone_url": "https://example.test/training/profile-site.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r13",
+      "origin/main": "r12",
+      "origin/starter": "r13"
+    },
+    "remote_fixtures": {
+      "branches": {
+        "origin/main": "r12",
+        "origin/starter": "r13"
+      },
+      "default_branch": "main",
+      "head": "r13",
+      "tree": {
+        "index.html": "profile-index-v2",
+        "starter-notes.md": "starter-notes-v1",
+        "styles/site.css": "profile-css-v1"
+      },
+      "url": "https://example.test/training/profile-site.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/training/profile-site.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "starter": "origin/starter"
+    },
+    "working_tree": {}
+  },
+  "clone-hard-lab-notebook-depth-branch": {
+    "branches": {
+      "review": "r32"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r32",
+        "is_merge": false,
+        "message": "Remote commit r32",
+        "order": 1,
+        "parents": [],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "review",
+      "target": "r32",
+      "type": "branch"
+    },
+    "last_clone_branch": "review",
+    "last_clone_depth": 1,
+    "last_clone_destination": "notebook-review",
+    "last_clone_directory": "notebook-review",
+    "last_clone_shallow": true,
+    "last_clone_url": "https://example.test/docs/lab-notebook.git",
+    "operation_metadata": {
+      "last_clone_branch": "review",
+      "last_clone_depth": 1,
+      "last_clone_destination": "notebook-review",
+      "last_clone_directory": "notebook-review",
+      "last_clone_shallow": true,
+      "last_clone_url": "https://example.test/docs/lab-notebook.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r32",
+      "origin/main": "r24",
+      "origin/review": "r32"
+    },
+    "remote_fixtures": {
+      "branches": {
+        "origin/main": "r24",
+        "origin/review": "r32"
+      },
+      "default_branch": "main",
+      "default_head": "r24",
+      "head": "r32",
+      "tree": {
+        "README.md": "notebook-readme-v2",
+        "entries/day-1.md": "day1-v1",
+        "entries/day-2.md": "day2-v1"
+      },
+      "url": "https://example.test/docs/lab-notebook.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/docs/lab-notebook.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "review": "origin/review"
+    },
+    "working_tree": {}
+  },
+  "clone-hard-mobile-ui-shallow-branch": {
+    "branches": {
+      "starter": "r31"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r31",
+        "is_merge": false,
+        "message": "Remote commit r31",
+        "order": 1,
+        "parents": [],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "starter",
+      "target": "r31",
+      "type": "branch"
+    },
+    "last_clone_branch": "starter",
+    "last_clone_depth": 1,
+    "last_clone_destination": "mobile-ui-lab",
+    "last_clone_directory": "mobile-ui-lab",
+    "last_clone_shallow": true,
+    "last_clone_url": "https://example.test/frontend/mobile-ui.git",
+    "operation_metadata": {
+      "last_clone_branch": "starter",
+      "last_clone_depth": 1,
+      "last_clone_destination": "mobile-ui-lab",
+      "last_clone_directory": "mobile-ui-lab",
+      "last_clone_shallow": true,
+      "last_clone_url": "https://example.test/frontend/mobile-ui.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r31",
+      "origin/main": "r23",
+      "origin/starter": "r31"
+    },
+    "remote_fixtures": {
+      "branches": {
+        "origin/main": "r23",
+        "origin/starter": "r31"
+      },
+      "default_branch": "main",
+      "default_head": "r23",
+      "head": "r31",
+      "tree": {
+        "README.md": "mobile-readme-v2",
+        "screens/home.tsx": "home-v1",
+        "styles/mobile.css": "mobile-css-v1"
+      },
+      "url": "https://example.test/frontend/mobile-ui.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/frontend/mobile-ui.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "starter": "origin/starter"
+    },
+    "working_tree": {}
+  },
+  "clone-hard-research-log-ssh": {
+    "branches": {
+      "main": "r34"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r34",
+        "is_merge": false,
+        "message": "Remote commit r34",
+        "order": 0,
+        "parents": [],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "r34",
+      "type": "branch"
+    },
+    "last_clone_branch": "main",
+    "last_clone_depth": null,
+    "last_clone_destination": "research-log-lab",
+    "last_clone_directory": "research-log-lab",
+    "last_clone_shallow": false,
+    "last_clone_url": "git@example.test:docs/research-log.git",
+    "operation_metadata": {
+      "last_clone_branch": "main",
+      "last_clone_depth": null,
+      "last_clone_destination": "research-log-lab",
+      "last_clone_directory": "research-log-lab",
+      "last_clone_shallow": false,
+      "last_clone_url": "git@example.test:docs/research-log.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r34"
+    },
+    "remote_fixtures": {
+      "default_branch": "main",
+      "default_head": "r33",
+      "head": "r34",
+      "tree": {
+        "README.md": "research-readme-v2",
+        "notes/week-1.md": "week1-v1",
+        "notes/week-2.md": "week2-v1"
+      },
+      "url": "git@example.test:docs/research-log.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "git@example.test:docs/research-log.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "main"
+    },
+    "working_tree": {}
+  },
+  "clone-hard-ssh-shallow": {
+    "branches": {
+      "main": "r60"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r60",
+        "is_merge": false,
+        "message": "Remote commit r60",
+        "order": 0,
+        "parents": [],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "r60",
+      "type": "branch"
+    },
+    "last_clone_branch": "main",
+    "last_clone_depth": 1,
+    "last_clone_destination": "oss-review",
+    "last_clone_directory": "oss-review",
+    "last_clone_shallow": true,
+    "last_clone_url": "git@github.com:open-dev/oss-toolkit.git",
+    "operation_metadata": {
+      "last_clone_branch": "main",
+      "last_clone_depth": 1,
+      "last_clone_destination": "oss-review",
+      "last_clone_directory": "oss-review",
+      "last_clone_shallow": true,
+      "last_clone_url": "git@github.com:open-dev/oss-toolkit.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r60"
+    },
+    "remote_fixtures": {
+      "default_branch": "main",
+      "default_head": "r59",
+      "head": "r60",
+      "tree": {
+        "README.md": "oss-readme-v2",
+        "src/toolkit.py": "toolkit-v2"
+      },
+      "url": "git@github.com:open-dev/oss-toolkit.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "git@github.com:open-dev/oss-toolkit.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "main"
+    },
+    "working_tree": {}
+  },
+  "clone-med-feature": {
+    "branches": {
+      "feature/auth": "r50"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r49",
+        "is_merge": false,
+        "message": "Remote commit r49",
+        "order": 0,
+        "parents": [],
+        "tree": {}
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "r50",
+        "is_merge": false,
+        "message": "Remote commit r50",
+        "order": 1,
+        "parents": [
+          "r49"
+        ],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/auth",
+      "target": "r50",
+      "type": "branch"
+    },
+    "last_clone_branch": "feature/auth",
+    "last_clone_depth": null,
+    "last_clone_destination": "backend-api",
+    "last_clone_directory": "backend-api",
+    "last_clone_shallow": false,
+    "last_clone_url": "https://github.com/acme-startup/backend-api.git",
+    "operation_metadata": {
+      "last_clone_branch": "feature/auth",
+      "last_clone_depth": null,
+      "last_clone_destination": "backend-api",
+      "last_clone_directory": "backend-api",
+      "last_clone_shallow": false,
+      "last_clone_url": "https://github.com/acme-startup/backend-api.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r50",
+      "origin/feature/auth": "r50",
+      "origin/main": "r49"
+    },
+    "remote_fixtures": {
+      "branches": {
+        "origin/feature/auth": "r50",
+        "origin/main": "r49"
+      },
+      "default_branch": "main",
+      "default_head": "r49",
+      "head": "r50",
+      "tree": {
+        "README.md": "api-readme-v1",
+        "src/auth.py": "auth-v1"
+      },
+      "url": "https://github.com/acme-startup/backend-api.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/acme-startup/backend-api.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/auth": "origin/feature/auth"
+    },
+    "working_tree": {}
+  },
+  "clone-medium-analytics-ssh": {
+    "branches": {
+      "main": "r30"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r30",
+        "is_merge": false,
+        "message": "Remote commit r30",
+        "order": 0,
+        "parents": [],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "r30",
+      "type": "branch"
+    },
+    "last_clone_branch": "main",
+    "last_clone_depth": null,
+    "last_clone_destination": "analytics-worktree",
+    "last_clone_directory": "analytics-worktree",
+    "last_clone_shallow": false,
+    "last_clone_url": "git@example.test:training/analytics-lab.git",
+    "operation_metadata": {
+      "last_clone_branch": "main",
+      "last_clone_depth": null,
+      "last_clone_destination": "analytics-worktree",
+      "last_clone_directory": "analytics-worktree",
+      "last_clone_shallow": false,
+      "last_clone_url": "git@example.test:training/analytics-lab.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r30"
+    },
+    "remote_fixtures": {
+      "default_branch": "main",
+      "head": "r30",
+      "tree": {
+        "README.md": "analytics-readme-v3",
+        "metrics/report.md": "metrics-report-v2",
+        "src/summary.py": "summary-v1"
+      },
+      "url": "git@example.test:training/analytics-lab.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "git@example.test:training/analytics-lab.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "main"
+    },
+    "working_tree": {}
+  },
+  "clone-medium-cli-starter-folder": {
+    "branches": {
+      "starter": "r20"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r19",
+        "is_merge": false,
+        "message": "Remote commit r19",
+        "order": 0,
+        "parents": [],
+        "tree": {}
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "r20",
+        "is_merge": false,
+        "message": "Remote commit r20",
+        "order": 1,
+        "parents": [
+          "r19"
+        ],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "starter",
+      "target": "r20",
+      "type": "branch"
+    },
+    "last_clone_branch": "starter",
+    "last_clone_depth": null,
+    "last_clone_destination": "cli-starter-lab",
+    "last_clone_directory": "cli-starter-lab",
+    "last_clone_shallow": false,
+    "last_clone_url": "https://example.test/tools/cli-tool.git",
+    "operation_metadata": {
+      "last_clone_branch": "starter",
+      "last_clone_depth": null,
+      "last_clone_destination": "cli-starter-lab",
+      "last_clone_directory": "cli-starter-lab",
+      "last_clone_shallow": false,
+      "last_clone_url": "https://example.test/tools/cli-tool.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r20",
+      "origin/main": "r19",
+      "origin/starter": "r20"
+    },
+    "remote_fixtures": {
+      "branches": {
+        "origin/main": "r19",
+        "origin/starter": "r20"
+      },
+      "default_branch": "main",
+      "default_head": "r19",
+      "head": "r20",
+      "tree": {
+        "README.md": "cli-readme-v2",
+        "src/parser.py": "cli-parser-v2",
+        "starter.md": "cli-starter-v1"
+      },
+      "url": "https://example.test/tools/cli-tool.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/tools/cli-tool.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "starter": "origin/starter"
+    },
+    "working_tree": {}
+  },
+  "clone-medium-css-kit-shallow": {
+    "branches": {
+      "main": "r22"
+    },
+    "commits": [
+      {
+        "changes": {},
+        "files": {},
+        "id": "r22",
+        "is_merge": false,
+        "message": "Remote commit r22",
+        "order": 0,
+        "parents": [],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "r22",
+      "type": "branch"
+    },
+    "last_clone_branch": "main",
+    "last_clone_depth": 1,
+    "last_clone_destination": "css-kit",
+    "last_clone_directory": "css-kit",
+    "last_clone_shallow": true,
+    "last_clone_url": "https://example.test/frontend/css-kit.git",
+    "operation_metadata": {
+      "last_clone_branch": "main",
+      "last_clone_depth": 1,
+      "last_clone_destination": "css-kit",
+      "last_clone_directory": "css-kit",
+      "last_clone_shallow": true,
+      "last_clone_url": "https://example.test/frontend/css-kit.git"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "main": "r22"
+    },
+    "remote_fixtures": {
+      "default_branch": "main",
+      "head": "r22",
+      "tree": {
+        "README.md": "css-readme-v2",
+        "styles/tokens.css": "tokens-v2"
+      },
+      "url": "https://example.test/frontend/css-kit.git"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/frontend/css-kit.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "main"
+    },
+    "working_tree": {}
+  },
   "clone-named-api": {
     "branches": {
       "main": "r2"
@@ -92858,6 +101389,900 @@ TARGET_STATES = json.loads(r"""
       }
     }
   },
+  "commit-easy-auth-dir": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth/login.py": {
+            "after": "login-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/auth/logout.py": {
+            "after": "logout-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth/login.py": "added",
+          "src/auth/logout.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Add auth module",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "src/auth/login.py": "login-v1",
+          "src/auth/logout.py": "logout-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "commit-easy-form-validation": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/form.js": {
+            "after": "form-validation-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/form.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Update form validation",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "src/form.js": "form-validation-v2",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "commit-easy-initial": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "README.md": {
+            "after": "readme-init-v1",
+            "before": "readme-v1",
+            "change_type": "modified"
+          },
+          "main.py": {
+            "after": "main-init-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "requirements.txt": {
+            "after": "reqs-init-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "modified",
+          "main.py": "added",
+          "requirements.txt": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-init-v1",
+          "main.py": "main-init-v1",
+          "requirements.txt": "reqs-init-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "commit-easy-navbar-spacing": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "styles/navbar.css": {
+            "after": "navbar-spacing-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "styles/navbar.css": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Adjust navbar spacing",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/navbar.css": "navbar-spacing-v2",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "commit-easy-readme-setup": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "README.md": {
+            "after": "readme-setup-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Clarify setup steps",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-setup-v2",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "commit-hard-export-distractor": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/export.py": {
+            "after": "export-code-v3",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/export.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Fix export validation",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/export.py": "export-code-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "scratch/export-test-output.txt": "export-output-draft"
+    }
+  },
+  "commit-hard-parser": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/parser.py": {
+            "after": "parser-v2",
+            "before": null,
+            "change_type": "added"
+          },
+          "tests/test_parser.py": {
+            "after": "test-parser-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added",
+          "tests/test_parser.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Add parser module with unit tests",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "parser-v2",
+          "tests/test_parser.py": "test-parser-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "debug.log": "debug-draft",
+      "scratch.py": "scratch-draft"
+    }
+  },
+  "commit-hard-profile-distractor": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/profile-card.js": {
+            "after": "profile-js-v3",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/profile-card.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Update profile card behavior",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/profile-card.js": "profile-js-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "notes/profile-ideas.md": "profile-notes-draft"
+    }
+  },
+  "commit-hard-search-two-targets-one-distractor": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/search.js": {
+            "after": "search-js-v3",
+            "before": null,
+            "change_type": "added"
+          },
+          "templates/search.html": {
+            "after": "search-template-v3",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/search.js": "added",
+          "templates/search.html": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Refine search ranking display",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.js": "search-js-v3",
+          "templates/search.html": "search-template-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "notes/search-ranking.md": "search-notes-draft"
+    }
+  },
+  "commit-hard-selective": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "api/handler.py": {
+            "after": "handler-bugfix-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "api/handler.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Fix request handler null check",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "api/handler.py": "handler-bugfix-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "api/experimental.py": "experimental-wip-v1"
+    }
+  },
   "commit-login-copy": {
     "branches": {
       "main": "c1"
@@ -92929,6 +102354,406 @@ TARGET_STATES = json.loads(r"""
         "message": "move HEAD",
         "ref": "HEAD@{0}",
         "target": "c1"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "commit-med-docker": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          ".env.example": {
+            "after": "env-example-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "Dockerfile": {
+            "after": "dockerfile-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          ".env.example": "added",
+          "Dockerfile": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Add Docker configuration",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          ".env.example": "env-example-v1",
+          "Dockerfile": "dockerfile-v2",
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "commit-medium-export-flow": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "docs/export.md": {
+            "after": "export-docs-v2",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/export.py": {
+            "after": "export-code-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/export.md": "added",
+          "src/export.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Document export flow update",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/export.md": "export-docs-v2",
+          "src/app.py": "app-v1",
+          "src/export.py": "export-code-v2",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "commit-medium-profile-card": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/profile-card.js": {
+            "after": "profile-js-v2",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/profile-card.css": {
+            "after": "profile-css-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/profile-card.js": "added",
+          "styles/profile-card.css": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Update profile card layout",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "src/profile-card.js": "profile-js-v2",
+          "styles/profile-card.css": "profile-css-v2",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "commit-medium-search-results": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/search.js": {
+            "after": "search-js-v2",
+            "before": null,
+            "change_type": "added"
+          },
+          "templates/search.html": {
+            "after": "search-template-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/search.js": "added",
+          "templates/search.html": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Refine search results view",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "src/search.js": "search-js-v2",
+          "styles/site.css": "style-v1",
+          "templates/search.html": "search-template-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
       }
     ],
     "remote_branches": {},
@@ -94009,6 +103834,666 @@ TARGET_STATES = json.loads(r"""
         "message": "move HEAD",
         "ref": "HEAD@{0}",
         "target": "c1"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "e1": {
+    "branches": {
+      "main": "c2",
+      "recovery-4-1-e1": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-e1",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-e1",
+    "last_switch_branch": "recovery-4-1-e1",
+    "last_switched_to": "recovery-4-1-e1",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-e1",
+      "last_switch_branch": "recovery-4-1-e1",
+      "last_switched_to": "recovery-4-1-e1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~1",
+        "commit": "c2",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "e2": {
+    "branches": {
+      "main": "c2",
+      "recovery-4-1-e2": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-e2",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-e2",
+    "last_switch_branch": "recovery-4-1-e2",
+    "last_switched_to": "recovery-4-1-e2",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-e2",
+      "last_switch_branch": "recovery-4-1-e2",
+      "last_switched_to": "recovery-4-1-e2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~1",
+        "commit": "c2",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "e3": {
+    "branches": {
+      "main": "c2",
+      "recovery-4-1-e3": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-e3",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-e3",
+    "last_switch_branch": "recovery-4-1-e3",
+    "last_switched_to": "recovery-4-1-e3",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-e3",
+      "last_switch_branch": "recovery-4-1-e3",
+      "last_switched_to": "recovery-4-1-e3"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~1",
+        "commit": "c2",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "e4": {
+    "branches": {
+      "main": "c2",
+      "recovery-4-1-e4": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-e4",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-e4",
+    "last_switch_branch": "recovery-4-1-e4",
+    "last_switched_to": "recovery-4-1-e4",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-e4",
+      "last_switch_branch": "recovery-4-1-e4",
+      "last_switched_to": "recovery-4-1-e4"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~1",
+        "commit": "c2",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "e5": {
+    "branches": {
+      "main": "c2",
+      "recovery-4-1-e5": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-e5",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-e5",
+    "last_switch_branch": "recovery-4-1-e5",
+    "last_switched_to": "recovery-4-1-e5",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-e5",
+      "last_switch_branch": "recovery-4-1-e5",
+      "last_switched_to": "recovery-4-1-e5"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~1",
+        "commit": "c2",
+        "ref": "main"
       }
     ],
     "remote_branches": {},
@@ -103574,6 +114059,278 @@ TARGET_STATES = json.loads(r"""
     "tags": {},
     "upstream_tracking": {
       "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "fetch-easy-cap-check": {
+    "branches": {
+      "feature/models": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/models.py": {
+            "after": "models-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/models.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Groupmate pushed model classes",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/models.py": "models-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "feature/models",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/models": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/models": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/capstone-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "fetch-easy-corp-list": {
+    "branches": {
+      "release/v2": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/audit.py": {
+            "after": "audit-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/audit.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Release v2 preparation",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/audit.py": "audit-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "release/v2",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/release/v2": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/release/v2": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/corp-backend.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "fetch-hard-oss-review": {
+    "branches": {
+      "release/next": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/core.py": {
+            "after": "core-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/core.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Upstream merged large PR",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/core.py": "core-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "release/next",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/release/next",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/release/next",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {
+      "origin/release/next": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/release/next": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/upstream/oss-contrib.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "release/next": "origin/release/next"
     },
     "working_tree": {}
   },
@@ -254874,6 +265631,666 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
+  "h1": {
+    "branches": {
+      "main": "c0",
+      "recovery-4-1-h1": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-h1",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-h1",
+    "last_switch_branch": "recovery-4-1-h1",
+    "last_switched_to": "recovery-4-1-h1",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-h1",
+      "last_switch_branch": "recovery-4-1-h1",
+      "last_switched_to": "recovery-4-1-h1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~3",
+        "commit": "c0",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "h2": {
+    "branches": {
+      "main": "c0",
+      "recovery-4-1-h2": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-h2",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-h2",
+    "last_switch_branch": "recovery-4-1-h2",
+    "last_switched_to": "recovery-4-1-h2",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-h2",
+      "last_switch_branch": "recovery-4-1-h2",
+      "last_switched_to": "recovery-4-1-h2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~3",
+        "commit": "c0",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "h3": {
+    "branches": {
+      "main": "c0",
+      "recovery-4-1-h3": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-h3",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-h3",
+    "last_switch_branch": "recovery-4-1-h3",
+    "last_switched_to": "recovery-4-1-h3",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-h3",
+      "last_switch_branch": "recovery-4-1-h3",
+      "last_switched_to": "recovery-4-1-h3"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~3",
+        "commit": "c0",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "h4": {
+    "branches": {
+      "main": "c0",
+      "recovery-4-1-h4": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-h4",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-h4",
+    "last_switch_branch": "recovery-4-1-h4",
+    "last_switched_to": "recovery-4-1-h4",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-h4",
+      "last_switch_branch": "recovery-4-1-h4",
+      "last_switched_to": "recovery-4-1-h4"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~3",
+        "commit": "c0",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "h5": {
+    "branches": {
+      "main": "c0",
+      "recovery-4-1-h5": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-h5",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-h5",
+    "last_switch_branch": "recovery-4-1-h5",
+    "last_switched_to": "recovery-4-1-h5",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-h5",
+      "last_switch_branch": "recovery-4-1-h5",
+      "last_switched_to": "recovery-4-1-h5"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~3",
+        "commit": "c0",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
   "history-graph-feature": {
     "branches": {
       "feature/profile": "c3",
@@ -256149,6 +267566,490 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
+  "init-easy-current-empty": {
+    "branches": {
+      "main": null
+    },
+    "commits": [],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": null,
+      "type": "branch"
+    },
+    "last_init_branch": "main",
+    "last_init_current_directory": true,
+    "last_init_directory": null,
+    "last_init_initial_branch": "main",
+    "last_init_quiet": false,
+    "last_init_reinitialized": false,
+    "operation_metadata": {
+      "last_init_branch": "main",
+      "last_init_current_directory": true,
+      "last_init_directory": null,
+      "last_init_initial_branch": "main",
+      "last_init_quiet": false,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": false,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "init-easy-invoice": {
+    "branches": {
+      "main": null
+    },
+    "commits": [],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": null,
+      "type": "branch"
+    },
+    "last_init_branch": "main",
+    "last_init_current_directory": false,
+    "last_init_directory": "invoice-tracker",
+    "last_init_initial_branch": "main",
+    "last_init_quiet": false,
+    "last_init_reinitialized": false,
+    "operation_metadata": {
+      "last_init_branch": "main",
+      "last_init_current_directory": false,
+      "last_init_directory": "invoice-tracker",
+      "last_init_initial_branch": "main",
+      "last_init_quiet": false,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": false,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "init-easy-trunk-branch": {
+    "branches": {
+      "trunk": null
+    },
+    "commits": [],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "trunk",
+      "target": null,
+      "type": "branch"
+    },
+    "last_init_branch": "trunk",
+    "last_init_current_directory": true,
+    "last_init_directory": null,
+    "last_init_initial_branch": "trunk",
+    "last_init_quiet": false,
+    "last_init_reinitialized": false,
+    "operation_metadata": {
+      "last_init_branch": "trunk",
+      "last_init_current_directory": true,
+      "last_init_directory": null,
+      "last_init_initial_branch": "trunk",
+      "last_init_quiet": false,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": false,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "init-hard-ci": {
+    "branches": {
+      "main": null
+    },
+    "commits": [],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": null,
+      "type": "branch"
+    },
+    "last_init_branch": "main",
+    "last_init_current_directory": false,
+    "last_init_directory": "ci-configs",
+    "last_init_initial_branch": "main",
+    "last_init_quiet": false,
+    "last_init_reinitialized": false,
+    "operation_metadata": {
+      "last_init_branch": "main",
+      "last_init_current_directory": false,
+      "last_init_directory": "ci-configs",
+      "last_init_initial_branch": "main",
+      "last_init_quiet": false,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": false,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "pipelines/build.yml": "untracked"
+    }
+  },
+  "init-hard-research-log": {
+    "branches": {
+      "main": null
+    },
+    "commits": [],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": null,
+      "type": "branch"
+    },
+    "last_init_branch": "main",
+    "last_init_current_directory": false,
+    "last_init_directory": "research-log",
+    "last_init_initial_branch": "main",
+    "last_init_quiet": true,
+    "last_init_reinitialized": false,
+    "operation_metadata": {
+      "last_init_branch": "main",
+      "last_init_current_directory": false,
+      "last_init_directory": "research-log",
+      "last_init_initial_branch": "main",
+      "last_init_quiet": true,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": false,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "archive/old.md": "untracked",
+      "notes/ideas.md": "untracked",
+      "research-log/README.md": "untracked"
+    }
+  },
+  "init-hard-safe-rerun": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Keep existing notes",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_init_branch": "main",
+    "last_init_current_directory": true,
+    "last_init_directory": null,
+    "last_init_initial_branch": "main",
+    "last_init_quiet": true,
+    "last_init_reinitialized": true,
+    "operation_metadata": {
+      "last_init_branch": "main",
+      "last_init_current_directory": true,
+      "last_init_directory": null,
+      "last_init_initial_branch": "main",
+      "last_init_quiet": true,
+      "last_init_reinitialized": true,
+      "repository_reinitialized": true
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "notes/today.md": "untracked"
+    }
+  },
+  "init-hard-ui-kit": {
+    "branches": {
+      "trunk": null
+    },
+    "commits": [],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "trunk",
+      "target": null,
+      "type": "branch"
+    },
+    "last_init_branch": "trunk",
+    "last_init_current_directory": false,
+    "last_init_directory": "ui-kit",
+    "last_init_initial_branch": "trunk",
+    "last_init_quiet": true,
+    "last_init_reinitialized": false,
+    "operation_metadata": {
+      "last_init_branch": "trunk",
+      "last_init_current_directory": false,
+      "last_init_directory": "ui-kit",
+      "last_init_initial_branch": "trunk",
+      "last_init_quiet": true,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": false,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "brand-assets/logo.svg": "untracked",
+      "experiments/mockup.html": "untracked",
+      "ui-kit/tokens.css": "untracked"
+    }
+  },
+  "init-med-oss": {
+    "branches": {
+      "main": null
+    },
+    "commits": [],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": null,
+      "type": "branch"
+    },
+    "last_init_branch": "main",
+    "last_init_current_directory": false,
+    "last_init_directory": "oss-contrib",
+    "last_init_initial_branch": "main",
+    "last_init_quiet": false,
+    "last_init_reinitialized": false,
+    "operation_metadata": {
+      "last_init_branch": "main",
+      "last_init_current_directory": false,
+      "last_init_directory": "oss-contrib",
+      "last_init_initial_branch": "main",
+      "last_init_quiet": false,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": false,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "init-medium-docs-site": {
+    "branches": {
+      "main": null
+    },
+    "commits": [],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": null,
+      "type": "branch"
+    },
+    "last_init_branch": "main",
+    "last_init_current_directory": false,
+    "last_init_directory": "docs-site",
+    "last_init_initial_branch": "main",
+    "last_init_quiet": false,
+    "last_init_reinitialized": false,
+    "operation_metadata": {
+      "last_init_branch": "main",
+      "last_init_current_directory": false,
+      "last_init_directory": "docs-site",
+      "last_init_initial_branch": "main",
+      "last_init_quiet": false,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": false,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "init-medium-quiet-research-log": {
+    "branches": {
+      "main": null
+    },
+    "commits": [],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": null,
+      "type": "branch"
+    },
+    "last_init_branch": "main",
+    "last_init_current_directory": false,
+    "last_init_directory": "research-log",
+    "last_init_initial_branch": "main",
+    "last_init_quiet": true,
+    "last_init_reinitialized": false,
+    "operation_metadata": {
+      "last_init_branch": "main",
+      "last_init_current_directory": false,
+      "last_init_directory": "research-log",
+      "last_init_initial_branch": "main",
+      "last_init_quiet": true,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": false,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "init-medium-trunk-api-playground": {
+    "branches": {
+      "trunk": null
+    },
+    "commits": [],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "trunk",
+      "target": null,
+      "type": "branch"
+    },
+    "last_init_branch": "trunk",
+    "last_init_current_directory": false,
+    "last_init_directory": "api-playground",
+    "last_init_initial_branch": "trunk",
+    "last_init_quiet": false,
+    "last_init_reinitialized": false,
+    "operation_metadata": {
+      "last_init_branch": "trunk",
+      "last_init_current_directory": false,
+      "last_init_directory": "api-playground",
+      "last_init_initial_branch": "trunk",
+      "last_init_quiet": false,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": false,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
   "init-named-invoice": {
     "branches": {
       "main": null
@@ -256346,6 +268247,2382 @@ TARGET_STATES = json.loads(r"""
         "status": "conflicted"
       }
     }
+  },
+  "m1": {
+    "branches": {
+      "main": "c1",
+      "recovery-4-1-m1": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-m1",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-m1",
+    "last_switch_branch": "recovery-4-1-m1",
+    "last_switched_to": "recovery-4-1-m1",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-m1",
+      "last_switch_branch": "recovery-4-1-m1",
+      "last_switched_to": "recovery-4-1-m1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~2",
+        "commit": "c1",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "m2": {
+    "branches": {
+      "main": "c1",
+      "recovery-4-1-m2": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-m2",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-m2",
+    "last_switch_branch": "recovery-4-1-m2",
+    "last_switched_to": "recovery-4-1-m2",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-m2",
+      "last_switch_branch": "recovery-4-1-m2",
+      "last_switched_to": "recovery-4-1-m2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~2",
+        "commit": "c1",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "m3": {
+    "branches": {
+      "main": "c1",
+      "recovery-4-1-m3": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-m3",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-m3",
+    "last_switch_branch": "recovery-4-1-m3",
+    "last_switched_to": "recovery-4-1-m3",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-m3",
+      "last_switch_branch": "recovery-4-1-m3",
+      "last_switched_to": "recovery-4-1-m3"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~2",
+        "commit": "c1",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "m4": {
+    "branches": {
+      "main": "c1",
+      "recovery-4-1-m4": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-m4",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-m4",
+    "last_switch_branch": "recovery-4-1-m4",
+    "last_switched_to": "recovery-4-1-m4",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-m4",
+      "last_switch_branch": "recovery-4-1-m4",
+      "last_switched_to": "recovery-4-1-m4"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~2",
+        "commit": "c1",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "m5": {
+    "branches": {
+      "main": "c1",
+      "recovery-4-1-m5": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": "readme-v0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add feature groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue feature work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v3",
+            "before": "readme-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Complete feature work (lost tip)",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "recovery-4-1-m5",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery-4-1-m5",
+    "last_switch_branch": "recovery-4-1-m5",
+    "last_switched_to": "recovery-4-1-m5",
+    "operation_metadata": {
+      "last_branch_created": "recovery-4-1-m5",
+      "last_switch_branch": "recovery-4-1-m5",
+      "last_switched_to": "recovery-4-1-m5"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~2",
+        "commit": "c1",
+        "ref": "main"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "manual-easy-auth-copy": {
+    "branches": {
+      "feature/auth-timeout": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/auth.js": {
+            "after": "timeout=3000",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/auth.js": "timeout=3000"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.js": {
+            "after": "timeout=5000",
+            "before": "timeout=3000",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.js": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/auth.js": "timeout=5000"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.js": {
+            "after": "timeout=2500",
+            "before": "timeout=3000",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.js": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/auth.js": "timeout=2500"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.js": {
+            "after": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n",
+            "before": "timeout=5000",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.js": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Resolve conflict cleanly",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/auth.js": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/auth.js"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/auth-timeout",
+    "last_merge_conflict_paths": [
+      "src/auth.js"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/auth.js",
+    "operation_metadata": {
+      "last_merge_branch": "feature/auth-timeout",
+      "last_merge_conflict_paths": [
+        "src/auth.js"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/auth.js"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "manual-easy-billing-copy": {
+    "branches": {
+      "feature/regional-currency": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "currency='USD'",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/billing.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/billing.py": "currency='USD'"
+        }
+      },
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "currency='PHP'",
+            "before": "currency='USD'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/billing.py": "currency='PHP'"
+        }
+      },
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "currency='EUR'",
+            "before": "currency='USD'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/billing.py": "currency='EUR'"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/billing.py": {
+            "after": "<<<<<<< HEAD\ncurrency='PHP'\n=======\ncurrency='EUR'\n>>>>>>> feature/regional-currency\n",
+            "before": "currency='PHP'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Resolve conflict cleanly",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/billing.py": "<<<<<<< HEAD\ncurrency='PHP'\n=======\ncurrency='EUR'\n>>>>>>> feature/regional-currency\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/billing.py"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/regional-currency",
+    "last_merge_conflict_paths": [
+      "src/billing.py"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/billing.py",
+    "operation_metadata": {
+      "last_merge_branch": "feature/regional-currency",
+      "last_merge_conflict_paths": [
+        "src/billing.py"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/billing.py"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "manual-easy-config-copy": {
+    "branches": {
+      "feature/debug-config": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/config.py": {
+            "after": "debug=False",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/config.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/config.py": "debug=False"
+        }
+      },
+      {
+        "changes": {
+          "src/config.py": {
+            "after": "debug=False\nlog_level=INFO",
+            "before": "debug=False",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/config.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/config.py": "debug=False\nlog_level=INFO"
+        }
+      },
+      {
+        "changes": {
+          "src/config.py": {
+            "after": "debug=True\nlog_level=DEBUG",
+            "before": "debug=False",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/config.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/config.py": "debug=True\nlog_level=DEBUG"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/config.py": {
+            "after": "<<<<<<< HEAD\ndebug=False\nlog_level=INFO\n=======\ndebug=True\nlog_level=DEBUG\n>>>>>>> feature/debug-config\n",
+            "before": "debug=False\nlog_level=INFO",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/config.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Resolve conflict cleanly",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/config.py": "<<<<<<< HEAD\ndebug=False\nlog_level=INFO\n=======\ndebug=True\nlog_level=DEBUG\n>>>>>>> feature/debug-config\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/config.py"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/debug-config",
+    "last_merge_conflict_paths": [
+      "src/config.py"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/config.py",
+    "operation_metadata": {
+      "last_merge_branch": "feature/debug-config",
+      "last_merge_conflict_paths": [
+        "src/config.py"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/config.py"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "manual-easy-navbar-copy": {
+    "branches": {
+      "feature/navbar-rebrand": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/components/Navbar.tsx": {
+            "after": "brand=AppName",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/components/Navbar.tsx": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/components/Navbar.tsx": "brand=AppName"
+        }
+      },
+      {
+        "changes": {
+          "src/components/Navbar.tsx": {
+            "after": "brand=MyApp",
+            "before": "brand=AppName",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/components/Navbar.tsx": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/components/Navbar.tsx": "brand=MyApp"
+        }
+      },
+      {
+        "changes": {
+          "src/components/Navbar.tsx": {
+            "after": "brand=BetaApp",
+            "before": "brand=AppName",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/components/Navbar.tsx": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/components/Navbar.tsx": "brand=BetaApp"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/components/Navbar.tsx": {
+            "after": "<<<<<<< HEAD\nbrand=MyApp\n=======\nbrand=BetaApp\n>>>>>>> feature/navbar-rebrand\n",
+            "before": "brand=MyApp",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/components/Navbar.tsx": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Resolve conflict cleanly",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/components/Navbar.tsx": "<<<<<<< HEAD\nbrand=MyApp\n=======\nbrand=BetaApp\n>>>>>>> feature/navbar-rebrand\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/components/Navbar.tsx"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/navbar-rebrand",
+    "last_merge_conflict_paths": [
+      "src/components/Navbar.tsx"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/components/Navbar.tsx",
+    "operation_metadata": {
+      "last_merge_branch": "feature/navbar-rebrand",
+      "last_merge_conflict_paths": [
+        "src/components/Navbar.tsx"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/components/Navbar.tsx"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "manual-easy-profile-copy": {
+    "branches": {
+      "feature/profile-copy": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/profile.tsx": {
+            "after": "title=Profile",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/profile.tsx": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/profile.tsx": "title=Profile"
+        }
+      },
+      {
+        "changes": {
+          "src/profile.tsx": {
+            "after": "title=Account profile",
+            "before": "title=Profile",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/profile.tsx": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/profile.tsx": "title=Account profile"
+        }
+      },
+      {
+        "changes": {
+          "src/profile.tsx": {
+            "after": "title=Member profile",
+            "before": "title=Profile",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/profile.tsx": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/profile.tsx": "title=Member profile"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/profile.tsx": {
+            "after": "<<<<<<< HEAD\ntitle=Account profile\n=======\ntitle=Member profile\n>>>>>>> feature/profile-copy\n",
+            "before": "title=Account profile",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/profile.tsx": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Resolve conflict cleanly",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/profile.tsx": "<<<<<<< HEAD\ntitle=Account profile\n=======\ntitle=Member profile\n>>>>>>> feature/profile-copy\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/profile.tsx"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/profile-copy",
+    "last_merge_conflict_paths": [
+      "src/profile.tsx"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/profile.tsx",
+    "operation_metadata": {
+      "last_merge_branch": "feature/profile-copy",
+      "last_merge_conflict_paths": [
+        "src/profile.tsx"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/profile.tsx"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "manual-hard-medium-carryover": {
+    "branches": {
+      "feature/help-center": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route('/help')",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/routes.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/routes.ts": "route('/help')"
+        }
+      },
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route('/support')",
+            "before": "route('/help')",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/routes.ts": "route('/support')"
+        }
+      },
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route('/help-center')",
+            "before": "route('/help')",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/routes.ts": "route('/help-center')"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/routes.ts": {
+            "after": "<<<<<<< HEAD\nroute('/support')\n=======\nroute('/help-center')\n>>>>>>> feature/help-center\n",
+            "before": "route('/support')",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Resolve release conflict",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/routes.ts": "<<<<<<< HEAD\nroute('/support')\n=======\nroute('/help-center')\n>>>>>>> feature/help-center\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/routes.ts"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/help-center",
+    "last_merge_conflict_paths": [
+      "src/routes.ts"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/routes.ts",
+    "operation_metadata": {
+      "last_merge_branch": "feature/help-center",
+      "last_merge_conflict_paths": [
+        "src/routes.ts"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/routes.ts"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "manual-hard-migration": {
+    "branches": {
+      "feature/migration": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "db/migrations/001_users.sql": {
+            "after": "migration-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "db/migrations/001_users.sql": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "db/migrations/001_users.sql": "migration-base"
+        }
+      },
+      {
+        "changes": {
+          "db/migrations/001_users.sql": {
+            "after": "migration-main",
+            "before": "migration-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "db/migrations/001_users.sql": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "db/migrations/001_users.sql": "migration-main"
+        }
+      },
+      {
+        "changes": {
+          "db/migrations/001_users.sql": {
+            "after": "migration-feature",
+            "before": "migration-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "db/migrations/001_users.sql": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "db/migrations/001_users.sql": "migration-feature"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "db/migrations/001_users.sql": {
+            "after": "<<<<<<< HEAD\nmigration-main\n=======\nmigration-feature\n>>>>>>> feature/migration\n",
+            "before": "migration-main",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "db/migrations/001_users.sql": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Resolve release conflict",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "db/migrations/001_users.sql": "<<<<<<< HEAD\nmigration-main\n=======\nmigration-feature\n>>>>>>> feature/migration\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "db/migrations/001_users.sql"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/migration",
+    "last_merge_conflict_paths": [
+      "db/migrations/001_users.sql"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "db/migrations/001_users.sql",
+    "operation_metadata": {
+      "last_merge_branch": "feature/migration",
+      "last_merge_conflict_paths": [
+        "db/migrations/001_users.sql"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "db/migrations/001_users.sql"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "manual-hard-pricing": {
+    "branches": {
+      "feature/pricing": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/pricing.rb": {
+            "after": "pricing-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/pricing.rb": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/pricing.rb": "pricing-base"
+        }
+      },
+      {
+        "changes": {
+          "src/pricing.rb": {
+            "after": "pricing-main",
+            "before": "pricing-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/pricing.rb": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/pricing.rb": "pricing-main"
+        }
+      },
+      {
+        "changes": {
+          "src/pricing.rb": {
+            "after": "pricing-feature",
+            "before": "pricing-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/pricing.rb": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/pricing.rb": "pricing-feature"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/pricing.rb": {
+            "after": "<<<<<<< HEAD\npricing-main\n=======\npricing-feature\n>>>>>>> feature/pricing\n",
+            "before": "pricing-main",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/pricing.rb": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Resolve release conflict",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/pricing.rb": "<<<<<<< HEAD\npricing-main\n=======\npricing-feature\n>>>>>>> feature/pricing\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/pricing.rb"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/pricing",
+    "last_merge_conflict_paths": [
+      "src/pricing.rb"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/pricing.rb",
+    "operation_metadata": {
+      "last_merge_branch": "feature/pricing",
+      "last_merge_conflict_paths": [
+        "src/pricing.rb"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/pricing.rb"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "manual-hard-schema": {
+    "branches": {
+      "feature/schema": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "schema/orders.sql": {
+            "after": "schema-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "schema/orders.sql": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "schema/orders.sql": "schema-base"
+        }
+      },
+      {
+        "changes": {
+          "schema/orders.sql": {
+            "after": "schema-main",
+            "before": "schema-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "schema/orders.sql": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "schema/orders.sql": "schema-main"
+        }
+      },
+      {
+        "changes": {
+          "schema/orders.sql": {
+            "after": "schema-feature",
+            "before": "schema-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "schema/orders.sql": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "schema/orders.sql": "schema-feature"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "schema/orders.sql": {
+            "after": "<<<<<<< HEAD\nschema-main\n=======\nschema-feature\n>>>>>>> feature/schema\n",
+            "before": "schema-main",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "schema/orders.sql": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Resolve release conflict",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "schema/orders.sql": "<<<<<<< HEAD\nschema-main\n=======\nschema-feature\n>>>>>>> feature/schema\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "schema/orders.sql"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/schema",
+    "last_merge_conflict_paths": [
+      "schema/orders.sql"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "schema/orders.sql",
+    "operation_metadata": {
+      "last_merge_branch": "feature/schema",
+      "last_merge_conflict_paths": [
+        "schema/orders.sql"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "schema/orders.sql"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "manual-medium-gateway": {
+    "branches": {
+      "feature/gateway": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "config/gateway.yml": {
+            "after": "gateway-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "config/gateway.yml": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "config/gateway.yml": "gateway-base"
+        }
+      },
+      {
+        "changes": {
+          "config/gateway.yml": {
+            "after": "gateway-main",
+            "before": "gateway-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/gateway.yml": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "config/gateway.yml": "gateway-main"
+        }
+      },
+      {
+        "changes": {
+          "config/gateway.yml": {
+            "after": "gateway-feature",
+            "before": "gateway-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/gateway.yml": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "config/gateway.yml": "gateway-feature"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "config/gateway.yml": {
+            "after": "<<<<<<< HEAD\ngateway-main\n=======\ngateway-feature\n>>>>>>> feature/gateway\n",
+            "before": "gateway-main",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/gateway.yml": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Resolve integration conflict",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "config/gateway.yml": "<<<<<<< HEAD\ngateway-main\n=======\ngateway-feature\n>>>>>>> feature/gateway\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "config/gateway.yml"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/gateway",
+    "last_merge_conflict_paths": [
+      "config/gateway.yml"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "config/gateway.yml",
+    "operation_metadata": {
+      "last_merge_branch": "feature/gateway",
+      "last_merge_conflict_paths": [
+        "config/gateway.yml"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "config/gateway.yml"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "manual-medium-policy": {
+    "branches": {
+      "feature/policy": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/policy.yml": {
+            "after": "policy-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/policy.yml": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/policy.yml": "policy-base"
+        }
+      },
+      {
+        "changes": {
+          "src/policy.yml": {
+            "after": "policy-main",
+            "before": "policy-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/policy.yml": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/policy.yml": "policy-main"
+        }
+      },
+      {
+        "changes": {
+          "src/policy.yml": {
+            "after": "policy-feature",
+            "before": "policy-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/policy.yml": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/policy.yml": "policy-feature"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/policy.yml": {
+            "after": "<<<<<<< HEAD\npolicy-main\n=======\npolicy-feature\n>>>>>>> feature/policy\n",
+            "before": "policy-main",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/policy.yml": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Resolve integration conflict",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/policy.yml": "<<<<<<< HEAD\npolicy-main\n=======\npolicy-feature\n>>>>>>> feature/policy\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/policy.yml"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/policy",
+    "last_merge_conflict_paths": [
+      "src/policy.yml"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/policy.yml",
+    "operation_metadata": {
+      "last_merge_branch": "feature/policy",
+      "last_merge_conflict_paths": [
+        "src/policy.yml"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/policy.yml"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "manual-medium-router": {
+    "branches": {
+      "feature/routes": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/routes.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/routes.ts": "route-base"
+        }
+      },
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route-main",
+            "before": "route-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/routes.ts": "route-main"
+        }
+      },
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route-feature",
+            "before": "route-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/routes.ts": "route-feature"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/routes.ts": {
+            "after": "<<<<<<< HEAD\nroute-main\n=======\nroute-feature\n>>>>>>> feature/routes\n",
+            "before": "route-main",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Resolve integration conflict",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/routes.ts": "<<<<<<< HEAD\nroute-main\n=======\nroute-feature\n>>>>>>> feature/routes\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/routes.ts"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/routes",
+    "last_merge_conflict_paths": [
+      "src/routes.ts"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/routes.ts",
+    "operation_metadata": {
+      "last_merge_branch": "feature/routes",
+      "last_merge_conflict_paths": [
+        "src/routes.ts"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/routes.ts"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
   },
   "merge-abort-auth": {
     "branches": {
@@ -256932,6 +271209,173 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
+  "merge-easy-cap-docs": {
+    "branches": {
+      "docs/readme-update": "c2",
+      "staging": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Project base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "README update complete",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "staging",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_merge_branch": "docs/readme-update",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "last_merge_branch": "docs/readme-update",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "merge-easy-free-contact": {
+    "branches": {
+      "feature/contact-form": "c2",
+      "integration": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Project base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/contact.py": {
+            "after": "contact-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/contact.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Contact form complete",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/contact.py": "contact-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "integration",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/contact-form",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "last_merge_branch": "feature/contact-form",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
   "merge-ff-maincopy": {
     "branches": {
       "feature/copy": "c3",
@@ -257117,6 +271561,276 @@ TARGET_STATES = json.loads(r"""
         "message": "move HEAD",
         "ref": "HEAD@{0}",
         "target": "c2"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "merge-hard-devops-cert": {
+    "branches": {
+      "feature/current-work": "c1",
+      "hotfix/cert-renewal": "c2",
+      "release/stable": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/certs.py": {
+            "after": "cert-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/certs.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Cert renewal hotfix",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/certs.py": "cert-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/release.py": {
+            "after": "rel-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/release.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Release stable diverged",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/release.py": "rel-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/certs.py": {
+            "after": "cert-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/release.py": {
+            "after": null,
+            "before": "rel-v1",
+            "change_type": "deleted"
+          }
+        },
+        "files": {
+          "src/certs.py": "added",
+          "src/release.py": "deleted"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'hotfix/cert-renewal'",
+        "order": 3,
+        "parents": [
+          "c3",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/certs.py": "cert-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release/stable",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_auto_staged_paths": [
+      "src/certs.py",
+      "src/release.py"
+    ],
+    "last_merge_branch": "hotfix/cert-renewal",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": true,
+    "last_merge_target": "c2",
+    "last_switch_branch": "release/stable",
+    "last_switched_to": "release/stable",
+    "operation_metadata": {
+      "last_merge_auto_staged_paths": [
+        "src/certs.py",
+        "src/release.py"
+      ],
+      "last_merge_branch": "hotfix/cert-renewal",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": true,
+      "last_merge_target": "c2",
+      "last_switch_branch": "release/stable",
+      "last_switched_to": "release/stable"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "merge-med-corp-sso": {
+    "branches": {
+      "feature/sso-integration": "c2",
+      "release/v1": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Project base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/sso.py": {
+            "after": "sso-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/sso.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "SSO integration complete",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/sso.py": "sso-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/sso.py": {
+            "after": "sso-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/sso.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'feature/sso-integration'",
+        "order": 2,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/sso.py": "sso-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release/v1",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_auto_staged_paths": [
+      "src/sso.py"
+    ],
+    "last_merge_branch": "feature/sso-integration",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "last_merge_auto_staged_paths": [
+        "src/sso.py"
+      ],
+      "last_merge_branch": "feature/sso-integration",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": true,
+      "last_merge_target": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
       }
     ],
     "remote_branches": {},
@@ -257636,6 +272350,3280 @@ TARGET_STATES = json.loads(r"""
       "src/auth.js": {
         "content": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout",
         "status": "conflicted"
+      }
+    }
+  },
+  "mergetool-easy-auth-copy": {
+    "branches": {
+      "feature/auth-timeout": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/auth.js": {
+            "after": "timeout=3000",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/auth.js": "timeout=3000"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.js": {
+            "after": "timeout=5000",
+            "before": "timeout=3000",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.js": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/auth.js": "timeout=5000"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.js": {
+            "after": "timeout=2500",
+            "before": "timeout=3000",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.js": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/auth.js": "timeout=2500"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.js": {
+            "after": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n",
+            "before": "timeout=5000",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.js": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/auth-timeout'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/auth.js": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/auth.js"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/auth-timeout",
+    "last_merge_conflict_paths": [
+      "src/auth.js"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/auth.js",
+    "operation_metadata": {
+      "last_merge_branch": "feature/auth-timeout",
+      "last_merge_conflict_paths": [
+        "src/auth.js"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/auth.js"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-easy-billing-copy": {
+    "branches": {
+      "feature/regional-currency": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "currency='USD'",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/billing.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/billing.py": "currency='USD'"
+        }
+      },
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "currency='PHP'",
+            "before": "currency='USD'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/billing.py": "currency='PHP'"
+        }
+      },
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "currency='EUR'",
+            "before": "currency='USD'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/billing.py": "currency='EUR'"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/billing.py": {
+            "after": "<<<<<<< HEAD\ncurrency='PHP'\n=======\ncurrency='EUR'\n>>>>>>> feature/regional-currency\n",
+            "before": "currency='PHP'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/regional-currency'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/billing.py": "<<<<<<< HEAD\ncurrency='PHP'\n=======\ncurrency='EUR'\n>>>>>>> feature/regional-currency\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/billing.py"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/regional-currency",
+    "last_merge_conflict_paths": [
+      "src/billing.py"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/billing.py",
+    "operation_metadata": {
+      "last_merge_branch": "feature/regional-currency",
+      "last_merge_conflict_paths": [
+        "src/billing.py"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/billing.py"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-easy-config-copy": {
+    "branches": {
+      "feature/debug-config": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/config.py": {
+            "after": "debug=False",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/config.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/config.py": "debug=False"
+        }
+      },
+      {
+        "changes": {
+          "src/config.py": {
+            "after": "debug=False\nlog_level=INFO",
+            "before": "debug=False",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/config.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/config.py": "debug=False\nlog_level=INFO"
+        }
+      },
+      {
+        "changes": {
+          "src/config.py": {
+            "after": "debug=True\nlog_level=DEBUG",
+            "before": "debug=False",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/config.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/config.py": "debug=True\nlog_level=DEBUG"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/config.py": {
+            "after": "<<<<<<< HEAD\ndebug=False\nlog_level=INFO\n=======\ndebug=True\nlog_level=DEBUG\n>>>>>>> feature/debug-config\n",
+            "before": "debug=False\nlog_level=INFO",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/config.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/debug-config'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/config.py": "<<<<<<< HEAD\ndebug=False\nlog_level=INFO\n=======\ndebug=True\nlog_level=DEBUG\n>>>>>>> feature/debug-config\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/config.py"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/debug-config",
+    "last_merge_conflict_paths": [
+      "src/config.py"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/config.py",
+    "operation_metadata": {
+      "last_merge_branch": "feature/debug-config",
+      "last_merge_conflict_paths": [
+        "src/config.py"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/config.py"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-easy-navbar-copy": {
+    "branches": {
+      "feature/navbar-rebrand": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/components/Navbar.tsx": {
+            "after": "brand=AppName",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/components/Navbar.tsx": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/components/Navbar.tsx": "brand=AppName"
+        }
+      },
+      {
+        "changes": {
+          "src/components/Navbar.tsx": {
+            "after": "brand=MyApp",
+            "before": "brand=AppName",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/components/Navbar.tsx": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/components/Navbar.tsx": "brand=MyApp"
+        }
+      },
+      {
+        "changes": {
+          "src/components/Navbar.tsx": {
+            "after": "brand=BetaApp",
+            "before": "brand=AppName",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/components/Navbar.tsx": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/components/Navbar.tsx": "brand=BetaApp"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/components/Navbar.tsx": {
+            "after": "<<<<<<< HEAD\nbrand=MyApp\n=======\nbrand=BetaApp\n>>>>>>> feature/navbar-rebrand\n",
+            "before": "brand=MyApp",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/components/Navbar.tsx": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/navbar-rebrand'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/components/Navbar.tsx": "<<<<<<< HEAD\nbrand=MyApp\n=======\nbrand=BetaApp\n>>>>>>> feature/navbar-rebrand\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/components/Navbar.tsx"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/navbar-rebrand",
+    "last_merge_conflict_paths": [
+      "src/components/Navbar.tsx"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/components/Navbar.tsx",
+    "operation_metadata": {
+      "last_merge_branch": "feature/navbar-rebrand",
+      "last_merge_conflict_paths": [
+        "src/components/Navbar.tsx"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/components/Navbar.tsx"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-easy-profile-copy": {
+    "branches": {
+      "feature/profile-copy": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/profile.tsx": {
+            "after": "title=Profile",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/profile.tsx": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/profile.tsx": "title=Profile"
+        }
+      },
+      {
+        "changes": {
+          "src/profile.tsx": {
+            "after": "title=Account profile",
+            "before": "title=Profile",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/profile.tsx": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/profile.tsx": "title=Account profile"
+        }
+      },
+      {
+        "changes": {
+          "src/profile.tsx": {
+            "after": "title=Member profile",
+            "before": "title=Profile",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/profile.tsx": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/profile.tsx": "title=Member profile"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/profile.tsx": {
+            "after": "<<<<<<< HEAD\ntitle=Account profile\n=======\ntitle=Member profile\n>>>>>>> feature/profile-copy\n",
+            "before": "title=Account profile",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/profile.tsx": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/profile-copy'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/profile.tsx": "<<<<<<< HEAD\ntitle=Account profile\n=======\ntitle=Member profile\n>>>>>>> feature/profile-copy\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/profile.tsx"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/profile-copy",
+    "last_merge_conflict_paths": [
+      "src/profile.tsx"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/profile.tsx",
+    "operation_metadata": {
+      "last_merge_branch": "feature/profile-copy",
+      "last_merge_conflict_paths": [
+        "src/profile.tsx"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/profile.tsx"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-hard-medium-carryover": {
+    "branches": {
+      "feature/help-center": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route('/help')",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/routes.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/routes.ts": "route('/help')"
+        }
+      },
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route('/support')",
+            "before": "route('/help')",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/routes.ts": "route('/support')"
+        }
+      },
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route('/help-center')",
+            "before": "route('/help')",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/routes.ts": "route('/help-center')"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/routes.ts": {
+            "after": "<<<<<<< HEAD\nroute('/support')\n=======\nroute('/help-center')\n>>>>>>> feature/help-center\n",
+            "before": "route('/support')",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/help-center'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/routes.ts": "<<<<<<< HEAD\nroute('/support')\n=======\nroute('/help-center')\n>>>>>>> feature/help-center\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/routes.ts"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/help-center",
+    "last_merge_conflict_paths": [
+      "src/routes.ts"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/routes.ts",
+    "operation_metadata": {
+      "last_merge_branch": "feature/help-center",
+      "last_merge_conflict_paths": [
+        "src/routes.ts"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/routes.ts"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-hard-migration": {
+    "branches": {
+      "feature/migration": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "db/migrations/001_users.sql": {
+            "after": "migration-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "db/migrations/001_users.sql": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "db/migrations/001_users.sql": "migration-base"
+        }
+      },
+      {
+        "changes": {
+          "db/migrations/001_users.sql": {
+            "after": "migration-main",
+            "before": "migration-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "db/migrations/001_users.sql": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "db/migrations/001_users.sql": "migration-main"
+        }
+      },
+      {
+        "changes": {
+          "db/migrations/001_users.sql": {
+            "after": "migration-feature",
+            "before": "migration-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "db/migrations/001_users.sql": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "db/migrations/001_users.sql": "migration-feature"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "db/migrations/001_users.sql": {
+            "after": "<<<<<<< HEAD\nmigration-main\n=======\nmigration-feature\n>>>>>>> feature/migration\n",
+            "before": "migration-main",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "db/migrations/001_users.sql": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/migration'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "db/migrations/001_users.sql": "<<<<<<< HEAD\nmigration-main\n=======\nmigration-feature\n>>>>>>> feature/migration\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "db/migrations/001_users.sql"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/migration",
+    "last_merge_conflict_paths": [
+      "db/migrations/001_users.sql"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "db/migrations/001_users.sql",
+    "operation_metadata": {
+      "last_merge_branch": "feature/migration",
+      "last_merge_conflict_paths": [
+        "db/migrations/001_users.sql"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "db/migrations/001_users.sql"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-hard-pricing": {
+    "branches": {
+      "feature/pricing": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/pricing.rb": {
+            "after": "pricing-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/pricing.rb": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/pricing.rb": "pricing-base"
+        }
+      },
+      {
+        "changes": {
+          "src/pricing.rb": {
+            "after": "pricing-main",
+            "before": "pricing-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/pricing.rb": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/pricing.rb": "pricing-main"
+        }
+      },
+      {
+        "changes": {
+          "src/pricing.rb": {
+            "after": "pricing-feature",
+            "before": "pricing-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/pricing.rb": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/pricing.rb": "pricing-feature"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/pricing.rb": {
+            "after": "<<<<<<< HEAD\npricing-main\n=======\npricing-feature\n>>>>>>> feature/pricing\n",
+            "before": "pricing-main",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/pricing.rb": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/pricing'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/pricing.rb": "<<<<<<< HEAD\npricing-main\n=======\npricing-feature\n>>>>>>> feature/pricing\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/pricing.rb"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/pricing",
+    "last_merge_conflict_paths": [
+      "src/pricing.rb"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/pricing.rb",
+    "operation_metadata": {
+      "last_merge_branch": "feature/pricing",
+      "last_merge_conflict_paths": [
+        "src/pricing.rb"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/pricing.rb"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-hard-schema": {
+    "branches": {
+      "feature/schema": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "schema/orders.sql": {
+            "after": "schema-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "schema/orders.sql": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "schema/orders.sql": "schema-base"
+        }
+      },
+      {
+        "changes": {
+          "schema/orders.sql": {
+            "after": "schema-main",
+            "before": "schema-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "schema/orders.sql": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "schema/orders.sql": "schema-main"
+        }
+      },
+      {
+        "changes": {
+          "schema/orders.sql": {
+            "after": "schema-feature",
+            "before": "schema-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "schema/orders.sql": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "schema/orders.sql": "schema-feature"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "schema/orders.sql": {
+            "after": "<<<<<<< HEAD\nschema-main\n=======\nschema-feature\n>>>>>>> feature/schema\n",
+            "before": "schema-main",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "schema/orders.sql": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/schema'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "schema/orders.sql": "<<<<<<< HEAD\nschema-main\n=======\nschema-feature\n>>>>>>> feature/schema\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "schema/orders.sql"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/schema",
+    "last_merge_conflict_paths": [
+      "schema/orders.sql"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "schema/orders.sql",
+    "operation_metadata": {
+      "last_merge_branch": "feature/schema",
+      "last_merge_conflict_paths": [
+        "schema/orders.sql"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "schema/orders.sql"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-medium-easy-carryover": {
+    "branches": {
+      "feature/auth-timeout": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/auth.js": {
+            "after": "timeout=3000",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/auth.js": "timeout=3000"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.js": {
+            "after": "timeout=5000",
+            "before": "timeout=3000",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.js": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/auth.js": "timeout=5000"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.js": {
+            "after": "timeout=2500",
+            "before": "timeout=3000",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.js": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/auth.js": "timeout=2500"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.js": {
+            "after": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n",
+            "before": "timeout=5000",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.js": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/auth-timeout'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/auth.js": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/auth.js"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/auth-timeout",
+    "last_merge_conflict_paths": [
+      "src/auth.js"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/auth.js",
+    "operation_metadata": {
+      "last_merge_branch": "feature/auth-timeout",
+      "last_merge_conflict_paths": [
+        "src/auth.js"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/auth.js"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-medium-gateway": {
+    "branches": {
+      "feature/gateway": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "config/gateway.yml": {
+            "after": "gateway-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "config/gateway.yml": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "config/gateway.yml": "gateway-base"
+        }
+      },
+      {
+        "changes": {
+          "config/gateway.yml": {
+            "after": "gateway-main",
+            "before": "gateway-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/gateway.yml": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "config/gateway.yml": "gateway-main"
+        }
+      },
+      {
+        "changes": {
+          "config/gateway.yml": {
+            "after": "gateway-feature",
+            "before": "gateway-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/gateway.yml": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "config/gateway.yml": "gateway-feature"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "config/gateway.yml": {
+            "after": "<<<<<<< HEAD\ngateway-main\n=======\ngateway-feature\n>>>>>>> feature/gateway\n",
+            "before": "gateway-main",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/gateway.yml": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/gateway'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "config/gateway.yml": "<<<<<<< HEAD\ngateway-main\n=======\ngateway-feature\n>>>>>>> feature/gateway\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "config/gateway.yml"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/gateway",
+    "last_merge_conflict_paths": [
+      "config/gateway.yml"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "config/gateway.yml",
+    "operation_metadata": {
+      "last_merge_branch": "feature/gateway",
+      "last_merge_conflict_paths": [
+        "config/gateway.yml"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "config/gateway.yml"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-medium-policy": {
+    "branches": {
+      "feature/policy": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/policy.yml": {
+            "after": "policy-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/policy.yml": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/policy.yml": "policy-base"
+        }
+      },
+      {
+        "changes": {
+          "src/policy.yml": {
+            "after": "policy-main",
+            "before": "policy-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/policy.yml": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/policy.yml": "policy-main"
+        }
+      },
+      {
+        "changes": {
+          "src/policy.yml": {
+            "after": "policy-feature",
+            "before": "policy-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/policy.yml": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/policy.yml": "policy-feature"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/policy.yml": {
+            "after": "<<<<<<< HEAD\npolicy-main\n=======\npolicy-feature\n>>>>>>> feature/policy\n",
+            "before": "policy-main",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/policy.yml": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/policy'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/policy.yml": "<<<<<<< HEAD\npolicy-main\n=======\npolicy-feature\n>>>>>>> feature/policy\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/policy.yml"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/policy",
+    "last_merge_conflict_paths": [
+      "src/policy.yml"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/policy.yml",
+    "operation_metadata": {
+      "last_merge_branch": "feature/policy",
+      "last_merge_conflict_paths": [
+        "src/policy.yml"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/policy.yml"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-medium-router": {
+    "branches": {
+      "feature/routes": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route-base",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/routes.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/routes.ts": "route-base"
+        }
+      },
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route-main",
+            "before": "route-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/routes.ts": "route-main"
+        }
+      },
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route-feature",
+            "before": "route-base",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch update",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/routes.ts": "route-feature"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/routes.ts": {
+            "after": "<<<<<<< HEAD\nroute-main\n=======\nroute-feature\n>>>>>>> feature/routes\n",
+            "before": "route-main",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/routes'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/routes.ts": "<<<<<<< HEAD\nroute-main\n=======\nroute-feature\n>>>>>>> feature/routes\n"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/routes.ts"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/routes",
+    "last_merge_conflict_paths": [
+      "src/routes.ts"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_workspace_file_written": "src/routes.ts",
+    "operation_metadata": {
+      "last_merge_branch": "feature/routes",
+      "last_merge_conflict_paths": [
+        "src/routes.ts"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_workspace_file_written": "src/routes.ts"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "partial-easy-auth-validation": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.py": {
+            "after": {
+              "hunks": [
+                "auth-validation-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Isolate auth validation",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": {
+            "hunks": [
+              "auth-validation-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/auth.py": {
+        "leftover_hunks": [
+          "auth-refactor-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/auth.py": {
+        "hunks": [
+          "auth-refactor-hunk"
+        ],
+        "status": "modified"
+      }
+    }
+  },
+  "partial-easy-billing": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/billing.py": {
+            "after": {
+              "hunks": [
+                "billing-fix-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/billing.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Fix billing calculation rounding error",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/billing.py": {
+            "hunks": [
+              "billing-fix-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/billing.py": {
+        "leftover_hunks": [
+          "billing-experimental-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/billing.py": {
+        "hunks": [
+          "billing-experimental-hunk"
+        ],
+        "status": "modified"
+      }
+    }
+  },
+  "partial-easy-export-format": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/export.py": {
+            "after": {
+              "hunks": [
+                "export-format-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/export.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Isolate export formatting",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/export.py": {
+            "hunks": [
+              "export-format-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/export.py": {
+        "leftover_hunks": [
+          "export-logging-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/export.py": {
+        "hunks": [
+          "export-logging-hunk"
+        ],
+        "status": "modified"
+      }
+    }
+  },
+  "partial-easy-routes": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/routes.py": {
+            "after": {
+              "hunks": [
+                "routes-handler-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/routes.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Update API route handlers",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/routes.py": {
+            "hunks": [
+              "routes-handler-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/routes.py": {
+        "leftover_hunks": [
+          "routes-experimental-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/routes.py": {
+        "hunks": [
+          "routes-experimental-hunk"
+        ],
+        "status": "modified"
+      }
+    }
+  },
+  "partial-easy-search-ranking": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/search.py": {
+            "after": {
+              "hunks": [
+                "search-ranking-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/search.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Isolate search ranking",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": {
+            "hunks": [
+              "search-ranking-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/search.py": {
+        "leftover_hunks": [
+          "search-cleanup-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/search.py": {
+        "hunks": [
+          "search-cleanup-hunk"
+        ],
+        "status": "modified"
+      }
+    }
+  },
+  "partial-hard-auth-cross-file": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.py": {
+            "after": {
+              "hunks": [
+                "auth-validation-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          },
+          "tests/test_auth.py": {
+            "after": {
+              "hunks": [
+                "auth-validation-test-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added",
+          "tests/test_auth.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Commit auth validation path",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": {
+            "hunks": [
+              "auth-validation-hunk"
+            ],
+            "status": "partial"
+          },
+          "tests/test_auth.py": {
+            "hunks": [
+              "auth-validation-test-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/auth.py": {
+        "leftover_hunks": [
+          "auth-refactor-hunk"
+        ],
+        "target_hunks": []
+      },
+      "tests/test_auth.py": {
+        "leftover_hunks": [
+          "auth-test-cleanup-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "notes/auth-debug.md": "auth-debug-draft",
+      "src/auth.py": {
+        "hunks": [
+          "auth-refactor-hunk"
+        ],
+        "status": "modified"
+      },
+      "tests/test_auth.py": {
+        "hunks": [
+          "auth-test-cleanup-hunk"
+        ],
+        "status": "modified"
+      }
+    }
+  },
+  "partial-hard-export-cross-file": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/export.py": {
+            "after": {
+              "hunks": [
+                "export-format-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          },
+          "tests/test_export.py": {
+            "after": {
+              "hunks": [
+                "export-format-test-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/export.py": "added",
+          "tests/test_export.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Commit export formatting path",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/export.py": {
+            "hunks": [
+              "export-format-hunk"
+            ],
+            "status": "partial"
+          },
+          "tests/test_export.py": {
+            "hunks": [
+              "export-format-test-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/export.py": {
+        "leftover_hunks": [
+          "export-logging-hunk"
+        ],
+        "target_hunks": []
+      },
+      "tests/test_export.py": {
+        "leftover_hunks": [
+          "export-test-cleanup-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "notes/export-followup.md": "export-followup-draft",
+      "src/export.py": {
+        "hunks": [
+          "export-logging-hunk"
+        ],
+        "status": "modified"
+      },
+      "tests/test_export.py": {
+        "hunks": [
+          "export-test-cleanup-hunk"
+        ],
+        "status": "modified"
+      }
+    }
+  },
+  "partial-hard-search-cross-file": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/search.py": {
+            "after": {
+              "hunks": [
+                "search-ranking-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          },
+          "tests/test_search.py": {
+            "after": {
+              "hunks": [
+                "search-ranking-test-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/search.py": "added",
+          "tests/test_search.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Commit search ranking path",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": {
+            "hunks": [
+              "search-ranking-hunk"
+            ],
+            "status": "partial"
+          },
+          "tests/test_search.py": {
+            "hunks": [
+              "search-ranking-test-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/search.py": {
+        "leftover_hunks": [
+          "search-cleanup-hunk"
+        ],
+        "target_hunks": []
+      },
+      "tests/test_search.py": {
+        "leftover_hunks": [
+          "search-test-fixture-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/search.py": {
+        "hunks": [
+          "search-cleanup-hunk"
+        ],
+        "status": "modified"
+      },
+      "tests/test_search.py": {
+        "hunks": [
+          "search-test-fixture-hunk"
+        ],
+        "status": "modified"
+      },
+      "tmp/search-output.txt": "search-output-draft"
+    }
+  },
+  "partial-hard-terraform": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "terraform/main.tf": {
+            "after": {
+              "hunks": [
+                "terraform-network-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "terraform/main.tf": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Update network Terraform configuration",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "terraform/main.tf": {
+            "hunks": [
+              "terraform-network-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "terraform/main.tf": {
+        "leftover_hunks": [
+          "terraform-experimental-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "terraform/debug.txt": "terraform-debug-draft",
+      "terraform/main.tf": {
+        "hunks": [
+          "terraform-experimental-hunk"
+        ],
+        "status": "modified"
+      }
+    }
+  },
+  "partial-med-three-hunk": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/parser.py": {
+            "after": {
+              "hunks": [
+                "parser-bugfix-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Fix parser bug and refactor token handling",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": {
+            "hunks": [
+              "parser-bugfix-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/parser.py": {
+        "leftover_hunks": [
+          "parser-refactor-hunk",
+          "parser-experimental-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/parser.py": {
+        "hunks": [
+          "parser-refactor-hunk",
+          "parser-experimental-hunk"
+        ],
+        "status": "modified"
+      }
+    }
+  },
+  "partial-medium-dashboard-filter": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/dashboard.js": {
+            "after": {
+              "hunks": [
+                "dashboard-filter-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/dashboard.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Commit dashboard filter change",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/dashboard.js": {
+            "hunks": [
+              "dashboard-filter-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/dashboard.js": {
+        "leftover_hunks": [
+          "dashboard-theme-hunk",
+          "dashboard-console-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "notes/dashboard-ideas.md": "dashboard-ideas-draft",
+      "src/dashboard.js": {
+        "hunks": [
+          "dashboard-theme-hunk",
+          "dashboard-console-hunk"
+        ],
+        "status": "modified"
+      }
+    }
+  },
+  "partial-medium-payment-rounding": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/payment.py": {
+            "after": {
+              "hunks": [
+                "payment-rounding-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/payment.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Commit payment rounding fix",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payment.py": {
+            "hunks": [
+              "payment-rounding-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/payment.py": {
+        "leftover_hunks": [
+          "payment-logging-hunk",
+          "payment-comment-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/payment.py": {
+        "hunks": [
+          "payment-logging-hunk",
+          "payment-comment-hunk"
+        ],
+        "status": "modified"
+      },
+      "tmp/payment-scratch.txt": "payment-scratch-draft"
+    }
+  },
+  "partial-medium-profile-validation": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/profile.py": {
+            "after": {
+              "hunks": [
+                "profile-validation-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/profile.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Commit profile validation only",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/profile.py": {
+            "hunks": [
+              "profile-validation-hunk"
+            ],
+            "status": "partial"
+          }
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/profile.py": {
+        "leftover_hunks": [
+          "profile-copy-hunk",
+          "profile-cleanup-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "notes/profile-todo.md": "profile-todo-draft",
+      "src/profile.py": {
+        "hunks": [
+          "profile-copy-hunk",
+          "profile-cleanup-hunk"
+        ],
+        "status": "modified"
       }
     }
   },
@@ -258415,6 +276403,106 @@ TARGET_STATES = json.loads(r"""
     },
     "working_tree": {}
   },
+  "pull-med-free-client": {
+    "branches": {
+      "staging": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/content.py": {
+            "after": "content-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/content.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Client pushed new content",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/content.py": "content-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "staging",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/staging",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/staging",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {
+      "origin/staging": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/staging": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/client/client-site.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "staging": "origin/staging"
+    },
+    "working_tree": {}
+  },
   "pull-origin-main": {
     "branches": {
       "main": "r2"
@@ -259174,6 +277262,295 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
+  "push-easy-cap-auth": {
+    "branches": {
+      "feature/user-auth": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Implement user auth",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/user-auth",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/user-auth",
+    "last_push_commit": "c2",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/user-auth",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "feature/user-auth",
+      "last_push_commit": "c2",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/user-auth"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/user-auth": "c2"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/team/capstone-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "push-easy-free-landing": {
+    "branches": {
+      "feature/client-landing": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/landing.py": {
+            "after": "landing-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/landing.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Implement client landing page",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/landing.py": "landing-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/client-landing",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/client-landing",
+    "last_push_commit": "c2",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/client-landing",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "feature/client-landing",
+      "last_push_commit": "c2",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/client-landing"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/client-landing": "c2"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/client/client-site.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "push-hard-devops-fwl": {
+    "branches": {
+      "feature/pipeline-config": "c3",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common ancestor",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/pipeline.py": {
+            "after": "old-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/pipeline.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Original pipeline commit (remote still here)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/pipeline.py": "old-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/pipeline.py": {
+            "after": "new-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/pipeline.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Rebased pipeline commit (local, diverged from remote)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/pipeline.py": "new-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": true,
+    "force_with_lease": true,
+    "head": {
+      "name": "feature/pipeline-config",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/pipeline-config",
+    "last_push_commit": "c3",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/pipeline-config",
+    "operation_metadata": {
+      "force_push_with_lease": true,
+      "force_with_lease": true,
+      "last_push_branch": "feature/pipeline-config",
+      "last_push_commit": "c3",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/pipeline-config"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/pipeline-config": "c3"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/team/devops-infra.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/pipeline-config": "origin/feature/pipeline-config"
+    },
+    "working_tree": {}
+  },
   "push-lease-feature": {
     "branches": {
       "feature/payment": "c1",
@@ -259351,6 +277728,96 @@ TARGET_STATES = json.loads(r"""
     "tags": {},
     "upstream_tracking": {
       "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "push-med-docs-track": {
+    "branches": {
+      "feature/v2-migration-guide": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "docs/migration.md": {
+            "after": "migration-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/migration.md": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add v2 migration guide",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/migration.md": "migration-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/v2-migration-guide",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/v2-migration-guide",
+    "last_push_commit": "c2",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/v2-migration-guide",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "feature/v2-migration-guide",
+      "last_push_commit": "c2",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/v2-migration-guide"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/v2-migration-guide": "c2"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/team/docs-portal.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/v2-migration-guide": "origin/feature/v2-migration-guide"
     },
     "working_tree": {}
   },
@@ -259533,6 +278000,1618 @@ TARGET_STATES = json.loads(r"""
     "tags": {},
     "upstream_tracking": {
       "feature/profile": "origin/feature/profile"
+    },
+    "working_tree": {}
+  },
+  "rb-easy-cap-group": {
+    "branches": {
+      "feature/group-auth": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/auth.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Merge commit on main",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature tip (still on remote)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_push_deleted_branch": "origin/feature/group-auth",
+    "last_push_remote": "origin",
+    "operation_metadata": {
+      "last_push_deleted_branch": "origin/feature/group-auth",
+      "last_push_remote": "origin",
+      "remote_branch_deleted": "feature/group-auth"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branch_deleted": "feature/group-auth",
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "rb-easy-corp-sprint": {
+    "branches": {
+      "feature/sprint12-compliance": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/compliance.py": {
+            "after": "comp-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/compliance.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Merge commit on main",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/compliance.py": "comp-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature tip (still on remote)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/compliance.py": "comp-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_push_deleted_branch": "origin/feature/sprint12-compliance",
+    "last_push_remote": "origin",
+    "operation_metadata": {
+      "last_push_deleted_branch": "origin/feature/sprint12-compliance",
+      "last_push_remote": "origin",
+      "remote_branch_deleted": "feature/sprint12-compliance"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branch_deleted": "feature/sprint12-compliance",
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "rb-hard-oss-full": {
+    "branches": {
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/contrib.py": {
+            "after": "contrib-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/contrib.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "OSS contribution (merged)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/contrib.py": "contrib-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/contrib.py": {
+            "after": "contrib-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/contrib.py": "added"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge contribution into main",
+        "order": 2,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/contrib.py": "contrib-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_deleted": "feature/oss-contribution",
+    "last_push_deleted_branch": "origin/feature/oss-contribution",
+    "last_push_remote": "origin",
+    "operation_metadata": {
+      "last_branch_deleted": "feature/oss-contribution",
+      "last_push_deleted_branch": "origin/feature/oss-contribution",
+      "last_push_remote": "origin",
+      "remote_branch_deleted": "feature/oss-contribution"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branch_deleted": "feature/oss-contribution",
+    "remote_branches": {},
+    "remote_stale_branches": [
+      "origin/feature/oss-contribution"
+    ],
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "rb-med-free-prune": {
+    "branches": {
+      "feature/old-landing": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/landing.py": {
+            "after": "landing-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/landing.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main at latest",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/landing.py": "landing-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature tip (already deleted on remote)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/landing.py": "landing-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": [
+      "origin/feature/old-landing"
+    ],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "operation_metadata": {
+      "fetch_pruned_refs": [
+        "origin/feature/old-landing"
+      ],
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_stale_branches": [
+      "origin/feature/old-landing"
+    ],
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remotes": {
+      "origin": "https://github.com/client/client-site.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "re6": {
+    "branches": {
+      "main": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v0"
+        }
+      },
+      {
+        "changes": {
+          "config.py": {
+            "after": "config-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "config.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add config module",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v0",
+          "config.py": "config-v1"
+        }
+      },
+      {
+        "changes": {
+          "config.py": {
+            "after": "config-v2-risky",
+            "before": "config-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Risky config change",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v0",
+          "config.py": "config-v2-risky"
+        }
+      },
+      {
+        "changes": {
+          "notes.md": {
+            "after": "notes-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "notes.md": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Unrelated follow-up",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v0",
+          "config.py": "config-v2-risky",
+          "notes.md": "notes-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "notes.md": {
+            "after": null,
+            "before": "notes-v1",
+            "change_type": "deleted"
+          }
+        },
+        "files": {
+          "notes.md": "deleted"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Revert \"Unrelated follow-up\"",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v0",
+          "config.py": "config-v2-risky"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_push_branch": "main",
+    "last_push_commit": "c4",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c4",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c3",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "main",
+      "last_push_commit": "c4",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c4",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c3"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      },
+      {
+        "message": "revert: c3",
+        "ref": "HEAD@{1}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c4"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/backend-service.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "re7": {
+    "branches": {
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "site-readme",
+            "before": null,
+            "change_type": "added"
+          },
+          "index.html": {
+            "after": "home-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "index.html": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial site",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "site-readme",
+          "index.html": "home-v1"
+        }
+      },
+      {
+        "changes": {
+          "pricing.html": {
+            "after": "pricing-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "pricing.html": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add pricing page",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "site-readme",
+          "index.html": "home-v1",
+          "pricing.html": "pricing-v1"
+        }
+      },
+      {
+        "changes": {
+          "index.html": {
+            "after": "home-v2-banner",
+            "before": "home-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "index.html": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add promo banner to homepage",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "site-readme",
+          "index.html": "home-v2-banner",
+          "pricing.html": "pricing-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "index.html": {
+            "after": "home-v1",
+            "before": "home-v2-banner",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "index.html": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Revert \"Add promo banner to homepage\"",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "site-readme",
+          "index.html": "home-v1",
+          "pricing.html": "pricing-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_push_branch": "main",
+    "last_push_commit": "c3",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c3",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c2",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "main",
+      "last_push_commit": "c3",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c3",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      },
+      {
+        "message": "revert: c2",
+        "ref": "HEAD@{1}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c3"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/agency-site.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "re8": {
+    "branches": {
+      "main": "c5"
+    },
+    "commits": [
+      {
+        "changes": {
+          "config/timeouts.json": {
+            "after": "timeouts-v1-30s",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/server.js": {
+            "after": "server-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "config/timeouts.json": "added",
+          "src/server.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial service",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "config/timeouts.json": "timeouts-v1-30s",
+          "src/server.js": "server-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/health.js": {
+            "after": "health-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/health.js": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add health endpoint",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "config/timeouts.json": "timeouts-v1-30s",
+          "src/health.js": "health-v1",
+          "src/server.js": "server-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/logger.js": {
+            "after": "logger-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/logger.js": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add request logging",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "config/timeouts.json": "timeouts-v1-30s",
+          "src/health.js": "health-v1",
+          "src/logger.js": "logger-v1",
+          "src/server.js": "server-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/logger.js": {
+            "after": "logger-v2",
+            "before": "logger-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/logger.js": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Log slow queries",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "config/timeouts.json": "timeouts-v1-30s",
+          "src/health.js": "health-v1",
+          "src/logger.js": "logger-v2",
+          "src/server.js": "server-v1"
+        }
+      },
+      {
+        "changes": {
+          "config/timeouts.json": {
+            "after": "timeouts-v2-1s",
+            "before": "timeouts-v1-30s",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/timeouts.json": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Lower API timeout to 1s",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "config/timeouts.json": "timeouts-v2-1s",
+          "src/health.js": "health-v1",
+          "src/logger.js": "logger-v2",
+          "src/server.js": "server-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "config/timeouts.json": {
+            "after": "timeouts-v1-30s",
+            "before": "timeouts-v2-1s",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/timeouts.json": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Revert \"Lower API timeout to 1s\"",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "config/timeouts.json": "timeouts-v1-30s",
+          "src/health.js": "health-v1",
+          "src/logger.js": "logger-v2",
+          "src/server.js": "server-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_push_branch": "main",
+    "last_push_commit": "c5",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c5",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c4",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "main",
+      "last_push_commit": "c5",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c5",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c4"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c5"
+      },
+      {
+        "message": "revert: c4",
+        "ref": "HEAD@{1}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c5"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/payments-api.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "rec-easy-cap-ui": {
+    "branches": {
+      "feature/ui-layout": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/ui.py": {
+            "after": "ui-local-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/ui.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Local UI work",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/ui.py": "ui-local-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/component.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/component.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Groupmate pushed component",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/component.py": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/component.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/ui.py": {
+            "after": null,
+            "before": "ui-local-v1",
+            "change_type": "deleted"
+          }
+        },
+        "files": {
+          "src/component.py": "added",
+          "src/ui.py": "deleted"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/feature/ui-layout'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/component.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/ui-layout",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "src/component.py",
+      "src/ui.py"
+    ],
+    "last_merge_branch": "origin/feature/ui-layout",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "feature/ui-layout",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/ui-layout",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "src/component.py",
+        "src/ui.py"
+      ],
+      "last_merge_branch": "origin/feature/ui-layout",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "feature/ui-layout",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/ui-layout",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/ui-layout": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/ui-layout": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/capstone-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/ui-layout": "origin/feature/ui-layout"
+    },
+    "working_tree": {}
+  },
+  "rec-easy-docs-chapter": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "docs/chapter-3.md": {
+            "after": "ch3-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/chapter-3.md": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Your new chapter",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/chapter-3.md": "ch3-v1"
+        }
+      },
+      {
+        "changes": {
+          "docs/chapter-4.md": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/chapter-4.md": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Colleague's chapter",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/chapter-4.md": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "docs/chapter-3.md": {
+            "after": null,
+            "before": "ch3-v1",
+            "change_type": "deleted"
+          },
+          "docs/chapter-4.md": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/chapter-3.md": "deleted",
+          "docs/chapter-4.md": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/main'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/chapter-4.md": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "docs/chapter-3.md",
+      "docs/chapter-4.md"
+    ],
+    "last_merge_branch": "origin/main",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "main",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "docs/chapter-3.md",
+        "docs/chapter-4.md"
+      ],
+      "last_merge_branch": "origin/main",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "main",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/main": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/docs-portal.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "rec-hard-corp-audit": {
+    "branches": {
+      "develop": "c1",
+      "feature/compliance-audit": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/audit.py": {
+            "after": "audit-local-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/audit.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Local audit work",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/audit.py": "audit-local-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/compliance.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/compliance.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Teammate pushed audit fix",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/compliance.py": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/audit.py": {
+            "after": null,
+            "before": "audit-local-v1",
+            "change_type": "deleted"
+          },
+          "src/compliance.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/audit.py": "deleted",
+          "src/compliance.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/feature/compliance-audit'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/compliance.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/compliance-audit",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "src/audit.py",
+      "src/compliance.py"
+    ],
+    "last_merge_branch": "origin/feature/compliance-audit",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "feature/compliance-audit",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/compliance-audit",
+    "last_switch_branch": "feature/compliance-audit",
+    "last_switched_to": "feature/compliance-audit",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "src/audit.py",
+        "src/compliance.py"
+      ],
+      "last_merge_branch": "origin/feature/compliance-audit",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "feature/compliance-audit",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/compliance-audit",
+      "last_switch_branch": "feature/compliance-audit",
+      "last_switched_to": "feature/compliance-audit",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/compliance-audit": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/compliance-audit": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/corp-backend.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/compliance-audit": "origin/feature/compliance-audit"
+    },
+    "working_tree": {}
+  },
+  "rec-med-qa-testrunner": {
+    "branches": {
+      "feature/test-runner-v2": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/runner.py": {
+            "after": "runner-local-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/runner.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Local test runner work",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/runner.py": "runner-local-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/reporter.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/reporter.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Teammate pushed fixes",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/reporter.py": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/reporter.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/runner.py": {
+            "after": null,
+            "before": "runner-local-v1",
+            "change_type": "deleted"
+          }
+        },
+        "files": {
+          "src/reporter.py": "added",
+          "src/runner.py": "deleted"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/feature/test-runner-v2'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/reporter.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/test-runner-v2",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "src/reporter.py",
+      "src/runner.py"
+    ],
+    "last_merge_branch": "origin/feature/test-runner-v2",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "feature/test-runner-v2",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/test-runner-v2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "src/reporter.py",
+        "src/runner.py"
+      ],
+      "last_merge_branch": "origin/feature/test-runner-v2",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "feature/test-runner-v2",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/test-runner-v2",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/test-runner-v2": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/test-runner-v2": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/qa-suite.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/test-runner-v2": "origin/feature/test-runner-v2"
     },
     "working_tree": {}
   },
@@ -260852,6 +280931,827 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
+  "restore-easy-discard": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "restore-easy-unstage": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "notes.txt": "notes-draft"
+    }
+  },
+  "restore-easy-unstage-app": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/app.py": "app-change-v2"
+    }
+  },
+  "restore-easy-unstage-css": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "styles/site.css": "css-change-v2"
+    }
+  },
+  "restore-easy-unstage-guide": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "docs/guide.md": "guide-change-v2"
+    }
+  },
+  "restore-hard-cleanup": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "debug.log": "debug-draft",
+      "scratch/notes.txt": "notes-draft"
+    }
+  },
+  "restore-hard-mixed-export": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "notes/export-plan.md": "notes-draft",
+      "src/export.py": "export-code-v2"
+    }
+  },
+  "restore-hard-mixed-profile": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "notes/profile-ideas.md": "notes-draft",
+      "src/profile-card.js": "profile-js-v2"
+    }
+  },
+  "restore-hard-mixed-search": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "notes/search.md": "notes-draft",
+      "src/search.js": "search-js-v2"
+    }
+  },
+  "restore-med-unstage-discard": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "experimental.py": "experimental-v1"
+    }
+  },
+  "restore-medium-app-debug": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/app.py": "app-change-v2"
+    }
+  },
+  "restore-medium-css-build": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "styles/site.css": "css-change-v2"
+    }
+  },
+  "restore-medium-docs-scratch": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "styles/site.css": {
+            "after": "style-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added",
+          "styles/site.css": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "styles/site.css": "style-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "docs/guide.md": "guide-change-v2"
+    }
+  },
   "restore-readme-draft": {
     "branches": {
       "main": "c0"
@@ -261490,6 +282390,785 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
+  "rh6": {
+    "branches": {
+      "main": "c6"
+    },
+    "commits": [
+      {
+        "changes": {
+          "app/coupons.py": {
+            "after": "coupons-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "app/tax.py": {
+            "after": "tax-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "flags/checkout.json": {
+            "after": "checkout-flag-v1-beta-only",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "app/coupons.py": "added",
+          "app/tax.py": "added",
+          "flags/checkout.json": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial checkout flow",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "app/coupons.py": "coupons-v1",
+          "app/tax.py": "tax-v1",
+          "flags/checkout.json": "checkout-flag-v1-beta-only"
+        }
+      },
+      {
+        "changes": {
+          "flags/checkout.json": {
+            "after": "checkout-flag-v2-all-users",
+            "before": "checkout-flag-v1-beta-only",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "flags/checkout.json": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Enable beta checkout for all users",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "app/coupons.py": "coupons-v1",
+          "app/tax.py": "tax-v1",
+          "flags/checkout.json": "checkout-flag-v2-all-users"
+        }
+      },
+      {
+        "changes": {
+          "app/email.py": {
+            "after": "email-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "app/email.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add order summary email",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "app/coupons.py": "coupons-v1",
+          "app/email.py": "email-v1",
+          "app/tax.py": "tax-v1",
+          "flags/checkout.json": "checkout-flag-v2-all-users"
+        }
+      },
+      {
+        "changes": {
+          "app/coupons.py": {
+            "after": "coupons-v2-double",
+            "before": "coupons-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "app/coupons.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Apply coupon discounts twice",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "app/coupons.py": "coupons-v2-double",
+          "app/email.py": "email-v1",
+          "app/tax.py": "tax-v1",
+          "flags/checkout.json": "checkout-flag-v2-all-users"
+        }
+      },
+      {
+        "changes": {
+          "metrics/checkout.py": {
+            "after": "metrics-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "metrics/checkout.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Add checkout metrics",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "app/coupons.py": "coupons-v2-double",
+          "app/email.py": "email-v1",
+          "app/tax.py": "tax-v1",
+          "flags/checkout.json": "checkout-flag-v2-all-users",
+          "metrics/checkout.py": "metrics-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "app/coupons.py": {
+            "after": "coupons-v1",
+            "before": "coupons-v2-double",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "app/coupons.py": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Revert \"Apply coupon discounts twice\"",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "app/coupons.py": "coupons-v1",
+          "app/email.py": "email-v1",
+          "app/tax.py": "tax-v1",
+          "flags/checkout.json": "checkout-flag-v2-all-users",
+          "metrics/checkout.py": "metrics-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "flags/checkout.json": {
+            "after": "checkout-flag-v1-beta-only",
+            "before": "checkout-flag-v2-all-users",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "flags/checkout.json": "modified"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Revert \"Enable beta checkout for all users\"",
+        "order": 6,
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "app/coupons.py": "coupons-v1",
+          "app/email.py": "email-v1",
+          "app/tax.py": "tax-v1",
+          "flags/checkout.json": "checkout-flag-v1-beta-only",
+          "metrics/checkout.py": "metrics-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c6",
+      "type": "branch"
+    },
+    "last_push_branch": "main",
+    "last_push_commit": "c6",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c6",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c1",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "main",
+      "last_push_commit": "c6",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c6",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c5"
+      },
+      {
+        "message": "revert: c3",
+        "ref": "HEAD@{1}",
+        "target": "c5"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c6"
+      },
+      {
+        "message": "revert: c1",
+        "ref": "HEAD@{3}",
+        "target": "c6"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c6"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/shop.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "rh7": {
+    "branches": {
+      "main": "c5"
+    },
+    "commits": [
+      {
+        "changes": {
+          "auth/audit.py": {
+            "after": "audit-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "auth/cache.py": {
+            "after": "cache-v1-15m",
+            "before": null,
+            "change_type": "added"
+          },
+          "auth/session.py": {
+            "after": "session-v1-8h",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "auth/audit.py": "added",
+          "auth/cache.py": "added",
+          "auth/session.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial auth service",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "auth/audit.py": "audit-v1",
+          "auth/cache.py": "cache-v1-15m",
+          "auth/session.py": "session-v1-8h"
+        }
+      },
+      {
+        "changes": {
+          "auth/session.py": {
+            "after": "session-v2-30d",
+            "before": "session-v1-8h",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "auth/session.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Extend sessions to 30 days",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "auth/audit.py": "audit-v1",
+          "auth/cache.py": "cache-v1-15m",
+          "auth/session.py": "session-v2-30d"
+        }
+      },
+      {
+        "changes": {
+          "auth/audit.py": {
+            "after": "audit-v2",
+            "before": "audit-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "auth/audit.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add login audit fields",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "auth/audit.py": "audit-v2",
+          "auth/cache.py": "cache-v1-15m",
+          "auth/session.py": "session-v2-30d"
+        }
+      },
+      {
+        "changes": {
+          "auth/cache.py": {
+            "after": "cache-v2-24h",
+            "before": "cache-v1-15m",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "auth/cache.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Cache sessions for 24 hours",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "auth/audit.py": "audit-v2",
+          "auth/cache.py": "cache-v2-24h",
+          "auth/session.py": "session-v2-30d"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "auth/cache.py": {
+            "after": "cache-v1-15m",
+            "before": "cache-v2-24h",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "auth/cache.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Revert \"Cache sessions for 24 hours\"",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "auth/audit.py": "audit-v2",
+          "auth/cache.py": "cache-v1-15m",
+          "auth/session.py": "session-v2-30d"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "auth/session.py": {
+            "after": "session-v1-8h",
+            "before": "session-v2-30d",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "auth/session.py": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Revert \"Extend sessions to 30 days\"",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "auth/audit.py": "audit-v2",
+          "auth/cache.py": "cache-v1-15m",
+          "auth/session.py": "session-v1-8h"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_push_branch": "main",
+    "last_push_commit": "c5",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c5",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c1",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "main",
+      "last_push_commit": "c5",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c5",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      },
+      {
+        "message": "revert: c3",
+        "ref": "HEAD@{1}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c5"
+      },
+      {
+        "message": "revert: c1",
+        "ref": "HEAD@{3}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c5"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/auth-service.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "rh8": {
+    "branches": {
+      "main": "c7"
+    },
+    "commits": [
+      {
+        "changes": {
+          "site/analytics.js": {
+            "after": "analytics-v1-anon",
+            "before": null,
+            "change_type": "added"
+          },
+          "site/nav.html": {
+            "after": "nav-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "site/robots.txt": {
+            "after": "robots-v1-allow",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "site/analytics.js": "added",
+          "site/nav.html": "added",
+          "site/robots.txt": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial public site",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "site/analytics.js": "analytics-v1-anon",
+          "site/nav.html": "nav-v1",
+          "site/robots.txt": "robots-v1-allow"
+        }
+      },
+      {
+        "changes": {
+          "site/pricing.html": {
+            "after": "pricing-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "site/pricing.html": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add pricing page",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "site/analytics.js": "analytics-v1-anon",
+          "site/nav.html": "nav-v1",
+          "site/pricing.html": "pricing-v1",
+          "site/robots.txt": "robots-v1-allow"
+        }
+      },
+      {
+        "changes": {
+          "site/robots.txt": {
+            "after": "robots-v2-disallow-all",
+            "before": "robots-v1-allow",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "site/robots.txt": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Block search engines in robots.txt",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "site/analytics.js": "analytics-v1-anon",
+          "site/nav.html": "nav-v1",
+          "site/pricing.html": "pricing-v1",
+          "site/robots.txt": "robots-v2-disallow-all"
+        }
+      },
+      {
+        "changes": {
+          "site/changelog.html": {
+            "after": "changelog-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "site/changelog.html": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add changelog page",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "site/analytics.js": "analytics-v1-anon",
+          "site/changelog.html": "changelog-v1",
+          "site/nav.html": "nav-v1",
+          "site/pricing.html": "pricing-v1",
+          "site/robots.txt": "robots-v2-disallow-all"
+        }
+      },
+      {
+        "changes": {
+          "site/analytics.js": {
+            "after": "analytics-v2-full-ip",
+            "before": "analytics-v1-anon",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "site/analytics.js": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Log full visitor IP addresses",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "site/analytics.js": "analytics-v2-full-ip",
+          "site/changelog.html": "changelog-v1",
+          "site/nav.html": "nav-v1",
+          "site/pricing.html": "pricing-v1",
+          "site/robots.txt": "robots-v2-disallow-all"
+        }
+      },
+      {
+        "changes": {
+          "site/nav.html": {
+            "after": "nav-v2",
+            "before": "nav-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "site/nav.html": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Fix footer typo",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "site/analytics.js": "analytics-v2-full-ip",
+          "site/changelog.html": "changelog-v1",
+          "site/nav.html": "nav-v2",
+          "site/pricing.html": "pricing-v1",
+          "site/robots.txt": "robots-v2-disallow-all"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "site/analytics.js": {
+            "after": "analytics-v1-anon",
+            "before": "analytics-v2-full-ip",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "site/analytics.js": "modified"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Revert \"Log full visitor IP addresses\"",
+        "order": 6,
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "site/analytics.js": "analytics-v1-anon",
+          "site/changelog.html": "changelog-v1",
+          "site/nav.html": "nav-v2",
+          "site/pricing.html": "pricing-v1",
+          "site/robots.txt": "robots-v2-disallow-all"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "site/robots.txt": {
+            "after": "robots-v1-allow",
+            "before": "robots-v2-disallow-all",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "site/robots.txt": "modified"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Revert \"Block search engines in robots.txt\"",
+        "order": 7,
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "site/analytics.js": "analytics-v1-anon",
+          "site/changelog.html": "changelog-v1",
+          "site/nav.html": "nav-v2",
+          "site/pricing.html": "pricing-v1",
+          "site/robots.txt": "robots-v1-allow"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c7",
+      "type": "branch"
+    },
+    "last_push_branch": "main",
+    "last_push_commit": "c7",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c7",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c2",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "main",
+      "last_push_commit": "c7",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c7",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c6"
+      },
+      {
+        "message": "revert: c4",
+        "ref": "HEAD@{1}",
+        "target": "c6"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c7"
+      },
+      {
+        "message": "revert: c2",
+        "ref": "HEAD@{3}",
+        "target": "c7"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c7"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/public-site.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
   "rm-cached-dist": {
     "branches": {
       "main": "c0"
@@ -261859,6 +283538,694 @@ TARGET_STATES = json.loads(r"""
     "stash_stack": [],
     "tags": {},
     "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "rm6": {
+    "branches": {
+      "main": "c5"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "payroll-readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "payroll/export.py": {
+            "after": "export-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "payroll/tax.py": {
+            "after": "tax-v1-progressive",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "payroll/export.py": "added",
+          "payroll/tax.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial payroll service",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "payroll-readme-v1",
+          "payroll/export.py": "export-v1",
+          "payroll/tax.py": "tax-v1-progressive"
+        }
+      },
+      {
+        "changes": {
+          "payroll/holidays.py": {
+            "after": "holidays-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "payroll/holidays.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add holiday calendar",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "payroll-readme-v1",
+          "payroll/export.py": "export-v1",
+          "payroll/holidays.py": "holidays-v1",
+          "payroll/tax.py": "tax-v1-progressive"
+        }
+      },
+      {
+        "changes": {
+          "payroll/tax.py": {
+            "after": "tax-v2-flat-30",
+            "before": "tax-v1-progressive",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "payroll/tax.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Switch withholding to a flat 30% rate",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "payroll-readme-v1",
+          "payroll/export.py": "export-v1",
+          "payroll/holidays.py": "holidays-v1",
+          "payroll/tax.py": "tax-v2-flat-30"
+        }
+      },
+      {
+        "changes": {
+          "payroll/export.py": {
+            "after": "export-v2-bank",
+            "before": "export-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "payroll/export.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add bank file export",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "payroll-readme-v1",
+          "payroll/export.py": "export-v2-bank",
+          "payroll/holidays.py": "holidays-v1",
+          "payroll/tax.py": "tax-v2-flat-30"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "payroll-readme-v2",
+            "before": "payroll-readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Document payroll cut-off",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "payroll-readme-v2",
+          "payroll/export.py": "export-v2-bank",
+          "payroll/holidays.py": "holidays-v1",
+          "payroll/tax.py": "tax-v2-flat-30"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "payroll/tax.py": {
+            "after": "tax-v1-progressive",
+            "before": "tax-v2-flat-30",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "payroll/tax.py": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Revert \"Switch withholding to a flat 30% rate\"",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "README.md": "payroll-readme-v2",
+          "payroll/export.py": "export-v2-bank",
+          "payroll/holidays.py": "holidays-v1",
+          "payroll/tax.py": "tax-v1-progressive"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_push_branch": "main",
+    "last_push_commit": "c5",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c5",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c2",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "main",
+      "last_push_commit": "c5",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c5",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c5"
+      },
+      {
+        "message": "revert: c2",
+        "ref": "HEAD@{1}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c5"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/payroll.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "rm7": {
+    "branches": {
+      "main": "c6"
+    },
+    "commits": [
+      {
+        "changes": {
+          "app/settings.py": {
+            "after": "settings-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "notify/push.py": {
+            "after": "push-v1-batched",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "app/settings.py": "added",
+          "notify/push.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial notification service",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "app/settings.py": "settings-v1",
+          "notify/push.py": "push-v1-batched"
+        }
+      },
+      {
+        "changes": {
+          "notify/templates.py": {
+            "after": "templates-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "notify/templates.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add notification templates",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "app/settings.py": "settings-v1",
+          "notify/push.py": "push-v1-batched",
+          "notify/templates.py": "templates-v1"
+        }
+      },
+      {
+        "changes": {
+          "notify/push.py": {
+            "after": "push-v2-every-minute",
+            "before": "push-v1-batched",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "notify/push.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Send push notifications every minute",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "app/settings.py": "settings-v1",
+          "notify/push.py": "push-v2-every-minute",
+          "notify/templates.py": "templates-v1"
+        }
+      },
+      {
+        "changes": {
+          "notify/quiet_hours.py": {
+            "after": "quiet-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "notify/quiet_hours.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add quiet hours",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "app/settings.py": "settings-v1",
+          "notify/push.py": "push-v2-every-minute",
+          "notify/quiet_hours.py": "quiet-v1",
+          "notify/templates.py": "templates-v1"
+        }
+      },
+      {
+        "changes": {
+          "app/settings.py": {
+            "after": "settings-v2",
+            "before": "settings-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "app/settings.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Add a settings toggle for sounds",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "app/settings.py": "settings-v2",
+          "notify/push.py": "push-v2-every-minute",
+          "notify/quiet_hours.py": "quiet-v1",
+          "notify/templates.py": "templates-v1"
+        }
+      },
+      {
+        "changes": {
+          "docs/notify.md": {
+            "after": "notify-doc-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/notify.md": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Document notification settings",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "app/settings.py": "settings-v2",
+          "docs/notify.md": "notify-doc-v1",
+          "notify/push.py": "push-v2-every-minute",
+          "notify/quiet_hours.py": "quiet-v1",
+          "notify/templates.py": "templates-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "notify/push.py": {
+            "after": "push-v1-batched",
+            "before": "push-v2-every-minute",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "notify/push.py": "modified"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Revert \"Send push notifications every minute\"",
+        "order": 6,
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "app/settings.py": "settings-v2",
+          "docs/notify.md": "notify-doc-v1",
+          "notify/push.py": "push-v1-batched",
+          "notify/quiet_hours.py": "quiet-v1",
+          "notify/templates.py": "templates-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c6",
+      "type": "branch"
+    },
+    "last_push_branch": "main",
+    "last_push_commit": "c6",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c6",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c2",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "main",
+      "last_push_commit": "c6",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c6",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c6"
+      },
+      {
+        "message": "revert: c2",
+        "ref": "HEAD@{1}",
+        "target": "c6"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c6"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/notify.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "rm8": {
+    "branches": {
+      "main": "c5"
+    },
+    "commits": [
+      {
+        "changes": {
+          "search/index.py": {
+            "after": "index-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "search/ranking.py": {
+            "after": "ranking-v1-relevance",
+            "before": null,
+            "change_type": "added"
+          },
+          "ui/results.html": {
+            "after": "results-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "search/index.py": "added",
+          "search/ranking.py": "added",
+          "ui/results.html": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial docs portal",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "search/index.py": "index-v1",
+          "search/ranking.py": "ranking-v1-relevance",
+          "ui/results.html": "results-v1"
+        }
+      },
+      {
+        "changes": {
+          "search/ranking.py": {
+            "after": "ranking-v2-by-date",
+            "before": "ranking-v1-relevance",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "search/ranking.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Sort search results by upload date",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "search/index.py": "index-v1",
+          "search/ranking.py": "ranking-v2-by-date",
+          "ui/results.html": "results-v1"
+        }
+      },
+      {
+        "changes": {
+          "search/synonyms.py": {
+            "after": "synonyms-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "search/synonyms.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add synonym list",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "search/index.py": "index-v1",
+          "search/ranking.py": "ranking-v2-by-date",
+          "search/synonyms.py": "synonyms-v1",
+          "ui/results.html": "results-v1"
+        }
+      },
+      {
+        "changes": {
+          "ui/results.html": {
+            "after": "results-v2",
+            "before": "results-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "ui/results.html": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Paginate the results page",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "search/index.py": "index-v1",
+          "search/ranking.py": "ranking-v2-by-date",
+          "search/synonyms.py": "synonyms-v1",
+          "ui/results.html": "results-v2"
+        }
+      },
+      {
+        "changes": {
+          "docs/search.md": {
+            "after": "search-doc-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/search.md": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Document search tips",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "docs/search.md": "search-doc-v1",
+          "search/index.py": "index-v1",
+          "search/ranking.py": "ranking-v2-by-date",
+          "search/synonyms.py": "synonyms-v1",
+          "ui/results.html": "results-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "search/ranking.py": {
+            "after": "ranking-v1-relevance",
+            "before": "ranking-v2-by-date",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "search/ranking.py": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Revert \"Sort search results by upload date\"",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "docs/search.md": "search-doc-v1",
+          "search/index.py": "index-v1",
+          "search/ranking.py": "ranking-v1-relevance",
+          "search/synonyms.py": "synonyms-v1",
+          "ui/results.html": "results-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_push_branch": "main",
+    "last_push_commit": "c5",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c5",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c1",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "main",
+      "last_push_commit": "c5",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c5",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c5"
+      },
+      {
+        "message": "revert: c1",
+        "ref": "HEAD@{1}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c5"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/docs-portal.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
     "working_tree": {}
   },
   "sc-apply-audit-recorded-a": {
@@ -397144,6 +419511,554 @@ TARGET_STATES = json.loads(r"""
     },
     "working_tree": {}
   },
+  "squash-easy-cap-report": {
+    "branches": {
+      "feature/report-generator": "c4",
+      "integration": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/report.py": {
+            "after": "rep-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/report.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Report: initial impl",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/report.py": "rep-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/report.py": {
+            "after": "rep-v2",
+            "before": "rep-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/report.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Report: add filters",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/report.py": "rep-v2"
+        }
+      },
+      {
+        "changes": {
+          "src/report.py": {
+            "after": "rep-v3",
+            "before": "rep-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/report.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Report: fix edge case",
+        "order": 3,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/report.py": "rep-v3"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/report.py": {
+            "after": "rep-v3",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/report.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Add report generator module",
+        "order": 4,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/report.py": "rep-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "integration",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/report-generator",
+    "last_merge_target": "c4",
+    "operation_metadata": {
+      "last_merge_branch": "feature/report-generator",
+      "last_merge_target": "c4",
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "squash-easy-free-payment": {
+    "branches": {
+      "feature/payment-flow": "c4",
+      "staging": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/payment.py": {
+            "after": "pay-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/payment.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "wip",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payment.py": "pay-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/payment.py": {
+            "after": "pay-v2",
+            "before": "pay-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/payment.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "fix again",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payment.py": "pay-v2"
+        }
+      },
+      {
+        "changes": {
+          "src/payment.py": {
+            "after": "pay-v3",
+            "before": "pay-v2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/payment.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "ok this time",
+        "order": 3,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payment.py": "pay-v3"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/payment.py": {
+            "after": "pay-v3",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/payment.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Add payment flow",
+        "order": 4,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payment.py": "pay-v3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "staging",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/payment-flow",
+    "last_merge_target": "c4",
+    "operation_metadata": {
+      "last_merge_branch": "feature/payment-flow",
+      "last_merge_target": "c4",
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "staging_area": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "squash-hard-devops-log": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/log.py": {
+            "after": "log-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/log.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Log rotation: add cron",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/log.py": "log-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/log.py": {
+            "after": "log-v2",
+            "before": "log-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/log.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Log rotation: add retention",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/log.py": "log-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/log.py": {
+            "after": "log-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/log.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Add log rotation configuration",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/log.py": "log-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_branch_deleted": "feature/log-rotation",
+    "last_merge_branch": "feature/log-rotation",
+    "last_merge_target": "c3",
+    "operation_metadata": {
+      "last_branch_deleted": "feature/log-rotation",
+      "last_merge_branch": "feature/log-rotation",
+      "last_merge_target": "c3",
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "squash-med-corp-gdpr": {
+    "branches": {
+      "staging": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Remote commit c2",
+        "order": 1,
+        "parents": [],
+        "tree": {}
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "README.md": {
+            "after": null,
+            "before": "readme-v1",
+            "change_type": "deleted"
+          }
+        },
+        "files": {
+          "README.md": "deleted"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Add GDPR data export endpoint",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "staging",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/feature/gdpr-export",
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/feature/gdpr-export",
+      "last_merge_target": "c2",
+      "remote_tracking_updated": true,
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/gdpr-export": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/gdpr-export": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/corp-backend.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "staging_area": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
   "sr-apply-audit-coordinates-a": {
     "branches": {
       "donor/patch": "m3",
@@ -400808,6 +423723,198 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
+  "stash-easy-cap-review": {
+    "branches": {
+      "feature/models": "c1",
+      "review/groupmate-branch": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial capstone-system snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "review/groupmate-branch",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "push",
+    "last_stash_operation": "push",
+    "last_switch_branch": "review/groupmate-branch",
+    "last_switched_to": "review/groupmate-branch",
+    "operation_metadata": {
+      "last_stash_action": "push",
+      "last_stash_operation": "push",
+      "last_switch_branch": "review/groupmate-branch",
+      "last_switched_to": "review/groupmate-branch",
+      "stash_count": 1
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 1,
+    "stash_stack": [
+      {
+        "conflicts": [],
+        "message": "WIP on feature/models",
+        "staging": {},
+        "working_tree": {
+          "src/models.py": "models-wip"
+        }
+      }
+    ],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "stash-easy-docs-switch": {
+    "branches": {
+      "feature/api-docs": "c1",
+      "release/stable": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial docs-portal snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release/stable",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "push",
+    "last_stash_operation": "push",
+    "last_switch_branch": "release/stable",
+    "last_switched_to": "release/stable",
+    "operation_metadata": {
+      "last_stash_action": "push",
+      "last_stash_operation": "push",
+      "last_switch_branch": "release/stable",
+      "last_switched_to": "release/stable",
+      "stash_count": 1
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 1,
+    "stash_stack": [
+      {
+        "conflicts": [],
+        "message": "WIP on feature/api-docs",
+        "staging": {},
+        "working_tree": {
+          "docs/api-reference.md": "api-ref-wip"
+        }
+      }
+    ],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "stash-hard-oss-multi": {
+    "branches": {
+      "feature/lexer": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Lexer feature base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/lexer",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "pop",
+    "last_stash_operation": "pop",
+    "operation_metadata": {
+      "last_stash_action": "pop",
+      "last_stash_operation": "pop",
+      "stash_count": 0
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 0,
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/experiment.py": "exp-wip"
+    }
+  },
   "stash-list-one": {
     "branches": {
       "main": "c2"
@@ -401021,6 +424128,90 @@ TARGET_STATES = json.loads(r"""
     "tags": {},
     "upstream_tracking": {},
     "working_tree": {}
+  },
+  "stash-med-corp-named": {
+    "branches": {
+      "feature/billing": "c1",
+      "hotfix/tax-fix": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Billing feature base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/tax.py": {
+            "after": "tax-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/tax.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Hotfix branch tip",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/tax.py": "tax-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/billing",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "pop",
+    "last_stash_operation": "pop",
+    "last_switch_branch": "feature/billing",
+    "last_switched_to": "feature/billing",
+    "operation_metadata": {
+      "last_stash_action": "pop",
+      "last_stash_operation": "pop",
+      "last_switch_branch": "feature/billing",
+      "last_switched_to": "feature/billing",
+      "stash_count": 0
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 0,
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/billing.py": "billing-wip"
+    }
   },
   "stash-pop-app": {
     "branches": {
@@ -409327,6 +432518,7800 @@ TARGET_STATES = json.loads(r"""
     "working_tree": {
       "README.md": "draft"
     }
+  },
+  "v21e-auth": {
+    "branches": {
+      "feature/auth": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/auth",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "feature/auth",
+    "last_switch_branch": "feature/auth",
+    "last_switched_to": "feature/auth",
+    "operation_metadata": {
+      "last_branch_created": "feature/auth",
+      "last_switch_branch": "feature/auth",
+      "last_switched_to": "feature/auth"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v21e-login": {
+    "branches": {
+      "bugfix/login": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "bugfix/login",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "bugfix/login",
+    "last_switch_branch": "bugfix/login",
+    "last_switched_to": "bugfix/login",
+    "operation_metadata": {
+      "last_branch_created": "bugfix/login",
+      "last_switch_branch": "bugfix/login",
+      "last_switched_to": "bugfix/login"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v21e-ui": {
+    "branches": {
+      "experiment/ui": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial project snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "experiment/ui",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "experiment/ui",
+    "last_switch_branch": "experiment/ui",
+    "last_switched_to": "experiment/ui",
+    "operation_metadata": {
+      "last_branch_created": "experiment/ui",
+      "last_switch_branch": "experiment/ui",
+      "last_switched_to": "experiment/ui"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v21h-detach-save": {
+    "branches": {
+      "main": "c3",
+      "saved-work": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial experiment setup",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/experiment.py": {
+            "after": "exp-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/experiment.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Experimental changes at detached HEAD",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/experiment.py": "exp-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          },
+          "src/main.py": {
+            "after": "main-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "modified",
+          "src/main.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Latest main progress",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "src/main.py": "main-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "saved-work",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_branch_created": "saved-work",
+    "last_switch_branch": "saved-work",
+    "last_switched_to": "saved-work",
+    "operation_metadata": {
+      "last_branch_created": "saved-work",
+      "last_switch_branch": "saved-work",
+      "last_switched_to": "saved-work"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v21h-from-develop": {
+    "branches": {
+      "develop": "c3",
+      "feature/workspace": "c3",
+      "main": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap ide platform",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "editor.py": {
+            "after": "editor-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "editor.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Stable main snapshot",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "editor.py": "editor-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/plugins.py": {
+            "after": "plugins-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/plugins.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Develop: add plugin system",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "editor.py": "editor-v1",
+          "src/plugins.py": "plugins-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/workspace",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "feature/workspace",
+    "last_switch_branch": "feature/workspace",
+    "last_switched_to": "feature/workspace",
+    "operation_metadata": {
+      "last_branch_created": "feature/workspace",
+      "last_switch_branch": "feature/workspace",
+      "last_switched_to": "feature/workspace"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v21h-hotfix-c1": {
+    "branches": {
+      "hotfix/critical": "c1",
+      "main": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/orders.py": {
+            "after": "orders-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/orders.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Release v1.0 snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "orders-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/bulk.py": {
+            "after": "bulk-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/orders.py": {
+            "after": "orders-v2",
+            "before": "orders-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/bulk.py": "added",
+          "src/orders.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add bulk order support",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/bulk.py": "bulk-v1",
+          "src/orders.py": "orders-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "hotfix/critical",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_branch_created": "hotfix/critical",
+    "last_switch_branch": "hotfix/critical",
+    "last_switched_to": "hotfix/critical",
+    "operation_metadata": {
+      "last_branch_created": "hotfix/critical",
+      "last_switch_branch": "hotfix/critical",
+      "last_switched_to": "hotfix/critical"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v21m-export": {
+    "branches": {
+      "feature/export": "c4",
+      "main": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap report generator",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/ingest.py": {
+            "after": "ingest-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/ingest.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add data ingest",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/ingest.py": "ingest-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/aggregate.py": {
+            "after": "aggregate-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/aggregate.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add aggregation",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/aggregate.py": "aggregate-v1",
+          "src/ingest.py": "ingest-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/render.py": {
+            "after": "render-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/render.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Add renderer",
+        "order": 3,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/aggregate.py": "aggregate-v1",
+          "src/ingest.py": "ingest-v1",
+          "src/render.py": "render-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/export",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_branch_created": "feature/export",
+    "last_switch_branch": "feature/export",
+    "last_switched_to": "feature/export",
+    "operation_metadata": {
+      "last_branch_created": "feature/export",
+      "last_switch_branch": "feature/export",
+      "last_switched_to": "feature/export"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v21m-notifications": {
+    "branches": {
+      "feature/notifications": "c3",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap messaging app",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/queue.py": {
+            "after": "queue-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/queue.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add message queue",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/queue.py": "queue-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/tracking.py": {
+            "after": "tracking-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/tracking.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add delivery tracking",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/queue.py": "queue-v1",
+          "src/tracking.py": "tracking-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/notifications",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "feature/notifications",
+    "last_switch_branch": "feature/notifications",
+    "last_switched_to": "feature/notifications",
+    "operation_metadata": {
+      "last_branch_created": "feature/notifications",
+      "last_switch_branch": "feature/notifications",
+      "last_switched_to": "feature/notifications"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v21m-payments": {
+    "branches": {
+      "feature/payments": "c2",
+      "main": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap e-commerce app",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/catalog.py": {
+            "after": "catalog-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/catalog.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add product catalog",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/catalog.py": "catalog-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/payments",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_branch_created": "feature/payments",
+    "last_switch_branch": "feature/payments",
+    "last_switched_to": "feature/payments",
+    "operation_metadata": {
+      "last_branch_created": "feature/payments",
+      "last_switch_branch": "feature/payments",
+      "last_switched_to": "feature/payments"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v23e-auth": {
+    "branches": {
+      "feature/auth": "c1",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial ticketing-app snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "push",
+    "last_stash_operation": "push",
+    "last_switch_branch": "main",
+    "last_switched_to": "main",
+    "operation_metadata": {
+      "last_stash_action": "push",
+      "last_stash_operation": "push",
+      "last_switch_branch": "main",
+      "last_switched_to": "main",
+      "stash_count": 1
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 1,
+    "stash_stack": [
+      {
+        "conflicts": [],
+        "message": "WIP on feature/auth",
+        "staging": {},
+        "working_tree": {
+          "src/auth.py": "auth-wip"
+        }
+      }
+    ],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v23e-cache": {
+    "branches": {
+      "feature/cache": "c1",
+      "release/v2": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial data-store snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release/v2",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "push",
+    "last_stash_operation": "push",
+    "last_switch_branch": "release/v2",
+    "last_switched_to": "release/v2",
+    "operation_metadata": {
+      "last_stash_action": "push",
+      "last_stash_operation": "push",
+      "last_switch_branch": "release/v2",
+      "last_switched_to": "release/v2",
+      "stash_count": 1
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 1,
+    "stash_stack": [
+      {
+        "conflicts": [],
+        "message": "WIP on feature/cache",
+        "staging": {},
+        "working_tree": {
+          "src/cache.py": "cache-wip"
+        }
+      }
+    ],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v23e-notify": {
+    "branches": {
+      "develop": "c1",
+      "feature/notify": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Initial messaging-service snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "develop",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "push",
+    "last_stash_operation": "push",
+    "last_switch_branch": "develop",
+    "last_switched_to": "develop",
+    "operation_metadata": {
+      "last_stash_action": "push",
+      "last_stash_operation": "push",
+      "last_switch_branch": "develop",
+      "last_switched_to": "develop",
+      "stash_count": 1
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 1,
+    "stash_stack": [
+      {
+        "conflicts": [],
+        "message": "WIP on feature/notify",
+        "staging": {},
+        "working_tree": {
+          "src/notify.py": "notify-wip"
+        }
+      }
+    ],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v23h-dropped-api": {
+    "branches": {
+      "feature/api-v2": "c1",
+      "hotfix/urgent": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "API v2 prototype started",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/fix.py": {
+            "after": "fix-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/fix.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Hotfix committed",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/fix.py": "fix-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/api-v2",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "drop",
+    "last_stash_operation": "drop",
+    "last_switch_branch": "feature/api-v2",
+    "last_switched_to": "feature/api-v2",
+    "operation_metadata": {
+      "last_stash_action": "drop",
+      "last_stash_operation": "drop",
+      "last_switch_branch": "feature/api-v2",
+      "last_switched_to": "feature/api-v2",
+      "stash_count": 0
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 0,
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v23h-dropped-auth": {
+    "branches": {
+      "feature/auth-rework": "c1",
+      "main": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Auth rework in progress",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/app.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main moves forward",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/auth-rework",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "drop",
+    "last_stash_operation": "drop",
+    "last_switch_branch": "feature/auth-rework",
+    "last_switched_to": "feature/auth-rework",
+    "operation_metadata": {
+      "last_stash_action": "drop",
+      "last_stash_operation": "drop",
+      "last_switch_branch": "feature/auth-rework",
+      "last_switched_to": "feature/auth-rework",
+      "stash_count": 0
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 0,
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v23h-dropped-refactor": {
+    "branches": {
+      "feature/refactor": "c1",
+      "release/v1": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Refactor started",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/app.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Release v1 stable",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/refactor",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "drop",
+    "last_stash_operation": "drop",
+    "last_switch_branch": "feature/refactor",
+    "last_switched_to": "feature/refactor",
+    "operation_metadata": {
+      "last_stash_action": "drop",
+      "last_stash_operation": "drop",
+      "last_switch_branch": "feature/refactor",
+      "last_switched_to": "feature/refactor",
+      "stash_count": 0
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 0,
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v23m-to-hotfix": {
+    "branches": {
+      "feature/orders": "c1",
+      "hotfix/fix-tax": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Orders feature base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/tax.py": {
+            "after": "tax-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/tax.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Hotfix branch tip",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/tax.py": "tax-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/orders",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "pop",
+    "last_stash_operation": "pop",
+    "last_switch_branch": "feature/orders",
+    "last_switched_to": "feature/orders",
+    "operation_metadata": {
+      "last_stash_action": "pop",
+      "last_stash_operation": "pop",
+      "last_switch_branch": "feature/orders",
+      "last_switched_to": "feature/orders",
+      "stash_count": 0
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 0,
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/orders.py": "ord-wip"
+    }
+  },
+  "v23m-to-main": {
+    "branches": {
+      "feature/payments": "c1",
+      "main": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Payment feature in progress",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/app.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Main moves forward",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/payments",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "pop",
+    "last_stash_operation": "pop",
+    "last_switch_branch": "feature/payments",
+    "last_switched_to": "feature/payments",
+    "operation_metadata": {
+      "last_stash_action": "pop",
+      "last_stash_operation": "pop",
+      "last_switch_branch": "feature/payments",
+      "last_switched_to": "feature/payments",
+      "stash_count": 0
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 0,
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/payments.py": "pay-wip"
+    }
+  },
+  "v23m-to-release": {
+    "branches": {
+      "feature/analytics": "c1",
+      "release/v2": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Analytics feature base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/release.py": {
+            "after": "release-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/release.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Release v2 preparation",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/release.py": "release-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/analytics",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_stash_action": "pop",
+    "last_stash_operation": "pop",
+    "last_switch_branch": "feature/analytics",
+    "last_switched_to": "feature/analytics",
+    "operation_metadata": {
+      "last_stash_action": "pop",
+      "last_stash_operation": "pop",
+      "last_switch_branch": "feature/analytics",
+      "last_switched_to": "feature/analytics",
+      "stash_count": 0
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_count": 0,
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/analytics.py": "ana-wip"
+    }
+  },
+  "v24e-auth": {
+    "branches": {
+      "feature/auth": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "feat-auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Implement feature",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "feat-auth-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/auth",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/auth",
+    "last_push_commit": "c2",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/auth",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "feature/auth",
+      "last_push_commit": "c2",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/auth"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/auth": "c2"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/team/ticketing-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v24e-orders": {
+    "branches": {
+      "feature/orders": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/orders.py": {
+            "after": "feat-orders-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/orders.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Implement feature",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "feat-orders-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/orders",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/orders",
+    "last_push_commit": "c2",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/orders",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "feature/orders",
+      "last_push_commit": "c2",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/orders"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/orders": "c2"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/team/e-commerce.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v24e-parser": {
+    "branches": {
+      "feature/parser": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "feat-parser-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Implement feature",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "feat-parser-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/parser",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/parser",
+    "last_push_commit": "c2",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/parser",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "feature/parser",
+      "last_push_commit": "c2",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/parser"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/parser": "c2"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/team/data-pipeline.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v24h-auth": {
+    "branches": {
+      "feature/auth": "c3",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common ancestor",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "old-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Original feature commit (remote still here)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "old-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "new-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Rebased feature commit (local, diverged from remote)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "new-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": true,
+    "force_with_lease": true,
+    "head": {
+      "name": "feature/auth",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/auth",
+    "last_push_commit": "c3",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/auth",
+    "operation_metadata": {
+      "force_push_with_lease": true,
+      "force_with_lease": true,
+      "last_push_branch": "feature/auth",
+      "last_push_commit": "c3",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/auth"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/auth": "c3"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/team/ticketing-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/auth": "origin/feature/auth"
+    },
+    "working_tree": {}
+  },
+  "v24h-orders": {
+    "branches": {
+      "feature/orders": "c3",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common ancestor",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/orders.py": {
+            "after": "old-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/orders.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Original feature commit (remote still here)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "old-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/orders.py": {
+            "after": "new-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/orders.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Rebased feature commit (local, diverged from remote)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "new-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": true,
+    "force_with_lease": true,
+    "head": {
+      "name": "feature/orders",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/orders",
+    "last_push_commit": "c3",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/orders",
+    "operation_metadata": {
+      "force_push_with_lease": true,
+      "force_with_lease": true,
+      "last_push_branch": "feature/orders",
+      "last_push_commit": "c3",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/orders"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/orders": "c3"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/team/e-commerce.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/orders": "origin/feature/orders"
+    },
+    "working_tree": {}
+  },
+  "v24h-parser": {
+    "branches": {
+      "feature/parser": "c3",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common ancestor",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "old-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Original feature commit (remote still here)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "old-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "new-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Rebased feature commit (local, diverged from remote)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "new-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": true,
+    "force_with_lease": true,
+    "head": {
+      "name": "feature/parser",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/parser",
+    "last_push_commit": "c3",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/parser",
+    "operation_metadata": {
+      "force_push_with_lease": true,
+      "force_with_lease": true,
+      "last_push_branch": "feature/parser",
+      "last_push_commit": "c3",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/parser"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/parser": "c3"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/team/data-pipeline.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/parser": "origin/feature/parser"
+    },
+    "working_tree": {}
+  },
+  "v24m-auth": {
+    "branches": {
+      "feature/auth": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "feat-auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Implement feature",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "feat-auth-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/auth",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/auth",
+    "last_push_commit": "c2",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/auth",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "feature/auth",
+      "last_push_commit": "c2",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/auth"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/auth": "c2"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/team/ticketing-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/auth": "origin/feature/auth"
+    },
+    "working_tree": {}
+  },
+  "v24m-orders": {
+    "branches": {
+      "feature/orders": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/orders.py": {
+            "after": "feat-orders-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/orders.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Implement feature",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "feat-orders-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/orders",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/orders",
+    "last_push_commit": "c2",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/orders",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "feature/orders",
+      "last_push_commit": "c2",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/orders"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/orders": "c2"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/team/e-commerce.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/orders": "origin/feature/orders"
+    },
+    "working_tree": {}
+  },
+  "v24m-parser": {
+    "branches": {
+      "feature/parser": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "feat-parser-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Implement feature",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "feat-parser-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/parser",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/parser",
+    "last_push_commit": "c2",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/parser",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "feature/parser",
+      "last_push_commit": "c2",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/parser"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/parser": "c2"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://github.com/team/data-pipeline.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/parser": "origin/feature/parser"
+    },
+    "working_tree": {}
+  },
+  "v25e-develop": {
+    "branches": {
+      "develop": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/api.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/api.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "New remote work not yet fetched",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/api.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "develop",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/develop": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/develop": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/api-gateway.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v25e-feature": {
+    "branches": {
+      "feature/auth": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "New remote work not yet fetched",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "feature/auth",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/feature/auth": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/auth": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/auth-service.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v25e-main": {
+    "branches": {
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/feature.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/feature.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "New remote work not yet fetched",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/feature.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {
+      "origin/main": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/main": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/ticketing-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v25h-develop": {
+    "branches": {
+      "develop": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/api.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/api.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Teammate committed to remote",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/api.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "develop",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/develop",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/develop",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {
+      "origin/develop": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/develop": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/api-gateway.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v25h-feature": {
+    "branches": {
+      "feature/auth": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Teammate committed to remote",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "feature/auth",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/feature/auth",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/feature/auth",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/auth": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/auth": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/auth-service.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v25h-main": {
+    "branches": {
+      "main": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/feature.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/feature.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Teammate committed to remote",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/feature.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "main",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/main",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/main",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/main": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/ticketing-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v25m-develop": {
+    "branches": {
+      "develop": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/api.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/api.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Teammate committed to remote",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/api.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "develop",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/develop",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/develop",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {
+      "origin/develop": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/develop": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/api-gateway.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "develop": "origin/develop"
+    },
+    "working_tree": {}
+  },
+  "v25m-feature": {
+    "branches": {
+      "feature/auth": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Teammate committed to remote",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "feature/auth",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/feature/auth",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/feature/auth",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/auth": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/auth": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/auth-service.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/auth": "origin/feature/auth"
+    },
+    "working_tree": {}
+  },
+  "v25m-main": {
+    "branches": {
+      "main": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Baseline snapshot",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/feature.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/feature.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Teammate committed to remote",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/feature.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "main",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/main",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/main",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/main": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/ticketing-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "v26e-auth": {
+    "branches": {
+      "feature/auth": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "local-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Local work (non-overlapping)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "local-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/tests.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/tests.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Teammate pushed to remote (non-overlapping)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/tests.py": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.py": {
+            "after": null,
+            "before": "local-v1",
+            "change_type": "deleted"
+          },
+          "src/tests.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "deleted",
+          "src/tests.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/feature/auth'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/tests.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/auth",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "src/auth.py",
+      "src/tests.py"
+    ],
+    "last_merge_branch": "origin/feature/auth",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "feature/auth",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/auth",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "src/auth.py",
+        "src/tests.py"
+      ],
+      "last_merge_branch": "origin/feature/auth",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "feature/auth",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/auth",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/auth": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/auth": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/ticketing-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/auth": "origin/feature/auth"
+    },
+    "working_tree": {}
+  },
+  "v26e-hotfix": {
+    "branches": {
+      "hotfix/critical": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/fix.py": {
+            "after": "local-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/fix.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Local work (non-overlapping)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/fix.py": "local-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/hotfix_tests.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/hotfix_tests.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Teammate pushed to remote (non-overlapping)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/hotfix_tests.py": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/fix.py": {
+            "after": null,
+            "before": "local-v1",
+            "change_type": "deleted"
+          },
+          "src/hotfix_tests.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/fix.py": "deleted",
+          "src/hotfix_tests.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/hotfix/critical'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/hotfix_tests.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "hotfix/critical",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "src/fix.py",
+      "src/hotfix_tests.py"
+    ],
+    "last_merge_branch": "origin/hotfix/critical",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "hotfix/critical",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/hotfix/critical",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "src/fix.py",
+        "src/hotfix_tests.py"
+      ],
+      "last_merge_branch": "origin/hotfix/critical",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "hotfix/critical",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/hotfix/critical",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/hotfix/critical": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/hotfix/critical": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/order-service.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "hotfix/critical": "origin/hotfix/critical"
+    },
+    "working_tree": {}
+  },
+  "v26e-payments": {
+    "branches": {
+      "feature/payments": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/payments.py": {
+            "after": "local-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/payments.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Local work (non-overlapping)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payments.py": "local-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/invoice.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/invoice.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Teammate pushed to remote (non-overlapping)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/invoice.py": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/invoice.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/payments.py": {
+            "after": null,
+            "before": "local-v1",
+            "change_type": "deleted"
+          }
+        },
+        "files": {
+          "src/invoice.py": "added",
+          "src/payments.py": "deleted"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/feature/payments'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/invoice.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/payments",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "src/invoice.py",
+      "src/payments.py"
+    ],
+    "last_merge_branch": "origin/feature/payments",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "feature/payments",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/payments",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "src/invoice.py",
+        "src/payments.py"
+      ],
+      "last_merge_branch": "origin/feature/payments",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "feature/payments",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/payments",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/payments": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/payments": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/e-commerce.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/payments": "origin/feature/payments"
+    },
+    "working_tree": {}
+  },
+  "v26h-auth": {
+    "branches": {
+      "feature/auth": "c0",
+      "feature/current": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "local-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Local work on target branch (non-overlapping)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "local-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/tests.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/tests.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Teammate pushed to remote (non-overlapping)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/tests.py": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.py": {
+            "after": null,
+            "before": "local-v1",
+            "change_type": "deleted"
+          },
+          "src/tests.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "deleted",
+          "src/tests.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/feature/auth'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/tests.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/auth",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "src/auth.py",
+      "src/tests.py"
+    ],
+    "last_merge_branch": "origin/feature/auth",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "feature/auth",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/auth",
+    "last_switch_branch": "feature/auth",
+    "last_switched_to": "feature/auth",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "src/auth.py",
+        "src/tests.py"
+      ],
+      "last_merge_branch": "origin/feature/auth",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "feature/auth",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/auth",
+      "last_switch_branch": "feature/auth",
+      "last_switched_to": "feature/auth",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/auth": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/auth": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/ticketing-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/auth": "origin/feature/auth"
+    },
+    "working_tree": {}
+  },
+  "v26h-hotfix": {
+    "branches": {
+      "feature/current": "c1",
+      "hotfix/critical": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/fix.py": {
+            "after": "local-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/fix.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Local work on target branch (non-overlapping)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/fix.py": "local-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/hotfix_tests.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/hotfix_tests.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Teammate pushed to remote (non-overlapping)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/hotfix_tests.py": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/fix.py": {
+            "after": null,
+            "before": "local-v1",
+            "change_type": "deleted"
+          },
+          "src/hotfix_tests.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/fix.py": "deleted",
+          "src/hotfix_tests.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/hotfix/critical'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/hotfix_tests.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "hotfix/critical",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "src/fix.py",
+      "src/hotfix_tests.py"
+    ],
+    "last_merge_branch": "origin/hotfix/critical",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "hotfix/critical",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/hotfix/critical",
+    "last_switch_branch": "hotfix/critical",
+    "last_switched_to": "hotfix/critical",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "src/fix.py",
+        "src/hotfix_tests.py"
+      ],
+      "last_merge_branch": "origin/hotfix/critical",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "hotfix/critical",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/hotfix/critical",
+      "last_switch_branch": "hotfix/critical",
+      "last_switched_to": "hotfix/critical",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/hotfix/critical": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/hotfix/critical": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/order-service.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "hotfix/critical": "origin/hotfix/critical"
+    },
+    "working_tree": {}
+  },
+  "v26h-payments": {
+    "branches": {
+      "feature/current": "c1",
+      "feature/payments": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/payments.py": {
+            "after": "local-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/payments.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Local work on target branch (non-overlapping)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payments.py": "local-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/invoice.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/invoice.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Teammate pushed to remote (non-overlapping)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/invoice.py": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/invoice.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/payments.py": {
+            "after": null,
+            "before": "local-v1",
+            "change_type": "deleted"
+          }
+        },
+        "files": {
+          "src/invoice.py": "added",
+          "src/payments.py": "deleted"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/feature/payments'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/invoice.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/payments",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "src/invoice.py",
+      "src/payments.py"
+    ],
+    "last_merge_branch": "origin/feature/payments",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "feature/payments",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/payments",
+    "last_switch_branch": "feature/payments",
+    "last_switched_to": "feature/payments",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "src/invoice.py",
+        "src/payments.py"
+      ],
+      "last_merge_branch": "origin/feature/payments",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "feature/payments",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/payments",
+      "last_switch_branch": "feature/payments",
+      "last_switched_to": "feature/payments",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/payments": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/payments": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/e-commerce.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/payments": "origin/feature/payments"
+    },
+    "working_tree": {}
+  },
+  "v26m-auth": {
+    "branches": {
+      "feature/auth": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "local-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Local work (non-overlapping)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "local-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/tests.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/tests.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Teammate pushed to remote (non-overlapping)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/tests.py": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.py": {
+            "after": null,
+            "before": "local-v1",
+            "change_type": "deleted"
+          },
+          "src/tests.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "deleted",
+          "src/tests.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/feature/auth'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/tests.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/auth",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "src/auth.py",
+      "src/tests.py"
+    ],
+    "last_merge_branch": "origin/feature/auth",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "feature/auth",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/auth",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "src/auth.py",
+        "src/tests.py"
+      ],
+      "last_merge_branch": "origin/feature/auth",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "feature/auth",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/auth",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/auth": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/auth": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/ticketing-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/auth": "origin/feature/auth"
+    },
+    "working_tree": {}
+  },
+  "v26m-hotfix": {
+    "branches": {
+      "hotfix/critical": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/fix.py": {
+            "after": "local-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/fix.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Local work (non-overlapping)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/fix.py": "local-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/hotfix_tests.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/hotfix_tests.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Teammate pushed to remote (non-overlapping)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/hotfix_tests.py": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/fix.py": {
+            "after": null,
+            "before": "local-v1",
+            "change_type": "deleted"
+          },
+          "src/hotfix_tests.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/fix.py": "deleted",
+          "src/hotfix_tests.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/hotfix/critical'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/hotfix_tests.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "hotfix/critical",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "src/fix.py",
+      "src/hotfix_tests.py"
+    ],
+    "last_merge_branch": "origin/hotfix/critical",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "hotfix/critical",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/hotfix/critical",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "src/fix.py",
+        "src/hotfix_tests.py"
+      ],
+      "last_merge_branch": "origin/hotfix/critical",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "hotfix/critical",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/hotfix/critical",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/hotfix/critical": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/hotfix/critical": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/order-service.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "hotfix/critical": "origin/hotfix/critical"
+    },
+    "working_tree": {}
+  },
+  "v26m-payments": {
+    "branches": {
+      "feature/payments": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/payments.py": {
+            "after": "local-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/payments.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Local work (non-overlapping)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payments.py": "local-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/invoice.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/invoice.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Teammate pushed to remote (non-overlapping)",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/invoice.py": "remote-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/invoice.py": {
+            "after": "remote-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/payments.py": {
+            "after": null,
+            "before": "local-v1",
+            "change_type": "deleted"
+          }
+        },
+        "files": {
+          "src/invoice.py": "added",
+          "src/payments.py": "deleted"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'origin/feature/payments'",
+        "order": 3,
+        "parents": [
+          "c2",
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/invoice.py": "remote-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "feature/payments",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_auto_staged_paths": [
+      "src/invoice.py",
+      "src/payments.py"
+    ],
+    "last_merge_branch": "origin/feature/payments",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": false,
+    "last_merge_target": "c3",
+    "last_push_branch": "feature/payments",
+    "last_push_commit": "c0",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/payments",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_auto_staged_paths": [
+        "src/invoice.py",
+        "src/payments.py"
+      ],
+      "last_merge_branch": "origin/feature/payments",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": false,
+      "last_merge_target": "c3",
+      "last_push_branch": "feature/payments",
+      "last_push_commit": "c0",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/payments",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/payments": "c0"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/payments": "c3"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/e-commerce.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/payments": "origin/feature/payments"
+    },
+    "working_tree": {}
+  },
+  "v27e-auth": {
+    "branches": {
+      "feature/auth": "c2",
+      "main": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Project base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch complete",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/auth",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "last_merge_branch": "feature/auth",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v27e-hotfix": {
+    "branches": {
+      "hotfix/fix-critical": "c2",
+      "release/v2": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Project base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/fix.py": {
+            "after": "fix-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/fix.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch complete",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/fix.py": "fix-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release/v2",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_merge_branch": "hotfix/fix-critical",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "last_merge_branch": "hotfix/fix-critical",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v27e-payments": {
+    "branches": {
+      "develop": "c2",
+      "feature/payments": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Project base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/payments.py": {
+            "after": "pay-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/payments.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch complete",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payments.py": "pay-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "develop",
+      "target": "c2",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/payments",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "last_merge_branch": "feature/payments",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v27h-auth": {
+    "branches": {
+      "feature/auth": "c2",
+      "feature/current": "c1",
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Auth feature diverged",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/app.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Main diverged",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/app.py": {
+            "after": null,
+            "before": "app-v1",
+            "change_type": "deleted"
+          },
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/app.py": "deleted",
+          "src/auth.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'feature/auth'",
+        "order": 3,
+        "parents": [
+          "c3",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_auto_staged_paths": [
+      "src/app.py",
+      "src/auth.py"
+    ],
+    "last_merge_branch": "feature/auth",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": true,
+    "last_merge_target": "c2",
+    "last_switch_branch": "main",
+    "last_switched_to": "main",
+    "operation_metadata": {
+      "last_merge_auto_staged_paths": [
+        "src/app.py",
+        "src/auth.py"
+      ],
+      "last_merge_branch": "feature/auth",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": true,
+      "last_merge_target": "c2",
+      "last_switch_branch": "main",
+      "last_switched_to": "main"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v27h-hotfix": {
+    "branches": {
+      "feature/current": "c1",
+      "hotfix/critical": "c2",
+      "release/v1": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/fix.py": {
+            "after": "fix-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/fix.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Hotfix diverged",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/fix.py": "fix-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/release.py": {
+            "after": "rel-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/release.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Release diverged",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/release.py": "rel-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/fix.py": {
+            "after": "fix-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/release.py": {
+            "after": null,
+            "before": "rel-v1",
+            "change_type": "deleted"
+          }
+        },
+        "files": {
+          "src/fix.py": "added",
+          "src/release.py": "deleted"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'hotfix/critical'",
+        "order": 3,
+        "parents": [
+          "c3",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/fix.py": "fix-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release/v1",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_auto_staged_paths": [
+      "src/fix.py",
+      "src/release.py"
+    ],
+    "last_merge_branch": "hotfix/critical",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": true,
+    "last_merge_target": "c2",
+    "last_switch_branch": "release/v1",
+    "last_switched_to": "release/v1",
+    "operation_metadata": {
+      "last_merge_auto_staged_paths": [
+        "src/fix.py",
+        "src/release.py"
+      ],
+      "last_merge_branch": "hotfix/critical",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": true,
+      "last_merge_target": "c2",
+      "last_switch_branch": "release/v1",
+      "last_switched_to": "release/v1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v27h-payments": {
+    "branches": {
+      "develop": "c0",
+      "feature/current": "c1",
+      "feature/payments": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/payments.py": {
+            "after": "pay-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/payments.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Payments diverged",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payments.py": "pay-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/core.py": {
+            "after": "core-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/core.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Develop diverged",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/core.py": "core-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/core.py": {
+            "after": null,
+            "before": "core-v1",
+            "change_type": "deleted"
+          },
+          "src/payments.py": {
+            "after": "pay-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/core.py": "deleted",
+          "src/payments.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'feature/payments'",
+        "order": 3,
+        "parents": [
+          "c3",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payments.py": "pay-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "develop",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_auto_staged_paths": [
+      "src/core.py",
+      "src/payments.py"
+    ],
+    "last_merge_branch": "feature/payments",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": true,
+    "last_merge_target": "c2",
+    "last_switch_branch": "develop",
+    "last_switched_to": "develop",
+    "operation_metadata": {
+      "last_merge_auto_staged_paths": [
+        "src/core.py",
+        "src/payments.py"
+      ],
+      "last_merge_branch": "feature/payments",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": true,
+      "last_merge_target": "c2",
+      "last_switch_branch": "develop",
+      "last_switched_to": "develop"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v27m-auth": {
+    "branches": {
+      "feature/auth": "c2",
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Project base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch complete",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'feature/auth'",
+        "order": 2,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_auto_staged_paths": [
+      "src/auth.py"
+    ],
+    "last_merge_branch": "feature/auth",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "last_merge_auto_staged_paths": [
+        "src/auth.py"
+      ],
+      "last_merge_branch": "feature/auth",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": true,
+      "last_merge_target": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v27m-hotfix": {
+    "branches": {
+      "hotfix/fix-critical": "c2",
+      "release/v2": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Project base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/fix.py": {
+            "after": "fix-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/fix.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch complete",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/fix.py": "fix-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/fix.py": {
+            "after": "fix-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/fix.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'hotfix/fix-critical'",
+        "order": 2,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/fix.py": "fix-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release/v2",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_auto_staged_paths": [
+      "src/fix.py"
+    ],
+    "last_merge_branch": "hotfix/fix-critical",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "last_merge_auto_staged_paths": [
+        "src/fix.py"
+      ],
+      "last_merge_branch": "hotfix/fix-critical",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": true,
+      "last_merge_target": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v27m-payments": {
+    "branches": {
+      "develop": "c0",
+      "feature/payments": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Project base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/payments.py": {
+            "after": "pay-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/payments.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature branch complete",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payments.py": "pay-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/payments.py": {
+            "after": "pay-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/payments.py": "added"
+        },
+        "id": "c0",
+        "is_merge": true,
+        "message": "Merge branch 'feature/payments'",
+        "order": 2,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/payments.py": "pay-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "develop",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_auto_staged_paths": [
+      "src/payments.py"
+    ],
+    "last_merge_branch": "feature/payments",
+    "last_merge_created_commit": "c0",
+    "last_merge_no_ff": true,
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "last_merge_auto_staged_paths": [
+        "src/payments.py"
+      ],
+      "last_merge_branch": "feature/payments",
+      "last_merge_created_commit": "c0",
+      "last_merge_no_ff": true,
+      "last_merge_target": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v28e-auth": {
+    "branches": {
+      "feature/auth": "c3",
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Auth: add login",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v2",
+            "before": "auth-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Auth: add logout",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Squash auth feature into main",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/auth",
+    "last_merge_target": "c3",
+    "operation_metadata": {
+      "last_merge_branch": "feature/auth",
+      "last_merge_target": "c3",
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v28e-orders": {
+    "branches": {
+      "develop": "c0",
+      "feature/orders": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/orders.py": {
+            "after": "ord-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/orders.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Orders: add create",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "ord-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/orders.py": {
+            "after": "ord-v2",
+            "before": "ord-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/orders.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Orders: add cancel",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "ord-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/orders.py": {
+            "after": "ord-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/orders.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Squash orders feature into develop",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "ord-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "develop",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/orders",
+    "last_merge_target": "c3",
+    "operation_metadata": {
+      "last_merge_branch": "feature/orders",
+      "last_merge_target": "c3",
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v28e-parser": {
+    "branches": {
+      "feature/parser": "c3",
+      "release/v2": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "par-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Parser: initial impl",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "par-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "par-v2",
+            "before": "par-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/parser.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Parser: add error handling",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "par-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/parser.py": {
+            "after": "par-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Squash parser feature into release/v2",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "par-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release/v2",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/parser",
+    "last_merge_target": "c3",
+    "operation_metadata": {
+      "last_merge_branch": "feature/parser",
+      "last_merge_target": "c3",
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v28h-auth": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Auth: add login",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v2",
+            "before": "auth-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Auth: add logout",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Squash auth feature into main",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_branch_deleted": "feature/auth",
+    "last_merge_branch": "feature/auth",
+    "last_merge_target": "c3",
+    "operation_metadata": {
+      "last_branch_deleted": "feature/auth",
+      "last_merge_branch": "feature/auth",
+      "last_merge_target": "c3",
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v28h-orders": {
+    "branches": {
+      "develop": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/orders.py": {
+            "after": "ord-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/orders.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Orders: add create",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "ord-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/orders.py": {
+            "after": "ord-v2",
+            "before": "ord-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/orders.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Orders: add cancel",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "ord-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/orders.py": {
+            "after": "ord-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/orders.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Squash orders feature into develop",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "ord-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "develop",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_branch_deleted": "feature/orders",
+    "last_merge_branch": "feature/orders",
+    "last_merge_target": "c3",
+    "operation_metadata": {
+      "last_branch_deleted": "feature/orders",
+      "last_merge_branch": "feature/orders",
+      "last_merge_target": "c3",
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v28h-parser": {
+    "branches": {
+      "release/v2": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "par-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Parser: initial impl",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "par-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "par-v2",
+            "before": "par-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/parser.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Parser: add error handling",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "par-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/parser.py": {
+            "after": "par-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Squash parser feature into release/v2",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "par-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release/v2",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_branch_deleted": "feature/parser",
+    "last_merge_branch": "feature/parser",
+    "last_merge_target": "c3",
+    "operation_metadata": {
+      "last_branch_deleted": "feature/parser",
+      "last_merge_branch": "feature/parser",
+      "last_merge_target": "c3",
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v28m-auth": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Remote commit c2",
+        "order": 1,
+        "parents": [],
+        "tree": {}
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "README.md": {
+            "after": null,
+            "before": "readme-v1",
+            "change_type": "deleted"
+          }
+        },
+        "files": {
+          "README.md": "deleted"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Squash remote auth feature into main",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/feature/auth",
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/feature/auth",
+      "last_merge_target": "c2",
+      "remote_tracking_updated": true,
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/auth": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/auth": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/ticketing-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v28m-orders": {
+    "branches": {
+      "develop": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Remote commit c2",
+        "order": 1,
+        "parents": [],
+        "tree": {}
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "README.md": {
+            "after": null,
+            "before": "readme-v1",
+            "change_type": "deleted"
+          }
+        },
+        "files": {
+          "README.md": "deleted"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Squash remote orders feature into develop",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "develop",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/feature/orders",
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/feature/orders",
+      "last_merge_target": "c2",
+      "remote_tracking_updated": true,
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/orders": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/orders": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/e-commerce.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v28m-parser": {
+    "branches": {
+      "release/v2": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Bootstrap project",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Remote commit c2",
+        "order": 1,
+        "parents": [],
+        "tree": {}
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "README.md": {
+            "after": null,
+            "before": "readme-v1",
+            "change_type": "deleted"
+          }
+        },
+        "files": {
+          "README.md": "deleted"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Squash remote parser feature into release/v2",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {}
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "head": {
+      "name": "release/v2",
+      "target": "c0",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/feature/parser",
+    "last_merge_target": "c2",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/feature/parser",
+      "last_merge_target": "c2",
+      "remote_tracking_updated": true,
+      "squash_merge_staged": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/parser": "c2"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/feature/parser": "c2"
+    },
+    "remotes": {
+      "origin": "https://github.com/team/data-pipeline.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "squash_merge_staged": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v29e-auth": {
+    "branches": {
+      "feature/auth": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/auth.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Merge commit on main",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature tip (still on remote)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_push_deleted_branch": "origin/feature/auth",
+    "last_push_remote": "origin",
+    "operation_metadata": {
+      "last_push_deleted_branch": "origin/feature/auth",
+      "last_push_remote": "origin",
+      "remote_branch_deleted": "feature/auth"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branch_deleted": "feature/auth",
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v29e-orders": {
+    "branches": {
+      "feature/orders": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/orders.py": {
+            "after": "ord-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/orders.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Merge commit on main",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "ord-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature tip (still on remote)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "ord-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_push_deleted_branch": "origin/feature/orders",
+    "last_push_remote": "origin",
+    "operation_metadata": {
+      "last_push_deleted_branch": "origin/feature/orders",
+      "last_push_remote": "origin",
+      "remote_branch_deleted": "feature/orders"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branch_deleted": "feature/orders",
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v29e-parser": {
+    "branches": {
+      "feature/parser": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/parser.py": {
+            "after": "par-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/parser.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Merge commit on main",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "par-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature tip (still on remote)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "par-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_push_deleted_branch": "origin/feature/parser",
+    "last_push_remote": "origin",
+    "operation_metadata": {
+      "last_push_deleted_branch": "origin/feature/parser",
+      "last_push_remote": "origin",
+      "remote_branch_deleted": "feature/parser"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branch_deleted": "feature/parser",
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v29h-auth": {
+    "branches": {
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature work (merged)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/auth.py": "added"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge feature into main",
+        "order": 2,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_deleted": "feature/auth",
+    "last_push_deleted_branch": "origin/feature/auth",
+    "last_push_remote": "origin",
+    "operation_metadata": {
+      "last_branch_deleted": "feature/auth",
+      "last_push_deleted_branch": "origin/feature/auth",
+      "last_push_remote": "origin",
+      "remote_branch_deleted": "feature/auth"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branch_deleted": "feature/auth",
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v29h-orders": {
+    "branches": {
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/orders.py": {
+            "after": "ord-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/orders.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature work (merged)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "ord-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/orders.py": {
+            "after": "ord-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/orders.py": "added"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge feature into main",
+        "order": 2,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "ord-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_deleted": "feature/orders",
+    "last_push_deleted_branch": "origin/feature/orders",
+    "last_push_remote": "origin",
+    "operation_metadata": {
+      "last_branch_deleted": "feature/orders",
+      "last_push_deleted_branch": "origin/feature/orders",
+      "last_push_remote": "origin",
+      "remote_branch_deleted": "feature/orders"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branch_deleted": "feature/orders",
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v29h-parser": {
+    "branches": {
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Base commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "par-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature work (merged)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "par-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "par-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge feature into main",
+        "order": 2,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "par-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_deleted": "feature/parser",
+    "last_push_deleted_branch": "origin/feature/parser",
+    "last_push_remote": "origin",
+    "operation_metadata": {
+      "last_branch_deleted": "feature/parser",
+      "last_push_deleted_branch": "origin/feature/parser",
+      "last_push_remote": "origin",
+      "remote_branch_deleted": "feature/parser"
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branch_deleted": "feature/parser",
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v29m-auth": {
+    "branches": {
+      "feature/auth": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/auth.py": {
+            "after": "auth-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/auth.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main at latest",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature tip (already deleted on remote)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "auth-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": [
+      "origin/feature/auth"
+    ],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "operation_metadata": {
+      "fetch_pruned_refs": [
+        "origin/feature/auth"
+      ],
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_stale_branches": [
+      "origin/feature/auth"
+    ],
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remotes": {
+      "origin": "https://github.com/team/ticketing-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v29m-orders": {
+    "branches": {
+      "feature/orders": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/orders.py": {
+            "after": "ord-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/orders.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main at latest",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "ord-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature tip (already deleted on remote)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/orders.py": "ord-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": [
+      "origin/feature/orders"
+    ],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "operation_metadata": {
+      "fetch_pruned_refs": [
+        "origin/feature/orders"
+      ],
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_stale_branches": [
+      "origin/feature/orders"
+    ],
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remotes": {
+      "origin": "https://github.com/team/e-commerce.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "v29m-parser": {
+    "branches": {
+      "feature/parser": "c2",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/parser.py": {
+            "after": "par-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/parser.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main at latest",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "par-v1"
+        }
+      },
+      {
+        "changes": {},
+        "files": {},
+        "id": "c2",
+        "is_merge": false,
+        "message": "Feature tip (already deleted on remote)",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "par-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": [
+      "origin/feature/parser"
+    ],
+    "head": {
+      "name": "main",
+      "target": "c1",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "operation_metadata": {
+      "fetch_pruned_refs": [
+        "origin/feature/parser"
+      ],
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_stale_branches": [
+      "origin/feature/parser"
+    ],
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remotes": {
+      "origin": "https://github.com/team/data-pipeline.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
   }
 }
 """)

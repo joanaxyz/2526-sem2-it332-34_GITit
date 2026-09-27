@@ -8,6 +8,7 @@ from drf_spectacular.utils import PolymorphicProxySerializer, extend_schema_fiel
 from rest_framework import serializers
 
 from common.openapi import GameplayRunStatusField, RuntimeStepResponseSerializer
+from tutoring.openapi import CommandIntroductionResponseSerializer
 
 
 class AdventureRunResponseSerializer(serializers.Serializer):
@@ -103,6 +104,7 @@ class AdventureLevelTierCommandStepResponseSerializer(AdventureLevelTierRunStepR
 
 
 class AdventureLevelTierCommandRunResponseSerializer(serializers.Serializer):
+    tutor = CommandIntroductionResponseSerializer(allow_null=True)
     id = serializers.IntegerField()
     replay = serializers.BooleanField()
     stars = serializers.IntegerField()
@@ -119,6 +121,7 @@ class AdventureLevelTierCommandRunResponseSerializer(serializers.Serializer):
 
 
 class AdventureLevelTierRunResponseSerializer(serializers.Serializer):
+    tutor = CommandIntroductionResponseSerializer(allow_null=True)
     id = serializers.IntegerField()
     replay = serializers.BooleanField()
     stars = serializers.IntegerField()

@@ -6,6 +6,7 @@ from typing import Any
 
 from curriculum.seed_data.blueprint_overlay import BLUEPRINT_CHALLENGE_SPECS
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
+from curriculum.seed_data.generated.generated_trajectories import SOLUTION_TRAJECTORIES
 from curriculum.seed_data.source.challenge_fixtures import (
     BRANCH_BASE,
     BRANCH_LONG,
@@ -127,6 +128,7 @@ def variant(
         # genuinely missing target is rejected downstream (empty target_state).
         "target_state_template": TARGET_STATES.get(case_id, {}),
         "solution_commands_template": solution,
+        "solution_trajectory_template": SOLUTION_TRAJECTORIES.get(case_id, {}),
         "solution_workspace_files_template": workspace_files or [],
         "evaluation_spec_template": evaluation,
         "scenario_context_template": enrich_context_with_required_details(
@@ -142,9 +144,6 @@ def variant(
             solution_commands=solution,
             evaluation_spec=evaluation,
         ),
-        "scaffold_policy_template": {
-            "diagram": "primary",
-        },
     }
 
 # First-completion GitCoin payout per trial difficulty (override via `reward`).

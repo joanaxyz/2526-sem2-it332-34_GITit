@@ -147,6 +147,21 @@
   white-space: nowrap;
 }
 
+/* Run-state flag beside the mission (e.g. a retry served a different variant). */
+.gameplay-header-flag {
+  flex: 0 0 auto;
+  border: 1px solid hsl(var(--warning) / 0.45);
+  border-radius: 999px;
+  padding: 0.14rem 0.5rem;
+  color: hsl(var(--warning));
+  background: hsl(var(--warning) / 0.08);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  line-height: 1.2;
+  white-space: nowrap;
+}
+
 .gameplay-header-audio.is-muted {
   border-color: hsl(var(--muted-foreground) / 0.28);
   background: rgba(3, 11, 25, 0.48);

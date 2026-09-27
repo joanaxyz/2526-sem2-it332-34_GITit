@@ -21,32 +21,87 @@ import {
   type ParsedGitCommand,
 } from '@/shared/git/simulator/types'
 import { normalizeState, snapshotForCommand } from '@/shared/git/simulator/state'
+import { rebaseGitPathspecs } from '@/shared/git/simulator/gitPathspecs'
+import {
+  effectiveCwd,
+  executeShellCommand,
+  shellProgram,
+  type ShellContext,
+} from '@/shared/git/simulator/shell'
+
+export type TerminalContext = ShellContext
+
+export type TerminalExecution = {
+  execution: CommandExecutionPayload
+  /** Working directory after the command (project-relative, `''` is the root). */
+  cwd: string
+}
+
+/**
+ * Run one line typed into the workspace terminal: a shell command (`ls`, `cd`,
+ * `mkdir`, ...) or a git command. `context.cwd` is the terminal's working
+ * directory; git pathspecs are read relative to it like real git. The payload
+ * carries the directory the command ran in so the backend can replay it.
+ */
+export function executeTerminalCommand(
+  repositoryState: MutableRepositoryState,
+  command: string,
+  context: TerminalContext = {},
+): TerminalExecution {
+  const state = normalizeState(repositoryState)
+  const cwd = effectiveCwd(state, context.cwd ?? '')
+  const withCwd = (execution: CommandExecutionPayload) => (cwd ? { ...execution, cwd } : execution)
+
+  if (shellProgram(command)) {
+    const shell = executeShellCommand(state, command, { ...context, cwd })
+    const execution = result({
+      processed: true,
+      state: shell.state,
+      output: [shell.stdout, shell.stderr].filter(Boolean).join('\n'),
+      normalizedCommand: collapseWhitespace(command),
+      exitCode: shell.exitCode,
+      stdout: shell.stdout,
+      stderr: shell.stderr,
+      commandFamily: shell.program,
+      // Read-only shell commands are free diagnostics. File-changing ones are
+      // replayed by the backend and never count against the command budget.
+      diagnostic: !shell.changesFiles,
+      diagnosticMetadata: shell.program === 'cd' ? ['changed_directory'] : [],
+    })
+    return { execution: withCwd(execution), cwd: shell.cwd }
+  }
+
+  const rootCommand = rebaseGitPathspecs(command, cwd)
+  const execution = runGitCommand(state, rootCommand)
+  if (rootCommand !== command) execution.normalized_command = normalizedGitCommand(command)
+  return { execution: withCwd(execution), cwd }
+}
 
 export function executeGitCommand(
   repositoryState: MutableRepositoryState,
   command: string,
+  context: TerminalContext = {},
 ): CommandExecutionPayload {
-  const normalizedFallback = command.trim().split(/\s+/).filter(Boolean).join(' ')
+  return executeTerminalCommand(repositoryState, command, context).execution
+}
 
-  // `cd` is shell navigation, not git. This simulator models a single repository
-  // (no separate working directory), so `cd` is accepted as a no-op: it lets
-  // realistic onboarding flows (clone/init a folder, then `cd` into it) read
-  // naturally without changing repository state. Marked diagnostic so it never
-  // counts against a level's command budget. `mkdir` is intentionally NOT
-  // supported - directories exist implicitly via file paths.
-  if (normalizedFallback === 'cd' || normalizedFallback.startsWith('cd ')) {
-    return result({
-      processed: true,
-      state: normalizeState(repositoryState),
-      output: '',
-      normalizedCommand: normalizedFallback,
-      exitCode: 0,
-      stdout: '',
-      commandFamily: 'cd',
-      diagnostic: true,
-      diagnosticMetadata: ['changed_directory'],
-    })
+function collapseWhitespace(command: string) {
+  return command.trim().split(/\s+/).filter(Boolean).join(' ')
+}
+
+function normalizedGitCommand(command: string) {
+  try {
+    return new GitCommandParser().parse(command).normalizedText
+  } catch {
+    return collapseWhitespace(command)
   }
+}
+
+function runGitCommand(
+  repositoryState: MutableRepositoryState,
+  command: string,
+): CommandExecutionPayload {
+  const normalizedFallback = collapseWhitespace(command)
 
   let parsed: ParsedGitCommand
   try {
@@ -273,9 +328,31 @@ export function computeTargetState(
   solutionCommands: string[],
 ): RepositorySnapshot {
   let state = normalizeState(initialState)
+  let cwd = ''
   for (const command of solutionCommands) {
     if (!command.trim()) continue
-    state = executeGitCommand(state, command).next_state
+    const terminal = executeTerminalCommand(state, command, { cwd })
+    state = terminal.execution.next_state
+    cwd = terminal.cwd
   }
   return snapshotForCommand(state, true)
+}
+
+/**
+ * The state in front of every solution command, in the shape
+ * `generate-targets.mjs` emits. The backend fingerprints it into the variant's
+ * solution trajectory, which tells the tutor which step a learner is at.
+ */
+export function replaySolution(initialState: MutableRepositoryState, solutionCommands: string[]) {
+  let state = normalizeState(initialState)
+  let cwd = ''
+  const steps = []
+  for (const command of solutionCommands) {
+    if (!command.trim()) continue
+    const { execution, cwd: nextCwd } = executeTerminalCommand(state, command, { cwd })
+    steps.push({ command, diagnostic: Boolean(execution.diagnostic), ready: normalizeState(state) })
+    state = execution.next_state
+    cwd = nextCwd
+  }
+  return { steps, final: normalizeState(state) }
 }

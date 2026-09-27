@@ -24,14 +24,17 @@ EXPECTED_HASHES = {
     "chapters": "b3588181c71c0f83a053bc4c69666129d9923ca7736100c43a79156a3ca75b57",
     "commands": "5e4af04c91823d35b9d813f2715bc9fe3b83f5b36e2fa4dccd628c6beec2f0cc",
     "lessons": "f9f4b58f337841475c56bf31e12b2cd21ebb354a4f81fcd59b4e63a811b59c25",
-    # 2026-09-10: repinned after git-init target metadata was corrected and
-    # generated targets were refreshed by commit 57b814d.
-    "adventures": "26c28379253375526e4601f4053513ada14b11905f95443d44b2a500f6f8b188",
+    # 2026-09-22: repinned after the dead `scaffold_policy_template` key was
+    # dropped from the authored specs. Scaffolding is now a constant ladder in
+    # practice/services/scaffolding.py, not authored content. No authored
+    # scenario changed - reverting only that key restores the previous hash.
+    "adventures": "163c402de718e62dc7b90740109f477b08ab01b464003f9da415cea6fd98ce08",
     # 2026-09-13: repinned after ch6-challenge-easy was corrected. Both variants
     # authored their work-in-progress file as untracked, so `git stash` saved
     # nothing and the closing `git stash pop` had an empty stack - the stash
     # lesson never stashed. The WIP file is now a tracked modification.
-    "challenges": "5d2299d6928bbb0652b8b79ff95bcbcaba8c242e0952f9e5f80247495b2326f3",
+    # 2026-09-22: repinned alongside "adventures" for the same key removal.
+    "challenges": "2d2d954e7e91ad32cca6f767effcb297b31099ece0cdc52a6f1ce667f44b8952",
 }
 
 

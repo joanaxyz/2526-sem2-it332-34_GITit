@@ -294,8 +294,8 @@ class TestClientCommandExecutionService:
     def test_unknown_command_reports_unprocessed(self):
         execution = self.execute(
             {},
-            "echo hello",
-            frontend_execution_payload("echo hello", {}, processed=False, exit_code=127),
+            "python cleanup.py",
+            frontend_execution_payload("python cleanup.py", {}, processed=False, exit_code=127),
         )
         assert execution.result.processed is False
         assert execution.state_mutated is False

@@ -1,0 +1,57 @@
+.repository-diagram-content { display: flex; flex-direction: column; min-height: 0; }
+.repository-history-canvas { flex: 1 1 auto; min-height: 10rem; }
+.repository-diagram-details {
+  flex: 0 1 auto;
+  max-height: 48%;
+  overflow: auto;
+  border-bottom: 1px solid hsl(var(--border));
+  color: hsl(var(--muted-foreground));
+  font-size: 0.75rem;
+}
+.repository-diagram-details > summary {
+  padding: 0.5rem 0.8rem;
+  cursor: pointer;
+  font-weight: 500;
+}
+.repository-diagram-details > summary:hover {
+  color: hsl(var(--foreground));
+  background: hsl(var(--muted) / 0.3);
+}
+.repository-diagram-details > summary:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: -2px;
+}
+.repository-diagram-details > .repository-state-map {
+  max-height: none;
+  overflow: visible;
+  border-bottom: 0;
+}
+.repository-state-map {
+  flex: 0 1 auto;
+  max-height: 48%;
+  overflow: auto;
+  padding: 0.65rem 0.8rem 0;
+  border-bottom: 1px solid hsl(var(--border));
+  font-size: 0.75rem;
+  line-height: 1.5;
+  color: hsl(var(--foreground));
+}
+.repository-state-map__metadata { display: grid; gap: 0.1rem; margin: 0 0 0.65rem; }
+.repository-state-map__metadata span { color: hsl(var(--muted-foreground)); font-family: var(--font-mono); }
+.repository-state-map__metadata[data-initialized='true'] strong { color: hsl(var(--success)); }
+.repository-state-map__flow { display: grid; grid-template-columns: minmax(0, 1fr) 1rem minmax(0, 1fr); gap: 0.4rem; }
+.repository-state-map__area { min-width: 0; }
+.repository-state-map summary { cursor: pointer; font-weight: 600; }
+.repository-state-map summary:hover { color: hsl(var(--primary)); }
+.repository-state-map summary:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.repository-state-map summary span { font-family: var(--font-mono); margin-left: 0.25rem; }
+.repository-state-map ul { margin: 0.45rem 0; padding: 0; list-style: none; }
+.repository-state-map li { overflow-wrap: anywhere; }
+.repository-state-map__area li { display: flex; flex-direction: column; padding-block: 0.2rem; }
+.repository-state-map small { color: hsl(var(--muted-foreground)); font-size: 0.6875rem; }
+.repository-state-map code { font-family: var(--font-mono); font-size: inherit; }
+.repository-state-map__arrow { color: hsl(var(--muted-foreground)); }
+.repository-state-map__extras { display: grid; gap: 0.2rem; padding-top: 0.35rem; }
+.repository-state-map__history { margin: 0.35rem 0; color: hsl(var(--muted-foreground)); text-align: center; }
+.repository-folder-node { display: grid; gap: 0.5rem; width: 8rem; padding: 0.75rem; border: 1px dashed hsl(var(--border)); border-radius: var(--radius-sm); text-align: center; background: hsl(var(--card)); font-size: 0.75rem; }
+.repository-folder-node span { color: hsl(var(--muted-foreground)); }

@@ -36,6 +36,9 @@ export function ShopOnboarding({ ready, ownsCompanion, canBuy }: {
   const navigate = useNavigate()
   if (!onboarding || !['shop', 'purchase'].includes(onboarding.phase)) return null
 
+  // Skipping the Shop only skips buying; the Home tour still runs on the next visit.
+  const skipShop = () => onboarding!.setPhase('home')
+
   function visitHome() {
     onboarding!.setPhase('home')
     navigate(`${HOME_ROUTE}?tab=loadout`)
@@ -43,7 +46,7 @@ export function ShopOnboarding({ ready, ownsCompanion, canBuy }: {
 
   return (
     <>
-      <OnboardingBanner step={2} actions={
+      <OnboardingBanner step={2} onSkip={skipShop} actions={
         ownsCompanion ? <Button size="sm" onClick={visitHome}>Visit Home</Button> :
           ready && !canBuy ? <Button size="sm" variant="outline" onClick={visitHome}>Continue without buying</Button> : null
       }>
@@ -55,7 +58,7 @@ export function ShopOnboarding({ ready, ownsCompanion, canBuy }: {
       </OnboardingBanner>
       {ready && !ownsCompanion && onboarding.phase === 'shop' ? (
         <GameplayWorkspaceTour label="Shop welcome tour" finishLabel="Choose my character" steps={shopSteps}
-          onClose={(reason) => onboarding.setPhase(reason === 'skip' ? 'done' : 'purchase')} />
+          onClose={(reason) => reason === 'skip' ? skipShop() : onboarding.setPhase('purchase')} />
       ) : null}
     </>
   )

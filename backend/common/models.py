@@ -3,9 +3,11 @@ from django.db import models
 
 class VariantBase(models.Model):
     """Shared shape for authored problem variants (adventure waves, challenge
-    trials): one authored case with an initial/target state pair, an
-    evaluation spec, and scaffold policy. Concrete subclasses add only their
-    parent FK."""
+    trials): one authored case with an initial/target state pair and an
+    evaluation spec. Concrete subclasses add only their parent FK.
+
+    Scaffolding is not authored here - it is a constant ladder keyed by tier
+    difficulty in ``practice.services.scaffolding``."""
 
     # Variant slugs are rendered from authored case identifiers. Keep both
     # fields on the same explicit bound so bulk seeding cannot succeed on
@@ -23,11 +25,14 @@ class VariantBase(models.Model):
     # {"mode": "write" | "create", "path": str, "content": str}. Optional
     # "after_command_index" (default 0) controls when the edit applies.
     solution_workspace_files = models.JSONField(default=list, blank=True)
+    # Generated alongside target_state by replaying the solution: repository
+    # fingerprints in front of every solution command (simulator/trajectory.py).
+    # The tutor uses it to tell which step a learner is at. Never hand-edited.
+    solution_trajectory = models.JSONField(default=dict, blank=True)
     case_id = models.CharField(max_length=160, blank=True)
     semantic_key = models.CharField(max_length=240, blank=True)
     parameter_context = models.JSONField(default=dict, blank=True)
     scenario_context = models.JSONField(default=dict, blank=True)
-    scaffold_policy = models.JSONField(default=dict, blank=True)
     is_published = models.BooleanField(default=True)
 
     class Meta:

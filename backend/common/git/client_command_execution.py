@@ -21,6 +21,14 @@ from typing import Any
 from common.constants import COMMAND_COUNTED, COMMAND_DIAGNOSTIC, COMMAND_UNPROCESSABLE
 from common.exceptions import BadRequest, PayloadTooLarge
 from common.git.command_transition_verifier import ClientTransitionVerifier
+from common.git.git_pathspecs import rebase_git_pathspecs
+from common.git.shell_commands import (
+    effective_cwd,
+    normalize_client_cwd,
+    replay_shell_command,
+    shell_command_changes_files,
+    shell_program,
+)
 from common.schemas.schema_validation import validate_repository_state_payload
 from common.services.performance import timing
 from simulator.services import (
@@ -129,9 +137,22 @@ class ClientCommandExecutionService:
 
         processed = self._require_bool(execution, "processed")
         diagnostic = self._require_bool(execution, "diagnostic")
+        cwd = normalize_client_cwd(execution.get("cwd"))
+        is_shell = shell_program(command) is not None
+        replayed_exit_code: int | None = None
 
         with span("repository_state_normalize"):
-            if processed and not diagnostic:
+            if processed and not diagnostic and is_shell:
+                # File-changing shell commands (touch, mkdir, rm, mv, echo > f)
+                # are replayed from the persisted state with the same trusted
+                # helpers as the Project Files endpoints; the browser's
+                # next_state is only its preview.
+                replayed_state, replayed_exit_code = replay_shell_command(
+                    previous_state, command, effective_cwd(previous_state, cwd)
+                )
+                next_state = tools.normalize_state(replayed_state)
+                validate_repository_state_payload(next_state, field_name="execution.next_state")
+            elif processed and not diagnostic:
                 raw_next_state = (
                     execution.get("next_state")
                     if "next_state" in execution and execution.get("next_state") is not None
@@ -161,7 +182,11 @@ class ClientCommandExecutionService:
             state=next_state,
             output=str(execution.get("output") or ""),
             normalized_command=submitted_normalized,
-            exit_code=self._parse_exit_code(execution.get("exit_code")),
+            exit_code=(
+                replayed_exit_code
+                if replayed_exit_code is not None
+                else self._parse_exit_code(execution.get("exit_code"))
+            ),
             diagnostic=diagnostic,
             stdout=str(execution.get("stdout") or ""),
             stderr=str(execution.get("stderr") or ""),
@@ -181,9 +206,13 @@ class ClientCommandExecutionService:
             expected_client_revision=expected_client_revision,
         )
 
+        # Git reads pathspecs relative to the terminal's folder; verification
+        # works from the project root like the simulator does.
+        verification_command = rebase_git_pathspecs(expected_normalized, cwd)
+
         if result.processed and result.diagnostic:
             next_state = self.transition_verifier.verified_diagnostic_state(
-                command=expected_normalized,
+                command=verification_command,
                 previous_state=previous_state,
                 command_family=result.command_family,
                 exit_code=result.exit_code,
@@ -198,13 +227,14 @@ class ClientCommandExecutionService:
         # every payload; a pathological command sequence (mass file/commit
         # creation) must not grow it past what a row and response can carry.
         if result.processed and not result.diagnostic:
-            self.transition_verifier.verify(
-                command=expected_normalized,
-                previous_state=previous_state,
-                next_state=next_state,
-                command_family=result.command_family,
-                exit_code=result.exit_code,
-            )
+            if not is_shell:
+                self.transition_verifier.verify(
+                    command=verification_command,
+                    previous_state=previous_state,
+                    next_state=next_state,
+                    command_family=result.command_family,
+                    exit_code=result.exit_code,
+                )
             state_size = len(json.dumps(next_state, separators=(",", ":"), default=str))
             if state_size > MAX_REPOSITORY_STATE_BYTES:
                 raise PayloadTooLarge(
@@ -215,7 +245,9 @@ class ClientCommandExecutionService:
         classification, increment = CommandCountClassifier().classify(
             command=command,
             processed=result.processed,
-            diagnostic=result.diagnostic,
+            # Shell commands never spend the git command budget, including the
+            # file-changing ones, which match free Project Files edits.
+            diagnostic=result.diagnostic or is_shell,
         )
         return ExecutedCommand(
             previous_state=previous_state,
@@ -275,15 +307,18 @@ class ClientCommandExecutionService:
 
         parsed = parse_git_command(expected_normalized)
         is_git_command = parsed is not None
-        is_cd_command = expected_normalized == "cd" or expected_normalized.startswith("cd ")
-        expected_family = (
-            "cd" if is_cd_command else (parsed[1] if parsed and len(parsed) > 1 else "")
+        program = shell_program(command)
+        is_shell_command = program is not None
+        expected_family = program if program else (parsed[1] if parsed and len(parsed) > 1 else "")
+        expected_diagnostic = (
+            not shell_command_changes_files(command)
+            if is_shell_command
+            else is_diagnostic_command(expected_normalized)
         )
-        expected_diagnostic = is_cd_command or is_diagnostic_command(expected_normalized)
 
-        if result.processed and not (is_git_command or is_cd_command):
+        if result.processed and not (is_git_command or is_shell_command):
             raise BadRequest(
-                "Only Git commands and supported shell no-ops may be submitted as processed executions."
+                "Only Git commands and supported shell commands may be submitted as processed executions."
             )
 
         if result.diagnostic and not expected_diagnostic:
@@ -294,9 +329,9 @@ class ClientCommandExecutionService:
         if result.processed and result.command_family != expected_family:
             raise BadRequest("execution.command_family does not match the submitted command.")
         if not result.processed:
-            if not (is_git_command or is_cd_command) and result.command_family:
+            if not (is_git_command or is_shell_command) and result.command_family:
                 raise BadRequest("Non-Git executions must not include a command family.")
-            if (is_git_command or is_cd_command) and result.command_family not in {
+            if (is_git_command or is_shell_command) and result.command_family not in {
                 "",
                 expected_family,
             }:

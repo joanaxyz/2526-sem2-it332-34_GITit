@@ -1,26 +1,9 @@
-export type TerminalPrompt = {
-  user: string
-  host: string
-  cwd: string
-}
-
 /**
- * Shell identity for the workspace terminals, derived from live data:
- * the signed-in username, the story slug, and the level's repo slug.
- * Fallbacks only cover missing data (guest sessions, legacy runs).
+ * Shell identity for the workspace terminals: the signed-in username and
+ * nothing else. Host and working-directory segments only crowded the prompt
+ * out of the panel, and the command line is the part learners read.
+ * The fallback only covers missing data (guest sessions, legacy runs).
  */
-export function terminalPrompt({
-  username,
-  host,
-  repo,
-}: {
-  username?: string | null
-  host?: string | null
-  repo?: string | null
-}): TerminalPrompt {
-  return {
-    user: (username || 'blue').toLowerCase().replace(/\s+/g, '-'),
-    host: host || 'arcane-spire',
-    cwd: `~/${repo || 'repo'}`,
-  }
+export function terminalPrompt(username?: string | null): string {
+  return (username || 'adventurer').toLowerCase().replace(/\s+/g, '-')
 }

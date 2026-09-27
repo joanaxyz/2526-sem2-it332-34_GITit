@@ -5,12 +5,12 @@
 .panel-eyebrow {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  color: rgba(218, 233, 248, 0.88);
+  gap: 0.4rem;
+  color: rgba(218, 233, 248, 0.7);
   font-family: var(--font-mono);
-  font-size: var(--text-xs);
+  font-size: var(--text-2xs);
   font-weight: 600;
-  letter-spacing: 0.14em;
+  letter-spacing: 0.1em;
   line-height: 1.2;
   text-transform: uppercase;
 }
@@ -24,18 +24,43 @@
 }
 
 .panel-eyebrow svg {
-  width: 0.95rem;
-  height: 0.95rem;
+  width: 0.82rem;
+  height: 0.82rem;
   color: rgb(var(--theme-primary-rgb));
 }
 
-.lvlctx-header {
+/* One eyebrow band shared by every workspace pane header. Panes whose header
+   is the band alone use .workspace-panel-header; the level context pane stacks
+   a title row under it and adds --stacked, so both start at the same height. */
+.workspace-panel-header,
+.workspace-panel-header--stacked > .panel-eyebrow,
+.gameplay-pane .ui-card-header.workspace-panel-header,
+.gameplay-panel-scroll .ui-card-header.workspace-panel-header,
+.gameplay-project-region .ui-card-header.workspace-panel-header {
+  display: flex;
+  box-sizing: border-box;
+  height: var(--workspace-panel-header-height);
+  min-height: var(--workspace-panel-header-height);
+  flex: 0 0 auto;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: 0 var(--workspace-panel-header-inline);
+}
+
+/* The level context pane keeps its title row, so only its eyebrow is the band. */
+.workspace-panel-header--stacked,
+.gameplay-panel-scroll .ui-card-header.workspace-panel-header--stacked {
+  height: auto;
+  flex-direction: column;
+  align-items: stretch;
   gap: 0;
   padding: 0;
 }
 
-.lvlctx-header .panel-eyebrow {
-  padding: 0.58rem 0.75rem;
+.workspace-panel-header--stacked > .panel-eyebrow {
+  align-self: stretch;
   border-bottom: 1px solid hsl(var(--border) / 0.55);
 }
 
@@ -67,13 +92,6 @@
 
 .lvlctx-section {
   padding: 0.62rem 0.75rem 0.72rem;
-}
-
-.lvlctx-tags {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 0.4rem;
-  padding: 0.62rem 0.75rem 0;
 }
 
 .lvlctx-section + .lvlctx-section {

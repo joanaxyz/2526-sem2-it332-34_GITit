@@ -8,7 +8,6 @@ import {
 } from '@/features/story-map/components/TierWorkspacePanels'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { WorkspaceEditorOverlay } from '@/shared/level/components/WorkspaceEditorOverlay'
-import type { TerminalPrompt } from '@/shared/level/terminalPrompt'
 import type { TerminalLine } from '@/shared/level/types'
 import type {
   WorkspaceFileInput,
@@ -20,6 +19,7 @@ import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import { WORKSPACE_BATTLE_STAGE_ROW } from '@/shared/level/workspaceLayout'
 
 export function TierWorkspaceMain({
+  teachingActive,
   run,
   lines,
   shellPrompt,
@@ -44,9 +44,10 @@ export function TierWorkspaceMain({
   onCloseEditor,
   onWriteFile,
 }: {
+  teachingActive?: boolean
   run: TierRun
   lines: TerminalLine[]
-  shellPrompt: TerminalPrompt
+  shellPrompt: string
   projectFilesOpen: boolean
   workspaceEditorPath: string | null
   createDisabled: boolean
@@ -87,6 +88,7 @@ export function TierWorkspaceMain({
       >
         <TierBattlePanel run={run} director={battleDirector} />
         <TierTerminalStage
+          teachingActive={teachingActive}
           run={run}
           lines={lines}
           prompt={shellPrompt}

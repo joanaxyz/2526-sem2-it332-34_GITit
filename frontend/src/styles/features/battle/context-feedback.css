@@ -201,6 +201,7 @@
   .gameplay-header-mission { max-width: none; flex: 1 1 auto; border-left: 0; padding-left: 0.25rem; }
   .gameplay-header-mission span { display: none; }
   .gameplay-header-mission strong { font-size: var(--text-xs); }
+  .gameplay-header-flag { display: none; }
   .gameplay-header-spacer { display: none; }
   .gameplay-header-button,
   .gameplay-header-icon-button { width: 2rem; min-width: 2rem; min-height: 2rem; padding: 0; font-size: 0; }

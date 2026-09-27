@@ -165,7 +165,7 @@ export function ChallengeWorkspace() {
   if (query.isError) return <ErrorState title="Could not load challenge workspace" description={query.error.message} />
   if (!run) return <ErrorState title="Could not load challenge workspace" description="The API returned no run data." />
 
-  const shellPrompt = terminalPrompt({ username: user?.username, repo: run.challenge.slug })
+  const shellPrompt = terminalPrompt(user?.username)
   const tourKey = `${user?.id ?? 'guest'}:challenge:${run.challenge.level_id}`
   const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenLevelTour(user?.id)
   const isTourOpen = run.status === 'started' && (tourOpen || shouldAutoOpenTour)

@@ -28,6 +28,7 @@ export type CommitNodeData = {
 }
 
 export type EmptyRepositoryNodeData = {
+  initialized: boolean
   branchName: string
   variant: DagVariant
 }

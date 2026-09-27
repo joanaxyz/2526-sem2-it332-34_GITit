@@ -41,14 +41,14 @@ export function ContextualFeedbackPanel({ run }: { run: ChallengeRun }) {
 
   return (
     <Card className="h-full w-full min-w-0 shadow-none lvlctx flex min-h-0 flex-col">
-      <CardHeader className="lvlctx-header">
+      <CardHeader className="lvlctx-header workspace-panel-header">
         <span className="panel-eyebrow">Contextual Feedback</span>
       </CardHeader>
       <CardContent className="lvlctx-body feedback-scroll app-scrollbar">
         {/* aria-live so screen readers hear each consequence as it lands. */}
         <div aria-live="polite">
           {entries.length === 0 ? (
-            <p className="feedback-text--empty">Run a command to see its consequence here.</p>
+            <p className="feedback-text--empty">No commands yet.</p>
           ) : (
             <ol className="feedback-history">
               {entries.map((entry) => (

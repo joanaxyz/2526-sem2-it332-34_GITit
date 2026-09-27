@@ -1441,6 +1441,56 @@
                 }
             }
         },
+        "/api/adventure-tier-runs/{run_id}/introduction/complete/": {
+            "post": {
+                "operationId": "command_introduction_complete",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "run_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "adventure-tier-runs"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IntroductionComplete"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IntroductionComplete"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/IntroductionComplete"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/IntroductionCompleteResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/adventure-tier-runs/{run_id}/retry/": {
             "post": {
                 "operationId": "adventure_tier_runs_retry_create",
@@ -4610,6 +4660,14 @@
             "AdventureLevelTierCommandRunResponse": {
                 "type": "object",
                 "properties": {
+                    "tutor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CommandIntroductionResponse"
+                            }
+                        ],
+                        "nullable": true
+                    },
                     "id": {
                         "type": "integer"
                     },
@@ -4672,6 +4730,7 @@
                     "repository_state",
                     "stars",
                     "status",
+                    "tutor",
                     "visualization"
                 ]
             },
@@ -4723,6 +4782,14 @@
             "AdventureLevelTierRunResponse": {
                 "type": "object",
                 "properties": {
+                    "tutor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CommandIntroductionResponse"
+                            }
+                        ],
+                        "nullable": true
+                    },
                     "id": {
                         "type": "integer"
                     },
@@ -4837,6 +4904,7 @@
                     "steps",
                     "story",
                     "tier",
+                    "tutor",
                     "variant",
                     "visualization"
                 ]
@@ -5702,6 +5770,11 @@
                         "type": "integer",
                         "minimum": 0,
                         "nullable": true
+                    },
+                    "cwd": {
+                        "type": "string",
+                        "description": "Terminal working directory the command ran in, relative to the project root.",
+                        "maxLength": 240
                     }
                 },
                 "required": [
@@ -5778,6 +5851,101 @@
                     "id",
                     "slug",
                     "title"
+                ]
+            },
+            "CommandIntroductionForm": {
+                "type": "object",
+                "properties": {
+                    "teaching_key": {
+                        "type": "string"
+                    },
+                    "usage_form": {
+                        "type": "string"
+                    },
+                    "label": {
+                        "type": "string"
+                    },
+                    "summary": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "label",
+                    "summary",
+                    "teaching_key",
+                    "usage_form"
+                ]
+            },
+            "CommandIntroductionResponse": {
+                "type": "object",
+                "properties": {
+                    "context_id": {
+                        "type": "string"
+                    },
+                    "teaching_key": {
+                        "type": "string"
+                    },
+                    "run_revision": {
+                        "type": "integer"
+                    },
+                    "phase": {
+                        "$ref": "#/components/schemas/PhaseEnum"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "needs": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RepositoryChange"
+                        }
+                    },
+                    "changes": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/RepositoryChange"
+                        }
+                    },
+                    "verdict": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/VerdictEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    },
+                    "explanation": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "example_command": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "completion_token": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "command_form": {
+                        "$ref": "#/components/schemas/CommandIntroductionForm"
+                    }
+                },
+                "required": [
+                    "changes",
+                    "command_form",
+                    "completion_token",
+                    "context_id",
+                    "example_command",
+                    "explanation",
+                    "needs",
+                    "phase",
+                    "run_revision",
+                    "teaching_key",
+                    "title",
+                    "verdict"
                 ]
             },
             "CommandSubmit": {
@@ -6613,6 +6781,34 @@
                     "abandoned"
                 ]
             },
+            "IntroductionComplete": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "string",
+                        "maxLength": 16000
+                    }
+                },
+                "required": [
+                    "token"
+                ]
+            },
+            "IntroductionCompleteResponse": {
+                "type": "object",
+                "properties": {
+                    "tutor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CommandIntroductionResponse"
+                            }
+                        ],
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "tutor"
+                ]
+            },
             "KeyEnum": {
                 "enum": [
                     "shop-purchases"
@@ -6751,6 +6947,11 @@
                 ],
                 "type": "string",
                 "description": "* `system` - Follow system\n* `reduced` - Reduced\n* `full` - Full"
+            },
+            "NullEnum": {
+                "enum": [
+                    null
+                ]
             },
             "OnboardingPhaseEnum": {
                 "enum": [
@@ -7087,6 +7288,14 @@
                     "modules"
                 ]
             },
+            "PhaseEnum": {
+                "enum": [
+                    "introduction",
+                    "feedback"
+                ],
+                "type": "string",
+                "description": "* `introduction` - introduction\n* `feedback` - feedback"
+            },
             "PlayerPreferences": {
                 "type": "object",
                 "properties": {
@@ -7158,6 +7367,39 @@
                 "required": [
                     "user"
                 ]
+            },
+            "RepositoryChange": {
+                "type": "object",
+                "properties": {
+                    "kind": {
+                        "$ref": "#/components/schemas/RepositoryChangeKindEnum"
+                    },
+                    "text": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "kind",
+                    "text"
+                ]
+            },
+            "RepositoryChangeKindEnum": {
+                "enum": [
+                    "repository",
+                    "commit",
+                    "branch",
+                    "head",
+                    "staging",
+                    "working_tree",
+                    "conflict",
+                    "tag",
+                    "remote",
+                    "config",
+                    "stash",
+                    "operation"
+                ],
+                "type": "string",
+                "description": "* `repository` - repository\n* `commit` - commit\n* `branch` - branch\n* `head` - head\n* `staging` - staging\n* `working_tree` - working_tree\n* `conflict` - conflict\n* `tag` - tag\n* `remote` - remote\n* `config` - config\n* `stash` - stash\n* `operation` - operation"
             },
             "RuntimeStepResponse": {
                 "type": "object",
@@ -7604,6 +7846,14 @@
                     "message"
                 ]
             },
+            "VerdictEnum": {
+                "enum": [
+                    "correct",
+                    "incorrect"
+                ],
+                "type": "string",
+                "description": "* `correct` - correct\n* `incorrect` - incorrect"
+            },
             "VisibilityEnum": {
                 "enum": [
                     "private",
@@ -7637,7 +7887,7 @@
             },
             "WorkspaceFile": {
                 "type": "object",
-                "description": "Shared create/write contract for a run workspace file.",
+                "description": "Shared create/write contract for a run workspace file.\n\nOn create, a ``path`` ending in ``/`` makes an empty folder instead of a file.",
                 "properties": {
                     "path": {
                         "type": "string",

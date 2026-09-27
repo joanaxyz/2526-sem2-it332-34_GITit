@@ -1,7 +1,7 @@
 import { ArrowLeft, ArrowRight, Check, X } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
+import type { CSSProperties, ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 import { Button } from '@/shared/components/Button'
@@ -21,7 +21,7 @@ export type WorkspaceTourStep = {
   selector: string
   icon: LucideIcon
   title: string
-  body: string
+  body: ReactNode
   placement?: WorkspaceTourPlacement
   optional?: boolean
 }
@@ -67,12 +67,25 @@ function sameResolvedSteps(
 export function GameplayWorkspaceTour({
   label,
   finishLabel = 'Start playing',
+  skipLabel = 'Skip tour',
+  showSkip = true,
+  showProgress = true,
+  finishDisabled = false,
+  finishIcon: FinishIcon = Check,
+  cardClassName,
   steps,
   refreshKey,
   onClose,
 }: {
   label: string
   finishLabel?: string
+  skipLabel?: string
+  showSkip?: boolean
+  showProgress?: boolean
+  finishDisabled?: boolean
+  /** Icon for the final action; defaults to a check mark. */
+  finishIcon?: LucideIcon
+  cardClassName?: string
   steps: readonly WorkspaceTourStep[]
   refreshKey?: string | number
   onClose: (reason: WorkspaceTourCloseReason) => void
@@ -202,7 +215,7 @@ export function GameplayWorkspaceTour({
   useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (availableSteps.length === 0) return
-      if (event.key === 'Escape') {
+      if (event.key === 'Escape' && showSkip) {
         event.preventDefault()
         onClose('skip')
         return
@@ -220,18 +233,21 @@ export function GameplayWorkspaceTour({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [activeIndex, availableSteps.length, onClose])
+  }, [activeIndex, availableSteps.length, onClose, showSkip])
 
   if (!activeStep || !layout || typeof document === 'undefined') return null
 
   const viewportWidth = window.innerWidth
   const viewportHeight = window.innerHeight
+  const targetVisible = layout.target.bottom > HEADER_CLEARANCE
+    && layout.target.top < viewportHeight - VIEWPORT_GAP
+    && layout.target.right > 0 && layout.target.left < viewportWidth
   const spotlight = spotlightRect(layout.target, viewportWidth, viewportHeight)
   const Icon = activeStep.icon
   const finalStep = activeIndex === availableSteps.length - 1
   // A long final CTA has priority over the optional keyboard hint. Keeping all
   // three footer items in this fixed-width card can push the action offscreen.
-  const compactActions = finalStep && finishLabel.length > 16
+  const compactActions = !showProgress || (finalStep && finishLabel.length > 16)
   const titleId = `${markerId}-title`
   const bodyId = `${markerId}-body`
   const cardStyle = {
@@ -242,7 +258,7 @@ export function GameplayWorkspaceTour({
 
   return createPortal(
     <div className="workspace-tour" data-testid="workspace-tour">
-      <div className="workspace-tour__scrim" style={{ left: 0, top: 0, width: '100%', height: spotlight.top }} />
+      {targetVisible ? <><div className="workspace-tour__scrim" style={{ left: 0, top: 0, width: '100%', height: spotlight.top }} />
       <div
         className="workspace-tour__scrim"
         style={{ left: 0, top: spotlight.bottom, width: '100%', height: viewportHeight - spotlight.bottom }}
@@ -293,11 +309,11 @@ export function GameplayWorkspaceTour({
           d={layout.arrowPath}
           markerEnd={`url(#${markerId})`}
         />
-      </svg>
+      </svg></> : <div className="workspace-tour__scrim" style={{ inset: 0 }} />}
 
       <section
         ref={setCardElement}
-        className="workspace-tour__card"
+        className={`workspace-tour__card${cardClassName ? ` ${cardClassName}` : ''}`}
         key={activeStep.id}
         style={cardStyle}
         role="dialog"
@@ -310,18 +326,20 @@ export function GameplayWorkspaceTour({
         <header className="workspace-tour__header">
           <div className="workspace-tour__meta">
             <span className="workspace-tour__eyebrow">{label}</span>
-            <span className="workspace-tour__count">
-              {activeIndex + 1} / {availableSteps.length}
-            </span>
+            {availableSteps.length > 1 ? (
+              <span className="workspace-tour__count">
+                {activeIndex + 1} / {availableSteps.length}
+              </span>
+            ) : null}
           </div>
-          <button
+          {showSkip ? <button
             type="button"
             className="workspace-tour__skip"
             onClick={() => onClose('skip')}
           >
-            Skip tour
+            {skipLabel}
             <X aria-hidden="true" />
-          </button>
+          </button> : null}
         </header>
 
         <div className="workspace-tour__message" aria-live="polite">
@@ -330,11 +348,11 @@ export function GameplayWorkspaceTour({
           </span>
           <div>
             <h2 id={titleId}>{activeStep.title}</h2>
-            <p id={bodyId}>{activeStep.body}</p>
+            <div id={bodyId} className="workspace-tour__body">{activeStep.body}</div>
           </div>
         </div>
 
-        <nav className="workspace-tour__progress" aria-label={`${label} steps`}>
+        {showProgress ? <nav className="workspace-tour__progress" aria-label={`${label} steps`}>
           {availableSteps.map(({ step }, index) => (
             <button
               type="button"
@@ -347,10 +365,10 @@ export function GameplayWorkspaceTour({
               <span aria-hidden="true" />
             </button>
           ))}
-        </nav>
+        </nav> : null}
 
         <footer className={`workspace-tour__actions${compactActions ? ' is-compact' : ''}`}>
-          <Button
+          {showProgress ? <Button
             type="button"
             variant="ghost"
             size="sm"
@@ -360,18 +378,19 @@ export function GameplayWorkspaceTour({
           >
             <ArrowLeft aria-hidden="true" />
             Back
-          </Button>
-          <span className="workspace-tour__shortcut">Alt + arrows</span>
+          </Button> : null}
+          {showProgress ? <span className="workspace-tour__shortcut">Alt + arrows</span> : null}
           <Button
             type="button"
             size="sm"
             className="workspace-tour__next"
+            disabled={finishDisabled}
             onClick={() => {
               if (finalStep) onClose('finish')
               else setActiveIndex((index) => index + 1)
             }}
           >
-            {finalStep ? <Check aria-hidden="true" /> : null}
+            {finalStep ? <FinishIcon aria-hidden="true" /> : null}
             {finalStep ? finishLabel : 'Next'}
             {finalStep ? null : <ArrowRight aria-hidden="true" />}
           </Button>
