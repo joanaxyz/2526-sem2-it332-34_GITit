@@ -1053,23 +1053,38 @@ def _trusted_blueprint_generator_callables(
 
     trusted: set[str] = set()
     generator_bindings = _scope_bindings(tree.body)
-    target_import_is_canonical = _canonical_import_binding(
-        common_tree,
-        module="curriculum.seed_data.generated.generated_targets",
-        name="TARGET_STATES",
-    ) and _mapping_owner_is_read_only(
-        common_tree,
-        "TARGET_STATES",
-        allow_definition=False,
+    generated_template_mappings_are_read_only = all(
+        _canonical_import_binding(
+            common_tree,
+            module=module,
+            name=name,
+        )
+        and _mapping_owner_is_read_only(
+            common_tree,
+            name,
+            allow_definition=False,
+        )
+        for module, name in (
+            (
+                "curriculum.seed_data.generated.generated_targets",
+                "TARGET_STATES",
+            ),
+            (
+                "curriculum.seed_data.generated.generated_trajectories",
+                "SOLUTION_TRAJECTORIES",
+            ),
+        )
     )
     if (
         "v" not in generator_bindings
         and _callable_names_are_only_called(common_tree, {"v"})
-        and target_import_is_canonical
+        and generated_template_mappings_are_read_only
         and _read_only_helper_definition(
             common_tree,
             "v",
-            safe_method_receivers=frozenset({"TARGET_STATES"}),
+            safe_method_receivers=frozenset(
+                {"SOLUTION_TRAJECTORIES", "TARGET_STATES"}
+            ),
         )
     ):
         trusted.add("v")

@@ -177,7 +177,7 @@
   border-radius: 999px;
   background: rgba(var(--theme-surface-rgb), 0.96);
   color: hsl(var(--warning));
-  font-size: 0.55rem;
+  font-size: var(--text-2xs);
   line-height: 1;
   letter-spacing: 0.08em;
   box-shadow: 0 0 7px hsl(var(--warning) / 0.22);

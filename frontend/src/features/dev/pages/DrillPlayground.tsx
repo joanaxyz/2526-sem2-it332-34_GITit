@@ -1,5 +1,5 @@
 import { DrillSession } from '@/features/drills/components/DrillSession'
-import { DRILL_PLAN_FIXTURE } from '@/features/dev/fixtures/drillPlan'
+import { DRILL_PLAN_FIXTURE } from '@/features/dev/utils/drillPlan'
 
 /**
  * Squire's Drill on fixture content, with no auth and no level gate.

@@ -7,7 +7,7 @@
   border-radius: 999px;
   color: var(--a-t2);
   font-family: var(--font-mono);
-  font-size: 0.6rem;
+  font-size: var(--text-2xs);
   font-weight: 600;
   letter-spacing: 0.06em;
   text-transform: uppercase;
@@ -34,8 +34,8 @@
 .kp-cell-tag {
   color: var(--a-t2);
   font-family: var(--font-mono);
-  font-size: 0.58rem;
+  font-size: var(--text-2xs);
   text-transform: uppercase;
   letter-spacing: 0.06em;
 }
-.kp-cell-evidence { color: var(--a-t3); font-size: 0.58rem; line-height: 1.3; text-align: center; }
+.kp-cell-evidence { color: var(--a-t3); font-size: var(--text-2xs); line-height: 1.3; text-align: center; }

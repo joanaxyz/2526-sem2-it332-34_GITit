@@ -17,7 +17,6 @@ from curriculum.seed_data.source.adventure_level_specs.v3_advanced_workflows imp
 from curriculum.seed_data.stories import STORIES
 from curriculum.selectors import chapter_locked, story_locked
 from players.services import get_or_create_player
-from shop.models import Entitlement
 
 EXPECTED_ARCANE_CHAPTERS = (
     (
@@ -211,15 +210,13 @@ def test_seed_creates_story_books_and_playable_fieldwork(db):
         assert CommandForm.objects.filter(adventure_levels__in=levels, is_published=True).exists()
 
 
-def test_story_api_exposes_difficulty_ownership_and_prerequisite(db, django_user_model):
+def test_story_api_exposes_difficulty_and_prerequisite(db, django_user_model):
     call_command("seed_curriculum")
     user = django_user_model.objects.create_user(
         username="three-story-reader",
         email="three-story-reader@example.com",
         password="pass12345",
     )
-    player = get_or_create_player(user)
-    Entitlement.objects.create(player=player, kind="story", slug="frostbound-citadel")
     client = APIClient()
     client.force_authenticate(user=user)
 
@@ -227,10 +224,9 @@ def test_story_api_exposes_difficulty_ownership_and_prerequisite(db, django_user
 
     assert response.status_code == 200
     rows = {row["slug"]: row for row in response.json()}
-    assert rows["arcane-spire"]["owned"] is False
-    assert rows["git-it-legacy"]["owned"] is True
     assert rows["arcane-spire"]["difficulty"] == "beginner"
-    assert rows["frostbound-citadel"]["owned"] is True
+    assert "owned" not in rows["arcane-spire"]
+    assert "price" not in rows["arcane-spire"]
     assert rows["frostbound-citadel"]["locked"] is True
     assert rows["frostbound-citadel"]["prerequisite_story"] == {
         "slug": "arcane-spire",
@@ -255,9 +251,8 @@ def test_advanced_chapters_respect_story_access(db, django_user_model):
     locked, _ = story_locked(player=player, story=story)
     assert locked is True
 
-    Entitlement.objects.create(player=player, kind="story", slug=story.slug)
-    # The story remains progression-locked until every Arcane Spire command
-    # form is mastered.
+    # Story access is progression-only: Frostbound stays locked until every
+    # Arcane Spire command form is mastered.
     locked, reason = story_locked(player=player, story=story)
     assert locked is True
     assert "Master every command in The Arcane Spire" in reason
