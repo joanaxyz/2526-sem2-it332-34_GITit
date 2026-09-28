@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 import { isImageWarm, warmImage, warmImages, warmSprite, withBudget } from './preload'
 import type { SpriteAnimation } from './types'
+import { isSpritePixelAnchorWarm } from './usePixelBounds'
 
 /**
  * jsdom never loads images: it leaves `decode` undefined and fires neither
@@ -79,6 +80,17 @@ describe('warmSprite', () => {
     await warmSprite(sheet('/d-sheet.png'))
 
     expect(isImageWarm('/d-sheet.png')).toBe(true)
+  })
+
+  it('tracks anchor measurement separately from image decode', async () => {
+    const animation = sheet('/d-anchor-sheet.png')
+    await warmImage(animation.src)
+
+    expect(isSpritePixelAnchorWarm(animation)).toBe(false)
+
+    await warmSprite(animation, { measureAnchor: true })
+
+    expect(isSpritePixelAnchorWarm(animation)).toBe(true)
   })
 })
 

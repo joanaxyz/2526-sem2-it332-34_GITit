@@ -1,8 +1,18 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 import { useSpritePixelAnchor } from '@/shared/sprites/usePixelBounds'
 import { cn } from '@/shared/utils/cn'
 import type { FrameSegment, SpriteAnimation, SpriteAnimatorHandle } from '@/shared/sprites/types'
+
+function framePosition(animation: SpriteAnimation, frame: number): string {
+  // Percentage positioning: p% aligns the p% point of the oversized sheet
+  // with the p% point of the frame box, so column c maps to c/(cols-1)-100%.
+  const col = frame % animation.columns
+  const row = Math.floor(frame / animation.columns)
+  const x = animation.columns > 1 ? (col * 100) / (animation.columns - 1) : 0
+  const y = animation.rows > 1 ? (row * 100) / (animation.rows - 1) : 0
+  return `${x}% ${y}%`
+}
 
 /**
  * Zero-dependency spritesheet animator.
@@ -92,17 +102,22 @@ export const SpriteAnimator = forwardRef<
     setFlipped(flipX)
   }, [flipX])
 
-  function paintFrame(frame: number) {
+  const paintFrame = useCallback((frame: number) => {
     const node = spriteRef.current
     const a = animRef.current
     if (!node) return
-    // Percentage positioning: p% aligns the p% point of the oversized sheet
-    // with the p% point of the frame box, so column c maps to c/(cols-1)-100%.
-    const col = frame % a.columns
-    const row = Math.floor(frame / a.columns)
-    const x = a.columns > 1 ? (col * 100) / (a.columns - 1) : 0
-    const y = a.rows > 1 ? (row * 100) / (a.rows - 1) : 0
-    node.style.backgroundPosition = `${x}% ${y}%`
+    node.style.backgroundPosition = framePosition(a, frame)
+  }, [])
+
+  function paintAnimation(a: SpriteAnimation, frame: number) {
+    const node = spriteRef.current
+    if (!node) return
+    // The source, grid and first frame are one visual transaction. Updating
+    // only the position before React commits the new source briefly paints the
+    // old sheet using the new sheet's coordinates, which reads as a flash.
+    node.style.backgroundImage = `url(${a.src})`
+    node.style.backgroundSize = `${a.columns * 100}% ${a.rows * 100}%`
+    node.style.backgroundPosition = framePosition(a, frame)
   }
 
   useImperativeHandle(ref, () => ({
@@ -125,7 +140,7 @@ export const SpriteAnimator = forwardRef<
       frameRef.current = segment?.from ?? 0
       playingRef.current = true
       animRef.current = next
-      paintFrame(frameRef.current)
+      paintAnimation(next, frameRef.current)
       setAnim(next)
     },
     playSegment: (segment: FrameSegment, opts?: { onComplete?: () => void }) => {
@@ -180,7 +195,7 @@ export const SpriteAnimator = forwardRef<
     }
     rafId = requestAnimationFrame(step)
     return () => cancelAnimationFrame(rafId)
-  }, [anim])
+  }, [anim, paintFrame])
 
   const displayScale = anim.displayScale ?? 1
   const layout = layoutAnimation ?? anim
@@ -217,7 +232,7 @@ export const SpriteAnimator = forwardRef<
           backgroundImage: `url(${anim.src})`,
           backgroundRepeat: 'no-repeat',
           backgroundSize: `${anim.columns * 100}% ${anim.rows * 100}%`,
-          backgroundPosition: '0% 0%',
+          backgroundPosition: framePosition(anim, frameRef.current),
           imageRendering: pixelated ? 'pixelated' : 'auto',
         }}
       />

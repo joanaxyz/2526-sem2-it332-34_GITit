@@ -3,10 +3,14 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
+import { loadTierRunPage } from '@/features/story-map/pages/loadTierRunPage'
+import { tierRunAssetManifest } from '@/features/story-map/utils/tierBattle'
 import { syncTierRunInCache } from '@/features/story-map/utils/tierRunCache'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
+import { warmBattleAssets } from '@/shared/battle/battleAssets'
+import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 
 type TierStartMode = 'start' | 'replay' | 'retry'
 
@@ -30,6 +34,7 @@ export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
   const { tierId, runId } = useParams<{ tierId?: string; runId?: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { companionSlug } = usePlayerLoadout()
   const targetId = Number(mode === 'retry' ? runId : tierId)
 
   const start = useMutation({
@@ -40,14 +45,19 @@ export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
       if (mode === 'retry') return tierRunsApi.retryRun(targetId)
       return tierRunsApi.startRun(targetId, { replay: mode === 'replay' })
     },
-    onSuccess: (run) => {
+    onSuccess: async (run) => {
       syncTierRunInCache(queryClient, run)
+      await Promise.allSettled([
+        loadTierRunPage(),
+        warmBattleAssets(tierRunAssetManifest(run, companionSlug)),
+      ])
       navigate(`/adventure-tier-runs/${run.id}`, { replace: true })
     },
   })
 
   useEffect(() => {
     if (start.isIdle) {
+      void loadTierRunPage().catch(() => undefined)
       start.mutate()
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -62,5 +72,5 @@ export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
   }
 
   const copy = loadingCopy[mode]
-  return <LoadingScreen description={copy.description} label={copy.label} />
+  return <LoadingScreen companionSlug={companionSlug} description={copy.description} label={copy.label} />
 }

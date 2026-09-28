@@ -79,13 +79,26 @@ export function loadSpritePixelAnchor(
       spriteAnchorCache.set(key, anchor)
       return anchor
     })
-    .catch(() => null)
+    .catch(() => {
+      // A failed measurement is still settled. Remember it so entry gates do
+      // not mistake an already-decoded sheet for work that is perpetually late.
+      spriteAnchorCache.set(key, null)
+      return null
+    })
     .finally(() => {
       spriteAnchorPromises.delete(key)
     })
 
   spriteAnchorPromises.set(key, promise)
   return promise
+}
+
+/** True once the visible-pixel anchor has been measured or definitively failed. */
+export function isSpritePixelAnchorWarm(
+  animation: SpriteAnimation,
+  alphaThreshold = DEFAULT_ALPHA_THRESHOLD,
+): boolean {
+  return spriteAnchorCache.has(animationKey(animation, alphaThreshold))
 }
 
 function loadImagePixelBounds(src: string, alphaThreshold = DEFAULT_ALPHA_THRESHOLD): Promise<ImagePixelBounds | null> {

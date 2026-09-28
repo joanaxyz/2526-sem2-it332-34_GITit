@@ -1,7 +1,11 @@
 import { useCallback } from 'react'
 import type { MutableRefObject } from 'react'
 
-import { effectForSkill, effectPlacementForSkill } from '@/shared/battle/effects/effectRegistry'
+import {
+  effectForSkill,
+  effectPlacementForSkill,
+  warmEffectForSkill,
+} from '@/shared/battle/effects/effectRegistry'
 import type { MonsterActorHandle } from '@/shared/battle/components/MonsterActor'
 import type { PlayerActorHandle } from '@/shared/battle/components/PlayerActor'
 import type { BattleEvent, BattleMonster } from '@/shared/battle/types'
@@ -41,6 +45,10 @@ export function usePlayerAttackChoreography({
     async (event: PlayerAttackEvent, animate: boolean) => {
       const player = playerRef.current
       if (animate) {
+        // Usually a no-op because the entry gate already decoded this family.
+        // It also covers diagnostic or newly introduced commands that were not
+        // knowable when the run first opened.
+        await warmEffectForSkill(event.skill, companionSlugRef.current)
         // The companion attack sheet must finish its full windup before the skill
         // leaves Blue's hands. The cast-end sheet then plays alongside the effect
         // instead of freezing the windup's final frame.

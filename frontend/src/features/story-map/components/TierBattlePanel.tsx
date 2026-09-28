@@ -1,12 +1,11 @@
 import { useMemo } from 'react'
 
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
+import { tierBattleEncounter } from '@/features/story-map/utils/tierBattle'
 import { BattleStage } from '@/shared/battle/components/BattleStage'
 import { GameplayBattlePanel } from '@/shared/battle/components/GameplayBattlePanel'
-import { clientAdventureRoster } from '@/shared/battle/deriveBattleEvents'
 import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import { useBattleEncounterSetup } from '@/shared/battle/hooks/useBattleEncounterSetup'
-import { getStoryWorld } from '@/shared/story-worlds/registry'
 
 /** RuneBound encounter stage, sized consistently with the Arcane Spire. */
 export function TierBattlePanel({
@@ -16,18 +15,27 @@ export function TierBattlePanel({
   run: TierRun
   director: BattleDirector
 }) {
-  const storyWorld = getStoryWorld(run.story?.world_slug ?? run.story?.slug)
   const maxHp = Math.max(1, run.counts.maximum_counted_commands)
-  const playerHp = Math.max(0, run.counts.remaining_counted_commands)
-  const encounterKey = `${run.id}:${run.tier.id}:${run.variant.id}`
-  const roster = useMemo(
-    () => clientAdventureRoster(0, 1, Object.keys(storyWorld.battle.monsters), {
-      seed: `${storyWorld.slug}:${run.tier.adventure_level_id}:${run.variant.id}`,
-      storyWorldSlug: storyWorld.slug,
+  const runId = run.id
+  const tierId = run.tier.id
+  const adventureLevelId = run.tier.adventure_level_id
+  const variantId = run.variant.id
+  const storySlug = run.story?.slug
+  const storyWorldSlug = run.story?.world_slug
+  const encounter = useMemo(
+    () => tierBattleEncounter({
+      runId,
+      tierId,
+      adventureLevelId,
+      variantId,
+      storySlug,
+      storyWorldSlug,
       maxHp,
     }),
-    [maxHp, run.tier.adventure_level_id, run.variant.id, storyWorld],
+    [adventureLevelId, maxHp, runId, storySlug, storyWorldSlug, tierId, variantId],
   )
+  const { storyWorld, encounterKey, roster } = encounter
+  const playerHp = Math.max(0, run.counts.remaining_counted_commands)
 
   useBattleEncounterSetup({
     director,

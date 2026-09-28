@@ -6,6 +6,7 @@ import { useAdventureLevelAssets } from './useAdventureLevelAssets'
 
 const warmed = vi.hoisted(() => ({
   manifests: [] as unknown[],
+  options: [] as unknown[],
   release: null as null | (() => void),
 }))
 
@@ -14,8 +15,9 @@ vi.mock('@/shared/battle/battleAssets', async (importOriginal) => {
   return {
     ...actual,
     battleAssetsWarm: () => false,
-    warmBattleAssets: (manifest: unknown) => {
+    warmBattleAssets: (manifest: unknown, options?: unknown) => {
       warmed.manifests.push(manifest)
+      warmed.options.push(options)
       return new Promise<void>((resolve) => {
         warmed.release = resolve
       })
@@ -63,6 +65,7 @@ function finishWarming() {
 
 beforeEach(() => {
   warmed.manifests = []
+  warmed.options = []
   warmed.release = null
 })
 
@@ -77,6 +80,7 @@ describe('useAdventureLevelAssets', () => {
     )
 
     expect(result.current).toBe(false)
+    expect(warmed.options).toEqual([undefined])
 
     finishWarming()
 
@@ -118,5 +122,23 @@ describe('useAdventureLevelAssets', () => {
 
     expect(result.current).toBe(true)
     expect(warmed.manifests).toHaveLength(1)
+  })
+
+  it('gates again when navigation reuses the component for a different run', async () => {
+    const { rerender, result } = renderHook(
+      (props: { run: AdventureRun }) =>
+        useAdventureLevelAssets({ run: props.run, companionSlug: 'blue', enabled: true }),
+      { initialProps: { run } },
+    )
+
+    finishWarming()
+    await waitFor(() => expect(result.current).toBe(true))
+
+    rerender({ run: { ...run, id: 103 } as AdventureRun })
+
+    expect(result.current).toBe(false)
+    expect(warmed.manifests).toHaveLength(2)
+    finishWarming()
+    await waitFor(() => expect(result.current).toBe(true))
   })
 })

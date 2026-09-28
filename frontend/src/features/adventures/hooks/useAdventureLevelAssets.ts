@@ -1,15 +1,6 @@
-import { useEffect, useRef, useState } from 'react'
-
 import type { AdventureRun } from '@/features/adventures/types'
 import { adventureLevelAssetManifest } from '@/features/adventures/utils/adventureLevelAssets'
-import { battleAssetsWarm, warmBattleAssets } from '@/shared/battle/battleAssets'
-import type { BattleAssetManifest } from '@/shared/battle/battleAssets'
-
-/**
- * Past this the wait has cost more than the pop it prevents. The workspace opens
- * with whatever has arrived and the rest keeps decoding in the background.
- */
-const LEVEL_ASSET_BUDGET_MS = 8000
+import { useBattleAssetGate } from '@/shared/battle/hooks/useBattleAssetGate'
 
 /**
  * Holds the level entry until its art is decoded.
@@ -34,32 +25,10 @@ export function useAdventureLevelAssets({
    *  companion's sheets would warm art this level never shows. */
   enabled: boolean
 }): boolean {
-  const manifestRef = useRef<BattleAssetManifest | null>(null)
-  if (!manifestRef.current && enabled && run?.current_attempt) {
-    manifestRef.current = adventureLevelAssetManifest(run, companionSlug)
-  }
-  const manifest = manifestRef.current
-  const [warm, setWarm] = useState(() => (manifest ? battleAssetsWarm(manifest) : false))
-
-  useEffect(() => {
-    if (!manifest || warm) return undefined
-    // A level revisited in the same session is already decoded; opening it
-    // behind a loading screen again would be a flicker of its own.
-    if (battleAssetsWarm(manifest)) {
-      setWarm(true)
-      return undefined
-    }
-
-    let active = true
-    void warmBattleAssets(manifest, { timeoutMs: LEVEL_ASSET_BUDGET_MS }).then(() => {
-      if (active) setWarm(true)
-    })
-    return () => {
-      active = false
-    }
-  }, [manifest, warm])
-
-  // No attempt on stage yet: nothing to paint, so nothing to hold back.
-  if (!run?.current_attempt) return true
-  return warm
+  const entryKey = run?.current_attempt ? `adventure:${run.id}:${companionSlug}` : null
+  return useBattleAssetGate({
+    entryKey,
+    enabled,
+    buildManifest: () => (run ? adventureLevelAssetManifest(run, companionSlug) : null),
+  })
 }

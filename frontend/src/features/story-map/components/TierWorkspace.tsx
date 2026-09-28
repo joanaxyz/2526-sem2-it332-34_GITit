@@ -17,6 +17,7 @@ import { useTierWorkspaceMutations } from '@/features/story-map/hooks/useTierWor
 import { createTierWorkspaceCommandHandler } from '@/features/story-map/utils/tierWorkspaceCommand'
 import { useLeaveAbandonedRun } from '@/features/story-map/hooks/useLeaveAbandonedRun'
 import { useTierRun } from '@/features/story-map/hooks/useTierRun'
+import { useTierRunAssets } from '@/features/story-map/hooks/useTierRunAssets'
 import { invalidateTierProgressQueries } from '@/features/story-map/utils/tierRunCache'
 import {
   DEFAULT_TERMINAL_PANE_RATIO,
@@ -40,6 +41,7 @@ import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { usePersistentState } from '@/shared/utils/persistentState'
+import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 
 /** Mirrors ChallengeWorkspace.tsx for the adventure-tier run lifecycle - new
  * and parallel, ChallengeWorkspace itself is untouched. Its first-run tour is
@@ -52,6 +54,12 @@ export function TierWorkspace() {
   const queryClient = useQueryClient()
   const runId = Number(params.runId)
   const { query, run, lines } = useTierRun(runId)
+  const { companionSlug, isLoading: loadoutLoading } = usePlayerLoadout()
+  const assetsReady = useTierRunAssets({
+    run,
+    companionSlug,
+    enabled: !loadoutLoading,
+  })
   const observedRunId = run?.id ?? null
   const observedRunStatus = run?.status ?? null
   const mutation = useTierCommandSubmission(runId)
@@ -141,12 +149,12 @@ export function TierWorkspace() {
     setStartOverConfirmOpen,
     setDismissedCompletionRunId,
   })
-  if (query.isLoading) {
+  if (query.isLoading || (!query.isError && !assetsReady)) {
     return (
       <LoadingScreen
+        companionSlug={companionSlug}
         description="Preparing the repository, terminal, and adventure workspace."
         label="Loading adventure"
-        showCompanion={false}
       />
     )
   }
