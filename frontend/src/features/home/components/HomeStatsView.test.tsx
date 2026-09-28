@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
-import { afterEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { HomeView } from '@/features/home/components/home-hub/homeViews'
 import { emptyHomeFixture, richHomeFixture } from '@/features/home/preview/fixtures'
@@ -81,6 +81,10 @@ function deepFreeze<T>(value: T): T {
   }
   return value
 }
+
+beforeEach(() => {
+  mocks.summary.mockResolvedValue(performanceFixture)
+})
 
 afterEach(() => {
   cleanup()

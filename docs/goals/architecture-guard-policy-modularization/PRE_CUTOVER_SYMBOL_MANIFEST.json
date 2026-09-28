@@ -159,9 +159,7 @@
               "is_published",
               "lock_reason",
               "locked",
-              "owned",
               "prerequisite_story",
-              "price",
               "slug",
               "sort_order",
               "summary",
@@ -173,7 +171,7 @@
         ],
         "type": "set"
       },
-      "resolved_value_sha256": "ec557c49c69f2b982e0cd8e14427b9a6b460c5b786ec757b425fba98f6b63224"
+      "resolved_value_sha256": "613190583e95a42360473be76ab3c64aff1ac22aa220e8ad202b0aec615254fd"
     },
     "CATALOG_STORY_FIELDS": {
       "kind": "constant",
@@ -186,9 +184,7 @@
           "is_published",
           "lock_reason",
           "locked",
-          "owned",
           "prerequisite_story",
-          "price",
           "slug",
           "sort_order",
           "summary",
@@ -197,7 +193,7 @@
         ],
         "type": "frozenset"
       },
-      "resolved_value_sha256": "fc583c3e106ec86d0af4fdcd8615ca364dfbded66937cce4ac55f126a53e2d6c"
+      "resolved_value_sha256": "444cd16c82ddc94b208693b2e3c03282ded8597283e0d1ca36e3bf60d655d386"
     },
     "DASHBOARD_FRONTEND_API": {
       "kind": "constant",
@@ -501,7 +497,7 @@
     },
     "catalog_contract_source_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "d40ef3eb83c5e94f4e4b0fb674eeab4dfa22cb5590f5d17f1513d5348befec11",
+      "normalized_ast_sha256": "d6633bb268db671b5a6d583b90e9a01237a275ea3dc6aaa095a04ff10304f427",
       "owner": "scripts.checks.architecture_guard.contracts.catalog",
       "pre_cutover_lines": [
         2801,
@@ -510,7 +506,7 @@
     },
     "catalog_openapi_contract_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "dee075151924512d3120615fbf3e9d44dd3112d1671ab8e4e467021602e101e4",
+      "normalized_ast_sha256": "79fab75572500e64cde2eec3f97d291753f50a8d01c931348185573df9f6a8a6",
       "owner": "scripts.checks.architecture_guard.contracts.catalog",
       "pre_cutover_lines": [
         3003,
@@ -726,7 +722,7 @@
     },
     "progress_summary_backend_contract_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "fb0b040532b3e291b63e7d27e389fb02382f4d93598c024df8d62b3115875341",
+      "normalized_ast_sha256": "c9bd6cb751e47d3de832ac074dc22be97fcab2fdcdb6e619be668c5d4e5215fa",
       "owner": "scripts.checks.architecture_guard.contracts.progress",
       "pre_cutover_lines": [
         4041,
@@ -843,7 +839,7 @@
     },
     "stats_contract_source_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "3fdd0ce099440706ba2443073029fa2324b307caea8a5a880964380bd4451967",
+      "normalized_ast_sha256": "d2cd6aa0942b97c5dd4f2d24807146a61684caf72b61d419d5cdaafde9bb1e6c",
       "owner": "scripts.checks.architecture_guard.contracts.progress",
       "pre_cutover_lines": [
         4185,
@@ -852,7 +848,7 @@
     },
     "stats_openapi_contract_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "d70f6eb625fbf89ca935aa717a7d1fd34c9faa3ada008777ecb7b44f9bfdcb3b",
+      "normalized_ast_sha256": "e8762ed6c03b417c383a54e966694284965eebf9b43de13a984f387cad98c90b",
       "owner": "scripts.checks.architecture_guard.contracts.progress",
       "pre_cutover_lines": [
         4268,

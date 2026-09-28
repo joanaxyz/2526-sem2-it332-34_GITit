@@ -230,7 +230,7 @@
 .change-diagram__head {
   padding: 0 0.3rem;
   border-radius: 0.25rem;
-  font-size: 0.625rem;
+  font-size: var(--text-2xs);
   font-weight: 800;
   line-height: 1.5;
 }

@@ -399,7 +399,9 @@ def replayed(tmp_path_factory):
     )
     # A non-zero exit means a route was rejected or ran over its budget.
     assert result.returncode == 0, result.stderr
-    return json.loads(output.read_text(encoding="utf-8"))
+    payload = json.loads(output.read_text(encoding="utf-8"))
+    assert set(payload) == {"targets", "replays"}
+    return payload["targets"]
 
 
 @needs_simulator

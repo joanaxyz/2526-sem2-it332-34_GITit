@@ -3,12 +3,15 @@ import { useMemo, useState } from 'react'
 
 import type { OrientationStep } from '@/features/story-map/components/orientation/types'
 import { normalizeBuilderCommand } from '@/features/story-map/components/orientation/types'
+import {
+  OrientationCommandLesson,
+  OrientationStepAction as StepAction,
+} from '@/features/story-map/components/orientation/OrientationStepParts'
 import { CentralizedDistributedDiagram } from '@/features/story-map/components/orientation/visuals/CentralizedDistributedDiagram'
 import { CommitAnatomyDiagram, CommitChainDiagram } from '@/features/story-map/components/orientation/visuals/CommitChainDiagram'
 import { FourAreaPipelineDiagram } from '@/features/story-map/components/orientation/visuals/FourAreaPipelineDiagram'
 import { PlatformWorkspaceDiagram } from '@/features/story-map/components/orientation/visuals/PlatformWorkspaceDiagram'
 import { Button } from '@/shared/components/Button'
-import { CopyButton } from '@/shared/components/CopyButton'
 import { LiveDagPanel } from '@/shared/level/components/LiveDagPanel'
 import { cn } from '@/shared/utils/cn'
 
@@ -16,22 +19,6 @@ const BUILDER_TOKENS = ['git', 'commit', 'log', 'status', '-m', '--oneline', '--
 
 function addToSet(current: Set<string>, value: string) {
   return new Set([...current, value])
-}
-
-function StepAction({
-  onClick,
-  children = 'Complete & continue',
-  disabled = false,
-}: {
-  onClick: () => void
-  children?: string
-  disabled?: boolean
-}) {
-  return (
-    <Button type="button" className="orientation-step-primary-action" disabled={disabled} onClick={onClick}>
-      {children} <ChevronRight aria-hidden="true" />
-    </Button>
-  )
 }
 
 export function OrientationStepView({
@@ -170,28 +157,8 @@ export function OrientationStepView({
         )
 
       case 'git_command':
-      case 'shell_command': {
-        const command = (step.accept_prefixes ?? step.accept_exact ?? [])[0] ?? step.hint ?? 'See the prompt above.'
-        return (
-          <div className="orientation-command-lesson">
-            <div className="orientation-command-block">
-              <div className="orientation-command-label">
-                <span>{step.kind === 'git_command' ? 'Git command' : 'Shell command'}</span>
-                <CopyButton value={command} label="command" />
-              </div>
-              <pre><code>{command}</code></pre>
-            </div>
-            {step.success_output ? (
-              <div className="orientation-output-block">
-                <span>Expected output</span>
-                <pre><code>{step.success_output}</code></pre>
-              </div>
-            ) : null}
-            {step.hint ? <p className="orientation-hint">{step.hint}</p> : null}
-            <StepAction onClick={proceed}>{hasNextStep ? 'I tried this — continue' : 'Mark step complete'}</StepAction>
-          </div>
-        )
-      }
+      case 'shell_command':
+        return <OrientationCommandLesson step={step} hasNextStep={hasNextStep} onContinue={proceed} />
 
       case 'pipeline':
         return (

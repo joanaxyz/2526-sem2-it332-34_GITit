@@ -274,7 +274,7 @@ def test_home_hub_guard_rejects_role_bypasses_and_integration_forwarding():
     assert any(
         "must not import ../../skills/hooks/useLearnedSkills" in row for row in hub_violations
     )
-    assert any("four-prop contract" in row for row in hub_violations)
+    assert any("three-prop contract" in row for row in hub_violations)
     assert any("must not own useState" in row for row in hub_violations)
     assert any("must destructure usePlayerLoadout" in row for row in hub_violations)
     assert any("only narrow Profile workspace props" in row for row in hub_violations)
@@ -380,10 +380,10 @@ def test_home_hub_runtime_obeys_profile_workspace_ownership():
 def test_home_overview_guard_rejects_role_bypasses_and_wide_boundaries():
     composition_path = f"{_FRONTEND}/src/features/home/components/HomeStatsView.tsx"
     model_path = f"{_FRONTEND}/src/features/home/components/home-stats/homeStatsModel.ts"
-    dashboard_path = f"{_FRONTEND}/src/features/home/components/home-stats/HomeStatsDashboard.tsx"
+    results_path = f"{_FRONTEND}/src/features/home/components/home-stats/HomeResultsPanel.tsx"
     gallery_path = f"{_FRONTEND}/src/features/home/components/home-stats/HomeAchievementGallery.tsx"
     composition_violations = home_overview_source_violations(
-        source="import { useMemo, useState } from 'react'\nimport './home-stats/homeStatsModel'\nconst dashboard = import('./home-stats/HomeStatsDashboard')\nconst gallery = require(`./home-stats/HomeAchievementGallery`)\nconst api = import('../api/homeApi')\nconst model = useMemo(() => buildHomeStatsModel(home, stats), [home, stats])\nexport const View = () => <section className=\"home-overview-grid\">\n  <HomeStatsDashboard {...model.dashboard} />\n  <HomeAchievementGallery achievements={model.achievements} />\n</section>\n",
+        source="import { useMemo, useState } from 'react'\nimport './home-stats/homeStatsModel'\nconst progress = import('./home-stats/HomeProgressPanel')\nconst skills = import('./home-stats/HomeSkillsPanel')\nconst results = import('./home-stats/HomeResultsPanel')\nconst gallery = require(`./home-stats/HomeAchievementGallery`)\nconst api = import('../api/homeApi')\nconst model = useMemo(() => buildHomeStatsModel(home, stats), [home, stats])\nexport const View = () => <section className=\"home-overview-grid\">\n  <HomeProgressPanel {...model.progress} />\n  <HomeSkillsPanel skills={model.skills} />\n  <HomeResultsPanel results={model.results} />\n  <HomeAchievementGallery achievements={model.achievements} />\n</section>\n",
         path_label=composition_path,
         role="composition",
     )
@@ -392,10 +392,10 @@ def test_home_overview_guard_rejects_role_bypasses_and_wide_boundaries():
         path_label=model_path,
         role="model",
     )
-    dashboard_violations = home_overview_source_violations(
-        source="import type { HomeStatsDashboardModel } from './homeStatsModel'\nconst summaries = import('../../types')\nconst root = require(`../HomeStatsView`)\nuseState(); const marker = 'home-overview-achievement-card'\nexport function HomeStatsDashboard({ home, stats }) { return null }\n",
-        path_label=dashboard_path,
-        role="dashboard",
+    results_violations = home_overview_source_violations(
+        source="import type { HomeResultsModel } from './homeStatsModel'\nconst summaries = import('../../types')\nconst root = require(`../HomeStatsView`)\nuseState(); const marker = 'home-overview-achievement-card'\nexport function HomeResultsPanel({ home, stats }) { return null }\n",
+        path_label=results_path,
+        role="results",
     )
     gallery_violations = home_overview_source_violations(
         source="import type { Achievement } from '../../../utils/achievements'\nconst router = import(`react-router-dom`)\nconst root = require('../HomeStatsView')\nderiveAchievements(home, stats)\nconst marker = 'home-overview-story-body'\nexport function HomeAchievementGallery({ home, stats }) { return null }\n",
@@ -403,24 +403,22 @@ def test_home_overview_guard_rejects_role_bypasses_and_wide_boundaries():
         role="gallery",
     )
     oversized = home_overview_source_violations(
-        source="\n".join(["// line"] * 81), path_label=composition_path, role="composition"
+        source="\n".join(["// line"] * 61), path_label=composition_path, role="composition"
     )
     assert any("must not import ../api/homeApi" in row for row in composition_violations)
     assert any("must not own useState" in row for row in composition_violations)
     assert any("must not spread objects" in row for row in composition_violations)
-    assert any(
-        "HomeStatsDashboard must receive only dashboard" in row for row in composition_violations
-    )
+    assert any("HomeProgressPanel must receive" in row for row in composition_violations)
     assert any("must not import react-router-dom" in row for row in model_violations)
     assert any("must not import ../HomeStatsView" in row for row in model_violations)
     assert any("must not own home-overview-" in row for row in model_violations)
-    assert any("must not import ../../types" in row for row in dashboard_violations)
-    assert any("must not receive raw home or stats" in row for row in dashboard_violations)
-    assert any("must not own home-overview-achievement-card" in row for row in dashboard_violations)
+    assert any("must not import ../../types" in row for row in results_violations)
+    assert any("must not receive raw home or stats" in row for row in results_violations)
+    assert any("must not own home-overview-achievement-card" in row for row in results_violations)
     assert any("must not import react-router-dom" in row for row in gallery_violations)
     assert any("must not own deriveAchievements" in row for row in gallery_violations)
     assert any("must not own home-overview-story" in row for row in gallery_violations)
-    assert any("has 81 lines; limit is 80" in row for row in oversized)
+    assert any("has 61 lines; limit is 60" in row for row in oversized)
 
 
 def test_home_overview_guard_allows_equivalent_model_syntax_and_blocks_value_aliases():

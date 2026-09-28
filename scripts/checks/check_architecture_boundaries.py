@@ -1278,9 +1278,16 @@ def home_overview_source_violations(
                     "ActivityTrendChart",
                     "GitCommandIcon",
                     "deriveAchievements",
+                    "home-overview-achievement-card",
                     "useState",
                 ),
-                "gallery": ("ActivityTrendChart", "GitCommandIcon", "SkillProfileBars"),
+                "gallery": (
+                    "ActivityTrendChart",
+                    "deriveAchievements",
+                    "GitCommandIcon",
+                    "home-overview-story",
+                    "SkillProfileBars",
+                ),
             }[role],
         )
     for marker in forbidden_markers:

@@ -14,7 +14,7 @@ CHAPTER_MANAGEMENT_SOURCE_CHOICES = (
 
 
 class Story(models.Model):
-    """A purchasable curriculum world containing an ordered chapter sequence."""
+    """A curriculum world containing an ordered chapter sequence."""
 
     DIFFICULTY_BEGINNER = "beginner"
     DIFFICULTY_INTERMEDIATE = "intermediate"

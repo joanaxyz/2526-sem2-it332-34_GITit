@@ -1,22 +1,19 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
-import { Check, Lock, Play, Swords } from 'lucide-react'
 import { useNavigate } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
-import type { AdventureLevelSummary, AdventureLevelTierAccess, ChallengeSummary } from '@/features/story-map/types'
+import type { AdventureLevelSummary, ChallengeSummary } from '@/features/story-map/types'
 import { allChallengeTrials } from '@/features/story-map/utils/challengeUi'
 import { pathDataFor, pathGeometry } from '@/features/story-map/utils/pathGeometry'
 import { useStoryArtifactNavigation } from '@/features/story-map/hooks/useStoryArtifactNavigation'
 import type { LearningChapter } from '@/features/story-map/types'
 import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
 import { syncTierRunInCache } from '@/features/story-map/utils/tierRunCache'
-import { StarRating, type StarFillState } from '@/shared/level/components/StarRating'
 import { useFocusTrap } from '@/shared/utils/useFocusTrap'
 
-import { adventureLevelCleared, nextPlayableLevelId } from '@/features/story-map/utils/storyMapChapter'
+import { nextPlayableLevelId } from '@/features/story-map/utils/storyMapChapter'
 import { StoryLevelTierPanel, StoryTrialsPanel } from './StoryAdventurePanels'
-
-const DIFFICULTY_ORDER = ['easy', 'medium', 'hard'] as const
+import { StoryChallengeNode, StoryPathLevelNode, type StoryTrialState } from './StoryPathNodes'
 
 const PILL_CLOSE_MS = 180
 
@@ -30,23 +27,6 @@ const CALLOUT_MAX_WIDTH = 292
 const CALLOUT_MIN_WIDTH = 208
 const CALLOUT_CARET_INSET = 22
 const DEFAULT_NODE_RADIUS = 37
-
-// Node-level star display only: one star per difficulty tier (easy/medium/
-// hard, in that order), full once that tier is completed, half while a wave
-// is in progress on it, empty otherwise. Distinct from the numeric `stars`
-// grade used by the tier-popup and challenge-trial-card StarRating call
-// sites, which this deliberately leaves untouched.
-function tierStarFillStates(tiers: AdventureLevelTierAccess[]): StarFillState[] {
-  return DIFFICULTY_ORDER.map((difficulty) => {
-    const tier = tiers.find((candidate) => candidate.difficulty === difficulty)
-    if (!tier) return 'empty'
-    if (tier.completion) return 'full'
-    if (tier.wave_progress.completed > 0 && tier.wave_progress.completed < tier.wave_progress.total) {
-      return 'half'
-    }
-    return 'empty'
-  })
-}
 
 export function StoryAdventurePath({
   chapter,
@@ -242,7 +222,7 @@ export function StoryAdventurePath({
 
   const trialsCleared = trials.length > 0 && trials.every((trial) => trial.completion)
   const clearedTrialCount = trials.filter((trial) => trial.completion).length
-  const trialState = loading
+  const trialState: StoryTrialState = loading
     ? 'loading'
     : challengesLocked || !trials.length
     ? 'locked'
@@ -325,123 +305,33 @@ export function StoryAdventurePath({
           <path d={routePathData} />
         </svg>
 
-        {nodes.map((node, index) => {
-          const level = node
-          const pos = points[index]
-          const state = level
-            ? level.locked || chapter.locked
-              ? 'locked'
-              : adventureLevelCleared(level)
-              ? 'cleared'
-              : level.id === currentLevelId
-              ? 'current'
-              : 'ready'
-            : loading
-            ? 'loading'
-            : 'locked'
-          const hasTiers = Boolean(level && level.tiers.length > 0)
-          const starFillStates = level && hasTiers ? tierStarFillStates(level.tiers) : undefined
-          const stars = level?.completion?.stars ?? 0
-          const disabled = !level || state === 'locked' || state === 'loading'
-          const selected = Boolean(level && selectedLevelId === level.id)
-          const closing = Boolean(level && closingLevelId === level.id && !selected)
-          const showPlayPill = Boolean(level && !hasTiers && (selected || closing))
+        {nodes.map((level, index) => (
+          <StoryPathLevelNode
+            key={level?.id ?? `placeholder-${index}`}
+            level={level}
+            index={index}
+            position={points[index]}
+            chapterLocked={chapter.locked}
+            currentLevelId={currentLevelId}
+            loading={loading}
+            selectedLevelId={selectedLevelId}
+            closingLevelId={closingLevelId}
+            onToggle={toggleLevelPill}
+            onOpenLevel={openAdventureLevel}
+          />
+        ))}
 
-          return (
-            <div
-              className="story-path-node"
-              data-state={state}
-              data-selected={selected || undefined}
-              key={level?.id ?? `placeholder-${index}`}
-              style={{ '--node-x': `${pos.x}px`, '--node-y': `${pos.y}px` } as React.CSSProperties}
-            >
-              <button
-                type="button"
-                className="story-path-node-button"
-                data-onboarding={level?.id === currentLevelId && !disabled ? 'next-level' : undefined}
-                disabled={disabled}
-                aria-label={
-                  level
-                    ? `Level ${index + 1}: ${level.title}. ${selected ? 'Play action open' : 'Open play action'}.`
-                    : `Locked level ${index + 1}`
-                }
-                aria-expanded={level ? selected : undefined}
-                aria-controls={level && hasTiers ? 'story-level-tier-panel' : undefined}
-                onClick={() => {
-                  if (!level) return
-                  toggleLevelPill(level.id)
-                }}
-              >
-                <span className="story-path-node-ring">
-                  {state === 'locked' ? <Lock className="size-5" aria-hidden="true" /> : <span>{index + 1}</span>}
-                </span>
-                {state === 'cleared' ? (
-                  <span className="story-path-node-badge" aria-hidden="true">
-                    <Check className="size-3.5" strokeWidth={3} />
-                  </span>
-                ) : null}
-              </button>
-
-              {showPlayPill ? (
-                <button
-                  type="button"
-                  className="story-path-node-play"
-                  data-pill-state={closing ? 'closing' : 'open'}
-                  aria-label={`Play ${level!.title}`}
-                  onClick={() => openAdventureLevel(level!)}
-                >
-                  <Play className="size-4" fill="currentColor" aria-hidden="true" />
-                  <span className="sr-only">Play</span>
-                </button>
-              ) : null}
-
-              {state === 'locked' || state === 'loading' ? null : (
-                <StarRating
-                  stars={starFillStates ? undefined : stars}
-                  fillStates={starFillStates}
-                  size="sm"
-                  className="story-path-stars"
-                  label={level?.title ?? 'Level'}
-                />
-              )}
-            </div>
-          )
-        })}
-
-        <button
-          type="button"
-          className="story-path-node story-path-node--trial"
-          data-onboarding={trials.length > 0 ? 'challenges' : undefined}
-          data-state={trialState}
-          data-open={trialsOpen || undefined}
-          style={{ '--node-x': `${trialPoint.x}px`, '--node-y': `${trialPoint.y}px` } as React.CSSProperties}
+        <StoryChallengeNode
+          trialCount={trials.length}
+          state={trialState}
+          open={trialsOpen}
           disabled={trialDisabled}
-          title={
-            trialState === 'locked' && !loading
-              ? chapter.locked
-                ? chapter.lock_reason
-                : 'Clear the adventure levels to unlock the trials.'
-              : undefined
-          }
-          aria-label={trialState === 'locked' ? 'Challenge trials (locked)' : 'Challenge trials'}
-          aria-expanded={trialsOpen}
-          aria-controls="story-challenge-panel"
-          onClick={() => setTrialsOpen((open) => !open)}
-        >
-          <span className="story-path-node-ring">
-            {trialState === 'locked' ? (
-              <Lock className="size-5" aria-hidden="true" />
-            ) : (
-              <Swords className="size-6" aria-hidden="true" />
-            )}
-          </span>
-          <span className="story-challenge-node-label">Challenge Gate</span>
-          {trialState === 'cleared' ? (
-            <span className="story-path-node-badge" aria-hidden="true">
-              <Check className="size-3.5" strokeWidth={3} />
-            </span>
-          ) : null}
-        </button>
+          position={trialPoint}
+          loading={loading}
+          chapterLocked={chapter.locked}
+          chapterLockReason={chapter.lock_reason}
+          onToggle={() => setTrialsOpen((open) => !open)}
+        />
 
         {selectedTierLevel && calloutPlacement ? (
           <svg

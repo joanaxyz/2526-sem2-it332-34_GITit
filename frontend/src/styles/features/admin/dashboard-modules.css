@@ -1,0 +1,273 @@
+/* ── module accordion ───────────────────────────────────────────────────── */
+
+.dk-modules { display: grid; gap: 0.5rem; }
+
+.dk-mod-item {
+  border: 1px solid var(--a-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  transition: border-color 160ms ease;
+}
+.dk-mod-item.is-open { border-color: var(--a-border-2); }
+
+.dk-mod-trigger {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+  padding: 1rem 1.25rem;
+  background: var(--a-surface);
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  transition: background 140ms ease;
+}
+.dk-mod-trigger:hover { background: var(--a-surface-2); }
+.dk-mod-item.is-open .dk-mod-trigger { background: var(--a-surface-2); }
+
+/* module number chip */
+.dk-mod-num {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: var(--radius-md);
+  background: var(--a-surface-3);
+  border: 1px solid var(--a-border-2);
+  color: var(--a-t2);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  transition: background 160ms ease, color 160ms ease, border-color 160ms ease;
+}
+.dk-mod-item.is-open .dk-mod-num {
+  background: rgba(var(--a-blue), 0.1);
+  border-color: rgba(var(--a-blue), 0.3);
+  color: rgb(var(--a-blue));
+}
+
+.dk-mod-meta { flex: 1; min-width: 0; display: grid; gap: 0.1rem; }
+.dk-mod-title {
+  color: var(--a-t1);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.dk-mod-hint {
+  color: var(--a-t4);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.dk-mod-right {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex: 0 0 auto;
+}
+
+/* met/total pill */
+.dk-mod-badge {
+  padding: 0.2rem 0.65rem;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  border: 1px solid;
+}
+.dk-mod-badge.all     { background: rgb(var(--a-green) / 0.08); color: rgb(var(--a-green)); border-color: rgb(var(--a-green) / 0.25); }
+.dk-mod-badge.partial { background: rgb(var(--a-amber) / 0.08); color: rgb(var(--a-amber)); border-color: rgb(var(--a-amber) / 0.25); }
+.dk-mod-badge.none    { background: var(--a-surface-3); color: var(--a-t4); border-color: var(--a-border); }
+
+.dk-mod-chevron {
+  width: 1rem;
+  height: 1rem;
+  color: var(--a-t4);
+  transition: transform 200ms ease, color 200ms ease;
+  flex: 0 0 auto;
+}
+.dk-mod-item.is-open .dk-mod-chevron { transform: rotate(180deg); color: var(--a-t2); }
+
+/* accordion body */
+.dk-mod-body {
+  border-top: 1px solid var(--a-border);
+  background: var(--a-bg);
+  padding: 1.5rem 1.25rem;
+  display: grid;
+  gap: 1.25rem;
+}
+
+/* ── General Objective block ────────────────────────────────────────────── */
+
+.dk-go {
+  display: grid;
+  gap: 0.6rem;
+  padding: 1rem 1.1rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--a-border-2);
+  background: var(--a-surface);
+}
+
+.dk-go-top {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+.dk-go-label {
+  color: var(--a-t3);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  flex: 0 0 auto;
+}
+.dk-go-kpi-row {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.dk-go-text {
+  margin: 0;
+  color: var(--a-t2);
+  font-size: var(--text-xs);
+  line-height: 1.65;
+}
+
+/* ── SO list ────────────────────────────────────────────────────────────── */
+
+.dk-so-list { display: grid; gap: 0; }
+
+.dk-so-row {
+  display: grid;
+  grid-template-columns: 1.75rem 1fr auto;
+  align-items: start;
+  gap: 0.75rem;
+  padding: 0.85rem 0;
+  border-bottom: 1px solid var(--a-border);
+}
+.dk-so-row:last-child { border-bottom: 0; padding-bottom: 0; }
+.dk-so-row:first-child { padding-top: 0; }
+
+/* status icon column */
+.dk-so-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.4rem;
+  height: 1.4rem;
+  border-radius: 50%;
+  border: 1px solid var(--a-border-2);
+  background: var(--a-surface-2);
+  flex: 0 0 auto;
+  margin-top: 0.1rem;
+}
+.dk-so-icon svg { width: 0.8rem; height: 0.8rem; display: block; }
+.dk-so-row.is-met  .dk-so-icon { background: rgb(var(--a-green) / 0.1); border-color: rgb(var(--a-green) / 0.3); }
+.dk-so-row.is-met  .dk-so-icon svg { color: rgb(var(--a-green)); }
+.dk-so-row.is-miss .dk-so-icon { background: rgb(var(--a-red) / 0.1); border-color: rgb(var(--a-red) / 0.3); }
+.dk-so-row.is-miss .dk-so-icon svg { color: rgb(var(--a-red)); }
+.dk-so-row.is-none .dk-so-icon svg { color: var(--a-t4); }
+
+/* text column */
+.dk-so-body { display: grid; gap: 0.2rem; }
+.dk-so-id {
+  color: var(--a-t4);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.dk-so-text {
+  margin: 0;
+  color: var(--a-t2);
+  font-size: var(--text-xs);
+  line-height: 1.6;
+}
+
+/* KPI chip column (right); an SO with two metrics shows them side by side */
+.dk-so-kpis { display: flex; align-items: flex-start; gap: 0.9rem; }
+.dk-so-kpi {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.2rem;
+  flex: 0 0 auto;
+  padding-top: 0.1rem;
+}
+.dk-so-kpi-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--a-border-2);
+  background: var(--a-surface-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  color: var(--a-t3);
+  white-space: nowrap;
+}
+.dk-so-kpi-chip.is-met  { background: rgb(var(--a-green) / 0.08); border-color: rgb(var(--a-green) / 0.2); color: rgb(var(--a-green)); }
+.dk-so-kpi-chip.is-miss { background: rgb(var(--a-red)   / 0.08); border-color: rgb(var(--a-red)   / 0.2); color: rgb(var(--a-red)); }
+
+.dk-so-kpi-val {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  color: var(--a-t3);
+  text-align: right;
+}
+.dk-so-kpi-val.is-met  { color: rgb(var(--a-green)); }
+.dk-so-kpi-val.is-miss { color: rgb(var(--a-red)); }
+
+/* shared KPI chips / value text used in go-kpi-row too */
+.dk-chip {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid rgba(var(--a-blue), 0.2);
+  background: rgba(var(--a-blue), 0.07);
+  color: rgb(var(--a-blue));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  flex: 0 0 auto;
+}
+.dk-val {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 800;
+  color: var(--a-t2);
+}
+.dk-val.is-met  { color: rgb(var(--a-green)); }
+.dk-val.is-miss { color: rgb(var(--a-red)); }
+.dk-val.is-none { color: var(--a-t4); }
+
+.dk-target-text {
+  color: var(--a-t4);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+}
+
+/* status icons inside GO row */
+.dk-status-icon svg { width: 0.9rem; height: 0.9rem; display: block; }
+.dk-status-icon.is-met  svg { color: rgb(var(--a-green)); }
+.dk-status-icon.is-miss svg { color: rgb(var(--a-red)); }
+.dk-status-icon.is-none { display: none; }
+

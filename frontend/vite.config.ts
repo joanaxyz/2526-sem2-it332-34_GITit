@@ -60,6 +60,7 @@ export default defineConfig(({ mode }) => ({
           groups: [
             {
               name: vendorChunkName,
+              debugName: 'vendor chunks',
             },
           ],
         },

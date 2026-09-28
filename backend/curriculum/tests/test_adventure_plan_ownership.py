@@ -784,6 +784,31 @@ def test_policy_rejects_blueprint_generator_global_lookup_rebinding(tmp_path: Pa
     assert any("generator helper parameters must be read-only" in error for error in errors)
 
 
+@pytest.mark.parametrize(
+    "owner_violation",
+    [
+        "SOLUTION_TRAJECTORIES.clear()",
+        "SOLUTION_TRAJECTORIES = {}",
+    ],
+)
+def test_policy_rejects_solution_trajectory_owner_changes(
+    tmp_path: Path,
+    owner_violation: str,
+):
+    fixture_root = _copy_policy_fixture(tmp_path)
+    _copy_blueprint_generator_sources(fixture_root)
+    _mutate(
+        fixture_root,
+        "backend/curriculum/seed_data/source/adventure_level_specs/common.py",
+        "def v(\n",
+        f"{owner_violation}\n\ndef v(\n",
+    )
+
+    errors = adventure_plan_ownership_errors(root=fixture_root)
+
+    assert any("generator helper parameters must be read-only" in error for error in errors)
+
+
 def test_policy_rejects_target_state_loop_rebinding(tmp_path: Path):
     fixture_root = _copy_policy_fixture(tmp_path)
     _copy_blueprint_generator_sources(fixture_root)
