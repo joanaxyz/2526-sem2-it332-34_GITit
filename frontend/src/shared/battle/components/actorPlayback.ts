@@ -1,4 +1,5 @@
 import { animationDuration } from '@/shared/sprites/animationTiming'
+import { warmImage } from '@/shared/sprites/preload'
 import type { SpriteAnimation, SpriteAnimatorHandle } from '@/shared/sprites/types'
 
 /**
@@ -8,16 +9,16 @@ import type { SpriteAnimation, SpriteAnimatorHandle } from '@/shared/sprites/typ
  * director: play one non-looping windup/release strip, then fire the gameplay
  * effect only after that strip has completed.
  */
-export function playOneShotSprite(
+export async function playOneShotSprite(
   sprite: SpriteAnimatorHandle | null,
   animation: SpriteAnimation,
   capMs?: number,
 ): Promise<void> {
+  if (!sprite) return
+  // Most battle sheets are warm before mount; this is the safety net for
+  // previews, direct links and unexpected poses so a swap never paints a blank.
+  await warmImage(animation.src)
   return new Promise((resolve) => {
-    if (!sprite) {
-      resolve()
-      return
-    }
     let settled = false
     const finish = () => {
       if (settled) return

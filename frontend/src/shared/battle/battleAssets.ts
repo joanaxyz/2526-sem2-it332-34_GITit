@@ -6,6 +6,7 @@ import { getCompanion } from '@/shared/cosmetics/companions/registry'
 import { companionBattleFromDef, companionFromDef } from '@/shared/cosmetics/companionRuntime'
 import { isImageWarm, warmImages, warmSprite, withBudget } from '@/shared/sprites/preload'
 import type { SpriteAnimation } from '@/shared/sprites/types'
+import { isSpritePixelAnchorWarm } from '@/shared/sprites/usePixelBounds'
 import { monsterSkin } from '@/shared/story-worlds/registry'
 import type { StoryWorldDef } from '@/shared/story-worlds/types'
 
@@ -82,7 +83,9 @@ export function monsterAssetManifest(
 export function battleAssetsWarm(manifest: BattleAssetManifest): boolean {
   return (
     manifest.images.every((src) => isImageWarm(src)) &&
-    manifest.anchored.every((sheet) => isImageWarm(sheet.src))
+    manifest.anchored.every(
+      (sheet) => isImageWarm(sheet.src) && isSpritePixelAnchorWarm(sheet),
+    )
   )
 }
 

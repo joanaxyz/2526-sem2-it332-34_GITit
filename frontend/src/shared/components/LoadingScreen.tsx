@@ -129,7 +129,7 @@ export function LoadingScreen({
           {description ? <p className="git-it-loading-screen__description">{description}</p> : null}
           {slow ? (
             <p className="git-it-loading-screen__slow">
-              Still working. The server is taking longer than usual.
+              Still working. The workspace and its artwork are taking longer than usual.
             </p>
           ) : null}
         </div>

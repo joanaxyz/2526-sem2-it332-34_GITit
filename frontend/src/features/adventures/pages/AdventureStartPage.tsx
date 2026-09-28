@@ -3,11 +3,14 @@ import { Navigate, useNavigate, useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { useStartAdventureRun } from '@/features/adventures/hooks/useAdventureRun'
+import { loadAdventureRunPage } from '@/features/adventures/pages/loadAdventureRunPage'
+import { adventureLevelAssetManifest } from '@/features/adventures/utils/adventureLevelAssets'
 import { syncAdventureRunInCache } from '@/features/adventures/utils/adventureRunCache'
 import { ApiError } from '@/shared/api/apiError'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
+import { warmBattleAssets } from '@/shared/battle/battleAssets'
 
 /**
  * Entry page for chapter adventure-level runs.
@@ -27,9 +30,17 @@ export function AdventureStartPage() {
 
   useEffect(() => {
     if (levelId && start.isIdle) {
+      // Fetch the lazy workspace chunk alongside the API request instead of
+      // discovering it only after the loading screen navigates away.
+      void loadAdventureRunPage().catch(() => undefined)
       start.mutate({ levelId }, {
-        onSuccess: (run) => {
+        onSuccess: async (run) => {
           syncAdventureRunInCache(queryClient, run)
+          const manifest = adventureLevelAssetManifest(run, companionSlug)
+          await Promise.allSettled([
+            loadAdventureRunPage(),
+            ...(manifest ? [warmBattleAssets(manifest)] : []),
+          ])
           navigate(`/adventure-runs/${run.id}`, { replace: true })
         },
       })

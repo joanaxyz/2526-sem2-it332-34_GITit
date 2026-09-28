@@ -1,4 +1,5 @@
 import type { SpriteAnimation } from '@/shared/sprites/types'
+import { warmImages } from '@/shared/sprites/preload'
 
 import { effectSpecForSkill } from './skill-effects/catalog'
 import {
@@ -26,6 +27,12 @@ export { monsterAttackEffect }
 export function effectForSkill(skill: string, companionSlug?: string | null): BattleEffect {
   const spec = effectSpecForSkill(skill, companionSlug)
   return (ctx) => playResolvedSkillEffect(ctx, spec)
+}
+
+/** Decode every layer an effect can paint before its choreography begins. */
+export function warmEffectForSkill(skill: string, companionSlug?: string | null): Promise<void> {
+  const spec = effectSpecForSkill(skill, companionSlug)
+  return warmImages(spec.layers ? [spec.layers.back.src, spec.layers.front.src] : [spec.sheet.src])
 }
 
 /** Whether a skill sheet flies from the companion or plays centered on the target. */
