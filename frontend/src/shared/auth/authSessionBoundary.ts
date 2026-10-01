@@ -6,7 +6,7 @@ export const AUTH_SESSION_CHANNEL_NAME = 'git-it-auth-session'
 
 export type AuthSessionMessage =
   | { type: 'session'; accessToken: string; user: User }
-  | { type: 'access-token'; accessToken: string }
+  | { type: 'access-token'; accessToken: string; userId?: number }
   | { type: 'clear-session' }
 
 type AuthStorage = Pick<Storage, 'getItem' | 'setItem' | 'removeItem'>
@@ -73,7 +73,14 @@ export function decodeAuthSessionMessage(value: unknown): AuthSessionMessage | n
   if (!hasUsableToken(value.accessToken)) return null
 
   if (value.type === 'access-token') {
-    return { type: 'access-token', accessToken: value.accessToken }
+    if (value.userId !== undefined && (typeof value.userId !== 'number' || !Number.isInteger(value.userId))) {
+      return null
+    }
+    return {
+      type: 'access-token',
+      accessToken: value.accessToken,
+      ...(typeof value.userId === 'number' ? { userId: value.userId } : {}),
+    }
   }
 
   if (value.type === 'session') {

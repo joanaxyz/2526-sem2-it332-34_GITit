@@ -7,6 +7,7 @@ import { CommandIntroductionPanel } from '@/features/story-map/components/Comman
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { readTierRunBootstrap } from '@/features/story-map/utils/tierRunBootstrap'
 import { queryKeys } from '@/shared/api/queryKeys'
+import { useAuthStore } from '@/shared/auth/useAuth'
 
 vi.mock('@/features/story-map/api/commandIntroductionsApi', () => ({
   commandIntroductionsApi: { complete: vi.fn() },
@@ -69,9 +70,15 @@ function setup(lesson = tutor, replay = false) {
   return { client, run, onDismiss }
 }
 
-beforeEach(() => { vi.mocked(commandIntroductionsApi.complete).mockResolvedValue({ tutor: null }) })
+beforeEach(() => {
+  useAuthStore.getState().setSession('learner-token', {
+    id: 1, username: 'learner', email: 'learner@example.com', is_staff: false,
+  })
+  vi.mocked(commandIntroductionsApi.complete).mockResolvedValue({ tutor: null })
+})
 afterEach(() => {
   cleanup()
+  useAuthStore.getState().clearSession()
   document.querySelectorAll('[data-command-input], [data-tour-target="live-dag"]').forEach((element) => element.remove())
   vi.clearAllMocks()
   sessionStorage.clear()

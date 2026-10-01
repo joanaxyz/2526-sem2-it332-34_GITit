@@ -109,7 +109,7 @@ it('owns hydration, event transitions, cross-tab sync, and failure-tolerant acti
     value: TestBroadcastChannel,
   })
 
-  const { beginAuthConfirmation, confirmAuthSession, useAuthStore } = await import('./useAuth')
+  const { assertAuthSession, AuthSessionChangedError, beginAuthConfirmation, confirmAuthSession, useAuthStore } = await import('./useAuth')
   const channel = TestBroadcastChannel.instances[0]
   expect(channel?.name).toBe(AUTH_SESSION_CHANNEL_NAME)
   expect(useAuthStore.getState().user).toEqual(canonicalUser)
@@ -117,6 +117,9 @@ it('owns hydration, event transitions, cross-tab sync, and failure-tolerant acti
   expect(storage.values.has(LEGACY_ACCESS_TOKEN_STORAGE_KEY)).toBe(false)
 
   useAuthStore.getState().setSession('active', canonicalUser)
+  const originalGeneration = useAuthStore.getState().sessionGeneration
+  useAuthStore.getState().setAccessToken('rotated')
+  expect(useAuthStore.getState().sessionGeneration).toBe(originalGeneration)
   const authenticatedState = useAuthStore.getState()
   channel?.emit({ type: 'session', accessToken: '   ', user: canonicalUser })
   channel?.emit({ type: 'session', accessToken: 'forged', user: { username: 'partial' } })
@@ -174,6 +177,13 @@ it('owns hydration, event transitions, cross-tab sync, and failure-tolerant acti
   expect(useAuthStore.getState()).toMatchObject({ accessToken: ' padded-token ', user: canonicalUser })
   expect(channel?.posted).toHaveLength(postsBeforeTokenConfirmation ?? 0)
 
+  const confirmedGeneration = useAuthStore.getState().sessionGeneration
+  channel?.emit({ type: 'access-token', accessToken: 'same-account', userId: canonicalUser.id })
+  expect(useAuthStore.getState().sessionGeneration).toBe(confirmedGeneration)
+  expect(useAuthStore.getState().user).toBeNull()
+  confirmAuthSession('same-account', canonicalUser, confirmedGeneration)
+  expect(useAuthStore.getState().sessionGeneration).toBe(confirmedGeneration)
+
   const postsBeforeRefreshConfirmation = channel?.posted.length ?? 0
   beginAuthConfirmation('refreshed-token')
   expect(useAuthStore.getState()).toMatchObject({ accessToken: 'refreshed-token', user: null })
@@ -181,11 +191,21 @@ it('owns hydration, event transitions, cross-tab sync, and failure-tolerant acti
   expect(channel?.posted.at(-1)).toEqual({
     type: 'access-token',
     accessToken: 'refreshed-token',
+    userId: canonicalUser.id,
   })
 
   confirmAuthSession('refreshed-token', canonicalUser)
   expect(useAuthStore.getState()).toMatchObject({ accessToken: 'refreshed-token', user: canonicalUser })
   expect(channel?.posted).toHaveLength(postsBeforeRefreshConfirmation + 1)
+
+  const previousGeneration = useAuthStore.getState().sessionGeneration
+  const otherUser = { ...canonicalUser, id: 2, username: 'other-student' }
+  channel?.emit({ type: 'session', accessToken: 'other-account', user: otherUser })
+  expect(useAuthStore.getState().sessionGeneration).toBeGreaterThan(previousGeneration)
+  expect(() => assertAuthSession(previousGeneration)).toThrow(AuthSessionChangedError)
+  expect(() => confirmAuthSession('old-result', canonicalUser, previousGeneration)).toThrow(AuthSessionChangedError)
+  expect(useAuthStore.getState()).toMatchObject({ accessToken: 'other-account', user: null })
+  confirmAuthSession('other-account', otherUser)
 
   channel?.emit({ type: 'clear-session' })
   expect(useAuthStore.getState()).toMatchObject({ accessToken: null, user: null })

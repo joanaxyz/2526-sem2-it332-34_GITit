@@ -6,6 +6,7 @@ import { authApi } from '@/shared/auth/authApi'
 import {
   beginAuthConfirmation,
   confirmAuthSession,
+  assertAuthSession,
   useAuthStore,
 } from '@/shared/auth/useAuth'
 import { refreshSharedAccessToken } from '@/shared/api/httpClient'
@@ -18,18 +19,21 @@ export function Protected({ children }: { children: ReactElement }) {
   const bootstrapQuery = useQuery({
     queryKey: queryKeys.authBootstrap,
     queryFn: async () => {
+      const generation = useAuthStore.getState().sessionGeneration
       if (token) {
         const user = await authApi.me()
-        confirmAuthSession(token, user)
+        assertAuthSession(generation)
+        confirmAuthSession(useAuthStore.getState().accessToken ?? token, user, generation)
         return user
       }
       // Shares the tab's single-flight refresh. Calling /auth/refresh/ directly
       // here raced the 401 retry path, and single-use rotation turned the loser
       // into a spurious logout.
       const access = await refreshSharedAccessToken()
-      beginAuthConfirmation(access)
+      beginAuthConfirmation(access, generation)
       const user = await authApi.me()
-      confirmAuthSession(access, user)
+      assertAuthSession(generation)
+      confirmAuthSession(useAuthStore.getState().accessToken ?? access, user, generation)
       return user
     },
     enabled: !token || !user,

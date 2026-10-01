@@ -14,7 +14,7 @@ import { AudioControls } from '@/shared/audio/AudioControls'
 import { authApi } from '@/shared/auth/authApi'
 import { useRank } from '@/shared/progress/rank'
 import type { User } from '@/shared/auth/types'
-import { useAuthStore } from '@/shared/auth/useAuth'
+import { AuthSessionChangedError, useAuthStore } from '@/shared/auth/useAuth'
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 import { useWalletSummary } from '@/shared/wallet/hooks/useWallet'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
@@ -38,12 +38,17 @@ function useAppLogout() {
   const clearSession = useAuthStore((state) => state.clearSession)
 
   return useCallback(async () => {
+    const generation = useAuthStore.getState().sessionGeneration
     try {
       await authApi.logout()
+    } catch (error) {
+      if (!(error instanceof AuthSessionChangedError)) throw error
     } finally {
-      queryClient.clear()
-      clearSession()
-      navigate('/login')
+      if (useAuthStore.getState().sessionGeneration === generation) {
+        queryClient.clear()
+        clearSession()
+        navigate('/login')
+      }
     }
   }, [clearSession, navigate, queryClient])
 }

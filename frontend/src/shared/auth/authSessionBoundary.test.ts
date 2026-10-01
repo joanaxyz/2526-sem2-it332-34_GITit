@@ -82,6 +82,9 @@ describe('decodeAuthSessionMessage', () => {
       accessToken: 'fresh',
     })
     expect(decodeAuthSessionMessage({ type: 'clear-session' })).toEqual({ type: 'clear-session' })
+    expect(decodeAuthSessionMessage({ type: 'access-token', accessToken: 'fresh', userId: 7 })).toEqual({
+      type: 'access-token', accessToken: 'fresh', userId: 7,
+    })
   })
 
   it.each([
@@ -90,6 +93,8 @@ describe('decodeAuthSessionMessage', () => {
     { type: 'unknown' },
     { type: 'access-token', accessToken: '' },
     { type: 'access-token', accessToken: '   ' },
+    { type: 'access-token', accessToken: 'fresh', userId: '7' },
+    { type: 'access-token', accessToken: 'fresh', userId: 7.5 },
     { type: 'session', accessToken: 'fresh', user: { username: 'partial' } },
   ])('rejects malformed channel input %#', (value) => {
     expect(decodeAuthSessionMessage(value)).toBeNull()

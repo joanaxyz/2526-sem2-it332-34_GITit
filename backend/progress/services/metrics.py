@@ -442,9 +442,7 @@ class MetricsService:
         today = timezone.localdate()
 
         # Accuracy + total volume from the unified command log (spans both modes).
-        steps = CommandStep.objects.filter(
-            Q(challenge_run__player=player) | Q(attempt__player=player)
-        )
+        steps = self._player_steps(player=player)
         step_totals = steps.aggregate(
             total=Count("id"),
             unclean=Count(
@@ -462,12 +460,16 @@ class MetricsService:
         skill_profile = self._command_skill_profile(player=player)
 
         # Perfect-clear counts needed for headline.
-        adv_completions = AdventureLevelCompletion.objects.filter(player=player)
-        chal_completions = ChallengeTrialCompletion.objects.filter(player=player)
-        adv_perf_hits = adv_completions.filter(stars=3).count()
-        chal_perf_hits = chal_completions.filter(stars=3).count()
-        adv_done = AdventureLevelCompletion.objects.filter(player=player).count()
-        chal_done = ChallengeTrialCompletion.objects.filter(player=player).count()
+        completion_counts = {
+            "total": Count("id"),
+            "perfect": Count("id", filter=Q(stars=3)),
+        }
+        adv_completions = AdventureLevelCompletion.objects.filter(player=player).aggregate(
+            **completion_counts
+        )
+        chal_completions = ChallengeTrialCompletion.objects.filter(player=player).aggregate(
+            **completion_counts
+        )
 
         # Headline numbers.
         chal_counts = ChallengeRun.objects.filter(player=player, is_replay=False).aggregate(
@@ -495,7 +497,7 @@ class MetricsService:
         wallet = Wallet.objects.filter(player=player).only("balance").first()
 
         headline = {
-            "levels_completed": adv_done + chal_done,
+            "levels_completed": adv_completions["total"] + chal_completions["total"],
             "finish_rate": self._rate(completed, started),
             "accuracy": accuracy,
             # boss_floors / comebacks are challenge-only concepts (difficulty tiers,
@@ -503,7 +505,7 @@ class MetricsService:
             # instead of implying they cover adventures.
             "boss_floors": {"value": chal_counts["hard_completed"] or 0, "scope": "challenge"},
             "comebacks": {"value": chal_counts["comebacks"] or 0, "scope": "challenge"},
-            "perfect_clears": adv_perf_hits + chal_perf_hits,
+            "perfect_clears": adv_completions["perfect"] + chal_completions["perfect"],
             "day_streak": streak.current_streak if streak else 0,
             "longest_streak": streak.longest_streak if streak else 0,
             "gitcoins": wallet.balance if wallet else 0,
@@ -620,6 +622,13 @@ class MetricsService:
             denominator += weight
         return round(numerator / denominator, 1) if denominator else None
 
+    def _player_steps(self, *, player):
+        return CommandStep.objects.filter(
+            Q(challenge_run__player=player)
+            | Q(attempt__player=player)
+            | Q(adventure_tier_run__player=player)
+        )
+
     def _active_days(self, *, player, since) -> set:
         adventure_completion_days = (
             AdventureLevelCompletion.objects.filter(player=player, completed_at__gte=since)
@@ -634,9 +643,8 @@ class MetricsService:
             .distinct()
         )
         step_days = (
-            CommandStep.objects.filter(
-                Q(challenge_run__player=player) | Q(attempt__player=player), created_at__gte=since
-            )
+            self._player_steps(player=player)
+            .filter(created_at__gte=since)
             .annotate(day=TruncDate("created_at"))
             .values_list("day", flat=True)
             .distinct()
@@ -680,9 +688,8 @@ class MetricsService:
         ):
             completed_by_day[day] = completed_by_day.get(day, 0) + count
         commands_by_day = dict(
-            CommandStep.objects.filter(
-                Q(challenge_run__player=player) | Q(attempt__player=player), created_at__gte=since
-            )
+            self._player_steps(player=player)
+            .filter(created_at__gte=since)
             .annotate(day=TruncDate("created_at"))
             .values("day")
             .annotate(count=Count("id"))
