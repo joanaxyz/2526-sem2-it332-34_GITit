@@ -13,6 +13,8 @@ const user = {
   is_staff: false,
 }
 
+const freshToken = `header.${btoa(JSON.stringify({ user_id: String(user.id) }))}.signature`
+
 function jsonResponse(status: number, payload: unknown) {
   return new Response(JSON.stringify(payload), {
     status,
@@ -38,10 +40,10 @@ describe('apiRequest auth refresh', () => {
       const headers = init?.headers as Record<string, string> | undefined
 
       if (url.endsWith('/auth/refresh/')) {
-        return Promise.resolve(jsonResponse(200, { access: 'fresh-token' }))
+        return Promise.resolve(jsonResponse(200, { access: freshToken }))
       }
 
-      if (headers?.Authorization === 'Bearer fresh-token') {
+      if (headers?.Authorization === `Bearer ${freshToken}`) {
         return Promise.resolve(jsonResponse(200, { endpoint: url.split('/').at(-2) }))
       }
 
@@ -56,7 +58,7 @@ describe('apiRequest auth refresh', () => {
 
     expect(first).toEqual({ endpoint: 'first' })
     expect(second).toEqual({ endpoint: 'second' })
-    expect(useAuthStore.getState().accessToken).toBe('fresh-token')
+    expect(useAuthStore.getState().accessToken).toBe(freshToken)
     expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/auth/refresh/'))).toHaveLength(1)
   })
 
@@ -70,10 +72,10 @@ describe('apiRequest auth refresh', () => {
       const headers = init?.headers as Record<string, string> | undefined
 
       if (url.endsWith('/auth/refresh/')) {
-        return Promise.resolve(jsonResponse(200, { access: 'fresh-token' }))
+        return Promise.resolve(jsonResponse(200, { access: freshToken }))
       }
 
-      if (headers?.Authorization === 'Bearer fresh-token') {
+      if (headers?.Authorization === `Bearer ${freshToken}`) {
         return Promise.resolve(jsonResponse(200, { endpoint: url.split('/').at(-2) }))
       }
 
@@ -106,10 +108,10 @@ describe('apiRequest auth refresh', () => {
         if (refreshAttempts === 1) {
           return Promise.resolve(jsonResponse(401, { detail: 'Session expired.' }))
         }
-        return Promise.resolve(jsonResponse(200, { access: 'fresh-token' }))
+        return Promise.resolve(jsonResponse(200, { access: freshToken }))
       }
 
-      if (headers?.Authorization === 'Bearer fresh-token') {
+      if (headers?.Authorization === `Bearer ${freshToken}`) {
         return Promise.resolve(jsonResponse(200, { endpoint: url.split('/').at(-2) }))
       }
 
@@ -122,7 +124,7 @@ describe('apiRequest auth refresh', () => {
     await vi.runAllTimersAsync()
 
     await expect(request).resolves.toEqual({ endpoint: 'protected' })
-    expect(useAuthStore.getState().accessToken).toBe('fresh-token')
+    expect(useAuthStore.getState().accessToken).toBe(freshToken)
     expect(fetchMock.mock.calls.filter(([url]) => String(url).endsWith('/auth/refresh/'))).toHaveLength(2)
   })
 

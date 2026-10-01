@@ -15,6 +15,8 @@ from __future__ import annotations
 
 from collections import OrderedDict
 
+from django.db import transaction
+
 _MAX_ENTRIES = 512
 type CommandHistoryCacheKey = tuple[object, ...]
 
@@ -36,7 +38,16 @@ class LRUCommandHistoryCache:
         return list(cached)
 
     def _remember(self, key: CommandHistoryCacheKey, history: list[str]) -> None:
-        self._cache[key] = list(history)
-        self._cache.move_to_end(key)
-        while len(self._cache) > _MAX_ENTRIES:
-            self._cache.popitem(last=False)
+        # Both appended history and query results can contain uncommitted steps.
+        # A rolled-back attempt count can later be reused, so never publish it
+        # until the outer transaction commits. Snapshot now: callers can reuse
+        # or mutate their list before Django runs the callback.
+        snapshot = tuple(history)
+
+        def publish() -> None:
+            self._cache[key] = list(snapshot)
+            self._cache.move_to_end(key)
+            while len(self._cache) > _MAX_ENTRIES:
+                self._cache.popitem(last=False)
+
+        transaction.on_commit(publish)

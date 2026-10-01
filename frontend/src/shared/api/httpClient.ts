@@ -3,13 +3,14 @@ import { toast } from 'sonner'
 import { ApiError, describeApiError, readApiFieldErrors } from './apiError'
 import { apiOperations } from './generated/apiTypes'
 import type { ApiOperationId, ApiRequestBody, ApiResponseBody } from './generated/apiTypes'
-import { useAuthStore } from '@/shared/auth/useAuth'
+import { assertAuthSession, AuthSessionChangedError, useAuthStore } from '@/shared/auth/useAuth'
+import { assertAccessTokenScope } from '@/shared/auth/accessTokenScope'
 
 const API_BASE_URL = resolveApiBaseUrl()
 
 type RequestOptions = RequestInit & { skipAuthRefresh?: boolean }
 
-let refreshPromise: Promise<string> | null = null
+let refreshFlight: { sessionGeneration: number; promise: Promise<string> } | null = null
 const REFRESH_RETRY_DELAY_MS = 250
 
 function resolveApiBaseUrl() {
@@ -71,31 +72,52 @@ async function parseResponse(response: Response) {
 }
 
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  return requestForSession<T>(path, options, useAuthStore.getState().sessionGeneration)
+}
+
+async function requestForSession<T>(path: string, options: RequestOptions, sessionGeneration: number): Promise<T> {
+  assertAuthSession(sessionGeneration)
   const token = useAuthStore.getState().accessToken
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...options,
-    credentials: 'include',
-    headers: {
-      'Content-Type': 'application/json',
-      'X-Git-It-Client': 'web',
-      ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      ...options.headers,
-    },
-  })
+  let response: Response
+  try {
+    response = await fetch(`${API_BASE_URL}${path}`, {
+      ...options,
+      credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-Git-It-Client': 'web',
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+        ...options.headers,
+      },
+    })
+  } catch (error) {
+    assertAuthSession(sessionGeneration)
+    throw error
+  }
+  assertAuthSession(sessionGeneration)
 
   if (response.status === 401 && !options.skipAuthRefresh) {
     const latestToken = useAuthStore.getState().accessToken
     if (token && latestToken && token !== latestToken) {
-      return apiRequest<T>(path, { ...options, skipAuthRefresh: true })
+      return requestForSession<T>(path, { ...options, skipAuthRefresh: true }, sessionGeneration)
     }
 
-    const refreshed = await refreshAccessToken(token)
+    const refreshed = await refreshAccessToken(token, sessionGeneration)
+    assertAuthSession(sessionGeneration)
     if (refreshed) {
-      return apiRequest<T>(path, { ...options, skipAuthRefresh: true })
+      return requestForSession<T>(path, { ...options, skipAuthRefresh: true }, sessionGeneration)
     }
   }
 
-  const payload = await parseResponse(response)
+  let payload: unknown
+  try {
+    payload = await parseResponse(response)
+  } catch (error) {
+    assertAuthSession(sessionGeneration)
+    throw error
+  }
+  // Reading the body is asynchronous too; a handoff can happen after headers.
+  assertAuthSession(sessionGeneration)
   if (!response.ok) {
     // Field errors carry the only useful text on a DRF 400 (password rules,
     // for one), so they must reach the caller instead of "Bad Request".
@@ -118,26 +140,31 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
  * apart from "refresh could not be reached" (network, 429, 5xx).
  */
 export function refreshSharedAccessToken(): Promise<string> {
-  if (!refreshPromise) {
-    const pending = requestAccessTokenRefresh(0)
-    refreshPromise = pending
+  const sessionGeneration = useAuthStore.getState().sessionGeneration
+  if (!refreshFlight || refreshFlight.sessionGeneration !== sessionGeneration) {
+    const pending = requestAccessTokenRefresh(0, sessionGeneration)
+    refreshFlight = { sessionGeneration, promise: pending }
     // The catch keeps this bookkeeping chain from surfacing as an unhandled
     // rejection; real callers still await `pending` and see the error.
     pending
       .catch(() => undefined)
       .finally(() => {
-        if (refreshPromise === pending) refreshPromise = null
+        if (refreshFlight?.promise === pending) refreshFlight = null
       })
   }
 
-  return refreshPromise
+  return refreshFlight.promise
 }
 
-async function refreshAccessToken(tokenAtStart: string | null): Promise<boolean> {
+async function refreshAccessToken(tokenAtStart: string | null, sessionGeneration: number): Promise<boolean> {
   try {
+    assertAuthSession(sessionGeneration)
     await refreshSharedAccessToken()
+    assertAuthSession(sessionGeneration)
     return true
   } catch (error) {
+    assertAuthSession(sessionGeneration)
+    if (error instanceof AuthSessionChangedError) throw error
     // Another tab may have broadcast a working token while ours was failing.
     const latestToken = useAuthStore.getState().accessToken
     if (latestToken && latestToken !== tokenAtStart) {
@@ -157,21 +184,25 @@ function sleep(ms: number) {
   })
 }
 
-async function requestAccessTokenRefresh(attempt: number): Promise<string> {
+async function requestAccessTokenRefresh(attempt: number, sessionGeneration: number): Promise<string> {
   try {
+    assertAuthSession(sessionGeneration)
     const payload = await apiRequest<ApiResponseBody<'auth_refresh_create'>>('/auth/refresh/', {
       method: 'POST',
       skipAuthRefresh: true,
     })
+    assertAuthSession(sessionGeneration)
+    assertAccessTokenScope(payload.access, useAuthStore.getState().sessionUserId)
     useAuthStore.getState().setAccessToken(payload.access)
     return payload.access
   } catch (error) {
+    assertAuthSession(sessionGeneration)
     // Refresh token rotation can cause a 401 if another tab refreshed at the same
     // time. Give the browser a moment to apply the rotated refresh cookie, then
     // retry once before giving up.
     if (error instanceof ApiError && error.status === 401 && attempt < 1) {
       await sleep(REFRESH_RETRY_DELAY_MS)
-      return requestAccessTokenRefresh(attempt + 1)
+      return requestAccessTokenRefresh(attempt + 1, sessionGeneration)
     }
     throw error
   }

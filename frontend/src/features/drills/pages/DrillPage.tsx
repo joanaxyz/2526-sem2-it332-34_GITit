@@ -1,11 +1,13 @@
 import { Link, useParams } from 'react-router-dom'
-import { useQuery } from '@tanstack/react-query'
+import { useEffect, useState } from 'react'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 
 import { drillsApi } from '@/features/drills/api/drillsApi'
 import { DrillSession } from '@/features/drills/components/DrillSession'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { drillExitPath } from '@/features/drills/utils/drillRoutes'
+import { waitForDrillWrites } from '@/features/drills/utils/drillRunCache'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { storyPath } from '@/shared/navigation/routes'
 
@@ -19,16 +21,34 @@ import { storyPath } from '@/shared/navigation/routes'
 export function DrillPage() {
   const { levelId } = useParams<{ levelId: string }>()
   const id = Number(levelId)
+
+  return <DrillEntry key={id} id={id} />
+}
+
+function DrillEntry({ id }: { id: number }) {
+  const queryClient = useQueryClient()
+  const [entered, setEntered] = useState(false)
   const plan = useQuery({
     queryKey: queryKeys.levelDrill(id),
-    queryFn: () => drillsApi.getPlan(id),
+    queryFn: async ({ signal }) => {
+      await waitForDrillWrites(queryClient, id, signal)
+      signal.throwIfAborted()
+      return drillsApi.getPlan(id)
+    },
     enabled: Number.isFinite(id),
-    // Content is derived from seed data, so it is stable for a session;
-    // progress is refetched by the map, not by re-entering the drill.
-    staleTime: 5 * 60 * 1000,
+    // The payload includes this player's live resume state as well as content.
+    // Read it on every entry, after any writes from the previous visit settle.
+    staleTime: 0,
+    refetchOnMount: 'always',
   })
 
-  if (plan.isPending) {
+  useEffect(() => {
+    // A pending mutation can update the cache before the entry GET finishes.
+    // Once entered, background refreshes must not remount the active session.
+    if (plan.isFetchedAfterMount && !plan.isFetching) setEntered(true)
+  }, [plan.isFetchedAfterMount, plan.isFetching])
+
+  if (plan.isPending || !entered) {
     return (
       <LoadingScreen
         label="Opening the drill"

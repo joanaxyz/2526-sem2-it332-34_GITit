@@ -138,4 +138,36 @@ describe('Protected', () => {
     expect(screen.queryByText('Login destination')).not.toBeInTheDocument()
     queryClient.clear()
   })
+
+  it('does not install an old bootstrap identity after another account signs in', async () => {
+    useAuthStore.getState().clearSession()
+    refreshSharedAccessToken.mockResolvedValue('first-token')
+    const confirmation = deferred<User>()
+    vi.spyOn(authApi, 'me').mockReturnValue(confirmation.promise)
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    renderProtected(queryClient)
+    await waitFor(() => expect(authApi.me).toHaveBeenCalledOnce())
+
+    const nextUser = { ...cachedUser, id: 2, username: 'next-student' }
+    act(() => { useAuthStore.getState().setSession('next-token', nextUser) })
+    await act(async () => { confirmation.resolve(cachedUser) })
+
+    expect(useAuthStore.getState()).toMatchObject({ accessToken: 'next-token', user: nextUser })
+    queryClient.clear()
+  })
+
+  it('preserves a refreshed token when confirming the current identity', async () => {
+    useAuthStore.getState().setSession('stale-token', cachedUser)
+    useAuthStore.setState({ user: null })
+    vi.spyOn(authApi, 'me').mockImplementation(async () => {
+      useAuthStore.getState().setAccessToken('fresh-token')
+      return cachedUser
+    })
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    renderProtected(queryClient)
+
+    await waitFor(() => expect(screen.getByText('Protected child')).toBeInTheDocument())
+    expect(useAuthStore.getState().accessToken).toBe('fresh-token')
+    queryClient.clear()
+  })
 })

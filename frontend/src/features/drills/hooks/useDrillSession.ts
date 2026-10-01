@@ -3,6 +3,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { drillsApi } from '@/features/drills/api/drillsApi'
 import { queryKeys } from '@/shared/api/queryKeys'
+import { drillRunMutationKey } from '@/features/drills/utils/drillRunCache'
+import { assertAuthSession, useAuthStore } from '@/shared/auth/useAuth'
 import type { DrillAnswer, DrillPlan, DrillVerdict } from '@/features/drills/types'
 import type { DrillQueueState } from '@/features/drills/utils/drillQueue'
 import { gradeCard, gradeSequence } from '@/features/drills/utils/drillGrading'
@@ -64,6 +66,7 @@ function highWater(
  */
 export function useDrillSession(plan: DrillPlan) {
   const queryClient = useQueryClient()
+  const [sessionGeneration] = useState(() => useAuthStore.getState().sessionGeneration)
   // A drill runs for several minutes and re-asks what you missed, so a
   // refresh used to cost the whole ladder. The server hands back the
   // queue it last checkpointed; `restoreQueue` refuses it if the seeded
@@ -97,14 +100,30 @@ export function useDrillSession(plan: DrillPlan) {
   }, [queue])
 
   const saveRun = useMutation({
-    mutationFn: (body: Parameters<typeof drillsApi.saveRun>[1]) =>
-      drillsApi.saveRun(plan.level.id, body),
+    mutationKey: drillRunMutationKey(plan.level.id),
+    scope: { id: `drill-run:${plan.level.id}` },
+    mutationFn: (body: Parameters<typeof drillsApi.saveRun>[1]) => {
+      assertAuthSession(sessionGeneration)
+      return drillsApi.saveRun(plan.level.id, body)
+    },
+    onSuccess: ({ resume }) => {
+      queryClient.setQueryData<DrillPlan>(queryKeys.levelDrill(plan.level.id), (current) =>
+        current ? { ...current, resume } : current,
+      )
+    },
   })
 
   const report = useMutation({
-    mutationFn: (body: Parameters<typeof drillsApi.reportSession>[1]) =>
-      drillsApi.reportSession(plan.level.id, body),
-    onSuccess: () => {
+    mutationKey: drillRunMutationKey(plan.level.id),
+    scope: { id: `drill-run:${plan.level.id}` },
+    mutationFn: (body: Parameters<typeof drillsApi.reportSession>[1]) => {
+      assertAuthSession(sessionGeneration)
+      return drillsApi.reportSession(plan.level.id, body)
+    },
+    onSuccess: ({ progress }) => {
+      queryClient.setQueryData<DrillPlan>(queryKeys.levelDrill(plan.level.id), (current) =>
+        current ? { ...current, progress, resume: null } : current,
+      )
       // The level map paints a "Drilled" mark from the chapter overview, so
       // it has to be refetched or the map still says undrilled on return.
       if (plan.level.chapter_id) {
@@ -112,6 +131,20 @@ export function useDrillSession(plan: DrillPlan) {
           queryKey: queryKeys.chapterOverview(plan.level.chapter_id),
         })
       }
+    },
+  })
+
+  const discard = useMutation({
+    mutationKey: drillRunMutationKey(plan.level.id),
+    scope: { id: `drill-run:${plan.level.id}` },
+    mutationFn: () => {
+      assertAuthSession(sessionGeneration)
+      return drillsApi.discardRun(plan.level.id)
+    },
+    onSuccess: () => {
+      queryClient.setQueryData<DrillPlan>(queryKeys.levelDrill(plan.level.id), (current) =>
+        current ? { ...current, resume: null } : current,
+      )
     },
   })
 
@@ -159,28 +192,28 @@ export function useDrillSession(plan: DrillPlan) {
   const advance = useCallback(() => {
     if (!verdict) return
     if (ask?.kind === 'sequence' && !verdict.correct) setFinaleMissed(true)
-    setQueue((current) => {
-      const next = answerCurrent(current, verdict.correct)
-      checkpoint(next)
-      return next
-    })
+    const next = answerCurrent(queue, verdict.correct)
+    setQueue(next)
+    // Keep network writes outside React's replayable state updater.
+    checkpoint(next)
     setAnswer(null)
     setVerdict(null)
     setRound((value) => value + 1)
-  }, [ask, checkpoint, verdict])
+  }, [ask, checkpoint, queue, verdict])
 
   const restart = useCallback(() => {
     reportedRef.current = false
     // Drop the server-side checkpoint too, or leaving mid-way through the
     // second run would offer to resume the first one.
-    drillsApi.discardRun(plan.level.id).catch(() => undefined)
+    discard.mutate()
+    report.reset()
     setQueue(createQueue(plan.cards, Boolean(plan.sequence)))
     setBest({})
     setFinaleMissed(false)
     setAnswer(null)
     setVerdict(null)
     setRound(0)
-  }, [plan.cards, plan.level.id, plan.sequence])
+  }, [discard, plan.cards, plan.sequence, report])
 
   const rail: DrillRailSegment[] = useMemo(() => {
     const segments: DrillRailSegment[] = plan.cards.map((planCard) => {
