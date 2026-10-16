@@ -260,4 +260,27 @@ describe('StoryMapPage responsive rails', () => {
     expect(await screen.findByText('Orientation workspace')).toBeInTheDocument()
     queryClient.clear()
   })
+
+  it('does not strand onboarding when Module 0 has no published lessons', async () => {
+    const setPhase = vi.fn()
+    mocks.useAppOnboarding.mockReturnValue({ phase: 'orientation', setPhase })
+    vi.mocked(storyMapApi.listChapters).mockResolvedValue([orientationChapter, chapter])
+    vi.mocked(storyMapApi.listOrientationLessons).mockResolvedValue([])
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MemoryRouter initialEntries={['/stories/arcane-spire']}>
+          <Routes>
+            <Route path="/stories/:storySlug" element={<StoryMapPage />} />
+          </Routes>
+        </MemoryRouter>
+      </QueryClientProvider>,
+    )
+
+    await waitFor(() => expect(setPhase).toHaveBeenCalledWith('stories'))
+    await waitFor(() => expect(storyMapApi.getChapterOverview).toHaveBeenCalledWith(chapter.id))
+    expect(screen.queryByText('Orientation workspace')).not.toBeInTheDocument()
+    queryClient.clear()
+  })
 })

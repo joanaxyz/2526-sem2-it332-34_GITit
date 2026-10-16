@@ -4,9 +4,9 @@ import { onboardingPhases } from '@/shared/preferences/preferences'
 export type { OnboardingPhase }
 
 // The account's phase lives on the server (PlayerPreferences.onboarding_phase).
-// This cache only mirrors it so a reload resumes the journey at the right step
-// without waiting on the request; an account we have never seen here resolves
-// to "done", which is what keeps existing players out of the tour.
+// This cache is a best-effort fallback when that account request fails. The UI
+// does not act on it while the authoritative request is still pending; an
+// account we have never seen here resolves to "done".
 const sessionPhases = new Map<number, OnboardingPhase>()
 export const onboardingStorageKey = (userId: number) => `git-it-app-onboarding:v4:${userId}`
 

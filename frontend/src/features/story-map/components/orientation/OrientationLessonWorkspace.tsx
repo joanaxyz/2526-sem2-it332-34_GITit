@@ -3,6 +3,11 @@ import { Check, CheckCircle2, ChevronLeft, ChevronRight, Compass, ShieldCheck } 
 import { useEffect, useMemo, useState } from 'react'
 
 import { storyMapApi } from '@/features/story-map/api/storyMapApi'
+import {
+  clearOrientationDraft,
+  readOrientationDraft,
+  writeOrientationDraft,
+} from '@/features/story-map/components/orientation/orientationProgress'
 import { OrientationStepView } from '@/features/story-map/components/orientation/OrientationStepView'
 import {
   CRITICAL_LESSON_SLUGS,
@@ -12,13 +17,22 @@ import {
 } from '@/features/story-map/components/orientation/types'
 import type { LearningChapter } from '@/features/story-map/types'
 import { queryKeys } from '@/shared/api/queryKeys'
+import { useAuthStore } from '@/shared/auth/useAuth'
 import { Badge } from '@/shared/components/Badge'
 import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { GamePanel } from '@/shared/components/GamePanel'
-import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { cn } from '@/shared/utils/cn'
+
+type LessonDraftState = {
+  key: string | null
+  lessonId: number | null
+  stepIndex: number
+  completedSteps: Set<string>
+}
+
+const EMPTY_COMPLETED_STEPS = new Set<string>()
 
 export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
   chapter: LearningChapter
@@ -28,6 +42,7 @@ export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
   onLeaveModule: () => void
 }) {
   const queryClient = useQueryClient()
+  const userId = useAuthStore((state) => state.user?.id ?? state.sessionUserId)
 
   const lessonsQuery = useQuery({
     queryKey: queryKeys.orientationLessons(chapter.id),
@@ -56,19 +71,54 @@ export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
   const lesson = lessonDetailQuery.data
   const steps = useMemo(() => lesson?.interaction_steps ?? [], [lesson?.interaction_steps])
   const layout: OrientationLayout = (lesson && LESSON_LAYOUT_BY_SLUG[lesson.slug]) ?? 'storyboard'
+  const draftKey = lesson ? `${userId ?? 'guest'}:${lesson.id}` : null
 
-  const [stepIndex, setStepIndex] = useState(0)
-  const [completedSteps, setCompletedSteps] = useState<Set<string>>(() => new Set())
-
-  useEffect(() => {
-    setStepIndex(0)
-    setCompletedSteps(new Set())
-  }, [activeLessonId])
+  const [draft, setDraft] = useState<LessonDraftState>(
+    () => ({ key: null, lessonId: null, stepIndex: 0, completedSteps: new Set() }),
+  )
 
   useEffect(() => {
-    if (!lesson?.is_complete) return
-    setCompletedSteps(new Set(steps.map((step) => step.id)))
-  }, [lesson?.is_complete, lesson?.id, steps])
+    if (!lesson || !draftKey) return
+    const stepIds = steps.map((step) => step.id)
+    if (lesson.is_complete) {
+      if (userId !== null) clearOrientationDraft(userId, lesson.id)
+      setDraft({ key: draftKey, lessonId: lesson.id, stepIndex: 0, completedSteps: new Set(stepIds) })
+      return
+    }
+
+    const saved = userId === null ? null : readOrientationDraft(userId, lesson.id, stepIds)
+    setDraft({
+      key: draftKey,
+      lessonId: lesson.id,
+      stepIndex: saved?.stepIndex ?? Math.min(lesson.highest_step_seen, Math.max(stepIds.length - 1, 0)),
+      completedSteps: new Set(saved?.completedStepIds ?? []),
+    })
+  }, [draftKey, lesson, steps, userId])
+
+  const draftReady = Boolean(lesson && draftKey && draft.key === draftKey)
+  const stepIndex = draftReady ? draft.stepIndex : 0
+  const completedSteps = draftReady ? draft.completedSteps : EMPTY_COMPLETED_STEPS
+
+  useEffect(() => {
+    if (
+      !lesson
+      || lesson.is_complete
+      || userId === null
+      || !draftReady
+    ) return
+    writeOrientationDraft(userId, lesson.id, {
+      stepIndex: draft.stepIndex,
+      completedStepIds: [...draft.completedSteps],
+    })
+  }, [draft, draftReady, lesson, userId])
+
+  const updateDraft = (update: (current: LessonDraftState) => LessonDraftState) => {
+    if (!lesson || !draftReady) return
+    setDraft((current) => {
+      if (current.key !== draftKey) return current
+      return update(current)
+    })
+  }
 
   const completeMutation = useMutation({
     mutationFn: () => storyMapApi.completeOrientationLesson(lesson!.id, Math.max(steps.length - 1, 0)),
@@ -91,7 +141,10 @@ export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
 
   const handleStepComplete = () => {
     if (!currentStep) return
-    setCompletedSteps((previous) => new Set([...previous, currentStep.id]))
+    updateDraft((current) => ({
+      ...current,
+      completedSteps: new Set([...current.completedSteps, currentStep.id]),
+    }))
   }
 
   const selectLesson = (lessonId: number) => {
@@ -99,23 +152,46 @@ export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
     setActiveLessonId(lessonId)
   }
 
+  const masthead = (
+    <header className="orientation-masthead">
+      <p className="orientation-kicker"><Compass aria-hidden="true" /> Module 0 · Orientation</p>
+      <h1 id="orientation-title">{chapter.title}</h1>
+      <p className="orientation-masthead-copy">Learn the mental model in short, interactive topics—or jump straight to your first quest.</p>
+      <Button type="button" variant="ghost" className="orientation-skip-primer" onClick={onLeaveModule}>
+        Go to first quest <ChevronRight aria-hidden="true" />
+      </Button>
+    </header>
+  )
+
   if (lessonsQuery.isLoading) {
-    return <LoadingScreen label="Loading orientation" description="Preparing lessons for this chapter." />
+    return <div className="orientation-workspace">
+      {masthead}
+      <GamePanel as="section" className="orientation-panel orientation-panel--state" aria-label="Orientation status">
+        <div className="orientation-inline-state"><LoadingState label="Loading orientation" variant="inline" /></div>
+      </GamePanel>
+    </div>
   }
   if (lessonsQuery.isError) {
-    return <ErrorState title="Could not load orientation lessons" description={lessonsQuery.error.message} />
+    return <div className="orientation-workspace">
+      {masthead}
+      <GamePanel as="section" className="orientation-panel orientation-panel--state" aria-label="Orientation status">
+        <ErrorState title="Could not load orientation lessons" description={lessonsQuery.error.message} />
+        <Button type="button" variant="outline" onClick={() => void lessonsQuery.refetch()}>Try again</Button>
+      </GamePanel>
+    </div>
   }
   if (!lessons.length) {
-    return <ErrorState title="No orientation lessons" description="This chapter has no published lessons yet." />
+    return <div className="orientation-workspace">
+      {masthead}
+      <GamePanel as="section" className="orientation-panel orientation-panel--state" aria-label="Orientation status">
+        <ErrorState title="No orientation lessons" description="This chapter has no published lessons yet. Continue to your first quest instead." />
+      </GamePanel>
+    </div>
   }
 
   return (
     <div className="orientation-workspace">
-      <header className="orientation-masthead">
-        <p className="orientation-kicker"><Compass aria-hidden="true" /> Module 0 · Orientation</p>
-        <h1 id="orientation-title">{chapter.title}</h1>
-        <p>Build the mental model first. The commands will make more sense when you can see the state they change.</p>
-      </header>
+      {masthead}
 
       <GamePanel as="nav" className="orientation-syllabus" aria-label="Module 0 topics">
         <div className="orientation-syllabus-head">
@@ -131,7 +207,7 @@ export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
             aria-valuemax={100}
             aria-valuenow={courseProgress}
           >
-            <span style={{ width: `${courseProgress}%` }} />
+            <span style={{ transform: `scaleX(${courseProgress / 100})` }} />
           </div>
         </div>
 
@@ -163,8 +239,8 @@ export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
       <GamePanel as="section" className="orientation-panel" aria-label="Current topic">
         {lessonDetailQuery.isError ? (
           <ErrorState title="Could not load this topic" description={lessonDetailQuery.error.message} />
-        ) : !lesson || lessonDetailQuery.isLoading ? (
-          <div className="orientation-inline-state"><LoadingState label="Loading lesson" variant="inline" /></div>
+        ) : !lesson || lessonDetailQuery.isLoading || !draftReady ? (
+          <div className="orientation-inline-state"><LoadingState label="Restoring lesson progress" variant="inline" /></div>
         ) : (
           <article className="orientation-lesson" aria-labelledby="orientation-lesson-title">
             <header className="orientation-lesson-header">
@@ -196,7 +272,7 @@ export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
                         className={cn('orientation-step-tab', active && 'is-active', complete && 'is-complete')}
                         aria-current={active ? 'step' : undefined}
                         aria-label={`Step ${index + 1}: ${step.title}${complete ? ', complete' : ''}`}
-                        onClick={() => setStepIndex(index)}
+                        onClick={() => updateDraft((current) => ({ ...current, stepIndex: index }))}
                       >
                         <span aria-hidden="true">{complete ? <Check /> : index + 1}</span>
                         <strong>{step.title}</strong>
@@ -223,7 +299,10 @@ export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
                   completed={completedSteps.has(currentStep.id)}
                   onStepComplete={handleStepComplete}
                   hasNextStep={stepIndex < steps.length - 1}
-                  onContinueToNext={() => setStepIndex((current) => Math.min(current + 1, steps.length - 1))}
+                  onContinueToNext={() => updateDraft((current) => ({
+                    ...current,
+                    stepIndex: Math.min(current.stepIndex + 1, steps.length - 1),
+                  }))}
                 />
               ) : null}
             </div>

@@ -51,6 +51,14 @@ beforeEach(() => {
 })
 
 describe('RegisterForm password rejection', () => {
+  it('uses product copy for an empty password confirmation', async () => {
+    renderForm()
+    submit()
+
+    expect(await screen.findByText('Confirm your password.')).toBeInTheDocument()
+    expect(screen.queryByText(/Too small:/)).not.toBeInTheDocument()
+  })
+
   it('shows the rule Django rejected the password with, under the password field', async () => {
     mocks.register.mockRejectedValue(rejectedPassword())
     renderForm()

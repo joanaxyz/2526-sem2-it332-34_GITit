@@ -6,7 +6,7 @@ import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
 import { Button } from '@/shared/components/Button'
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
 import { Modal } from '@/shared/components/Modal'
-import { SHOP_ROUTE } from '@/shared/navigation/routes'
+import { HOME_ROUTE, SHOP_ROUTE } from '@/shared/navigation/routes'
 
 export function StoryOnboarding({
   ready,
@@ -30,24 +30,24 @@ export function StoryOnboarding({
       id: 'welcome',
       selector: '[data-onboarding="stories"]',
       icon: GitBranch,
-      title: 'Your Git journey starts here',
-      body: 'Stories is your starting point for learning Git safely. We’ll explore the map, visit the Shop to buy your character, then stop at Home before your first level. Your real projects stay untouched.',
+      title: 'This is your learning map',
+      body: 'Choose a chapter, read its guide, then open a level. Practice runs use a safe workspace, never your real projects.',
     },
     {
       id: 'learn',
       selector: compact ? '[aria-controls="story-map-tools"]' : '.chapter-book',
       icon: BookOpen,
-      title: 'Read before you practice',
+      title: 'Check the chapter guide',
       body: compact
-        ? 'Open Chapter tools to find the Chapter Book. Its Field Guide explains this chapter’s commands and examples before you enter a level.'
-        : 'The Chapter Book opens this chapter’s Field Guide. Read the commands and examples here before entering a level.',
+        ? 'Open Chapter tools, then use the Field Guide to review the commands for this chapter.'
+        : 'Open the Field Guide to review the commands for this chapter.',
     },
     {
       id: 'challenges',
       selector: '[data-onboarding="challenges"]',
       icon: Swords,
-      title: 'Practice, then test your skills',
-      body: 'Clear every Adventure level in the chapter to unlock its Challenge Gate. Then work through Easy, Medium, and Hard trials. The workspace tours explain commands, scoring, and completion when you play.',
+      title: 'Challenges follow practice',
+      body: 'Finish the chapter’s Adventure levels to unlock its Challenge difficulties.',
       optional: true,
     },
     {
@@ -55,17 +55,17 @@ export function StoryOnboarding({
       selector: '[data-onboarding="next-level"]',
       icon: Play,
       title: 'Open your next level',
-      body: 'When your character is ready, select this numbered level and press the Play button that appears. Read its objective and use Git commands to solve it.',
+      body: 'Choose the glowing level, then select Play. The objective tells you what to do.',
       optional: true,
     },
     {
       id: 'companion',
       selector: compact ? '[aria-controls="story-map-utilities"]' : '.story-companion-panel',
       icon: Sparkles,
-      title: hasCompanion ? 'Visit the Shop, then Home' : 'Let’s choose your character',
-      body: (compact ? 'Story utilities holds your chapters and companion. ' : '') + (hasCompanion
-        ? 'You already have a companion, so there’s no need to buy another. Let’s visit the Shop, then Home to see your character and progress.'
-        : 'Adventures need an equipped companion. Next we’ll go to the Shop, choose a character, and buy it with GitCoins. Then we’ll check your loadout in Home.'),
+      title: hasCompanion ? 'Your companion is ready' : 'Choose a companion before playing',
+      body: (compact ? 'Open Story utilities to see your companion. ' : '') + (hasCompanion
+        ? 'Next, visit Home to see your profile and progress.'
+        : 'Every playable level needs an equipped companion. Next, choose one in the Shop.'),
     },
   ] satisfies WorkspaceTourStep[], [compact, hasCompanion])
 
@@ -85,35 +85,37 @@ export function StoryOnboarding({
     <>
       <Modal
         open={onboarding.phase === 'welcome'}
-        title="Choose where to begin"
+        title="Choose how to learn"
         className="story-onboarding-choice"
         contentClassName="story-onboarding-choice__content"
         onClose={skipOrientation}
       >
         <p>
-          Module 0 is a guided introduction to Git and how GIT it! works. Take it if you are new to Git or want a refresher; otherwise, continue directly to Module 1.
+          New to Git? Take the short primer. Already know the basics? Go to the first chapter.
         </p>
         <div className="story-onboarding-choice__actions">
           {orientationAvailable ? (
-            <Button type="button" onClick={startOrientation}>I’m new — start Module 0</Button>
+            <Button type="button" onClick={startOrientation}>Start Git primer</Button>
           ) : null}
           <Button type="button" variant="outline" onClick={skipOrientation}>
-            I know the basics — skip to Module 1
+            Go to first chapter
           </Button>
         </div>
-        <small>You can open Module 0 later from the Chapters dropdown.</small>
+        <small>You can open the primer later from Chapters.</small>
       </Modal>
 
       {ready && onboarding.phase === 'stories' ? (
         <GameplayWorkspaceTour
-          label="Welcome tour"
-          finishLabel="Visit the Shop"
+          label="Getting started"
+          finishLabel={hasCompanion ? 'Explore Home' : 'Choose a companion'}
           steps={steps}
-          onClose={(reason) => {
-            if (reason === 'skip') onboarding.setPhase('done')
-            else {
+          onClose={() => {
+            if (hasCompanion) {
+              onboarding.setPhase('home')
+              navigate(HOME_ROUTE)
+            } else {
               onboarding.setPhase('shop')
-              navigate(SHOP_ROUTE)
+              navigate(`${SHOP_ROUTE}?required=1`)
             }
           }}
         />

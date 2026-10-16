@@ -22,7 +22,7 @@ const mocks = vi.hoisted(() => ({ usePlayerLoadout: vi.fn(), useStories: vi.fn()
 vi.mock('@/features/story-map/hooks/useStories', () => ({ useStories: mocks.useStories }))
 vi.mock('@/shared/player-loadout/usePlayerLoadout', () => ({ usePlayerLoadout: mocks.usePlayerLoadout }))
 vi.mock('@/features/story-map/components/path/StoryAdventurePath', () => ({
-  StoryAdventurePath: () => <div>Story path</div>,
+  StoryAdventurePath: () => <button data-onboarding="next-level">Story path</button>,
 }))
 
 const chapter: LearningChapter = {
@@ -113,7 +113,7 @@ describe('Module 0 hands the onboarding journey back', () => {
     fireEvent.click(await screen.findByRole('button', { name: '01 Foundations' }))
 
     await waitFor(() => expect(screen.getByText('Story path')).toBeInTheDocument())
-    expect(await screen.findByRole('heading', { name: 'Your Git journey starts here' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'This is your learning map' })).toBeInTheDocument()
     expect(localStorage.getItem(onboardingStorageKey(401))).toBe('stories')
   })
 
@@ -127,7 +127,7 @@ describe('Module 0 hands the onboarding journey back', () => {
     fireEvent.click(await screen.findByRole('button', { name: /Continue to Module 1/ }))
 
     await waitFor(() => expect(screen.getByText('Story path')).toBeInTheDocument())
-    expect(await screen.findByRole('heading', { name: 'Your Git journey starts here' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'This is your learning map' })).toBeInTheDocument()
     expect(localStorage.getItem(onboardingStorageKey(401))).toBe('stories')
   })
 
@@ -138,6 +138,6 @@ describe('Module 0 hands the onboarding journey back', () => {
     renderMap()
 
     await waitFor(() => expect(screen.getByText('Story path')).toBeInTheDocument())
-    expect(await screen.findByRole('heading', { name: 'Your Git journey starts here' })).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'This is your learning map' })).toBeInTheDocument()
   })
 })
