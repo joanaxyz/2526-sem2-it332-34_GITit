@@ -30,7 +30,7 @@ const schema = z
       .email('Enter a valid email address.')
       .transform((value) => value.toLowerCase()),
     password: z.string().min(8, 'Use at least eight characters.'),
-    password_confirm: z.string().min(8),
+    password_confirm: z.string().min(8, 'Confirm your password.'),
   })
   .refine((data) => data.password === data.password_confirm, {
     path: ['password_confirm'],

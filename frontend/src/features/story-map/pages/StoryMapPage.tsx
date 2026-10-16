@@ -71,8 +71,9 @@ export function StoryMapPage() {
     enabled: Boolean(orientationChapter && orientationPhaseActive),
     staleTime: 60 * 1000,
   })
-  const orientationComplete = Boolean(
-    orientationLessonsQuery.data?.length && orientationLessonsQuery.data.every((lesson) => lesson.is_complete),
+  const orientationComplete = orientationLessonsQuery.isSuccess && (
+    orientationLessonsQuery.data.length === 0 ||
+    orientationLessonsQuery.data.every((lesson) => lesson.is_complete)
   )
   const activeStory = useMemo(
     () => storiesQuery.data?.find((story) => story.slug === storySlug) ?? null,

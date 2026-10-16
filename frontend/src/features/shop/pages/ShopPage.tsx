@@ -59,7 +59,7 @@ export function ShopPage() {
 
   function act(item: ShopDisplayItem) {
     if (item.owned) {
-      navigate(`${HOME_ROUTE}?tab=loadout`)
+      navigate(`${HOME_ROUTE}?view=profile`)
       return
     }
     if (actionDisabled(item, pending, balance, wallet.isPending, purchasesEnabled)) return
@@ -81,6 +81,7 @@ export function ShopPage() {
 
         <ShopOnboarding
           ready={shop.isSuccess && wallet.isSuccess}
+          hasCompanion={hasCompanion}
           ownsCompanion={companions.some((item) => item.owned)}
           canBuy={purchasesEnabled && companions.some((item) => !item.owned && item.price <= balance)}
         />

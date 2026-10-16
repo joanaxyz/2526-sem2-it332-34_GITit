@@ -1,26 +1,25 @@
 import type { ReactNode } from 'react'
 import { Route } from 'lucide-react'
 
-import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
-
-export function OnboardingBanner({ step, children, actions, onSkip }: {
-  step: number
+export function OnboardingBanner({ title, children, actions, onSkip, skipLabel = 'Explore on my own' }: {
+  title: string
   children: ReactNode
   actions?: ReactNode
-  /** Replaces ending the whole journey, for steps that only skip themselves. */
   onSkip?: () => void
+  skipLabel?: string
 }) {
-  const onboarding = useAppOnboarding()
   return (
     <aside className="app-onboarding-banner" aria-label="Getting started" data-onboarding="setup-progress">
       <Route aria-hidden="true" />
       <div className="app-onboarding-banner__copy">
-        <strong>Getting started · {step} of 3</strong>
+        <strong>{title}</strong>
         <p>{children}</p>
       </div>
       <div className="app-onboarding-banner__actions">
         {actions}
-        <button type="button" className="app-onboarding-skip" onClick={onSkip ?? (() => onboarding?.setPhase('done'))}>Skip setup</button>
+        {onSkip ? (
+          <button type="button" className="app-onboarding-skip" onClick={onSkip}>{skipLabel}</button>
+        ) : null}
       </div>
     </aside>
   )
