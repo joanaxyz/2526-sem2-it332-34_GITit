@@ -30,6 +30,7 @@ export function TierWorkspaceMain({
   onRenameFile,
   onDeleteFile,
   onOpenFile,
+  onOpenStory,
   onCommand,
   onCloseEditor,
   onWriteFile,
@@ -50,6 +51,7 @@ export function TierWorkspaceMain({
   onRenameFile: (input: WorkspaceFileRenameInput) => Promise<TierRun>
   onDeleteFile: (path: string) => Promise<TierRun>
   onOpenFile: (path: string | null) => void
+  onOpenStory: () => void
   onCommand: (command: string) => void
   onCloseEditor: () => void
   onWriteFile: (input: WorkspaceFileInput) => Promise<TierRun>
@@ -67,6 +69,7 @@ export function TierWorkspaceMain({
         onRenameFile={onRenameFile}
         onDeleteFile={onDeleteFile}
         onOpenFile={onOpenFile}
+        onOpenStory={onOpenStory}
       />
       <section
         className="gameplay-workspace__main challenge-workspace__main tier-workspace__main"

@@ -68,6 +68,7 @@ export function TierObjectivesCard({
           className="tier-story-button"
           disabled={!onOpenStory}
           onClick={onOpenStory}
+          data-tour-target="tier-story"
         >
           <BookOpenText aria-hidden="true" />
           Story
