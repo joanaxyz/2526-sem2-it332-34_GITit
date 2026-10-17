@@ -1,5 +1,7 @@
-import { TierContextPanel } from '@/features/story-map/components/TierContextPanel'
+import { TierObjectivesCard } from '@/features/story-map/components/tier-workspace/TierObjectivesCard'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
+import { tierObjectives } from '@/features/story-map/utils/tierObjectives'
+import { tierStoryContent } from '@/features/story-map/utils/tierStory'
 import { ProjectStructurePanel } from '@/shared/level/components/ProjectStructurePanel'
 import type {
   WorkspaceFileInput,
@@ -39,8 +41,11 @@ export function TierSidebar({
       data-testid="tier-workspace-sidebar"
       data-tour-target="level-story"
     >
-      <div className="gameplay-panel-scroll app-scrollbar" data-testid="level-context-scroll">
-        <TierContextPanel run={run} />
+      <div className="gameplay-pane tier-objectives-region">
+        <TierObjectivesCard
+          objectives={tierObjectives(run)}
+          requiredValues={tierStoryContent(run).requiredValues}
+        />
       </div>
 
       <div
