@@ -11,6 +11,14 @@ from typing import Any
 CONTENT_PATH = Path(__file__).with_name("revised_legacy_scenarios.json")
 
 
+def scenario_briefing(item: dict[str, Any]) -> tuple[str, str]:
+    """Move the authored starting position into the task at the seed boundary."""
+    story, marker, starting_point = item["story"].rpartition("\n\nStarting point:")
+    if not marker:
+        return item["story"], item["task"]
+    return story.rstrip(), f'{item["task"].rstrip()}\n\nStarting point: {starting_point.strip()}'
+
+
 @cache
 def revised_legacy_scenarios() -> dict[str, dict[str, Any]]:
     """Return revised content keyed by the stable legacy case ID.

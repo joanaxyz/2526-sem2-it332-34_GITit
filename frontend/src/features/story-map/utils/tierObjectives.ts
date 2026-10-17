@@ -10,7 +10,7 @@ import { normalizeLevelContext } from '@/shared/level/utils/levelContext'
  * here; the card only reads {id, text, status}.
  */
 export function tierObjectives(run: Pick<TierRun, 'status' | 'scenario_context'>): TierObjective[] {
-  const task = normalizeLevelContext(run.scenario_context).task
+  const task = normalizeLevelContext(run.scenario_context).task.split('\n\nStarting point:')[0].trim()
   if (!task) return []
   return [{ id: 'task', text: task, status: run.status === 'completed' ? 'done' : 'pending' }]
 }
