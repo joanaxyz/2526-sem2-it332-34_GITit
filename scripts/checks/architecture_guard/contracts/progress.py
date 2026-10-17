@@ -150,6 +150,10 @@ def progress_summary_backend_contract_violations(
             "activity_window": "serializers.ChoiceField(choices=sorted(ACTIVITY_WINDOWS))",
             "headline": "StatsHeadlineSerializer()",
         },
+        "StatsActivityResponseSerializer": {
+            "activity_trend": "StatsTrendPointSerializer(many=True)",
+            "activity_window": "serializers.ChoiceField(choices=sorted(ACTIVITY_WINDOWS))",
+        },
         "DashboardSummaryResponseSerializer": {
             "kpis": "DashboardKpiSetSerializer()",
             "chapter_kpis": ("serializers.DictField(child=DashboardKpiSetSerializer())"),
@@ -356,6 +360,13 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
             "activity_window": {"$ref": "#/components/schemas/ActivityWindowEnum"},
             "headline": {"$ref": "#/components/schemas/StatsHeadline"},
         },
+        "StatsActivityResponse": {
+            "activity_trend": {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/StatsTrendPoint"},
+            },
+            "activity_window": {"$ref": "#/components/schemas/ActivityWindowEnum"},
+        },
     }
     for schema_name, expected_properties in expected_schema_properties.items():
         expected_fields = set(expected_properties)
@@ -393,6 +404,21 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
     if response_schema.get("$ref") != "#/components/schemas/StatsSummaryResponse":
         violations.append(
             f"{STATS_GENERATED_OPENAPI}: progress_stats_retrieve must return StatsSummaryResponse"
+        )
+    activity_response_schema = (
+        schema.get("paths", {})
+        .get("/api/progress/stats/activity/", {})
+        .get("get", {})
+        .get("responses", {})
+        .get("200", {})
+        .get("content", {})
+        .get("application/json", {})
+        .get("schema", {})
+    )
+    if activity_response_schema.get("$ref") != "#/components/schemas/StatsActivityResponse":
+        violations.append(
+            f"{STATS_GENERATED_OPENAPI}: progress_stats_activity_retrieve must return "
+            "StatsActivityResponse"
         )
     return violations
 

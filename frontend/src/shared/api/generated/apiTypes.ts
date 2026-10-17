@@ -144,6 +144,7 @@ export type ApiSchemas = {
   "ShopPurchaseResponse": { "owned": boolean; "shop": ApiSchemas["ShopResponse"]; "wallet": ApiSchemas["WalletSummaryResponse"] }
   "ShopResponse": { "active_companion": string | null; "items": Array<ApiSchemas["ShopItemResponse"]>; "purchases_enabled": boolean }
   "SourceEntryPointEnum": "level_page" | "retry"
+  "StatsActivityResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "activity_window": ApiSchemas["ActivityWindowEnum"] }
   "StatsHeadline": { "accuracy": number | null; "boss_floors": ApiSchemas["StatsScopedCount"]; "comebacks": ApiSchemas["StatsScopedCount"]; "commands_run": number; "day_streak": number; "finish_rate": ApiSchemas["RateMetric"]; "gitcoins": number; "levels_completed": number; "longest_streak": number; "perfect_clears": number }
   "StatsScopedCount": { "scope": string; "value": number }
   "StatsSkillAxis": { "command": string; "hint": string; "key": string; "label": string; "value": number | null }
@@ -234,6 +235,7 @@ export type ApiPath =
   | "/api/progress/dashboard/"
   | "/api/progress/performance/"
   | "/api/progress/stats/"
+  | "/api/progress/stats/activity/"
   | "/api/progress/wallet/"
   | "/api/schema/"
   | "/api/shop/catalog/"
@@ -314,6 +316,7 @@ export type ApiMethodByPath = {
   "/api/progress/dashboard/": "GET"
   "/api/progress/performance/": "GET"
   "/api/progress/stats/": "GET"
+  "/api/progress/stats/activity/": "GET"
   "/api/progress/wallet/": "GET"
   "/api/schema/": "GET"
   "/api/shop/catalog/": "GET"
@@ -414,6 +417,7 @@ export const apiOperations = {
   progress_dashboard_retrieve: { method: "GET", path: "/api/progress/dashboard/", operationId: "progress_dashboard_retrieve", tags: ["progress"] },
   progress_performance_retrieve: { method: "GET", path: "/api/progress/performance/", operationId: "progress_performance_retrieve", tags: ["progress"] },
   progress_stats_retrieve: { method: "GET", path: "/api/progress/stats/", operationId: "progress_stats_retrieve", tags: ["progress"] },
+  progress_stats_activity_retrieve: { method: "GET", path: "/api/progress/stats/activity/", operationId: "progress_stats_activity_retrieve", tags: ["progress"] },
   progress_wallet_retrieve: { method: "GET", path: "/api/progress/wallet/", operationId: "progress_wallet_retrieve", tags: ["progress"] },
   schema_retrieve: { method: "GET", path: "/api/schema/", operationId: "schema_retrieve", tags: ["schema"] },
   shop_catalog_retrieve: { method: "GET", path: "/api/shop/catalog/", operationId: "shop_catalog_retrieve", tags: ["shop"] },
@@ -517,6 +521,7 @@ export type ApiRequestBodyByOperation = {
   progress_dashboard_retrieve: null
   progress_performance_retrieve: null
   progress_stats_retrieve: null
+  progress_stats_activity_retrieve: null
   progress_wallet_retrieve: null
   schema_retrieve: null
   shop_catalog_retrieve: null
@@ -617,6 +622,7 @@ export type ApiResponseBodyByOperation = {
   progress_dashboard_retrieve: ApiSchemas["DashboardSummaryResponse"]
   progress_performance_retrieve: ApiSchemas["PerformanceSummaryResponse"]
   progress_stats_retrieve: ApiSchemas["StatsSummaryResponse"]
+  progress_stats_activity_retrieve: ApiSchemas["StatsActivityResponse"]
   progress_wallet_retrieve: ApiSchemas["WalletSummaryResponse"]
   schema_retrieve: { [key: string]: JsonValue }
   shop_catalog_retrieve: ApiSchemas["ShopResponse"]

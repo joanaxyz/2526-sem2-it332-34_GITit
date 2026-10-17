@@ -147,6 +147,7 @@ class AdventureCommandService:
         with span("step_create"):
             step = CommandStep.objects.create(
                 attempt=attempt,
+                player=attempt.player,
                 command_text=command,
                 terminal_output=result.output,
                 result_category=CommandStep.ResultCategory.TARGET_MATCHED

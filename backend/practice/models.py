@@ -45,6 +45,18 @@ class CommandStep(models.Model):
         related_name="steps",
         on_delete=models.CASCADE,
     )
+    # Step ownership used to be reachable only through one of the three run
+    # parents above. Metrics then had to LEFT JOIN every parent and OR their
+    # player ids, which prevents an index-driven lookup as the history grows.
+    # Steps are immutable append-only records, so store that ownership directly
+    # and keep it synchronized from the one required parent on save.
+    player = models.ForeignKey(
+        "players.Player",
+        related_name="command_steps",
+        on_delete=models.CASCADE,
+        editable=False,
+        db_index=False,
+    )
     command_text = models.TextField()
     terminal_output = models.TextField(blank=True)
     result_category = models.CharField(max_length=32, choices=ResultCategory.choices)
@@ -73,6 +85,7 @@ class CommandStep(models.Model):
             # Adventure history is queried by the run held in attempt.
             models.Index(fields=["attempt", "id"], name="cmdstep_attempt_id_idx"),
             models.Index(fields=["adventure_tier_run", "id"], name="cmdstep_tier_run_id_idx"),
+            models.Index(fields=["player", "created_at"], name="cmdstep_player_created_idx"),
         ]
         constraints = [
             models.CheckConstraint(
@@ -104,3 +117,20 @@ class CommandStep(models.Model):
                 name="command_step_valid_counts",
             ),
         ]
+
+    def save(self, *args, **kwargs):
+        """Derive the immutable owner from the step's exactly-one run parent.
+
+        Production writers pass ``player`` explicitly so this is query-free on
+        the hot path. Deriving it here also protects fixtures and future writers
+        from creating a step that metrics cannot find, or assigning the wrong
+        player's id to a run.
+        """
+
+        if self.challenge_run_id is not None:
+            self.player_id = self.challenge_run.player_id
+        elif self.attempt_id is not None:
+            self.player_id = self.attempt.player_id
+        elif self.adventure_tier_run_id is not None:
+            self.player_id = self.adventure_tier_run.player_id
+        super().save(*args, **kwargs)

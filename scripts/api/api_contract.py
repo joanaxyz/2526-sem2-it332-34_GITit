@@ -65,6 +65,7 @@ REQUIRED_OPERATION_RESPONSES = {
     "challenge_runs_submit_command_create": "ChallengeCommandResponse",
     "progress_dashboard_retrieve": "DashboardSummaryResponse",
     "progress_stats_retrieve": "StatsSummaryResponse",
+    "progress_stats_activity_retrieve": "StatsActivityResponse",
     "progress_wallet_retrieve": "WalletSummaryResponse",
     "shop_catalog_retrieve": "ShopResponse",
     "shop_catalog_purchase_create": "ShopPurchaseResponse",

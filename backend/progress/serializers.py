@@ -113,6 +113,13 @@ class StatsSummaryResponseSerializer(serializers.Serializer):
     headline = StatsHeadlineSerializer()
 
 
+class StatsActivityResponseSerializer(serializers.Serializer):
+    activity_trend = StatsTrendPointSerializer(many=True)
+    # Echo the resolved range just like the full summary so an unknown query
+    # value can never make the client mislabel the returned buckets.
+    activity_window = serializers.ChoiceField(choices=sorted(ACTIVITY_WINDOWS))
+
+
 class DashboardSummaryResponseSerializer(serializers.Serializer):
     kpis = DashboardKpiSetSerializer()
     chapter_kpis = serializers.DictField(child=DashboardKpiSetSerializer())
