@@ -227,6 +227,8 @@ export function Component() {
                 challenges={PREVIEW_CHALLENGES}
                 challengesLocked={false}
                 loading={false}
+                hasCompanion
+                onCompanionRequired={() => undefined}
                 defaultTrialsOpen
               />
             </section>

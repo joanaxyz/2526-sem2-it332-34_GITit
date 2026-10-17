@@ -82,6 +82,43 @@
   justify-content: center;
 }
 
+/* A level gate is a point-of-use prompt, not another onboarding chapter.
+   It borrows the existing spotlight geometry while the top lightbar gives
+   this one blocking state a clear edge against the dimmed map. */
+.workspace-tour__card.companion-required-tour {
+  background:
+    radial-gradient(circle at 16% 0%, rgba(var(--theme-primary-rgb), 0.14), transparent 12rem),
+    hsl(var(--card));
+}
+
+.workspace-tour__card.companion-required-tour::before {
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--panel-lightbar);
+  content: '';
+}
+
+.companion-required-tour .workspace-tour__eyebrow {
+  color: rgb(var(--theme-primary-soft-rgb));
+}
+
+.companion-required-tour .workspace-tour__body {
+  max-width: 42ch;
+  color: var(--text-secondary);
+}
+
+:where(.app-nav-link, .app-mobile-nav-link).is-companion-required-target {
+  background: rgba(var(--theme-primary-rgb), 0.16);
+  color: #f4fbff;
+  box-shadow: inset 0 -2px 0 rgb(var(--theme-primary-rgb));
+}
+
+:where(.app-nav-link, .app-mobile-nav-link).is-companion-required-target svg {
+  color: rgb(var(--theme-primary-rgb));
+  filter: drop-shadow(0 0 7px rgba(var(--theme-primary-rgb), 0.72));
+}
+
 @media (max-width: 700px) {
   .app-onboarding-banner { flex-wrap: wrap; align-items: flex-start; }
   .app-onboarding-banner__actions { width: 100%; }

@@ -1,14 +1,12 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import type { AdventureLevelSummary, ChallengeSummary } from '@/features/story-map/types'
 import { allChallengeTrials } from '@/features/story-map/utils/challengeUi'
 import { pathDataFor, pathGeometry } from '@/features/story-map/utils/pathGeometry'
 import { useStoryArtifactNavigation } from '@/features/story-map/hooks/useStoryArtifactNavigation'
+import { useStoryAdventureStarts } from '@/features/story-map/hooks/useStoryAdventureStarts'
 import type { LearningChapter } from '@/features/story-map/types'
-import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
-import { syncTierRunInCache } from '@/features/story-map/utils/tierRunCache'
 import { useFocusTrap } from '@/shared/utils/useFocusTrap'
 
 import { nextPlayableLevelId } from '@/features/story-map/utils/storyMapChapter'
@@ -34,6 +32,8 @@ export function StoryAdventurePath({
   challenges,
   challengesLocked,
   loading,
+  hasCompanion,
+  onCompanionRequired,
   defaultTrialsOpen = false,
 }: {
   chapter: LearningChapter
@@ -41,18 +41,17 @@ export function StoryAdventurePath({
   challenges: ChallengeSummary[]
   challengesLocked: boolean
   loading: boolean
+  hasCompanion: boolean
+  onCompanionRequired: () => void
   defaultTrialsOpen?: boolean
 }) {
   const { openAdventureLevel, openChallengeArtifact } = useStoryArtifactNavigation()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const startTierRunMutation = useMutation({
-    mutationFn: ({ tierId, replay }: { tierId: number; replay?: boolean }) =>
-      tierRunsApi.startRun(tierId, replay ? { replay: true } : undefined),
-    onSuccess: (run) => {
-      syncTierRunInCache(queryClient, run)
-      navigate(`/adventure-tier-runs/${run.id}`)
-    },
+  const { openAdventure, startTier, startTierRunMutation } = useStoryAdventureStarts({
+    hasCompanion,
+    onCompanionRequired,
+    onOpenAdventure: openAdventureLevel,
+    onTierRunStarted: (runId) => navigate(`/adventure-tier-runs/${runId}`),
   })
   const currentLevelId = nextPlayableLevelId(levels, chapter.locked)
   const placeholderCount = Math.max(3, chapter.adventure_level_count || 6)
@@ -317,7 +316,7 @@ export function StoryAdventurePath({
             selectedLevelId={selectedLevelId}
             closingLevelId={closingLevelId}
             onToggle={toggleLevelPill}
-            onOpenLevel={openAdventureLevel}
+            onOpenLevel={openAdventure}
           />
         ))}
 
@@ -360,7 +359,7 @@ export function StoryAdventurePath({
             pendingTierId={startTierRunMutation.variables?.tierId}
             isStarting={startTierRunMutation.isPending}
             onClose={() => setSelectedLevelId(null)}
-            onStartTier={(tierId, replay) => startTierRunMutation.mutate({ tierId, replay })}
+            onStartTier={startTier}
             onOpenDrill={() => navigate(`/adventure-levels/${selectedTierLevel.id}/drill`)}
           />
         ) : null}
@@ -375,7 +374,7 @@ export function StoryAdventurePath({
           pendingTierId={startTierRunMutation.variables?.tierId}
           isStarting={startTierRunMutation.isPending}
           onClose={() => setSelectedLevelId(null)}
-          onStartTier={(tierId, replay) => startTierRunMutation.mutate({ tierId, replay })}
+          onStartTier={startTier}
           onOpenDrill={() => navigate(`/adventure-levels/${selectedTierLevel.id}/drill`)}
         />
       ) : null}

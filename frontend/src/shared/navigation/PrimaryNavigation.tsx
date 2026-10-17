@@ -109,6 +109,7 @@ export type PrimaryNavProps = {
   navClassName: string
   linkClassName: string
   activeClassName?: string
+  shopTarget?: 'desktop' | 'mobile'
 }
 
 export function PrimaryNav({
@@ -116,6 +117,7 @@ export function PrimaryNav({
   navClassName,
   linkClassName,
   activeClassName = 'is-active',
+  shopTarget,
 }: PrimaryNavProps) {
   const location = useLocation()
   const navItems = includeAdmin ? [...primaryNavItems, adminNavItem] : primaryNavItems
@@ -131,6 +133,7 @@ export function PrimaryNav({
           <NavLink
             key={to}
             aria-current={matchesCurrentPath ? 'page' : undefined}
+            data-companion-shop-target={to === SHOP_ROUTE ? shopTarget : undefined}
             className={({ isActive }) =>
               cn(linkClassName, (isActive || matchesCurrentPath) && activeClassName)
             }

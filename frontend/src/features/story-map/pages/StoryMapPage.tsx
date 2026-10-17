@@ -4,6 +4,7 @@ import { useParams, useSearchParams } from 'react-router-dom'
 import { PanelLeftOpen, PanelRightOpen, X } from 'lucide-react'
 
 import { StoryAdventurePath } from '@/features/story-map/components/path/StoryAdventurePath'
+import { CompanionRequiredOverlay } from '@/features/story-map/components/CompanionRequiredOverlay'
 import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
 import { ChapterOverview } from '@/features/story-map/components/ChapterOverview'
 import { OrientationLessonWorkspace } from '@/features/story-map/components/orientation/OrientationLessonWorkspace'
@@ -48,9 +49,11 @@ export function StoryMapPage() {
   const onboarding = useAppOnboarding()
   const { storySlug: routeStorySlug } = useParams<{ storySlug: string }>()
   const storySlug = routeStorySlug ?? 'git-it-legacy'
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const chapterParam = searchParams.get('chapter')
   const focusedChapterId = chapterParam ? Number(chapterParam) : null
+  const companionRequiredFromRoute = searchParams.get('companion-required') === '1'
+  const [companionPromptOpen, setCompanionPromptOpen] = useState(companionRequiredFromRoute)
 
   const chaptersQuery = useQuery({
     queryKey: queryKeys.storyChapters(storySlug),
@@ -90,6 +93,20 @@ export function StoryMapPage() {
   const [leftRailOpen, setLeftRailOpen] = useState(false)
   const [rightRailOpen, setRightRailOpen] = useState(false)
   const compactStoryMap = useCompactStoryMap()
+
+  useEffect(() => {
+    if (companionRequiredFromRoute && !hasCompanion && !loadoutLoading) {
+      setCompanionPromptOpen(true)
+    }
+  }, [companionRequiredFromRoute, hasCompanion, loadoutLoading])
+
+  useEffect(() => {
+    if (!hasCompanion || !companionRequiredFromRoute) return
+    const next = new URLSearchParams(searchParams)
+    next.delete('companion-required')
+    setSearchParams(next, { replace: true })
+    setCompanionPromptOpen(false)
+  }, [companionRequiredFromRoute, hasCompanion, searchParams, setSearchParams])
   // A story only runs orientation if it actually has a Module 0. Without this
   // guard the disabled lessons query stays `isPending` forever, and the map
   // below never leaves its loading state.
@@ -199,6 +216,13 @@ export function StoryMapPage() {
     userSelectedChapterId.current = orientationChapter.id
     setActiveChapterId(orientationChapter.id)
   }
+  const dismissCompanionPrompt = () => {
+    setCompanionPromptOpen(false)
+    if (!searchParams.has('companion-required')) return
+    const next = new URLSearchParams(searchParams)
+    next.delete('companion-required')
+    setSearchParams(next, { replace: true })
+  }
 
   return (
     <div
@@ -206,6 +230,11 @@ export function StoryMapPage() {
       style={storyWorldStyle(storyWorld)}
     >
       <div className="story-map-backdrop" style={storyMapStyle} aria-hidden="true" />
+
+      <CompanionRequiredOverlay
+        open={companionPromptOpen && !hasCompanion && !loadoutLoading}
+        onDismiss={dismissCompanionPrompt}
+      />
 
       <div className="story-map-rail-controls" aria-label="Map panels">
         {!showingOrientation ? <button
@@ -259,7 +288,7 @@ export function StoryMapPage() {
           {userId != null ? (
             <StoryOnboarding
               key={userId}
-              ready={!showingOrientation && Boolean(overview) && !overviewQuery.isError && !loadoutLoading && !loadoutError}
+              ready={!companionPromptOpen && !showingOrientation && Boolean(overview) && !overviewQuery.isError && !loadoutLoading && !loadoutError}
               compact={compactStoryMap}
               hasCompanion={hasCompanion}
               orientationAvailable={Boolean(orientationChapter)}
@@ -281,6 +310,8 @@ export function StoryMapPage() {
               challenges={challenges}
               challengesLocked={challengesLocked}
               loading={overviewQuery.isLoading}
+              hasCompanion={hasCompanion}
+              onCompanionRequired={() => setCompanionPromptOpen(true)}
             />
           )}
         </section>
