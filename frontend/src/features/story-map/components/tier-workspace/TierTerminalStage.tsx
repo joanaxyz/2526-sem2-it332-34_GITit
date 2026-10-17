@@ -4,7 +4,7 @@ import { queryKeys } from '@/shared/api/queryKeys'
 import { useTerminalCwd } from '@/shared/level-runtime/terminalCwd'
 import type { TerminalLine } from '@/shared/level/types'
 
-/** Full-width terminal under the battle stage; contextual feedback lives in the sidebar. */
+/** Full-width terminal under the battle stage, input docked at its foot; contextual feedback lives in the sidebar. */
 export function TierTerminalStage({
   run,
   lines,
@@ -34,6 +34,7 @@ export function TierTerminalStage({
           runDisabled={mutationPending || dagAnimating || battleAnimating}
           processing={mutationPending}
           className="h-full"
+          dockInput
           onCommand={onCommand}
         />
       </div>
