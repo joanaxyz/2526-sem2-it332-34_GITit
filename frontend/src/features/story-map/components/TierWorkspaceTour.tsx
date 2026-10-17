@@ -1,4 +1,4 @@
-import { CircleCheck, FolderTree, GitBranch, MessageSquareText, ScrollText, Star, Swords, Target, TerminalSquare } from 'lucide-react'
+import { BookOpenText, CircleCheck, FolderTree, GitBranch, MessageSquareText, ScrollText, Star, Swords, Target, TerminalSquare } from 'lucide-react'
 
 import {
   GameplayWorkspaceTour,
@@ -18,6 +18,14 @@ const tierWorkspaceTourSteps = [
     icon: ScrollText,
     title: 'Review the objective',
     body: 'Objectives state the result you have to reach at this difficulty, with any exact values you need to copy. Each one is checked off when it is done.',
+    placement: 'right',
+  },
+  {
+    id: 'tier-story-button',
+    selector: '[data-tour-target="tier-story"]',
+    icon: BookOpenText,
+    title: 'Reread the story',
+    body: 'The story opens when you start a level. Use Story to bring back the scenario and your task at any time.',
     placement: 'right',
   },
   {

@@ -1,12 +1,18 @@
 export type LevelTourMode = 'adventure' | 'challenge' | 'tier'
 
-const LEVEL_TOUR_VERSION = 'v3'
+// Versioned per mode: bumping one mode re-shows only that mode's tour, so a new
+// tier step does not replay the adventure and challenge tours for everyone.
+const LEVEL_TOUR_VERSIONS: Record<LevelTourMode, string> = {
+  adventure: 'v3',
+  challenge: 'v3',
+  tier: 'v4',
+}
 
 export function levelTourStorageKey(
   userId?: number | null,
   mode: LevelTourMode = 'challenge',
 ) {
-  return `git-it-practice-workspace-tour:${LEVEL_TOUR_VERSION}:${userId ?? 'guest'}:${mode}`
+  return `git-it-practice-workspace-tour:${LEVEL_TOUR_VERSIONS[mode]}:${userId ?? 'guest'}:${mode}`
 }
 
 function safeStorage() {

@@ -29,6 +29,7 @@ export function TierSidebar({
   onRenameFile,
   onDeleteFile,
   onOpenFile,
+  onOpenStory,
 }: {
   run: TierRun
   teachingActive?: boolean
@@ -40,6 +41,7 @@ export function TierSidebar({
   onRenameFile: (input: WorkspaceFileRenameInput) => Promise<TierRun>
   onDeleteFile: (path: string) => Promise<TierRun>
   onOpenFile: (path: string | null) => void
+  onOpenStory?: () => void
 }) {
   const hasFeedback = run.scaffolding.contextual_feedback
 
@@ -57,6 +59,7 @@ export function TierSidebar({
         <TierObjectivesCard
           objectives={tierObjectives(run)}
           requiredValues={tierStoryContent(run).requiredValues}
+          onOpenStory={onOpenStory}
         />
       </div>
 
