@@ -1,3 +1,5 @@
+import type { ComponentProps, CSSProperties } from 'react'
+
 import { TierDiagramStage } from '@/features/story-map/components/tier-workspace/TierDiagramStage'
 import { TierSidebar } from '@/features/story-map/components/tier-workspace/TierSidebar'
 import { TierTerminalStage } from '@/features/story-map/components/tier-workspace/TierTerminalStage'
@@ -15,6 +17,7 @@ import { WORKSPACE_BATTLE_STAGE_ROW } from '@/shared/level/workspaceLayout'
 
 export function TierWorkspaceMain({
   teachingActive,
+  repoGraphDrawer,
   run,
   lines,
   shellPrompt,
@@ -36,6 +39,8 @@ export function TierWorkspaceMain({
   onWriteFile,
 }: {
   teachingActive?: boolean
+  /** Present while the layout shows the repository graph as a drawer. */
+  repoGraphDrawer?: ComponentProps<typeof TierDiagramStage>['drawer']
   run: TierRun
   lines: TerminalLine[]
   shellPrompt: string
@@ -73,7 +78,7 @@ export function TierWorkspaceMain({
       />
       <section
         className="gameplay-workspace__main challenge-workspace__main tier-workspace__main"
-        style={{ gridTemplateRows: `${WORKSPACE_BATTLE_STAGE_ROW} minmax(13rem, 1fr)` }}
+        style={{ '--tier-battle-row': WORKSPACE_BATTLE_STAGE_ROW } as CSSProperties}
       >
         <TierBattlePanel run={run} director={battleDirector} />
         <TierTerminalStage
@@ -89,6 +94,7 @@ export function TierWorkspaceMain({
       <TierDiagramStage
         run={run}
         animation={dagAnimation}
+        drawer={repoGraphDrawer}
       />
       <WorkspaceEditorOverlay
         snapshot={run.repository_state}

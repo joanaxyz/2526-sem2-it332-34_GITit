@@ -1,5 +1,6 @@
-import { cleanup, render, screen, within } from '@testing-library/react'
-import { afterEach, describe, expect, it } from 'vitest'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { createRef } from 'react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 
@@ -55,5 +56,31 @@ describe('TierStatsBar', () => {
     expect(statValue('Mode')).toHaveTextContent('Adventure · Replay')
     expect(screen.queryByText('Difficulty')).not.toBeInTheDocument()
     expect(statValue('Star target')).toHaveTextContent('≤ 3 commands')
+  })
+
+  it('has no Repo graph button unless the layout uses the drawer', () => {
+    render(<TierStatsBar run={makeRun()} />)
+
+    expect(screen.queryByRole('button', { name: /repo graph/i })).not.toBeInTheDocument()
+  })
+
+  it('opens the drawer from the Repo graph button and flags unseen graph changes', () => {
+    const onOpen = vi.fn()
+    const trigger = { open: false, hasUpdate: true, controls: 'tier-repo-graph', buttonRef: createRef<HTMLButtonElement>(), onOpen }
+    const { rerender } = render(<TierStatsBar run={makeRun()} repoGraph={trigger} />)
+
+    const button = screen.getByRole('button', { name: 'Repo graph, updated' })
+    expect(button).toHaveAttribute('aria-haspopup', 'dialog')
+    expect(button).toHaveAttribute('aria-expanded', 'false')
+    expect(button).toHaveAttribute('aria-controls', 'tier-repo-graph')
+    expect(button.querySelector('.tier-repo-graph-dot')).not.toBeNull()
+    expect(trigger.buttonRef.current).toBe(button)
+
+    fireEvent.click(button)
+    expect(onOpen).toHaveBeenCalledOnce()
+
+    rerender(<TierStatsBar run={makeRun()} repoGraph={{ ...trigger, open: true, hasUpdate: false }} />)
+    expect(screen.getByRole('button', { name: 'Repo graph' })).toHaveAttribute('aria-expanded', 'true')
+    expect(document.querySelector('.tier-repo-graph-dot')).toBeNull()
   })
 })

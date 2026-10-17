@@ -1,11 +1,12 @@
 import { Check, CircleAlert } from 'lucide-react'
-import { useEffect, useId, useState, useSyncExternalStore } from 'react'
+import { useEffect, useId, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 
 import type { CommandIntroduction } from '@/features/story-map/api/commandIntroductionsApi'
 import { RepositoryChangeDiagram } from '@/features/story-map/components/RepositoryChangeDiagram'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { useCommandIntroduction } from '@/features/story-map/hooks/useCommandIntroduction'
+import { useMediaQuery } from '@/features/story-map/hooks/useMediaQuery'
 import { commandFamilyIcon, repositoryChangeIcon } from '@/features/story-map/utils/commandIntroductionIcons'
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
 
@@ -171,18 +172,6 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
 function sameWords(left: string, right: string) {
   const words = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
   return words(left) === words(right)
-}
-
-function useMediaQuery(query: string) {
-  return useSyncExternalStore(
-    (notify) => {
-      const list = window.matchMedia?.(query)
-      list?.addEventListener('change', notify)
-      return () => list?.removeEventListener('change', notify)
-    },
-    () => window.matchMedia?.(query).matches ?? false,
-    () => false,
-  )
 }
 
 function GuideTabs({ tab, onTab, tabs }: {

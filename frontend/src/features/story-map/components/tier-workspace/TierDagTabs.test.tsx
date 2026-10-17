@@ -7,13 +7,13 @@ import type { RepositorySnapshot } from '@/shared/level/types'
 // Each diagram mock exposes the props the tabs hand it, so the test can see
 // that both stay mounted and which one was asked to refit.
 vi.mock('@/features/story-map/components/TierDagStage', () => ({
-  TierDagStage: ({ showHeader, refitKey }: { showHeader?: boolean; refitKey?: number }) => (
+  TierDagStage: ({ showHeader, refitKey }: { showHeader?: boolean; refitKey?: string }) => (
     <div data-testid="live-view" data-header={String(showHeader)} data-refit={refitKey} />
   ),
 }))
 
 vi.mock('@/shared/level/components/LiveDagPanel', () => ({
-  LiveDagPanel: ({ showHeader, refitKey, zoomStorageKey }: { showHeader?: boolean; refitKey?: number; zoomStorageKey?: string }) => (
+  LiveDagPanel: ({ showHeader, refitKey, zoomStorageKey }: { showHeader?: boolean; refitKey?: string; zoomStorageKey?: string }) => (
     <div data-testid="expected-view" data-header={String(showHeader)} data-refit={refitKey} data-zoom-key={zoomStorageKey} />
   ),
 }))
@@ -78,11 +78,11 @@ describe('TierDagTabs', () => {
     expect(livePane).toHaveClass('is-inactive')
     expect(livePane).toHaveAttribute('inert')
     expect(screen.getByTestId('live-view')).toBe(liveView)
-    expect(screen.getByTestId('expected-view')).toHaveAttribute('data-refit', '1')
-    expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '0')
+    expect(screen.getByTestId('expected-view')).toHaveAttribute('data-refit', '1:0')
+    expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '0:0')
 
     fireEvent.click(screen.getByRole('tab', { name: 'Live DAG' }))
-    expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '1')
+    expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '1:0')
   })
 
   it('does not refit when the active tab is clicked again', () => {
@@ -90,7 +90,7 @@ describe('TierDagTabs', () => {
 
     fireEvent.click(liveTab)
 
-    expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '0')
+    expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '0:0')
   })
 
   it('moves between tabs with the arrow, Home and End keys', () => {
@@ -118,7 +118,7 @@ describe('TierDagTabs', () => {
     rerender(tabs(1))
 
     expect(screen.getByRole('tab', { name: 'Live DAG' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '1')
+    expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '1:0')
     // The switch does not steal focus from wherever the learner is.
     expect(expectedTab).toHaveFocus()
   })
@@ -129,7 +129,26 @@ describe('TierDagTabs', () => {
     rerender(tabs(1))
 
     expect(screen.getByRole('tab', { name: 'Live DAG' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '0')
+    expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '0:0')
+  })
+
+  it('refits both views when the host reveals the card', () => {
+    const { rerender } = render(
+      <TierDagTabs snapshot={snapshot} expectedState={snapshot} countedCommands={0} animation={animation} refitToken={1} />,
+    )
+    rerender(<TierDagTabs snapshot={snapshot} expectedState={snapshot} countedCommands={0} animation={animation} refitToken={2} />)
+
+    expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '0:2')
+    expect(screen.getByTestId('expected-view')).toHaveAttribute('data-refit', '0:2')
+  })
+
+  it('drops its tour anchors while it sits in a closed drawer', () => {
+    render(
+      <TierDagTabs snapshot={snapshot} expectedState={snapshot} countedCommands={0} animation={animation} tourAnchors={false} />,
+    )
+
+    expect(document.querySelector('[data-tour-target="expected-state"]')).toBeNull()
+    expect(document.querySelector('[data-tour-target="live-dag"]')).toBeNull()
   })
 
   it('keeps separate zoom keys and the tour anchors', () => {

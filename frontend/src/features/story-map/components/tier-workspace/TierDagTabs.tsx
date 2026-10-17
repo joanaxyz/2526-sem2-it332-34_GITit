@@ -28,12 +28,18 @@ export function TierDagTabs({
   expectedState,
   countedCommands,
   animation,
+  refitToken,
+  tourAnchors = true,
 }: {
   snapshot: RepositorySnapshot
   expectedState: RepositorySnapshot
   /** The run's counted-command total; an increase switches back to the Live DAG. */
   countedCommands: number
   animation: TierDagAnimationController
+  /** Changes when the host reveals the card (e.g. a drawer opening); both views refit. */
+  refitToken?: number
+  /** Off while the card sits in a closed drawer, where the tour cannot point at it. */
+  tourAnchors?: boolean
 }) {
   const baseId = useId()
   const [active, setActive] = useState<DagTab>('live')
@@ -95,7 +101,7 @@ export function TierDagTabs({
             aria-selected={active === tab.id}
             aria-controls={panelId(tab.id)}
             tabIndex={active === tab.id ? 0 : -1}
-            data-tour-target={tab.id === 'expected' ? 'expected-state' : undefined}
+            data-tour-target={tourAnchors && tab.id === 'expected' ? 'expected-state' : undefined}
             onClick={() => select(tab.id)}
             onKeyDown={onTabKeyDown}
           >
@@ -105,14 +111,14 @@ export function TierDagTabs({
       </div>
 
       <div className="tier-dag-panes">
-        <div {...paneProps('live')} data-tour-target="live-dag">
+        <div {...paneProps('live')} data-tour-target={tourAnchors ? 'live-dag' : undefined}>
           <TierDagStage
             snapshot={snapshot}
             animation={animation}
             zoomStorageKey={DAG_ZOOM_KEY}
             className="h-full min-h-0"
             showHeader={false}
-            refitKey={activations.live}
+            refitKey={`${activations.live}:${refitToken ?? 0}`}
           />
         </div>
         <div {...paneProps('expected')}>
@@ -125,7 +131,7 @@ export function TierDagTabs({
             fitViewPadding={0.16}
             layoutDirection="vertical"
             showHeader={false}
-            refitKey={activations.expected}
+            refitKey={`${activations.expected}:${refitToken ?? 0}`}
           />
         </div>
         <TierDagLegend />

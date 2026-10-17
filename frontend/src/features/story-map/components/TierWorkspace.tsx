@@ -28,6 +28,8 @@ import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
 import { useOutcomeAnimationGate } from '@/shared/level-runtime/outcomeAnimation'
 import { useTierDagAnimation } from '@/features/story-map/hooks/useTierDagAnimation'
 import { useTierAutoOpenQueue } from '@/features/story-map/hooks/useTierAutoOpenQueue'
+import { useTierRepoDrawer } from '@/features/story-map/hooks/useTierRepoDrawer'
+import { TIER_REPO_GRAPH_ID } from '@/features/story-map/components/tier-workspace/TierDiagramStage'
 import { tierStoryContent } from '@/features/story-map/utils/tierStory'
 import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
@@ -80,6 +82,7 @@ export function TierWorkspace() {
     difficulty: run?.tier.difficulty,
     started: run?.status === 'started',
   })
+  const repoDrawer = useTierRepoDrawer(run?.repository_state)
   const [exitNavigationRunId, setExitNavigationRunId] = useState<number | null>(null)
   const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
   const latestRunRef = useRef<TierRun | null>(null)
@@ -205,9 +208,23 @@ export function TierWorkspace() {
         commandGuideOpen={introductionOpen || Boolean(replayGuide)}
         onSelectCommandGuide={openCommandGuide}
       />
-      <TierStatsBar run={run} />
+      <TierStatsBar
+        run={run}
+        repoGraph={repoDrawer.drawerMode ? {
+          open: repoDrawer.open,
+          hasUpdate: repoDrawer.hasUpdate,
+          controls: TIER_REPO_GRAPH_ID,
+          buttonRef: repoDrawer.buttonRef,
+          onOpen: repoDrawer.openDrawer,
+        } : undefined}
+      />
       <TierWorkspaceMain
         teachingActive={introductionOpen}
+        repoGraphDrawer={repoDrawer.drawerMode ? {
+          open: repoDrawer.open,
+          openCount: repoDrawer.openCount,
+          onClose: repoDrawer.closeDrawer,
+        } : undefined}
         run={run}
         lines={lines}
         shellPrompt={shellPrompt}
