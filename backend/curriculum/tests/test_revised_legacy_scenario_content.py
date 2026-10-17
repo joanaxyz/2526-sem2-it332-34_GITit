@@ -5,7 +5,10 @@ from django.core.management import call_command
 
 from adventures.models import AdventureLevelTierWaveVariant
 from curriculum.management.commands.seed_legacy_modules import LEGACY_MODULE_LEVELS
-from curriculum.seed_data.revised_legacy_scenarios import revised_legacy_scenarios
+from curriculum.seed_data.revised_legacy_scenarios import (
+    revised_legacy_scenarios,
+    scenario_briefing,
+)
 
 
 def _legacy_cases() -> list[dict]:
@@ -24,6 +27,22 @@ def test_revised_bank_covers_every_legacy_variant_once():
     assert len(cases) == len(content) == 265
     assert set(content) == {case["case_id"] for case in cases}
     assert len({item["source_case_id"] for item in content.values()}) == 265
+
+
+def test_briefing_moves_starting_point_without_mutating_authored_content():
+    for case_id, item in revised_legacy_scenarios().items():
+        original = dict(item)
+        story, task = scenario_briefing(item)
+        assert story.strip(), case_id
+        assert "Starting point:" not in story, case_id
+        assert task.startswith(item["task"] + "\n\nStarting point:"), case_id
+        assert task.count("Starting point:") == 1, case_id
+        assert story + "\n\n" + task.split("\n\n", 1)[1] == item["story"], case_id
+        assert item == original
+
+
+def test_briefing_without_starting_point_is_unchanged():
+    assert scenario_briefing({"story": "Story.", "task": "Task."}) == ("Story.", "Task.")
 
 
 def test_revised_bank_has_complete_learner_facing_content_without_staff_sections():
@@ -75,15 +94,21 @@ def test_legacy_seed_persists_revised_variant_content():
 
     variant = AdventureLevelTierWaveVariant.objects.get(case_id="init-easy-invoice")
     assert variant.label == "Initialize invoice-tracker"
-    assert variant.scenario_context["task"] == (
+    assert variant.scenario_context["task"].startswith(
         "Create a new invoice-tracker folder that is a Git repository, with main as its "
-        "first branch."
+        "first branch.\n\nStarting point:"
     )
     assert variant.scenario_context["real_world_context"].startswith(
         "A client project can grow beyond its first brief."
     )
     assert variant.scenario_context["details"][0]["label"] == ""
-    assert "Starting point:" in variant.scenario_context["details"][0]["value"]
+    assert "Starting point:" not in variant.scenario_context["details"][0]["value"]
+
+    for seeded in AdventureLevelTierWaveVariant.objects.filter(case_id__in=revised_legacy_scenarios()):
+        context = seeded.scenario_context
+        assert context["real_world_context"].strip(), seeded.case_id
+        assert context["task"].count("Starting point:") == 1, seeded.case_id
+        assert "Starting point:" not in context["details"][0]["value"], seeded.case_id
 
     conflict = AdventureLevelTierWaveVariant.objects.get(case_id="manual-easy-auth-copy")
     assert conflict.scenario_context["details"][1] == {
