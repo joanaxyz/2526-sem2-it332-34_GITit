@@ -6,6 +6,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
 import { TierExitConfirmModal } from '@/features/story-map/components/TierExitConfirmModal'
 import { TierStatusHeader } from '@/features/story-map/components/TierStatusHeader'
+import { TierStatsBar } from '@/features/story-map/components/tier-workspace/TierStatsBar'
 import { TierOutcomeModal } from '@/features/story-map/components/TierOutcomeModal'
 import { TierStartOverConfirmModal } from '@/features/story-map/components/TierStartOverConfirmModal'
 import { TierWorkspaceMain } from '@/features/story-map/components/TierWorkspaceMain'
@@ -212,7 +213,7 @@ export function TierWorkspace() {
   } as CSSProperties
 
   return (
-    <div className="workspace-bg gameplay-workspace-screen">
+    <div className="workspace-bg gameplay-workspace-screen tier-workspace-screen">
       <TierStatusHeader
         run={run}
         isExiting={exitMutation.isPending || exitNavigationPending}
@@ -226,6 +227,7 @@ export function TierWorkspace() {
         commandGuideOpen={introductionOpen || Boolean(replayGuide)}
         onSelectCommandGuide={openCommandGuide}
       />
+      <TierStatsBar run={run} />
       <TierWorkspaceMain
         teachingActive={introductionOpen}
         run={run}
