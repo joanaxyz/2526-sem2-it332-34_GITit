@@ -56,7 +56,20 @@ Each challenge should have:
 ## Scaffolding
 
 Support is not authored. `practice/services/scaffolding.py` owns one constant
-ladder keyed by tier difficulty, and every gameplay surface reads it from there:
+ladder per gameplay surface, keyed by difficulty, and every surface reads its
+ladder from there.
+
+Adventure level tiers (`TIER_SCAFFOLDING_LADDER`, `supports_for_tier`):
+feedback fades first, then the Expected State diagram.
+
+| Difficulty | Live DAG | Expected State | Contextual feedback |
+| --- | --- | --- | --- |
+| easy | yes | yes | yes |
+| medium | yes | yes | no |
+| hard | yes | no | no |
+
+Challenge trials (`SCAFFOLDING_LADDER`, `supports_for`): the Expected State
+diagram fades first, then feedback.
 
 | Difficulty | Live DAG | Expected State | Contextual feedback |
 | --- | --- | --- | --- |
@@ -65,11 +78,11 @@ ladder keyed by tier difficulty, and every gameplay surface reads it from there:
 | hard | yes | no | no |
 
 Guided adventure runs walk waves instead of difficulty tiers, so they sit
-outside the ladder: live DAG plus the objective checklist, nothing that fades.
+outside both ladders: live DAG plus the objective checklist, nothing that fades.
 
 The Expected State panel needs both the ladder flag and a populated
-`target_state`, so a variant with an empty target silently loses its easy-tier
-diagram. Targets come from `python manage.py generate_targets` - never by hand.
+`target_state`, so a variant with an empty target silently loses its diagram.
+Targets come from `python manage.py generate_targets` - never by hand.
 
 ## Objective Checks
 

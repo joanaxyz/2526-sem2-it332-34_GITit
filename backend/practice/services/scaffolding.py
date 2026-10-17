@@ -1,13 +1,25 @@
-"""The one owner of the fading-scaffold ladder.
+"""The one owner of the fading-scaffold ladders.
 
-Support fades with tier difficulty, and the ladder is a constant here - never
+Support fades with difficulty, and each ladder is a constant here - never
 authored per variant and never re-derived in a payload or command processor.
-The live DAG is always available; the target diagram goes first, then the
-per-command contextual feedback.
+The live DAG is always available.
+
+Two ladders, one per gameplay surface:
+
+- ``TIER_SCAFFOLDING_LADDER`` (difficulty-tiered adventure levels): the
+  per-command contextual feedback goes first, then the Expected State
+  diagram. Easy shows both, Medium keeps only the Expected State, Hard neither.
+- ``SCAFFOLDING_LADDER`` (challenge trials): the Expected State diagram goes
+  first, then the contextual feedback. Easy shows both, Medium keeps only the
+  feedback, Hard neither.
+
+Guided adventure runs walk waves instead of difficulty tiers and sit outside
+both ladders (``GUIDED_SUPPORTS``).
 """
 
 from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
 
+# Challenge trials.
 SCAFFOLDING_LADDER = {
     DIFFICULTY_EASY: {
         "live_dag": True,
@@ -18,6 +30,25 @@ SCAFFOLDING_LADDER = {
         "live_dag": True,
         "expected_state": False,
         "contextual_feedback": True,
+    },
+    DIFFICULTY_HARD: {
+        "live_dag": True,
+        "expected_state": False,
+        "contextual_feedback": False,
+    },
+}
+
+# Difficulty-tiered adventure levels.
+TIER_SCAFFOLDING_LADDER = {
+    DIFFICULTY_EASY: {
+        "live_dag": True,
+        "expected_state": True,
+        "contextual_feedback": True,
+    },
+    DIFFICULTY_MEDIUM: {
+        "live_dag": True,
+        "expected_state": True,
+        "contextual_feedback": False,
     },
     DIFFICULTY_HARD: {
         "live_dag": True,
@@ -38,8 +69,14 @@ GUIDED_SUPPORTS = {
 
 class ScaffoldingService:
     def supports_for(self, difficulty: str) -> dict:
-        """Support flags for a tier. Unknown difficulty gets the least support."""
+        """Support flags for a challenge trial. Unknown difficulty gets the least support."""
         return dict(SCAFFOLDING_LADDER.get(difficulty, SCAFFOLDING_LADDER[DIFFICULTY_HARD]))
+
+    def supports_for_tier(self, difficulty: str) -> dict:
+        """Support flags for an adventure level tier. Unknown difficulty gets the least support."""
+        return dict(
+            TIER_SCAFFOLDING_LADDER.get(difficulty, TIER_SCAFFOLDING_LADDER[DIFFICULTY_HARD])
+        )
 
     def guided_supports(self) -> dict:
         return dict(GUIDED_SUPPORTS)
