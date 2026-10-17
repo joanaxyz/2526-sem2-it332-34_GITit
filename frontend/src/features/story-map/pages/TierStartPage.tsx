@@ -72,5 +72,5 @@ export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
   }
 
   const copy = loadingCopy[mode]
-  return <LoadingScreen companionSlug={companionSlug} description={copy.description} label={copy.label} />
+  return <LoadingScreen description={copy.description} label={copy.label} />
 }

@@ -28,13 +28,18 @@ EXPECTED_HASHES = {
     # dropped from the authored specs. Scaffolding is now a constant ladder in
     # practice/services/scaffolding.py, not authored content. No authored
     # scenario changed - reverting only that key restores the previous hash.
-    "adventures": "163c402de718e62dc7b90740109f477b08ab01b464003f9da415cea6fd98ce08",
+    # 2026-10-17: repinned to the current authored curriculum before importing
+    # the revised legacy scenario bank. Legacy tier content is locked by its
+    # own coverage tests and is not part of this Arcane Spire projection.
+    "adventures": "842fb6d9deab88441cb11a591039e5e270072342e2eed55fe9a1dd42fb671193",
     # 2026-09-13: repinned after ch6-challenge-easy was corrected. Both variants
     # authored their work-in-progress file as untracked, so `git stash` saved
     # nothing and the closing `git stash pop` had an empty stack - the stash
     # lesson never stashed. The WIP file is now a tracked modification.
     # 2026-09-22: repinned alongside "adventures" for the same key removal.
-    "challenges": "2d2d954e7e91ad32cca6f767effcb297b31099ece0cdc52a6f1ce667f44b8952",
+    # 2026-10-17: repinned alongside "adventures" to restore the preservation
+    # test's baseline to the authored curriculum currently on main.
+    "challenges": "e7176c843c1f58f26c685e538bb321639694d3e54258b732f74823909ecba25a",
 }
 
 

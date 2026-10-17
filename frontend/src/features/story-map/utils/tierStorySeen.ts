@@ -1,6 +1,7 @@
 import type { TierDifficulty } from '@/features/story-map/components/tierWorkspaceTypes'
 
-const TIER_STORY_VERSION = 'v1'
+// v2 reopens the modal once so existing players receive the revised scenario bank.
+const TIER_STORY_VERSION = 'v2'
 
 /**
  * One "story seen" flag per user, adventure level and difficulty. Variants are

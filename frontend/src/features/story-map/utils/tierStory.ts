@@ -4,6 +4,7 @@ import { normalizeLevelContext } from '@/shared/level/utils/levelContext'
 type TierStoryContent = {
   title: string
   intro: string
+  realWorldContext: string
   task: string
   /** Exact literals the learner must type (clone URL, commit message...). */
   requiredValues: { label: string; value: string }[]
@@ -26,6 +27,7 @@ export function tierStoryContent(
   return {
     title: run.variant?.label?.trim() || run.tier.adventure_level_title,
     intro: narrative || context.story,
+    realWorldContext: context.realWorldContext,
     task: context.task,
     requiredValues: context.details.filter((_, index) => index !== narrativeIndex),
   }

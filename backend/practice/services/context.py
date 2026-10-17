@@ -18,8 +18,14 @@ LEAKY_KEYS = {
 # of this schema: it lives on AdventureLevel.objective_checks (server-side
 # requirements) and reaches the client only as evaluated {label, satisfied}
 # rows in the attempt payload.
-ALLOWED_KEYS = {"schema_version", "story", "task", "details"}
-ORDERED_ALLOWED_KEYS = ("schema_version", "story", "task", "details")
+ALLOWED_KEYS = {"schema_version", "story", "real_world_context", "task", "details"}
+ORDERED_ALLOWED_KEYS = (
+    "schema_version",
+    "story",
+    "real_world_context",
+    "task",
+    "details",
+)
 
 
 class ScenarioContextNormalizer:
@@ -37,6 +43,7 @@ class ScenarioContextNormalizer:
         normalized = {
             "schema_version": 3,
             "story": self._text(context.get("story") or fallback_story),
+            "real_world_context": self._text(context.get("real_world_context")),
             "task": self._text(context.get("task")),
             "details": self._details(context.get("details")),
         }

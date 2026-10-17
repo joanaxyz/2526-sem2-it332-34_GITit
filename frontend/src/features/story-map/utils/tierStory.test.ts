@@ -19,6 +19,7 @@ describe('tierStoryContent', () => {
     const content = tierStoryContent(
       run({
         story: 'Clone with the requested destination.',
+        real_world_context: 'A clone gives the contributor the shared project history.',
         task: 'Use the provided remote URL.',
         details: [
           { label: '', value: 'Your team portal is hosted remotely.' },
@@ -30,6 +31,7 @@ describe('tierStoryContent', () => {
     expect(content).toEqual({
       title: 'Clone docs-portal',
       intro: 'Your team portal is hosted remotely.',
+      realWorldContext: 'A clone gives the contributor the shared project history.',
       task: 'Use the provided remote URL.',
       requiredValues: [{ label: 'Repository URL', value: 'https://example.test/docs-portal.git' }],
     })
@@ -40,6 +42,7 @@ describe('tierStoryContent', () => {
 
     expect(content.title).toBe('Cloning Repositories')
     expect(content.intro).toBe('Initialize the current folder.')
+    expect(content.realWorldContext).toBe('')
     expect(content.task).toBe('')
     expect(content.requiredValues).toEqual([])
   })

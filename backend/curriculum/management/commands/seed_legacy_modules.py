@@ -65,6 +65,7 @@ from curriculum.models import (
 from curriculum.seed_data.command_catalog import COMMAND_CATALOG
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
 from curriculum.seed_data.generated.generated_trajectories import SOLUTION_TRAJECTORIES
+from curriculum.seed_data.revised_legacy_scenarios import revised_legacy_scenario
 from curriculum.seed_data.spec_helpers import required_commit_message_details
 
 LEGACY_STORY_SLUG = "git-it-legacy"
@@ -13259,11 +13260,16 @@ class Command(BaseCommand):
         )
         wave.command_forms.set(forms)
         for case in tier_spec["cases"]:
+            revised = revised_legacy_scenario(case["case_id"])
+            required_values = [
+                *revised.get("required_values", []),
+                *required_case_details(case),
+            ]
             AdventureLevelTierWaveVariant.objects.update_or_create(
                 wave=wave,
                 slug=case["case_id"],
                 defaults={
-                    "label": case["label"],
+                    "label": revised["label"],
                     "initial_state": case["initial_state"],
                     "evaluation_spec": ev(
                         case["state_requirements"],
@@ -13282,10 +13288,11 @@ class Command(BaseCommand):
                     "scenario_context": {
                         "schema_version": 3,
                         "story": tier_spec["story"],
-                        "task": tier_spec["task"],
+                        "real_world_context": revised["real_world_context"],
+                        "task": revised["task"],
                         "details": [
-                            {"label": "", "value": case["context"]},
-                            *required_case_details(case),
+                            {"label": "", "value": revised["story"]},
+                            *required_values,
                         ],
                     },
                     "is_published": True,

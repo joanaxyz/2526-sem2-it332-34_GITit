@@ -11,4 +11,11 @@ describe('normalizeLevelContext', () => {
       }).details,
     ).toEqual([{ label: '', value: 'Save staged work' }])
   })
+
+  it('normalizes real-world context for the tier story modal', () => {
+    expect(
+      normalizeLevelContext({ real_world_context: '  Teams clone shared work locally.  ' })
+        .realWorldContext,
+    ).toBe('Teams clone shared work locally.')
+  })
 })

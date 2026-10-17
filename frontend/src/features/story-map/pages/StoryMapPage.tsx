@@ -178,7 +178,7 @@ export function StoryMapPage() {
   })
 
   if (chaptersQuery.isLoading || (orientationRequested && orientationLessonsQuery.isPending)) {
-    return <LoadingScreen companionSlug={companionSlug} description="Preparing the story map." label="Loading map" />
+    return <LoadingScreen description="Preparing the story map." label="Loading map" />
   }
   if (chaptersQuery.isError) {
     return <ErrorState title="Could not load map" description={chaptersQuery.error.message} />

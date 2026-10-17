@@ -4,6 +4,8 @@ import type {
   PointerEvent as ReactPointerEvent,
 } from 'react'
 
+import { usePersistentState } from '@/shared/utils/persistentState'
+
 import { VIEWPORT_GAP, type RectSnapshot } from './gameplayWorkspaceTourLayout'
 import type {
   WorkspaceTourPane as Pane,
@@ -37,6 +39,43 @@ const PANE_MINIMUMS: Record<Pane, Size> = {
   aside: { width: 240, height: 160 },
 }
 const KEYBOARD_TRANSFORM_STEP = 16
+
+type TransformPreference = {
+  panePositions: Partial<Record<Pane, Position>>
+  paneSizes: Partial<Record<Pane, Size>>
+}
+
+const EMPTY_TRANSFORM: TransformPreference = { panePositions: {}, paneSizes: {} }
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return typeof value === 'object' && value !== null
+}
+
+function storedPosition(value: unknown): Position | undefined {
+  if (!isRecord(value) || !Number.isFinite(value.left) || !Number.isFinite(value.top)) return undefined
+  return { left: Number(value.left), top: Number(value.top) }
+}
+
+function storedSize(value: unknown): Size | undefined {
+  if (!isRecord(value) || !Number.isFinite(value.width) || !Number.isFinite(value.height)) return undefined
+  if (Number(value.width) <= 0 || Number(value.height) <= 0) return undefined
+  return { width: Number(value.width), height: Number(value.height) }
+}
+
+function sanitizeTransformPreference(value: TransformPreference): TransformPreference {
+  if (!isRecord(value)) return EMPTY_TRANSFORM
+  const rawPositions = isRecord(value.panePositions) ? value.panePositions : {}
+  const rawSizes = isRecord(value.paneSizes) ? value.paneSizes : {}
+  const panePositions: TransformPreference['panePositions'] = {}
+  const paneSizes: TransformPreference['paneSizes'] = {}
+  for (const pane of ['main', 'aside'] as const) {
+    const position = storedPosition(rawPositions[pane])
+    const size = storedSize(rawSizes[pane])
+    if (position) panePositions[pane] = position
+    if (size) paneSizes[pane] = size
+  }
+  return { panePositions, paneSizes }
+}
 
 export function workspaceTourFrame(position: Position, size: Size): RectSnapshot {
   return {
@@ -86,31 +125,44 @@ export function useWorkspaceTourTransform({
   cardElement,
   separate,
   transformable,
+  transformPreferenceKey,
   activeStepId,
   refreshKey,
 }: {
   cardElement: HTMLElement | null
   separate: boolean
   transformable: boolean
+  transformPreferenceKey?: string
   activeStepId?: string
   refreshKey?: string | number
 }) {
-  const [panePositions, setPanePositions] = useState<Partial<Record<Pane, Position>>>({})
-  const [paneSizes, setPaneSizes] = useState<Partial<Record<Pane, Size>>>({})
+  const [preference, setPreference] = usePersistentState<TransformPreference>(
+    transformPreferenceKey ?? null,
+    EMPTY_TRANSFORM,
+    sanitizeTransformPreference,
+  )
+  const { panePositions, paneSizes } = preference
   const [frontPane, setFrontPane] = useState<Pane>('main')
   const [transformMode, setTransformMode] = useState<TransformMode | null>(null)
+  const [transformViewportEnabled, setTransformViewportEnabled] = useState(
+    () => typeof window !== 'undefined' && window.innerWidth > TRANSFORM_BREAKPOINT,
+  )
   const transformSessionRef = useRef<TransformSession | null>(null)
-  const transformed = Object.values(panePositions).some(Boolean) || Object.values(paneSizes).some(Boolean)
+  const transformed = transformViewportEnabled && (
+    Boolean(panePositions.main || paneSizes.main)
+    || (separate && Boolean(panePositions.aside || paneSizes.aside))
+  )
 
   const resetTransform = useCallback(() => {
-    setPanePositions({})
-    setPaneSizes({})
-  }, [])
+    setPreference(EMPTY_TRANSFORM)
+  }, [setPreference])
 
   const resetPane = useCallback((pane: Pane) => {
-    setPanePositions((positions) => ({ ...positions, [pane]: undefined }))
-    setPaneSizes((sizes) => ({ ...sizes, [pane]: undefined }))
-  }, [])
+    setPreference((current) => ({
+      panePositions: { ...current.panePositions, [pane]: undefined },
+      paneSizes: { ...current.paneSizes, [pane]: undefined },
+    }))
+  }, [setPreference])
 
   const paneElement = useCallback((pane: Pane) => (
     separate
@@ -132,8 +184,11 @@ export function useWorkspaceTourTransform({
       const frame = paneFrame(pane)
       if (frame) pinned[pane] = { left: frame.left, top: frame.top }
     }
-    setPanePositions((positions) => ({ ...pinned, ...positions }))
-  }, [paneFrame, separate])
+    setPreference((current) => ({
+      ...current,
+      panePositions: { ...pinned, ...current.panePositions },
+    }))
+  }, [paneFrame, separate, setPreference])
 
   /** A card grows right and down from where it sits, up to the viewport edge. */
   const paneBounds = useCallback((pane: Pane): PaneBounds | null => {
@@ -164,10 +219,13 @@ export function useWorkspaceTourTransform({
       frame,
     }
     pinPanes()
-    setPanePositions((positions) => ({ ...positions, [pane]: clampPosition(frame, frame) }))
+    setPreference((current) => ({
+      ...current,
+      panePositions: { ...current.panePositions, [pane]: clampPosition(frame, frame) },
+    }))
     setFrontPane(pane)
     setTransformMode('move')
-  }, [paneFrame, pinPanes, transformable])
+  }, [paneFrame, pinPanes, setPreference, transformable])
 
   const beginResize = useCallback((pane: Pane, event: ReactPointerEvent<HTMLButtonElement>) => {
     if (!transformable || window.innerWidth <= TRANSFORM_BREAKPOINT) return
@@ -201,18 +259,24 @@ export function useWorkspaceTourTransform({
     event.preventDefault()
     event.stopPropagation()
     pinPanes()
-    setPanePositions((positions) => ({
-      ...positions,
-      [pane]: clampPosition({ left: frame.left + delta.dx, top: frame.top + delta.dy }, frame),
+    setPreference((current) => ({
+      ...current,
+      panePositions: {
+        ...current.panePositions,
+        [pane]: clampPosition({ left: frame.left + delta.dx, top: frame.top + delta.dy }, frame),
+      },
     }))
     setFrontPane(pane)
-  }, [paneFrame, pinPanes, resetPane])
+  }, [paneFrame, pinPanes, resetPane, setPreference])
 
   const resizeWithKeyboard = useCallback((pane: Pane, event: ReactKeyboardEvent<HTMLButtonElement>) => {
     if (event.key === 'Home') {
       event.preventDefault()
       event.stopPropagation()
-      setPaneSizes((sizes) => ({ ...sizes, [pane]: undefined }))
+      setPreference((current) => ({
+        ...current,
+        paneSizes: { ...current.paneSizes, [pane]: undefined },
+      }))
       return
     }
     const delta = arrowDelta(event)
@@ -221,12 +285,15 @@ export function useWorkspaceTourTransform({
     event.preventDefault()
     event.stopPropagation()
     pinPanes()
-    setPaneSizes((sizes) => ({
-      ...sizes,
-      [pane]: clampSize({ width: bounds.size.width + delta.dx, height: bounds.size.height + delta.dy }, bounds),
+    setPreference((current) => ({
+      ...current,
+      paneSizes: {
+        ...current.paneSizes,
+        [pane]: clampSize({ width: bounds.size.width + delta.dx, height: bounds.size.height + delta.dy }, bounds),
+      },
     }))
     setFrontPane(pane)
-  }, [paneBounds, pinPanes])
+  }, [paneBounds, pinPanes, setPreference])
 
   useEffect(() => {
     if (!transformable) return
@@ -238,16 +305,22 @@ export function useWorkspaceTourTransform({
       const dy = event.clientY - session.startY
       if (session.mode === 'move') {
         const { pane, frame } = session
-        setPanePositions((positions) => ({
-          ...positions,
-          [pane]: clampPosition({ left: frame.left + dx, top: frame.top + dy }, frame),
+        setPreference((current) => ({
+          ...current,
+          panePositions: {
+            ...current.panePositions,
+            [pane]: clampPosition({ left: frame.left + dx, top: frame.top + dy }, frame),
+          },
         }))
         return
       }
       const { pane, bounds } = session
-      setPaneSizes((sizes) => ({
-        ...sizes,
-        [pane]: clampSize({ width: bounds.size.width + dx, height: bounds.size.height + dy }, bounds),
+      setPreference((current) => ({
+        ...current,
+        paneSizes: {
+          ...current.paneSizes,
+          [pane]: clampSize({ width: bounds.size.width + dx, height: bounds.size.height + dy }, bounds),
+        },
       }))
     }
     const finishTransform = (event: PointerEvent) => {
@@ -265,14 +338,17 @@ export function useWorkspaceTourTransform({
       window.removeEventListener('pointerup', finishTransform)
       window.removeEventListener('pointercancel', finishTransform)
     }
-  }, [transformable])
+  }, [setPreference, transformable])
 
   useEffect(() => {
     if (!transformable) return
     // A smaller window shrinks resized cards to fit and keeps every card in view.
     const keepCardsVisible = () => {
+      const enabled = window.innerWidth > TRANSFORM_BREAKPOINT
+      setTransformViewportEnabled(enabled)
+      // Keep the desktop preference intact while a narrow layout temporarily
+      // uses the guide's normal responsive placement.
       if (window.innerWidth <= TRANSFORM_BREAKPOINT) {
-        resetTransform()
         return
       }
       const available = {
@@ -284,37 +360,54 @@ export function useWorkspaceTourTransform({
         width: Math.min(size.width, available.width),
         height: Math.min(size.height, available.height),
       })
-      setPaneSizes((sizes) => {
-        const next = { ...sizes }
+      setPreference((current) => {
+        const paneSizesNext = { ...current.paneSizes }
+        const panePositionsNext = { ...current.panePositions }
+        let changed = false
         for (const pane of ['main', 'aside'] as const) {
-          const size = next[pane]
-          if (size) next[pane] = fit(size)
+          const size = paneSizesNext[pane]
+          if (size) {
+            const nextSize = fit(size)
+            if (nextSize.width !== size.width || nextSize.height !== size.height) {
+              paneSizesNext[pane] = nextSize
+              changed = true
+            }
+          }
         }
-        return next
-      })
-      setPanePositions((positions) => {
-        const next = { ...positions }
         for (const pane of ['main', 'aside'] as const) {
-          const position = next[pane]
+          const position = panePositionsNext[pane]
           const frame = frames[pane]
-          if (position && frame) next[pane] = clampPosition(position, fit(frame))
+          if (position && frame) {
+            const nextPosition = clampPosition(position, fit(frame))
+            if (nextPosition.left !== position.left || nextPosition.top !== position.top) {
+              panePositionsNext[pane] = nextPosition
+              changed = true
+            }
+          }
         }
-        return next
+        return changed
+          ? { panePositions: panePositionsNext, paneSizes: paneSizesNext }
+          : current
       })
     }
+    keepCardsVisible()
     window.addEventListener('resize', keepCardsVisible)
     return () => window.removeEventListener('resize', keepCardsVisible)
-  }, [paneFrame, resetTransform, separate, transformable])
+  }, [paneFrame, separate, setPreference, transformable])
 
   useEffect(() => {
+    if (transformPreferenceKey) return
     resetTransform()
     transformSessionRef.current = null
     setTransformMode(null)
-  }, [activeStepId, refreshKey, resetTransform])
+  }, [activeStepId, refreshKey, resetTransform, transformPreferenceKey])
+
+  const visiblePanePositions = transformViewportEnabled ? panePositions : {}
+  const visiblePaneSizes = transformViewportEnabled ? paneSizes : {}
 
   return {
-    panePositions,
-    paneSizes,
+    panePositions: visiblePanePositions,
+    paneSizes: visiblePaneSizes,
     frontPane,
     setFrontPane,
     transformMode,

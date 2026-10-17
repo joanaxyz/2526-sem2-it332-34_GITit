@@ -73,6 +73,7 @@ export function GameplayWorkspaceTour({
   refreshKey,
   collapseTarget,
   transformable = false,
+  transformPreferenceKey,
   onClose,
 }: {
   label: string
@@ -101,6 +102,8 @@ export function GameplayWorkspaceTour({
   collapseTarget?: string
   /** Let the learner move and resize guide cards while keeping them in the viewport. */
   transformable?: boolean
+  /** Persist transformable card positions and sizes in the browser under this preference key. */
+  transformPreferenceKey?: string
   onClose: (reason: WorkspaceTourCloseReason) => void
 }) {
   const markerId = `workspace-tour-arrow-${useId().replace(/:/g, '')}`
@@ -120,6 +123,7 @@ export function GameplayWorkspaceTour({
     cardElement,
     separate,
     transformable,
+    transformPreferenceKey,
     activeStepId: activeStep?.id,
     refreshKey,
   })

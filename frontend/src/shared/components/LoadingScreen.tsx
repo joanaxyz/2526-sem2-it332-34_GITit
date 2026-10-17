@@ -81,7 +81,8 @@ export function LoadingScreen({
   description?: string
   className?: string
   /** Overrides the equipped companion. Only pass it when the surface knows a
-   * companion the player has not equipped (a preview, another player's run). */
+   * companion the player has not equipped (a preview, another player's run).
+   * Pass null to intentionally hide the companion. */
   companionSlug?: string | null
   showCompanion?: boolean
 }) {
@@ -89,13 +90,14 @@ export function LoadingScreen({
   // preview surface can still pin a specific one.
   const equipped = useEquippedCompanion()
   const playerName = useAuthStore((state) => state.user?.username)
-  const slug = companionSlug ?? equipped.slug
+  const slug = companionSlug === undefined ? equipped.slug : companionSlug
+  const companionVisible = showCompanion && slug !== null
   const painted = useElapsedFlag(LOADING_PAINT_DELAY_MS)
   const slow = useElapsedFlag(LOADING_SLOW_AFTER_MS)
   // A player who owns no companion is on their first run: the default one
   // stands in, and the wait doubles as the one welcome they get. Never when an
   // explicit slug means this loader is showing somebody else's pick.
-  const welcome = !companionSlug && equipped.isUnequipped
+  const welcome = companionSlug === undefined && equipped.isUnequipped
   const greeting = playerName ? `Welcome, ${playerName}` : 'Welcome to GIT it!'
 
   // Nothing behind the screen is ready to be touched, so the page underneath
@@ -116,9 +118,9 @@ export function LoadingScreen({
       role="status"
     >
       <div className="git-it-loading-screen__frame">
-        <div className={cn('git-it-companion-loader', showCompanion && 'has-companion')}>
+        <div className={cn('git-it-companion-loader', companionVisible && 'has-companion')}>
           <div className="git-it-companion-loader__stage">
-            {showCompanion ? <CompanionRunLoader companionSlug={slug} /> : null}
+            {companionVisible ? <CompanionRunLoader companionSlug={slug} /> : null}
           </div>
           <CommitRail />
         </div>

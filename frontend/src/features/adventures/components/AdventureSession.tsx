@@ -135,7 +135,6 @@ export function AdventureSession({
   if (query.isLoading || (!query.isError && !assetsReady)) {
     return (
       <LoadingScreen
-        companionSlug={companionSlug}
         description="Preparing the repository, terminal, and command challenge."
         label="Loading adventure"
       />
@@ -163,7 +162,6 @@ export function AdventureSession({
   if (!attempt && run.status === 'started') {
     return (
       <LoadingScreen
-        companionSlug={companionSlug}
         description="Setting up the next repository."
         label="Preparing next level"
       />
