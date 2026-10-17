@@ -1,57 +1,15 @@
-import { Smile, Target, TerminalSquare } from 'lucide-react'
-
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
-import {
-  DifficultyChip,
-  type LevelFact,
-  LevelStoryCard,
-  StarTriplet,
-} from '@/shared/level/components/LevelContextPanel'
-import { RookIcon, StarSolidIcon } from '@/shared/level/components/workspaceIcons'
+import { LevelStoryCard } from '@/shared/level/components/LevelContextPanel'
 import { hasLevelContext, normalizeLevelContext } from '@/shared/level/utils/levelContext'
 
+/** Scenario and objective for a tier run. The run facts live in TierStatsBar. */
 export function TierContextPanel({ run }: { run: TierRun }) {
   const context = contextForRun(run)
-  const facts: LevelFact[] = [
-    {
-      label: 'Mode',
-      icon: RookIcon,
-      value: `Adventure${run.replay ? ' · Replay' : ''}`,
-    },
-    ...(run.difficulty
-      ? [{ label: 'Difficulty', icon: Smile, value: <DifficultyChip difficulty={run.difficulty} /> }]
-      : []),
-    {
-      label: 'Stars',
-      icon: StarSolidIcon,
-      iconClass: 'lvlctx-icon--amber',
-      value: <StarTriplet count={run.stars || 0} />,
-    },
-    {
-      label: 'Commands',
-      icon: TerminalSquare,
-      value: (
-        <span className="lvlctx-num" data-tour-target="command-budget">
-          {run.counts.counted_action_total} / {run.policy.max_counted_commands}
-        </span>
-      ),
-    },
-    {
-      label: 'Star target',
-      icon: Target,
-      value: (
-        <span className="lvlctx-num" data-tour-target="star-budget">
-          ≤ {run.policy.min_counted_commands} {run.policy.min_counted_commands === 1 ? 'command' : 'commands'}
-        </span>
-      ),
-    },
-  ]
 
   return (
     <LevelStoryCard
       title={run.tier.adventure_level_title}
       context={context}
-      facts={facts}
       labels={{
         story: 'Scenario',
         task: 'Objective',

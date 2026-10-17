@@ -26,7 +26,7 @@ const tierWorkspaceTourSteps = [
     icon: Star,
     title: 'Earn up to 3 stars',
     body: 'Solve the level for 1 star. Use no more counted commands than the Star target for 2. Do both on your first try for 3.',
-    placement: 'right',
+    placement: 'bottom',
   },
   {
     id: 'tier-budget',
@@ -34,7 +34,7 @@ const tierWorkspaceTourSteps = [
     icon: TerminalSquare,
     title: 'Watch the command limit',
     body: 'Commands shows used / limit. Changes and invalid commands count; valid read-only inspections are free. Solve by the last counted command or the run ends.',
-    placement: 'right',
+    placement: 'bottom',
   },
   {
     id: 'tier-battle',
