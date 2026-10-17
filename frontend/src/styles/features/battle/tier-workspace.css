@@ -380,6 +380,7 @@
   font-size: var(--text-base);
   line-height: 1.6;
   overflow-wrap: anywhere;
+  white-space: pre-line;
 }
 
 .tier-story-modal__section {

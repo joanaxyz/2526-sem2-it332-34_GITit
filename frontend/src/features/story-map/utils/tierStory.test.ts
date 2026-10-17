@@ -15,6 +15,30 @@ function run(scenario: Record<string, unknown>, label = 'Clone docs-portal'): St
 }
 
 describe('tierStoryContent', () => {
+  it('moves the starting point from an older saved run into the task', () => {
+    const content = tierStoryContent(run({
+      task: 'Clone api-lab into api-workshop.',
+      details: [{ label: '', value: 'Your internship starts Monday.\n\nStarting point: Outside any repository.' }],
+    }))
+    expect(content.intro).toBe('Your internship starts Monday.')
+    expect(content.task).toBe('Clone api-lab into api-workshop.\n\nStarting point: Outside any repository.')
+    expect(content.requiredValues).toEqual([])
+  })
+
+  it('does not duplicate a starting point already included in the task', () => {
+    const task = 'Clone the repository.\n\nStarting point: Outside any repository.'
+    const content = tierStoryContent(run({ story: 'Story.\n\nStarting point: Outside any repository.', task }))
+    expect(content.intro).toBe('Story.')
+    expect(content.task).toBe(task)
+  })
+
+  it('preserves the briefing from newly seeded runs', () => {
+    const task = 'Clone the repository.\n\nStarting point: Outside any repository.'
+    const content = tierStoryContent(run({ story: 'Story.', task }))
+    expect(content.intro).toBe('Story.')
+    expect(content.task).toBe(task)
+  })
+
   it('uses the first unlabeled detail as the intro and keeps labeled details as required values', () => {
     const content = tierStoryContent(
       run({
