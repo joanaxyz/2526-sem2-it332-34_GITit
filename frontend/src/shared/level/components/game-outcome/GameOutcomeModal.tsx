@@ -27,6 +27,10 @@ export type GameOutcomeStat = {
   denominator?: number
   suffix?: string
   helper: string
+  /** Per-tile accent color; falls back to the tone's primary/destructive. */
+  accentColor?: string
+  /** Shows a "Target met" chip in the tile header. */
+  targetMet?: boolean
   icon?: ComponentType<{ className?: string }>
   /** Neon icon art (battle-outcome assets); wins over `icon` when set. */
   iconSrc?: string
@@ -51,6 +55,7 @@ export function GameOutcomeModal({
   stats,
   children,
   actions,
+  headerActions,
   className,
 }: {
   open: boolean
@@ -71,6 +76,8 @@ export function GameOutcomeModal({
   /** Surface-specific section rendered between the stats and the actions. */
   children?: ReactNode
   actions?: ReactNode
+  /** Icon-button actions rendered in the top-right header cluster (alongside the close button). */
+  headerActions?: ReactNode
   className?: string
 }) {
   const isFailed = tone === 'failure'
@@ -80,7 +87,7 @@ export function GameOutcomeModal({
   // (the arc art has no zero-star variant, so starless wins keep the icon crest).
   const starArtKey = isFailed ? 'lose' : earnedStars && earnedStars > 0 ? `win-${earnedStars}` : null
   const starArt = useLazyImage(starArtKey, STAR_ART_LOADERS)
-  const statAccent = isFailed ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'
+  const defaultAccent = isFailed ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'
 
   return (
     <Modal
@@ -93,16 +100,22 @@ export function GameOutcomeModal({
       onClose={onClose}
     >
       <div className={cn('game-outcome relative overflow-hidden', isFailed ? 'is-failure' : 'is-success')}>
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
-          className="game-outcome-close"
-          onClick={onClose}
-          aria-label="Close modal"
-        >
-          <X className="size-4" />
-        </Button>
+        <div className="game-outcome-header-actions">
+          {headerActions ? (
+            <>
+              {headerActions}
+              <span className="game-outcome-header-divider" aria-hidden="true" />
+            </>
+          ) : null}
+          <button
+            type="button"
+            className="game-outcome-header-btn"
+            onClick={onClose}
+            aria-label="Close modal"
+          >
+            <X className="size-3.5" />
+          </button>
+        </div>
         {!isFailed ? <GameOutcomeConfetti /> : null}
 
         <div className="game-outcome-hero relative text-center">
@@ -137,12 +150,12 @@ export function GameOutcomeModal({
           {badges ? <div className="mt-3 flex flex-wrap justify-center gap-2">{badges}</div> : null}
 
           {stats && stats.length ? (
-            <div className="game-outcome-stat-grid mt-4 grid grid-cols-2 gap-2.5 text-left sm:grid-cols-3">
+            <div className="game-outcome-stat-grid">
               {stats.map((stat, index) => (
                 <GameOutcomeStatTile
                   key={stat.label}
                   {...stat}
-                  accentColor={statAccent}
+                  accentColor={stat.accentColor ?? defaultAccent}
                   animationDelay={160 + index * 60}
                 />
               ))}
@@ -151,7 +164,7 @@ export function GameOutcomeModal({
 
           {children}
 
-          {actions ? <div className="game-outcome-actions mt-4 flex flex-wrap justify-center gap-3">{actions}</div> : null}
+          {actions ? <div className="game-outcome-actions">{actions}</div> : null}
         </div>
       </div>
     </Modal>
