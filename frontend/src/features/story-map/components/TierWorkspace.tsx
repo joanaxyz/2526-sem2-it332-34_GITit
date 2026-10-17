@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useBlocker, useNavigate, useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
 import { TierExitConfirmModal } from '@/features/story-map/components/TierExitConfirmModal'
 import { TierStatusHeader } from '@/features/story-map/components/TierStatusHeader'
+import { TierStatsBar } from '@/features/story-map/components/tier-workspace/TierStatsBar'
+import { TierStoryModal } from '@/features/story-map/components/tier-workspace/TierStoryModal'
 import { TierOutcomeModal } from '@/features/story-map/components/TierOutcomeModal'
 import { TierStartOverConfirmModal } from '@/features/story-map/components/TierStartOverConfirmModal'
 import { TierWorkspaceMain } from '@/features/story-map/components/TierWorkspaceMain'
@@ -19,22 +20,17 @@ import { useLeaveAbandonedRun } from '@/features/story-map/hooks/useLeaveAbandon
 import { useTierRun } from '@/features/story-map/hooks/useTierRun'
 import { useTierRunAssets } from '@/features/story-map/hooks/useTierRunAssets'
 import { invalidateTierProgressQueries } from '@/features/story-map/utils/tierRunCache'
-import {
-  DEFAULT_TERMINAL_PANE_RATIO,
-  TERMINAL_PANE_RATIO_KEY,
-  clamp,
-  constrainedTerminalPaneRatio,
-  mapUrlForRun,
-  ratioSanitizer,
-} from '@/features/story-map/components/tierWorkspaceLayout'
+import { mapUrlForRun } from '@/features/story-map/components/tierWorkspaceLayout'
 import { useTierScaffolding } from '@/features/story-map/scaffolding/useTierScaffolding'
 import { useAuthStore } from '@/shared/auth/useAuth'
-import { useDragResize } from '@/shared/level/hooks/useDragResize'
-import { hasSeenLevelTour, markLevelTourSeen } from '@/shared/level/utils/levelTour'
 import { terminalPrompt } from '@/shared/level/terminalPrompt'
 import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
 import { useOutcomeAnimationGate } from '@/shared/level-runtime/outcomeAnimation'
 import { useTierDagAnimation } from '@/features/story-map/hooks/useTierDagAnimation'
+import { useTierAutoOpenQueue } from '@/features/story-map/hooks/useTierAutoOpenQueue'
+import { useTierRepoDrawer } from '@/features/story-map/hooks/useTierRepoDrawer'
+import { TIER_REPO_GRAPH_ID } from '@/features/story-map/components/tier-workspace/TierDiagramStage'
+import { tierStoryContent } from '@/features/story-map/utils/tierStory'
 import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { ErrorState } from '@/shared/components/ErrorState'
@@ -65,11 +61,6 @@ export function TierWorkspace() {
   const mutation = useTierCommandSubmission(runId)
   const { clearToast, evaluateAndNotify } = useTierScaffolding(runId)
   const [dismissedCompletionRunId, setDismissedCompletionRunId] = useState<number | null>(null)
-  const [terminalPaneRatio, setTerminalPaneRatio] = usePersistentState(
-    TERMINAL_PANE_RATIO_KEY,
-    DEFAULT_TERMINAL_PANE_RATIO,
-    ratioSanitizer(0.4, 0.92, DEFAULT_TERMINAL_PANE_RATIO),
-  )
   const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
   const dagAnimation = useTierDagAnimation()
   const battleDirector = useBattleDirector()
@@ -80,12 +71,18 @@ export function TierWorkspace() {
   })
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
   const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
-  const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
   // A hidden guide stays hidden for its lesson (across commands) until reopened.
   const [hiddenGuideKey, setHiddenGuideKey] = useState<string | null>(null)
   const [selectedGuideKey, setSelectedGuideKey] = useState<string | null>(null)
   const commandGuides = useCommandGuideHistory(runId, run?.tutor)
   const user = useAuthStore((state) => state.user)
+  const autoOpen = useTierAutoOpenQueue({
+    userId: user?.id,
+    adventureLevelId: run?.tier.adventure_level_id,
+    difficulty: run?.tier.difficulty,
+    started: run?.status === 'started',
+  })
+  const repoDrawer = useTierRepoDrawer(run?.repository_state)
   const [exitNavigationRunId, setExitNavigationRunId] = useState<number | null>(null)
   const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
   const latestRunRef = useRef<TierRun | null>(null)
@@ -96,15 +93,6 @@ export function TierWorkspace() {
     if (!activeRunId || bypassNavigationRunId.current === activeRunId) return false
     return currentLocation.pathname !== nextLocation.pathname || currentLocation.search !== nextLocation.search
   })
-  const terminalGridRef = useRef<HTMLDivElement>(null)
-  const beginTerminalPaneResize = useDragResize(terminalGridRef, 'col-resize', (event, bounds) => {
-    setTerminalPaneRatio(constrainedTerminalPaneRatio(event.clientX, bounds))
-  })
-
-  const resizeStep = 0.03
-  const keyboardResizeTerminalPane = (delta: number) => {
-    setTerminalPaneRatio((value) => clamp(value + delta * resizeStep, 0.4, 0.92))
-  }
 
   useEffect(() => {
     latestRunRef.current = run
@@ -162,11 +150,10 @@ export function TierWorkspace() {
   if (!run) return <ErrorState title="Could not load adventure workspace" description="The API returned no run data." />
 
   const shellPrompt = terminalPrompt(user?.username)
-  const tourKey = `${user?.id ?? 'guest'}:tier`
-  const tourOpen =
-    run.status === 'started' && dismissedTourKey !== tourKey && !hasSeenLevelTour(user?.id, 'tier')
+  const { storyOpen, tourOpen, guideAllowed } = autoOpen
+  const story = tierStoryContent(run)
   const guideHidden = run.tutor?.phase === 'introduction' && run.tutor.teaching_key === hiddenGuideKey
-  const introductionOpen = Boolean(run.tutor && !tourOpen
+  const introductionOpen = Boolean(run.tutor && guideAllowed
     && !mutation.isPending && !dagAnimation.animating && !battleDirector.animating
     && !guideHidden)
   const replayGuide = selectedGuideKey
@@ -199,20 +186,15 @@ export function TierWorkspace() {
 
   const isReplaying = retryMutation.isPending || replayMutation.isPending
   const outcomeModalOpen =
-    !introductionOpen && !replayGuide &&
+    !storyOpen && !introductionOpen && !replayGuide &&
     !exitNavigationPending &&
     (run.status === 'completed' || run.status === 'failed') &&
     !mutation.isPending &&
     dismissedCompletionRunId !== run.id &&
     completionAnimationReady(run.id)
 
-  const terminalGridStyle = {
-    '--terminal-pane-size': `${terminalPaneRatio}fr`,
-    '--feedback-pane-size': `${1 - terminalPaneRatio}fr`,
-  } as CSSProperties
-
   return (
-    <div className="workspace-bg gameplay-workspace-screen">
+    <div className="workspace-bg gameplay-workspace-screen tier-workspace-screen">
       <TierStatusHeader
         run={run}
         isExiting={exitMutation.isPending || exitNavigationPending}
@@ -221,13 +203,28 @@ export function TierWorkspace() {
         onRetry={() => retryMutation.mutate()}
         onStartOver={() => setStartOverConfirmOpen(true)}
         onReplay={() => replayMutation.mutate(run.tier.id)}
-        commandGuides={run.status === 'started' && !tourOpen ? commandGuides : []}
+        commandGuides={run.status === 'started' && guideAllowed ? commandGuides : []}
         currentCommandGuideKey={run.tutor?.teaching_key}
         commandGuideOpen={introductionOpen || Boolean(replayGuide)}
         onSelectCommandGuide={openCommandGuide}
       />
+      <TierStatsBar
+        run={run}
+        repoGraph={repoDrawer.drawerMode ? {
+          open: repoDrawer.open,
+          hasUpdate: repoDrawer.hasUpdate,
+          controls: TIER_REPO_GRAPH_ID,
+          buttonRef: repoDrawer.buttonRef,
+          onOpen: repoDrawer.openDrawer,
+        } : undefined}
+      />
       <TierWorkspaceMain
         teachingActive={introductionOpen}
+        repoGraphDrawer={repoDrawer.drawerMode ? {
+          open: repoDrawer.open,
+          openCount: repoDrawer.openCount,
+          onClose: repoDrawer.closeDrawer,
+        } : undefined}
         run={run}
         lines={lines}
         shellPrompt={shellPrompt}
@@ -242,8 +239,6 @@ export function TierWorkspace() {
         writeDisabled={run.status !== 'started' || writeFileMutation.isPending}
         dagAnimation={dagAnimation}
         battleDirector={battleDirector}
-        terminalGridRef={terminalGridRef}
-        terminalGridStyle={terminalGridStyle}
         mutationPending={mutation.isPending}
         onToggleProjectFiles={() => setProjectFilesOpen((value) => !value)}
         onCreateFile={async (input) => {
@@ -263,9 +258,7 @@ export function TierWorkspace() {
           return updatedRun
         }}
         onOpenFile={setWorkspaceEditorPath}
-        onBeginTerminalPaneResize={beginTerminalPaneResize}
-        onKeyboardTerminalPaneResize={keyboardResizeTerminalPane}
-        onResetTerminalPaneResize={() => setTerminalPaneRatio(DEFAULT_TERMINAL_PANE_RATIO)}
+        onOpenStory={autoOpen.openStory}
         onCommand={submit}
         onCloseEditor={() => setWorkspaceEditorPath(null)}
         onWriteFile={(input) => writeFileMutation.mutateAsync(input)}
@@ -304,14 +297,19 @@ export function TierWorkspace() {
             : null
         }
       />
+      <TierStoryModal
+        open={storyOpen}
+        title={story.title}
+        intro={story.intro}
+        task={story.task}
+        onClose={autoOpen.closeStory}
+      />
       {tourOpen ? (
         <TierWorkspaceTour
-          key={`${tourKey}:${run.id}`}
+          key={`${user?.id ?? 'guest'}:tier:${run.id}`}
           runId={run.id}
-          onClose={() => {
-            markLevelTourSeen(user?.id, 'tier')
-            setDismissedTourKey(tourKey)
-          }}
+          onClose={autoOpen.closeTour}
+          targetInDrawer={repoDrawer.drawerMode && Boolean(run.scaffolding.expected_state && run.expected_state)}
         />
       ) : null}
       <TierExitConfirmModal

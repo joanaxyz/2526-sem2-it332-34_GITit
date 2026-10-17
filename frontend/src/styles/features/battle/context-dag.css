@@ -219,10 +219,6 @@
   min-height: 0;
 }
 
-.tier-repository-view.has-target {
-  grid-template-rows: repeat(2, minmax(0, 1fr));
-}
-
 .tier-gameplay-workspace {
   grid-template-columns: clamp(17.5rem, 19vw, 20rem) minmax(0, 1fr) clamp(20rem, 27vw, 32rem);
 }

@@ -379,10 +379,10 @@ class AdventureLevelTierCommandProcessingService:
 
 
 def _uses_contextual_feedback(run: AdventureLevelTierRun) -> bool:
-    return ScaffoldingService().shows_contextual_feedback(run.tier.difficulty)
+    return ScaffoldingService().supports_for_tier(run.tier.difficulty)["contextual_feedback"]
 
 
 def _visible_target_state(run: AdventureLevelTierRun) -> dict | None:
-    if ScaffoldingService().shows_expected_state(run.tier.difficulty):
+    if ScaffoldingService().supports_for_tier(run.tier.difficulty)["expected_state"]:
         return run.selected_variant.target_state
     return None

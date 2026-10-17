@@ -164,7 +164,49 @@
   background: linear-gradient(180deg, rgba(1, 8, 19, 0.88), rgba(1, 8, 19, 0.98));
 }
 
+/* Docked input (TerminalPanel dockInput, opt-in): the history fills the panel
+   and scrolls on its own, anchored to the bottom so the newest line sits right
+   above an input row pinned to the panel's foot. Only these opt-in classes are
+   styled here; the default stream layout above is unchanged. */
+.terminal-output--docked {
+  display: flex;
+  flex-direction: column;
+  overflow-x: hidden;
+  overflow-y: auto;
+  cursor: text;
+}
+
+/* margin-top:auto (not justify-content:flex-end) keeps the history anchored to
+   the bottom while it is short and still scrollable once it overflows. */
+.terminal-history {
+  margin-top: auto;
+}
+
+.terminal-output--docked .terminal-line {
+  overflow-wrap: anywhere;
+}
+
+.terminal-input-dock {
+  flex: 0 0 auto;
+  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.14);
+  padding: var(--space-3) var(--space-4) var(--space-4);
+  background: linear-gradient(180deg, rgba(1, 8, 19, 0.88), rgba(1, 8, 19, 0.98));
+}
+
+.terminal-input-dock .command-input {
+  position: static;
+  align-items: center;
+  margin: 0;
+  border-top: 0;
+  padding: 0;
+  background: transparent;
+}
+
 @media (max-width: 600px) {
+  .terminal-input-dock {
+    padding: var(--space-2) var(--space-3) var(--space-3);
+  }
+
   .command-input-paste span {
     display: none;
   }

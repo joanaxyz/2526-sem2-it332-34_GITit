@@ -132,6 +132,26 @@ describe('LiveDagPanel', () => {
     expect(screen.getByTitle(/Staged: src\/form\.js/)).toBeInTheDocument()
   })
 
+  it('shows its title band by default and drops it when a host owns the heading', () => {
+    const { container, rerender } = render(<LiveDagPanel title="Expected State" snapshot={snapshot} />)
+    const card = container.querySelector('.live-dag-panel') as HTMLElement
+
+    expect(screen.getByText('Expected State')).toBeInTheDocument()
+    expect(card.style.borderTop).not.toBe('')
+
+    rerender(<LiveDagPanel title="Expected State" snapshot={snapshot} showHeader={false} />)
+
+    expect(screen.queryByText('Expected State')).not.toBeInTheDocument()
+    expect(card.style.borderTop).toBe('')
+    expect(screen.getByTitle(/commit c2/i)).toBeInTheDocument()
+  })
+
+  it('keeps announcing command activity without its title band', () => {
+    render(<LiveDagPanel snapshot={snapshot} showHeader={false} activity="processing" />)
+
+    expect(screen.getByText('Repository command running')).toHaveAttribute('role', 'status')
+  })
+
   it('can render commits in a horizontal flow', () => {
     render(<LiveDagPanel snapshot={snapshot} layoutDirection="horizontal" />)
 

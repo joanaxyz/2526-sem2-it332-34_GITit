@@ -1,11 +1,8 @@
-import type { CSSProperties, RefObject } from 'react'
+import type { ComponentProps, CSSProperties } from 'react'
 
-import {
-  TierDiagramStage,
-  TierSidebar,
-  TierTerminalStage,
-  type ResizeStart,
-} from '@/features/story-map/components/TierWorkspacePanels'
+import { TierDiagramStage } from '@/features/story-map/components/tier-workspace/TierDiagramStage'
+import { TierSidebar } from '@/features/story-map/components/tier-workspace/TierSidebar'
+import { TierTerminalStage } from '@/features/story-map/components/tier-workspace/TierTerminalStage'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { WorkspaceEditorOverlay } from '@/shared/level/components/WorkspaceEditorOverlay'
 import type { TerminalLine } from '@/shared/level/types'
@@ -20,6 +17,7 @@ import { WORKSPACE_BATTLE_STAGE_ROW } from '@/shared/level/workspaceLayout'
 
 export function TierWorkspaceMain({
   teachingActive,
+  repoGraphDrawer,
   run,
   lines,
   shellPrompt,
@@ -29,22 +27,20 @@ export function TierWorkspaceMain({
   writeDisabled,
   dagAnimation,
   battleDirector,
-  terminalGridRef,
-  terminalGridStyle,
   mutationPending,
   onToggleProjectFiles,
   onCreateFile,
   onRenameFile,
   onDeleteFile,
   onOpenFile,
-  onBeginTerminalPaneResize,
-  onKeyboardTerminalPaneResize,
-  onResetTerminalPaneResize,
+  onOpenStory,
   onCommand,
   onCloseEditor,
   onWriteFile,
 }: {
   teachingActive?: boolean
+  /** Present while the layout shows the repository graph as a drawer. */
+  repoGraphDrawer?: ComponentProps<typeof TierDiagramStage>['drawer']
   run: TierRun
   lines: TerminalLine[]
   shellPrompt: string
@@ -54,17 +50,13 @@ export function TierWorkspaceMain({
   writeDisabled: boolean
   dagAnimation: TierDagAnimationController
   battleDirector: BattleDirector
-  terminalGridRef: RefObject<HTMLDivElement | null>
-  terminalGridStyle: CSSProperties
   mutationPending: boolean
   onToggleProjectFiles: () => void
   onCreateFile: (input: WorkspaceFileInput) => Promise<TierRun>
   onRenameFile: (input: WorkspaceFileRenameInput) => Promise<TierRun>
   onDeleteFile: (path: string) => Promise<TierRun>
   onOpenFile: (path: string | null) => void
-  onBeginTerminalPaneResize: ResizeStart
-  onKeyboardTerminalPaneResize: (delta: number) => void
-  onResetTerminalPaneResize: () => void
+  onOpenStory: () => void
   onCommand: (command: string) => void
   onCloseEditor: () => void
   onWriteFile: (input: WorkspaceFileInput) => Promise<TierRun>
@@ -73,6 +65,7 @@ export function TierWorkspaceMain({
     <main className="gameplay-workspace tier-gameplay-workspace">
       <TierSidebar
         run={run}
+        teachingActive={teachingActive}
         projectFilesOpen={projectFilesOpen}
         workspaceEditorPath={workspaceEditorPath}
         createDisabled={createDisabled}
@@ -81,31 +74,27 @@ export function TierWorkspaceMain({
         onRenameFile={onRenameFile}
         onDeleteFile={onDeleteFile}
         onOpenFile={onOpenFile}
+        onOpenStory={onOpenStory}
       />
       <section
         className="gameplay-workspace__main challenge-workspace__main tier-workspace__main"
-        style={{ gridTemplateRows: `${WORKSPACE_BATTLE_STAGE_ROW} minmax(13rem, 1fr)` }}
+        style={{ '--tier-battle-row': WORKSPACE_BATTLE_STAGE_ROW } as CSSProperties}
       >
         <TierBattlePanel run={run} director={battleDirector} />
         <TierTerminalStage
-          teachingActive={teachingActive}
           run={run}
           lines={lines}
           prompt={shellPrompt}
-          terminalGridRef={terminalGridRef}
-          terminalGridStyle={terminalGridStyle}
           mutationPending={mutationPending}
           dagAnimating={dagAnimation.animating}
           battleAnimating={battleDirector.animating}
-          onBeginTerminalPaneResize={onBeginTerminalPaneResize}
-          onKeyboardTerminalPaneResize={onKeyboardTerminalPaneResize}
-          onResetTerminalPaneResize={onResetTerminalPaneResize}
           onCommand={onCommand}
         />
       </section>
       <TierDiagramStage
         run={run}
         animation={dagAnimation}
+        drawer={repoGraphDrawer}
       />
       <WorkspaceEditorOverlay
         snapshot={run.repository_state}
