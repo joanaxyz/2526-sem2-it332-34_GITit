@@ -1,4 +1,5 @@
-import type { CSSProperties, ComponentType } from 'react'
+import type { CSSProperties, ComponentType, HTMLAttributes } from 'react'
+import { CheckCircle2 } from 'lucide-react'
 
 import { useCountUp } from './useCountUp'
 
@@ -10,14 +11,20 @@ export type GameOutcomeStatTileProps = {
   helper: string
   accentColor: string
   animationDelay: number
+  /** Shows a small "Target met" chip in the header row. */
+  targetMet?: boolean
   /** Optional glyph rendered in the accent chip; lucide icons satisfy this. */
   icon?: ComponentType<{ className?: string }>
   /** Neon icon art (battle-outcome assets); wins over `icon` when set. */
   iconSrc?: string
+  style?: HTMLAttributes<HTMLDivElement>['style']
 }
 
 /**
- * Animated stat tile shared by the challenge and adventure game outcome modals.
+ * Animated stat tile. All three tiles maintain identical height via
+ * min-height on `.game-outcome-stat-tile`, and a progress-bar slot is
+ * always reserved (empty track when there is no denominator) so numbers
+ * and captions stay horizontally aligned across the row.
  */
 export function GameOutcomeStatTile({
   label,
@@ -27,8 +34,10 @@ export function GameOutcomeStatTile({
   helper,
   accentColor,
   animationDelay,
+  targetMet,
   icon: Icon,
   iconSrc,
+  style,
 }: GameOutcomeStatTileProps) {
   const animatedNum = useCountUp(numerator, 900, animationDelay + 50)
   const hasBar = denominator !== undefined && denominator > 0
@@ -36,22 +45,11 @@ export function GameOutcomeStatTile({
 
   return (
     <div
-      className="game-outcome-stat-tile group relative overflow-hidden rounded-xl border border-border/60 p-2.5 transition-all duration-200 hover:-translate-y-0.5"
-      style={
-        {
-          animationDelay: `${animationDelay}ms`,
-          background: `linear-gradient(150deg, color-mix(in srgb, ${accentColor} 16%, transparent) 0%, color-mix(in srgb, ${accentColor} 5%, transparent) 52%, hsl(var(--background) / 0.34) 100%)`,
-          boxShadow: `inset 0 0 0 1px color-mix(in srgb, ${accentColor} 28%, transparent)`,
-        } as CSSProperties
-      }
+      className="game-outcome-stat-tile"
+      style={{ animationDelay: `${animationDelay}ms`, ...style } as CSSProperties}
     >
-      <div
-        aria-hidden
-        className="pointer-events-none absolute -right-5 -top-6 size-16 rounded-full opacity-30 blur-2xl transition-opacity duration-200 group-hover:opacity-55"
-        style={{ background: accentColor }}
-      />
-
-      <div className="game-outcome-stat-tile-row relative">
+      {/* Header: icon + label + optional target-met chip */}
+      <div className="game-outcome-stat-header">
         {iconSrc ? (
           <img className="game-outcome-stat-icon" src={iconSrc} alt="" aria-hidden="true" />
         ) : Icon ? (
@@ -62,38 +60,43 @@ export function GameOutcomeStatTile({
             <Icon className="size-3.5" />
           </span>
         ) : null}
+        <span className="game-outcome-stat-label">{label}</span>
+        {targetMet ? (
+          <span className="game-outcome-stat-target-chip">
+            <CheckCircle2 className="size-2.5" />
+            Target
+          </span>
+        ) : null}
+      </div>
 
-        <div className="game-outcome-stat-body">
-          <span className="font-mono text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{label}</span>
-
-          <div className="flex items-baseline gap-1">
-            <span
-              className="font-mono text-xl font-extrabold tracking-tight tabular-nums"
-              style={{ color: accentColor }}
-            >
-              {animatedNum}
-              {suffix}
-            </span>
-            {denominator !== undefined ? (
-              <span className="text-sm font-semibold text-muted-foreground">/ {denominator}</span>
-            ) : null}
-          </div>
-
-          {hasBar ? (
-            <div className="relative mt-1 h-1.5 overflow-hidden rounded-full bg-border/40">
-              <div
-                className="h-full rounded-full transition-[width] duration-700 ease-out"
-                style={{
-                  width: `${fillPercent}%`,
-                  background: accentColor,
-                  boxShadow: `0 0 10px color-mix(in srgb, ${accentColor} 70%, transparent)`,
-                }}
-              />
-            </div>
+      {/* Main content */}
+      <div className="game-outcome-stat-tile-main">
+        {/* Big number */}
+        <div className="game-outcome-stat-number-row">
+          <span className="game-outcome-stat-value" style={{ color: accentColor }}>
+            {animatedNum}{suffix}
+          </span>
+          {denominator !== undefined ? (
+            <span className="game-outcome-stat-denom">/ {denominator}</span>
           ) : null}
-
-          <div className="mt-1 text-xs leading-snug text-muted-foreground">{helper}</div>
         </div>
+
+        {/* Progress bar slot — always reserves height; empty if no denominator */}
+        <div className="game-outcome-stat-bar-track">
+          {hasBar ? (
+            <div
+              className="game-outcome-stat-bar-fill"
+              style={{
+                width: `${fillPercent}%`,
+                background: accentColor,
+                boxShadow: `0 0 10px color-mix(in srgb, ${accentColor} 70%, transparent)`,
+              }}
+            />
+          ) : null}
+        </div>
+
+        {/* Caption */}
+        <p className="game-outcome-stat-caption">{helper}</p>
       </div>
     </div>
   )
