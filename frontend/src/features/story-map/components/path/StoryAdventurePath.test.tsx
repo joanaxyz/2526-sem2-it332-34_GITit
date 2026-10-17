@@ -26,6 +26,7 @@ function renderPath(ui: ReactElement) {
 const mocks = vi.hoisted(() => ({
   openAdventureLevel: vi.fn(),
   openChallengeArtifact: vi.fn(),
+  onCompanionRequired: vi.fn(),
 }))
 
 vi.mock('@/features/story-map/hooks/useStoryArtifactNavigation', () => ({
@@ -118,6 +119,8 @@ describe('StoryAdventurePath challenge gate', () => {
         challenges={[challenge]}
         challengesLocked={false}
         loading={false}
+        hasCompanion
+        onCompanionRequired={mocks.onCompanionRequired}
       />,
     )
 
@@ -157,6 +160,8 @@ describe('StoryAdventurePath challenge gate', () => {
         challenges={[challenge]}
         challengesLocked={false}
         loading={false}
+        hasCompanion
+        onCompanionRequired={mocks.onCompanionRequired}
       />,
     )
 
@@ -175,6 +180,8 @@ describe('StoryAdventurePath challenge gate', () => {
         challenges={[challenge]}
         challengesLocked={false}
         loading={false}
+        hasCompanion
+        onCompanionRequired={mocks.onCompanionRequired}
       />,
     )
 
@@ -233,7 +240,7 @@ describe('StoryAdventurePath level callout', () => {
     vi.clearAllMocks()
   })
 
-  function openCallout() {
+  function openCallout(hasCompanion = true) {
     const result = renderPath(
       <StoryAdventurePath
         chapter={chapter}
@@ -241,6 +248,8 @@ describe('StoryAdventurePath level callout', () => {
         challenges={[challenge]}
         challengesLocked={false}
         loading={false}
+        hasCompanion={hasCompanion}
+        onCompanionRequired={mocks.onCompanionRequired}
       />,
     )
     const node = screen.getByRole('button', { name: /^Level 1: Stage and Commit\./ })
@@ -304,5 +313,62 @@ describe('StoryAdventurePath level callout', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'Close Stage and Commit details' }))
     expect(screen.queryByRole('region', { name: 'Stage and Commit' })).not.toBeInTheDocument()
+  })
+
+  it('asks for a companion instead of starting a tier without one', () => {
+    openCallout(false)
+
+    fireEvent.click(screen.getByRole('button', {
+      name: 'Stage and Commit, Medium tier: Continue',
+    }))
+
+    expect(mocks.onCompanionRequired).toHaveBeenCalledOnce()
+  })
+})
+
+describe('StoryAdventurePath companion gate', () => {
+  afterEach(() => {
+    cleanup()
+    vi.clearAllMocks()
+  })
+
+  it('keeps the learner on the map when a level is started without a companion', () => {
+    renderPath(
+      <StoryAdventurePath
+        chapter={chapter}
+        levels={[adventure]}
+        challenges={[challenge]}
+        challengesLocked={false}
+        loading={false}
+        hasCompanion={false}
+        onCompanionRequired={mocks.onCompanionRequired}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /^Level 1: Initialize a Repository\./ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Play Initialize a Repository' }))
+
+    expect(mocks.onCompanionRequired).toHaveBeenCalledOnce()
+    expect(mocks.openAdventureLevel).not.toHaveBeenCalled()
+  })
+
+  it('opens the level normally once a companion is equipped', () => {
+    renderPath(
+      <StoryAdventurePath
+        chapter={chapter}
+        levels={[adventure]}
+        challenges={[challenge]}
+        challengesLocked={false}
+        loading={false}
+        hasCompanion
+        onCompanionRequired={mocks.onCompanionRequired}
+      />,
+    )
+
+    fireEvent.click(screen.getByRole('button', { name: /^Level 1: Initialize a Repository\./ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Play Initialize a Repository' }))
+
+    expect(mocks.openAdventureLevel).toHaveBeenCalledWith(adventure)
+    expect(mocks.onCompanionRequired).not.toHaveBeenCalled()
   })
 })

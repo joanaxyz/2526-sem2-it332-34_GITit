@@ -311,7 +311,11 @@ export function AppTopbar({ className }: { className?: string }) {
         </span>
       </NavLink>
 
-      <CurrentUserPrimaryNav navClassName="app-nav" linkClassName="app-nav-link" />
+      <CurrentUserPrimaryNav
+        navClassName="app-nav"
+        linkClassName="app-nav-link"
+        shopTarget="desktop"
+      />
 
       <AppAccountCluster user={user} />
     </header>
@@ -328,6 +332,7 @@ export function AppMobileNav() {
       navClassName={cn('app-mobile-nav', user?.is_staff && 'has-admin')}
       linkClassName="app-mobile-nav-link"
       activeClassName="is-active"
+      shopTarget="mobile"
     />
   )
 }
