@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { TierDagAnimationController } from '@/features/story-map/hooks/useTierDagAnimation'
@@ -68,6 +68,42 @@ describe('TierDiagramStage', () => {
     expect(screen.getByRole('tab', { name: 'Expected state' })).toHaveAttribute('aria-selected', 'false')
     expect(screen.getByTestId('tier-dag-stage')).toBeInTheDocument()
     expect(screen.getByTestId('expected-dag-stage')).toBeInTheDocument()
+  })
+
+  it('is a plain column, not a dialog, outside drawer mode', () => {
+    render(<TierDiagramStage run={makeRun(true)} animation={animation} />)
+
+    const rail = document.getElementById('tier-repo-graph')!
+    expect(rail).not.toHaveAttribute('role')
+    expect(rail).not.toHaveAttribute('inert')
+    expect(screen.queryByRole('button', { name: 'Close repository graph' })).not.toBeInTheDocument()
+  })
+
+  it('stays mounted but inert and hidden while the drawer is closed', () => {
+    render(<TierDiagramStage run={makeRun(true)} animation={animation} drawer={{ open: false, openCount: 0, onClose: vi.fn() }} />)
+
+    const rail = document.getElementById('tier-repo-graph')!
+    expect(rail).toHaveClass('is-drawer', 'is-closed')
+    expect(rail).toHaveAttribute('inert')
+    expect(rail).toHaveAttribute('role', 'dialog')
+    expect(rail).not.toHaveAttribute('aria-modal')
+    expect(screen.getByTestId('tier-dag-stage')).toBeInTheDocument()
+    expect(document.querySelector('.tier-dag-backdrop')).toBeNull()
+  })
+
+  it('opens as a modal dialog that closes on Escape, the backdrop and its close button', () => {
+    const onClose = vi.fn()
+    render(<TierDiagramStage run={makeRun(true)} animation={animation} drawer={{ open: true, openCount: 1, onClose }} />)
+
+    const dialog = screen.getByRole('dialog', { name: 'Repository graph' })
+    expect(dialog).toHaveClass('is-open')
+    expect(dialog).toHaveAttribute('aria-modal', 'true')
+    expect(dialog).not.toHaveAttribute('inert')
+
+    fireEvent.keyDown(document, { key: 'Escape' })
+    fireEvent.click(document.querySelector('.tier-dag-backdrop')!)
+    fireEvent.click(screen.getByRole('button', { name: 'Close repository graph' }))
+    expect(onClose).toHaveBeenCalledTimes(3)
   })
 
   it('treats a missing expected snapshot as no Expected State', () => {

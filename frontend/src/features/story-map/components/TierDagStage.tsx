@@ -16,7 +16,7 @@ export function TierDagStage({
   zoomStorageKey: string
   className?: string
   showHeader?: boolean
-  refitKey?: number
+  refitKey?: string | number
 }) {
   return (
     <section

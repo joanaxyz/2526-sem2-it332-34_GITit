@@ -24,7 +24,7 @@ export function TierTerminalStage({
 }) {
   const cwd = useTerminalCwd(queryKeys.adventureTierRun(run.id), run.repository_state)
   return (
-    <div className="gameplay-terminal-grid" data-testid="tier-terminal-stage">
+    <div className="gameplay-terminal-grid tier-terminal-stage" data-testid="tier-terminal-stage">
       <div className="gameplay-pane" data-tour-target="terminal">
         <TerminalPanel
           lines={lines}
