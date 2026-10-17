@@ -62,4 +62,20 @@ describe('TierTerminalStage', () => {
     expect(stage.querySelector('[data-tour-target="feedback"]')).toBeNull()
     expect(screen.queryByRole('separator')).not.toBeInTheDocument()
   })
+
+  it('docks the input row at the foot of the terminal', () => {
+    render(
+      <TierTerminalStage
+        run={makeRun()}
+        lines={[]}
+        prompt="learner"
+        mutationPending={false}
+        dagAnimating={false}
+        battleAnimating={false}
+        onCommand={vi.fn()}
+      />,
+    )
+    expect(document.querySelector('.terminal-panel')).toHaveClass('terminal-panel--docked')
+    expect(screen.getByLabelText('Git command').closest('.terminal-input-dock')).not.toBeNull()
+  })
 })
