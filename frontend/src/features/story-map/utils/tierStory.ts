@@ -23,12 +23,21 @@ export function tierStoryContent(
   const context = normalizeLevelContext(run.scenario_context)
   const narrativeIndex = context.details.findIndex((detail) => !detail.label)
   const narrative = narrativeIndex >= 0 ? context.details[narrativeIndex].value : ''
+  let intro = narrative || context.story
+  let task = context.task
+  // Saved runs keep their original briefing even after the scenario bank is reseeded.
+  const startingPointIndex = intro.lastIndexOf('\n\nStarting point:')
+  if (startingPointIndex >= 0) {
+    const startingPoint = intro.slice(startingPointIndex).trim()
+    intro = intro.slice(0, startingPointIndex).trimEnd()
+    if (!task.includes(startingPoint)) task = [task, startingPoint].filter(Boolean).join('\n\n')
+  }
 
   return {
     title: run.variant?.label?.trim() || run.tier.adventure_level_title,
-    intro: narrative || context.story,
+    intro,
     realWorldContext: context.realWorldContext,
-    task: context.task,
+    task,
     requiredValues: context.details.filter((_, index) => index !== narrativeIndex),
   }
 }

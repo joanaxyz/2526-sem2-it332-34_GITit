@@ -49,6 +49,7 @@ export function TierStoryModal({
 
   const context = realWorldContext?.trim()
   const hasStory = Boolean(intro || task || context)
+  const taskParagraphs = task.split(/\n\s*\n/).filter((paragraph) => paragraph.trim())
 
   return (
     <Modal
@@ -68,7 +69,13 @@ export function TierStoryModal({
       {task ? (
         <section className="tier-story-modal__section tier-story-modal__section--task" aria-labelledby="tier-story-task">
           <h3 id="tier-story-task" className="tier-story-modal__heading">Your task</h3>
-          <p>{task}</p>
+          {taskParagraphs.map((paragraph, index) => (
+            <p key={index}>
+              {paragraph.startsWith('Starting point:') ? (
+                <><strong>Starting point:</strong>{paragraph.slice('Starting point:'.length)}</>
+              ) : paragraph}
+            </p>
+          ))}
         </section>
       ) : null}
       {hasStory ? null : <p className="tier-story-modal__empty">No story is available for this level.</p>}
