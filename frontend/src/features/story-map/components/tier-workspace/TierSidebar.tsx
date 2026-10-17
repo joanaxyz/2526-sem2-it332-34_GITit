@@ -1,3 +1,4 @@
+import { TierContextualFeedbackPanel } from '@/features/story-map/components/TierContextualFeedbackPanel'
 import { TierObjectivesCard } from '@/features/story-map/components/tier-workspace/TierObjectivesCard'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { tierObjectives } from '@/features/story-map/utils/tierObjectives'
@@ -9,8 +10,17 @@ import type {
 } from '@/shared/level/workspaceFileTypes'
 import { cn } from '@/shared/utils/cn'
 
+/**
+ * Left column: Objectives, Project files, then Contextual feedback.
+ *
+ * Feedback is part of the difficulty's scaffolding. Where the difficulty has
+ * none (Hard) the card is not rendered and Project files takes its space.
+ * While a command guide teaches, the card keeps its space so the column does
+ * not jump, but its content is hidden: the guide is the feedback then.
+ */
 export function TierSidebar({
   run,
+  teachingActive = false,
   projectFilesOpen,
   workspaceEditorPath,
   createDisabled,
@@ -21,6 +31,7 @@ export function TierSidebar({
   onOpenFile,
 }: {
   run: TierRun
+  teachingActive?: boolean
   projectFilesOpen: boolean
   workspaceEditorPath: string | null
   createDisabled: boolean
@@ -30,14 +41,15 @@ export function TierSidebar({
   onDeleteFile: (path: string) => Promise<TierRun>
   onOpenFile: (path: string | null) => void
 }) {
+  const hasFeedback = run.scaffolding.contextual_feedback
+
   return (
     <aside
-      className="gameplay-workspace__sidebar"
-      style={{
-        gridTemplateRows: projectFilesOpen
-          ? 'minmax(13rem, 0.72fr) minmax(18rem, 0.58fr)'
-          : 'minmax(13rem, 1fr) auto',
-      }}
+      className={cn(
+        'gameplay-workspace__sidebar tier-sidebar',
+        hasFeedback && 'has-feedback',
+        !projectFilesOpen && 'is-files-collapsed',
+      )}
       data-testid="tier-workspace-sidebar"
       data-tour-target="level-story"
     >
@@ -67,6 +79,16 @@ export function TierSidebar({
           onOpenFile={onOpenFile}
         />
       </div>
+
+      {hasFeedback ? (
+        <div
+          className={cn('gameplay-pane tier-feedback-region', teachingActive && 'is-suspended')}
+          data-testid="tier-feedback-region"
+          data-tour-target="feedback"
+        >
+          <TierContextualFeedbackPanel run={run} />
+        </div>
+      ) : null}
     </aside>
   )
 }

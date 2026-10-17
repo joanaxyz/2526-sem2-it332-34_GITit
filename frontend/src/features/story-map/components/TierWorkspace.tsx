@@ -1,5 +1,4 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useBlocker, useNavigate, useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 
@@ -20,17 +19,9 @@ import { useLeaveAbandonedRun } from '@/features/story-map/hooks/useLeaveAbandon
 import { useTierRun } from '@/features/story-map/hooks/useTierRun'
 import { useTierRunAssets } from '@/features/story-map/hooks/useTierRunAssets'
 import { invalidateTierProgressQueries } from '@/features/story-map/utils/tierRunCache'
-import {
-  DEFAULT_TERMINAL_PANE_RATIO,
-  TERMINAL_PANE_RATIO_KEY,
-  clamp,
-  constrainedTerminalPaneRatio,
-  mapUrlForRun,
-  ratioSanitizer,
-} from '@/features/story-map/components/tierWorkspaceLayout'
+import { mapUrlForRun } from '@/features/story-map/components/tierWorkspaceLayout'
 import { useTierScaffolding } from '@/features/story-map/scaffolding/useTierScaffolding'
 import { useAuthStore } from '@/shared/auth/useAuth'
-import { useDragResize } from '@/shared/level/hooks/useDragResize'
 import { hasSeenLevelTour, markLevelTourSeen } from '@/shared/level/utils/levelTour'
 import { terminalPrompt } from '@/shared/level/terminalPrompt'
 import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
@@ -66,11 +57,6 @@ export function TierWorkspace() {
   const mutation = useTierCommandSubmission(runId)
   const { clearToast, evaluateAndNotify } = useTierScaffolding(runId)
   const [dismissedCompletionRunId, setDismissedCompletionRunId] = useState<number | null>(null)
-  const [terminalPaneRatio, setTerminalPaneRatio] = usePersistentState(
-    TERMINAL_PANE_RATIO_KEY,
-    DEFAULT_TERMINAL_PANE_RATIO,
-    ratioSanitizer(0.4, 0.92, DEFAULT_TERMINAL_PANE_RATIO),
-  )
   const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
   const dagAnimation = useTierDagAnimation()
   const battleDirector = useBattleDirector()
@@ -97,15 +83,6 @@ export function TierWorkspace() {
     if (!activeRunId || bypassNavigationRunId.current === activeRunId) return false
     return currentLocation.pathname !== nextLocation.pathname || currentLocation.search !== nextLocation.search
   })
-  const terminalGridRef = useRef<HTMLDivElement>(null)
-  const beginTerminalPaneResize = useDragResize(terminalGridRef, 'col-resize', (event, bounds) => {
-    setTerminalPaneRatio(constrainedTerminalPaneRatio(event.clientX, bounds))
-  })
-
-  const resizeStep = 0.03
-  const keyboardResizeTerminalPane = (delta: number) => {
-    setTerminalPaneRatio((value) => clamp(value + delta * resizeStep, 0.4, 0.92))
-  }
 
   useEffect(() => {
     latestRunRef.current = run
@@ -207,11 +184,6 @@ export function TierWorkspace() {
     dismissedCompletionRunId !== run.id &&
     completionAnimationReady(run.id)
 
-  const terminalGridStyle = {
-    '--terminal-pane-size': `${terminalPaneRatio}fr`,
-    '--feedback-pane-size': `${1 - terminalPaneRatio}fr`,
-  } as CSSProperties
-
   return (
     <div className="workspace-bg gameplay-workspace-screen tier-workspace-screen">
       <TierStatusHeader
@@ -244,8 +216,6 @@ export function TierWorkspace() {
         writeDisabled={run.status !== 'started' || writeFileMutation.isPending}
         dagAnimation={dagAnimation}
         battleDirector={battleDirector}
-        terminalGridRef={terminalGridRef}
-        terminalGridStyle={terminalGridStyle}
         mutationPending={mutation.isPending}
         onToggleProjectFiles={() => setProjectFilesOpen((value) => !value)}
         onCreateFile={async (input) => {
@@ -265,9 +235,6 @@ export function TierWorkspace() {
           return updatedRun
         }}
         onOpenFile={setWorkspaceEditorPath}
-        onBeginTerminalPaneResize={beginTerminalPaneResize}
-        onKeyboardTerminalPaneResize={keyboardResizeTerminalPane}
-        onResetTerminalPaneResize={() => setTerminalPaneRatio(DEFAULT_TERMINAL_PANE_RATIO)}
         onCommand={submit}
         onCloseEditor={() => setWorkspaceEditorPath(null)}
         onWriteFile={(input) => writeFileMutation.mutateAsync(input)}
