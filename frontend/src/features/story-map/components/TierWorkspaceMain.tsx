@@ -1,11 +1,6 @@
-import type { CSSProperties, RefObject } from 'react'
-
 import { TierDiagramStage } from '@/features/story-map/components/tier-workspace/TierDiagramStage'
 import { TierSidebar } from '@/features/story-map/components/tier-workspace/TierSidebar'
-import {
-  TierTerminalStage,
-  type ResizeStart,
-} from '@/features/story-map/components/tier-workspace/TierTerminalStage'
+import { TierTerminalStage } from '@/features/story-map/components/tier-workspace/TierTerminalStage'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { WorkspaceEditorOverlay } from '@/shared/level/components/WorkspaceEditorOverlay'
 import type { TerminalLine } from '@/shared/level/types'
@@ -29,17 +24,12 @@ export function TierWorkspaceMain({
   writeDisabled,
   dagAnimation,
   battleDirector,
-  terminalGridRef,
-  terminalGridStyle,
   mutationPending,
   onToggleProjectFiles,
   onCreateFile,
   onRenameFile,
   onDeleteFile,
   onOpenFile,
-  onBeginTerminalPaneResize,
-  onKeyboardTerminalPaneResize,
-  onResetTerminalPaneResize,
   onCommand,
   onCloseEditor,
   onWriteFile,
@@ -54,17 +44,12 @@ export function TierWorkspaceMain({
   writeDisabled: boolean
   dagAnimation: TierDagAnimationController
   battleDirector: BattleDirector
-  terminalGridRef: RefObject<HTMLDivElement | null>
-  terminalGridStyle: CSSProperties
   mutationPending: boolean
   onToggleProjectFiles: () => void
   onCreateFile: (input: WorkspaceFileInput) => Promise<TierRun>
   onRenameFile: (input: WorkspaceFileRenameInput) => Promise<TierRun>
   onDeleteFile: (path: string) => Promise<TierRun>
   onOpenFile: (path: string | null) => void
-  onBeginTerminalPaneResize: ResizeStart
-  onKeyboardTerminalPaneResize: (delta: number) => void
-  onResetTerminalPaneResize: () => void
   onCommand: (command: string) => void
   onCloseEditor: () => void
   onWriteFile: (input: WorkspaceFileInput) => Promise<TierRun>
@@ -73,6 +58,7 @@ export function TierWorkspaceMain({
     <main className="gameplay-workspace tier-gameplay-workspace">
       <TierSidebar
         run={run}
+        teachingActive={teachingActive}
         projectFilesOpen={projectFilesOpen}
         workspaceEditorPath={workspaceEditorPath}
         createDisabled={createDisabled}
@@ -88,18 +74,12 @@ export function TierWorkspaceMain({
       >
         <TierBattlePanel run={run} director={battleDirector} />
         <TierTerminalStage
-          teachingActive={teachingActive}
           run={run}
           lines={lines}
           prompt={shellPrompt}
-          terminalGridRef={terminalGridRef}
-          terminalGridStyle={terminalGridStyle}
           mutationPending={mutationPending}
           dagAnimating={dagAnimation.animating}
           battleAnimating={battleDirector.animating}
-          onBeginTerminalPaneResize={onBeginTerminalPaneResize}
-          onKeyboardTerminalPaneResize={onKeyboardTerminalPaneResize}
-          onResetTerminalPaneResize={onResetTerminalPaneResize}
           onCommand={onCommand}
         />
       </section>

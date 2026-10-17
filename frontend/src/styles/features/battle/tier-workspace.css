@@ -59,6 +59,49 @@
   font-size: var(--text-xs);
 }
 
+/* Left column: Objectives, Project files, then Contextual feedback when the
+   difficulty provides it. The grid replaces the shared sidebar's inline
+   two-row template.
+
+   Objectives sits on a minmax(0, max-content) row: grid sizing gives the fr
+   rows their minimum first, then grows Objectives up to its full content, and
+   only the leftover goes to the fr rows. So Project files and feedback shrink
+   to their minimum before Objectives is capped (and its list scrolls). */
+.gameplay-workspace__sidebar.tier-sidebar {
+  grid-template-rows: minmax(0, max-content) minmax(9rem, 1fr);
+}
+
+/* With nothing below the collapsed file list, Objectives takes the column. */
+.gameplay-workspace__sidebar.tier-sidebar.is-files-collapsed {
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.gameplay-workspace__sidebar.tier-sidebar.has-feedback {
+  grid-template-rows: minmax(0, max-content) minmax(9rem, 1fr) minmax(8rem, 1fr);
+}
+
+.gameplay-workspace__sidebar.tier-sidebar.has-feedback.is-files-collapsed {
+  grid-template-rows: minmax(0, max-content) auto minmax(8rem, 1fr);
+}
+
+/* Required values are exact literals (URLs, commit messages): break anywhere
+   rather than clip in a narrow column. */
+.tier-required-values .lvlctx-copy {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.tier-required-values .lvlctx-copy code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+/* The command guide stands in for feedback while it teaches: the card keeps
+   its space so the column does not jump, but its timeline is hidden. */
+.tier-feedback-region.is-suspended .ui-card-content {
+  visibility: hidden;
+}
+
 /* Objectives card: only the list scrolls; the Story button stays pinned. */
 .tier-objectives-region .tier-objectives__body {
   display: flex;
@@ -170,6 +213,20 @@
   .tier-objective,
   .tier-objective__box {
     transition: none;
+  }
+}
+
+/* Interim narrow layout until the drawer-or-stack decision: the shared rule
+   forces a two-row sidebar with !important, so the tier sidebar restates its
+   stacked rows the same way. */
+@media (max-width: 900px) {
+  .gameplay-workspace__sidebar.tier-sidebar {
+    grid-template-rows: auto !important;
+    grid-auto-rows: auto;
+  }
+
+  .tier-feedback-region {
+    max-height: 22rem;
   }
 }
 

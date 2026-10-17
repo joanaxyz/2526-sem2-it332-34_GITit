@@ -36,17 +36,30 @@ describe('TierTerminalStage', () => {
         run={makeRun()}
         lines={[]}
         prompt="learner"
-        terminalGridRef={{ current: null }}
-        terminalGridStyle={{}}
         mutationPending={false}
         dagAnimating={false}
         battleAnimating={false}
-        onBeginTerminalPaneResize={vi.fn()}
-        onKeyboardTerminalPaneResize={vi.fn()}
-        onResetTerminalPaneResize={vi.fn()}
         onCommand={vi.fn()}
       />,
     )
     expect(screen.queryByRole('button', { name: 'Command guide' })).not.toBeInTheDocument()
+  })
+
+  it('renders the terminal alone, with no feedback split or resize handle', () => {
+    render(
+      <TierTerminalStage
+        run={{ ...makeRun(), scaffolding: { live_dag: true, expected_state: true, contextual_feedback: true } } as TierRun}
+        lines={[]}
+        prompt="learner"
+        mutationPending={false}
+        dagAnimating={false}
+        battleAnimating={false}
+        onCommand={vi.fn()}
+      />,
+    )
+    const stage = screen.getByTestId('tier-terminal-stage')
+    expect(stage).not.toHaveClass('has-feedback')
+    expect(stage.querySelector('[data-tour-target="feedback"]')).toBeNull()
+    expect(screen.queryByRole('separator')).not.toBeInTheDocument()
   })
 })
