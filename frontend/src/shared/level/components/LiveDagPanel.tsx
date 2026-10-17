@@ -37,6 +37,8 @@ export function LiveDagPanel({
   pauseChangeAnimations = false,
   activity = 'idle',
   layoutDirection = 'vertical',
+  showHeader = true,
+  refitKey,
 }: {
   title?: string
   snapshot: RepositorySnapshot
@@ -58,6 +60,10 @@ export function LiveDagPanel({
   activity?: DagActivity
   /** Controls whether commits flow top-to-bottom or left-to-right. */
   layoutDirection?: DagLayoutDirection
+  /** Hide the title band (and its accent edge) when a host such as a tab bar owns the heading. */
+  showHeader?: boolean
+  /** Changing this re-runs the fit, e.g. when a hidden-but-mounted view becomes visible again. */
+  refitKey?: string | number
 }) {
   return (
     <RepositoryStateDiagram
@@ -72,6 +78,8 @@ export function LiveDagPanel({
       pauseChangeAnimations={pauseChangeAnimations}
       activity={activity}
       layoutDirection={layoutDirection}
+      showHeader={showHeader}
+      refitKey={refitKey}
     />
   )
 }
@@ -89,6 +97,8 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   pauseChangeAnimations = false,
   activity = 'idle',
   layoutDirection = 'vertical',
+  showHeader = true,
+  refitKey,
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -102,6 +112,8 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   pauseChangeAnimations?: boolean
   activity?: DagActivity
   layoutDirection?: DagLayoutDirection
+  showHeader?: boolean
+  refitKey?: string | number
 }) {
   const colors = VARIANT_COLORS[variant]
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
@@ -187,6 +199,12 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
     return activeNode?.data as CommitNodeData | undefined
   }, [activeCommitId, diagramNodes])
 
+  const activityStatus = activity !== 'idle' ? (
+    <span className="sr-only" role="status" aria-live="polite">
+      {activityLabel(activity)}
+    </span>
+  ) : null
+
   return (
     <Card
       className={cn(
@@ -195,16 +213,16 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
         activity === 'processing' && 'is-processing',
         className,
       )}
-      style={{ borderTop: `1.5px solid ${colors.border}` }}
+      style={showHeader ? { borderTop: `1.5px solid ${colors.border}` } : undefined}
     >
-      <CardHeader className="workspace-panel-header" style={{ background: colors.headerBg }}>
-        <span className={cn('panel-eyebrow', colors.titleClass)}>{title}</span>
-        {activity !== 'idle' ? (
-          <span className="sr-only" role="status" aria-live="polite">
-            {activityLabel(activity)}
-          </span>
-        ) : null}
-      </CardHeader>
+      {showHeader ? (
+        <CardHeader className="workspace-panel-header" style={{ background: colors.headerBg }}>
+          <span className={cn('panel-eyebrow', colors.titleClass)}>{title}</span>
+          {activityStatus}
+        </CardHeader>
+      ) : (
+        activityStatus
+      )}
       <CardContent className={cn('p-0 repository-diagram-content', contentClassName)}>
         <details className="repository-diagram-details app-scrollbar">
           <summary>Repository details</summary>
@@ -251,7 +269,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
                 aria-label={`${title} view controls`}
               />
               <FitViewOnTopologyChange
-                fitSignature={layoutCacheKey}
+                fitSignature={refitKey === undefined ? layoutCacheKey : `${layoutCacheKey}:refit-${refitKey}`}
                 topologySignature={layoutSignature}
                 fitViewPadding={fitViewPadding}
                 zoomStorageKey={zoomStorageKey}
@@ -278,6 +296,8 @@ function RepositoryStateDiagram({
   pauseChangeAnimations = false,
   activity = 'idle',
   layoutDirection = 'vertical',
+  showHeader = true,
+  refitKey,
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -291,6 +311,8 @@ function RepositoryStateDiagram({
   pauseChangeAnimations?: boolean
   activity?: DagActivity
   layoutDirection?: DagLayoutDirection
+  showHeader?: boolean
+  refitKey?: string | number
 }) {
   return (
     <ReactFlowProvider>
@@ -307,6 +329,8 @@ function RepositoryStateDiagram({
         pauseChangeAnimations={pauseChangeAnimations}
         activity={activity}
         layoutDirection={layoutDirection}
+        showHeader={showHeader}
+        refitKey={refitKey}
       />
     </ReactFlowProvider>
   )
