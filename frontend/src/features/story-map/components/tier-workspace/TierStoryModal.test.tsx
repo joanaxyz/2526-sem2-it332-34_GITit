@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { TierStoryModal } from './TierStoryModal'
@@ -12,6 +12,34 @@ const story = {
 }
 
 describe('TierStoryModal', () => {
+  it('orders the story, context, task with starting point, and start action', () => {
+    render(<TierStoryModal open {...story}
+      task={`${story.task}\n\nStarting point: You are outside any repository.`}
+      realWorldContext="Teams clone shared projects locally." onClose={vi.fn()} />)
+    const context = screen.getByRole('region', { name: 'Real-world context' })
+    const task = screen.getByRole('region', { name: 'Your task' })
+    const follows = (a: Element, b: Element) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
+    expect(follows(screen.getByText(story.intro), context)).toBe(true)
+    expect(follows(context, task)).toBe(true)
+    expect(follows(task, screen.getByRole('button', { name: /start coding/i }))).toBe(true)
+    expect(within(task).getByText(story.task).tagName).toBe('P')
+    expect(within(task).getByText('Starting point:').tagName).toBe('STRONG')
+    expect(task.querySelectorAll('p')).toHaveLength(2)
+  })
+
+  it.each(['button', 'ctrl', 'meta'])('returns focus to the terminal using %s', async (action) => {
+    const onClose = vi.fn()
+    const view = render(<>
+      <input data-command-input aria-label="Terminal" />
+      <TierStoryModal open {...story} onClose={onClose} />
+    </>)
+    if (action === 'button') fireEvent.click(screen.getByRole('button', { name: /start coding/i }))
+    else fireEvent.keyDown(document, { key: 'Enter', ctrlKey: action === 'ctrl', metaKey: action === 'meta' })
+    expect(onClose).toHaveBeenCalledTimes(1)
+    view.rerender(<input data-command-input aria-label="Terminal" />)
+    await waitFor(() => expect(screen.getByRole('textbox', { name: 'Terminal' })).toHaveFocus())
+  })
+
   it('shows the title, intro and task from the run, without an empty context section', () => {
     render(<TierStoryModal open {...story} onClose={vi.fn()} />)
 
