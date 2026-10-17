@@ -1,4 +1,4 @@
-import { ArrowRight, BookOpen, Castle, CheckCircle2, DoorOpen, RefreshCcw, Sparkles, Trophy, XCircle } from 'lucide-react'
+import { BookOpen, Castle, CheckCircle2, DoorOpen, RefreshCcw, Sparkles, Trophy, XCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
 
@@ -149,7 +149,6 @@ export function AdventureOutcomeModal({
           variant={wonBelowPerfect ? 'secondary' : 'default'}
           title={`Start ${run.next_level?.title ?? 'next level'}`}
         >
-          <ArrowRight data-icon="inline-start" />
           {isOpeningNextLevel ? 'Opening next level' : 'Next level'}
         </Button>
       ) : null}

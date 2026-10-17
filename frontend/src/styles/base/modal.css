@@ -85,6 +85,18 @@
   overflow-y: auto;
 }
 
+/* Game outcome shell: the inner .game-outcome handles its own scroll so the
+   card can use its full content height without being double-clipped. */
+.game-outcome-shell.app-modal-card {
+  overflow: visible;
+  max-height: none;
+}
+
+.game-outcome-shell .app-modal-content {
+  padding: 0;
+  overflow: visible;
+}
+
 html,
 body,
 #root {

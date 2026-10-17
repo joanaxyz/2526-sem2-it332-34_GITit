@@ -1,4 +1,4 @@
-import { ArrowRight, Castle, Gem, RefreshCcw, Sparkles, WandSparkles, XCircle } from 'lucide-react'
+import { Gem, Map, RefreshCcw, RotateCcw, Sparkles, WandSparkles, XCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
 
@@ -92,25 +92,37 @@ export function TierOutcomeModal({
           ? `Nice work. ${run.progress.completed} of ${run.progress.total} clears done for this difficulty - continue with a new scenario to finish it.`
           : 'Level cleared.'
   const Icon = isFailed ? XCircle : Sparkles
+  const targetActionsMet =
+    !isFailed &&
+    run.counts.counted_action_total > 0 &&
+    run.counts.counted_action_total <= run.counts.minimum_counted_commands
+
+  // Bar fills as actions approach the target; green when at/under target, amber otherwise.
+  const actionsAccent = targetActionsMet ? 'hsl(142 70% 55%)' : '#f59e0b'
+
   const stats = [
     {
       label: 'Actions',
       numerator: run.counts.counted_action_total,
-      denominator: run.counts.maximum_counted_commands,
-      helper: `Full stars target: ${run.counts.minimum_counted_commands}`,
+      denominator: run.counts.minimum_counted_commands,
+      helper: `Max allowed: ${run.counts.maximum_counted_commands}`,
       iconSrc: terminalIconImage,
+      accentColor: actionsAccent,
+      targetMet: targetActionsMet,
     },
     {
       label: 'Diagnostics',
       numerator: run.counts.non_counted_diagnostic_total,
       helper: 'Free inspections used',
       iconSrc: bugIconImage,
+      accentColor: 'hsl(var(--primary))',
     },
     {
       label: 'Attempts',
       numerator: run.counts.total_attempts,
       helper: isReplay ? 'Free-play attempt' : 'Saved attempt count',
       iconSrc: skullIconImage,
+      accentColor: 'hsl(var(--primary))',
     },
   ]
 
@@ -155,63 +167,64 @@ export function TierOutcomeModal({
     </>
   )
 
-  const actions = isReplay ? (
+  const headerActions = (
     <>
       {onRetry ? (
-        <Button type="button" disabled={isNavigating} onClick={onRetry}>
-          <RefreshCcw data-icon="inline-start" />
-          {isRetrying ? 'Starting fresh run' : 'Play again'}
-        </Button>
+        <button
+          type="button"
+          className="game-outcome-header-btn"
+          disabled={isNavigating}
+          onClick={onRetry}
+          aria-label={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
+          title={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
+        >
+          <RotateCcw className="size-3.5" />
+        </button>
       ) : null}
-      <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToMap}>
-        <Castle data-icon="inline-start" />
-        Back to Map
-      </Button>
+      <button
+        type="button"
+        className="game-outcome-header-btn"
+        disabled={isNavigating}
+        onClick={onBackToMap}
+        aria-label="Back to Map"
+        title="Back to Map"
+      >
+        <Map className="size-3.5" />
+      </button>
     </>
-  ) : isFailed ? (
-    <>
-      {onRetry ? (
-        <Button type="button" disabled={isNavigating} onClick={onRetry}>
-          <RefreshCcw data-icon="inline-start" />
-          {isRetrying ? 'Starting fresh variant' : 'Start fresh variant'}
-        </Button>
-      ) : null}
-      <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToMap}>
-        <Castle data-icon="inline-start" />
-        Back to Map
+  )
+
+  const actions = canAdvance ? (
+    onNextLevel && nextDifficultyLabel ? (
+      <Button type="button" disabled={isNavigating} onClick={onNextLevel}>
+        {isStartingNextLevel ? 'Opening next level…' : 'Continue'}
       </Button>
-    </>
-  ) : canAdvance ? (
-    <>
-      {onNextLevel && nextDifficultyLabel ? (
-        <Button type="button" disabled={isNavigating} onClick={onNextLevel}>
-          <ArrowRight data-icon="inline-start" />
-          {isStartingNextLevel ? 'Opening next level' : `Next: ${nextDifficultyLabel}`}
-        </Button>
-      ) : null}
+    ) : (
       <Button type="button" variant="secondary" disabled={isNavigating} onClick={onClose}>
         Stay in workspace
       </Button>
-    </>
+    )
   ) : isPartialClear ? (
-    <>
-      {onContinue ? (
-        <Button type="button" disabled={isNavigating} onClick={onContinue}>
-          <ArrowRight data-icon="inline-start" />
-          {isContinuing ? 'Starting next scenario' : 'Continue to next scenario'}
-        </Button>
-      ) : null}
-      <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToMap}>
-        <Castle data-icon="inline-start" />
-        Back to Map
+    onContinue ? (
+      <Button type="button" disabled={isNavigating} onClick={onContinue}>
+        {isContinuing ? 'Starting next scenario…' : 'Continue'}
       </Button>
-    </>
-  ) : run.status === 'completed' ? (
-    <Button type="button" variant="ghost" disabled={isNavigating} onClick={onBackToMap}>
-      <Castle data-icon="inline-start" />
-      Back to Map
-    </Button>
-  ) : null
+    ) : null
+  ) : isFailed ? (
+    onRetry ? (
+      <Button type="button" disabled={isNavigating} onClick={onRetry}>
+        <RefreshCcw data-icon="inline-start" />
+        {isRetrying ? 'Starting fresh variant…' : 'Try again'}
+      </Button>
+    ) : null
+  ) : isReplay ? (
+    onRetry ? (
+      <Button type="button" disabled={isNavigating} onClick={onRetry}>
+        <RefreshCcw data-icon="inline-start" />
+        {isRetrying ? 'Starting…' : 'Play again'}
+      </Button>
+    ) : null
+  ) : run.status === 'completed' ? null : null
 
   return (
     <GameOutcomeModal
@@ -227,6 +240,7 @@ export function TierOutcomeModal({
       message={message}
       stats={stats}
       actions={actions}
+      headerActions={headerActions}
     />
   )
 }
