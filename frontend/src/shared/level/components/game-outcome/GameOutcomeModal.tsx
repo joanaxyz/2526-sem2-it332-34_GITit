@@ -2,7 +2,6 @@ import type { ComponentType, ReactNode } from 'react'
 import { X } from 'lucide-react'
 
 import titlesImage from '@/assets/images/battle-outcome/titles.webp'
-import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
 import { useLazyImage } from '@/shared/utils/useLazyImage'
