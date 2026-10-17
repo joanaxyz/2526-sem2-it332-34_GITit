@@ -13,10 +13,12 @@ import { cn } from '@/shared/utils/cn'
 /**
  * Left column: Objectives, Project files, then Contextual feedback.
  *
- * Feedback is part of the difficulty's scaffolding. Where the difficulty has
- * none (Hard) the card is not rendered and Project files takes its space.
- * While a command guide teaches, the card keeps its space so the column does
- * not jump, but its content is hidden: the guide is the feedback then.
+ * Feedback is part of the difficulty's scaffolding (run.scaffolding.
+ * contextual_feedback, Easy only). Where the difficulty has none (Medium,
+ * Hard) the card is not rendered and Project files takes its space. While a
+ * command guide teaches on a difficulty with feedback, the card keeps its
+ * space so the column does not jump, but its content is hidden: the guide is
+ * the feedback then.
  */
 export function TierSidebar({
   run,

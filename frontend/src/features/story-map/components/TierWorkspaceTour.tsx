@@ -104,12 +104,31 @@ const tierWorkspaceTourSteps = [
   },
 ] satisfies readonly WorkspaceTourStep[]
 
-export function TierWorkspaceTour({ runId, onClose }: { runId: number; onClose: () => void }) {
+// In the 700-1099px layout the diagrams sit in a closed drawer, so the
+// "Compare the target" step has nothing to point at and is skipped; the live
+// step (anchored to the Repo graph button) mentions the target graph instead.
+const LIVE_DAG_WITH_TARGET_IN_DRAWER_BODY =
+  'Repo graph opens the live diagram of the current commits, branches, and HEAD after every valid command, and the target graph to compare it with.'
+
+const tierWorkspaceTourStepsWithTargetInDrawer = tierWorkspaceTourSteps.map((step) =>
+  step.id === 'tier-live-dag' ? { ...step, body: LIVE_DAG_WITH_TARGET_IN_DRAWER_BODY } : step,
+)
+
+export function TierWorkspaceTour({
+  runId,
+  onClose,
+  targetInDrawer = false,
+}: {
+  runId: number
+  onClose: () => void
+  /** The run has an Expected State and it sits in the closed repository-graph drawer. */
+  targetInDrawer?: boolean
+}) {
   return (
     <GameplayWorkspaceTour
       label="Level quick tour"
       finishLabel="Start level"
-      steps={tierWorkspaceTourSteps}
+      steps={targetInDrawer ? tierWorkspaceTourStepsWithTargetInDrawer : tierWorkspaceTourSteps}
       refreshKey={runId}
       onClose={onClose}
     />

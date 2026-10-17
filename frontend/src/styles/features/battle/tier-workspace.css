@@ -222,9 +222,10 @@
   }
 }
 
-/* Right column, Easy: Live DAG and Expected State behind tabs in one frame.
-   Panes stack in one grid cell; the inactive one is hidden with visibility
-   (never display:none) so React Flow keeps its measured size, zoom and pan. */
+/* Right column, Easy and Medium (any run with an Expected State): Live DAG
+   and Expected State behind tabs in one frame. Panes stack in one grid cell;
+   the inactive one is hidden with opacity (never display:none) so React Flow
+   keeps its measured size, zoom and pan. */
 .tier-dag-tabs {
   position: relative;
   display: flex;

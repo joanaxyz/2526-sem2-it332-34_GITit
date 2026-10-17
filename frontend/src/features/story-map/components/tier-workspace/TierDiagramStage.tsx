@@ -22,9 +22,9 @@ type RepoGraphDrawer = {
 }
 
 /**
- * Right column. With an Expected State (Easy) the two diagrams share a tabbed
- * card; without one (Medium, Hard) the Live DAG stands alone under its own
- * title and no tab bar is shown.
+ * Right column, driven by run.scaffolding.expected_state. With an Expected
+ * State (Easy, Medium) the two diagrams share a tabbed card; without one
+ * (Hard) the Live DAG stands alone under its own title and no tab bar is shown.
  *
  * In drawer mode the same, always-mounted rail becomes a modal dialog: while
  * closed it is moved off screen, transparent and inert (never display:none, so
