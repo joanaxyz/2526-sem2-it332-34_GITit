@@ -98,6 +98,7 @@ Avoid premature-pass checks such as `staging_empty: true` unless the initial sta
 
 The learner must never have to guess an arbitrary literal that evaluation requires.
 
+- Put the short scenario narrative in `scenario_context.story`, the one-sentence objective in `scenario_context.task`, and optional practical background in `scenario_context.real_world_context`. Empty fields are omitted from the tier story modal.
 - Name each value's purpose in the story or task prose (for example, "Use the required commit message shown below").
 - Put the exact copyable value in `scenario_context.details`. The workspace displays the value only; the label remains available to assistive technology and the copy button.
 - Do not expose whole solution commands. Command choice remains part of the exercise; only otherwise-uninferable values such as required commit messages, URLs, branch names, and refs belong in copy details.

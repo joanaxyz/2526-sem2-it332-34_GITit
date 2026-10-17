@@ -12,12 +12,11 @@ import { storyPath } from '@/shared/navigation/routes'
  * only used around playable Adventure/Challenge routes, never Home or Stories.
  */
 export function RequireCompanion({ children }: { children: ReactElement }) {
-  const { companionSlug, hasCompanion, isLoading, isError, error } = usePlayerLoadout()
+  const { hasCompanion, isLoading, isError, error } = usePlayerLoadout()
 
   if (isLoading) {
     return (
       <LoadingScreen
-        companionSlug={companionSlug}
         description="Checking your adventuring party."
         label="Loading"
       />

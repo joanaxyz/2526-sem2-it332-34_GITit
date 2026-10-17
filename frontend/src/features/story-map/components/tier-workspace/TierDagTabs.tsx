@@ -87,27 +87,29 @@ export function TierDagTabs({
 
   return (
     <section className="tier-dag-tabs" aria-label="Repository diagrams">
-      <div className="tier-dag-tablist workspace-panel-header" role="tablist" aria-label="Repository view">
-        {TABS.map((tab) => (
-          <button
-            key={tab.id}
-            ref={(element) => {
-              tabRefs.current[tab.id] = element
-            }}
-            type="button"
-            role="tab"
-            id={tabId(tab.id)}
-            className="tier-dag-tab"
-            aria-selected={active === tab.id}
-            aria-controls={panelId(tab.id)}
-            tabIndex={active === tab.id ? 0 : -1}
-            data-tour-target={tourAnchors && tab.id === 'expected' ? 'expected-state' : undefined}
-            onClick={() => select(tab.id)}
-            onKeyDown={onTabKeyDown}
-          >
-            {tab.label}
-          </button>
-        ))}
+      <div className="tier-dag-tablist workspace-panel-header">
+        <div className="tier-dag-toggle" role="tablist" aria-label="Repository view" data-active={active}>
+          {TABS.map((tab) => (
+            <button
+              key={tab.id}
+              ref={(element) => {
+                tabRefs.current[tab.id] = element
+              }}
+              type="button"
+              role="tab"
+              id={tabId(tab.id)}
+              className="tier-dag-tab"
+              aria-selected={active === tab.id}
+              aria-controls={panelId(tab.id)}
+              tabIndex={active === tab.id ? 0 : -1}
+              data-tour-target={tourAnchors && tab.id === 'expected' ? 'expected-state' : undefined}
+              onClick={() => select(tab.id)}
+              onKeyDown={onTabKeyDown}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
       </div>
 
       <div className="tier-dag-panes">

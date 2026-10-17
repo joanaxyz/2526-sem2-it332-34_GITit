@@ -78,7 +78,6 @@ export function AdventureStartPage() {
 
   return (
     <LoadingScreen
-      companionSlug={companionSlug}
       description="Preparing the repository, terminal, and command challenge."
       label="Starting adventure"
     />

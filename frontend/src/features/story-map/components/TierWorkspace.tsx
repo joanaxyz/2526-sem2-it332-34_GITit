@@ -140,7 +140,6 @@ export function TierWorkspace() {
   if (query.isLoading || (!query.isError && !assetsReady)) {
     return (
       <LoadingScreen
-        companionSlug={companionSlug}
         description="Preparing the repository, terminal, and adventure workspace."
         label="Loading adventure"
       />
@@ -301,6 +300,7 @@ export function TierWorkspace() {
         open={storyOpen}
         title={story.title}
         intro={story.intro}
+        realWorldContext={story.realWorldContext}
         task={story.task}
         onClose={autoOpen.closeStory}
       />

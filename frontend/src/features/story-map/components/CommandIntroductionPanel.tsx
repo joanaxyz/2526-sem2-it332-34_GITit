@@ -9,6 +9,7 @@ import { useCommandIntroduction } from '@/features/story-map/hooks/useCommandInt
 import { useMediaQuery } from '@/features/story-map/hooks/useMediaQuery'
 import { commandFamilyIcon, repositoryChangeIcon } from '@/features/story-map/utils/commandIntroductionIcons'
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
+import { COMMAND_GUIDE_LAYOUT_KEY } from '@/shared/level/workspaceKeys'
 
 type RepositoryChange = CommandIntroduction['needs'][number]
 type Concept = CommandIntroduction['concepts'][number]
@@ -143,6 +144,7 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
       focusCard={replay || !introduction}
       showProgress={false}
       transformable
+      transformPreferenceKey={COMMAND_GUIDE_LAYOUT_KEY}
       paneLabels={{ main: 'command card', aside: `${changeTitle.toLowerCase()} card` }}
       reveal={introduction ? CONTEXT_REGIONS : FEEDBACK_REGIONS}
       collapseTarget="[data-command-guide-launcher]"

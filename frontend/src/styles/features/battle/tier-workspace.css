@@ -242,15 +242,51 @@
 
 .tier-dag-tablist.workspace-panel-header {
   justify-content: flex-start;
-  gap: var(--space-2);
   border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.14);
   padding-inline: var(--space-3);
   background: rgba(var(--theme-primary-rgb), 0.03);
 }
 
+.tier-dag-toggle {
+  position: relative;
+  isolation: isolate;
+  display: inline-grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  padding: 2px;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.24);
+  border-radius: var(--radius-pill);
+  background: rgba(1, 8, 19, 0.72);
+  box-shadow: inset 0 1px 0 rgba(var(--theme-primary-rgb), 0.08);
+}
+
+.tier-dag-toggle::before {
+  position: absolute;
+  z-index: -1;
+  top: 2px;
+  bottom: 2px;
+  left: 2px;
+  width: calc(50% - 2px);
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--control-bg-active);
+  box-shadow: 0 0 10px rgba(var(--theme-primary-rgb), 0.12);
+  content: '';
+  transform: translateX(0);
+  transition:
+    transform 200ms var(--ease-out),
+    border-color var(--motion-normal) var(--ease-out),
+    box-shadow var(--motion-normal) var(--ease-out);
+}
+
+.tier-dag-toggle[data-active='expected']::before {
+  transform: translateX(100%);
+}
+
 .tier-dag-tab {
-  border: 1px solid transparent;
-  border-radius: var(--radius-sm);
+  position: relative;
+  border: 0;
+  border-radius: var(--radius-pill);
   padding: var(--space-1) var(--space-3);
   background: transparent;
   color: hsl(var(--muted-foreground));
@@ -262,19 +298,16 @@
   text-transform: uppercase;
   cursor: pointer;
   transition:
-    color var(--motion-fast) var(--ease-out),
-    border-color var(--motion-fast) var(--ease-out),
+    color var(--motion-normal) var(--ease-out),
     background var(--motion-fast) var(--ease-out);
 }
 
-.tier-dag-tab:hover {
+.tier-dag-tab[aria-selected='false']:hover {
   color: hsl(var(--foreground));
   background: var(--control-bg-hover);
 }
 
 .tier-dag-tab[aria-selected='true'] {
-  border-color: var(--control-border);
-  background: var(--control-bg-active);
   color: rgb(var(--theme-primary-rgb));
 }
 
@@ -297,6 +330,8 @@
   min-width: 0;
   min-height: 0;
   overflow: hidden;
+  opacity: 1;
+  transition: opacity 150ms var(--ease-out);
 }
 
 /* Hidden with opacity, not visibility: React Flow gives every node an inline
@@ -324,7 +359,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .tier-dag-tab {
+  .tier-dag-toggle::before,
+  .tier-dag-tab,
+  .tier-dag-pane {
     transition: none;
   }
 }

@@ -93,6 +93,7 @@ type CopyDetail = {
 export type LevelScenarioContext = {
   schema_version?: number
   story?: string
+  real_world_context?: string
   task?: string
   details?: CopyDetail[]
 }

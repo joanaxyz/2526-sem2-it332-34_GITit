@@ -87,6 +87,7 @@ describe('GameplayWorkspaceTour', () => {
     document.querySelectorAll('[data-test-tour-target]').forEach((element) => element.remove())
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalWidth })
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: originalHeight })
+    window.localStorage.clear()
     vi.restoreAllMocks()
   })
 
@@ -371,6 +372,52 @@ describe('GameplayWorkspaceTour', () => {
     expect(dialog).toHaveStyle({ height: '288px' })
 
     fireEvent.click(screen.getByRole('button', { name: 'Reset command guide size and position' }))
+    expect(screen.queryByRole('button', { name: 'Reset command guide size and position' })).not.toBeInTheDocument()
+  })
+
+  it('restores a transformable guide layout from browser preferences', async () => {
+    const preferenceKey = 'test:command-guide-layout'
+    addTarget('first')
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.classList.contains('workspace-tour__card')) {
+        return rect({ left: 420, top: 220, width: 352, height: 240 })
+      }
+      return rect()
+    })
+
+    const renderGuide = () => render(
+      <GameplayWorkspaceTour
+        label="Command guide"
+        steps={[step('first')]}
+        transformable
+        transformPreferenceKey={preferenceKey}
+        onClose={vi.fn()}
+      />,
+    )
+
+    const first = renderGuide()
+    await screen.findByRole('dialog', { name: 'first title' })
+    const move = screen.getByRole('button', { name: 'Move command guide' })
+    fireEvent.pointerDown(move, { clientX: 100, clientY: 100, pointerId: 1 })
+    fireEvent.pointerMove(window, { clientX: 140, clientY: 130, pointerId: 1 })
+    fireEvent.pointerUp(window, { pointerId: 1 })
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Resize command guide' }), {
+      key: 'ArrowRight',
+    })
+
+    await waitFor(() => expect(window.localStorage.getItem(`git-it:pref:${preferenceKey}`)).not.toBeNull())
+    first.unmount()
+
+    renderGuide()
+    const restored = await screen.findByRole('dialog', { name: 'first title' })
+    expect(restored).toHaveStyle({ left: '460px', top: '250px', width: '368px', height: '240px' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reset command guide size and position' }))
+    expect(restored).not.toHaveStyle({ left: '460px', top: '250px' })
+    expect(restored).toHaveStyle({ width: '352px' })
+    expect(restored.style.height).toBe('')
     expect(screen.queryByRole('button', { name: 'Reset command guide size and position' })).not.toBeInTheDocument()
   })
 
