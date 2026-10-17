@@ -5,7 +5,9 @@ import type { TierDagAnimationController } from '@/features/story-map/hooks/useT
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 
 vi.mock('@/features/story-map/components/TierDagStage', () => ({
-  TierDagStage: () => <div data-testid="tier-dag-stage">Live DAG</div>,
+  TierDagStage: ({ showHeader = true }: { showHeader?: boolean }) => (
+    <div data-testid="tier-dag-stage">{showHeader ? 'Live DAG' : null}</div>
+  ),
 }))
 
 vi.mock('@/shared/level/components/LiveDagPanel', () => ({
@@ -40,6 +42,7 @@ function makeRun(expectedState: boolean): TierRun {
       expected_state: expectedState,
       contextual_feedback: false,
     },
+    counts: { counted_action_total: 0 },
     repository_state: snapshot,
     expected_state: expectedState ? snapshot : null,
   } as unknown as TierRun
@@ -48,21 +51,29 @@ function makeRun(expectedState: boolean): TierRun {
 afterEach(cleanup)
 
 describe('TierDiagramStage', () => {
-  it('always renders the Live DAG without a collapse control', () => {
+  it('shows the Live DAG under its own title, with no tab bar, when there is no Expected State', () => {
     render(<TierDiagramStage run={makeRun(false)} animation={animation} />)
 
-    expect(screen.getByTestId('tier-dag-stage')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: /live dag panel/i })).not.toBeInTheDocument()
+    expect(screen.getByTestId('tier-dag-stage')).toHaveTextContent('Live DAG')
+    expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
     expect(screen.queryByTestId('expected-dag-stage')).not.toBeInTheDocument()
-    expect(document.querySelector('.tier-repository-view')).not.toHaveClass('has-target')
+    expect(screen.queryByRole('button', { name: /live dag panel/i })).not.toBeInTheDocument()
   })
 
-  it('stacks Expected State with Live DAG when target scaffolding is available', () => {
+  it('puts Live DAG and Expected State behind tabs when target scaffolding is available', () => {
     render(<TierDiagramStage run={makeRun(true)} animation={animation} />)
 
+    expect(screen.getByRole('tablist')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Live DAG' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Expected state' })).toHaveAttribute('aria-selected', 'false')
     expect(screen.getByTestId('tier-dag-stage')).toBeInTheDocument()
-    expect(screen.getByTestId('expected-dag-stage')).toHaveTextContent('Expected State')
-    expect(document.querySelector('.tier-repository-view')).toHaveClass('has-target')
+    expect(screen.getByTestId('expected-dag-stage')).toBeInTheDocument()
+  })
+
+  it('treats a missing expected snapshot as no Expected State', () => {
+    const run = { ...makeRun(true), expected_state: null } as TierRun
+    render(<TierDiagramStage run={run} animation={animation} />)
+
     expect(screen.queryByRole('tablist')).not.toBeInTheDocument()
   })
 })

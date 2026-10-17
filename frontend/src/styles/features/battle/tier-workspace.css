@@ -216,6 +216,112 @@
   }
 }
 
+/* Right column, Easy: Live DAG and Expected State behind tabs in one frame.
+   Panes stack in one grid cell; the inactive one is hidden with visibility
+   (never display:none) so React Flow keeps its measured size, zoom and pan. */
+.tier-dag-tabs {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.3);
+  border-radius: var(--radius-md);
+  background: rgba(1, 8, 19, 0.92);
+  box-shadow: inset 0 1px 0 rgba(var(--theme-primary-rgb), 0.1);
+}
+
+.tier-dag-tablist.workspace-panel-header {
+  justify-content: flex-start;
+  gap: var(--space-2);
+  border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.14);
+  padding-inline: var(--space-3);
+  background: rgba(var(--theme-primary-rgb), 0.03);
+}
+
+.tier-dag-tab {
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) var(--ease-out);
+}
+
+.tier-dag-tab:hover {
+  color: hsl(var(--foreground));
+  background: var(--control-bg-hover);
+}
+
+.tier-dag-tab[aria-selected='true'] {
+  border-color: var(--control-border);
+  background: var(--control-bg-active);
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.tier-dag-tab:focus-visible {
+  outline: none;
+  box-shadow: var(--control-focus-ring);
+}
+
+.tier-dag-panes {
+  position: relative; /* anchors the node legend */
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.tier-dag-pane {
+  position: relative;
+  z-index: var(--z-base);
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Hidden with opacity, not visibility: React Flow gives every node an inline
+   `visibility: visible`, which overrides an inherited `hidden` and let the
+   inactive graph paint through. The pane keeps its size (zoom and fit stay
+   valid); `inert` on the element takes it out of the tab order and the
+   accessibility tree. */
+.tier-dag-pane.is-inactive {
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The frame and tab bar belong to .tier-dag-tabs; embedded diagrams drop theirs. */
+.tier-dag-pane > .challenge-dag-stage,
+.tier-dag-pane > .live-dag-panel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.tier-dag-pane > .challenge-dag-stage::before {
+  top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tier-dag-tab {
+    transition: none;
+  }
+}
+
 /* Interim narrow layout until the drawer-or-stack decision: the shared rule
    forces a two-row sidebar with !important, so the tier sidebar restates its
    stacked rows the same way. */

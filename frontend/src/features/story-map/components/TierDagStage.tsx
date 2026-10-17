@@ -8,11 +8,15 @@ export function TierDagStage({
   animation,
   zoomStorageKey,
   className,
+  showHeader,
+  refitKey,
 }: {
   snapshot: RepositorySnapshot
   animation: TierDagAnimationController
   zoomStorageKey: string
   className?: string
+  showHeader?: boolean
+  refitKey?: number
 }) {
   return (
     <section
@@ -32,6 +36,8 @@ export function TierDagStage({
         pauseChangeAnimations={animation.activity === 'processing'}
         activity={animation.activity}
         layoutDirection="vertical"
+        showHeader={showHeader}
+        refitKey={refitKey}
       />
     </section>
   )
