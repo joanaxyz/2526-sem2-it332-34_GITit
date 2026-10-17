@@ -1,11 +1,11 @@
 import type { CSSProperties, RefObject } from 'react'
 
+import { TierDiagramStage } from '@/features/story-map/components/tier-workspace/TierDiagramStage'
+import { TierSidebar } from '@/features/story-map/components/tier-workspace/TierSidebar'
 import {
-  TierDiagramStage,
-  TierSidebar,
   TierTerminalStage,
   type ResizeStart,
-} from '@/features/story-map/components/TierWorkspacePanels'
+} from '@/features/story-map/components/tier-workspace/TierTerminalStage'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { WorkspaceEditorOverlay } from '@/shared/level/components/WorkspaceEditorOverlay'
 import type { TerminalLine } from '@/shared/level/types'
