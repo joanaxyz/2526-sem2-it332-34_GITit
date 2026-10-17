@@ -8,6 +8,15 @@ import type { CommandSubmissionOutcome } from '@/shared/level-runtime/commandOut
 
 export type TierDifficulty = 'easy' | 'medium' | 'hard'
 
+/** One row of the Objectives card. `failed` is reserved for objectives a run can break. */
+export type TierObjectiveStatus = 'pending' | 'done' | 'failed'
+
+export type TierObjective = {
+  id: string
+  text: string
+  status: TierObjectiveStatus
+}
+
 type TierCompletionRewards = {
   first_level_clear: boolean
   coins_awarded: number

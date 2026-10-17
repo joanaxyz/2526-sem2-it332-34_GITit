@@ -17,7 +17,7 @@ const tierWorkspaceTourSteps = [
     selector: '[data-tour-target="tier-brief"]',
     icon: ScrollText,
     title: 'Review the objective',
-    body: 'Scenario sets up the repository you were handed. Objective states the result you have to reach at this difficulty.',
+    body: 'Objectives state the result you have to reach at this difficulty, with any exact values you need to copy. Each one is checked off when it is done.',
     placement: 'right',
   },
   {

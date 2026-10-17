@@ -19,7 +19,7 @@ function addTarget(attribute: string, value?: string) {
   document.body.appendChild(element)
 }
 
-// The anchors here are the ones the tier-workspace panels, TierStatsBar and TierContextPanel render, so
+// The anchors here are the ones the tier-workspace panels (TierStatsBar, TierObjectivesCard...) render, so
 // a renamed target fails this test instead of silently killing the whole tour:
 // GameplayWorkspaceTour renders nothing when a required step cannot resolve.
 function addRequiredTierTargets() {

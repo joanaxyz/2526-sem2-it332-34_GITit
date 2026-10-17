@@ -59,6 +59,120 @@
   font-size: var(--text-xs);
 }
 
+/* Objectives card: only the list scrolls; the Story button stays pinned. */
+.tier-objectives-region .tier-objectives__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow: hidden;
+  padding: var(--space-3);
+}
+
+.tier-objectives__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.tier-objectives__empty {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.tier-objective-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tier-objective {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+  border: 1px solid hsl(var(--border) / 0.7);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  background: var(--control-bg);
+  color: hsl(var(--foreground));
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  transition:
+    border-color var(--motion-normal) var(--ease-out),
+    background var(--motion-normal) var(--ease-out);
+}
+
+.tier-objective__text {
+  overflow-wrap: anywhere;
+}
+
+.tier-objective__box {
+  display: grid;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.1rem;
+  place-items: center;
+  border: 1.5px solid hsl(var(--muted-foreground) / 0.6);
+  border-radius: var(--radius-sm);
+  transition:
+    border-color var(--motion-normal) var(--ease-out),
+    background var(--motion-normal) var(--ease-out);
+}
+
+.tier-objective__box svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.tier-objective.is-done {
+  border-color: hsl(var(--success) / 0.4);
+  background: hsl(var(--success) / 0.06);
+}
+
+.tier-objective.is-done .tier-objective__box {
+  border-color: hsl(var(--success));
+  background: hsl(var(--success));
+  color: hsl(var(--success-foreground));
+}
+
+.tier-objective.is-done .tier-objective__text {
+  color: hsl(var(--muted-foreground));
+  text-decoration: line-through;
+  text-decoration-color: hsl(var(--success));
+  text-decoration-thickness: 2px;
+}
+
+.tier-objective.is-failed {
+  border-color: hsl(var(--destructive) / 0.45);
+  background: hsl(var(--destructive) / 0.06);
+}
+
+.tier-objective.is-failed .tier-objective__box {
+  border-color: hsl(var(--destructive));
+  color: hsl(var(--destructive));
+}
+
+.tier-required-values {
+  margin-top: var(--space-4);
+}
+
+.tier-story-button {
+  flex: none;
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tier-objective,
+  .tier-objective__box {
+    transition: none;
+  }
+}
+
 @media (max-width: 600px) {
   .gameplay-workspace-screen.tier-workspace-screen {
     grid-template-rows: 3.35rem auto minmax(0, 1fr);
