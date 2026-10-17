@@ -183,6 +183,7 @@ class AdventureLevelTierCommandProcessingService:
         with span("step_create"):
             step = CommandStep.objects.create(
                 adventure_tier_run=run,
+                player=run.player,
                 command_text=command,
                 terminal_output=command_result.output,
                 result_category=result_category,

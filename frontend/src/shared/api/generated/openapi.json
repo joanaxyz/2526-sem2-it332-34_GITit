@@ -3173,6 +3173,42 @@
                 }
             }
         },
+        "/api/progress/stats/activity/": {
+            "get": {
+                "operationId": "progress_stats_activity_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "window",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "month",
+                                "week",
+                                "year"
+                            ],
+                            "default": "month"
+                        },
+                        "description": "Trailing activity window: week, month, or year."
+                    }
+                ],
+                "tags": [
+                    "progress"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/StatsActivityResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/progress/wallet/": {
             "get": {
                 "operationId": "progress_wallet_retrieve",
@@ -7618,6 +7654,24 @@
                 ],
                 "type": "string",
                 "description": "* `level_page` - level_page\n* `retry` - retry"
+            },
+            "StatsActivityResponse": {
+                "type": "object",
+                "properties": {
+                    "activity_trend": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StatsTrendPoint"
+                        }
+                    },
+                    "activity_window": {
+                        "$ref": "#/components/schemas/ActivityWindowEnum"
+                    }
+                },
+                "required": [
+                    "activity_trend",
+                    "activity_window"
+                ]
             },
             "StatsHeadline": {
                 "type": "object",

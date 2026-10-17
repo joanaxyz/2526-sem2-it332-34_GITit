@@ -84,6 +84,22 @@ def _step(runs, parent, *, number, days_ago=0, valid=True):
     CommandStep.objects.filter(pk=step.pk).update(
         created_at=timezone.make_aware(datetime.combine(day, time(12)))
     )
+    return step
+
+
+def test_player_steps_use_the_direct_owner_without_parent_joins(stats_players):
+    (_, player, runs), (_, other_player, other_runs) = stats_players
+    own_steps = [_step(runs, parent, number=1) for parent in runs]
+    _step(other_runs, "attempt", number=1)
+
+    queryset = MetricsService()._player_steps(player=player)
+    sql = str(queryset.query)
+
+    assert set(queryset) == set(own_steps)
+    assert all(step.player_id == player.id for step in own_steps)
+    assert other_player.id != player.id
+    assert '"practice_commandstep"."player_id"' in sql
+    assert " JOIN " not in sql
 
 
 @pytest.mark.parametrize("window,buckets", [("week", 7), ("month", 30), ("year", 12)])

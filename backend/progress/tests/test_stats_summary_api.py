@@ -1,9 +1,13 @@
 from datetime import date
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from rest_framework.test import APIClient
 
 from curriculum.models import CommandSkill
-from progress.serializers import StatsSummaryResponseSerializer
+from players.services import get_or_create_player
+from progress.serializers import StatsActivityResponseSerializer, StatsSummaryResponseSerializer
+from progress.services import MetricsService
 
 SUMMARY_KEYS = {"skill_profile", "activity_trend", "activity_window", "headline"}
 SKILL_AXIS_KEYS = {"key", "label", "hint", "value", "command"}
@@ -154,3 +158,35 @@ def test_stats_summary_activity_window_selects_the_trailing_span(db, django_user
     months = [date.fromisoformat(point["date"]) for point in year["activity_trend"]]
     assert months == sorted(months)
     assert months[-1].month == date.today().month
+
+
+def test_stats_activity_endpoint_returns_only_range_dependent_data(db, django_user_model):
+    user = django_user_model.objects.create_user(
+        username="stats-activity",
+        email="stats-activity@example.com",
+        password="pass12345",
+    )
+    client = APIClient()
+    client.force_authenticate(user=user)
+
+    response = client.get("/api/progress/stats/activity/", {"window": "week"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert set(payload) == {"activity_trend", "activity_window"}
+    assert payload["activity_window"] == "week"
+    assert len(payload["activity_trend"]) == 7
+    assert "headline" not in payload
+    assert "skill_profile" not in payload
+    documented = StatsActivityResponseSerializer(data=payload)
+    assert documented.is_valid(), documented.errors
+
+
+def test_activity_summary_uses_only_the_four_trend_queries(db, django_user_model):
+    user = django_user_model.objects.create_user(username="stats-activity-query-count")
+    player = get_or_create_player(user)
+    with CaptureQueriesContext(connection) as captured:
+        payload = MetricsService().activity_summary(player=player, activity_window="month")
+
+    assert payload["activity_window"] == "month"
+    assert len(captured) == 4

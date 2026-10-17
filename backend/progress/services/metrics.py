@@ -438,9 +438,6 @@ class MetricsService:
         Only `activity_trend` answers to `activity_window`; every headline number
         is all-time, so switching the window never changes what the rest of the
         screen reports."""
-        window = resolve_activity_window(activity_window)
-        today = timezone.localdate()
-
         # Accuracy + total volume from the unified command log (spans both modes).
         steps = self._player_steps(player=player)
         step_totals = steps.aggregate(
@@ -512,11 +509,30 @@ class MetricsService:
             "commands_run": total_steps,
         }
 
+        activity = self.activity_summary(player=player, activity_window=activity_window)
         return {
             "skill_profile": skill_profile,
-            "activity_trend": self._activity_trend(player=player, window=window, today=today),
-            "activity_window": window,
+            **activity,
             "headline": headline,
+        }
+
+    def activity_summary(self, *, player, activity_window: str | None = None) -> dict:
+        """Return only the range-dependent portion of learner stats.
+
+        Headline and skill-profile values are all-time. Keeping this narrow
+        boundary lets a chart range change avoid recomputing those invariant
+        aggregates while sharing the exact same bucketing implementation used
+        by the full summary.
+        """
+
+        window = resolve_activity_window(activity_window)
+        return {
+            "activity_trend": self._activity_trend(
+                player=player,
+                window=window,
+                today=timezone.localdate(),
+            ),
+            "activity_window": window,
         }
 
     def _command_skill_profile(self, *, player) -> list[dict]:
@@ -623,11 +639,7 @@ class MetricsService:
         return round(numerator / denominator, 1) if denominator else None
 
     def _player_steps(self, *, player):
-        return CommandStep.objects.filter(
-            Q(challenge_run__player=player)
-            | Q(attempt__player=player)
-            | Q(adventure_tier_run__player=player)
-        )
+        return CommandStep.objects.filter(player=player)
 
     def _active_days(self, *, player, since) -> set:
         adventure_completion_days = (

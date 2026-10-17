@@ -185,11 +185,15 @@ def test_stats_openapi_guard_rejects_wrong_nested_schema_signatures():
     schemas["StatsSummaryResponse"]["properties"]["skill_profile"] = {
         "items": {"$ref": "#/components/schemas/StatsSkillAxis"}
     }
+    schemas["StatsActivityResponse"]["properties"]["activity_trend"] = {
+        "items": {"$ref": "#/components/schemas/StatsTrendPoint"}
+    }
     violations = stats_openapi_contract_violations(schema)
     for component_name in (
         "RateMetric",
         "StatsSkillAxis",
         "StatsTrendPoint",
+        "StatsActivityResponse",
         "StatsSummaryResponse",
     ):
         assert any(f"{component_name} property schemas must be exact" in row for row in violations)

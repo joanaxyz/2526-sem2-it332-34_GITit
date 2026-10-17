@@ -12,4 +12,11 @@ export const statsApi = {
     const query = window ? `?window=${encodeURIComponent(window)}` : ''
     return apiOperationRequest('progress_stats_retrieve', `/progress/stats/${query}`)
   },
+  activity(window: ActivityWindow) {
+    const query = `?window=${encodeURIComponent(window)}`
+    return apiOperationRequest(
+      'progress_stats_activity_retrieve',
+      `/progress/stats/activity/${query}`,
+    )
+  },
 }

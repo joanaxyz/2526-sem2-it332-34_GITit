@@ -2,6 +2,8 @@ export const queryKeys = {
   authBootstrap: ['auth-bootstrap'] as const,
   homeSummary: ['home-summary'] as const,
   statsSummary: ['stats-summary'] as const,
+  /** Child key so invalidating statsSummary also expires every activity range. */
+  statsActivity: (window: string) => ['stats-summary', 'activity', window] as const,
   performanceSummary: ['performance-summary'] as const,
   wallet: ['wallet'] as const,
   stories: ['stories'] as const,
