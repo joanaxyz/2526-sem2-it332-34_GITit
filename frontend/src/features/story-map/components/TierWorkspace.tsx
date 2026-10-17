@@ -309,6 +309,7 @@ export function TierWorkspace() {
           key={`${user?.id ?? 'guest'}:tier:${run.id}`}
           runId={run.id}
           onClose={autoOpen.closeTour}
+          targetInDrawer={repoDrawer.drawerMode && Boolean(run.scaffolding.expected_state && run.expected_state)}
         />
       ) : null}
       <TierExitConfirmModal

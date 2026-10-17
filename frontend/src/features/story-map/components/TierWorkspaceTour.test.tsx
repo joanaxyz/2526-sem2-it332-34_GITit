@@ -86,4 +86,32 @@ describe('TierWorkspaceTour', () => {
     }
     expect(screen.getByText('11 / 11')).toBeInTheDocument()
   }, 15_000)
+
+  async function openLiveDagStep(targetInDrawer?: boolean) {
+    addRequiredTierTargets()
+    render(<TierWorkspaceTour runId={43} onClose={vi.fn()} targetInDrawer={targetInDrawer} />)
+    await screen.findByRole('heading', { name: 'Review the objective' }, { timeout: ASYNC_ASSERTION_TIMEOUT })
+    for (const heading of [
+      'Reread the story', 'Earn up to 3 stars', 'Watch the command limit', 'See command results',
+      'Track repository state',
+    ]) {
+      fireEvent.click(screen.getByRole('button', { name: /^next$/i }))
+      await screen.findByRole('heading', { name: heading })
+    }
+  }
+
+  it('mentions the target graph on the live step when the target sits in the drawer', async () => {
+    await openLiveDagStep(true)
+
+    expect(screen.getByText(/and the target graph to compare it with/)).toBeInTheDocument()
+  }, 15_000)
+
+  it('keeps the plain live step text when there is no target in a drawer', async () => {
+    await openLiveDagStep()
+
+    expect(
+      screen.getByText('The live diagram shows the current commits, branches, and HEAD after every valid command.'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/target graph/)).not.toBeInTheDocument()
+  }, 15_000)
 })
