@@ -31,7 +31,7 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
     visualizer = RepositoryVisualizationService()
     context = _scenario_context(run)
     repository_state = snapshotter.snapshot(run.repository_state, already_normalized=True)
-    supports = ScaffoldingService().supports_for(run.tier.difficulty)
+    supports = ScaffoldingService().supports_for_tier(run.tier.difficulty)
     expected_target = run.selected_variant.target_state
     target_state = run.selected_variant.target_state if supports["expected_state"] else None
     visualization = visualizer.snapshot(

@@ -91,8 +91,8 @@ describe('AppProviders', () => {
     const onSuccess = vi.fn()
     let start!: () => Promise<string>
     function PendingMutation() {
-      const mutation = useMutation({ mutationFn: () => response.promise, onSuccess })
-      useEffect(() => { start = mutation.mutateAsync }, [mutation.mutateAsync])
+      const { mutateAsync } = useMutation({ mutationFn: () => response.promise, onSuccess })
+      useEffect(() => { start = () => mutateAsync(undefined) }, [mutateAsync])
       return null
     }
     render(<AppProviders><PendingMutation /></AppProviders>)

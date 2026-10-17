@@ -40,6 +40,15 @@ describe('level tour storage', () => {
     expect(hasSeenLevelTour(7, 'adventure')).toBe(false)
   })
 
+  it('re-shows only the tier tour after its version bump', () => {
+    window.localStorage.setItem('git-it-practice-workspace-tour:v3:7:tier', 'seen')
+    markLevelTourSeen(7, 'adventure')
+
+    expect(levelTourStorageKey(7, 'tier')).toBe('git-it-practice-workspace-tour:v4:7:tier')
+    expect(hasSeenLevelTour(7, 'tier')).toBe(false)
+    expect(hasSeenLevelTour(7, 'adventure')).toBe(true)
+  })
+
   it('fails safely when browser storage reads are blocked', () => {
     vi.spyOn(localStorage, 'getItem').mockImplementation(() => {
       throw new DOMException('Blocked', 'SecurityError')

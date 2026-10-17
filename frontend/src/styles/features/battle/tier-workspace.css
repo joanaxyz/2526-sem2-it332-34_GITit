@@ -1,0 +1,385 @@
+/* Tier workspace layout (story-map tier runs only). Every rule is scoped to a
+   tier-* class so the adventure and challenge workspaces keep the shared
+   gameplay-* layout untouched. */
+
+/* Command bar, run status strip, then the workspace. */
+.gameplay-workspace-screen.tier-workspace-screen {
+  grid-template-rows: 3.65rem auto minmax(0, 1fr);
+}
+
+/* Centre column: battle stage over the terminal. The battle row size is the
+   shared WORKSPACE_BATTLE_STAGE_ROW, passed in as --tier-battle-row. */
+.gameplay-workspace__main.tier-workspace__main {
+  grid-template-rows: var(--tier-battle-row) minmax(13rem, 1fr);
+}
+
+.tier-stats-bar {
+  display: flex;
+  justify-content: flex-end;
+  min-width: 0;
+  border-bottom: 1px solid hsl(var(--border) / 0.55);
+  padding: var(--space-2) var(--space-4);
+  background: rgba(var(--theme-primary-rgb), 0.03);
+}
+
+.tier-stats {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2) var(--space-5);
+  margin: 0;
+}
+
+.tier-stat {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  white-space: nowrap;
+}
+
+.tier-stat dt {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-xs);
+  font-weight: 600;
+}
+
+.tier-stat-icon {
+  width: 0.9rem;
+  height: 0.9rem;
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.tier-stat-icon--amber {
+  color: hsl(var(--warning));
+}
+
+.tier-stat dd {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: var(--text-xs);
+}
+
+/* Left column: Objectives, Project files, then Contextual feedback when the
+   difficulty provides it. The grid replaces the shared sidebar's inline
+   two-row template.
+
+   Objectives sits on a minmax(0, max-content) row: grid sizing gives the fr
+   rows their minimum first, then grows Objectives up to its full content, and
+   only the leftover goes to the fr rows. So Project files and feedback shrink
+   to their minimum before Objectives is capped (and its list scrolls). */
+.gameplay-workspace__sidebar.tier-sidebar {
+  grid-template-rows: minmax(0, max-content) minmax(9rem, 1fr);
+}
+
+/* With nothing below the collapsed file list, Objectives takes the column. */
+.gameplay-workspace__sidebar.tier-sidebar.is-files-collapsed {
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
+.gameplay-workspace__sidebar.tier-sidebar.has-feedback {
+  grid-template-rows: minmax(0, max-content) minmax(9rem, 1fr) minmax(8rem, 1fr);
+}
+
+.gameplay-workspace__sidebar.tier-sidebar.has-feedback.is-files-collapsed {
+  grid-template-rows: minmax(0, max-content) auto minmax(8rem, 1fr);
+}
+
+/* Required values are exact literals (URLs, commit messages): break anywhere
+   rather than clip in a narrow column. */
+.tier-required-values .lvlctx-copy {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.tier-required-values .lvlctx-copy code {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-all;
+}
+
+/* The command guide stands in for feedback while it teaches: the card keeps
+   its space so the column does not jump, but its timeline is hidden. */
+.tier-feedback-region.is-suspended .ui-card-content {
+  visibility: hidden;
+}
+
+/* Objectives card: only the list scrolls; the Story button stays pinned. */
+.tier-objectives-region .tier-objectives__body {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  overflow: hidden;
+  padding: var(--space-3);
+}
+
+.tier-objectives__scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.tier-objectives__empty {
+  margin: 0;
+  color: hsl(var(--muted-foreground));
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.tier-objective-list {
+  display: grid;
+  gap: var(--space-2);
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.tier-objective {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--space-2);
+  align-items: start;
+  border: 1px solid hsl(var(--border) / 0.7);
+  border-radius: var(--radius-md);
+  padding: var(--space-2) var(--space-3);
+  background: var(--control-bg);
+  color: hsl(var(--foreground));
+  font-size: var(--text-sm);
+  line-height: 1.45;
+  transition:
+    border-color var(--motion-normal) var(--ease-out),
+    background var(--motion-normal) var(--ease-out);
+}
+
+.tier-objective__text {
+  overflow-wrap: anywhere;
+}
+
+.tier-objective__box {
+  display: grid;
+  width: 1.1rem;
+  height: 1.1rem;
+  margin-top: 0.1rem;
+  place-items: center;
+  border: 1.5px solid hsl(var(--muted-foreground) / 0.6);
+  border-radius: var(--radius-sm);
+  transition:
+    border-color var(--motion-normal) var(--ease-out),
+    background var(--motion-normal) var(--ease-out);
+}
+
+.tier-objective__box svg {
+  width: 0.75rem;
+  height: 0.75rem;
+}
+
+.tier-objective.is-done {
+  border-color: hsl(var(--success) / 0.4);
+  background: hsl(var(--success) / 0.06);
+}
+
+.tier-objective.is-done .tier-objective__box {
+  border-color: hsl(var(--success));
+  background: hsl(var(--success));
+  color: hsl(var(--success-foreground));
+}
+
+.tier-objective.is-done .tier-objective__text {
+  color: hsl(var(--muted-foreground));
+  text-decoration: line-through;
+  text-decoration-color: hsl(var(--success));
+  text-decoration-thickness: 2px;
+}
+
+.tier-objective.is-failed {
+  border-color: hsl(var(--destructive) / 0.45);
+  background: hsl(var(--destructive) / 0.06);
+}
+
+.tier-objective.is-failed .tier-objective__box {
+  border-color: hsl(var(--destructive));
+  color: hsl(var(--destructive));
+}
+
+.tier-required-values {
+  margin-top: var(--space-4);
+}
+
+.tier-story-button {
+  flex: none;
+  width: 100%;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tier-objective,
+  .tier-objective__box {
+    transition: none;
+  }
+}
+
+/* Right column, Easy and Medium (any run with an Expected State): Live DAG
+   and Expected State behind tabs in one frame. Panes stack in one grid cell;
+   the inactive one is hidden with opacity (never display:none) so React Flow
+   keeps its measured size, zoom and pan. */
+.tier-dag-tabs {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.3);
+  border-radius: var(--radius-md);
+  background: rgba(1, 8, 19, 0.92);
+  box-shadow: inset 0 1px 0 rgba(var(--theme-primary-rgb), 0.1);
+}
+
+.tier-dag-tablist.workspace-panel-header {
+  justify-content: flex-start;
+  gap: var(--space-2);
+  border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.14);
+  padding-inline: var(--space-3);
+  background: rgba(var(--theme-primary-rgb), 0.03);
+}
+
+.tier-dag-tab {
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: var(--space-1) var(--space-3);
+  background: transparent;
+  color: hsl(var(--muted-foreground));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  line-height: 1.2;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color var(--motion-fast) var(--ease-out),
+    border-color var(--motion-fast) var(--ease-out),
+    background var(--motion-fast) var(--ease-out);
+}
+
+.tier-dag-tab:hover {
+  color: hsl(var(--foreground));
+  background: var(--control-bg-hover);
+}
+
+.tier-dag-tab[aria-selected='true'] {
+  border-color: var(--control-border);
+  background: var(--control-bg-active);
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.tier-dag-tab:focus-visible {
+  outline: none;
+  box-shadow: var(--control-focus-ring);
+}
+
+.tier-dag-panes {
+  position: relative; /* anchors the node legend */
+  display: grid;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.tier-dag-pane {
+  position: relative;
+  z-index: var(--z-base);
+  grid-area: 1 / 1;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Hidden with opacity, not visibility: React Flow gives every node an inline
+   `visibility: visible`, which overrides an inherited `hidden` and let the
+   inactive graph paint through. The pane keeps its size (zoom and fit stay
+   valid); `inert` on the element takes it out of the tab order and the
+   accessibility tree. */
+.tier-dag-pane.is-inactive {
+  z-index: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* The frame and tab bar belong to .tier-dag-tabs; embedded diagrams drop theirs. */
+.tier-dag-pane > .challenge-dag-stage,
+.tier-dag-pane > .live-dag-panel {
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.tier-dag-pane > .challenge-dag-stage::before {
+  top: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tier-dag-tab {
+    transition: none;
+  }
+}
+
+/* Story modal: shared Modal chrome; only the briefing layout is tier-specific. */
+.tier-story-modal .tier-story-modal__body {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.tier-story-modal__intro,
+.tier-story-modal__section p,
+.tier-story-modal__empty {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+
+.tier-story-modal__section {
+  display: grid;
+  gap: var(--space-2);
+  border: 1px solid hsl(var(--border) / 0.7);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  background: var(--surface-raised);
+}
+
+.tier-story-modal__section--task {
+  border-color: var(--border-active);
+}
+
+.tier-story-modal__heading {
+  margin: 0;
+  color: rgb(var(--theme-primary-rgb));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+}
+
+.tier-story-modal__section--task p {
+  color: hsl(var(--foreground));
+}
+
+.tier-story-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.tier-story-modal__shortcut {
+  margin-left: var(--space-2);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  opacity: 0.75;
+}

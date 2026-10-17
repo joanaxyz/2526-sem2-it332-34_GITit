@@ -1,4 +1,4 @@
-import { CircleCheck, FolderTree, GitBranch, MessageSquareText, ScrollText, Star, Swords, Target, TerminalSquare } from 'lucide-react'
+import { BookOpenText, CircleCheck, FolderTree, GitBranch, MessageSquareText, ScrollText, Star, Swords, Target, TerminalSquare } from 'lucide-react'
 
 import {
   GameplayWorkspaceTour,
@@ -17,7 +17,15 @@ const tierWorkspaceTourSteps = [
     selector: '[data-tour-target="tier-brief"]',
     icon: ScrollText,
     title: 'Review the objective',
-    body: 'Scenario sets up the repository you were handed. Objective states the result you have to reach at this difficulty.',
+    body: 'Objectives state the result you have to reach at this difficulty, with any exact values you need to copy. Each one is checked off when it is done.',
+    placement: 'right',
+  },
+  {
+    id: 'tier-story-button',
+    selector: '[data-tour-target="tier-story"]',
+    icon: BookOpenText,
+    title: 'Reread the story',
+    body: 'The story opens when you start a level. Use Story to bring back the scenario and your task at any time.',
     placement: 'right',
   },
   {
@@ -26,7 +34,7 @@ const tierWorkspaceTourSteps = [
     icon: Star,
     title: 'Earn up to 3 stars',
     body: 'Solve the level for 1 star. Use no more counted commands than the Star target for 2. Do both on your first try for 3.',
-    placement: 'right',
+    placement: 'bottom',
   },
   {
     id: 'tier-budget',
@@ -34,7 +42,7 @@ const tierWorkspaceTourSteps = [
     icon: TerminalSquare,
     title: 'Watch the command limit',
     body: 'Commands shows used / limit. Changes and invalid commands count; valid read-only inspections are free. Solve by the last counted command or the run ends.',
-    placement: 'right',
+    placement: 'bottom',
   },
   {
     id: 'tier-battle',
@@ -96,12 +104,31 @@ const tierWorkspaceTourSteps = [
   },
 ] satisfies readonly WorkspaceTourStep[]
 
-export function TierWorkspaceTour({ runId, onClose }: { runId: number; onClose: () => void }) {
+// In the 700-1099px layout the diagrams sit in a closed drawer, so the
+// "Compare the target" step has nothing to point at and is skipped; the live
+// step (anchored to the Repo graph button) mentions the target graph instead.
+const LIVE_DAG_WITH_TARGET_IN_DRAWER_BODY =
+  'Repo graph opens the live diagram of the current commits, branches, and HEAD after every valid command, and the target graph to compare it with.'
+
+const tierWorkspaceTourStepsWithTargetInDrawer = tierWorkspaceTourSteps.map((step) =>
+  step.id === 'tier-live-dag' ? { ...step, body: LIVE_DAG_WITH_TARGET_IN_DRAWER_BODY } : step,
+)
+
+export function TierWorkspaceTour({
+  runId,
+  onClose,
+  targetInDrawer = false,
+}: {
+  runId: number
+  onClose: () => void
+  /** The run has an Expected State and it sits in the closed repository-graph drawer. */
+  targetInDrawer?: boolean
+}) {
   return (
     <GameplayWorkspaceTour
       label="Level quick tour"
       finishLabel="Start level"
-      steps={tierWorkspaceTourSteps}
+      steps={targetInDrawer ? tierWorkspaceTourStepsWithTargetInDrawer : tierWorkspaceTourSteps}
       refreshKey={runId}
       onClose={onClose}
     />

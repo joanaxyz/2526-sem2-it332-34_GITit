@@ -19,11 +19,11 @@ function addTarget(attribute: string, value?: string) {
   document.body.appendChild(element)
 }
 
-// The anchors here are the ones TierWorkspacePanels/TierContextPanel render, so
+// The anchors here are the ones the tier-workspace panels (TierStatsBar, TierObjectivesCard...) render, so
 // a renamed target fails this test instead of silently killing the whole tour:
 // GameplayWorkspaceTour renders nothing when a required step cannot resolve.
 function addRequiredTierTargets() {
-  for (const target of ['tier-brief', 'star-budget', 'command-budget', 'live-dag', 'project-files']) {
+  for (const target of ['tier-brief', 'tier-story', 'star-budget', 'command-budget', 'live-dag', 'project-files']) {
     addTarget('data-tour-target', target)
   }
   addTarget('data-testid', 'battle-stage')
@@ -51,7 +51,7 @@ describe('TierWorkspaceTour', () => {
     expect(screen.getByText('Level quick tour')).toBeVisible()
 
     for (const heading of [
-      'Earn up to 3 stars', 'Watch the command limit', 'See command results',
+      'Reread the story', 'Earn up to 3 stars', 'Watch the command limit', 'See command results',
       'Track repository state', 'Check project files', 'Run a Git command',
       'Complete the objective',
     ]) {
@@ -60,7 +60,7 @@ describe('TierWorkspaceTour', () => {
     }
     expect(screen.queryByText('Compare the target')).not.toBeInTheDocument()
     expect(screen.queryByText('Use the feedback')).not.toBeInTheDocument()
-    expect(screen.getByText('8 / 8')).toBeInTheDocument()
+    expect(screen.getByText('9 / 9')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /start level/i }))
     expect(onClose).toHaveBeenCalledOnce()
@@ -77,13 +77,41 @@ describe('TierWorkspaceTour', () => {
       await screen.findByRole('heading', { name: 'Review the objective' }, { timeout: ASYNC_ASSERTION_TIMEOUT }),
     ).toBeInTheDocument()
     for (const heading of [
-      'Earn up to 3 stars', 'Watch the command limit', 'See command results',
+      'Reread the story', 'Earn up to 3 stars', 'Watch the command limit', 'See command results',
       'Track repository state', 'Compare the target', 'Check project files',
       'Run a Git command', 'Use the feedback', 'Complete the objective',
     ]) {
       fireEvent.click(screen.getByRole('button', { name: /^next$/i }))
       expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
     }
-    expect(screen.getByText('10 / 10')).toBeInTheDocument()
+    expect(screen.getByText('11 / 11')).toBeInTheDocument()
+  }, 15_000)
+
+  async function openLiveDagStep(targetInDrawer?: boolean) {
+    addRequiredTierTargets()
+    render(<TierWorkspaceTour runId={43} onClose={vi.fn()} targetInDrawer={targetInDrawer} />)
+    await screen.findByRole('heading', { name: 'Review the objective' }, { timeout: ASYNC_ASSERTION_TIMEOUT })
+    for (const heading of [
+      'Reread the story', 'Earn up to 3 stars', 'Watch the command limit', 'See command results',
+      'Track repository state',
+    ]) {
+      fireEvent.click(screen.getByRole('button', { name: /^next$/i }))
+      await screen.findByRole('heading', { name: heading })
+    }
+  }
+
+  it('mentions the target graph on the live step when the target sits in the drawer', async () => {
+    await openLiveDagStep(true)
+
+    expect(screen.getByText(/and the target graph to compare it with/)).toBeInTheDocument()
+  }, 15_000)
+
+  it('keeps the plain live step text when there is no target in a drawer', async () => {
+    await openLiveDagStep()
+
+    expect(
+      screen.getByText('The live diagram shows the current commits, branches, and HEAD after every valid command.'),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/target graph/)).not.toBeInTheDocument()
   }, 15_000)
 })
