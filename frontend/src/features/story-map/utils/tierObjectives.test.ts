@@ -12,6 +12,12 @@ function run(status: TierRun['status'], task?: string) {
 }
 
 describe('tierObjectives', () => {
+  it('keeps the starting position in the briefing rather than the objective checklist', () => {
+    expect(tierObjectives(run('started', 'Clone the repository.\n\nStarting point: Outside any repository.'))).toEqual([
+      { id: 'task', text: 'Clone the repository.', status: 'pending' },
+    ])
+  })
+
   it('turns the task into a single pending objective while the run is in progress', () => {
     expect(tierObjectives(run('started', '  Initialize the repository.  '))).toEqual([
       { id: 'task', text: 'Initialize the repository.', status: 'pending' },

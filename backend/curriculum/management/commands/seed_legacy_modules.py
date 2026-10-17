@@ -65,7 +65,10 @@ from curriculum.models import (
 from curriculum.seed_data.command_catalog import COMMAND_CATALOG
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
 from curriculum.seed_data.generated.generated_trajectories import SOLUTION_TRAJECTORIES
-from curriculum.seed_data.revised_legacy_scenarios import revised_legacy_scenario
+from curriculum.seed_data.revised_legacy_scenarios import (
+    revised_legacy_scenario,
+    scenario_briefing,
+)
 from curriculum.seed_data.spec_helpers import required_commit_message_details
 
 LEGACY_STORY_SLUG = "git-it-legacy"
@@ -13261,6 +13264,7 @@ class Command(BaseCommand):
         wave.command_forms.set(forms)
         for case in tier_spec["cases"]:
             revised = revised_legacy_scenario(case["case_id"])
+            story, task = scenario_briefing(revised)
             required_values = [
                 *revised.get("required_values", []),
                 *required_case_details(case),
@@ -13289,9 +13293,9 @@ class Command(BaseCommand):
                         "schema_version": 3,
                         "story": tier_spec["story"],
                         "real_world_context": revised["real_world_context"],
-                        "task": revised["task"],
+                        "task": task,
                         "details": [
-                            {"label": "", "value": revised["story"]},
+                            {"label": "", "value": story},
                             *required_values,
                         ],
                     },
