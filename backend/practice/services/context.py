@@ -14,16 +14,26 @@ LEAKY_KEYS = {
 }
 
 # The learner-facing story context is deliberately flat and whitelist-only so the
-# frontend can render it without guessing. The objective checklist is NOT part
-# of this schema: it lives on AdventureLevel.objective_checks (server-side
-# requirements) and reaches the client only as evaluated {label, satisfied}
-# rows in the attempt payload.
-ALLOWED_KEYS = {"schema_version", "story", "real_world_context", "task", "details"}
+# frontend can render it without guessing. These fields mirror the authored
+# scenario brief; they contain no answer-key or evaluation data.
+ALLOWED_KEYS = {
+    "schema_version",
+    "story",
+    "starting_point",
+    "real_world_context",
+    "task",
+    "objective_checks",
+    "expected_result",
+    "details",
+}
 ORDERED_ALLOWED_KEYS = (
     "schema_version",
     "story",
+    "starting_point",
     "real_world_context",
     "task",
+    "objective_checks",
+    "expected_result",
     "details",
 )
 
@@ -43,8 +53,11 @@ class ScenarioContextNormalizer:
         normalized = {
             "schema_version": 3,
             "story": self._text(context.get("story") or fallback_story),
+            "starting_point": self._text(context.get("starting_point")),
             "real_world_context": self._text(context.get("real_world_context")),
             "task": self._text(context.get("task")),
+            "objective_checks": self._text_list(context.get("objective_checks")),
+            "expected_result": self._text(context.get("expected_result")),
             "details": self._details(context.get("details")),
         }
         return self._drop_empty(normalized)
@@ -79,6 +92,9 @@ class ScenarioContextNormalizer:
         if isinstance(value, (list, tuple, set)):
             return ", ".join(self._text(item) for item in value if item not in (None, ""))
         return str(value).strip()
+
+    def _text_list(self, value: Any) -> list[str]:
+        return [text for item in as_list(value) if (text := self._text(item))]
 
     def _drop_empty(self, value: Any) -> Any:
         if isinstance(value, dict):

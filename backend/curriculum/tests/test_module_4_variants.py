@@ -33,12 +33,12 @@ from curriculum.management.commands.seed_legacy_modules import (
     MODULE_4_REVERT_CASES,
     ev,
 )
+from curriculum.seed_data.generated.generated_targets import TARGET_STATES
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from players.services import get_or_create_player
 
 BACKEND = Path(__file__).resolve().parents[2]
 FRONTEND = BACKEND.parent / "frontend"
-TIER_TARGETS = BACKEND / "tier_targets.json"
 LEGACY_STORY = "git-it-legacy"
 
 LEVEL_BY_TABLE = {
@@ -140,7 +140,7 @@ def _evaluate(case: dict, state: dict, commands: list[str]):
 
 
 def _committed_targets() -> dict:
-    return json.loads(TIER_TARGETS.read_text(encoding="utf-8"))
+    return TARGET_STATES
 
 
 # ------------------------------------------------------------ always on ---
@@ -413,7 +413,7 @@ def test_correct_solution_passes_and_matches_committed_target(replayed, case_id)
     outcome = _evaluate(case, state, case["solution_commands"])
 
     assert outcome.target_matched, [r.get("type") for r in outcome.failed_rules]
-    assert state == _committed_targets()[case_id], "tier_targets.json is stale"
+    assert state == _committed_targets()[case_id], "generated_targets.py is stale"
 
 
 @needs_simulator

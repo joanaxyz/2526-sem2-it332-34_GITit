@@ -135,7 +135,7 @@ export function gitConfig(state: MutableRepositoryState, parsed: ParsedGitComman
   const [key, value] = parsed.args
   state.config[key] = value
   const metadata: Record<string, RepositoryValue> = {
-    last_config_scope: 'global',
+    last_config_scope: hasOption(parsed, '--global') ? 'global' : 'local',
     last_config_key: key,
     last_config_value: value,
   }

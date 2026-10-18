@@ -36,3 +36,34 @@ def test_read_only_wave_with_zero_minimum_starts_with_a_budget_of_one(db, django
     assert run.status == SESSION_STATUS_STARTED
     assert run.min_counted_commands == 1
     assert run.max_counted_commands == 1
+
+
+def test_variant_budget_overrides_the_shared_wave_budget(db, django_user_model):
+    story = Story.objects.create(slug="variant-budget-story", title="Variant budget")
+    chapter = Chapter.objects.create(
+        story=story, slug="variant-budget-m1", number=1, title="Module 1"
+    )
+    level = AdventureLevel.objects.create(
+        chapter=chapter, slug="variant-budget-level", title="Level"
+    )
+    tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
+    wave = AdventureLevelTierWave.objects.create(
+        tier=tier, slug="variant-budget-wave", min_counted_commands=2, max_counted_commands=5
+    )
+    AdventureLevelTierWaveVariant.objects.create(
+        wave=wave,
+        slug="variant-budget-v",
+        label="v",
+        initial_state={"repository_initialized": True},
+        parameter_context={"minimum_counted_commands": 4, "maximum_counted_commands": 7},
+    )
+    player = get_or_create_player(
+        django_user_model.objects.create_user(username="variant-budget", password="pass12345")
+    )
+
+    run = AdventureLevelTierRunService().start_run(
+        player=player, tier=tier, source_entry_point="level_page"
+    )
+
+    assert run.min_counted_commands == 4
+    assert run.max_counted_commands == 7

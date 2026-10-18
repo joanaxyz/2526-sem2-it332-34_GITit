@@ -79,9 +79,33 @@ export function writeWorkspaceFile(
     status: normalizedPath in baseTree ? 'modified' : 'untracked',
     content,
   }
+  stageMergetoolResolution(nextState, normalizedPath, content)
   refreshIgnoredPaths(nextState)
   setOperationMetadata(nextState, { last_workspace_file_written: normalizedPath })
   return normalizeState(nextState)
+}
+
+function stageMergetoolResolution(
+  state: MutableRepositoryState,
+  path: string,
+  content: RepositoryValue,
+) {
+  const opened = Array.isArray(state.operation_metadata?.last_mergetool_paths)
+    ? state.operation_metadata.last_mergetool_paths.map(String)
+    : []
+  if (!(state.conflicts ?? []).includes(path) || !opened.includes(path)) return
+
+  state.staging ??= {}
+  state.staging[path] = { status: 'modified', content: clone(content) }
+  delete state.working_tree?.[path]
+  state.conflicts = (state.conflicts ?? []).filter((conflict) => conflict !== path)
+  delete state.conflict_details?.[path]
+  const resolved = Array.isArray(state.operation_metadata?.last_mergetool_resolved_paths)
+    ? state.operation_metadata.last_mergetool_resolved_paths.map(String)
+    : []
+  setOperationMetadata(state, {
+    last_mergetool_resolved_paths: [...new Set([...resolved, path])].sort(),
+  })
 }
 
 /**
