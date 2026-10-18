@@ -105,20 +105,20 @@ describe('HomeStatsView contract', () => {
     expect(screen.getByRole('region', { name: 'Player overview' })).not.toHaveClass('is-split')
   })
 
-  it('states the finish rate once, in the citadel the record band never repeats', () => {
+  it('states the Arcane Spire finish rate once and never repeats it in the record band', () => {
     renderView('progress')
 
     const story = screen.getByRole('region', { name: 'Where you stand' }).querySelector('.home-overview-story-block')
     expect(within(story as HTMLElement).getByText('76%')).toBeInTheDocument()
     expect(within(story as HTMLElement).getByText('43 of 57 runs you started')).toBeInTheDocument()
-    expect(within(story as HTMLElement).getByLabelText('Runs finished 76%')).toBeInTheDocument()
+    expect(within(story as HTMLElement).getByLabelText('Arcane Spire runs finished 76%')).toBeInTheDocument()
 
-    // The record band used to open with its own "Levels finished" tile carrying
+    // The record band used to open with its own "Tiers cleared" tile carrying
     // the very same backend rate.
     const record = screen.getByRole('region', { name: 'Run results' })
-    expect(within(record).queryByText('Levels finished')).not.toBeInTheDocument()
+    expect(within(record).queryByText('Tiers cleared')).not.toBeInTheDocument()
     expect(Array.from(record.querySelectorAll('.home-overview-kpi-row > div > span:not(.home-overview-mini-sigil)')).map((label) => label.textContent)).toEqual([
-      'Hard levels finished',
+      'Hard runs finished',
       'Retries per finish',
       'Commands accepted',
     ])
@@ -130,17 +130,17 @@ describe('HomeStatsView contract', () => {
     expect(container.querySelector('.home-overview-grid')?.children).toHaveLength(0)
   })
 
-  it('plots the activity window and shows the citadel counts under Progress', () => {
+  it('plots the activity window and shows Arcane Spire tier counts under Progress', () => {
     renderView('progress')
 
     const progress = screen.getByRole('region', { name: 'Where you stand' })
     // The plot describes itself with the same totals the caption under it states.
     const plot = within(progress).getByRole('img', {
-      name: 'Last 30 days: 1,084 commands run and 56 levels finished, busiest in Tue, June 9 with 84 commands.',
+      name: 'Last 30 days: 1,084 Arcane Spire commands run and 56 tiers cleared, busiest in Tue, June 9 with 84 commands.',
     })
     expect(plot.querySelectorAll('.recharts-wrapper')).toHaveLength(2)
     expect(progress.querySelector('.home-overview-activity-summary')).toHaveTextContent(
-      '1,084 commands and 56 levels finished on 27 of 30 days',
+      '1,084 Arcane Spire commands and 56 tiers cleared on 27 of 30 days',
     )
 
     // The span control states which window is on screen, and only one is.
@@ -154,10 +154,10 @@ describe('HomeStatsView contract', () => {
     expect(progress.querySelector('.home-overview-activity')).not.toHaveAttribute('data-pending')
 
     // Hard trials won is gone from the list: it was the same count the record
-    // band's "Hard levels finished" tile already reports as its numerator.
+    // band's "Hard runs finished" tile already reports as its numerator.
     const story = progress.querySelector('.home-overview-story-block')
     expect(Array.from(story!.querySelectorAll('dt')).map((label) => label.textContent)).toEqual([
-      'Levels finished',
+      'Tiers cleared',
       'Flawless finishes',
     ])
     expect(Array.from(story!.querySelectorAll('dd')).map((value) => value.textContent)).toEqual(['43', '26'])
@@ -183,7 +183,9 @@ describe('HomeStatsView contract', () => {
     expect(skills.querySelectorAll('.home-overview-command-row')).toHaveLength(0)
     expect(within(skills).getByLabelText('Overall mastery 54%')).toBeInTheDocument()
     expect(within(skills).getByLabelText('2 of 3 proficiency stars')).toBeInTheDocument()
-    const radar = within(skills).getByRole('img', { name: /^Mastery across 18 git commands, overall 54%/ })
+    const radar = within(skills).getByRole('img', {
+      name: /^Mastery across 18 Arcane Spire commands, overall 54%/,
+    })
     expect(Array.from(radar.querySelectorAll('.ref-chart-rim-label')).map((tick) => tick.textContent)).toEqual([
       'init', 'clone', 'log', 'show', 'add', 'commit', 'restore', 'branch', 'switch',
       'merge', 'revert', 'reflog', 'stash', 'cherry-pick', 'fetch', 'pull', 'push', 'rebase',
@@ -247,14 +249,14 @@ describe('HomeStatsView contract', () => {
       return found
     })
     expect(charts.map((chart) => chart.querySelector('figcaption')?.textContent)).toEqual([
-      'Levels finished',
-      'Hard levels finished',
+      'Runs finished',
+      'Hard runs finished',
       'Retries that worked',
       'Retries per finish',
     ])
     expect(
       within(charts[0] as HTMLElement).getByRole('img', {
-        name: 'Levels finished per module: Module 1 - Repository Foundations 50%, Module 2 --',
+        name: 'Runs finished per module: Module 1 - Repository Foundations 50%, Module 2 --',
       }),
     ).toBeInTheDocument()
     // Every column is direct-labelled, so no value is reachable only by hovering.
@@ -290,7 +292,7 @@ describe('HomeStatsView contract', () => {
     expect(screen.getByText(/Run your first command and this window starts filling in/)).toBeInTheDocument()
     const story = document.querySelector('.home-overview-story-block')
     expect(Array.from(story!.querySelectorAll('dd')).map((value) => value.textContent)).toEqual(['0', '0'])
-    // An account with no runs gets an honest dash, not a 0% citadel.
+    // An account with no runs gets an honest dash, not a 0% run meter.
     expect(within(story as HTMLElement).getByText('--')).toBeInTheDocument()
     expect(within(story as HTMLElement).getByText('No runs yet')).toBeInTheDocument()
     expect(Array.from(document.querySelectorAll('.home-overview-kpi-row > div > strong')).map((value) => value.textContent)).toEqual([
@@ -312,7 +314,7 @@ describe('HomeStatsView contract', () => {
     skills.unmount()
   })
 
-  it('keeps story precedence and the 100-command accuracy threshold exact', () => {
+  it('keeps tier-completion counts and the 100-command accuracy threshold exact', () => {
     const home = structuredClone(richHomeFixture)
     const stats = structuredClone(richStatsFixture)
     stats.headline.levels_completed = 0
@@ -322,7 +324,7 @@ describe('HomeStatsView contract', () => {
 
     const first = renderView('progress', home, stats)
     const story = document.querySelector('.home-overview-story-block')
-    expect(Array.from(story!.querySelectorAll('dd')).map((value) => value.textContent)).toEqual(['43', '30'])
+    expect(Array.from(story!.querySelectorAll('dd')).map((value) => value.textContent)).toEqual(['0', '30'])
     expect(Array.from(document.querySelectorAll('.home-overview-kpi-row > div > strong')).at(-1)).toHaveTextContent('--')
     first.unmount()
 

@@ -10,7 +10,7 @@ import { Map, Sparkles, UserRound, type LucideIcon } from 'lucide-react'
  * playing at all, so a player with none sees the gap immediately.
  *
  * Progress and Run results used to be separate categories, but they reported the
- * same facts under different names — the citadel meter and the "Levels finished"
+ * same facts under different names — the run meter and the "Levels finished"
  * tile were both the backend's one finish rate. They are one category now, and
  * each number is stated exactly once.
  */
@@ -33,7 +33,7 @@ export const HOME_VIEWS: readonly HomeViewOption[] = [
   {
     id: 'progress',
     label: 'Progress',
-    blurb: 'How far through the story you are, your recent activity, and your run record',
+    blurb: 'Your Arcane Spire progress, recent activity, and run record',
     Icon: Map,
   },
   {

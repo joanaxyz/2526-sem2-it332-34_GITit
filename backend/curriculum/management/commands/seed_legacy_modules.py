@@ -1,4 +1,4 @@
-"""Seed the archived Module 0-4 content into the new Story/Chapter/Adventure schema.
+"""Seed the canonical Arcane Spire Module 0-4 curriculum.
 
 Source of truth for every literal below is the archived branch
 ``archive/may30-old-modules`` (read via ``git show``), specifically:
@@ -8,11 +8,9 @@ Source of truth for every literal below is the archived branch
   - backend/learning/management/commands/seed_module3_scenarios.py
   - backend/learning/management/commands/seed_module4_scenarios.py
 
-This is a one-shot legacy-import command, kept fully separate from
-seed_curriculum.py: it never touches the arcane-spire/frostbound-citadel/
-neon-backstreets Story or Chapter rows, and it is not wired into
-seed_curriculum's mixins. Re-running it is idempotent (update_or_create
-throughout), matching the archived commands' own convention.
+The content was imported from the archived modules, but this command is now
+the production curriculum owner. Re-running it is idempotent
+(``update_or_create`` throughout).
 
 Two content shapes are ported:
   - Module 0 (orientation): 8 ChapterOrientationLesson rows carrying the old
@@ -42,7 +40,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from django.core.management.base import BaseCommand
+from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from adventures.models import (
@@ -65,7 +63,7 @@ from curriculum.seed_data.revised_legacy_runtime import apply_revised_legacy_ban
 from curriculum.seed_data.revised_legacy_scenarios import revised_legacy_scenario
 from curriculum.seed_data.spec_helpers import required_commit_message_details
 
-LEGACY_STORY_SLUG = "git-it-legacy"
+LEGACY_STORY_SLUG = "arcane-spire"
 
 DIFFICULTY_MAX_COUNTED_COMMANDS = {"easy": 12, "medium": 10, "hard": 8}
 
@@ -107,7 +105,7 @@ def required_case_details(case: dict[str, Any]) -> list[dict[str, str]]:
 
 STORY_SPEC = {
     "slug": LEGACY_STORY_SLUG,
-    "title": "The Runebound Turret",
+    "title": "The Arcane Spire",
     "summary": (
         "Ascend a rune-lit tower while mastering Git fundamentals across five modules, "
         "from repository setup and branching to conflict resolution and history rewriting."
@@ -13016,10 +13014,21 @@ apply_revised_legacy_bank(LEGACY_MODULE_LEVELS)
 
 
 class Command(BaseCommand):
-    help = "Seed the archived Module 0-4 content into a new Story/Chapter/Adventure tree."
+    help = "Seed the canonical Arcane Spire Module 0-4 curriculum."
 
     @transaction.atomic
     def handle(self, *args, **options):
+        existing = Story.objects.filter(slug=LEGACY_STORY_SLUG).first()
+        active_chapter_slugs = {spec["slug"] for spec in CHAPTER_SPECS}
+        if (
+            existing is not None
+            and existing.chapters.exists()
+            and not existing.chapters.filter(slug__in=active_chapter_slugs).exists()
+        ):
+            raise CommandError(
+                "Refusing to overwrite an Arcane Spire row owned by the retired "
+                "three-story curriculum. Apply migrations before seeding."
+            )
         story = self._seed_story()
         chapters = self._seed_chapters(story)
         self._seed_orientation_lessons(chapters[0])
@@ -13099,8 +13108,9 @@ class Command(BaseCommand):
 
         The command library is global, so the importer reuses the canonical
         skills while creating chapter-owned forms with deterministic slugs.
-        Creating a missing skill keeps this legacy command useful on a blank
-        database; seed_curriculum can later update that same canonical row.
+        Creating a missing skill keeps the canonical command useful on a blank
+        database. The retired three-story seed is blocked once this curriculum
+        owns Arcane Spire.
         """
         catalog_by_slug = {
             spec["slug"]: (index, spec) for index, spec in enumerate(COMMAND_CATALOG, 1)

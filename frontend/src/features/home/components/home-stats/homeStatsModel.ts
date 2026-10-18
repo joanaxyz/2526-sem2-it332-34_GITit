@@ -159,7 +159,9 @@ export function buildHomeStatsModel(home: HomeSummary, stats: StatsSummary): Hom
     progress: {
       activity: buildActivity(stats),
       story: {
-        levelsCompleted: stats.headline.levels_completed || home.counts.completed,
+        // A completed run is not necessarily a cleared tier: some tiers require
+        // multiple successful runs, so zero is meaningful and must not fall back.
+        levelsCompleted: stats.headline.levels_completed,
         perfectClears: Math.max(stats.headline.perfect_clears, home.perfect_clears),
         finishRate: {
           ...stats.headline.finish_rate,
@@ -173,11 +175,12 @@ export function buildHomeStatsModel(home: HomeSummary, stats: StatsSummary): Hom
     skills: {
       rows: buildSkillRows(stats.skill_profile),
       overallMastery,
-      masteryStars: Math.max(1, Math.min(3, Math.ceil(overallMastery / 34))),
+      // Proficiency is earned: a learner at 0% must not receive a free star.
+      masteryStars: Math.min(3, Math.ceil(overallMastery / 34)),
     },
     results: {
       // `home.kpis.scr` is deliberately unused: it is the same finish rate the
-      // citadel already shows, and one fact per screen means one statement.
+      // Arcane Spire meter already shows, and one fact per screen means one statement.
       hardClearRate: { ...home.kpis.hlcr },
       averageRetries: { ...home.kpis.arc },
       accuracy: stats.headline.accuracy,

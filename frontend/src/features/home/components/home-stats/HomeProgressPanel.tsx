@@ -56,14 +56,14 @@ function ActivityBand({ activity }: { activity: HomeProgressModel['activity'] })
   return (
     <>
       <ActivityTrendChart
-        label={`${activity.heading}: ${formatNumber(activity.commandsRun)} commands run and ${formatNumber(activity.levelsCompleted)} levels finished${peak ? `, busiest in ${peak.caption} with ${formatNumber(peak.commandsRun)} commands` : ''}.`}
+        label={`${activity.heading}: ${formatNumber(activity.commandsRun)} Arcane Spire commands run and ${formatNumber(activity.levelsCompleted)} tiers cleared${peak ? `, busiest in ${peak.caption} with ${formatNumber(peak.commandsRun)} commands` : ''}.`}
         peakIndex={peakIndex}
         peakLabel={activity.peakLabel}
         points={points}
       />
       <p className="home-overview-activity-summary">
-        <strong>{formatNumber(activity.commandsRun)}</strong> commands and{' '}
-        <strong>{formatNumber(activity.levelsCompleted)}</strong> levels finished on{' '}
+        <strong>{formatNumber(activity.commandsRun)}</strong> Arcane Spire commands and{' '}
+        <strong>{formatNumber(activity.levelsCompleted)}</strong> tiers cleared on{' '}
         <strong>{formatNumber(activity.activeBuckets)}</strong> of {points.length} {activity.bucket}
       </p>
     </>
@@ -95,7 +95,7 @@ export function HomeProgressPanel({
         <section className="home-overview-stat-block">
           <div className="home-overview-band-head">
             <header className="ref-panel-head">
-              {progress.activity.heading} <em>commands run, then levels finished</em>
+              {progress.activity.heading} <em>Arcane Spire commands, then tiers cleared</em>
             </header>
             <ActivitySpanPicker
               activityWindow={activityWindow}
@@ -111,7 +111,7 @@ export function HomeProgressPanel({
           className={`home-overview-stat-block home-overview-story-block${finished >= 100 && attempted ? ' is-complete' : ''}`}
         >
           <header className="ref-panel-head">
-            Runs finished <em>every story and challenge</em>
+            Arcane Spire runs finished <em>active curriculum only</em>
           </header>
           <div className="home-overview-story-body">
             <div className="home-overview-story-sigil" aria-hidden="true">
@@ -127,7 +127,11 @@ export function HomeProgressPanel({
               <p
                 className="home-overview-story-rate"
                 data-empty={attempted ? undefined : 'true'}
-                aria-label={attempted ? `Runs finished ${finished}%` : 'Runs finished: no runs yet'}
+                aria-label={
+                  attempted
+                    ? `Arcane Spire runs finished ${finished}%`
+                    : 'Arcane Spire runs finished: no runs yet'
+                }
               >
                 <strong>{attempted ? `${finished}%` : '--'}</strong>
                 <small>
@@ -138,7 +142,7 @@ export function HomeProgressPanel({
               </p>
               <dl>
                 <div>
-                  <dt>Levels finished</dt>
+                  <dt>Tiers cleared</dt>
                   <dd className={story.levelsCompleted === 0 ? 'is-zero' : undefined}>
                     {formatNumber(story.levelsCompleted)}
                   </dd>
