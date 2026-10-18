@@ -20,7 +20,7 @@ def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
     )
     player = get_or_create_player(user)
     tier = AdventureLevelTier.objects.filter(
-        adventure_level__chapter__story__slug="git-it-legacy",
+        adventure_level__chapter__story__slug="arcane-spire",
         adventure_level__chapter__number=1,
         difficulty=DIFFICULTY_HARD,
     ).first()
@@ -105,7 +105,7 @@ def test_admin_aggregate_spans_learners_while_player_endpoint_stays_scoped(db, d
 
     call_command("seed_legacy_modules", verbosity=0)
     tier = AdventureLevelTier.objects.filter(
-        adventure_level__chapter__story__slug="git-it-legacy",
+        adventure_level__chapter__story__slug="arcane-spire",
         adventure_level__chapter__number=1,
         difficulty=DIFFICULTY_HARD,
     ).first()

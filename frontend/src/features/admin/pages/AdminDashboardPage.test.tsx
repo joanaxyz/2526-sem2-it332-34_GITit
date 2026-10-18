@@ -85,7 +85,7 @@ describe('AdminDashboardPage overall SCR', () => {
     vi.clearAllMocks()
   })
 
-  it('reads overall SCR from the Runebound KPI payload, not all-story run totals', async () => {
+  it('reads overall SCR from the Arcane Spire KPI payload, not all-story run totals', async () => {
     renderPage(analyticsFixture())
 
     await screen.findByText('KPI Overview')

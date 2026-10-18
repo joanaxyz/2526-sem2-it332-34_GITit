@@ -304,7 +304,7 @@ export function AdminDashboardPage() {
   const diag     = data.runebound_performance
 
   // Overall SCR uses the same source and filters as the per-module SCR
-  // (Runebound tier runs, Modules 1–4, replays excluded), not data.runs,
+  // (Arcane Spire tier runs, Modules 1–4, replays excluded), not data.runs,
   // which spans every story and run type.
   const byKey: Record<string, Rate> = {
     scr:  diag.kpis.scr,
@@ -327,7 +327,7 @@ export function AdminDashboardPage() {
         <div className="dk-header-left">
           <p className="dk-eyebrow">
             <Activity aria-hidden="true" />
-            Runebound Turret · Modules 1–4 · replays and staff excluded
+            Arcane Spire · Modules 1–4 · replays and staff excluded
           </p>
           <h1 className="dk-title">KPI Overview</h1>
           <p className="dk-subtitle">

@@ -2,7 +2,7 @@
 
 The admin dashboard's overall SCR card reads runebound_performance.kpis.scr,
 so it must equal the sum of the per-module rows: Runebound tier runs in story
-git-it-legacy, Modules 1-4, replays excluded.
+arcane-spire, Modules 1-4, replays excluded.
 """
 
 from rest_framework.test import APIClient
