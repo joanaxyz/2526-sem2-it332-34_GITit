@@ -22,7 +22,7 @@ describe('app entry routing', () => {
   })
 
   it.each([
-    ['/', 'Story map', '/stories/git-it-legacy'],
+    ['/', 'Story map', '/stories/arcane-spire'],
     ['/home', 'Home', '/home'],
     // The standalone Performance page is gone; its link now lands on Home.
     ['/performance', 'Home', '/home'],

@@ -9,7 +9,7 @@ import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
-// Diagnostic Runebound metrics are staff-only: they describe simulator and
+// Diagnostic Arcane Spire metrics are staff-only: they describe simulator and
 // retry behaviour, not learner outcomes, so they never appear in the player UI.
 type DiagnosticMetric = 'rta' | 'arc'
 
@@ -65,7 +65,7 @@ function StatusCell({ rate, target, higherIsBetter, format, evidenceKey }: {
 function KpiSummaryTable({ diagnostics }: {
   diagnostics: { kpis: { scr: RateMetricLike; car: RateMetricLike; hlcr: RateMetricLike; rta: RateMetricLike; arc: RateMetricLike }; modules: PerformanceModule[] }
 }) {
-  // Overall SCR shares the per-module source (Runebound tier runs, Modules 1–4,
+  // Overall SCR shares the per-module source (Arcane Spire tier runs, Modules 1–4,
   // replays excluded) instead of the all-story run totals.
   const overallByKey: Record<string, RateMetricLike> = {
     scr: diagnostics.kpis.scr,
@@ -182,7 +182,7 @@ export function AdminAnalyticsPage() {
     <div className="admin-analytics-page">
       <PageHeading
         title="Progress & Analytics"
-        description="How learners move through the curriculum and where the Runebound experience needs attention."
+        description="How learners move through the curriculum and where the Arcane Spire experience needs attention."
       />
 
       <section className="admin-summary-grid" aria-label="Learning summary">
@@ -205,7 +205,7 @@ export function AdminAnalyticsPage() {
           <div>
             <span className="admin-eyebrow">
               <Activity aria-hidden="true" />
-              Runebound diagnostics
+              Arcane Spire diagnostics
             </span>
             <h2 id="runebound-diagnostics-title">Technical signals across all learners</h2>
           </div>
@@ -252,7 +252,7 @@ export function AdminAnalyticsPage() {
           <div>
             <h2 id="kpi-summary-title">KPI Summary — All Learners</h2>
           </div>
-          <p className="admin-section-note">Runebound Turret · Modules 1–4</p>
+          <p className="admin-section-note">Arcane Spire · Modules 1–4</p>
         </header>
         <KpiSummaryTable diagnostics={diagnostics} />
       </section>

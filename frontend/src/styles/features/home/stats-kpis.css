@@ -1,5 +1,5 @@
 /* Three tiles, not four: the finish rate the fourth used to carry is stated once,
-   by the citadel in the band above. */
+   by the Runebound meter in the band above. */
 .home-overview-kpi-row {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
