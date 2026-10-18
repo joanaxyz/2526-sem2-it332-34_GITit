@@ -169,7 +169,6 @@ def test_more_correct_than_answered_is_rejected(db, django_user_model):
 
 def test_a_locked_level_cannot_be_drilled(db, django_user_model):
     call_command("seed_curriculum")
-    call_command("seed_legacy_modules")
     call_command("seed_drills")
     client, _player = make_client(django_user_model)
     locked = (

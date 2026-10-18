@@ -47,7 +47,7 @@ describe('RequireCompanion', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('/stories/git-it-legacy?companion-required=1')).toBeInTheDocument()
+      expect(screen.getByText('/stories/arcane-spire?companion-required=1')).toBeInTheDocument()
     })
   })
 

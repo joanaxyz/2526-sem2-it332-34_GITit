@@ -113,7 +113,7 @@ join adventures_adventureleveltier t on t.id = w.tier_id
 join adventures_adventurelevel l on l.id = t.adventure_level_id
 join curriculum_chapter c on c.id = l.chapter_id
 join curriculum_story s on s.id = c.story_id
-where s.slug = 'git-it-legacy' and v.target_state = '{}'::jsonb;
+where s.slug = 'arcane-spire' and v.target_state = '{}'::jsonb;
 ```
 
 **4. In the app.** As a learner who has not played Module 4, open

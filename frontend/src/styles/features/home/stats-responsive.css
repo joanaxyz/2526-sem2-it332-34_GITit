@@ -15,7 +15,7 @@
 }
 
 @media (max-width: 900px) {
-  /* The radar rail and the citadel drop under their band rather than shrinking
+  /* The radar rail and the run meter drop under their band rather than shrinking
      to a width where neither can be read. */
   .home-overview-stat-subgrid { grid-template-columns: minmax(0, 1fr); }
   .home-overview-mastery-orb .ref-chart-radar { max-width: 24rem; margin-inline: auto; }

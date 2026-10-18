@@ -1,7 +1,7 @@
 /* ── Overview view: Progress ───────────────────────────────────────────── */
-/* The 14-day activity plot and the citadel finish-rate sigil. */
+/* The activity plot and the Runebound finish-rate sigil. */
 
-/* The plot takes the width it can use; the citadel is a fixed-size instrument
+/* The plot takes the width it can use; the run meter is a fixed-size instrument
    standing beside it. */
 .home-overview-stat-subgrid {
   display: grid;
@@ -116,7 +116,7 @@
   text-wrap: pretty;
 }
 
-/* Citadel tower: a stone shell always visible, and a teal "construction" fill that
+/* Runebound progress tower: a stone shell always visible, and a teal fill that
    rises with actual track-progress (bottom-anchored, so the wide foundation fills
    first). At 100% the fill flips to the gold earned-achievement accent, matching the
    achievement medallions above. */
