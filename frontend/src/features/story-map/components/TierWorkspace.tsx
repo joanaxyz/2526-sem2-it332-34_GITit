@@ -300,8 +300,10 @@ export function TierWorkspace() {
         open={storyOpen}
         title={story.title}
         intro={story.intro}
+        startingPoint={story.startingPoint}
         realWorldContext={story.realWorldContext}
         task={story.task}
+        expectedResult={story.expectedResult}
         onClose={autoOpen.closeStory}
       />
       {tourOpen ? (

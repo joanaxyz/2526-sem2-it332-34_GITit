@@ -1159,73 +1159,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
-  "bh8": {
-    "final": {
-      "coarse": "8032a67a13af2dea",
-      "exact": "575dff347d117325"
-    },
-    "steps": [
-      {
-        "command": "git reflog",
-        "diagnostic": true,
-        "effect": [],
-        "positions": [
-          {
-            "coarse": "7f3930ccf90d324d",
-            "exact": "0994065107d72cce"
-          }
-        ]
-      },
-      {
-        "command": "git reset --hard c4",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "move",
-            "kind": "branch",
-            "subjects": [
-              "feature/rate-limits"
-            ],
-            "text": "Branch feature/rate-limits moves to another commit."
-          },
-          {
-            "action": "start",
-            "kind": "operation",
-            "subjects": [
-              "merge"
-            ],
-            "text": "A merge is in progress."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "7f3930ccf90d324d",
-            "exact": "0994065107d72cce"
-          }
-        ]
-      },
-      {
-        "command": "git rebase main",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "create",
-            "kind": "commit",
-            "ref": "feature/rate-limits",
-            "subjects": [],
-            "text": "3 new commits on feature/rate-limits."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "54577bbf305e238e",
-            "exact": "70e548b84e60d224"
-          }
-        ]
-      }
-    ],
-    "version": 2
-  },
   "bm6": {
     "final": {
       "coarse": "395c7ce306a3f86a",
@@ -1298,45 +1231,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "66f79682a5842e65",
             "exact": "695d9248796684f1"
-          }
-        ]
-      }
-    ],
-    "version": 2
-  },
-  "bm8": {
-    "final": {
-      "coarse": "f148b73446bbcec9",
-      "exact": "89de231be92e73e3"
-    },
-    "steps": [
-      {
-        "command": "git log --oneline --graph --all",
-        "diagnostic": true,
-        "effect": [],
-        "positions": [
-          {
-            "coarse": "84f53fd0023a5973",
-            "exact": "bdbecc9724a8cc58"
-          }
-        ]
-      },
-      {
-        "command": "git rebase --onto main spike/new-renderer feature/export-pdf",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "create",
-            "kind": "commit",
-            "ref": "feature/export-pdf",
-            "subjects": [],
-            "text": "3 new commits on feature/export-pdf."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "84f53fd0023a5973",
-            "exact": "bdbecc9724a8cc58"
           }
         ]
       }
@@ -1535,7 +1429,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git branch -D auth-update",
+        "command": "git branch -d auth-update",
         "diagnostic": false,
         "effect": [
           {
@@ -1592,7 +1486,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git branch -D myFix",
+        "command": "git branch -d myFix",
         "diagnostic": false,
         "effect": [
           {
@@ -1649,7 +1543,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git branch -D test/LoginFlow",
+        "command": "git branch -d test/LoginFlow",
         "diagnostic": false,
         "effect": [
           {
@@ -1706,7 +1600,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git branch -D fix/cart-total",
+        "command": "git branch -d fix/cart-total",
         "diagnostic": false,
         "effect": [
           {
@@ -47579,10 +47473,10 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
-  "cherry-hard-abort": {
+  "cherry-hard-abort-conflict": {
     "final": {
-      "coarse": "f1ee262567775b27",
-      "exact": "9874cc5350d86ee5"
+      "coarse": "830ad712fa34a1ba",
+      "exact": "390de9662286a7d7"
     },
     "steps": [
       {
@@ -47593,9 +47487,25 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
             "action": "remove",
             "kind": "staging",
             "subjects": [
-              "src/search.ts"
+              "README.md"
             ],
-            "text": "src/search.ts is unstaged."
+            "text": "README.md is unstaged."
+          },
+          {
+            "action": "remove",
+            "kind": "working_tree",
+            "subjects": [
+              "src/search.py"
+            ],
+            "text": "Edits to src/search.py are discarded or saved elsewhere."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/search.py"
+            ],
+            "text": "Conflict resolved in src/search.py."
           },
           {
             "action": "finish",
@@ -47608,18 +47518,18 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "e18e201d0a4b7e9b",
-            "exact": "a72c70bbb25f30db"
+            "coarse": "7e8f9613748f1b2e",
+            "exact": "2ff0e137e994148d"
           }
         ]
       }
     ],
     "version": 2
   },
-  "cherry-hard-export-null": {
+  "cherry-hard-export-conflict": {
     "final": {
-      "coarse": "c484afdb6fdb3eb6",
-      "exact": "e76d8138d318afb7"
+      "coarse": "1fc21b72307749e8",
+      "exact": "82f6c48d6d45414d"
     },
     "steps": [
       {
@@ -47627,31 +47537,109 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "diagnostic": false,
         "effect": [
           {
-            "action": "create",
-            "kind": "commit",
-            "ref": "release-2.0",
-            "subjects": [],
-            "text": "New commit on release-2.0."
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "src/export.py has uncommitted edits."
+          },
+          {
+            "action": "add",
+            "kind": "conflict",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "Conflict to resolve in src/export.py."
+          },
+          {
+            "action": "start",
+            "kind": "operation",
+            "subjects": [
+              "cherry-pick"
+            ],
+            "text": "A cherry-pick is in progress."
           }
         ],
         "positions": [
           {
-            "coarse": "29e15bb463b48715",
-            "exact": "a38fe17ba183311b"
+            "coarse": "f60f9e79c1c5f3af",
+            "exact": "c36ecaa888597ddc"
+          }
+        ]
+      },
+      {
+        "command": "git add src/export.py",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "src/export.py is staged."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "Conflict resolved in src/export.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "8f797534d6f48921",
+            "exact": "cb0620e9e10d175f"
+          },
+          {
+            "coarse": "b260269a0a33c8bf",
+            "exact": "407b7c82cd70977b"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick --continue",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "release-2.0",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "New commit on release-2.0, saving src/export.py."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "cherry-pick"
+            ],
+            "text": "The cherry-pick is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e71fe15e02ae4003",
+            "exact": "8054e21c9b57192d"
           }
         ]
       }
     ],
     "version": 2
   },
-  "cherry-hard-queue-finalize": {
+  "cherry-hard-trace-source": {
     "final": {
-      "coarse": "458c4712a92d35a0",
-      "exact": "9a95f1600e29e308"
+      "coarse": "8df6bd12361811d6",
+      "exact": "2431d17a71ae4068"
     },
     "steps": [
       {
-        "command": "git cherry-pick c1",
+        "command": "git cherry-pick -x c1",
         "diagnostic": false,
         "effect": [
           {
@@ -47664,20 +47652,40 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "3fd4f61897bf9b68",
-            "exact": "0f51fad321626fc2"
+            "coarse": "7bf7e9f8ab02de39",
+            "exact": "b89cf8fcafe9bb2b"
           }
         ]
       }
     ],
     "version": 2
   },
-  "cherry-hard-rate-limit": {
+  "cherry-hard-two-releases": {
     "final": {
-      "coarse": "ff848e0a92b1f115",
-      "exact": "88de47451b469a45"
+      "coarse": "d60f8868ae21b342",
+      "exact": "025497fa14a68501"
     },
     "steps": [
+      {
+        "command": "git switch release-1.2",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "release-1.2"
+            ],
+            "text": "HEAD moves to release-1.2."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "62a18d481310bc0b",
+            "exact": "46525abdd739e80f"
+          }
+        ]
+      },
       {
         "command": "git cherry-pick c1",
         "diagnostic": false,
@@ -47692,20 +47700,31 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "37fba66c035f1b36",
-            "exact": "e5cb6577b0dd37e1"
+            "coarse": "6fbc2aa187280431",
+            "exact": "f6c4a5da3846d14e"
           }
         ]
-      }
-    ],
-    "version": 2
-  },
-  "cherry-medium-invoice-rounding": {
-    "final": {
-      "coarse": "214e37965ee8bcfc",
-      "exact": "bd11373bf8dc9042"
-    },
-    "steps": [
+      },
+      {
+        "command": "git switch release-1.1",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "release-1.1"
+            ],
+            "text": "HEAD moves to release-1.1."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "b7307735136c4f76",
+            "exact": "aa8c7d0557970524"
+          }
+        ]
+      },
       {
         "command": "git cherry-pick c1",
         "diagnostic": false,
@@ -47720,8 +47739,36 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "0ab4f285a1961796",
-            "exact": "c254d30732f4fa18"
+            "coarse": "2fc559a5f036f2a5",
+            "exact": "d6c796d7a32c42a1"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "cherry-medium-invoice-rounding": {
+    "final": {
+      "coarse": "2129d8346be5a0da",
+      "exact": "262b20e1fbf0d985"
+    },
+    "steps": [
+      {
+        "command": "git cherry-pick feature/invoice-rounding",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "release-1.1",
+            "subjects": [],
+            "text": "New commit on release-1.1."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "aafc2ac11280b3d0",
+            "exact": "d593a48a0d3b20b0"
           }
         ]
       }
@@ -47730,8 +47777,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "cherry-medium-login-timeout": {
     "final": {
-      "coarse": "e4d0ba1b241839db",
-      "exact": "baa852f6086ee398"
+      "coarse": "2db9abc9e5c15ecc",
+      "exact": "e234ce2fbf923f29"
     },
     "steps": [
       {
@@ -47750,6 +47797,25 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "b394a830b3117018",
             "exact": "bcd1569339a5ee4a"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick c2",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "release-1.0",
+            "subjects": [],
+            "text": "New commit on release-1.0."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e4d0ba1b241839db",
+            "exact": "baa852f6086ee398"
           }
         ]
       }
@@ -49443,7 +49509,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git add .",
+        "command": "git add README.md main.py requirements.txt",
         "diagnostic": false,
         "effect": [
           {
@@ -49497,7 +49563,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git add -A",
+        "command": "git add styles/navbar.css",
         "diagnostic": false,
         "effect": [
           {
@@ -49567,7 +49633,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit --message \"Clarify setup steps\"",
+        "command": "git commit -m \"Clarify setup steps\"",
         "diagnostic": false,
         "effect": [
           {
@@ -50016,7 +50082,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git add --all",
+        "command": "git add src/profile-card.js styles/profile-card.css",
         "diagnostic": false,
         "effect": [
           {
@@ -50089,7 +50155,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit --message \"Refine search results view\"",
+        "command": "git commit -m \"Refine search results view\"",
         "diagnostic": false,
         "effect": [
           {
@@ -50620,8 +50686,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "e1": {
     "final": {
-      "coarse": "7f09d4cacf913bca",
-      "exact": "4f390697e95aed38"
+      "coarse": "869db7b21e7fbef0",
+      "exact": "fc42a6f37cda2b56"
     },
     "steps": [
       {
@@ -50647,24 +50713,24 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-e1 c3",
+        "command": "git switch -c recovery/e1 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-e1"
+              "recovery/e1"
             ],
-            "text": "Branch recovery-4-1-e1 is created."
+            "text": "Branch recovery/e1 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-e1"
+              "recovery/e1"
             ],
-            "text": "HEAD moves to recovery-4-1-e1."
+            "text": "HEAD moves to recovery/e1."
           }
         ],
         "positions": [
@@ -50679,8 +50745,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "e2": {
     "final": {
-      "coarse": "89095922dbe09cba",
-      "exact": "aad0f54e4629b12e"
+      "coarse": "f5bf72e14ad9c4d7",
+      "exact": "26b5ea168428e85f"
     },
     "steps": [
       {
@@ -50706,24 +50772,24 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-e2 c3",
+        "command": "git switch -c recovery/e2 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-e2"
+              "recovery/e2"
             ],
-            "text": "Branch recovery-4-1-e2 is created."
+            "text": "Branch recovery/e2 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-e2"
+              "recovery/e2"
             ],
-            "text": "HEAD moves to recovery-4-1-e2."
+            "text": "HEAD moves to recovery/e2."
           }
         ],
         "positions": [
@@ -50738,8 +50804,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "e3": {
     "final": {
-      "coarse": "fb372fd5ae0104b0",
-      "exact": "0a60010c639e50ba"
+      "coarse": "328a9d3ef57faf09",
+      "exact": "dc454b0f1c8738bc"
     },
     "steps": [
       {
@@ -50765,24 +50831,24 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-e3 c3",
+        "command": "git switch -c recovery/e3 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-e3"
+              "recovery/e3"
             ],
-            "text": "Branch recovery-4-1-e3 is created."
+            "text": "Branch recovery/e3 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-e3"
+              "recovery/e3"
             ],
-            "text": "HEAD moves to recovery-4-1-e3."
+            "text": "HEAD moves to recovery/e3."
           }
         ],
         "positions": [
@@ -50797,8 +50863,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "e4": {
     "final": {
-      "coarse": "bbc9557fd91594bd",
-      "exact": "05be48b40fee63f7"
+      "coarse": "6a823f0d41fc6eb7",
+      "exact": "6202ebf55043ca4b"
     },
     "steps": [
       {
@@ -50824,24 +50890,24 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-e4 c3",
+        "command": "git switch -c recovery/e4 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-e4"
+              "recovery/e4"
             ],
-            "text": "Branch recovery-4-1-e4 is created."
+            "text": "Branch recovery/e4 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-e4"
+              "recovery/e4"
             ],
-            "text": "HEAD moves to recovery-4-1-e4."
+            "text": "HEAD moves to recovery/e4."
           }
         ],
         "positions": [
@@ -50856,8 +50922,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "e5": {
     "final": {
-      "coarse": "27259dec40ce11b9",
-      "exact": "aded888a7207cdfe"
+      "coarse": "f990716d86b113c5",
+      "exact": "0fc2e77471ca01c2"
     },
     "steps": [
       {
@@ -50883,24 +50949,24 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-e5 c3",
+        "command": "git switch -c recovery/e5 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-e5"
+              "recovery/e5"
             ],
-            "text": "Branch recovery-4-1-e5 is created."
+            "text": "Branch recovery/e5 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-e5"
+              "recovery/e5"
             ],
-            "text": "HEAD moves to recovery-4-1-e5."
+            "text": "HEAD moves to recovery/e5."
           }
         ],
         "positions": [
@@ -52705,6 +52771,17 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "9e559e484c90b58f",
             "exact": "e70df6ebdf23a2a3"
+          }
+        ]
+      },
+      {
+        "command": "git log --oneline release/next..origin/release/next",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "1634d4214b2d0dd6",
+            "exact": "8295432a9969c50a"
           }
         ]
       },
@@ -119620,8 +119697,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "h1": {
     "final": {
-      "coarse": "b0790e85d34f60f3",
-      "exact": "1dd3d1f0d4158bed"
+      "coarse": "6919ba56e43c1dd1",
+      "exact": "66a192b7e766c86c"
     },
     "steps": [
       {
@@ -119630,8 +119707,19 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "effect": [],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
+          }
+        ]
+      },
+      {
+        "command": "git show c4",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       },
@@ -119641,36 +119729,36 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "effect": [],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-h1 c3",
+        "command": "git switch -c recovery/h1 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-h1"
+              "recovery/h1"
             ],
-            "text": "Branch recovery-4-1-h1 is created."
+            "text": "Branch recovery/h1 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-h1"
+              "recovery/h1"
             ],
-            "text": "HEAD moves to recovery-4-1-h1."
+            "text": "HEAD moves to recovery/h1."
           }
         ],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       }
@@ -119679,8 +119767,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "h2": {
     "final": {
-      "coarse": "bca69f64a0972f7d",
-      "exact": "f26cb8bcd4b0cd19"
+      "coarse": "3ea8f1e0cec5a8f5",
+      "exact": "3783819433bc9c5e"
     },
     "steps": [
       {
@@ -119689,8 +119777,19 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "effect": [],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
+          }
+        ]
+      },
+      {
+        "command": "git show c4",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       },
@@ -119700,36 +119799,36 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "effect": [],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-h2 c3",
+        "command": "git switch -c recovery/h2 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-h2"
+              "recovery/h2"
             ],
-            "text": "Branch recovery-4-1-h2 is created."
+            "text": "Branch recovery/h2 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-h2"
+              "recovery/h2"
             ],
-            "text": "HEAD moves to recovery-4-1-h2."
+            "text": "HEAD moves to recovery/h2."
           }
         ],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       }
@@ -119738,8 +119837,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "h3": {
     "final": {
-      "coarse": "a9dd67d4a0c6d4fb",
-      "exact": "2d413f9d9e565164"
+      "coarse": "ea9be2ddb99c63c5",
+      "exact": "061d92b359ccb24e"
     },
     "steps": [
       {
@@ -119748,8 +119847,19 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "effect": [],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
+          }
+        ]
+      },
+      {
+        "command": "git show c4",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       },
@@ -119759,36 +119869,36 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "effect": [],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-h3 c3",
+        "command": "git switch -c recovery/h3 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-h3"
+              "recovery/h3"
             ],
-            "text": "Branch recovery-4-1-h3 is created."
+            "text": "Branch recovery/h3 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-h3"
+              "recovery/h3"
             ],
-            "text": "HEAD moves to recovery-4-1-h3."
+            "text": "HEAD moves to recovery/h3."
           }
         ],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       }
@@ -119797,8 +119907,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "h4": {
     "final": {
-      "coarse": "b4c2b53782720756",
-      "exact": "a73944d645dc3b39"
+      "coarse": "08bfadc28f2239b0",
+      "exact": "7883fb0e2cfd751b"
     },
     "steps": [
       {
@@ -119807,8 +119917,19 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "effect": [],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
+          }
+        ]
+      },
+      {
+        "command": "git show c4",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       },
@@ -119818,36 +119939,36 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "effect": [],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-h4 c3",
+        "command": "git switch -c recovery/h4 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-h4"
+              "recovery/h4"
             ],
-            "text": "Branch recovery-4-1-h4 is created."
+            "text": "Branch recovery/h4 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-h4"
+              "recovery/h4"
             ],
-            "text": "HEAD moves to recovery-4-1-h4."
+            "text": "HEAD moves to recovery/h4."
           }
         ],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       }
@@ -119856,8 +119977,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "h5": {
     "final": {
-      "coarse": "3a58bcbf4d517f8a",
-      "exact": "43cc46ae6e932a34"
+      "coarse": "e4ffbbef8bd29c1a",
+      "exact": "a5474d8682ffc0bf"
     },
     "steps": [
       {
@@ -119866,8 +119987,19 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "effect": [],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
+          }
+        ]
+      },
+      {
+        "command": "git show c4",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       },
@@ -119877,36 +120009,36 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "effect": [],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-h5 c3",
+        "command": "git switch -c recovery/h5 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-h5"
+              "recovery/h5"
             ],
-            "text": "Branch recovery-4-1-h5 is created."
+            "text": "Branch recovery/h5 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-h5"
+              "recovery/h5"
             ],
-            "text": "HEAD moves to recovery-4-1-h5."
+            "text": "HEAD moves to recovery/h5."
           }
         ],
         "positions": [
           {
-            "coarse": "d8fe250709caf912",
-            "exact": "6429e8c9de145e72"
+            "coarse": "566edf4ea436fd3e",
+            "exact": "ea8d2b8a9e07d443"
           }
         ]
       }
@@ -120858,7 +120990,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git init",
+        "command": "git init -b main",
         "diagnostic": false,
         "effect": [
           {
@@ -120893,7 +121025,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git init invoice-tracker",
+        "command": "git init -b main invoice-tracker",
         "diagnostic": false,
         "effect": [
           {
@@ -120971,7 +121103,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git init ci-configs",
+        "command": "git init -b main ci-configs",
         "diagnostic": false,
         "effect": [
           {
@@ -121006,7 +121138,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git init -q -b main research-log",
+        "command": "git init -b main research-log",
         "diagnostic": false,
         "effect": [
           {
@@ -121041,7 +121173,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git init --quiet",
+        "command": "git init",
         "diagnostic": false,
         "effect": [],
         "positions": [
@@ -121061,7 +121193,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git init --quiet --initial-branch=trunk ui-kit",
+        "command": "git init --initial-branch=trunk ui-kit",
         "diagnostic": false,
         "effect": [
           {
@@ -121104,7 +121236,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git init oss-contrib",
+        "command": "git init -b main oss-contrib",
         "diagnostic": false,
         "effect": [
           {
@@ -121139,7 +121271,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     },
     "steps": [
       {
-        "command": "git init docs-site",
+        "command": "git init -b main docs-site",
         "diagnostic": false,
         "effect": [
           {
@@ -121167,14 +121299,14 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
-  "init-medium-quiet-research-log": {
+  "init-medium-existing-files": {
     "final": {
-      "coarse": "7df34fffeb22db96",
-      "exact": "7df34fffeb22db96"
+      "coarse": "f5116495dfe385af",
+      "exact": "bd5253450dd7978e"
     },
     "steps": [
       {
-        "command": "git init --quiet --initial-branch=main research-log",
+        "command": "git init -b main field-notes",
         "diagnostic": false,
         "effect": [
           {
@@ -121194,8 +121326,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "d81aa3414a2a5b14",
-            "exact": "d81aa3414a2a5b14"
+            "coarse": "4785e542413d27dc",
+            "exact": "be647bf028f45745"
           }
         ]
       }
@@ -121353,8 +121485,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "m1": {
     "final": {
-      "coarse": "6911345b54cd904a",
-      "exact": "5a0174053452c6ab"
+      "coarse": "59da351a038a3eae",
+      "exact": "8450890f94ce04fa"
     },
     "steps": [
       {
@@ -121380,24 +121512,24 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-m1 c3",
+        "command": "git switch -c recovery/m1 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-m1"
+              "recovery/m1"
             ],
-            "text": "Branch recovery-4-1-m1 is created."
+            "text": "Branch recovery/m1 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-m1"
+              "recovery/m1"
             ],
-            "text": "HEAD moves to recovery-4-1-m1."
+            "text": "HEAD moves to recovery/m1."
           }
         ],
         "positions": [
@@ -121412,8 +121544,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "m2": {
     "final": {
-      "coarse": "cc26dfc75b201cde",
-      "exact": "9ecdc4d799116dc4"
+      "coarse": "ade44b870d5d1a12",
+      "exact": "8a878ad152e7f2e1"
     },
     "steps": [
       {
@@ -121439,24 +121571,24 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-m2 c3",
+        "command": "git switch -c recovery/m2 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-m2"
+              "recovery/m2"
             ],
-            "text": "Branch recovery-4-1-m2 is created."
+            "text": "Branch recovery/m2 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-m2"
+              "recovery/m2"
             ],
-            "text": "HEAD moves to recovery-4-1-m2."
+            "text": "HEAD moves to recovery/m2."
           }
         ],
         "positions": [
@@ -121471,8 +121603,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "m3": {
     "final": {
-      "coarse": "ebf880389a5966f5",
-      "exact": "b62af6fd466ba72e"
+      "coarse": "9d72321dd7ffec53",
+      "exact": "814b88687a3348ff"
     },
     "steps": [
       {
@@ -121498,24 +121630,24 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-m3 c3",
+        "command": "git switch -c recovery/m3 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-m3"
+              "recovery/m3"
             ],
-            "text": "Branch recovery-4-1-m3 is created."
+            "text": "Branch recovery/m3 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-m3"
+              "recovery/m3"
             ],
-            "text": "HEAD moves to recovery-4-1-m3."
+            "text": "HEAD moves to recovery/m3."
           }
         ],
         "positions": [
@@ -121530,8 +121662,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "m4": {
     "final": {
-      "coarse": "ec28cb68a12638d2",
-      "exact": "c2aa02355bde69e7"
+      "coarse": "cd1afd5af4db78e2",
+      "exact": "47b730a566e23be6"
     },
     "steps": [
       {
@@ -121557,24 +121689,24 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-m4 c3",
+        "command": "git switch -c recovery/m4 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-m4"
+              "recovery/m4"
             ],
-            "text": "Branch recovery-4-1-m4 is created."
+            "text": "Branch recovery/m4 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-m4"
+              "recovery/m4"
             ],
-            "text": "HEAD moves to recovery-4-1-m4."
+            "text": "HEAD moves to recovery/m4."
           }
         ],
         "positions": [
@@ -121589,8 +121721,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "m5": {
     "final": {
-      "coarse": "9989cb4d8cec230a",
-      "exact": "c9bca15c85618f96"
+      "coarse": "893309d3a253629a",
+      "exact": "aa4e256a91ed39f8"
     },
     "steps": [
       {
@@ -121616,24 +121748,24 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git switch -c recovery-4-1-m5 c3",
+        "command": "git switch -c recovery/m5 c3",
         "diagnostic": false,
         "effect": [
           {
             "action": "create",
             "kind": "branch",
             "subjects": [
-              "recovery-4-1-m5"
+              "recovery/m5"
             ],
-            "text": "Branch recovery-4-1-m5 is created."
+            "text": "Branch recovery/m5 is created."
           },
           {
             "action": "move",
             "kind": "head",
             "subjects": [
-              "recovery-4-1-m5"
+              "recovery/m5"
             ],
-            "text": "HEAD moves to recovery-4-1-m5."
+            "text": "HEAD moves to recovery/m5."
           }
         ],
         "positions": [
@@ -121649,13 +121781,21 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "manual-easy-auth-copy": {
     "final": {
       "coarse": "94731f91642f89db",
-      "exact": "cf57f7e260de75ff"
+      "exact": "edfd9a88c7047ff8"
     },
     "steps": [
       {
         "command": "git merge feature/auth-timeout",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/auth.js"
+            ],
+            "text": "src/auth.js has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -121669,10 +121809,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "baa3d1be7a6df802",
             "exact": "dbb631446e9ba80e"
-          },
-          {
-            "coarse": "5b1db6ab4efadc04",
-            "exact": "e6e108a16656c8da"
           }
         ]
       },
@@ -121701,11 +121837,15 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "5322aabb411b080d",
             "exact": "990f7fe42a763929"
+          },
+          {
+            "coarse": "9c1abedfdf85a52f",
+            "exact": "a76438c38af28b6d"
           }
         ]
       },
       {
-        "command": "git commit -m \"Resolve conflict cleanly\"",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -121720,8 +121860,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "9dff1a5eaf4351c7",
-            "exact": "8dc746bfe2f8e743"
+            "coarse": "31491572758afdf6",
+            "exact": "05da11a2590f2b91"
           }
         ]
       }
@@ -121731,13 +121871,21 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "manual-easy-billing-copy": {
     "final": {
       "coarse": "71a32d75f5a10695",
-      "exact": "44bb6e81e6572ffd"
+      "exact": "257f357b01140ae1"
     },
     "steps": [
       {
         "command": "git merge feature/regional-currency",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/billing.py"
+            ],
+            "text": "src/billing.py has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -121751,10 +121899,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "bbafc89f4f4755f7",
             "exact": "2a9262557ac4b913"
-          },
-          {
-            "coarse": "7d2f230c60b6dbf2",
-            "exact": "512e8d4f45d7af19"
           }
         ]
       },
@@ -121783,11 +121927,15 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "cbcde77fd33b06c3",
             "exact": "b45dfa29ec19bf77"
+          },
+          {
+            "coarse": "f4c4f046b7f4745a",
+            "exact": "4113be2ebf466f2c"
           }
         ]
       },
       {
-        "command": "git commit -m \"Resolve conflict cleanly\"",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -121802,8 +121950,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "88a228420c0ce753",
-            "exact": "c8841afbb264a3e4"
+            "coarse": "912bc965710a2596",
+            "exact": "9743b5c5e0faed0d"
           }
         ]
       }
@@ -121813,13 +121961,21 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "manual-easy-config-copy": {
     "final": {
       "coarse": "d8211adaee2df381",
-      "exact": "46dcc839e1e93acd"
+      "exact": "d9dbb63f9661026a"
     },
     "steps": [
       {
         "command": "git merge feature/debug-config",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/config.py"
+            ],
+            "text": "src/config.py has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -121833,10 +121989,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "e73a4c8b128a3445",
             "exact": "479d2197f6379e8f"
-          },
-          {
-            "coarse": "ad6ec19d6b1f78c3",
-            "exact": "2d91c691373600fa"
           }
         ]
       },
@@ -121865,11 +122017,15 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "ffc57b4b654e3ef6",
             "exact": "763d460ce2c3b9f2"
+          },
+          {
+            "coarse": "165d1235e2363b6b",
+            "exact": "c144eec5ab5c31e6"
           }
         ]
       },
       {
-        "command": "git commit -m \"Resolve conflict cleanly\"",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -121884,8 +122040,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "6578fd6b2ef19a82",
-            "exact": "c649716efbb225ae"
+            "coarse": "6c0698d12bc7f20e",
+            "exact": "869c24643a2011a3"
           }
         ]
       }
@@ -121895,13 +122051,21 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "manual-easy-navbar-copy": {
     "final": {
       "coarse": "9d702bb979a01979",
-      "exact": "4aec9aa205eb3e75"
+      "exact": "eccd1b2936d6199e"
     },
     "steps": [
       {
         "command": "git merge feature/navbar-rebrand",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/components/Navbar.tsx"
+            ],
+            "text": "src/components/Navbar.tsx has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -121915,10 +122079,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "9ee502c717c70a15",
             "exact": "c823b8afcaf4fed3"
-          },
-          {
-            "coarse": "338a6810b156c1e8",
-            "exact": "27259ca4febef6bd"
           }
         ]
       },
@@ -121947,11 +122107,15 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "065826d07e7f5857",
             "exact": "6523341ff7989268"
+          },
+          {
+            "coarse": "4103fb65807923b4",
+            "exact": "f8b2f4cd0fcca163"
           }
         ]
       },
       {
-        "command": "git commit -m \"Resolve conflict cleanly\"",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -121966,8 +122130,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "a19c501c4deae800",
-            "exact": "7ec983f1539ce004"
+            "coarse": "0bfdaf42c06d7b30",
+            "exact": "d4bc29d1f9f8df17"
           }
         ]
       }
@@ -121977,13 +122141,21 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "manual-easy-profile-copy": {
     "final": {
       "coarse": "cefe7b844610340f",
-      "exact": "812949daa06c7932"
+      "exact": "fdc01b379796681c"
     },
     "steps": [
       {
         "command": "git merge feature/profile-copy",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/profile.tsx"
+            ],
+            "text": "src/profile.tsx has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -121997,10 +122169,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "03c2d5e3748a4cdc",
             "exact": "7278e1065d243f40"
-          },
-          {
-            "coarse": "b204fc3d53a482f0",
-            "exact": "e2dfafc834f79665"
           }
         ]
       },
@@ -122029,11 +122197,15 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "3dd478f34a163ab2",
             "exact": "b10c48f873b03304"
+          },
+          {
+            "coarse": "63e10d2e979f2459",
+            "exact": "8fc57af4acab7546"
           }
         ]
       },
       {
-        "command": "git commit -m \"Resolve conflict cleanly\"",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -122048,24 +122220,68 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "2c2776f30a072f79",
-            "exact": "e063e9445769b93b"
+            "coarse": "1c52303a41f7621e",
+            "exact": "2204db2e84951e29"
           }
         ]
       }
     ],
     "version": 2
   },
-  "manual-hard-medium-carryover": {
+  "manual-hard-abort-redo": {
     "final": {
-      "coarse": "035ba4da33af79b4",
-      "exact": "e7d6d967894e0f4e"
+      "coarse": "8305adae911b2fbc",
+      "exact": "aaec4c3f320f6530"
     },
     "steps": [
+      {
+        "command": "git merge --abort",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "remove",
+            "kind": "working_tree",
+            "subjects": [
+              "src/routes.ts"
+            ],
+            "text": "Edits to src/routes.ts are discarded or saved elsewhere."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/routes.ts"
+            ],
+            "text": "Conflict resolved in src/routes.ts."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "merge"
+            ],
+            "text": "The merge is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "3dad7fff7171230b",
+            "exact": "d83da96eb2b7205e"
+          }
+        ]
+      },
       {
         "command": "git merge feature/help-center",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/routes.ts"
+            ],
+            "text": "src/routes.ts has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -122073,16 +122289,20 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
               "src/routes.ts"
             ],
             "text": "Conflict to resolve in src/routes.ts."
+          },
+          {
+            "action": "start",
+            "kind": "operation",
+            "subjects": [
+              "merge"
+            ],
+            "text": "A merge is in progress."
           }
         ],
         "positions": [
           {
-            "coarse": "71bb5be23c5bbdd6",
-            "exact": "e9eecd60893b7979"
-          },
-          {
-            "coarse": "278898640e5c7bf5",
-            "exact": "de0353a14286005f"
+            "coarse": "d4cdcd3837afd27a",
+            "exact": "8fa58f287e1d5db8"
           }
         ]
       },
@@ -122109,13 +122329,17 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "01ac495bdb0e71e6",
-            "exact": "31ab0cb072329ae8"
+            "coarse": "3dad7fff7171230b",
+            "exact": "659323be41609ddb"
+          },
+          {
+            "coarse": "7dd0ef68c0047102",
+            "exact": "9778b545b056709f"
           }
         ]
       },
       {
-        "command": "git commit -m \"Resolve release conflict\"",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -122126,12 +122350,20 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
               "src/routes.ts"
             ],
             "text": "New commit on main, saving src/routes.ts."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "merge"
+            ],
+            "text": "The merge is finished."
           }
         ],
         "positions": [
           {
-            "coarse": "4eac618b8a5e27ce",
-            "exact": "0eae0fa6dbae3696"
+            "coarse": "e17dfda3c5be35cc",
+            "exact": "5e898ad28c71271a"
           }
         ]
       }
@@ -122141,13 +122373,21 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "manual-hard-migration": {
     "final": {
       "coarse": "8a8b6aab37cfa046",
-      "exact": "0ef9e06c9b8987dc"
+      "exact": "d562a3c3a23ca4a7"
     },
     "steps": [
       {
         "command": "git merge feature/migration",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "db/migrations/001_users.sql"
+            ],
+            "text": "db/migrations/001_users.sql has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -122161,10 +122401,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "71ee6cbcaecde12f",
             "exact": "bb19e26db2337395"
-          },
-          {
-            "coarse": "ca0931c747422679",
-            "exact": "0988bb07770e9ee3"
           }
         ]
       },
@@ -122193,11 +122429,15 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "6942907102fe3011",
             "exact": "03937e3a89b71487"
+          },
+          {
+            "coarse": "dcd60ba6c479c1bc",
+            "exact": "d91823a5d0e76ad9"
           }
         ]
       },
       {
-        "command": "git commit -m \"Resolve release conflict\"",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -122212,8 +122452,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "4bc47dab00d67c24",
-            "exact": "9252738318405d9a"
+            "coarse": "82b0c11044c4da6d",
+            "exact": "f192e25dd36d7126"
           }
         ]
       }
@@ -122223,13 +122463,21 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "manual-hard-pricing": {
     "final": {
       "coarse": "e763bd33f8246f07",
-      "exact": "147253dc4f6122c0"
+      "exact": "e54e37eb4a92c4bf"
     },
     "steps": [
       {
         "command": "git merge feature/pricing",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/pricing.rb"
+            ],
+            "text": "src/pricing.rb has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -122243,10 +122491,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "1c1be07dd244bac1",
             "exact": "a7d103ef98c016ba"
-          },
-          {
-            "coarse": "ac64537e5cebb777",
-            "exact": "d741084c909d3f21"
           }
         ]
       },
@@ -122275,11 +122519,15 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "e4c7b3551901d640",
             "exact": "a1379b323d5104e8"
+          },
+          {
+            "coarse": "59ff5023f2fedcb8",
+            "exact": "3fd36b32ce27f1af"
           }
         ]
       },
       {
-        "command": "git commit -m \"Resolve release conflict\"",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -122294,8 +122542,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "dac557c3f9699d8c",
-            "exact": "2ba6f7a45b94a7cd"
+            "coarse": "a7d0a1847329bbef",
+            "exact": "015a11720742d4ec"
           }
         ]
       }
@@ -122305,13 +122553,21 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "manual-hard-schema": {
     "final": {
       "coarse": "4f80981462ad6cf6",
-      "exact": "de8c2de4ded72d4a"
+      "exact": "bd665f96b25b2c62"
     },
     "steps": [
       {
         "command": "git merge feature/schema",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "schema/orders.sql"
+            ],
+            "text": "schema/orders.sql has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -122325,10 +122581,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "2e9e7bc2f7473ba5",
             "exact": "318401f80d0687a8"
-          },
-          {
-            "coarse": "658b27ab720aff0b",
-            "exact": "a469f50b098433f2"
           }
         ]
       },
@@ -122357,11 +122609,15 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "0d675171cf94b699",
             "exact": "39525196d8946be5"
+          },
+          {
+            "coarse": "a87d288c1a5e60db",
+            "exact": "6fee7ed6501f13ee"
           }
         ]
       },
       {
-        "command": "git commit -m \"Resolve release conflict\"",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -122376,8 +122632,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "368b2ffb52c92a22",
-            "exact": "e391d2c815df1896"
+            "coarse": "fe4e09b8b2a77d4e",
+            "exact": "06418d32ffc57b87"
           }
         ]
       }
@@ -122387,13 +122643,21 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "manual-medium-gateway": {
     "final": {
       "coarse": "9d518386c168a2de",
-      "exact": "09a5e4864563b514"
+      "exact": "961e8202ca975b51"
     },
     "steps": [
       {
         "command": "git merge feature/gateway",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "config/gateway.yml"
+            ],
+            "text": "config/gateway.yml has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -122407,10 +122671,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "eeb4bbccfe2af1df",
             "exact": "5bfacc7e7c0aef7f"
-          },
-          {
-            "coarse": "7d22970b69dad4ae",
-            "exact": "e7352f56fcf04bce"
           }
         ]
       },
@@ -122439,11 +122699,15 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "0267ec9767f43f19",
             "exact": "503df0560acc34fb"
+          },
+          {
+            "coarse": "169b5520aca55f15",
+            "exact": "39545bf465746dcc"
           }
         ]
       },
       {
-        "command": "git commit -m \"Resolve integration conflict\"",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -122458,8 +122722,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "dc403fd59da61e27",
-            "exact": "54c12e9c4307e8fd"
+            "coarse": "d5bbbdba2b6605ee",
+            "exact": "583b594a635cbae4"
           }
         ]
       }
@@ -122469,13 +122733,21 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "manual-medium-policy": {
     "final": {
       "coarse": "c1ca240f9527b965",
-      "exact": "1bc51d639e443c7e"
+      "exact": "445321227479b4d1"
     },
     "steps": [
       {
         "command": "git merge feature/policy",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/policy.yml"
+            ],
+            "text": "src/policy.yml has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -122489,10 +122761,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "4518e6259fe0bf59",
             "exact": "493555f98f5b2f60"
-          },
-          {
-            "coarse": "cd29bc423a3172f0",
-            "exact": "9c923f5ff574b846"
           }
         ]
       },
@@ -122521,11 +122789,15 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "9e333375a4226fbc",
             "exact": "0b37b28ceff19d1c"
+          },
+          {
+            "coarse": "71a4db98901af0a0",
+            "exact": "9adc863d8d694e72"
           }
         ]
       },
       {
-        "command": "git commit -m \"Resolve integration conflict\"",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -122540,8 +122812,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "06ba60ebce4ab11f",
-            "exact": "d0d72391372b8919"
+            "coarse": "f0384c4ab57283d2",
+            "exact": "cf32f4ee97101880"
           }
         ]
       }
@@ -122551,13 +122823,21 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "manual-medium-router": {
     "final": {
       "coarse": "9d5780b7e6d873ba",
-      "exact": "cf9d83d3c9734861"
+      "exact": "16bdc5276e6fe871"
     },
     "steps": [
       {
         "command": "git merge feature/routes",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/routes.ts"
+            ],
+            "text": "src/routes.ts has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -122571,10 +122851,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "652e7127bce98e03",
             "exact": "2b3fa80f2fff5e91"
-          },
-          {
-            "coarse": "92ab2c339f75c084",
-            "exact": "1991ade846a90321"
           }
         ]
       },
@@ -122603,11 +122879,15 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "11937a3f3295482b",
             "exact": "9af1bffd9754efb3"
+          },
+          {
+            "coarse": "75beb85ab4d4aa5d",
+            "exact": "d5116cbf43ba2837"
           }
         ]
       },
       {
-        "command": "git commit -m \"Resolve integration conflict\"",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -122622,8 +122902,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "b41d82dd775050e5",
-            "exact": "9f7de428943b0852"
+            "coarse": "0fc6a5440152d562",
+            "exact": "f3c78cd6ce0a41fb"
           }
         ]
       }
@@ -123114,16 +123394,502 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
-  "mergetool-easy-auth-copy": {
+  "mergetool-easy-app-locale": {
     "final": {
-      "coarse": "94731f91642f89db",
-      "exact": "ac9dbda3de018821"
+      "coarse": "a84ce5f422608951",
+      "exact": "1475a3f71996bde4"
     },
     "steps": [
+      {
+        "command": "git merge feature/app-locale",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "config/app.ini"
+            ],
+            "text": "config/app.ini has uncommitted edits."
+          },
+          {
+            "action": "add",
+            "kind": "conflict",
+            "subjects": [
+              "config/app.ini"
+            ],
+            "text": "Conflict to resolve in config/app.ini."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "aba140f98157fb37",
+            "exact": "7e950f2e84f27e9f"
+          }
+        ]
+      },
+      {
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "d8001783678afa19",
+            "exact": "aff2d6e23f168a4d"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "config/app.ini"
+            ],
+            "text": "New commit on main, saving config/app.ini."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "d8001783678afa19",
+            "exact": "aff2d6e23f168a4d"
+          },
+          {
+            "coarse": "d1137ff4b49f5e2b",
+            "exact": "240b7c6ef2087ecf"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "mergetool-easy-cache-ttl": {
+    "final": {
+      "coarse": "463f5b98b1b85f0c",
+      "exact": "d0a44aab7abbc489"
+    },
+    "steps": [
+      {
+        "command": "git merge feature/cache-ttl",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/cache.py"
+            ],
+            "text": "src/cache.py has uncommitted edits."
+          },
+          {
+            "action": "add",
+            "kind": "conflict",
+            "subjects": [
+              "src/cache.py"
+            ],
+            "text": "Conflict to resolve in src/cache.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "d408c0627e717442",
+            "exact": "9bb5436a07e84086"
+          }
+        ]
+      },
+      {
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "c977e357978c28d5",
+            "exact": "c2ed4b4bbd62a522"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "src/cache.py"
+            ],
+            "text": "New commit on main, saving src/cache.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "c977e357978c28d5",
+            "exact": "c2ed4b4bbd62a522"
+          },
+          {
+            "coarse": "b48e989fb50eeb1e",
+            "exact": "a3729f353f3c89a6"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "mergetool-easy-labels": {
+    "final": {
+      "coarse": "865a4cc22f2a76bd",
+      "exact": "56ac735a8e00b7c2"
+    },
+    "steps": [
+      {
+        "command": "git merge feature/labels-fil",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/labels.ts"
+            ],
+            "text": "src/labels.ts has uncommitted edits."
+          },
+          {
+            "action": "add",
+            "kind": "conflict",
+            "subjects": [
+              "src/labels.ts"
+            ],
+            "text": "Conflict to resolve in src/labels.ts."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "78678f450d609dd2",
+            "exact": "9c2e09ad44c8ee73"
+          }
+        ]
+      },
+      {
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "b1f13d4f1ad3affd",
+            "exact": "02de3b97d0dce02f"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "src/labels.ts"
+            ],
+            "text": "New commit on main, saving src/labels.ts."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "b1f13d4f1ad3affd",
+            "exact": "02de3b97d0dce02f"
+          },
+          {
+            "coarse": "6ca12d636f84019b",
+            "exact": "3c9812adf2d823cc"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "mergetool-easy-mail-footer": {
+    "final": {
+      "coarse": "fbbe4098b39c15cd",
+      "exact": "a6272ff0044a4ac0"
+    },
+    "steps": [
+      {
+        "command": "git merge feature/mail-footer",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/mailer.py"
+            ],
+            "text": "src/mailer.py has uncommitted edits."
+          },
+          {
+            "action": "add",
+            "kind": "conflict",
+            "subjects": [
+              "src/mailer.py"
+            ],
+            "text": "Conflict to resolve in src/mailer.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "815bd959ae70d07d",
+            "exact": "f00952b32b3b5482"
+          }
+        ]
+      },
+      {
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "e0e4233c2925da2a",
+            "exact": "eb9a64d9a184631a"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "src/mailer.py"
+            ],
+            "text": "New commit on main, saving src/mailer.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e0e4233c2925da2a",
+            "exact": "eb9a64d9a184631a"
+          },
+          {
+            "coarse": "4cf0e0b35ad8fbf3",
+            "exact": "e69dad18f52bcc3f"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "mergetool-easy-upload-limit": {
+    "final": {
+      "coarse": "7827f43fb66f7507",
+      "exact": "abad7001660fe5d7"
+    },
+    "steps": [
+      {
+        "command": "git merge feature/upload-limit",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/limits.js"
+            ],
+            "text": "src/limits.js has uncommitted edits."
+          },
+          {
+            "action": "add",
+            "kind": "conflict",
+            "subjects": [
+              "src/limits.js"
+            ],
+            "text": "Conflict to resolve in src/limits.js."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "7cb3d119f8349065",
+            "exact": "e8484f935183569f"
+          }
+        ]
+      },
+      {
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "e8ff5deb55e5c88e",
+            "exact": "26e263cf337ad143"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "src/limits.js"
+            ],
+            "text": "New commit on main, saving src/limits.js."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e8ff5deb55e5c88e",
+            "exact": "26e263cf337ad143"
+          },
+          {
+            "coarse": "8343216826724a33",
+            "exact": "fb8e476b090f38ff"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "mergetool-hard-choose-tool": {
+    "final": {
+      "coarse": "413f255e1d0440cb",
+      "exact": "c6ce1847e1971ca8"
+    },
+    "steps": [
+      {
+        "command": "git config merge.tool meld",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "set",
+            "kind": "config",
+            "subjects": [
+              "merge.tool"
+            ],
+            "text": "merge.tool is set."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "a3cfb0cc3c07e347",
+            "exact": "0221afbc75bf5885"
+          }
+        ]
+      },
+      {
+        "command": "git merge feature/pricing-v2",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/prices.py"
+            ],
+            "text": "src/prices.py has uncommitted edits."
+          },
+          {
+            "action": "add",
+            "kind": "conflict",
+            "subjects": [
+              "src/prices.py"
+            ],
+            "text": "Conflict to resolve in src/prices.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "ee3f31a37e47011a",
+            "exact": "fbb1fef45033a5c4"
+          }
+        ]
+      },
+      {
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "44ca8da203126467",
+            "exact": "913750a7279718ee"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "src/prices.py"
+            ],
+            "text": "New commit on main, saving src/prices.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "44ca8da203126467",
+            "exact": "913750a7279718ee"
+          },
+          {
+            "coarse": "7ce6e4ce4395cb6b",
+            "exact": "5ca632e05d75110d"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "mergetool-hard-no-leftovers": {
+    "final": {
+      "coarse": "255006d99d835956",
+      "exact": "6c5a8b36cfbc028d"
+    },
+    "steps": [
+      {
+        "command": "git config mergetool.keepBackup false",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "set",
+            "kind": "config",
+            "subjects": [
+              "mergetool.keepBackup"
+            ],
+            "text": "mergetool.keepBackup is set."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "baa3d1be7a6df802",
+            "exact": "6e95b46f47baa7b1"
+          }
+        ]
+      },
       {
         "command": "git merge feature/auth-timeout",
         "diagnostic": false,
         "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/auth.js"
+            ],
+            "text": "src/auth.js has uncommitted edits."
+          },
           {
             "action": "add",
             "kind": "conflict",
@@ -123135,45 +123901,24 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "baa3d1be7a6df802",
-            "exact": "dbb631446e9ba80e"
-          },
-          {
-            "coarse": "5b1db6ab4efadc04",
-            "exact": "e6e108a16656c8da"
+            "coarse": "f6e4be05bb84d40f",
+            "exact": "cd720fb7c54606d6"
           }
         ]
       },
       {
-        "command": "git add src/auth.js",
+        "command": "git mergetool",
         "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "staging",
-            "subjects": [
-              "src/auth.js"
-            ],
-            "text": "src/auth.js is staged."
-          },
-          {
-            "action": "remove",
-            "kind": "conflict",
-            "subjects": [
-              "src/auth.js"
-            ],
-            "text": "Conflict resolved in src/auth.js."
-          }
-        ],
+        "effect": [],
         "positions": [
           {
-            "coarse": "5322aabb411b080d",
-            "exact": "990f7fe42a763929"
+            "coarse": "8e5b48354ad54749",
+            "exact": "6471142409640827"
           }
         ]
       },
       {
-        "command": "git commit",
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -123188,74 +123933,73 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "9dff1a5eaf4351c7",
-            "exact": "8dc746bfe2f8e743"
+            "coarse": "8e5b48354ad54749",
+            "exact": "6471142409640827"
+          },
+          {
+            "coarse": "799d451c1fb0e970",
+            "exact": "3f95c0771f59b7f3"
           }
         ]
       }
     ],
     "version": 2
   },
-  "mergetool-easy-billing-copy": {
+  "mergetool-hard-one-of-two": {
     "final": {
-      "coarse": "71a32d75f5a10695",
-      "exact": "3642ad28988e62a6"
+      "coarse": "90a29ecd122c7231",
+      "exact": "5599eea7ab581834"
     },
     "steps": [
       {
-        "command": "git merge feature/regional-currency",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "conflict",
-            "subjects": [
-              "src/billing.py"
-            ],
-            "text": "Conflict to resolve in src/billing.py."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "bbafc89f4f4755f7",
-            "exact": "2a9262557ac4b913"
-          },
-          {
-            "coarse": "7d2f230c60b6dbf2",
-            "exact": "512e8d4f45d7af19"
-          }
-        ]
-      },
-      {
-        "command": "git add src/billing.py",
+        "command": "git merge feature/release-notes",
         "diagnostic": false,
         "effect": [
           {
             "action": "add",
             "kind": "staging",
             "subjects": [
-              "src/billing.py"
+              "docs/release.md"
             ],
-            "text": "src/billing.py is staged."
+            "text": "docs/release.md is staged."
           },
           {
-            "action": "remove",
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/version.py"
+            ],
+            "text": "src/version.py has uncommitted edits."
+          },
+          {
+            "action": "add",
             "kind": "conflict",
             "subjects": [
-              "src/billing.py"
+              "src/version.py"
             ],
-            "text": "Conflict resolved in src/billing.py."
+            "text": "Conflict to resolve in src/version.py."
           }
         ],
         "positions": [
           {
-            "coarse": "cbcde77fd33b06c3",
-            "exact": "b45dfa29ec19bf77"
+            "coarse": "d66c7e470ad4c3c8",
+            "exact": "41dd729902453ee0"
           }
         ]
       },
       {
-        "command": "git commit",
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "12df1beecd1af61f",
+            "exact": "5a89116694884a8d"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -123263,81 +124007,73 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
             "kind": "commit",
             "ref": "main",
             "subjects": [
-              "src/billing.py"
+              "docs/release.md",
+              "src/version.py"
             ],
-            "text": "New commit on main, saving src/billing.py."
+            "text": "New commit on main, saving docs/release.md and src/version.py."
           }
         ],
         "positions": [
           {
-            "coarse": "88a228420c0ce753",
-            "exact": "c8841afbb264a3e4"
+            "coarse": "12df1beecd1af61f",
+            "exact": "5a89116694884a8d"
+          },
+          {
+            "coarse": "1ad418f6534a755f",
+            "exact": "4e9433310a193a32"
           }
         ]
       }
     ],
     "version": 2
   },
-  "mergetool-easy-config-copy": {
+  "mergetool-hard-take-theirs": {
     "final": {
-      "coarse": "d8211adaee2df381",
-      "exact": "1e8710bc88658e8f"
+      "coarse": "abd02bf9109f39cb",
+      "exact": "f97fc9e508f31e71"
     },
     "steps": [
       {
-        "command": "git merge feature/debug-config",
+        "command": "git merge feature/i18n-refresh",
         "diagnostic": false,
         "effect": [
           {
             "action": "add",
-            "kind": "conflict",
+            "kind": "working_tree",
             "subjects": [
-              "src/config.py"
+              "src/i18n.json"
             ],
-            "text": "Conflict to resolve in src/config.py."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "e73a4c8b128a3445",
-            "exact": "479d2197f6379e8f"
+            "text": "src/i18n.json has uncommitted edits."
           },
-          {
-            "coarse": "ad6ec19d6b1f78c3",
-            "exact": "2d91c691373600fa"
-          }
-        ]
-      },
-      {
-        "command": "git add src/config.py",
-        "diagnostic": false,
-        "effect": [
           {
             "action": "add",
-            "kind": "staging",
-            "subjects": [
-              "src/config.py"
-            ],
-            "text": "src/config.py is staged."
-          },
-          {
-            "action": "remove",
             "kind": "conflict",
             "subjects": [
-              "src/config.py"
+              "src/i18n.json"
             ],
-            "text": "Conflict resolved in src/config.py."
+            "text": "Conflict to resolve in src/i18n.json."
           }
         ],
         "positions": [
           {
-            "coarse": "ffc57b4b654e3ef6",
-            "exact": "763d460ce2c3b9f2"
+            "coarse": "d0612f8cd5e5dfea",
+            "exact": "58367e8e3df9d89d"
           }
         ]
       },
       {
-        "command": "git commit",
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "8eed727949467c32",
+            "exact": "8ba8c17bb6355385"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -123345,81 +124081,74 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
             "kind": "commit",
             "ref": "main",
             "subjects": [
-              "src/config.py"
+              "src/i18n.json"
             ],
-            "text": "New commit on main, saving src/config.py."
+            "text": "New commit on main, saving src/i18n.json."
           }
         ],
         "positions": [
           {
-            "coarse": "6578fd6b2ef19a82",
-            "exact": "c649716efbb225ae"
+            "coarse": "8eed727949467c32",
+            "exact": "8ba8c17bb6355385"
+          },
+          {
+            "coarse": "eef1fdebf181236a",
+            "exact": "4beca7981b5b7702"
           }
         ]
       }
     ],
     "version": 2
   },
-  "mergetool-easy-navbar-copy": {
+  "mergetool-medium-api-limits": {
     "final": {
-      "coarse": "9d702bb979a01979",
-      "exact": "7b7a105a67d14fa1"
+      "coarse": "99ea60a718c2c32a",
+      "exact": "b1b44b1a4e162f4b"
     },
     "steps": [
       {
-        "command": "git merge feature/navbar-rebrand",
+        "command": "git merge feature/api-limits",
         "diagnostic": false,
         "effect": [
           {
             "action": "add",
-            "kind": "conflict",
+            "kind": "working_tree",
             "subjects": [
-              "src/components/Navbar.tsx"
+              "config/cors.yml",
+              "config/limits.yml"
             ],
-            "text": "Conflict to resolve in src/components/Navbar.tsx."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "9ee502c717c70a15",
-            "exact": "c823b8afcaf4fed3"
+            "text": "config/cors.yml and config/limits.yml have uncommitted edits."
           },
-          {
-            "coarse": "338a6810b156c1e8",
-            "exact": "27259ca4febef6bd"
-          }
-        ]
-      },
-      {
-        "command": "git add src/components/Navbar.tsx",
-        "diagnostic": false,
-        "effect": [
           {
             "action": "add",
-            "kind": "staging",
-            "subjects": [
-              "src/components/Navbar.tsx"
-            ],
-            "text": "src/components/Navbar.tsx is staged."
-          },
-          {
-            "action": "remove",
             "kind": "conflict",
             "subjects": [
-              "src/components/Navbar.tsx"
+              "config/cors.yml",
+              "config/limits.yml"
             ],
-            "text": "Conflict resolved in src/components/Navbar.tsx."
+            "text": "Conflict to resolve in config/cors.yml and config/limits.yml."
           }
         ],
         "positions": [
           {
-            "coarse": "065826d07e7f5857",
-            "exact": "6523341ff7989268"
+            "coarse": "f9af509e9ba757f7",
+            "exact": "e454d9c436c01ef4"
           }
         ]
       },
       {
-        "command": "git commit",
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "905a9e645981c03b",
+            "exact": "00fa2c4613de3226"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -123427,81 +124156,75 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
             "kind": "commit",
             "ref": "main",
             "subjects": [
-              "src/components/Navbar.tsx"
+              "config/cors.yml",
+              "config/limits.yml"
             ],
-            "text": "New commit on main, saving src/components/Navbar.tsx."
+            "text": "New commit on main, saving config/cors.yml and config/limits.yml."
           }
         ],
         "positions": [
           {
-            "coarse": "a19c501c4deae800",
-            "exact": "7ec983f1539ce004"
+            "coarse": "905a9e645981c03b",
+            "exact": "00fa2c4613de3226"
+          },
+          {
+            "coarse": "553199b5e5c1d044",
+            "exact": "d080a709c411ff2c"
           }
         ]
       }
     ],
     "version": 2
   },
-  "mergetool-easy-profile-copy": {
+  "mergetool-medium-checkout-copy": {
     "final": {
-      "coarse": "cefe7b844610340f",
-      "exact": "55fc1961eeb4802f"
+      "coarse": "d1a4a1b01b6d266b",
+      "exact": "2454a050a0441f7c"
     },
     "steps": [
       {
-        "command": "git merge feature/profile-copy",
+        "command": "git merge feature/checkout-copy",
         "diagnostic": false,
         "effect": [
           {
             "action": "add",
-            "kind": "conflict",
+            "kind": "working_tree",
             "subjects": [
-              "src/profile.tsx"
+              "src/checkout.js",
+              "src/receipt.js"
             ],
-            "text": "Conflict to resolve in src/profile.tsx."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "03c2d5e3748a4cdc",
-            "exact": "7278e1065d243f40"
+            "text": "src/checkout.js and src/receipt.js have uncommitted edits."
           },
-          {
-            "coarse": "b204fc3d53a482f0",
-            "exact": "e2dfafc834f79665"
-          }
-        ]
-      },
-      {
-        "command": "git add src/profile.tsx",
-        "diagnostic": false,
-        "effect": [
           {
             "action": "add",
-            "kind": "staging",
-            "subjects": [
-              "src/profile.tsx"
-            ],
-            "text": "src/profile.tsx is staged."
-          },
-          {
-            "action": "remove",
             "kind": "conflict",
             "subjects": [
-              "src/profile.tsx"
+              "src/checkout.js",
+              "src/receipt.js"
             ],
-            "text": "Conflict resolved in src/profile.tsx."
+            "text": "Conflict to resolve in src/checkout.js and src/receipt.js."
           }
         ],
         "positions": [
           {
-            "coarse": "3dd478f34a163ab2",
-            "exact": "b10c48f873b03304"
+            "coarse": "4515fe45ccd3a2d7",
+            "exact": "634231d44d49fc33"
           }
         ]
       },
       {
-        "command": "git commit",
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "17d9a1d59519f6f8",
+            "exact": "e9671e2795ffb454"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -123509,81 +124232,75 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
             "kind": "commit",
             "ref": "main",
             "subjects": [
-              "src/profile.tsx"
+              "src/checkout.js",
+              "src/receipt.js"
             ],
-            "text": "New commit on main, saving src/profile.tsx."
+            "text": "New commit on main, saving src/checkout.js and src/receipt.js."
           }
         ],
         "positions": [
           {
-            "coarse": "2c2776f30a072f79",
-            "exact": "e063e9445769b93b"
+            "coarse": "17d9a1d59519f6f8",
+            "exact": "e9671e2795ffb454"
+          },
+          {
+            "coarse": "4fa825b2572df05c",
+            "exact": "6917d05fa2baa8ae"
           }
         ]
       }
     ],
     "version": 2
   },
-  "mergetool-hard-medium-carryover": {
+  "mergetool-medium-db-names": {
     "final": {
-      "coarse": "035ba4da33af79b4",
-      "exact": "f5060832747eb4f6"
+      "coarse": "dd200e8fd066fa07",
+      "exact": "9a9706ee3efd57ae"
     },
     "steps": [
       {
-        "command": "git merge feature/help-center",
+        "command": "git merge feature/db-rename",
         "diagnostic": false,
         "effect": [
           {
             "action": "add",
-            "kind": "conflict",
+            "kind": "working_tree",
             "subjects": [
-              "src/routes.ts"
+              "schema/authors.sql",
+              "schema/books.sql"
             ],
-            "text": "Conflict to resolve in src/routes.ts."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "71bb5be23c5bbdd6",
-            "exact": "e9eecd60893b7979"
+            "text": "schema/authors.sql and schema/books.sql have uncommitted edits."
           },
-          {
-            "coarse": "278898640e5c7bf5",
-            "exact": "de0353a14286005f"
-          }
-        ]
-      },
-      {
-        "command": "git add src/routes.ts",
-        "diagnostic": false,
-        "effect": [
           {
             "action": "add",
-            "kind": "staging",
-            "subjects": [
-              "src/routes.ts"
-            ],
-            "text": "src/routes.ts is staged."
-          },
-          {
-            "action": "remove",
             "kind": "conflict",
             "subjects": [
-              "src/routes.ts"
+              "schema/authors.sql",
+              "schema/books.sql"
             ],
-            "text": "Conflict resolved in src/routes.ts."
+            "text": "Conflict to resolve in schema/authors.sql and schema/books.sql."
           }
         ],
         "positions": [
           {
-            "coarse": "01ac495bdb0e71e6",
-            "exact": "31ab0cb072329ae8"
+            "coarse": "fae5d7c5c8ee2784",
+            "exact": "aeb694dfdc440d15"
           }
         ]
       },
       {
-        "command": "git commit",
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "d7d7ae81c99e2069",
+            "exact": "dad55ecf314922b1"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -123591,81 +124308,75 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
             "kind": "commit",
             "ref": "main",
             "subjects": [
-              "src/routes.ts"
+              "schema/authors.sql",
+              "schema/books.sql"
             ],
-            "text": "New commit on main, saving src/routes.ts."
+            "text": "New commit on main, saving schema/authors.sql and schema/books.sql."
           }
         ],
         "positions": [
           {
-            "coarse": "4eac618b8a5e27ce",
-            "exact": "0eae0fa6dbae3696"
+            "coarse": "d7d7ae81c99e2069",
+            "exact": "dad55ecf314922b1"
+          },
+          {
+            "coarse": "6528f5949233f0b9",
+            "exact": "23017ea9e7712f06"
           }
         ]
       }
     ],
     "version": 2
   },
-  "mergetool-hard-migration": {
+  "mergetool-medium-docs-sync": {
     "final": {
-      "coarse": "8a8b6aab37cfa046",
-      "exact": "94d3e0a0a74eda54"
+      "coarse": "86d4bcf6657424fe",
+      "exact": "eb5530ecf07ff86f"
     },
     "steps": [
       {
-        "command": "git merge feature/migration",
+        "command": "git merge feature/docs-sync",
         "diagnostic": false,
         "effect": [
           {
             "action": "add",
-            "kind": "conflict",
+            "kind": "working_tree",
             "subjects": [
-              "db/migrations/001_users.sql"
+              "docs/setup.md",
+              "docs/usage.md"
             ],
-            "text": "Conflict to resolve in db/migrations/001_users.sql."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "71ee6cbcaecde12f",
-            "exact": "bb19e26db2337395"
+            "text": "docs/setup.md and docs/usage.md have uncommitted edits."
           },
-          {
-            "coarse": "ca0931c747422679",
-            "exact": "0988bb07770e9ee3"
-          }
-        ]
-      },
-      {
-        "command": "git add db/migrations/001_users.sql",
-        "diagnostic": false,
-        "effect": [
           {
             "action": "add",
-            "kind": "staging",
-            "subjects": [
-              "db/migrations/001_users.sql"
-            ],
-            "text": "db/migrations/001_users.sql is staged."
-          },
-          {
-            "action": "remove",
             "kind": "conflict",
             "subjects": [
-              "db/migrations/001_users.sql"
+              "docs/setup.md",
+              "docs/usage.md"
             ],
-            "text": "Conflict resolved in db/migrations/001_users.sql."
+            "text": "Conflict to resolve in docs/setup.md and docs/usage.md."
           }
         ],
         "positions": [
           {
-            "coarse": "6942907102fe3011",
-            "exact": "03937e3a89b71487"
+            "coarse": "6c43ff50c14e828b",
+            "exact": "ef73a5a754edc28c"
           }
         ]
       },
       {
-        "command": "git commit",
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "722fa70c01233f4e",
+            "exact": "ed945c4287292259"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
         "diagnostic": false,
         "effect": [
           {
@@ -123673,507 +124384,20 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
             "kind": "commit",
             "ref": "main",
             "subjects": [
-              "db/migrations/001_users.sql"
+              "docs/setup.md",
+              "docs/usage.md"
             ],
-            "text": "New commit on main, saving db/migrations/001_users.sql."
+            "text": "New commit on main, saving docs/setup.md and docs/usage.md."
           }
         ],
         "positions": [
           {
-            "coarse": "4bc47dab00d67c24",
-            "exact": "9252738318405d9a"
-          }
-        ]
-      }
-    ],
-    "version": 2
-  },
-  "mergetool-hard-pricing": {
-    "final": {
-      "coarse": "e763bd33f8246f07",
-      "exact": "0ff819b7eecff512"
-    },
-    "steps": [
-      {
-        "command": "git merge feature/pricing",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "conflict",
-            "subjects": [
-              "src/pricing.rb"
-            ],
-            "text": "Conflict to resolve in src/pricing.rb."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "1c1be07dd244bac1",
-            "exact": "a7d103ef98c016ba"
+            "coarse": "722fa70c01233f4e",
+            "exact": "ed945c4287292259"
           },
           {
-            "coarse": "ac64537e5cebb777",
-            "exact": "d741084c909d3f21"
-          }
-        ]
-      },
-      {
-        "command": "git add src/pricing.rb",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "staging",
-            "subjects": [
-              "src/pricing.rb"
-            ],
-            "text": "src/pricing.rb is staged."
-          },
-          {
-            "action": "remove",
-            "kind": "conflict",
-            "subjects": [
-              "src/pricing.rb"
-            ],
-            "text": "Conflict resolved in src/pricing.rb."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "e4c7b3551901d640",
-            "exact": "a1379b323d5104e8"
-          }
-        ]
-      },
-      {
-        "command": "git commit",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "create",
-            "kind": "commit",
-            "ref": "main",
-            "subjects": [
-              "src/pricing.rb"
-            ],
-            "text": "New commit on main, saving src/pricing.rb."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "dac557c3f9699d8c",
-            "exact": "2ba6f7a45b94a7cd"
-          }
-        ]
-      }
-    ],
-    "version": 2
-  },
-  "mergetool-hard-schema": {
-    "final": {
-      "coarse": "4f80981462ad6cf6",
-      "exact": "e4f512bfa5c1f8a1"
-    },
-    "steps": [
-      {
-        "command": "git merge feature/schema",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "conflict",
-            "subjects": [
-              "schema/orders.sql"
-            ],
-            "text": "Conflict to resolve in schema/orders.sql."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "2e9e7bc2f7473ba5",
-            "exact": "318401f80d0687a8"
-          },
-          {
-            "coarse": "658b27ab720aff0b",
-            "exact": "a469f50b098433f2"
-          }
-        ]
-      },
-      {
-        "command": "git add schema/orders.sql",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "staging",
-            "subjects": [
-              "schema/orders.sql"
-            ],
-            "text": "schema/orders.sql is staged."
-          },
-          {
-            "action": "remove",
-            "kind": "conflict",
-            "subjects": [
-              "schema/orders.sql"
-            ],
-            "text": "Conflict resolved in schema/orders.sql."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "0d675171cf94b699",
-            "exact": "39525196d8946be5"
-          }
-        ]
-      },
-      {
-        "command": "git commit",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "create",
-            "kind": "commit",
-            "ref": "main",
-            "subjects": [
-              "schema/orders.sql"
-            ],
-            "text": "New commit on main, saving schema/orders.sql."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "368b2ffb52c92a22",
-            "exact": "e391d2c815df1896"
-          }
-        ]
-      }
-    ],
-    "version": 2
-  },
-  "mergetool-medium-easy-carryover": {
-    "final": {
-      "coarse": "94731f91642f89db",
-      "exact": "ac9dbda3de018821"
-    },
-    "steps": [
-      {
-        "command": "git merge feature/auth-timeout",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "conflict",
-            "subjects": [
-              "src/auth.js"
-            ],
-            "text": "Conflict to resolve in src/auth.js."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "baa3d1be7a6df802",
-            "exact": "dbb631446e9ba80e"
-          },
-          {
-            "coarse": "5b1db6ab4efadc04",
-            "exact": "e6e108a16656c8da"
-          }
-        ]
-      },
-      {
-        "command": "git add src/auth.js",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "staging",
-            "subjects": [
-              "src/auth.js"
-            ],
-            "text": "src/auth.js is staged."
-          },
-          {
-            "action": "remove",
-            "kind": "conflict",
-            "subjects": [
-              "src/auth.js"
-            ],
-            "text": "Conflict resolved in src/auth.js."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "5322aabb411b080d",
-            "exact": "990f7fe42a763929"
-          }
-        ]
-      },
-      {
-        "command": "git commit",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "create",
-            "kind": "commit",
-            "ref": "main",
-            "subjects": [
-              "src/auth.js"
-            ],
-            "text": "New commit on main, saving src/auth.js."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "9dff1a5eaf4351c7",
-            "exact": "8dc746bfe2f8e743"
-          }
-        ]
-      }
-    ],
-    "version": 2
-  },
-  "mergetool-medium-gateway": {
-    "final": {
-      "coarse": "9d518386c168a2de",
-      "exact": "b680505cb47b2821"
-    },
-    "steps": [
-      {
-        "command": "git merge feature/gateway",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "conflict",
-            "subjects": [
-              "config/gateway.yml"
-            ],
-            "text": "Conflict to resolve in config/gateway.yml."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "eeb4bbccfe2af1df",
-            "exact": "5bfacc7e7c0aef7f"
-          },
-          {
-            "coarse": "7d22970b69dad4ae",
-            "exact": "e7352f56fcf04bce"
-          }
-        ]
-      },
-      {
-        "command": "git add config/gateway.yml",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "staging",
-            "subjects": [
-              "config/gateway.yml"
-            ],
-            "text": "config/gateway.yml is staged."
-          },
-          {
-            "action": "remove",
-            "kind": "conflict",
-            "subjects": [
-              "config/gateway.yml"
-            ],
-            "text": "Conflict resolved in config/gateway.yml."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "0267ec9767f43f19",
-            "exact": "503df0560acc34fb"
-          }
-        ]
-      },
-      {
-        "command": "git commit",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "create",
-            "kind": "commit",
-            "ref": "main",
-            "subjects": [
-              "config/gateway.yml"
-            ],
-            "text": "New commit on main, saving config/gateway.yml."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "dc403fd59da61e27",
-            "exact": "54c12e9c4307e8fd"
-          }
-        ]
-      }
-    ],
-    "version": 2
-  },
-  "mergetool-medium-policy": {
-    "final": {
-      "coarse": "c1ca240f9527b965",
-      "exact": "f5f26d890a02f1a9"
-    },
-    "steps": [
-      {
-        "command": "git merge feature/policy",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "conflict",
-            "subjects": [
-              "src/policy.yml"
-            ],
-            "text": "Conflict to resolve in src/policy.yml."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "4518e6259fe0bf59",
-            "exact": "493555f98f5b2f60"
-          },
-          {
-            "coarse": "cd29bc423a3172f0",
-            "exact": "9c923f5ff574b846"
-          }
-        ]
-      },
-      {
-        "command": "git add src/policy.yml",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "staging",
-            "subjects": [
-              "src/policy.yml"
-            ],
-            "text": "src/policy.yml is staged."
-          },
-          {
-            "action": "remove",
-            "kind": "conflict",
-            "subjects": [
-              "src/policy.yml"
-            ],
-            "text": "Conflict resolved in src/policy.yml."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "9e333375a4226fbc",
-            "exact": "0b37b28ceff19d1c"
-          }
-        ]
-      },
-      {
-        "command": "git commit",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "create",
-            "kind": "commit",
-            "ref": "main",
-            "subjects": [
-              "src/policy.yml"
-            ],
-            "text": "New commit on main, saving src/policy.yml."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "06ba60ebce4ab11f",
-            "exact": "d0d72391372b8919"
-          }
-        ]
-      }
-    ],
-    "version": 2
-  },
-  "mergetool-medium-router": {
-    "final": {
-      "coarse": "9d5780b7e6d873ba",
-      "exact": "2180c7f9d1e2cb35"
-    },
-    "steps": [
-      {
-        "command": "git merge feature/routes",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "conflict",
-            "subjects": [
-              "src/routes.ts"
-            ],
-            "text": "Conflict to resolve in src/routes.ts."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "652e7127bce98e03",
-            "exact": "2b3fa80f2fff5e91"
-          },
-          {
-            "coarse": "92ab2c339f75c084",
-            "exact": "1991ade846a90321"
-          }
-        ]
-      },
-      {
-        "command": "git add src/routes.ts",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "add",
-            "kind": "staging",
-            "subjects": [
-              "src/routes.ts"
-            ],
-            "text": "src/routes.ts is staged."
-          },
-          {
-            "action": "remove",
-            "kind": "conflict",
-            "subjects": [
-              "src/routes.ts"
-            ],
-            "text": "Conflict resolved in src/routes.ts."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "11937a3f3295482b",
-            "exact": "9af1bffd9754efb3"
-          }
-        ]
-      },
-      {
-        "command": "git commit",
-        "diagnostic": false,
-        "effect": [
-          {
-            "action": "create",
-            "kind": "commit",
-            "ref": "main",
-            "subjects": [
-              "src/routes.ts"
-            ],
-            "text": "New commit on main, saving src/routes.ts."
-          }
-        ],
-        "positions": [
-          {
-            "coarse": "b41d82dd775050e5",
-            "exact": "9f7de428943b0852"
+            "coarse": "e9e937795b10de35",
+            "exact": "77e94acda7737aed"
           }
         ]
       }
@@ -124183,7 +124407,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "partial-easy-auth-validation": {
     "final": {
       "coarse": "b2585aef7258fe1b",
-      "exact": "2919cc7baf37b00c"
+      "exact": "dcdcfdb22ee7ddb9"
     },
     "steps": [
       {
@@ -124207,7 +124431,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Isolate auth validation\"",
+        "command": "git commit -m \"Fix auth validation\"",
         "diagnostic": false,
         "effect": [
           {
@@ -124283,7 +124507,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "partial-easy-export-format": {
     "final": {
       "coarse": "24654406ce99f3f8",
-      "exact": "72f2fa6e9eab84e9"
+      "exact": "d42c478dac655cfb"
     },
     "steps": [
       {
@@ -124307,7 +124531,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Isolate export formatting\"",
+        "command": "git commit -m \"Fix export formatting\"",
         "diagnostic": false,
         "effect": [
           {
@@ -124383,7 +124607,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "partial-easy-search-ranking": {
     "final": {
       "coarse": "1eb965e5ca265307",
-      "exact": "f2defb71f5d3ab3d"
+      "exact": "0e5f45f68c5a85d0"
     },
     "steps": [
       {
@@ -124407,7 +124631,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Isolate search ranking\"",
+        "command": "git commit -m \"Fix search ranking\"",
         "diagnostic": false,
         "effect": [
           {
@@ -124433,7 +124657,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "partial-hard-auth-cross-file": {
     "final": {
       "coarse": "36fa44256118a613",
-      "exact": "60cb6e53c571f5b2"
+      "exact": "0b624a58d6da545e"
     },
     "steps": [
       {
@@ -124477,7 +124701,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Commit auth validation path\"",
+        "command": "git commit -m \"Fix auth validation and add its test\"",
         "diagnostic": false,
         "effect": [
           {
@@ -124504,7 +124728,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "partial-hard-export-cross-file": {
     "final": {
       "coarse": "99691e38d4beb878",
-      "exact": "5b14f71af43fc075"
+      "exact": "382177b9bd23ef89"
     },
     "steps": [
       {
@@ -124548,7 +124772,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Commit export formatting path\"",
+        "command": "git commit -m \"Fix export formatting and add its test\"",
         "diagnostic": false,
         "effect": [
           {
@@ -124575,7 +124799,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "partial-hard-search-cross-file": {
     "final": {
       "coarse": "ffd12bbd9ee206a7",
-      "exact": "63e518f2da4fe22d"
+      "exact": "8af5afb4664f363b"
     },
     "steps": [
       {
@@ -124619,7 +124843,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Commit search ranking path\"",
+        "command": "git commit -m \"Fix search ranking and add its test\"",
         "diagnostic": false,
         "effect": [
           {
@@ -124696,7 +124920,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "partial-med-three-hunk": {
     "final": {
       "coarse": "8958b8a0ceebaad8",
-      "exact": "be33e413262b6317"
+      "exact": "b11d2e95673d5e10"
     },
     "steps": [
       {
@@ -124720,7 +124944,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Fix parser bug and refactor token handling\"",
+        "command": "git commit -m \"Fix parser blank-line bug\"",
         "diagnostic": false,
         "effect": [
           {
@@ -124746,7 +124970,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "partial-medium-dashboard-filter": {
     "final": {
       "coarse": "b1e87c96d4a6c744",
-      "exact": "bfc1c459e611d7cb"
+      "exact": "e514e84b3f91393a"
     },
     "steps": [
       {
@@ -124770,7 +124994,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Commit dashboard filter change\"",
+        "command": "git commit -m \"Fix dashboard filter\"",
         "diagnostic": false,
         "effect": [
           {
@@ -124796,7 +125020,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "partial-medium-payment-rounding": {
     "final": {
       "coarse": "6c264f82800d91de",
-      "exact": "b2cb418c546db4a4"
+      "exact": "c3eb8a1cade6a343"
     },
     "steps": [
       {
@@ -124820,7 +125044,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Commit payment rounding fix\"",
+        "command": "git commit -m \"Fix payment rounding\"",
         "diagnostic": false,
         "effect": [
           {
@@ -124846,7 +125070,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "partial-medium-profile-validation": {
     "final": {
       "coarse": "1b68cc1216c70a33",
-      "exact": "d2f5c9e60f1b3584"
+      "exact": "2a0b7751b024129b"
     },
     "steps": [
       {
@@ -124870,7 +125094,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Commit profile validation only\"",
+        "command": "git commit -m \"Fix profile validation\"",
         "diagnostic": false,
         "effect": [
           {
@@ -125870,6 +126094,129 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "06d25291cc43b112",
             "exact": "cb8e383e327f90a9"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rebase-hard-continue": {
+    "final": {
+      "coarse": "ad4dc4e6408d644d",
+      "exact": "8a73a1f8be08d4ed"
+    },
+    "steps": [
+      {
+        "command": "git add src/limiter.py",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/limiter.py"
+            ],
+            "text": "src/limiter.py is staged."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/limiter.py"
+            ],
+            "text": "Conflict resolved in src/limiter.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "63bf2a80f8d9903f",
+            "exact": "f35add9fef6c069d"
+          },
+          {
+            "coarse": "18bc2a96787c216d",
+            "exact": "16afe6359af2da8d"
+          }
+        ]
+      },
+      {
+        "command": "git rebase --continue",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/rate-limits",
+            "subjects": [
+              "src/limiter.py"
+            ],
+            "text": "2 new commits on feature/rate-limits, saving src/limiter.py."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "rebase"
+            ],
+            "text": "The rebase is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "31d83afa7e87cb85",
+            "exact": "134e787fe3f4e7e5"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rebase-medium-abort": {
+    "final": {
+      "coarse": "1d560b87892b16d7",
+      "exact": "19d1bc2cb20ad3f7"
+    },
+    "steps": [
+      {
+        "command": "git rebase --abort",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "branch",
+            "subjects": [
+              "feature/export-pdf"
+            ],
+            "text": "Branch feature/export-pdf moves to another commit."
+          },
+          {
+            "action": "remove",
+            "kind": "working_tree",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "Edits to src/export.py are discarded or saved elsewhere."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "Conflict resolved in src/export.py."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "rebase"
+            ],
+            "text": "The rebase is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "69791ce29c6edb49",
+            "exact": "76befbdc8e91e900"
           }
         ]
       }
@@ -198114,12 +198461,12 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "v21h-from-develop": {
     "final": {
-      "coarse": "5aeda4ef0ffd53fe",
-      "exact": "c94ad3eebffca186"
+      "coarse": "d239bb87e97ecc97",
+      "exact": "c454edf979b7f1ba"
     },
     "steps": [
       {
-        "command": "git switch -c feature/workspace",
+        "command": "git switch -c feature/workspace main",
         "diagnostic": false,
         "effect": [
           {
@@ -198188,10 +198535,30 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "v21m-export": {
     "final": {
-      "coarse": "e2468848650ec1de",
-      "exact": "3ba72e2feb82c33b"
+      "coarse": "e5c5d0c4823b8ec4",
+      "exact": "767cd1ccff5e7493"
     },
     "steps": [
+      {
+        "command": "git branch feature/export-docs",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "feature/export-docs"
+            ],
+            "text": "Branch feature/export-docs is created."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e54660a4c1d9f2e9",
+            "exact": "3883a3bb7f23511e"
+          }
+        ]
+      },
       {
         "command": "git switch -c feature/export",
         "diagnostic": false,
@@ -198215,8 +198582,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "e54660a4c1d9f2e9",
-            "exact": "3883a3bb7f23511e"
+            "coarse": "25bf6819df859967",
+            "exact": "452bec3609c3b2d6"
           }
         ]
       }
@@ -198225,10 +198592,30 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "v21m-notifications": {
     "final": {
-      "coarse": "b9c75246db6ad343",
-      "exact": "ef33bd173d695f82"
+      "coarse": "2c6ea179cab24585",
+      "exact": "1853eab2b1916c16"
     },
     "steps": [
+      {
+        "command": "git branch feature/notifications-docs",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "feature/notifications-docs"
+            ],
+            "text": "Branch feature/notifications-docs is created."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "c24e66d6ba1ded91",
+            "exact": "4d37e754193b76c3"
+          }
+        ]
+      },
       {
         "command": "git switch -c feature/notifications",
         "diagnostic": false,
@@ -198252,8 +198639,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "c24e66d6ba1ded91",
-            "exact": "4d37e754193b76c3"
+            "coarse": "16555310f6772edb",
+            "exact": "0987dbadce27619f"
           }
         ]
       }
@@ -198262,10 +198649,30 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   },
   "v21m-payments": {
     "final": {
-      "coarse": "68668df6bb4816eb",
-      "exact": "a68239051726760d"
+      "coarse": "4f73651d6a90e164",
+      "exact": "5ccc5ea7bfc21c65"
     },
     "steps": [
+      {
+        "command": "git branch feature/payments-tests",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "feature/payments-tests"
+            ],
+            "text": "Branch feature/payments-tests is created."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "4c79b6093e49b907",
+            "exact": "027354ee363f521a"
+          }
+        ]
+      },
       {
         "command": "git switch -c feature/payments",
         "diagnostic": false,
@@ -198289,8 +198696,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "4c79b6093e49b907",
-            "exact": "027354ee363f521a"
+            "coarse": "f65b345884c5638d",
+            "exact": "ff9ef298fe92e891"
           }
         ]
       }
@@ -199419,6 +199826,17 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
+        "command": "git log --oneline develop..origin/develop",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "412981e1f554b30a",
+            "exact": "d628d7f5fa44037b"
+          }
+        ]
+      },
+      {
         "command": "git pull origin develop",
         "diagnostic": false,
         "effect": [
@@ -199468,6 +199886,17 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
+        "command": "git log --oneline feature/auth..origin/feature/auth",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "79027b470f48ce11",
+            "exact": "76eb8ccc9cdd415b"
+          }
+        ]
+      },
+      {
         "command": "git pull origin feature/auth",
         "diagnostic": false,
         "effect": [
@@ -199513,6 +199942,17 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "b3361f03736f5d3e",
             "exact": "29d4537010c005df"
+          }
+        ]
+      },
+      {
+        "command": "git log --oneline main..origin/main",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "e8aef83259503a49",
+            "exact": "bbf7ac02de96ebb4"
           }
         ]
       },
@@ -200604,7 +201044,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "v28e-auth": {
     "final": {
       "coarse": "216498dfe30c4c15",
-      "exact": "f84179934f126481"
+      "exact": "0000c60bed42aeb9"
     },
     "steps": [
       {
@@ -200628,7 +201068,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Squash auth feature into main\"",
+        "command": "git commit -m \"Add auth feature\"",
         "diagnostic": false,
         "effect": [
           {
@@ -200654,7 +201094,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "v28e-orders": {
     "final": {
       "coarse": "ff07556b218986ad",
-      "exact": "882fadcdf0b2e069"
+      "exact": "6bc2eef0bbeed6ee"
     },
     "steps": [
       {
@@ -200678,7 +201118,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Squash orders feature into develop\"",
+        "command": "git commit -m \"Add orders feature\"",
         "diagnostic": false,
         "effect": [
           {
@@ -200704,7 +201144,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "v28e-parser": {
     "final": {
       "coarse": "a5021f6bd8f3c154",
-      "exact": "c9adbe1d52cc3f39"
+      "exact": "184fc35f85b9c82b"
     },
     "steps": [
       {
@@ -200728,7 +201168,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Squash parser feature into release/v2\"",
+        "command": "git commit -m \"Add parser feature\"",
         "diagnostic": false,
         "effect": [
           {
@@ -200754,7 +201194,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "v28h-auth": {
     "final": {
       "coarse": "fc1c8dafade54f40",
-      "exact": "018ed959579261b2"
+      "exact": "f76bc59f5058cd59"
     },
     "steps": [
       {
@@ -200778,7 +201218,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Squash auth feature into main\"",
+        "command": "git commit -m \"Add auth feature\"",
         "diagnostic": false,
         "effect": [
           {
@@ -200814,7 +201254,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "positions": [
           {
             "coarse": "216498dfe30c4c15",
-            "exact": "f84179934f126481"
+            "exact": "0000c60bed42aeb9"
           }
         ]
       }
@@ -200824,7 +201264,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "v28h-orders": {
     "final": {
       "coarse": "252cecf0854072b5",
-      "exact": "214d9326c0895f67"
+      "exact": "dca16be2e5e91e04"
     },
     "steps": [
       {
@@ -200848,7 +201288,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Squash orders feature into develop\"",
+        "command": "git commit -m \"Add orders feature\"",
         "diagnostic": false,
         "effect": [
           {
@@ -200884,7 +201324,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "positions": [
           {
             "coarse": "ff07556b218986ad",
-            "exact": "882fadcdf0b2e069"
+            "exact": "6bc2eef0bbeed6ee"
           }
         ]
       }
@@ -200894,7 +201334,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "v28h-parser": {
     "final": {
       "coarse": "70bd758d442f1f45",
-      "exact": "02c1992b6d581aba"
+      "exact": "77b0144dddbe57c0"
     },
     "steps": [
       {
@@ -200918,7 +201358,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Squash parser feature into release/v2\"",
+        "command": "git commit -m \"Add parser feature\"",
         "diagnostic": false,
         "effect": [
           {
@@ -200954,7 +201394,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "positions": [
           {
             "coarse": "a5021f6bd8f3c154",
-            "exact": "c9adbe1d52cc3f39"
+            "exact": "184fc35f85b9c82b"
           }
         ]
       }
@@ -200964,7 +201404,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "v28m-auth": {
     "final": {
       "coarse": "18585507e1e8f776",
-      "exact": "370ab306af385e6b"
+      "exact": "6ecad00cbe9adf47"
     },
     "steps": [
       {
@@ -201015,7 +201455,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Squash remote auth feature into main\"",
+        "command": "git commit -m \"Add auth feature\"",
         "diagnostic": false,
         "effect": [
           {
@@ -201041,7 +201481,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "v28m-orders": {
     "final": {
       "coarse": "7aec5e913c2eabce",
-      "exact": "40c6722798ec3124"
+      "exact": "afb0000046a2a898"
     },
     "steps": [
       {
@@ -201092,7 +201532,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Squash remote orders feature into develop\"",
+        "command": "git commit -m \"Add orders feature\"",
         "diagnostic": false,
         "effect": [
           {
@@ -201118,7 +201558,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
   "v28m-parser": {
     "final": {
       "coarse": "dbf85aab282ee4a1",
-      "exact": "295a3c720098dc95"
+      "exact": "2a6714a6f4b7e289"
     },
     "steps": [
       {
@@ -201169,7 +201609,7 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ]
       },
       {
-        "command": "git commit -m \"Squash remote parser feature into release/v2\"",
+        "command": "git commit -m \"Add parser feature\"",
         "diagnostic": false,
         "effect": [
           {

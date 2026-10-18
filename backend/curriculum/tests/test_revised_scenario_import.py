@@ -1,0 +1,149 @@
+from __future__ import annotations
+
+import importlib.util
+from pathlib import Path
+
+import pytest
+
+REPO_ROOT = Path(__file__).resolve().parents[3]
+IMPORTER = REPO_ROOT / "scripts" / "curriculum" / "import_revised_scenarios.py"
+
+
+def _importer_module():
+    spec = importlib.util.spec_from_file_location("import_revised_scenarios", IMPORTER)
+    assert spec and spec.loader
+    module = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(module)
+    return module
+
+
+def test_importer_preserves_commands_file_edits_and_budgets():
+    module = _importer_module()
+    document = """
+### 3.1.1 Resolve the file · Easy
+
+**Variant ID:** `manual-one`
+
+**Story**
+A story.
+
+**Starting point:** A merge is stopped.
+
+**Real-World Context**
+Conflicts need decisions.
+
+**Your Task**
+Resolve the file.
+
+**Required resolved file content**
+
+`src/app.py`
+
+```
+VALUE = 1
+```
+
+**Objective Checklist**
+
+- [ ] The file is exact.
+- [ ] The merge is complete.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git merge feature/app` — Begin.
+2. In the simulator's file editor, set `src/app.py` to exactly: Resolve it.
+
+   ```
+   VALUE = 1
+   ```
+3. `git add src/app.py` — Stage it.
+4. `git commit --no-edit` — Finish.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- Any route with the same end state.
+
+**Expected Result**
+The merge is complete.
+
+**Evaluation (STAFF ONLY)**
+
+- Clean tree.
+- Minimum counted commands: 3 · Maximum counted commands: 12 (proposed)
+"""
+
+    parsed = module.parse_document(document, enforce_bank_counts=False)["manual-one"]
+
+    assert parsed["starting_point"] == "A merge is stopped."
+    assert parsed["objective_checks"] == ["The file is exact.", "The merge is complete."]
+    assert parsed["solution_commands"] == [
+        "git merge feature/app",
+        "git add src/app.py",
+        "git commit --no-edit",
+    ]
+    assert parsed["solution_workspace_files"] == [
+        {
+            "mode": "write",
+            "path": "src/app.py",
+            "content": "VALUE = 1",
+            "after_command_index": 1,
+        }
+    ]
+    assert (parsed["minimum_counted_commands"], parsed["maximum_counted_commands"]) == (3, 12)
+
+
+def test_importer_rejects_an_unsupported_answer_step():
+    module = _importer_module()
+    document = """
+### 1.1.1 Broken · Easy
+**Variant ID:** `broken`
+**Story** A
+**Starting point:** B
+**Real-World Context** C
+**Your Task** D
+**Objective Checklist**
+- [ ] E
+**Answer Key (STAFF ONLY)**
+1. Click a mystery button.
+**Accepted Alternatives (STAFF ONLY)**
+- None.
+**Expected Result** F
+**Evaluation (STAFF ONLY)**
+- Minimum counted commands: 1 · Maximum counted commands: 12 (proposed)
+"""
+
+    with pytest.raises(module.ImportError, match="Unsupported Answer Key step"):
+        module.parse_document(document, enforce_bank_counts=False)
+
+
+def test_importer_rejects_required_file_content_that_differs_from_the_answer_key():
+    module = _importer_module()
+    document = """
+### 3.1.1 Broken file · Easy
+**Variant ID:** `broken-file`
+**Story** A
+**Starting point:** B
+**Real-World Context** C
+**Your Task** D
+**Required resolved file content**
+`src/app.py`
+```
+EXPECTED = 1
+```
+**Objective Checklist**
+- [ ] E
+**Answer Key (STAFF ONLY)**
+1. In the simulator's file editor, set `src/app.py` to exactly:
+   ```
+   DIFFERENT = 2
+   ```
+2. `git add src/app.py`
+**Accepted Alternatives (STAFF ONLY)**
+- None.
+**Expected Result** F
+**Evaluation (STAFF ONLY)**
+- Minimum counted commands: 1 · Maximum counted commands: 12 (proposed)
+"""
+
+    with pytest.raises(module.ImportError, match="different required-file"):
+        module.parse_document(document, enforce_bank_counts=False)

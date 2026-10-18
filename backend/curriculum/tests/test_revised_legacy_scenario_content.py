@@ -5,10 +5,10 @@ from django.core.management import call_command
 
 from adventures.models import AdventureLevelTierWaveVariant
 from curriculum.management.commands.seed_legacy_modules import LEGACY_MODULE_LEVELS
-from curriculum.seed_data.revised_legacy_scenarios import (
-    revised_legacy_scenarios,
-    scenario_briefing,
-)
+from curriculum.seed_data.generated.generated_targets import TARGET_STATES
+from curriculum.seed_data.revised_legacy_runtime import DISPLACED_REVISED_CASE_IDS
+from curriculum.seed_data.revised_legacy_scenarios import revised_legacy_scenarios
+from evaluation.services.state_based import StateBasedEvaluator
 
 
 def _legacy_cases() -> list[dict]:
@@ -20,98 +20,145 @@ def _legacy_cases() -> list[dict]:
     ]
 
 
-def test_revised_bank_covers_every_legacy_variant_once():
+def test_revised_bank_uses_every_authored_variant_id_once():
     cases = _legacy_cases()
     content = revised_legacy_scenarios()
 
     assert len(cases) == len(content) == 265
+    assert len({case["case_id"] for case in cases}) == 265
     assert set(content) == {case["case_id"] for case in cases}
-    assert len({item["source_case_id"] for item in content.values()}) == 265
-
-
-def test_briefing_moves_starting_point_without_mutating_authored_content():
-    for case_id, item in revised_legacy_scenarios().items():
-        original = dict(item)
-        story, task = scenario_briefing(item)
-        assert story.strip(), case_id
-        assert "Starting point:" not in story, case_id
-        assert task.startswith(item["task"] + "\n\nStarting point:"), case_id
-        assert task.count("Starting point:") == 1, case_id
-        assert story + "\n\n" + task.split("\n\n", 1)[1] == item["story"], case_id
-        assert item == original
-
-
-def test_briefing_without_starting_point_is_unchanged():
-    assert scenario_briefing({"story": "Story.", "task": "Task."}) == ("Story.", "Task.")
+    assert {item["difficulty"] for item in content.values()} == {"easy", "medium", "hard"}
+    assert all("source_case_id" not in item for item in content.values())
 
 
 def test_revised_bank_has_complete_learner_facing_content_without_staff_sections():
     for case_id, item in revised_legacy_scenarios().items():
-        assert item["label"].strip(), case_id
-        assert item["story"].strip(), case_id
-        assert item["real_world_context"].strip(), case_id
-        assert item["task"].strip(), case_id
+        for field in (
+            "label",
+            "story",
+            "starting_point",
+            "real_world_context",
+            "task",
+            "expected_result",
+        ):
+            assert item[field].strip(), (case_id, field)
+        assert item["objective_checks"], case_id
+
         flattened = " ".join(
             [
                 item["label"],
                 item["story"],
+                item["starting_point"],
                 item["real_world_context"],
                 item["task"],
-                *(value["value"] for value in item["required_values"]),
+                item["expected_result"],
+                *item["objective_checks"],
+                *(file["content"] for file in item["required_files"]),
             ]
         ).lower()
         assert "staff only" not in flattened, case_id
         assert "answer key" not in flattened, case_id
         assert "accepted alternatives" not in flattened, case_id
-        assert "evaluation" not in flattened, case_id
 
 
-def test_revised_bank_exposes_required_resolved_files_as_copy_values():
-    content = revised_legacy_scenarios()
+def test_revised_bank_preserves_required_resolved_files_and_answer_order():
+    manual = revised_legacy_scenarios()["manual-easy-auth-copy"]
 
-    manual = content["manual-easy-auth-copy"]
-    assert manual["required_values"] == [
+    assert manual["required_files"] == [
+        {"path": "src/auth.js", "content": "timeout=5000\nretry=enabled"}
+    ]
+    assert manual["solution_commands"] == [
+        "git merge feature/auth-timeout",
+        "git add src/auth.js",
+        "git commit --no-edit",
+    ]
+    assert manual["solution_workspace_files"] == [
         {
-            "label": "Required file: src/auth.js",
-            "value": "timeout=5000\nretry=enabled",
+            "mode": "write",
+            "path": "src/auth.js",
+            "content": "timeout=5000\nretry=enabled",
+            "after_command_index": 1,
         }
     ]
 
 
-def test_revised_variant_task_replaces_the_generic_tier_task():
-    invoice = revised_legacy_scenarios()["init-easy-invoice"]
+def test_every_revised_answer_key_satisfies_its_runtime_evaluation():
+    evaluator = StateBasedEvaluator()
+    failures = []
 
-    assert invoice["label"] == "Initialize invoice-tracker"
-    assert invoice["task"] == (
-        "Create a new invoice-tracker folder that is a Git repository, with main as its "
-        "first branch."
-    )
+    for case in _legacy_cases():
+        outcome = evaluator.evaluate(
+            TARGET_STATES[case["case_id"]],
+            case["state_requirements"],
+            initial_state=case["initial_state"],
+            executed_commands=case["solution_commands"],
+        )
+        if not outcome.target_matched:
+            failures.append((case["case_id"], [rule["reason"] for rule in outcome.failed_rules]))
+
+    assert failures == []
 
 
 @pytest.mark.django_db
-def test_legacy_seed_persists_revised_variant_content():
+def test_legacy_seed_persists_the_complete_revised_variant_contract():
     call_command("seed_legacy_modules", verbosity=0)
 
     variant = AdventureLevelTierWaveVariant.objects.get(case_id="init-easy-invoice")
-    assert variant.label == "Initialize invoice-tracker"
-    assert variant.scenario_context["task"].startswith(
-        "Create a new invoice-tracker folder that is a Git repository, with main as its "
-        "first branch.\n\nStarting point:"
+    authored = revised_legacy_scenarios()["init-easy-invoice"]
+    assert variant.label == authored["label"]
+    assert variant.solution_commands == authored["solution_commands"]
+    assert variant.scenario_context == {
+        "schema_version": 3,
+        "story": authored["story"],
+        "starting_point": authored["starting_point"],
+        "real_world_context": authored["real_world_context"],
+        "task": authored["task"],
+        "objective_checks": authored["objective_checks"],
+        "expected_result": authored["expected_result"],
+        "details": [],
+    }
+    assert (
+        variant.parameter_context["minimum_counted_commands"]
+        == authored["minimum_counted_commands"]
     )
-    assert variant.scenario_context["real_world_context"].startswith(
-        "A client project can grow beyond its first brief."
+    assert (
+        variant.parameter_context["maximum_counted_commands"]
+        == authored["maximum_counted_commands"]
     )
-    assert variant.scenario_context["details"][0]["label"] == ""
-    assert "Starting point:" not in variant.scenario_context["details"][0]["value"]
-
-    for seeded in AdventureLevelTierWaveVariant.objects.filter(case_id__in=revised_legacy_scenarios()):
-        context = seeded.scenario_context
-        assert context["real_world_context"].strip(), seeded.case_id
-        assert context["task"].count("Starting point:") == 1, seeded.case_id
-        assert "Starting point:" not in context["details"][0]["value"], seeded.case_id
 
     conflict = AdventureLevelTierWaveVariant.objects.get(case_id="manual-easy-auth-copy")
-    assert conflict.scenario_context["details"][1] == {
+    assert conflict.scenario_context["details"][0] == {
         "label": "Required file: src/auth.js",
         "value": "timeout=5000\nretry=enabled",
     }
+    assert AdventureLevelTierWaveVariant.objects.filter(is_published=True).count() == 265
+
+
+@pytest.mark.django_db
+def test_reseed_unpublishes_all_displaced_revised_ids():
+    call_command("seed_legacy_modules", verbosity=0)
+
+    for displaced_id, replacement_id in DISPLACED_REVISED_CASE_IDS.items():
+        replacement = AdventureLevelTierWaveVariant.objects.get(case_id=replacement_id)
+        AdventureLevelTierWaveVariant.objects.create(
+            wave=replacement.wave,
+            slug=displaced_id,
+            label=f"Retired {displaced_id}",
+            initial_state=replacement.initial_state,
+            target_state=replacement.target_state,
+            evaluation_spec=replacement.evaluation_spec,
+            solution_commands=replacement.solution_commands,
+            solution_workspace_files=replacement.solution_workspace_files,
+            solution_trajectory=replacement.solution_trajectory,
+            case_id=displaced_id,
+            semantic_key=displaced_id,
+            parameter_context={},
+            scenario_context=replacement.scenario_context,
+            is_published=True,
+        )
+
+    call_command("seed_legacy_modules", verbosity=0)
+
+    displaced = AdventureLevelTierWaveVariant.objects.filter(case_id__in=DISPLACED_REVISED_CASE_IDS)
+    assert displaced.count() == len(DISPLACED_REVISED_CASE_IDS)
+    assert not displaced.filter(is_published=True).exists()

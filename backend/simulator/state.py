@@ -77,6 +77,8 @@ class RepositoryStateNormalizer:
         "merge_conflict_files": list,
         "cherry_pick_in_progress": False,
         "cherry_pick_original_head": None,
+        "cherry_pick_source": None,
+        "cherry_pick_conflict_files": list,
         "rebase_state": dict,
     }
 

@@ -5,8 +5,11 @@ import { LevelStoryCard } from '@/shared/level/components/LevelContextPanel'
 
 const context = {
   story: 'A repository has an untracked README.',
+  startingPoint: '',
   realWorldContext: '',
   task: 'Stage README.md before committing.',
+  objectiveChecks: [],
+  expectedResult: '',
   details: [{ label: 'Commit message', value: 'ready' }],
 }
 

@@ -13,16 +13,20 @@ export function TierStoryModal({
   open,
   title,
   intro,
+  startingPoint,
   task,
   realWorldContext,
+  expectedResult,
   onClose,
 }: {
   open: boolean
   title: string
   intro: string
+  startingPoint?: string
   task: string
   /** Why the skill matters outside the game; hidden when absent. */
   realWorldContext?: string
+  expectedResult?: string
   onClose: () => void
 }) {
   const onCloseRef = useRef(onClose)
@@ -48,8 +52,9 @@ export function TierStoryModal({
   }, [open])
 
   const context = realWorldContext?.trim()
-  const hasStory = Boolean(intro || task || context)
-  const taskParagraphs = task.split(/\n\s*\n/).filter((paragraph) => paragraph.trim())
+  const startingPointText = startingPoint?.trim()
+  const result = expectedResult?.trim()
+  const hasStory = Boolean(intro || startingPointText || task || context || result)
 
   return (
     <Modal
@@ -60,6 +65,12 @@ export function TierStoryModal({
       contentClassName="tier-story-modal__body"
     >
       {intro ? <p className="tier-story-modal__intro">{intro}</p> : null}
+      {startingPointText ? (
+        <section className="tier-story-modal__section" aria-labelledby="tier-story-starting-point">
+          <h3 id="tier-story-starting-point" className="tier-story-modal__heading">Starting point</h3>
+          <p>{startingPointText}</p>
+        </section>
+      ) : null}
       {context ? (
         <section className="tier-story-modal__section" aria-labelledby="tier-story-context">
           <h3 id="tier-story-context" className="tier-story-modal__heading">Real-world context</h3>
@@ -69,13 +80,13 @@ export function TierStoryModal({
       {task ? (
         <section className="tier-story-modal__section tier-story-modal__section--task" aria-labelledby="tier-story-task">
           <h3 id="tier-story-task" className="tier-story-modal__heading">Your task</h3>
-          {taskParagraphs.map((paragraph, index) => (
-            <p key={index}>
-              {paragraph.startsWith('Starting point:') ? (
-                <><strong>Starting point:</strong>{paragraph.slice('Starting point:'.length)}</>
-              ) : paragraph}
-            </p>
-          ))}
+          <p>{task}</p>
+        </section>
+      ) : null}
+      {result ? (
+        <section className="tier-story-modal__section" aria-labelledby="tier-story-expected-result">
+          <h3 id="tier-story-expected-result" className="tier-story-modal__heading">Expected result</h3>
+          <p>{result}</p>
         </section>
       ) : null}
       {hasStory ? null : <p className="tier-story-modal__empty">No story is available for this level.</p>}
