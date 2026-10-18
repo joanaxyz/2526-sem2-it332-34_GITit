@@ -6,8 +6,11 @@ def test_scenario_context_normalizer_keeps_only_story_schema_keys():
         {
             "schema_version": 3,
             "story": "A branch needs review.",
+            "starting_point": "You are on main with a clean worktree.",
             "real_world_context": "Reviewing first prevents accidental history changes.",
             "task": "Inspect the branch before changing it.",
+            "objective_checks": ["List the branch.", "Inspect its commits."],
+            "expected_result": "The branch is inspected without changing history.",
             "details": [{"label": "Branch", "value": "feature/auth"}],
             "intro": "legacy intro",
             "constraints": ["legacy constraint"],
@@ -19,8 +22,11 @@ def test_scenario_context_normalizer_keeps_only_story_schema_keys():
     assert context == {
         "schema_version": 3,
         "story": "A branch needs review.",
+        "starting_point": "You are on main with a clean worktree.",
         "real_world_context": "Reviewing first prevents accidental history changes.",
         "task": "Inspect the branch before changing it.",
+        "objective_checks": ["List the branch.", "Inspect its commits."],
+        "expected_result": "The branch is inspected without changing history.",
         "details": [{"label": "Branch", "value": "feature/auth"}],
     }
 

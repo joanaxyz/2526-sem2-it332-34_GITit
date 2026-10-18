@@ -76,6 +76,8 @@ export type RepositorySnapshot = {
   merge_conflict_files?: string[]
   cherry_pick_in_progress?: boolean
   cherry_pick_original_head?: string | null
+  cherry_pick_source?: string | null
+  cherry_pick_conflict_files?: string[]
   rebase_state?: RepositoryValue
   project_tree?: Record<string, RepositoryValue>
   visible_tree?: Record<string, RepositoryValue>
@@ -87,14 +89,15 @@ type CopyDetail = {
 }
 
 // Strict schema_version 3 story: the backend normalizer whitelists exactly
-// these keys, so the frontend never has to guess. The adventure objective
-// checklist is NOT part of this shape - it arrives as a separate top-level
-// `objective_checks` payload field.
+// these learner-facing keys, so the frontend never has to guess.
 export type LevelScenarioContext = {
   schema_version?: number
   story?: string
+  starting_point?: string
   real_world_context?: string
   task?: string
+  objective_checks?: string[]
+  expected_result?: string
   details?: CopyDetail[]
 }
 

@@ -40,12 +40,8 @@ here out of generated/generated_targets.py - never hand-written or backfilled.
 
 from __future__ import annotations
 
-import json
-from functools import cache
-from pathlib import Path
 from typing import Any
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.db import transaction
 
@@ -65,26 +61,13 @@ from curriculum.models import (
 from curriculum.seed_data.command_catalog import COMMAND_CATALOG
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
 from curriculum.seed_data.generated.generated_trajectories import SOLUTION_TRAJECTORIES
-from curriculum.seed_data.revised_legacy_scenarios import (
-    revised_legacy_scenario,
-    scenario_briefing,
-)
+from curriculum.seed_data.revised_legacy_runtime import apply_revised_legacy_bank
+from curriculum.seed_data.revised_legacy_scenarios import revised_legacy_scenario
 from curriculum.seed_data.spec_helpers import required_commit_message_details
 
 LEGACY_STORY_SLUG = "git-it-legacy"
 
 DIFFICULTY_MAX_COUNTED_COMMANDS = {"easy": 12, "medium": 10, "hard": 8}
-
-
-@cache
-def committed_tier_targets() -> dict[str, dict]:
-    """Target states replayed through the TypeScript simulator, keyed by
-    case_id (backend/tier_targets.json). Seeding reads them so a re-seed keeps
-    every variant's target_state instead of blanking it."""
-    path = Path(settings.BASE_DIR) / "tier_targets.json"
-    if not path.exists():
-        return {}
-    return json.loads(path.read_text(encoding="utf-8"))
 
 
 def ev(state_requirements: dict | None = None, *, required: list[str] | None = None) -> dict:
@@ -13029,6 +13012,7 @@ LEGACY_MODULE_LEVELS: list[dict[str, Any]] = [
     *MODULE_3_LEVELS,
     *MODULE_4_LEVELS,
 ]
+apply_revised_legacy_bank(LEGACY_MODULE_LEVELS)
 
 
 class Command(BaseCommand):
@@ -13264,9 +13248,14 @@ class Command(BaseCommand):
         wave.command_forms.set(forms)
         for case in tier_spec["cases"]:
             revised = revised_legacy_scenario(case["case_id"])
-            story, task = scenario_briefing(revised)
             required_values = [
-                *revised.get("required_values", []),
+                *(
+                    {
+                        "label": f"Required file: {item['path']}",
+                        "value": item["content"],
+                    }
+                    for item in revised.get("required_files", [])
+                ),
                 *required_case_details(case),
             ]
             AdventureLevelTierWaveVariant.objects.update_or_create(
@@ -13279,31 +13268,33 @@ class Command(BaseCommand):
                         case["state_requirements"],
                         required=case.get("required_commands", []),
                     ),
-                    "target_state": committed_tier_targets().get(
-                        case["case_id"],
-                        TARGET_STATES.get(case["case_id"], {}),
-                    ),
+                    "target_state": TARGET_STATES.get(case["case_id"], {}),
                     "solution_commands": case["solution_commands"],
                     "solution_workspace_files": case.get("solution_workspace_files", []),
                     "solution_trajectory": SOLUTION_TRAJECTORIES.get(case["case_id"], {}),
                     "case_id": case["case_id"],
                     "semantic_key": case["case_id"],
-                    "parameter_context": {},
+                    "parameter_context": {
+                        "scenario_number": revised["scenario_number"],
+                        "difficulty": revised["difficulty"],
+                        "minimum_counted_commands": revised["minimum_counted_commands"],
+                        "maximum_counted_commands": revised["maximum_counted_commands"],
+                    },
                     "scenario_context": {
                         "schema_version": 3,
-                        "story": tier_spec["story"],
+                        "story": revised["story"],
+                        "starting_point": revised["starting_point"],
                         "real_world_context": revised["real_world_context"],
-                        "task": task,
-                        "details": [
-                            {"label": "", "value": story},
-                            *required_values,
-                        ],
+                        "task": revised["task"],
+                        "objective_checks": revised["objective_checks"],
+                        "expected_result": revised["expected_result"],
+                        "details": required_values,
                     },
                     "is_published": True,
                 },
             )
-        # Unpublish retired variants that are no longer in the spec. They stay
-        # in the database because run records reference them (PROTECT).
-        wave.variants.filter(slug__in=MODULE_4_RETIRED_CASE_IDS).exclude(
-            slug__in=[case["case_id"] for case in tier_spec["cases"]]
-        ).update(is_published=False)
+        # Any variant displaced by the canonical revised bank stays available
+        # to historical runs (PROTECT) but can no longer be selected.
+        wave.variants.exclude(slug__in=[case["case_id"] for case in tier_spec["cases"]]).update(
+            is_published=False
+        )
