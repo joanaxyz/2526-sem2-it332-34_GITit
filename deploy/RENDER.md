@@ -131,9 +131,10 @@ for not binding in time.
 
 **To seed on a first deploy**, set `DJANGO_SEED_ON_STARTUP=True` on the
 `git-it-app` Environment page, redeploy, wait for the service to go live,
-then set it back to `False`. Seed commands do not use `--reset`, and
-`ALLOW_DESTRUCTIVE_SEED_RESET=False` prevents accidental production
-deletion.
+then set it back to `False`. Seed commands do not use `--reset`; the canonical
+`seed_all` command rejects reset because the old reset path belonged to the
+retired multi-story curriculum. `ALLOW_DESTRUCTIVE_SEED_RESET=False` remains
+configured for compatibility.
 
 After the first successful administrator login, remove all three
 `DJANGO_SUPERUSER_*` variables from the `git-it-app` Environment page and

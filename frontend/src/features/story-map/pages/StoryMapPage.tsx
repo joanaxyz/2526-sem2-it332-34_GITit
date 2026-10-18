@@ -48,7 +48,7 @@ export function StoryMapPage() {
   const userId = useAuthStore((state) => state.user?.id)
   const onboarding = useAppOnboarding()
   const { storySlug: routeStorySlug } = useParams<{ storySlug: string }>()
-  const storySlug = routeStorySlug ?? 'git-it-legacy'
+  const storySlug = routeStorySlug ?? 'arcane-spire'
   const [searchParams, setSearchParams] = useSearchParams()
   const chapterParam = searchParams.get('chapter')
   const focusedChapterId = chapterParam ? Number(chapterParam) : null

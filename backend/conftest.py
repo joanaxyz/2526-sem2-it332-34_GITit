@@ -31,6 +31,9 @@ def _clear_variant_evaluation_caches() -> None:
 
 @pytest.fixture(autouse=True)
 def _isolate_test_side_effects(settings):
+    # The former production curriculum command now exists only as an isolated
+    # engine fixture. Normal Django settings intentionally leave it disabled.
+    settings.ALLOW_RETIRED_CURRICULUM_FIXTURE_SEED = True
     for alias in settings.CACHES:
         caches[alias].clear()
     _clear_variant_evaluation_caches()

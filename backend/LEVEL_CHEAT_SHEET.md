@@ -1,5 +1,8 @@
 # GIT it! — All-level command cheat sheet
 
+> Historical reference for the retired multi-story fixture. Production uses
+> only the Module 0-4 Arcane Spire curriculum seeded by `seed_legacy_modules`.
+
 Generated from the live seeded curriculum on 2026-07-17. Covers **240 levels**, **582 waves**, and **1294 authored variants** across all three stories.
 
 Use the sequence for the variant whose story details, file names, branch names, commit IDs, or URLs match the level shown in the frontend. Commands on one row must be submitted left-to-right.

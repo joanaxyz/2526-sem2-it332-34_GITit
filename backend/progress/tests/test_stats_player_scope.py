@@ -20,13 +20,13 @@ from challenges.models import ChallengeLevel, ChallengeRun, ChallengeTrial, Chal
 from curriculum.models import Chapter, Story
 from players.services import get_or_create_player
 from practice.models import CommandStep
-from progress.models import AdventureLevelCompletion, ChallengeTrialCompletion
+from progress.models import AdventureLevelTierCompletion
 from progress.services import MetricsService
 
 
 @pytest.fixture
 def stats_players(db, django_user_model):
-    story = Story.objects.create(slug="stats", title="Stats")
+    story = Story.objects.create(slug="arcane-spire", title="The Arcane Spire")
     chapter = Chapter.objects.create(story=story, slug="stats", number=1, title="Stats")
     level = AdventureLevel.objects.create(chapter=chapter, slug="stats", title="Stats")
     wave = AdventureWave.objects.create(level=level, slug="stats")
@@ -87,6 +87,35 @@ def _step(runs, parent, *, number, days_ago=0, valid=True):
     return step
 
 
+def _completed_tier_run(player, *, story_slug: str, suffix: str, chapter_number: int):
+    story = Story.objects.create(slug=story_slug, title=suffix)
+    chapter = Chapter.objects.create(
+        story=story,
+        slug=f"{suffix}-chapter",
+        number=chapter_number,
+        title=f"{suffix} chapter",
+    )
+    level = AdventureLevel.objects.create(
+        chapter=chapter,
+        slug=f"{suffix}-level",
+        title=f"{suffix} level",
+    )
+    tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
+    wave = AdventureLevelTierWave.objects.create(tier=tier, slug=f"{suffix}-wave")
+    variant = AdventureLevelTierWaveVariant.objects.create(
+        wave=wave,
+        slug=f"{suffix}-variant",
+    )
+    run = AdventureLevelTierRun.objects.create(
+        player=player,
+        tier=tier,
+        current_wave=wave,
+        selected_variant=variant,
+        status="completed",
+    )
+    return run
+
+
 def test_player_steps_use_the_direct_owner_without_parent_joins(stats_players):
     (_, player, runs), (_, other_player, other_runs) = stats_players
     own_steps = [_step(runs, parent, number=1) for parent in runs]
@@ -103,7 +132,7 @@ def test_player_steps_use_the_direct_owner_without_parent_joins(stats_players):
 
 
 @pytest.mark.parametrize("window,buckets", [("week", 7), ("month", 30), ("year", 12)])
-def test_stats_include_every_command_parent_without_leaking_other_players(
+def test_stats_include_only_runebound_tier_commands_without_leaking_other_players(
     stats_players, window, buckets
 ):
     (user, player, runs), (_, _, other_runs) = stats_players
@@ -123,66 +152,88 @@ def test_stats_include_every_command_parent_without_leaking_other_players(
 
     assert response.status_code == 200
     payload = response.json()
-    assert payload["headline"]["commands_run"] == 6
+    assert payload["headline"]["commands_run"] == 4
     assert payload["headline"]["accuracy"] == 50.0
     assert len(payload["activity_trend"]) == buckets
-    assert sum(point["commands_run"] for point in payload["activity_trend"]) == 4
+    assert sum(point["commands_run"] for point in payload["activity_trend"]) == 2
     if window != "year":
         assert payload["activity_trend"][-1]["commands_run"] == 2
     today = timezone.localdate()
     since = timezone.make_aware(datetime.combine(today - timedelta(days=6), time.min))
-    assert MetricsService()._active_days(player=player, since=since) == {
-        today,
-        today - timedelta(days=1),
-        today - timedelta(days=2),
-    }
+    assert MetricsService()._active_days(player=player, since=since) == {today}
 
 
-def test_stats_count_mixed_star_completions_in_two_queries(stats_players):
+def test_stats_count_runebound_tier_completions_in_one_query(stats_players):
     (_, player, runs), (_, other_player, _) = stats_players
     level = runs["attempt"].level
-    trial = runs["challenge_run"].challenge_trial
     other_level = AdventureLevel.objects.create(
         chapter=level.chapter, slug="another", title="Another"
     )
-    other_trial = ChallengeTrial.objects.create(
-        challenge_level=trial.challenge_level, difficulty="medium"
-    )
-    for owner, completed_level, stars in (
-        (player, level, 3),
-        (player, other_level, 2),
-        (other_player, level, 3),
+    other_tier = AdventureLevelTier.objects.create(adventure_level=other_level, difficulty="easy")
+    for owner, completed_tier, stars in (
+        (player, runs["adventure_tier_run"].tier, 3),
+        (player, other_tier, 2),
+        (other_player, runs["adventure_tier_run"].tier, 3),
     ):
-        AdventureLevelCompletion.objects.create(
-            player=owner, adventure_level=completed_level, stars=stars
-        )
-    for owner, completed_trial, stars in (
-        (player, trial, 3),
-        (player, other_trial, 1),
-        (other_player, trial, 3),
-    ):
-        ChallengeTrialCompletion.objects.create(
-            player=owner, challenge_trial=completed_trial, stars=stars
-        )
+        AdventureLevelTierCompletion.objects.create(player=owner, tier=completed_tier, stars=stars)
 
     with CaptureQueriesContext(connection) as captured:
         summary = MetricsService().stats_summary(player=player)
 
-    assert summary["headline"]["levels_completed"] == 4
-    assert summary["headline"]["perfect_clears"] == 2
-    # Exclude the dated GROUP BY queries used to draw activity; the two headline
-    # aggregates each return total and perfect counts in one database round trip.
+    assert summary["headline"]["levels_completed"] == 2
+    assert summary["headline"]["perfect_clears"] == 1
+    # Exclude the dated GROUP BY query used to draw activity; the headline
+    # aggregate returns total, perfect, and hard counts in one round trip.
     completion_count_queries = [
         query["sql"]
         for query in captured
         if "COUNT(" in query["sql"]
         and "GROUP BY" not in query["sql"]
-        and any(
-            table in query["sql"]
-            for table in (
-                AdventureLevelCompletion._meta.db_table,
-                ChallengeTrialCompletion._meta.db_table,
-            )
-        )
+        and AdventureLevelTierCompletion._meta.db_table in query["sql"]
     ]
-    assert len(completion_count_queries) == 2
+    assert len(completion_count_queries) == 1
+
+
+def test_learner_progress_ignores_every_non_runebound_story(stats_players):
+    (user, player, runs), _ = stats_players
+    _step(runs, "adventure_tier_run", number=1)
+    AdventureLevelTierCompletion.objects.create(
+        player=player,
+        tier=runs["adventure_tier_run"].tier,
+        stars=3,
+    )
+
+    for number, slug in enumerate(
+        ("retired-arcane-campaign", "frostbound-citadel", "neon-backstreets"),
+        start=7,
+    ):
+        run = _completed_tier_run(
+            player,
+            story_slug=slug,
+            suffix=f"retired-{number}",
+            chapter_number=number,
+        )
+        _step({"adventure_tier_run": run}, "adventure_tier_run", number=1)
+        AdventureLevelTierCompletion.objects.create(
+            player=player,
+            tier=run.tier,
+            stars=3,
+        )
+
+    client = APIClient()
+    client.force_authenticate(user=user)
+    stats = client.get("/api/progress/stats/").json()
+    dashboard = client.get("/api/progress/dashboard/").json()
+
+    assert stats["headline"]["commands_run"] == 1
+    assert stats["headline"]["levels_completed"] == 1
+    assert stats["headline"]["perfect_clears"] == 1
+    assert dashboard["counts"] == {
+        "started": 1,
+        "completed": 1,
+        "failed": 0,
+        "abandoned": 0,
+    }
+    assert set(dashboard["chapter_kpis"]) == {"1"}
+    assert dashboard["perfect_clears"] == 1
+    assert dashboard["completed_stories"] == []

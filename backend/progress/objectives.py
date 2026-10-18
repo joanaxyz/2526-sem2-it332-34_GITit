@@ -3,7 +3,7 @@
 Only the SOs measured by CAR (Command Accuracy Rate) are mapped; the HLCR,
 ARC and RTA objectives are measured per module instead. The mapping is at
 level granularity: an SO's CAR is computed from every command submitted in
-the listed levels' tier runs (story git-it-legacy, replays excluded), so a
+the listed levels' tier runs (story arcane-spire, replays excluded), so a
 level that exercised several commands counts all of them toward its SO.
 
 Every level currently maps to exactly one SO. If a level ever needs to count
