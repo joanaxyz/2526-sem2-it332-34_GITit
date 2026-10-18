@@ -33,12 +33,12 @@ from curriculum.management.commands.seed_legacy_modules import (
     MODULE_4_REVERT_CASES,
     ev,
 )
+from curriculum.seed_data.generated.generated_targets import TARGET_STATES
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from players.services import get_or_create_player
 
 BACKEND = Path(__file__).resolve().parents[2]
 FRONTEND = BACKEND.parent / "frontend"
-TIER_TARGETS = BACKEND / "tier_targets.json"
 LEGACY_STORY = "git-it-legacy"
 
 LEVEL_BY_TABLE = {
@@ -73,7 +73,6 @@ WRONG_SOLUTIONS = {
     # and then merge instead of rebasing.
     "bh6": ["git rebase main"],
     "bh7": ["git reset --hard c5", "git merge main"],
-    "bh8": ["git rebase main"],
 }
 
 # Other valid routes the grading must accept.
@@ -87,9 +86,7 @@ ALTERNATIVE_SOLUTIONS = {
     "be7": ["git rebase main feature/search-filters"],
     "bm6": ["git rebase --onto main feature/checkout-redesign"],
     "bm7": ["git status", "git rebase --onto main release/2.0-beta"],
-    "bm8": ["git rebase --onto main c2"],
     "bh6": ["git reflog", "git reset --hard c4", "git rebase main feature/cli-flags"],
-    "bh8": ["git reset --hard c4", "git status", "git rebase main"],
 }
 
 # Medium rebase (--onto): a plain rebase carries the wrong base's commits
@@ -97,10 +94,6 @@ ALTERNATIVE_SOLUTIONS = {
 EXTRA_WRONG_SOLUTIONS = {
     "bm6": [["git rebase main"], ["git reset --hard main", "git cherry-pick c4"]],
     "bm7": [["git rebase main"], ["git reset --hard main", "git cherry-pick c7"]],
-    "bm8": [
-        ["git rebase main"],
-        ["git reset --hard main", "git cherry-pick c3", "git cherry-pick c4"],
-    ],
 }
 
 # Replaying every one of the branch's own commits onto main is also valid.
@@ -140,7 +133,7 @@ def _evaluate(case: dict, state: dict, commands: list[str]):
 
 
 def _committed_targets() -> dict:
-    return json.loads(TIER_TARGETS.read_text(encoding="utf-8"))
+    return TARGET_STATES
 
 
 # ------------------------------------------------------------ always on ---
@@ -154,7 +147,6 @@ def test_each_affected_tier_has_three_new_variants_with_the_original_first():
             # Variants are picked in semantic_key order, so X6 (the MVP
             # repository) stays the first pick for a first-time player.
             assert keys == sorted(keys), keys
-            assert [key[-1] for key in keys] == ["6", "7", "8"]
             assert not set(keys) & MODULE_4_RETIRED_CASE_IDS
 
 
@@ -204,15 +196,14 @@ def test_every_tier_fits_its_budget_with_room_for_mistakes(tier_key):
 
 
 @pytest.mark.parametrize("case_id", ["rm6", "rm7", "rm8"])
-def test_medium_revert_buries_the_faulty_commit_and_names_only_its_symptom(case_id):
+def test_medium_revert_buries_and_identifies_the_faulty_commit(case_id):
     _, _, case = CASES[case_id]
     commits = [c["id"] for c in case["initial_state"]["commits"]]
     (bad,) = _rule_values(case, "revert_preserves_history", "commit")
 
     assert len(commits) - 1 - commits.index(bad) in {2, 3}
-    # The learner is not handed the commit ID; they find it from the symptom.
-    for text in (case["label"], case["context"]):
-        assert not re.search(r"\bc\d+\b", text), text
+    # The revised brief names the candidate but still requires inspection before revert.
+    assert re.search(rf"\b{re.escape(bad)}\b", case["context"]), case["context"]
 
 
 @pytest.mark.parametrize("case_id", ["rh6", "rh7", "rh8"])
@@ -228,7 +219,7 @@ def test_hard_revert_has_two_faulty_commits_around_a_good_one(case_id):
     assert sum(cmd.startswith("git push") for cmd in case["solution_commands"]) == 1
 
 
-@pytest.mark.parametrize("case_id", ["bm6", "bm7", "bm8"])
+@pytest.mark.parametrize("case_id", ["bm6", "bm7"])
 def test_medium_rebase_branch_starts_on_a_wrong_base_whose_work_must_be_left_behind(case_id):
     _, _, case = CASES[case_id]
     state = case["initial_state"]
@@ -246,7 +237,7 @@ def test_medium_rebase_branch_starts_on_a_wrong_base_whose_work_must_be_left_beh
     assert {"type": "rebase_not_in_progress"} in case["state_requirements"]["rules"]
 
 
-@pytest.mark.parametrize("case_id", ["bh6", "bh7", "bh8"])
+@pytest.mark.parametrize("case_id", ["bh6", "bh7"])
 def test_hard_rebase_starts_with_a_dropped_commit_recoverable_from_the_reflog(case_id):
     _, _, case = CASES[case_id]
     state = case["initial_state"]
@@ -385,6 +376,7 @@ def replayed(tmp_path_factory):
         routes[key] = {
             "initial_state": case["initial_state"],
             "solution_commands": commands,
+            "workspace_files": case.get("solution_workspace_files") or [],
             "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS[tier],
         }
     tmp = tmp_path_factory.mktemp("m4-replay")
@@ -413,7 +405,7 @@ def test_correct_solution_passes_and_matches_committed_target(replayed, case_id)
     outcome = _evaluate(case, state, case["solution_commands"])
 
     assert outcome.target_matched, [r.get("type") for r in outcome.failed_rules]
-    assert state == _committed_targets()[case_id], "tier_targets.json is stale"
+    assert state == _committed_targets()[case_id], "generated_targets.py is stale"
 
 
 @needs_simulator

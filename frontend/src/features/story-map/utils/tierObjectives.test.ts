@@ -11,6 +11,18 @@ function run(status: TierRun['status'], task?: string) {
   } as Pick<TierRun, 'status' | 'scenario_context'>
 }
 
+function runWithObjectives(status: TierRun['status'], objectiveChecks: string[]) {
+  return {
+    status,
+    scenario_context: {
+      schema_version: 3,
+      story: 'Story',
+      task: 'Fallback task',
+      objective_checks: objectiveChecks,
+    },
+  } as Pick<TierRun, 'status' | 'scenario_context'>
+}
+
 describe('tierObjectives', () => {
   it('keeps the starting position in the briefing rather than the objective checklist', () => {
     expect(tierObjectives(run('started', 'Clone the repository.\n\nStarting point: Outside any repository.'))).toEqual([
@@ -35,5 +47,20 @@ describe('tierObjectives', () => {
   it('returns no objectives when the run has no task', () => {
     expect(tierObjectives(run('started'))).toEqual([])
     expect(tierObjectives(run('started', '   '))).toEqual([])
+  })
+
+  it('uses every authored checklist item instead of the fallback task', () => {
+    expect(tierObjectives(runWithObjectives('started', ['Create the branch.', 'Switch to it.']))).toEqual([
+      { id: 'objective-1', text: 'Create the branch.', status: 'pending' },
+      { id: 'objective-2', text: 'Switch to it.', status: 'pending' },
+    ])
+  })
+
+  it('keeps a transition-era embedded starting point out of the fallback objective', () => {
+    expect(
+      tierObjectives(
+        run('started', 'Clone the repository.\n\nStarting point: Outside any repository.'),
+      ),
+    ).toEqual([{ id: 'task', text: 'Clone the repository.', status: 'pending' }])
   })
 })
