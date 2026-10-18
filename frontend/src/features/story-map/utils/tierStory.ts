@@ -4,8 +4,10 @@ import { normalizeLevelContext } from '@/shared/level/utils/levelContext'
 type TierStoryContent = {
   title: string
   intro: string
+  startingPoint: string
   realWorldContext: string
   task: string
+  expectedResult: string
   /** Exact literals the learner must type (clone URL, commit message...). */
   requiredValues: { label: string; value: string }[]
 }
@@ -22,22 +24,32 @@ export function tierStoryContent(
 ): TierStoryContent {
   const context = normalizeLevelContext(run.scenario_context)
   const narrativeIndex = context.details.findIndex((detail) => !detail.label)
-  const narrative = narrativeIndex >= 0 ? context.details[narrativeIndex].value : ''
-  let intro = narrative || context.story
+  let intro = narrativeIndex >= 0 ? context.details[narrativeIndex].value : context.story
   let task = context.task
-  // Saved runs keep their original briefing even after the scenario bank is reseeded.
-  const startingPointIndex = intro.lastIndexOf('\n\nStarting point:')
-  if (startingPointIndex >= 0) {
-    const startingPoint = intro.slice(startingPointIndex).trim()
-    intro = intro.slice(0, startingPointIndex).trimEnd()
-    if (!task.includes(startingPoint)) task = [task, startingPoint].filter(Boolean).join('\n\n')
+  let startingPoint = context.startingPoint
+
+  // Older saved payloads embedded the starting point at the end of either the
+  // narrative or task. Promote it into the explicit field without duplicating
+  // it when the variant has already been reseeded with the revised contract.
+  const marker = '\n\nStarting point:'
+  const introMarker = intro.lastIndexOf(marker)
+  if (introMarker >= 0) {
+    startingPoint ||= intro.slice(introMarker + marker.length).trim()
+    intro = intro.slice(0, introMarker).trimEnd()
+  }
+  const taskMarker = task.lastIndexOf(marker)
+  if (taskMarker >= 0) {
+    startingPoint ||= task.slice(taskMarker + marker.length).trim()
+    task = task.slice(0, taskMarker).trimEnd()
   }
 
   return {
     title: run.variant?.label?.trim() || run.tier.adventure_level_title,
     intro,
+    startingPoint,
     realWorldContext: context.realWorldContext,
     task,
+    expectedResult: context.expectedResult,
     requiredValues: context.details.filter((_, index) => index !== narrativeIndex),
   }
 }

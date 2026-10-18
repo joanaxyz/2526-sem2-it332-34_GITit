@@ -15,36 +15,45 @@ function run(scenario: Record<string, unknown>, label = 'Clone docs-portal'): St
 }
 
 describe('tierStoryContent', () => {
-  it('moves the starting point from an older saved run into the task', () => {
-    const content = tierStoryContent(run({
-      task: 'Clone api-lab into api-workshop.',
-      details: [{ label: '', value: 'Your internship starts Monday.\n\nStarting point: Outside any repository.' }],
-    }))
+  it('promotes the starting point from an older saved narrative into its explicit field', () => {
+    const content = tierStoryContent(
+      run({
+        task: 'Clone api-lab into api-workshop.',
+        details: [
+          {
+            label: '',
+            value: 'Your internship starts Monday.\n\nStarting point: Outside any repository.',
+          },
+        ],
+      }),
+    )
+
     expect(content.intro).toBe('Your internship starts Monday.')
-    expect(content.task).toBe('Clone api-lab into api-workshop.\n\nStarting point: Outside any repository.')
-    expect(content.requiredValues).toEqual([])
+    expect(content.startingPoint).toBe('Outside any repository.')
+    expect(content.task).toBe('Clone api-lab into api-workshop.')
   })
 
-  it('does not duplicate a starting point already included in the task', () => {
-    const task = 'Clone the repository.\n\nStarting point: Outside any repository.'
-    const content = tierStoryContent(run({ story: 'Story.\n\nStarting point: Outside any repository.', task }))
-    expect(content.intro).toBe('Story.')
-    expect(content.task).toBe(task)
-  })
+  it('promotes a starting point embedded in a transition-era task without duplicating it', () => {
+    const content = tierStoryContent(
+      run({
+        story: 'A clean story.',
+        task: 'Clone the repository.\n\nStarting point: Outside any repository.',
+      }),
+    )
 
-  it('preserves the briefing from newly seeded runs', () => {
-    const task = 'Clone the repository.\n\nStarting point: Outside any repository.'
-    const content = tierStoryContent(run({ story: 'Story.', task }))
-    expect(content.intro).toBe('Story.')
-    expect(content.task).toBe(task)
+    expect(content.intro).toBe('A clean story.')
+    expect(content.startingPoint).toBe('Outside any repository.')
+    expect(content.task).toBe('Clone the repository.')
   })
 
   it('uses the first unlabeled detail as the intro and keeps labeled details as required values', () => {
     const content = tierStoryContent(
       run({
         story: 'Clone with the requested destination.',
+        starting_point: 'No local repository exists yet.',
         real_world_context: 'A clone gives the contributor the shared project history.',
         task: 'Use the provided remote URL.',
+        expected_result: 'A local clone is ready for work.',
         details: [
           { label: '', value: 'Your team portal is hosted remotely.' },
           { label: 'Repository URL', value: 'https://example.test/docs-portal.git' },
@@ -55,8 +64,10 @@ describe('tierStoryContent', () => {
     expect(content).toEqual({
       title: 'Clone docs-portal',
       intro: 'Your team portal is hosted remotely.',
+      startingPoint: 'No local repository exists yet.',
       realWorldContext: 'A clone gives the contributor the shared project history.',
       task: 'Use the provided remote URL.',
+      expectedResult: 'A local clone is ready for work.',
       requiredValues: [{ label: 'Repository URL', value: 'https://example.test/docs-portal.git' }],
     })
   })
@@ -68,6 +79,8 @@ describe('tierStoryContent', () => {
     expect(content.intro).toBe('Initialize the current folder.')
     expect(content.realWorldContext).toBe('')
     expect(content.task).toBe('')
+    expect(content.startingPoint).toBe('')
+    expect(content.expectedResult).toBe('')
     expect(content.requiredValues).toEqual([])
   })
 

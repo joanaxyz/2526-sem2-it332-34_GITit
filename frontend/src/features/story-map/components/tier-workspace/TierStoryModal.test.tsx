@@ -8,23 +8,27 @@ afterEach(cleanup)
 const story = {
   title: 'Initialize invoice-tracker',
   intro: 'A client hired you to build a simple invoice tracker.',
+  startingPoint: 'The invoice-tracker folder contains two untracked files.',
   task: 'Create and initialize a new Git repository named invoice-tracker.',
+  expectedResult: 'The folder is a repository and the files remain untracked.',
 }
 
 describe('TierStoryModal', () => {
-  it('orders the story, context, task with starting point, and start action', () => {
+  it('orders the complete authored briefing before the start action', () => {
     render(<TierStoryModal open {...story}
-      task={`${story.task}\n\nStarting point: You are outside any repository.`}
       realWorldContext="Teams clone shared projects locally." onClose={vi.fn()} />)
+    const startingPoint = screen.getByRole('region', { name: 'Starting point' })
     const context = screen.getByRole('region', { name: 'Real-world context' })
     const task = screen.getByRole('region', { name: 'Your task' })
+    const expectedResult = screen.getByRole('region', { name: 'Expected result' })
     const follows = (a: Element, b: Element) => Boolean(a.compareDocumentPosition(b) & Node.DOCUMENT_POSITION_FOLLOWING)
-    expect(follows(screen.getByText(story.intro), context)).toBe(true)
+    expect(follows(screen.getByText(story.intro), startingPoint)).toBe(true)
+    expect(follows(startingPoint, context)).toBe(true)
     expect(follows(context, task)).toBe(true)
-    expect(follows(task, screen.getByRole('button', { name: /start coding/i }))).toBe(true)
+    expect(follows(task, expectedResult)).toBe(true)
+    expect(follows(expectedResult, screen.getByRole('button', { name: /start coding/i }))).toBe(true)
     expect(within(task).getByText(story.task).tagName).toBe('P')
-    expect(within(task).getByText('Starting point:').tagName).toBe('STRONG')
-    expect(task.querySelectorAll('p')).toHaveLength(2)
+    expect(within(startingPoint).getByText(story.startingPoint).tagName).toBe('P')
   })
 
   it.each(['button', 'ctrl', 'meta'])('returns focus to the terminal using %s', async (action) => {
@@ -45,8 +49,12 @@ describe('TierStoryModal', () => {
 
     expect(screen.getByRole('dialog', { name: story.title })).toBeInTheDocument()
     expect(screen.getByText(story.intro)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Starting point' })).toBeInTheDocument()
+    expect(screen.getByText(story.startingPoint)).toBeInTheDocument()
     expect(screen.getByRole('heading', { name: 'Your task' })).toBeInTheDocument()
     expect(screen.getByText(story.task)).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Expected result' })).toBeInTheDocument()
+    expect(screen.getByText(story.expectedResult)).toBeInTheDocument()
     expect(screen.queryByRole('heading', { name: 'Real-world context' })).not.toBeInTheDocument()
   })
 

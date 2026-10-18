@@ -171,13 +171,21 @@ class AdventureLevelTierRunService:
         elif prior_run and prior_run.status == SESSION_STATUS_ABANDONED:
             prior_reference = None
 
-        # A wave may be authored with min_counted_commands=0 (read-only
-        # scenarios), but a run's star budget must be at least 1: the run
-        # constraint requires it, and a zero budget would otherwise surface as
-        # a misleading "active run" conflict. Same rule as
-        # common.runtime.star_target_for_variants: keep one command of room.
-        min_counted = max(1, wave.min_counted_commands)
-        max_counted = max(min_counted, wave.max_counted_commands)
+        # Revised scenario-bank budgets are authored per variant. Older waves
+        # still fall back to their shared budget. A run's star budget must be
+        # at least 1 because of the database constraint and to leave read-only
+        # scenarios one command of room.
+        parameters = (
+            variant.parameter_context if isinstance(variant.parameter_context, dict) else {}
+        )
+        min_counted = max(
+            1,
+            self._budget_value(parameters, "minimum_counted_commands", wave.min_counted_commands),
+        )
+        max_counted = max(
+            min_counted,
+            self._budget_value(parameters, "maximum_counted_commands", wave.max_counted_commands),
+        )
 
         try:
             run = AdventureLevelTierRun.objects.create(
@@ -197,6 +205,13 @@ class AdventureLevelTierRunService:
         except IntegrityError as exc:
             raise Conflict("An active run already exists for this difficulty tier.") from exc
         return self.hydrate_run(run)
+
+    @staticmethod
+    def _budget_value(parameters: dict, key: str, fallback: int) -> int:
+        try:
+            return int(parameters.get(key, fallback))
+        except (TypeError, ValueError):
+            return fallback
 
     def _unretried_last_failure(self, *, player, tier: AdventureLevelTier):
         """The learner's most recent run on this tier, if it failed and nothing

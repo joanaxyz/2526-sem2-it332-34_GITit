@@ -4,8 +4,11 @@ export type ObjectiveCheck = { label: string; satisfied: boolean }
 
 export type NormalizedLevelContext = {
   story: string
+  startingPoint: string
   realWorldContext: string
   task: string
+  objectiveChecks: string[]
+  expectedResult: string
   details: { label: string; value: string }[]
 }
 
@@ -15,8 +18,11 @@ export function normalizeLevelContext(
 ): NormalizedLevelContext {
   return {
     story: cleanText(context?.story),
+    startingPoint: cleanText(context?.starting_point),
     realWorldContext: cleanText(context?.real_world_context),
     task: cleanText(context?.task),
+    objectiveChecks: (context?.objective_checks ?? []).map(cleanText).filter(Boolean),
+    expectedResult: cleanText(context?.expected_result),
     details: (context?.details ?? [])
       .map((item) => ({ label: cleanText(item.label), value: cleanText(item.value) }))
       .filter((item) => item.value),
@@ -25,7 +31,15 @@ export function normalizeLevelContext(
 
 /** True when the normalized context carries any learner-facing detail. */
 export function hasLevelContext(context: NormalizedLevelContext) {
-  return Boolean(context.story || context.realWorldContext || context.task || context.details.length)
+  return Boolean(
+    context.story ||
+      context.startingPoint ||
+      context.realWorldContext ||
+      context.task ||
+      context.objectiveChecks.length ||
+      context.expectedResult ||
+      context.details.length,
+  )
 }
 
 function cleanText(value?: string) {

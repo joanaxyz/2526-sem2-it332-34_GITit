@@ -59,6 +59,29 @@ describe('workspace file state helpers', () => {
     expect(nextState.operation_metadata?.last_workspace_file_written).toBe('README.md')
   })
 
+  it('stages a saved conflict only when mergetool opened that path', () => {
+    const conflicted = baseState({
+      conflicts: ['src/app.ts'],
+      conflict_details: {
+        'src/app.ts': { base: 'base', ours: 'ours', theirs: 'theirs' },
+      },
+      working_tree: {
+        'src/app.ts': { status: 'conflicted', content: 'markers' },
+      },
+      operation_metadata: { last_mergetool_paths: ['src/app.ts'] },
+    })
+
+    const nextState = writeWorkspaceFile(conflicted, {
+      path: 'src/app.ts',
+      content: 'resolved',
+    })
+
+    expect(nextState.conflicts).toEqual([])
+    expect(nextState.working_tree).toEqual({})
+    expect(nextState.staging['src/app.ts']).toEqual({ status: 'modified', content: 'resolved' })
+    expect(nextState.operation_metadata?.last_mergetool_resolved_paths).toEqual(['src/app.ts'])
+  })
+
   it('rejects absolute paths', () => {
     expect(() => createWorkspaceFile(baseState(), { path: '/etc/passwd', content: '' })).toThrow(WorkspaceFileError)
   })

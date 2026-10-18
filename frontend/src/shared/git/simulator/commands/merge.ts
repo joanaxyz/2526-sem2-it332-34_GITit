@@ -1,6 +1,6 @@
 import type { RepositoryValue } from '@/shared/level/types'
 import { hasOption, optionValues } from '@/shared/git/simulator/parser'
-import { applyChanges, changeType, clone, commitById, commitPayload, diffTrees, headBranch, headCommit, isRecord, nextCommitId, setHeadCommit, setOperationMetadata, treeForCommit } from '@/shared/git/simulator/state'
+import { applyChanges, changesFromEntries, changeType, clone, commitById, commitPayload, diffTrees, headBranch, headCommit, isRecord, nextCommitId, setHeadCommit, setOperationMetadata, treeForCommit } from '@/shared/git/simulator/state'
 import { createCommit } from '@/shared/git/simulator/commands/commits'
 import { commonAncestor, commitsSince, isAncestor, resolveRef } from '@/shared/git/simulator/commands/refs'
 import { SimulatorCommandError, type CommandOutcome, type MutableRepositoryState, type ParsedGitCommand } from '@/shared/git/simulator/types'
@@ -177,7 +177,7 @@ export function gitMergetool(state: MutableRepositoryState, parsed: ParsedGitCom
   })
   return {
     command: 'mergetool',
-    stdout: `Opened ${configuredTool} for ${selected.join(', ')}.\nResolve the file in the workspace editor, save it, then run git add for the resolved path.`,
+    stdout: `Opened ${configuredTool} for ${selected.join(', ')}.\nResolve the file in the workspace editor and save it to stage the result.`,
   }
 }
 
@@ -192,14 +192,7 @@ export function gitRebase(state: MutableRepositoryState, parsed: ParsedGitComman
     return { command: 'rebase', stdout: '' }
   }
   if (hasOption(parsed, '--continue')) {
-    if (!isRecord(state.rebase_state)) throw new SimulatorCommandError('fatal: No rebase in progress?')
-    if (state.conflicts?.length) throw new SimulatorCommandError('You must edit all merge conflicts and then mark them as resolved using git add')
-    const remaining = Array.isArray(state.rebase_state.remaining) ? state.rebase_state.remaining.map(String) : []
-    if (!remaining.length) {
-      setOperationMetadata(state, { last_rebase_new_head: headCommit(state), last_rebase_replayed_commits: clone((state.rebase_state.applied as RepositoryValue[]) ?? []) })
-      delete state.rebase_state
-      return { command: 'rebase', stdout: 'Successfully rebased and updated current branch.' }
-    }
+    return continueRebase(state)
   }
   const ontoValues = optionValues(parsed, '--onto')
   const hasOnto = ontoValues.length > 0
@@ -251,4 +244,86 @@ export function gitRebase(state: MutableRepositoryState, parsed: ParsedGitComman
     last_rebase_replayed_commits: applied,
   })
   return { command: 'rebase', stdout: `Successfully rebased and updated ${currentBranch}.` }
+}
+
+function continueRebase(state: MutableRepositoryState): CommandOutcome {
+  if (!isRecord(state.rebase_state)) {
+    throw new SimulatorCommandError('fatal: No rebase in progress?')
+  }
+  if (state.conflicts?.length) {
+    throw new SimulatorCommandError(
+      'You must edit all merge conflicts and then mark them as resolved using git add',
+    )
+  }
+
+  const rebaseState = state.rebase_state
+  const branch = typeof rebaseState.branch === 'string' ? rebaseState.branch : headBranch(state)
+  if (branch && branch in (state.branches ?? {}) && headBranch(state) !== branch) {
+    state.head = { type: 'branch', name: branch, target: state.branches?.[branch] ?? null }
+  }
+  const applied = Array.isArray(rebaseState.applied)
+    ? rebaseState.applied.map(String)
+    : []
+  const currentSourceId = typeof rebaseState.current_source === 'string'
+    ? rebaseState.current_source
+    : null
+
+  if (currentSourceId) {
+    const source = commitById(state, currentSourceId)
+    if (!source) throw new SimulatorCommandError(`fatal: bad revision '${currentSourceId}'`)
+    const parent = headCommit(state)
+    const base = treeForCommit(state, parent)
+    const stagedChanges = changesFromEntries(base, clone(state.staging ?? {}))
+    if (!Object.keys(stagedChanges).length) {
+      throw new SimulatorCommandError('No changes - did you forget to use git add?', 1)
+    }
+    const tree = applyChanges(base, stagedChanges)
+    const commitId = nextCommitId(state)
+    state.commits ??= []
+    state.commits.push(
+      commitPayload({
+        state,
+        commitId,
+        message: source.message ?? `rebase ${currentSourceId}`,
+        parents: [parent].filter(Boolean) as string[],
+        tree,
+        changes: diffTrees(base, tree),
+      }),
+    )
+    setHeadCommit(state, commitId)
+    applied.push(commitId)
+    state.staging = {}
+  }
+
+  const remaining = Array.isArray(rebaseState.remaining)
+    ? rebaseState.remaining.map(String)
+    : []
+  for (const sourceId of remaining) {
+    const source = commitById(state, sourceId)
+    if (!source) throw new SimulatorCommandError(`fatal: bad revision '${sourceId}'`)
+    const parent = headCommit(state)
+    const base = treeForCommit(state, parent)
+    const tree = applyChanges(base, source.changes ?? {})
+    const commitId = nextCommitId(state)
+    state.commits ??= []
+    state.commits.push(
+      commitPayload({
+        state,
+        commitId,
+        message: source.message ?? `rebase ${sourceId}`,
+        parents: [parent].filter(Boolean) as string[],
+        tree,
+        changes: diffTrees(base, tree),
+      }),
+    )
+    setHeadCommit(state, commitId)
+    applied.push(commitId)
+  }
+
+  delete state.rebase_state
+  setOperationMetadata(state, {
+    last_rebase_new_head: headCommit(state),
+    last_rebase_replayed_commits: applied,
+  })
+  return { command: 'rebase', stdout: 'Successfully rebased and updated current branch.' }
 }
