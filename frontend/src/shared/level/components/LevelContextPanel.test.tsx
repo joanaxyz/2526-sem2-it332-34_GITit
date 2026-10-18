@@ -14,8 +14,11 @@ describe('LevelStoryCard', () => {
         titleIcon={GitBranch}
         context={{
           story: 'Use the required commit message shown below.',
+          startingPoint: '',
           realWorldContext: '',
           task: '',
+          objectiveChecks: [],
+          expectedResult: '',
           details: [{ label: 'Commit message', value: 'Save staged work' }],
         }}
       />,
@@ -32,8 +35,11 @@ describe('LevelStoryCard', () => {
         title="Clean Snapshots"
         context={{
           story: 'Inspect the repository.',
+          startingPoint: '',
           realWorldContext: '',
           task: 'Repair the commit.',
+          objectiveChecks: [],
+          expectedResult: '',
           details: [],
         }}
         showHeader={false}

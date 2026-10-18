@@ -4155,554 +4155,6 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "bh8": {
-    "branches": {
-      "feature/rate-limits": "c9",
-      "main": "c1"
-    },
-    "commits": [
-      {
-        "changes": {
-          "docs/README.md": {
-            "after": "docs-v1",
-            "before": null,
-            "change_type": "added"
-          },
-          "server/app.go": {
-            "after": "app-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "docs/README.md": "added",
-          "server/app.go": "added"
-        },
-        "id": "c0",
-        "is_merge": false,
-        "message": "Common base",
-        "order": 0,
-        "parents": [],
-        "tree": {
-          "docs/README.md": "docs-v1",
-          "server/app.go": "app-v1"
-        }
-      },
-      {
-        "changes": {
-          "server/app.go": {
-            "after": "app-v2",
-            "before": "app-v1",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "server/app.go": "modified"
-        },
-        "id": "c1",
-        "is_merge": false,
-        "message": "Add graceful shutdown",
-        "order": 1,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "docs/README.md": "docs-v1",
-          "server/app.go": "app-v2"
-        }
-      },
-      {
-        "changes": {
-          "server/limits.go": {
-            "after": "limits-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "server/limits.go": "added"
-        },
-        "id": "c2",
-        "is_merge": false,
-        "message": "Add rate limiter",
-        "order": 2,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "docs/README.md": "docs-v1",
-          "server/app.go": "app-v1",
-          "server/limits.go": "limits-v1"
-        }
-      },
-      {
-        "changes": {
-          "server/limits_test.go": {
-            "after": "limits-test-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "server/limits_test.go": "added"
-        },
-        "id": "c3",
-        "is_merge": false,
-        "message": "Test rate limiter",
-        "order": 3,
-        "parents": [
-          "c2"
-        ],
-        "tree": {
-          "docs/README.md": "docs-v1",
-          "server/app.go": "app-v1",
-          "server/limits.go": "limits-v1",
-          "server/limits_test.go": "limits-test-v1"
-        }
-      },
-      {
-        "changes": {
-          "docs/limits.md": {
-            "after": "limits-doc-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "docs/limits.md": "added"
-        },
-        "id": "c4",
-        "is_merge": false,
-        "message": "Document rate limits",
-        "order": 4,
-        "parents": [
-          "c3"
-        ],
-        "tree": {
-          "docs/README.md": "docs-v1",
-          "docs/limits.md": "limits-doc-v1",
-          "server/app.go": "app-v1",
-          "server/limits.go": "limits-v1",
-          "server/limits_test.go": "limits-test-v1"
-        }
-      },
-      {
-        "changes": {
-          "server/limits_test.go": {
-            "after": "limits-test-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "server/limits_test.go": "added"
-        },
-        "id": "c5",
-        "is_merge": false,
-        "message": "Test rate limiter",
-        "order": 5,
-        "parents": [
-          "c1"
-        ],
-        "tree": {
-          "docs/README.md": "docs-v1",
-          "server/app.go": "app-v2",
-          "server/limits_test.go": "limits-test-v1"
-        }
-      },
-      {
-        "changes": {
-          "docs/limits.md": {
-            "after": "limits-doc-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "docs/limits.md": "added"
-        },
-        "id": "c6",
-        "is_merge": false,
-        "message": "Document rate limits",
-        "order": 6,
-        "parents": [
-          "c5"
-        ],
-        "tree": {
-          "docs/README.md": "docs-v1",
-          "docs/limits.md": "limits-doc-v1",
-          "server/app.go": "app-v2",
-          "server/limits_test.go": "limits-test-v1"
-        }
-      },
-      {
-        "author": "GIT it",
-        "changes": {
-          "server/limits.go": {
-            "after": "limits-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "server/limits.go": "added"
-        },
-        "id": "c7",
-        "is_merge": false,
-        "message": "Add rate limiter",
-        "order": 7,
-        "parents": [
-          "c1"
-        ],
-        "tree": {
-          "docs/README.md": "docs-v1",
-          "server/app.go": "app-v2",
-          "server/limits.go": "limits-v1"
-        }
-      },
-      {
-        "author": "GIT it",
-        "changes": {
-          "server/limits_test.go": {
-            "after": "limits-test-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "server/limits_test.go": "added"
-        },
-        "id": "c8",
-        "is_merge": false,
-        "message": "Test rate limiter",
-        "order": 8,
-        "parents": [
-          "c7"
-        ],
-        "tree": {
-          "docs/README.md": "docs-v1",
-          "server/app.go": "app-v2",
-          "server/limits.go": "limits-v1",
-          "server/limits_test.go": "limits-test-v1"
-        }
-      },
-      {
-        "author": "GIT it",
-        "changes": {
-          "docs/limits.md": {
-            "after": "limits-doc-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "docs/limits.md": "added"
-        },
-        "id": "c9",
-        "is_merge": false,
-        "message": "Document rate limits",
-        "order": 9,
-        "parents": [
-          "c8"
-        ],
-        "tree": {
-          "docs/README.md": "docs-v1",
-          "docs/limits.md": "limits-doc-v1",
-          "server/app.go": "app-v2",
-          "server/limits.go": "limits-v1",
-          "server/limits_test.go": "limits-test-v1"
-        }
-      }
-    ],
-    "conflict_details": {},
-    "conflicts": [],
-    "head": {
-      "name": "feature/rate-limits",
-      "target": "c9",
-      "type": "branch"
-    },
-    "last_rebase_interactive": false,
-    "last_rebase_new_head": "c9",
-    "last_rebase_onto": null,
-    "last_rebase_replayed_commits": [
-      "c7",
-      "c8",
-      "c9"
-    ],
-    "last_rebase_target": "main",
-    "last_rebase_upstream": "c1",
-    "last_reset_mode": "hard",
-    "last_reset_previous_head": "c6",
-    "last_reset_target": "c4",
-    "last_reset_target_expr": "c4",
-    "merge_abort_state": {
-      "branches": {
-        "feature/rate-limits": "c6",
-        "main": "c1"
-      },
-      "commits": [
-        {
-          "changes": {
-            "docs/README.md": {
-              "after": "docs-v1",
-              "before": null,
-              "change_type": "added"
-            },
-            "server/app.go": {
-              "after": "app-v1",
-              "before": null,
-              "change_type": "added"
-            }
-          },
-          "files": {
-            "docs/README.md": "added",
-            "server/app.go": "added"
-          },
-          "id": "c0",
-          "is_merge": false,
-          "message": "Common base",
-          "order": 0,
-          "parents": [],
-          "tree": {
-            "docs/README.md": "docs-v1",
-            "server/app.go": "app-v1"
-          }
-        },
-        {
-          "changes": {
-            "server/app.go": {
-              "after": "app-v2",
-              "before": "app-v1",
-              "change_type": "modified"
-            }
-          },
-          "files": {
-            "server/app.go": "modified"
-          },
-          "id": "c1",
-          "is_merge": false,
-          "message": "Add graceful shutdown",
-          "order": 1,
-          "parents": [
-            "c0"
-          ],
-          "tree": {
-            "docs/README.md": "docs-v1",
-            "server/app.go": "app-v2"
-          }
-        },
-        {
-          "changes": {
-            "server/limits.go": {
-              "after": "limits-v1",
-              "before": null,
-              "change_type": "added"
-            }
-          },
-          "files": {
-            "server/limits.go": "added"
-          },
-          "id": "c2",
-          "is_merge": false,
-          "message": "Add rate limiter",
-          "order": 2,
-          "parents": [
-            "c0"
-          ],
-          "tree": {
-            "docs/README.md": "docs-v1",
-            "server/app.go": "app-v1",
-            "server/limits.go": "limits-v1"
-          }
-        },
-        {
-          "changes": {
-            "server/limits_test.go": {
-              "after": "limits-test-v1",
-              "before": null,
-              "change_type": "added"
-            }
-          },
-          "files": {
-            "server/limits_test.go": "added"
-          },
-          "id": "c3",
-          "is_merge": false,
-          "message": "Test rate limiter",
-          "order": 3,
-          "parents": [
-            "c2"
-          ],
-          "tree": {
-            "docs/README.md": "docs-v1",
-            "server/app.go": "app-v1",
-            "server/limits.go": "limits-v1",
-            "server/limits_test.go": "limits-test-v1"
-          }
-        },
-        {
-          "changes": {
-            "docs/limits.md": {
-              "after": "limits-doc-v1",
-              "before": null,
-              "change_type": "added"
-            }
-          },
-          "files": {
-            "docs/limits.md": "added"
-          },
-          "id": "c4",
-          "is_merge": false,
-          "message": "Document rate limits",
-          "order": 4,
-          "parents": [
-            "c3"
-          ],
-          "tree": {
-            "docs/README.md": "docs-v1",
-            "docs/limits.md": "limits-doc-v1",
-            "server/app.go": "app-v1",
-            "server/limits.go": "limits-v1",
-            "server/limits_test.go": "limits-test-v1"
-          }
-        },
-        {
-          "changes": {
-            "server/limits_test.go": {
-              "after": "limits-test-v1",
-              "before": null,
-              "change_type": "added"
-            }
-          },
-          "files": {
-            "server/limits_test.go": "added"
-          },
-          "id": "c5",
-          "is_merge": false,
-          "message": "Test rate limiter",
-          "order": 5,
-          "parents": [
-            "c1"
-          ],
-          "tree": {
-            "docs/README.md": "docs-v1",
-            "server/app.go": "app-v2",
-            "server/limits_test.go": "limits-test-v1"
-          }
-        },
-        {
-          "changes": {
-            "docs/limits.md": {
-              "after": "limits-doc-v1",
-              "before": null,
-              "change_type": "added"
-            }
-          },
-          "files": {
-            "docs/limits.md": "added"
-          },
-          "id": "c6",
-          "is_merge": false,
-          "message": "Document rate limits",
-          "order": 6,
-          "parents": [
-            "c5"
-          ],
-          "tree": {
-            "docs/README.md": "docs-v1",
-            "docs/limits.md": "limits-doc-v1",
-            "server/app.go": "app-v2",
-            "server/limits_test.go": "limits-test-v1"
-          }
-        }
-      ],
-      "conflict_details": {},
-      "conflicts": [],
-      "head": {
-        "name": "feature/rate-limits",
-        "target": "c6",
-        "type": "branch"
-      },
-      "operation_metadata": {},
-      "partial_hunks": {},
-      "reflog": [
-        {
-          "action": "commit: Document rate limits",
-          "commit": "c4",
-          "ref": "feature/rate-limits"
-        },
-        {
-          "action": "rebase (finish): refs/heads/feature/rate-limits onto c1",
-          "commit": "c6",
-          "ref": "feature/rate-limits"
-        }
-      ],
-      "remote_branches": {},
-      "remote_tags": {},
-      "remotes": {},
-      "replaced_commits": {},
-      "repository_initialized": true,
-      "staging": {},
-      "stash_stack": [],
-      "tags": {},
-      "upstream_tracking": {},
-      "working_tree": {}
-    },
-    "operation_metadata": {
-      "last_rebase_interactive": false,
-      "last_rebase_new_head": "c9",
-      "last_rebase_onto": null,
-      "last_rebase_replayed_commits": [
-        "c7",
-        "c8",
-        "c9"
-      ],
-      "last_rebase_target": "main",
-      "last_rebase_upstream": "c1",
-      "last_reset_mode": "hard",
-      "last_reset_previous_head": "c6",
-      "last_reset_target": "c4",
-      "last_reset_target_expr": "c4"
-    },
-    "partial_hunks": {},
-    "reflog": [
-      {
-        "action": "commit: Document rate limits",
-        "commit": "c4",
-        "ref": "feature/rate-limits"
-      },
-      {
-        "action": "rebase (finish): refs/heads/feature/rate-limits onto c1",
-        "commit": "c6",
-        "ref": "feature/rate-limits"
-      },
-      {
-        "message": "move HEAD",
-        "ref": "HEAD@{2}",
-        "target": "c4"
-      },
-      {
-        "message": "reset: moving to c4",
-        "ref": "HEAD@{3}",
-        "target": "c4"
-      },
-      {
-        "message": "move HEAD",
-        "ref": "HEAD@{4}",
-        "target": "c9"
-      }
-    ],
-    "remote_branches": {},
-    "remote_tags": {},
-    "remotes": {},
-    "replaced_commits": {},
-    "repository_initialized": true,
-    "staging": {},
-    "stash_stack": [],
-    "tags": {},
-    "upstream_tracking": {},
-    "working_tree": {}
-  },
   "bm6": {
     "branches": {
       "feature/checkout-redesign": "c3",
@@ -5248,290 +4700,6 @@ TARGET_STATES = json.loads(r"""
         "message": "move HEAD",
         "ref": "HEAD@{0}",
         "target": "c9"
-      }
-    ],
-    "remote_branches": {},
-    "remote_tags": {},
-    "remotes": {},
-    "replaced_commits": {},
-    "repository_initialized": true,
-    "staging": {},
-    "stash_stack": [],
-    "tags": {},
-    "upstream_tracking": {},
-    "working_tree": {}
-  },
-  "bm8": {
-    "branches": {
-      "feature/export-pdf": "c8",
-      "main": "c1",
-      "spike/new-renderer": "c2"
-    },
-    "commits": [
-      {
-        "changes": {
-          "render/engine.py": {
-            "after": "engine-v1",
-            "before": null,
-            "change_type": "added"
-          },
-          "reports/export.py": {
-            "after": "export-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "render/engine.py": "added",
-          "reports/export.py": "added"
-        },
-        "id": "c0",
-        "is_merge": false,
-        "message": "Common base",
-        "order": 0,
-        "parents": [],
-        "tree": {
-          "render/engine.py": "engine-v1",
-          "reports/export.py": "export-v1"
-        }
-      },
-      {
-        "changes": {
-          "reports/csv.py": {
-            "after": "csv-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "reports/csv.py": "added"
-        },
-        "id": "c1",
-        "is_merge": false,
-        "message": "Add CSV export",
-        "order": 1,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "render/engine.py": "engine-v1",
-          "reports/csv.py": "csv-v1",
-          "reports/export.py": "export-v1"
-        }
-      },
-      {
-        "changes": {
-          "render/engine.py": {
-            "after": "engine-v2-spike",
-            "before": "engine-v1",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "render/engine.py": "modified"
-        },
-        "id": "c2",
-        "is_merge": false,
-        "message": "Spike: swap rendering engine",
-        "order": 2,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "render/engine.py": "engine-v2-spike",
-          "reports/export.py": "export-v1"
-        }
-      },
-      {
-        "changes": {
-          "reports/pdf.py": {
-            "after": "pdf-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "reports/pdf.py": "added"
-        },
-        "id": "c3",
-        "is_merge": false,
-        "message": "Add PDF export",
-        "order": 3,
-        "parents": [
-          "c2"
-        ],
-        "tree": {
-          "render/engine.py": "engine-v2-spike",
-          "reports/export.py": "export-v1",
-          "reports/pdf.py": "pdf-v1"
-        }
-      },
-      {
-        "changes": {
-          "reports/pdf_pages.py": {
-            "after": "pdf-pages-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "reports/pdf_pages.py": "added"
-        },
-        "id": "c4",
-        "is_merge": false,
-        "message": "Add PDF page numbers",
-        "order": 4,
-        "parents": [
-          "c3"
-        ],
-        "tree": {
-          "render/engine.py": "engine-v2-spike",
-          "reports/export.py": "export-v1",
-          "reports/pdf.py": "pdf-v1",
-          "reports/pdf_pages.py": "pdf-pages-v1"
-        }
-      },
-      {
-        "changes": {
-          "reports/export.py": {
-            "after": "export-v2-pdf",
-            "before": "export-v1",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "reports/export.py": "modified"
-        },
-        "id": "c5",
-        "is_merge": false,
-        "message": "Wire PDF into the export menu",
-        "order": 5,
-        "parents": [
-          "c4"
-        ],
-        "tree": {
-          "render/engine.py": "engine-v2-spike",
-          "reports/export.py": "export-v2-pdf",
-          "reports/pdf.py": "pdf-v1",
-          "reports/pdf_pages.py": "pdf-pages-v1"
-        }
-      },
-      {
-        "author": "GIT it",
-        "changes": {
-          "reports/pdf.py": {
-            "after": "pdf-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "reports/pdf.py": "added"
-        },
-        "id": "c6",
-        "is_merge": false,
-        "message": "Add PDF export",
-        "order": 6,
-        "parents": [
-          "c1"
-        ],
-        "tree": {
-          "render/engine.py": "engine-v1",
-          "reports/csv.py": "csv-v1",
-          "reports/export.py": "export-v1",
-          "reports/pdf.py": "pdf-v1"
-        }
-      },
-      {
-        "author": "GIT it",
-        "changes": {
-          "reports/pdf_pages.py": {
-            "after": "pdf-pages-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "reports/pdf_pages.py": "added"
-        },
-        "id": "c7",
-        "is_merge": false,
-        "message": "Add PDF page numbers",
-        "order": 7,
-        "parents": [
-          "c6"
-        ],
-        "tree": {
-          "render/engine.py": "engine-v1",
-          "reports/csv.py": "csv-v1",
-          "reports/export.py": "export-v1",
-          "reports/pdf.py": "pdf-v1",
-          "reports/pdf_pages.py": "pdf-pages-v1"
-        }
-      },
-      {
-        "author": "GIT it",
-        "changes": {
-          "reports/export.py": {
-            "after": "export-v2-pdf",
-            "before": "export-v1",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "reports/export.py": "modified"
-        },
-        "id": "c8",
-        "is_merge": false,
-        "message": "Wire PDF into the export menu",
-        "order": 8,
-        "parents": [
-          "c7"
-        ],
-        "tree": {
-          "render/engine.py": "engine-v1",
-          "reports/csv.py": "csv-v1",
-          "reports/export.py": "export-v2-pdf",
-          "reports/pdf.py": "pdf-v1",
-          "reports/pdf_pages.py": "pdf-pages-v1"
-        }
-      }
-    ],
-    "conflict_details": {},
-    "conflicts": [],
-    "head": {
-      "name": "feature/export-pdf",
-      "target": "c8",
-      "type": "branch"
-    },
-    "last_rebase_interactive": false,
-    "last_rebase_new_head": "c8",
-    "last_rebase_onto": "c1",
-    "last_rebase_replayed_commits": [
-      "c6",
-      "c7",
-      "c8"
-    ],
-    "last_rebase_target": "main",
-    "last_rebase_upstream": "c2",
-    "operation_metadata": {
-      "last_rebase_interactive": false,
-      "last_rebase_new_head": "c8",
-      "last_rebase_onto": "c1",
-      "last_rebase_replayed_commits": [
-        "c6",
-        "c7",
-        "c8"
-      ],
-      "last_rebase_target": "main",
-      "last_rebase_upstream": "c2"
-    },
-    "partial_hunks": {},
-    "reflog": [
-      {
-        "message": "move HEAD",
-        "ref": "HEAD@{0}",
-        "target": "c8"
       }
     ],
     "remote_branches": {},
@@ -98274,7 +97442,7 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "cherry-hard-abort": {
+  "cherry-hard-abort-conflict": {
     "branches": {
       "main": "c2",
       "release-abort": "c3"
@@ -98282,56 +97450,56 @@ TARGET_STATES = json.loads(r"""
     "commits": [
       {
         "changes": {
-          "src/search.ts": {
-            "after": "search-base",
+          "src/search.py": {
+            "after": "query = 'base'",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "src/search.ts": "added"
+          "src/search.py": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Baseline",
+        "message": "Search baseline",
         "order": 0,
         "parents": [],
         "tree": {
-          "src/search.ts": "search-base"
+          "src/search.py": "query = 'base'"
         }
       },
       {
         "changes": {
-          "src/search.ts": {
-            "after": "search-hotfix",
-            "before": "search-base",
+          "src/search.py": {
+            "after": "query = 'fixed'",
+            "before": "query = 'base'",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/search.ts": "modified"
+          "src/search.py": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Fix search hotfix",
+        "message": "Fix search query",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/search.ts": "search-hotfix"
+          "src/search.py": "query = 'fixed'"
         }
       },
       {
         "changes": {
-          "src/other.ts": {
-            "after": "other-v1",
+          "README.md": {
+            "after": "main",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "src/other.ts": "added"
+          "README.md": "added"
         },
         "id": "c2",
         "is_merge": false,
@@ -98341,22 +97509,30 @@ TARGET_STATES = json.loads(r"""
           "c1"
         ],
         "tree": {
-          "src/other.ts": "other-v1",
-          "src/search.ts": "search-hotfix"
+          "README.md": "main",
+          "src/search.py": "query = 'fixed'"
         }
       },
       {
-        "changes": {},
-        "files": {},
+        "changes": {
+          "src/search.py": {
+            "after": "query = 'release'",
+            "before": "query = 'base'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
         "id": "c3",
         "is_merge": false,
-        "message": "Abort branch base",
+        "message": "Release search",
         "order": 3,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/search.ts": "search-base"
+          "src/search.py": "query = 'release'"
         }
       }
     ],
@@ -98390,64 +97566,67 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "cherry-hard-export-null": {
+  "cherry-hard-export-conflict": {
     "branches": {
       "main": "c2",
       "release-2.0": "c4"
     },
+    "cherry_pick_conflict_files": [
+      "src/export.py"
+    ],
     "commits": [
       {
         "changes": {
-          "src/export.ts": {
-            "after": "export-base",
+          "src/export.py": {
+            "after": "def export(rows):\n    return rows",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "src/export.ts": "added"
+          "src/export.py": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Baseline",
+        "message": "Export baseline",
         "order": 0,
         "parents": [],
         "tree": {
-          "src/export.ts": "export-base"
+          "src/export.py": "def export(rows):\n    return rows"
         }
       },
       {
         "changes": {
-          "src/export.ts": {
-            "after": "null-export-fix",
-            "before": "export-base",
+          "src/export.py": {
+            "after": "def export(rows):\n    return [r for r in rows if r is not None]",
+            "before": "def export(rows):\n    return rows",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/export.ts": "modified"
+          "src/export.py": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Fix null export",
+        "message": "Skip null export rows",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/export.ts": "null-export-fix"
+          "src/export.py": "def export(rows):\n    return [r for r in rows if r is not None]"
         }
       },
       {
         "changes": {
-          "src/other.ts": {
-            "after": "other-v1",
+          "README.md": {
+            "after": "main",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "src/other.ts": "added"
+          "README.md": "added"
         },
         "id": "c2",
         "is_merge": false,
@@ -98457,45 +97636,53 @@ TARGET_STATES = json.loads(r"""
           "c1"
         ],
         "tree": {
-          "src/export.ts": "null-export-fix",
-          "src/other.ts": "other-v1"
+          "README.md": "main",
+          "src/export.py": "def export(rows):\n    return [r for r in rows if r is not None]"
         }
       },
       {
-        "changes": {},
-        "files": {},
+        "changes": {
+          "src/export.py": {
+            "after": "def export(rows):\n    return list(rows)",
+            "before": "def export(rows):\n    return rows",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/export.py": "modified"
+        },
         "id": "c3",
         "is_merge": false,
-        "message": "Release branch base",
+        "message": "Release export adjustment",
         "order": 3,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/export.ts": "export-base"
+          "src/export.py": "def export(rows):\n    return list(rows)"
         }
       },
       {
         "author": "GIT it",
         "changes": {
-          "src/export.ts": {
-            "after": "null-export-fix",
-            "before": "export-base",
+          "src/export.py": {
+            "after": "def export(rows):\n    return [r for r in rows if r is not None]",
+            "before": "def export(rows):\n    return list(rows)",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/export.ts": "modified"
+          "src/export.py": "modified"
         },
         "id": "c4",
         "is_merge": false,
-        "message": "Fix null export",
+        "message": "Skip null export rows",
         "order": 4,
         "parents": [
           "c3"
         ],
         "tree": {
-          "src/export.ts": "null-export-fix"
+          "src/export.py": "def export(rows):\n    return [r for r in rows if r is not None]"
         }
       }
     ],
@@ -98506,13 +97693,23 @@ TARGET_STATES = json.loads(r"""
       "target": "c4",
       "type": "branch"
     },
+    "last_cherry_pick_conflict_paths": [
+      "src/export.py"
+    ],
+    "last_cherry_pick_conflicted": true,
     "last_cherry_pick_created_commit": "c4",
     "last_cherry_pick_no_commit": false,
     "last_cherry_pick_source": "c1",
+    "last_workspace_file_written": "src/export.py",
     "operation_metadata": {
+      "last_cherry_pick_conflict_paths": [
+        "src/export.py"
+      ],
+      "last_cherry_pick_conflicted": true,
       "last_cherry_pick_created_commit": "c4",
       "last_cherry_pick_no_commit": false,
-      "last_cherry_pick_source": "c1"
+      "last_cherry_pick_source": "c1",
+      "last_workspace_file_written": "src/export.py"
     },
     "partial_hunks": {},
     "reflog": [
@@ -98533,7 +97730,7 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "cherry-hard-queue-finalize": {
+  "cherry-hard-trace-source": {
     "branches": {
       "main": "c2",
       "release-finalize": "c4"
@@ -98542,7 +97739,7 @@ TARGET_STATES = json.loads(r"""
       {
         "changes": {
           "src/queue.ts": {
-            "after": "queue-base",
+            "after": "base",
             "before": null,
             "change_type": "added"
           }
@@ -98552,18 +97749,18 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Baseline",
+        "message": "Queue baseline",
         "order": 0,
         "parents": [],
         "tree": {
-          "src/queue.ts": "queue-base"
+          "src/queue.ts": "base"
         }
       },
       {
         "changes": {
           "src/queue.ts": {
-            "after": "queue-hotfix",
-            "before": "queue-base",
+            "after": "fixed",
+            "before": "base",
             "change_type": "modified"
           }
         },
@@ -98572,25 +97769,25 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Fix queue hotfix",
+        "message": "Fix queue delivery",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/queue.ts": "queue-hotfix"
+          "src/queue.ts": "fixed"
         }
       },
       {
         "changes": {
-          "src/other.ts": {
-            "after": "other-v1",
+          "README.md": {
+            "after": "main",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "src/other.ts": "added"
+          "README.md": "added"
         },
         "id": "c2",
         "is_merge": false,
@@ -98600,8 +97797,8 @@ TARGET_STATES = json.loads(r"""
           "c1"
         ],
         "tree": {
-          "src/other.ts": "other-v1",
-          "src/queue.ts": "queue-hotfix"
+          "README.md": "main",
+          "src/queue.ts": "fixed"
         }
       },
       {
@@ -98609,21 +97806,21 @@ TARGET_STATES = json.loads(r"""
         "files": {},
         "id": "c3",
         "is_merge": false,
-        "message": "Finalize branch base",
+        "message": "Release baseline",
         "order": 3,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/queue.ts": "queue-base"
+          "src/queue.ts": "base"
         }
       },
       {
         "author": "GIT it",
         "changes": {
           "src/queue.ts": {
-            "after": "queue-hotfix",
-            "before": "queue-base",
+            "after": "fixed",
+            "before": "base",
             "change_type": "modified"
           }
         },
@@ -98632,13 +97829,13 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c4",
         "is_merge": false,
-        "message": "Fix queue hotfix",
+        "message": "Fix queue delivery\n\n(cherry picked from commit c1)",
         "order": 4,
         "parents": [
           "c3"
         ],
         "tree": {
-          "src/queue.ts": "queue-hotfix"
+          "src/queue.ts": "fixed"
         }
       }
     ],
@@ -98676,16 +97873,17 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "cherry-hard-rate-limit": {
+  "cherry-hard-two-releases": {
     "branches": {
       "main": "c2",
-      "release-1.2": "c4"
+      "release-1.1": "c6",
+      "release-1.2": "c5"
     },
     "commits": [
       {
         "changes": {
           "src/ratelimit.py": {
-            "after": "ratelimit-base",
+            "after": "limit = 100",
             "before": null,
             "change_type": "added"
           }
@@ -98695,18 +97893,18 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Baseline",
+        "message": "Rate limit baseline",
         "order": 0,
         "parents": [],
         "tree": {
-          "src/ratelimit.py": "ratelimit-base"
+          "src/ratelimit.py": "limit = 100"
         }
       },
       {
         "changes": {
           "src/ratelimit.py": {
-            "after": "rate-limit-fix-v1",
-            "before": "ratelimit-base",
+            "after": "limit = 60",
+            "before": "limit = 100",
             "change_type": "modified"
           }
         },
@@ -98721,19 +97919,19 @@ TARGET_STATES = json.loads(r"""
           "c0"
         ],
         "tree": {
-          "src/ratelimit.py": "rate-limit-fix-v1"
+          "src/ratelimit.py": "limit = 60"
         }
       },
       {
         "changes": {
-          "src/other.py": {
-            "after": "other-v1",
+          "README.md": {
+            "after": "main",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "src/other.py": "added"
+          "README.md": "added"
         },
         "id": "c2",
         "is_merge": false,
@@ -98743,69 +97941,135 @@ TARGET_STATES = json.loads(r"""
           "c1"
         ],
         "tree": {
-          "src/other.py": "other-v1",
-          "src/ratelimit.py": "rate-limit-fix-v1"
+          "README.md": "main",
+          "src/ratelimit.py": "limit = 60"
         }
       },
       {
-        "changes": {},
-        "files": {},
+        "changes": {
+          "release.txt": {
+            "after": "1.2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "release.txt": "added"
+        },
         "id": "c3",
         "is_merge": false,
-        "message": "Release branch base",
+        "message": "Release 1.2 baseline",
         "order": 3,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/ratelimit.py": "ratelimit-base"
+          "release.txt": "1.2",
+          "src/ratelimit.py": "limit = 100"
+        }
+      },
+      {
+        "changes": {
+          "release.txt": {
+            "after": "1.1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "release.txt": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Release 1.1 baseline",
+        "order": 4,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "release.txt": "1.1",
+          "src/ratelimit.py": "limit = 100"
         }
       },
       {
         "author": "GIT it",
         "changes": {
           "src/ratelimit.py": {
-            "after": "rate-limit-fix-v1",
-            "before": "ratelimit-base",
+            "after": "limit = 60",
+            "before": "limit = 100",
             "change_type": "modified"
           }
         },
         "files": {
           "src/ratelimit.py": "modified"
         },
-        "id": "c4",
+        "id": "c5",
         "is_merge": false,
         "message": "Fix rate limit",
-        "order": 4,
+        "order": 5,
         "parents": [
           "c3"
         ],
         "tree": {
-          "src/ratelimit.py": "rate-limit-fix-v1"
+          "release.txt": "1.2",
+          "src/ratelimit.py": "limit = 60"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/ratelimit.py": {
+            "after": "limit = 60",
+            "before": "limit = 100",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/ratelimit.py": "modified"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Fix rate limit",
+        "order": 6,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "release.txt": "1.1",
+          "src/ratelimit.py": "limit = 60"
         }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "release-1.2",
-      "target": "c4",
+      "name": "release-1.1",
+      "target": "c6",
       "type": "branch"
     },
-    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_created_commit": "c6",
     "last_cherry_pick_no_commit": false,
     "last_cherry_pick_source": "c1",
+    "last_switch_branch": "release-1.1",
+    "last_switched_to": "release-1.1",
     "operation_metadata": {
-      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_created_commit": "c6",
       "last_cherry_pick_no_commit": false,
-      "last_cherry_pick_source": "c1"
+      "last_cherry_pick_source": "c1",
+      "last_switch_branch": "release-1.1",
+      "last_switched_to": "release-1.1"
     },
     "partial_hunks": {},
     "reflog": [
       {
         "message": "move HEAD",
         "ref": "HEAD@{0}",
-        "target": "c4"
+        "target": "c5"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c6"
       }
     ],
     "remote_branches": {},
@@ -98821,6 +98085,7 @@ TARGET_STATES = json.loads(r"""
   },
   "cherry-medium-invoice-rounding": {
     "branches": {
+      "feature/invoice-rounding": "c1",
       "main": "c2",
       "release-1.1": "c4"
     },
@@ -98965,7 +98230,7 @@ TARGET_STATES = json.loads(r"""
   "cherry-medium-login-timeout": {
     "branches": {
       "main": "c2",
-      "release-1.0": "c4"
+      "release-1.0": "c5"
     },
     "commits": [
       {
@@ -99069,22 +98334,46 @@ TARGET_STATES = json.loads(r"""
         "tree": {
           "src/login.js": "timeout-fix-v1"
         }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/other.js": {
+            "after": "other-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/other.js": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Main continues",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "src/login.js": "timeout-fix-v1",
+          "src/other.js": "other-v1"
+        }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
     "head": {
       "name": "release-1.0",
-      "target": "c4",
+      "target": "c5",
       "type": "branch"
     },
-    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_created_commit": "c5",
     "last_cherry_pick_no_commit": false,
-    "last_cherry_pick_source": "c1",
+    "last_cherry_pick_source": "c2",
     "operation_metadata": {
-      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_created_commit": "c5",
       "last_cherry_pick_no_commit": false,
-      "last_cherry_pick_source": "c1"
+      "last_cherry_pick_source": "c2"
     },
     "partial_hunks": {},
     "reflog": [
@@ -99092,6 +98381,11 @@ TARGET_STATES = json.loads(r"""
         "message": "move HEAD",
         "ref": "HEAD@{0}",
         "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c5"
       }
     ],
     "remote_branches": {},
@@ -104542,7 +103836,7 @@ TARGET_STATES = json.loads(r"""
   "e1": {
     "branches": {
       "main": "c2",
-      "recovery-4-1-e1": "c3"
+      "recovery/e1": "c3"
     },
     "commits": [
       {
@@ -104635,17 +103929,17 @@ TARGET_STATES = json.loads(r"""
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-e1",
+      "name": "recovery/e1",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-e1",
-    "last_switch_branch": "recovery-4-1-e1",
-    "last_switched_to": "recovery-4-1-e1",
+    "last_branch_created": "recovery/e1",
+    "last_switch_branch": "recovery/e1",
+    "last_switched_to": "recovery/e1",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-e1",
-      "last_switch_branch": "recovery-4-1-e1",
-      "last_switched_to": "recovery-4-1-e1"
+      "last_branch_created": "recovery/e1",
+      "last_switch_branch": "recovery/e1",
+      "last_switched_to": "recovery/e1"
     },
     "partial_hunks": {},
     "reflog": [
@@ -104674,7 +103968,7 @@ TARGET_STATES = json.loads(r"""
   "e2": {
     "branches": {
       "main": "c2",
-      "recovery-4-1-e2": "c3"
+      "recovery/e2": "c3"
     },
     "commits": [
       {
@@ -104767,17 +104061,17 @@ TARGET_STATES = json.loads(r"""
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-e2",
+      "name": "recovery/e2",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-e2",
-    "last_switch_branch": "recovery-4-1-e2",
-    "last_switched_to": "recovery-4-1-e2",
+    "last_branch_created": "recovery/e2",
+    "last_switch_branch": "recovery/e2",
+    "last_switched_to": "recovery/e2",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-e2",
-      "last_switch_branch": "recovery-4-1-e2",
-      "last_switched_to": "recovery-4-1-e2"
+      "last_branch_created": "recovery/e2",
+      "last_switch_branch": "recovery/e2",
+      "last_switched_to": "recovery/e2"
     },
     "partial_hunks": {},
     "reflog": [
@@ -104806,7 +104100,7 @@ TARGET_STATES = json.loads(r"""
   "e3": {
     "branches": {
       "main": "c2",
-      "recovery-4-1-e3": "c3"
+      "recovery/e3": "c3"
     },
     "commits": [
       {
@@ -104899,17 +104193,17 @@ TARGET_STATES = json.loads(r"""
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-e3",
+      "name": "recovery/e3",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-e3",
-    "last_switch_branch": "recovery-4-1-e3",
-    "last_switched_to": "recovery-4-1-e3",
+    "last_branch_created": "recovery/e3",
+    "last_switch_branch": "recovery/e3",
+    "last_switched_to": "recovery/e3",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-e3",
-      "last_switch_branch": "recovery-4-1-e3",
-      "last_switched_to": "recovery-4-1-e3"
+      "last_branch_created": "recovery/e3",
+      "last_switch_branch": "recovery/e3",
+      "last_switched_to": "recovery/e3"
     },
     "partial_hunks": {},
     "reflog": [
@@ -104938,7 +104232,7 @@ TARGET_STATES = json.loads(r"""
   "e4": {
     "branches": {
       "main": "c2",
-      "recovery-4-1-e4": "c3"
+      "recovery/e4": "c3"
     },
     "commits": [
       {
@@ -105031,17 +104325,17 @@ TARGET_STATES = json.loads(r"""
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-e4",
+      "name": "recovery/e4",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-e4",
-    "last_switch_branch": "recovery-4-1-e4",
-    "last_switched_to": "recovery-4-1-e4",
+    "last_branch_created": "recovery/e4",
+    "last_switch_branch": "recovery/e4",
+    "last_switched_to": "recovery/e4",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-e4",
-      "last_switch_branch": "recovery-4-1-e4",
-      "last_switched_to": "recovery-4-1-e4"
+      "last_branch_created": "recovery/e4",
+      "last_switch_branch": "recovery/e4",
+      "last_switched_to": "recovery/e4"
     },
     "partial_hunks": {},
     "reflog": [
@@ -105070,7 +104364,7 @@ TARGET_STATES = json.loads(r"""
   "e5": {
     "branches": {
       "main": "c2",
-      "recovery-4-1-e5": "c3"
+      "recovery/e5": "c3"
     },
     "commits": [
       {
@@ -105163,17 +104457,17 @@ TARGET_STATES = json.loads(r"""
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-e5",
+      "name": "recovery/e5",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-e5",
-    "last_switch_branch": "recovery-4-1-e5",
-    "last_switched_to": "recovery-4-1-e5",
+    "last_branch_created": "recovery/e5",
+    "last_switch_branch": "recovery/e5",
+    "last_switched_to": "recovery/e5",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-e5",
-      "last_switch_branch": "recovery-4-1-e5",
-      "last_switched_to": "recovery-4-1-e5"
+      "last_branch_created": "recovery/e5",
+      "last_switch_branch": "recovery/e5",
+      "last_switched_to": "recovery/e5"
     },
     "partial_hunks": {},
     "reflog": [
@@ -266326,113 +265620,140 @@ TARGET_STATES = json.loads(r"""
   "h1": {
     "branches": {
       "main": "c0",
-      "recovery-4-1-h1": "c3"
+      "recovery/h1": "c3"
     },
     "commits": [
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v0",
+          "src/search.py": {
+            "after": "baseline",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "README.md": "added"
+          "src/search.py": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Initial commit",
+        "message": "Reset position",
         "order": 0,
         "parents": [],
         "tree": {
-          "README.md": "readme-v0"
+          "src/search.py": "baseline"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v1",
-            "before": "readme-v0",
+          "src/search.py": {
+            "after": "groundwork",
+            "before": "baseline",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Add feature groundwork",
+        "message": "Search groundwork",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "README.md": "readme-v1"
+          "src/search.py": "groundwork"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v2",
-            "before": "readme-v1",
+          "src/search.py": {
+            "after": "continued",
+            "before": "groundwork",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Continue feature work",
+        "message": "Continue search work",
         "order": 2,
         "parents": [
           "c1"
         ],
         "tree": {
-          "README.md": "readme-v2"
+          "src/search.py": "continued"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v3",
-            "before": "readme-v2",
+          "src/search.py": {
+            "after": "borrower search fix",
+            "before": "continued",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c3",
         "is_merge": false,
-        "message": "Complete feature work (lost tip)",
+        "message": "Fix borrower search",
         "order": 3,
         "parents": [
           "c2"
         ],
         "tree": {
-          "README.md": "readme-v3"
+          "src/search.py": "borrower search fix"
+        }
+      },
+      {
+        "changes": {
+          "src/search.py": {
+            "after": "abandoned search experiment",
+            "before": "continued",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Abandoned search experiment",
+        "order": 4,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "src/search.py": "abandoned search experiment"
         }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-h1",
+      "name": "recovery/h1",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-h1",
-    "last_switch_branch": "recovery-4-1-h1",
-    "last_switched_to": "recovery-4-1-h1",
+    "last_branch_created": "recovery/h1",
+    "last_switch_branch": "recovery/h1",
+    "last_switched_to": "recovery/h1",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-h1",
-      "last_switch_branch": "recovery-4-1-h1",
-      "last_switched_to": "recovery-4-1-h1"
+      "last_branch_created": "recovery/h1",
+      "last_switch_branch": "recovery/h1",
+      "last_switched_to": "recovery/h1"
     },
     "partial_hunks": {},
     "reflog": [
+      {
+        "action": "checkout",
+        "commit": "c4",
+        "ref": "main"
+      },
       {
         "action": "commit",
         "commit": "c3",
@@ -266458,113 +265779,140 @@ TARGET_STATES = json.loads(r"""
   "h2": {
     "branches": {
       "main": "c0",
-      "recovery-4-1-h2": "c3"
+      "recovery/h2": "c3"
     },
     "commits": [
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v0",
+          "src/search.py": {
+            "after": "baseline",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "README.md": "added"
+          "src/search.py": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Initial commit",
+        "message": "Reset position",
         "order": 0,
         "parents": [],
         "tree": {
-          "README.md": "readme-v0"
+          "src/search.py": "baseline"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v1",
-            "before": "readme-v0",
+          "src/search.py": {
+            "after": "groundwork",
+            "before": "baseline",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Add feature groundwork",
+        "message": "Search groundwork",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "README.md": "readme-v1"
+          "src/search.py": "groundwork"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v2",
-            "before": "readme-v1",
+          "src/search.py": {
+            "after": "continued",
+            "before": "groundwork",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Continue feature work",
+        "message": "Continue search work",
         "order": 2,
         "parents": [
           "c1"
         ],
         "tree": {
-          "README.md": "readme-v2"
+          "src/search.py": "continued"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v3",
-            "before": "readme-v2",
+          "src/search.py": {
+            "after": "borrower search fix",
+            "before": "continued",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c3",
         "is_merge": false,
-        "message": "Complete feature work (lost tip)",
+        "message": "Fix borrower search",
         "order": 3,
         "parents": [
           "c2"
         ],
         "tree": {
-          "README.md": "readme-v3"
+          "src/search.py": "borrower search fix"
+        }
+      },
+      {
+        "changes": {
+          "src/search.py": {
+            "after": "abandoned search experiment",
+            "before": "continued",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Abandoned search experiment",
+        "order": 4,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "src/search.py": "abandoned search experiment"
         }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-h2",
+      "name": "recovery/h2",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-h2",
-    "last_switch_branch": "recovery-4-1-h2",
-    "last_switched_to": "recovery-4-1-h2",
+    "last_branch_created": "recovery/h2",
+    "last_switch_branch": "recovery/h2",
+    "last_switched_to": "recovery/h2",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-h2",
-      "last_switch_branch": "recovery-4-1-h2",
-      "last_switched_to": "recovery-4-1-h2"
+      "last_branch_created": "recovery/h2",
+      "last_switch_branch": "recovery/h2",
+      "last_switched_to": "recovery/h2"
     },
     "partial_hunks": {},
     "reflog": [
+      {
+        "action": "checkout",
+        "commit": "c4",
+        "ref": "main"
+      },
       {
         "action": "commit",
         "commit": "c3",
@@ -266590,113 +265938,140 @@ TARGET_STATES = json.loads(r"""
   "h3": {
     "branches": {
       "main": "c0",
-      "recovery-4-1-h3": "c3"
+      "recovery/h3": "c3"
     },
     "commits": [
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v0",
+          "src/search.py": {
+            "after": "baseline",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "README.md": "added"
+          "src/search.py": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Initial commit",
+        "message": "Reset position",
         "order": 0,
         "parents": [],
         "tree": {
-          "README.md": "readme-v0"
+          "src/search.py": "baseline"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v1",
-            "before": "readme-v0",
+          "src/search.py": {
+            "after": "groundwork",
+            "before": "baseline",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Add feature groundwork",
+        "message": "Search groundwork",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "README.md": "readme-v1"
+          "src/search.py": "groundwork"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v2",
-            "before": "readme-v1",
+          "src/search.py": {
+            "after": "continued",
+            "before": "groundwork",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Continue feature work",
+        "message": "Continue search work",
         "order": 2,
         "parents": [
           "c1"
         ],
         "tree": {
-          "README.md": "readme-v2"
+          "src/search.py": "continued"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v3",
-            "before": "readme-v2",
+          "src/search.py": {
+            "after": "borrower search fix",
+            "before": "continued",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c3",
         "is_merge": false,
-        "message": "Complete feature work (lost tip)",
+        "message": "Fix borrower search",
         "order": 3,
         "parents": [
           "c2"
         ],
         "tree": {
-          "README.md": "readme-v3"
+          "src/search.py": "borrower search fix"
+        }
+      },
+      {
+        "changes": {
+          "src/search.py": {
+            "after": "abandoned search experiment",
+            "before": "continued",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Abandoned search experiment",
+        "order": 4,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "src/search.py": "abandoned search experiment"
         }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-h3",
+      "name": "recovery/h3",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-h3",
-    "last_switch_branch": "recovery-4-1-h3",
-    "last_switched_to": "recovery-4-1-h3",
+    "last_branch_created": "recovery/h3",
+    "last_switch_branch": "recovery/h3",
+    "last_switched_to": "recovery/h3",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-h3",
-      "last_switch_branch": "recovery-4-1-h3",
-      "last_switched_to": "recovery-4-1-h3"
+      "last_branch_created": "recovery/h3",
+      "last_switch_branch": "recovery/h3",
+      "last_switched_to": "recovery/h3"
     },
     "partial_hunks": {},
     "reflog": [
+      {
+        "action": "checkout",
+        "commit": "c4",
+        "ref": "main"
+      },
       {
         "action": "commit",
         "commit": "c3",
@@ -266722,113 +266097,140 @@ TARGET_STATES = json.loads(r"""
   "h4": {
     "branches": {
       "main": "c0",
-      "recovery-4-1-h4": "c3"
+      "recovery/h4": "c3"
     },
     "commits": [
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v0",
+          "src/search.py": {
+            "after": "baseline",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "README.md": "added"
+          "src/search.py": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Initial commit",
+        "message": "Reset position",
         "order": 0,
         "parents": [],
         "tree": {
-          "README.md": "readme-v0"
+          "src/search.py": "baseline"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v1",
-            "before": "readme-v0",
+          "src/search.py": {
+            "after": "groundwork",
+            "before": "baseline",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Add feature groundwork",
+        "message": "Search groundwork",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "README.md": "readme-v1"
+          "src/search.py": "groundwork"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v2",
-            "before": "readme-v1",
+          "src/search.py": {
+            "after": "continued",
+            "before": "groundwork",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Continue feature work",
+        "message": "Continue search work",
         "order": 2,
         "parents": [
           "c1"
         ],
         "tree": {
-          "README.md": "readme-v2"
+          "src/search.py": "continued"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v3",
-            "before": "readme-v2",
+          "src/search.py": {
+            "after": "borrower search fix",
+            "before": "continued",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c3",
         "is_merge": false,
-        "message": "Complete feature work (lost tip)",
+        "message": "Fix borrower search",
         "order": 3,
         "parents": [
           "c2"
         ],
         "tree": {
-          "README.md": "readme-v3"
+          "src/search.py": "borrower search fix"
+        }
+      },
+      {
+        "changes": {
+          "src/search.py": {
+            "after": "abandoned search experiment",
+            "before": "continued",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Abandoned search experiment",
+        "order": 4,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "src/search.py": "abandoned search experiment"
         }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-h4",
+      "name": "recovery/h4",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-h4",
-    "last_switch_branch": "recovery-4-1-h4",
-    "last_switched_to": "recovery-4-1-h4",
+    "last_branch_created": "recovery/h4",
+    "last_switch_branch": "recovery/h4",
+    "last_switched_to": "recovery/h4",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-h4",
-      "last_switch_branch": "recovery-4-1-h4",
-      "last_switched_to": "recovery-4-1-h4"
+      "last_branch_created": "recovery/h4",
+      "last_switch_branch": "recovery/h4",
+      "last_switched_to": "recovery/h4"
     },
     "partial_hunks": {},
     "reflog": [
+      {
+        "action": "checkout",
+        "commit": "c4",
+        "ref": "main"
+      },
       {
         "action": "commit",
         "commit": "c3",
@@ -266854,113 +266256,140 @@ TARGET_STATES = json.loads(r"""
   "h5": {
     "branches": {
       "main": "c0",
-      "recovery-4-1-h5": "c3"
+      "recovery/h5": "c3"
     },
     "commits": [
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v0",
+          "src/search.py": {
+            "after": "baseline",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "README.md": "added"
+          "src/search.py": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Initial commit",
+        "message": "Reset position",
         "order": 0,
         "parents": [],
         "tree": {
-          "README.md": "readme-v0"
+          "src/search.py": "baseline"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v1",
-            "before": "readme-v0",
+          "src/search.py": {
+            "after": "groundwork",
+            "before": "baseline",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Add feature groundwork",
+        "message": "Search groundwork",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "README.md": "readme-v1"
+          "src/search.py": "groundwork"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v2",
-            "before": "readme-v1",
+          "src/search.py": {
+            "after": "continued",
+            "before": "groundwork",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Continue feature work",
+        "message": "Continue search work",
         "order": 2,
         "parents": [
           "c1"
         ],
         "tree": {
-          "README.md": "readme-v2"
+          "src/search.py": "continued"
         }
       },
       {
         "changes": {
-          "README.md": {
-            "after": "readme-v3",
-            "before": "readme-v2",
+          "src/search.py": {
+            "after": "borrower search fix",
+            "before": "continued",
             "change_type": "modified"
           }
         },
         "files": {
-          "README.md": "modified"
+          "src/search.py": "modified"
         },
         "id": "c3",
         "is_merge": false,
-        "message": "Complete feature work (lost tip)",
+        "message": "Fix borrower search",
         "order": 3,
         "parents": [
           "c2"
         ],
         "tree": {
-          "README.md": "readme-v3"
+          "src/search.py": "borrower search fix"
+        }
+      },
+      {
+        "changes": {
+          "src/search.py": {
+            "after": "abandoned search experiment",
+            "before": "continued",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Abandoned search experiment",
+        "order": 4,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "src/search.py": "abandoned search experiment"
         }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-h5",
+      "name": "recovery/h5",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-h5",
-    "last_switch_branch": "recovery-4-1-h5",
-    "last_switched_to": "recovery-4-1-h5",
+    "last_branch_created": "recovery/h5",
+    "last_switch_branch": "recovery/h5",
+    "last_switched_to": "recovery/h5",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-h5",
-      "last_switch_branch": "recovery-4-1-h5",
-      "last_switched_to": "recovery-4-1-h5"
+      "last_branch_created": "recovery/h5",
+      "last_switch_branch": "recovery/h5",
+      "last_switched_to": "recovery/h5"
     },
     "partial_hunks": {},
     "reflog": [
+      {
+        "action": "checkout",
+        "commit": "c4",
+        "ref": "main"
+      },
       {
         "action": "commit",
         "commit": "c3",
@@ -268440,14 +267869,14 @@ TARGET_STATES = json.loads(r"""
     "last_init_current_directory": false,
     "last_init_directory": "research-log",
     "last_init_initial_branch": "main",
-    "last_init_quiet": true,
+    "last_init_quiet": false,
     "last_init_reinitialized": false,
     "operation_metadata": {
       "last_init_branch": "main",
       "last_init_current_directory": false,
       "last_init_directory": "research-log",
       "last_init_initial_branch": "main",
-      "last_init_quiet": true,
+      "last_init_quiet": false,
       "last_init_reinitialized": false,
       "repository_reinitialized": false
     },
@@ -268506,14 +267935,14 @@ TARGET_STATES = json.loads(r"""
     "last_init_current_directory": true,
     "last_init_directory": null,
     "last_init_initial_branch": "main",
-    "last_init_quiet": true,
+    "last_init_quiet": false,
     "last_init_reinitialized": true,
     "operation_metadata": {
       "last_init_branch": "main",
       "last_init_current_directory": true,
       "last_init_directory": null,
       "last_init_initial_branch": "main",
-      "last_init_quiet": true,
+      "last_init_quiet": false,
       "last_init_reinitialized": true,
       "repository_reinitialized": true
     },
@@ -268549,14 +267978,14 @@ TARGET_STATES = json.loads(r"""
     "last_init_current_directory": false,
     "last_init_directory": "ui-kit",
     "last_init_initial_branch": "trunk",
-    "last_init_quiet": true,
+    "last_init_quiet": false,
     "last_init_reinitialized": false,
     "operation_metadata": {
       "last_init_branch": "trunk",
       "last_init_current_directory": false,
       "last_init_directory": "ui-kit",
       "last_init_initial_branch": "trunk",
-      "last_init_quiet": true,
+      "last_init_quiet": false,
       "last_init_reinitialized": false,
       "repository_reinitialized": false
     },
@@ -268660,7 +268089,7 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "init-medium-quiet-research-log": {
+  "init-medium-existing-files": {
     "branches": {
       "main": null
     },
@@ -268674,16 +268103,16 @@ TARGET_STATES = json.loads(r"""
     },
     "last_init_branch": "main",
     "last_init_current_directory": false,
-    "last_init_directory": "research-log",
+    "last_init_directory": "field-notes",
     "last_init_initial_branch": "main",
-    "last_init_quiet": true,
+    "last_init_quiet": false,
     "last_init_reinitialized": false,
     "operation_metadata": {
       "last_init_branch": "main",
       "last_init_current_directory": false,
-      "last_init_directory": "research-log",
+      "last_init_directory": "field-notes",
       "last_init_initial_branch": "main",
-      "last_init_quiet": true,
+      "last_init_quiet": false,
       "last_init_reinitialized": false,
       "repository_reinitialized": false
     },
@@ -268699,7 +268128,16 @@ TARGET_STATES = json.loads(r"""
     "stash_stack": [],
     "tags": {},
     "upstream_tracking": {},
-    "working_tree": {}
+    "working_tree": {
+      "field-notes/data.csv": {
+        "content": "date,value\n2026-10-17,1\n",
+        "status": "untracked"
+      },
+      "field-notes/notes.txt": {
+        "content": "Field observations\n",
+        "status": "untracked"
+      }
+    }
   },
   "init-medium-trunk-api-playground": {
     "branches": {
@@ -268943,7 +268381,7 @@ TARGET_STATES = json.loads(r"""
   "m1": {
     "branches": {
       "main": "c1",
-      "recovery-4-1-m1": "c3"
+      "recovery/m1": "c3"
     },
     "commits": [
       {
@@ -269036,17 +268474,17 @@ TARGET_STATES = json.loads(r"""
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-m1",
+      "name": "recovery/m1",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-m1",
-    "last_switch_branch": "recovery-4-1-m1",
-    "last_switched_to": "recovery-4-1-m1",
+    "last_branch_created": "recovery/m1",
+    "last_switch_branch": "recovery/m1",
+    "last_switched_to": "recovery/m1",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-m1",
-      "last_switch_branch": "recovery-4-1-m1",
-      "last_switched_to": "recovery-4-1-m1"
+      "last_branch_created": "recovery/m1",
+      "last_switch_branch": "recovery/m1",
+      "last_switched_to": "recovery/m1"
     },
     "partial_hunks": {},
     "reflog": [
@@ -269075,7 +268513,7 @@ TARGET_STATES = json.loads(r"""
   "m2": {
     "branches": {
       "main": "c1",
-      "recovery-4-1-m2": "c3"
+      "recovery/m2": "c3"
     },
     "commits": [
       {
@@ -269168,17 +268606,17 @@ TARGET_STATES = json.loads(r"""
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-m2",
+      "name": "recovery/m2",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-m2",
-    "last_switch_branch": "recovery-4-1-m2",
-    "last_switched_to": "recovery-4-1-m2",
+    "last_branch_created": "recovery/m2",
+    "last_switch_branch": "recovery/m2",
+    "last_switched_to": "recovery/m2",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-m2",
-      "last_switch_branch": "recovery-4-1-m2",
-      "last_switched_to": "recovery-4-1-m2"
+      "last_branch_created": "recovery/m2",
+      "last_switch_branch": "recovery/m2",
+      "last_switched_to": "recovery/m2"
     },
     "partial_hunks": {},
     "reflog": [
@@ -269207,7 +268645,7 @@ TARGET_STATES = json.loads(r"""
   "m3": {
     "branches": {
       "main": "c1",
-      "recovery-4-1-m3": "c3"
+      "recovery/m3": "c3"
     },
     "commits": [
       {
@@ -269300,17 +268738,17 @@ TARGET_STATES = json.loads(r"""
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-m3",
+      "name": "recovery/m3",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-m3",
-    "last_switch_branch": "recovery-4-1-m3",
-    "last_switched_to": "recovery-4-1-m3",
+    "last_branch_created": "recovery/m3",
+    "last_switch_branch": "recovery/m3",
+    "last_switched_to": "recovery/m3",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-m3",
-      "last_switch_branch": "recovery-4-1-m3",
-      "last_switched_to": "recovery-4-1-m3"
+      "last_branch_created": "recovery/m3",
+      "last_switch_branch": "recovery/m3",
+      "last_switched_to": "recovery/m3"
     },
     "partial_hunks": {},
     "reflog": [
@@ -269339,7 +268777,7 @@ TARGET_STATES = json.loads(r"""
   "m4": {
     "branches": {
       "main": "c1",
-      "recovery-4-1-m4": "c3"
+      "recovery/m4": "c3"
     },
     "commits": [
       {
@@ -269432,17 +268870,17 @@ TARGET_STATES = json.loads(r"""
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-m4",
+      "name": "recovery/m4",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-m4",
-    "last_switch_branch": "recovery-4-1-m4",
-    "last_switched_to": "recovery-4-1-m4",
+    "last_branch_created": "recovery/m4",
+    "last_switch_branch": "recovery/m4",
+    "last_switched_to": "recovery/m4",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-m4",
-      "last_switch_branch": "recovery-4-1-m4",
-      "last_switched_to": "recovery-4-1-m4"
+      "last_branch_created": "recovery/m4",
+      "last_switch_branch": "recovery/m4",
+      "last_switched_to": "recovery/m4"
     },
     "partial_hunks": {},
     "reflog": [
@@ -269471,7 +268909,7 @@ TARGET_STATES = json.loads(r"""
   "m5": {
     "branches": {
       "main": "c1",
-      "recovery-4-1-m5": "c3"
+      "recovery/m5": "c3"
     },
     "commits": [
       {
@@ -269564,17 +269002,17 @@ TARGET_STATES = json.loads(r"""
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "recovery-4-1-m5",
+      "name": "recovery/m5",
       "target": "c3",
       "type": "branch"
     },
-    "last_branch_created": "recovery-4-1-m5",
-    "last_switch_branch": "recovery-4-1-m5",
-    "last_switched_to": "recovery-4-1-m5",
+    "last_branch_created": "recovery/m5",
+    "last_switch_branch": "recovery/m5",
+    "last_switched_to": "recovery/m5",
     "operation_metadata": {
-      "last_branch_created": "recovery-4-1-m5",
-      "last_switch_branch": "recovery-4-1-m5",
-      "last_switched_to": "recovery-4-1-m5"
+      "last_branch_created": "recovery/m5",
+      "last_switch_branch": "recovery/m5",
+      "last_switched_to": "recovery/m5"
     },
     "partial_hunks": {},
     "reflog": [
@@ -269674,7 +269112,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/auth.js": {
-            "after": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n",
+            "after": "timeout=5000\nretry=enabled",
             "before": "timeout=5000",
             "change_type": "modified"
           }
@@ -269684,14 +269122,14 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Resolve conflict cleanly",
+        "message": "Merge branch 'feature/auth-timeout'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/auth.js": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n"
+          "src/auth.js": "timeout=5000\nretry=enabled"
         }
       }
     ],
@@ -269817,7 +269255,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/billing.py": {
-            "after": "<<<<<<< HEAD\ncurrency='PHP'\n=======\ncurrency='EUR'\n>>>>>>> feature/regional-currency\n",
+            "after": "currency='PHP'\nsupported=['PHP','EUR']",
             "before": "currency='PHP'",
             "change_type": "modified"
           }
@@ -269827,14 +269265,14 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Resolve conflict cleanly",
+        "message": "Merge branch 'feature/regional-currency'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/billing.py": "<<<<<<< HEAD\ncurrency='PHP'\n=======\ncurrency='EUR'\n>>>>>>> feature/regional-currency\n"
+          "src/billing.py": "currency='PHP'\nsupported=['PHP','EUR']"
         }
       }
     ],
@@ -269960,7 +269398,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/config.py": {
-            "after": "<<<<<<< HEAD\ndebug=False\nlog_level=INFO\n=======\ndebug=True\nlog_level=DEBUG\n>>>>>>> feature/debug-config\n",
+            "after": "debug=False\nlog_level=INFO\nverbose_errors=True",
             "before": "debug=False\nlog_level=INFO",
             "change_type": "modified"
           }
@@ -269970,14 +269408,14 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Resolve conflict cleanly",
+        "message": "Merge branch 'feature/debug-config'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/config.py": "<<<<<<< HEAD\ndebug=False\nlog_level=INFO\n=======\ndebug=True\nlog_level=DEBUG\n>>>>>>> feature/debug-config\n"
+          "src/config.py": "debug=False\nlog_level=INFO\nverbose_errors=True"
         }
       }
     ],
@@ -270103,7 +269541,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/components/Navbar.tsx": {
-            "after": "<<<<<<< HEAD\nbrand=MyApp\n=======\nbrand=BetaApp\n>>>>>>> feature/navbar-rebrand\n",
+            "after": "brand=MyApp\ntagline=Beta",
             "before": "brand=MyApp",
             "change_type": "modified"
           }
@@ -270113,14 +269551,14 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Resolve conflict cleanly",
+        "message": "Merge branch 'feature/navbar-rebrand'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/components/Navbar.tsx": "<<<<<<< HEAD\nbrand=MyApp\n=======\nbrand=BetaApp\n>>>>>>> feature/navbar-rebrand\n"
+          "src/components/Navbar.tsx": "brand=MyApp\ntagline=Beta"
         }
       }
     ],
@@ -270246,7 +269684,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/profile.tsx": {
-            "after": "<<<<<<< HEAD\ntitle=Account profile\n=======\ntitle=Member profile\n>>>>>>> feature/profile-copy\n",
+            "after": "title=Account profile\nsubtitle=Member profile",
             "before": "title=Account profile",
             "change_type": "modified"
           }
@@ -270256,14 +269694,14 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Resolve conflict cleanly",
+        "message": "Merge branch 'feature/profile-copy'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/profile.tsx": "<<<<<<< HEAD\ntitle=Account profile\n=======\ntitle=Member profile\n>>>>>>> feature/profile-copy\n"
+          "src/profile.tsx": "title=Account profile\nsubtitle=Member profile"
         }
       }
     ],
@@ -270315,10 +269753,11 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "manual-hard-medium-carryover": {
+  "manual-hard-abort-redo": {
     "branches": {
-      "feature/help-center": "c2",
-      "main": "c3"
+      "feature/help-center": "c3",
+      "feature/legacy-help": "c2",
+      "main": "c4"
     },
     "commits": [
       {
@@ -270334,7 +269773,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Base commit",
+        "message": "Base routes",
         "order": 0,
         "parents": [],
         "tree": {
@@ -270354,13 +269793,35 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Main update",
+        "message": "Main support route",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
           "src/routes.ts": "route('/support')"
+        }
+      },
+      {
+        "changes": {
+          "src/routes.ts": {
+            "after": "route('/legacy-help')",
+            "before": "route('/help')",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.ts": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Legacy help route",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/routes.ts": "route('/legacy-help')"
         }
       },
       {
@@ -270374,10 +269835,10 @@ TARGET_STATES = json.loads(r"""
         "files": {
           "src/routes.ts": "modified"
         },
-        "id": "c2",
+        "id": "c3",
         "is_merge": false,
-        "message": "Feature branch update",
-        "order": 2,
+        "message": "Help center route",
+        "order": 3,
         "parents": [
           "c0"
         ],
@@ -270389,7 +269850,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/routes.ts": {
-            "after": "<<<<<<< HEAD\nroute('/support')\n=======\nroute('/help-center')\n>>>>>>> feature/help-center\n",
+            "after": "route('/support')\nroute('/help-center')",
             "before": "route('/support')",
             "change_type": "modified"
           }
@@ -270397,46 +269858,44 @@ TARGET_STATES = json.loads(r"""
         "files": {
           "src/routes.ts": "modified"
         },
-        "id": "c3",
+        "id": "c4",
         "is_merge": true,
-        "message": "Resolve release conflict",
-        "order": 3,
+        "message": "Merge branch 'feature/help-center'",
+        "order": 4,
         "parents": [
           "c1",
-          "c2"
+          "c3"
         ],
         "tree": {
-          "src/routes.ts": "<<<<<<< HEAD\nroute('/support')\n=======\nroute('/help-center')\n>>>>>>> feature/help-center\n"
+          "src/routes.ts": "route('/support')\nroute('/help-center')"
         }
       }
     ],
     "conflict_details": {},
-    "conflict_files": [
-      "src/routes.ts"
-    ],
-    "conflict_on_merge": true,
     "conflicts": [],
     "head": {
       "name": "main",
-      "target": "c3",
+      "target": "c4",
       "type": "branch"
     },
+    "last_merge_aborted": true,
     "last_merge_branch": "feature/help-center",
     "last_merge_conflict_paths": [
       "src/routes.ts"
     ],
     "last_merge_conflicted": true,
-    "last_merge_created_commit": "c3",
-    "last_merge_target": "c2",
+    "last_merge_created_commit": "c4",
+    "last_merge_target": "c3",
     "last_workspace_file_written": "src/routes.ts",
     "operation_metadata": {
+      "last_merge_aborted": true,
       "last_merge_branch": "feature/help-center",
       "last_merge_conflict_paths": [
         "src/routes.ts"
       ],
       "last_merge_conflicted": true,
-      "last_merge_created_commit": "c3",
-      "last_merge_target": "c2",
+      "last_merge_created_commit": "c4",
+      "last_merge_target": "c3",
       "last_workspace_file_written": "src/routes.ts"
     },
     "partial_hunks": {},
@@ -270444,7 +269903,7 @@ TARGET_STATES = json.loads(r"""
       {
         "message": "move HEAD",
         "ref": "HEAD@{0}",
-        "target": "c3"
+        "target": "c4"
       }
     ],
     "remote_branches": {},
@@ -270532,7 +269991,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "db/migrations/001_users.sql": {
-            "after": "<<<<<<< HEAD\nmigration-main\n=======\nmigration-feature\n>>>>>>> feature/migration\n",
+            "after": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL UNIQUE,\n  display_name TEXT NOT NULL\n);",
             "before": "migration-main",
             "change_type": "modified"
           }
@@ -270542,14 +270001,14 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Resolve release conflict",
+        "message": "Merge branch 'feature/migration'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "db/migrations/001_users.sql": "<<<<<<< HEAD\nmigration-main\n=======\nmigration-feature\n>>>>>>> feature/migration\n"
+          "db/migrations/001_users.sql": "CREATE TABLE users (\n  id INTEGER PRIMARY KEY,\n  email TEXT NOT NULL UNIQUE,\n  display_name TEXT NOT NULL\n);"
         }
       }
     ],
@@ -270675,7 +270134,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/pricing.rb": {
-            "after": "<<<<<<< HEAD\npricing-main\n=======\npricing-feature\n>>>>>>> feature/pricing\n",
+            "after": "BASE_PRICE = 100\nDISCOUNT_PERCENT = 10\ndef final_price\n  BASE_PRICE * (100 - DISCOUNT_PERCENT) / 100.0\nend",
             "before": "pricing-main",
             "change_type": "modified"
           }
@@ -270685,14 +270144,14 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Resolve release conflict",
+        "message": "Merge branch 'feature/pricing'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/pricing.rb": "<<<<<<< HEAD\npricing-main\n=======\npricing-feature\n>>>>>>> feature/pricing\n"
+          "src/pricing.rb": "BASE_PRICE = 100\nDISCOUNT_PERCENT = 10\ndef final_price\n  BASE_PRICE * (100 - DISCOUNT_PERCENT) / 100.0\nend"
         }
       }
     ],
@@ -270818,7 +270277,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "schema/orders.sql": {
-            "after": "<<<<<<< HEAD\nschema-main\n=======\nschema-feature\n>>>>>>> feature/schema\n",
+            "after": "CREATE TABLE orders (\n  id INTEGER PRIMARY KEY,\n  customer_name TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'pending'\n);",
             "before": "schema-main",
             "change_type": "modified"
           }
@@ -270828,14 +270287,14 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Resolve release conflict",
+        "message": "Merge branch 'feature/schema'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "schema/orders.sql": "<<<<<<< HEAD\nschema-main\n=======\nschema-feature\n>>>>>>> feature/schema\n"
+          "schema/orders.sql": "CREATE TABLE orders (\n  id INTEGER PRIMARY KEY,\n  customer_name TEXT NOT NULL,\n  status TEXT NOT NULL DEFAULT 'pending'\n);"
         }
       }
     ],
@@ -270961,7 +270420,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "config/gateway.yml": {
-            "after": "<<<<<<< HEAD\ngateway-main\n=======\ngateway-feature\n>>>>>>> feature/gateway\n",
+            "after": "gateway:\n  timeout_seconds: 30\n  retry_count: 3",
             "before": "gateway-main",
             "change_type": "modified"
           }
@@ -270971,14 +270430,14 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Resolve integration conflict",
+        "message": "Merge branch 'feature/gateway'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "config/gateway.yml": "<<<<<<< HEAD\ngateway-main\n=======\ngateway-feature\n>>>>>>> feature/gateway\n"
+          "config/gateway.yml": "gateway:\n  timeout_seconds: 30\n  retry_count: 3"
         }
       }
     ],
@@ -271104,7 +270563,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/policy.yml": {
-            "after": "<<<<<<< HEAD\npolicy-main\n=======\npolicy-feature\n>>>>>>> feature/policy\n",
+            "after": "access:\n  default: deny\n  allow_roles:\n    - librarian",
             "before": "policy-main",
             "change_type": "modified"
           }
@@ -271114,14 +270573,14 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Resolve integration conflict",
+        "message": "Merge branch 'feature/policy'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/policy.yml": "<<<<<<< HEAD\npolicy-main\n=======\npolicy-feature\n>>>>>>> feature/policy\n"
+          "src/policy.yml": "access:\n  default: deny\n  allow_roles:\n    - librarian"
         }
       }
     ],
@@ -271247,7 +270706,7 @@ TARGET_STATES = json.loads(r"""
         "author": "GIT it",
         "changes": {
           "src/routes.ts": {
-            "after": "<<<<<<< HEAD\nroute-main\n=======\nroute-feature\n>>>>>>> feature/routes\n",
+            "after": "export const routes = [\"/\", \"/support\"];",
             "before": "route-main",
             "change_type": "modified"
           }
@@ -271257,14 +270716,14 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Resolve integration conflict",
+        "message": "Merge branch 'feature/routes'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/routes.ts": "<<<<<<< HEAD\nroute-main\n=======\nroute-feature\n>>>>>>> feature/routes\n"
+          "src/routes.ts": "export const routes = [\"/\", \"/support\"];"
         }
       }
     ],
@@ -273045,7 +272504,972 @@ TARGET_STATES = json.loads(r"""
       }
     }
   },
-  "mergetool-easy-auth-copy": {
+  "mergetool-easy-app-locale": {
+    "branches": {
+      "feature/app-locale": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "config/app.ini": {
+            "after": "base value for config/app.ini",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "config/app.ini": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "config/app.ini": "base value for config/app.ini"
+        }
+      },
+      {
+        "changes": {
+          "config/app.ini": {
+            "after": "main value for config/app.ini",
+            "before": "base value for config/app.ini",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/app.ini": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main updates",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "config/app.ini": "main value for config/app.ini"
+        }
+      },
+      {
+        "changes": {
+          "config/app.ini": {
+            "after": "feature value for config/app.ini",
+            "before": "base value for config/app.ini",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/app.ini": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Updates on feature/app-locale",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "config/app.ini": "feature value for config/app.ini"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "config/app.ini": {
+            "after": "[app]\nlocale = en_PH\ntimezone = Asia/Manila",
+            "before": "main value for config/app.ini",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/app.ini": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/app-locale'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "config/app.ini": "[app]\nlocale = en_PH\ntimezone = Asia/Manila"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "config/app.ini"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/app-locale",
+    "last_merge_conflict_paths": [
+      "config/app.ini"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "config/app.ini"
+    ],
+    "last_mergetool_resolved_paths": [
+      "config/app.ini"
+    ],
+    "last_mergetool_tool": "tool",
+    "last_workspace_file_written": "config/app.ini",
+    "operation_metadata": {
+      "last_merge_branch": "feature/app-locale",
+      "last_merge_conflict_paths": [
+        "config/app.ini"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "config/app.ini"
+      ],
+      "last_mergetool_resolved_paths": [
+        "config/app.ini"
+      ],
+      "last_mergetool_tool": "tool",
+      "last_workspace_file_written": "config/app.ini"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-easy-cache-ttl": {
+    "branches": {
+      "feature/cache-ttl": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/cache.py": {
+            "after": "base value for src/cache.py",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/cache.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/cache.py": "base value for src/cache.py"
+        }
+      },
+      {
+        "changes": {
+          "src/cache.py": {
+            "after": "main value for src/cache.py",
+            "before": "base value for src/cache.py",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/cache.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main updates",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/cache.py": "main value for src/cache.py"
+        }
+      },
+      {
+        "changes": {
+          "src/cache.py": {
+            "after": "feature value for src/cache.py",
+            "before": "base value for src/cache.py",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/cache.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Updates on feature/cache-ttl",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/cache.py": "feature value for src/cache.py"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/cache.py": {
+            "after": "CACHE_TTL = 300\nCACHE_ENABLED = True",
+            "before": "main value for src/cache.py",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/cache.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/cache-ttl'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/cache.py": "CACHE_TTL = 300\nCACHE_ENABLED = True"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/cache.py"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/cache-ttl",
+    "last_merge_conflict_paths": [
+      "src/cache.py"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "src/cache.py"
+    ],
+    "last_mergetool_resolved_paths": [
+      "src/cache.py"
+    ],
+    "last_mergetool_tool": "tool",
+    "last_workspace_file_written": "src/cache.py",
+    "operation_metadata": {
+      "last_merge_branch": "feature/cache-ttl",
+      "last_merge_conflict_paths": [
+        "src/cache.py"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "src/cache.py"
+      ],
+      "last_mergetool_resolved_paths": [
+        "src/cache.py"
+      ],
+      "last_mergetool_tool": "tool",
+      "last_workspace_file_written": "src/cache.py"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-easy-labels": {
+    "branches": {
+      "feature/labels-fil": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/labels.ts": {
+            "after": "base value for src/labels.ts",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/labels.ts": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/labels.ts": "base value for src/labels.ts"
+        }
+      },
+      {
+        "changes": {
+          "src/labels.ts": {
+            "after": "main value for src/labels.ts",
+            "before": "base value for src/labels.ts",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/labels.ts": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main updates",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/labels.ts": "main value for src/labels.ts"
+        }
+      },
+      {
+        "changes": {
+          "src/labels.ts": {
+            "after": "feature value for src/labels.ts",
+            "before": "base value for src/labels.ts",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/labels.ts": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Updates on feature/labels-fil",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/labels.ts": "feature value for src/labels.ts"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/labels.ts": {
+            "after": "export const greeting = \"Hello\";\nexport const farewell = \"Paalam\";",
+            "before": "main value for src/labels.ts",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/labels.ts": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/labels-fil'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/labels.ts": "export const greeting = \"Hello\";\nexport const farewell = \"Paalam\";"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/labels.ts"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/labels-fil",
+    "last_merge_conflict_paths": [
+      "src/labels.ts"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "src/labels.ts"
+    ],
+    "last_mergetool_resolved_paths": [
+      "src/labels.ts"
+    ],
+    "last_mergetool_tool": "tool",
+    "last_workspace_file_written": "src/labels.ts",
+    "operation_metadata": {
+      "last_merge_branch": "feature/labels-fil",
+      "last_merge_conflict_paths": [
+        "src/labels.ts"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "src/labels.ts"
+      ],
+      "last_mergetool_resolved_paths": [
+        "src/labels.ts"
+      ],
+      "last_mergetool_tool": "tool",
+      "last_workspace_file_written": "src/labels.ts"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-easy-mail-footer": {
+    "branches": {
+      "feature/mail-footer": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/mailer.py": {
+            "after": "base value for src/mailer.py",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/mailer.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/mailer.py": "base value for src/mailer.py"
+        }
+      },
+      {
+        "changes": {
+          "src/mailer.py": {
+            "after": "main value for src/mailer.py",
+            "before": "base value for src/mailer.py",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/mailer.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main updates",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/mailer.py": "main value for src/mailer.py"
+        }
+      },
+      {
+        "changes": {
+          "src/mailer.py": {
+            "after": "feature value for src/mailer.py",
+            "before": "base value for src/mailer.py",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/mailer.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Updates on feature/mail-footer",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/mailer.py": "feature value for src/mailer.py"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/mailer.py": {
+            "after": "SENDER = \"no-reply@library.test\"\nFOOTER = \"Sent by the library system\"",
+            "before": "main value for src/mailer.py",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/mailer.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/mail-footer'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/mailer.py": "SENDER = \"no-reply@library.test\"\nFOOTER = \"Sent by the library system\""
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/mailer.py"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/mail-footer",
+    "last_merge_conflict_paths": [
+      "src/mailer.py"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "src/mailer.py"
+    ],
+    "last_mergetool_resolved_paths": [
+      "src/mailer.py"
+    ],
+    "last_mergetool_tool": "tool",
+    "last_workspace_file_written": "src/mailer.py",
+    "operation_metadata": {
+      "last_merge_branch": "feature/mail-footer",
+      "last_merge_conflict_paths": [
+        "src/mailer.py"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "src/mailer.py"
+      ],
+      "last_mergetool_resolved_paths": [
+        "src/mailer.py"
+      ],
+      "last_mergetool_tool": "tool",
+      "last_workspace_file_written": "src/mailer.py"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-easy-upload-limit": {
+    "branches": {
+      "feature/upload-limit": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/limits.js": {
+            "after": "base value for src/limits.js",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/limits.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/limits.js": "base value for src/limits.js"
+        }
+      },
+      {
+        "changes": {
+          "src/limits.js": {
+            "after": "main value for src/limits.js",
+            "before": "base value for src/limits.js",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/limits.js": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main updates",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/limits.js": "main value for src/limits.js"
+        }
+      },
+      {
+        "changes": {
+          "src/limits.js": {
+            "after": "feature value for src/limits.js",
+            "before": "base value for src/limits.js",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/limits.js": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Updates on feature/upload-limit",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/limits.js": "feature value for src/limits.js"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/limits.js": {
+            "after": "maxUploadMb: 20\nallowedTypes: ['pdf', 'png']",
+            "before": "main value for src/limits.js",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/limits.js": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/upload-limit'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/limits.js": "maxUploadMb: 20\nallowedTypes: ['pdf', 'png']"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflict_files": [
+      "src/limits.js"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/upload-limit",
+    "last_merge_conflict_paths": [
+      "src/limits.js"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "src/limits.js"
+    ],
+    "last_mergetool_resolved_paths": [
+      "src/limits.js"
+    ],
+    "last_mergetool_tool": "tool",
+    "last_workspace_file_written": "src/limits.js",
+    "operation_metadata": {
+      "last_merge_branch": "feature/upload-limit",
+      "last_merge_conflict_paths": [
+        "src/limits.js"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "src/limits.js"
+      ],
+      "last_mergetool_resolved_paths": [
+        "src/limits.js"
+      ],
+      "last_mergetool_tool": "tool",
+      "last_workspace_file_written": "src/limits.js"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-hard-choose-tool": {
+    "branches": {
+      "feature/pricing-v2": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/prices.py": {
+            "after": "base value for src/prices.py",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/prices.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/prices.py": "base value for src/prices.py"
+        }
+      },
+      {
+        "changes": {
+          "src/prices.py": {
+            "after": "main value for src/prices.py",
+            "before": "base value for src/prices.py",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/prices.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main updates",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/prices.py": "main value for src/prices.py"
+        }
+      },
+      {
+        "changes": {
+          "src/prices.py": {
+            "after": "feature value for src/prices.py",
+            "before": "base value for src/prices.py",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/prices.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Updates on feature/pricing-v2",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/prices.py": "feature value for src/prices.py"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/prices.py": {
+            "after": "PRICE = 100\nDISCOUNT = 10",
+            "before": "main value for src/prices.py",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/prices.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/pricing-v2'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "src/prices.py": "PRICE = 100\nDISCOUNT = 10"
+        }
+      }
+    ],
+    "config": {
+      "merge.tool": "meld"
+    },
+    "configured_merge_tool": "meld",
+    "conflict_details": {},
+    "conflict_files": [
+      "src/prices.py"
+    ],
+    "conflict_on_merge": true,
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_config_key": "merge.tool",
+    "last_config_scope": "local",
+    "last_config_value": "meld",
+    "last_merge_branch": "feature/pricing-v2",
+    "last_merge_conflict_paths": [
+      "src/prices.py"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "src/prices.py"
+    ],
+    "last_mergetool_resolved_paths": [
+      "src/prices.py"
+    ],
+    "last_mergetool_tool": "meld",
+    "last_workspace_file_written": "src/prices.py",
+    "operation_metadata": {
+      "configured_merge_tool": "meld",
+      "last_config_key": "merge.tool",
+      "last_config_scope": "local",
+      "last_config_value": "meld",
+      "last_merge_branch": "feature/pricing-v2",
+      "last_merge_conflict_paths": [
+        "src/prices.py"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "src/prices.py"
+      ],
+      "last_mergetool_resolved_paths": [
+        "src/prices.py"
+      ],
+      "last_mergetool_tool": "meld",
+      "last_workspace_file_written": "src/prices.py"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "mergetool-hard-no-leftovers": {
     "branches": {
       "feature/auth-timeout": "c2",
       "main": "c3"
@@ -273054,7 +273478,7 @@ TARGET_STATES = json.loads(r"""
       {
         "changes": {
           "src/auth.js": {
-            "after": "timeout=3000",
+            "after": "base value for src/auth.js",
             "before": null,
             "change_type": "added"
           }
@@ -273064,18 +273488,18 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Base commit",
+        "message": "Common base",
         "order": 0,
         "parents": [],
         "tree": {
-          "src/auth.js": "timeout=3000"
+          "src/auth.js": "base value for src/auth.js"
         }
       },
       {
         "changes": {
           "src/auth.js": {
-            "after": "timeout=5000",
-            "before": "timeout=3000",
+            "after": "main value for src/auth.js",
+            "before": "base value for src/auth.js",
             "change_type": "modified"
           }
         },
@@ -273084,20 +273508,20 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Main update",
+        "message": "Main updates",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/auth.js": "timeout=5000"
+          "src/auth.js": "main value for src/auth.js"
         }
       },
       {
         "changes": {
           "src/auth.js": {
-            "after": "timeout=2500",
-            "before": "timeout=3000",
+            "after": "feature value for src/auth.js",
+            "before": "base value for src/auth.js",
             "change_type": "modified"
           }
         },
@@ -273106,21 +273530,21 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Feature branch update",
+        "message": "Updates on feature/auth-timeout",
         "order": 2,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/auth.js": "timeout=2500"
+          "src/auth.js": "feature value for src/auth.js"
         }
       },
       {
         "author": "GIT it",
         "changes": {
           "src/auth.js": {
-            "after": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n",
-            "before": "timeout=5000",
+            "after": "timeout=5000\nretry=enabled",
+            "before": "main value for src/auth.js",
             "change_type": "modified"
           }
         },
@@ -273136,10 +273560,13 @@ TARGET_STATES = json.loads(r"""
           "c2"
         ],
         "tree": {
-          "src/auth.js": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n"
+          "src/auth.js": "timeout=5000\nretry=enabled"
         }
       }
     ],
+    "config": {
+      "mergetool.keepBackup": "false"
+    },
     "conflict_details": {},
     "conflict_files": [
       "src/auth.js"
@@ -273151,6 +273578,9 @@ TARGET_STATES = json.loads(r"""
       "target": "c3",
       "type": "branch"
     },
+    "last_config_key": "mergetool.keepBackup",
+    "last_config_scope": "local",
+    "last_config_value": "false",
     "last_merge_branch": "feature/auth-timeout",
     "last_merge_conflict_paths": [
       "src/auth.js"
@@ -273158,8 +273588,19 @@ TARGET_STATES = json.loads(r"""
     "last_merge_conflicted": true,
     "last_merge_created_commit": "c3",
     "last_merge_target": "c2",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "src/auth.js"
+    ],
+    "last_mergetool_resolved_paths": [
+      "src/auth.js"
+    ],
+    "last_mergetool_tool": "tool",
     "last_workspace_file_written": "src/auth.js",
     "operation_metadata": {
+      "last_config_key": "mergetool.keepBackup",
+      "last_config_scope": "local",
+      "last_config_value": "false",
       "last_merge_branch": "feature/auth-timeout",
       "last_merge_conflict_paths": [
         "src/auth.js"
@@ -273167,6 +273608,14 @@ TARGET_STATES = json.loads(r"""
       "last_merge_conflicted": true,
       "last_merge_created_commit": "c3",
       "last_merge_target": "c2",
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "src/auth.js"
+      ],
+      "last_mergetool_resolved_paths": [
+        "src/auth.js"
+      ],
+      "last_mergetool_tool": "tool",
       "last_workspace_file_written": "src/auth.js"
     },
     "partial_hunks": {},
@@ -273188,104 +273637,126 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "mergetool-easy-billing-copy": {
+  "mergetool-hard-one-of-two": {
     "branches": {
-      "feature/regional-currency": "c2",
+      "feature/release-notes": "c2",
       "main": "c3"
     },
     "commits": [
       {
         "changes": {
-          "src/billing.py": {
-            "after": "currency='USD'",
+          "docs/release.md": {
+            "after": "old",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/version.py": {
+            "after": "base value for src/version.py",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "src/billing.py": "added"
+          "docs/release.md": "added",
+          "src/version.py": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Base commit",
+        "message": "Common base",
         "order": 0,
         "parents": [],
         "tree": {
-          "src/billing.py": "currency='USD'"
+          "docs/release.md": "old",
+          "src/version.py": "base value for src/version.py"
         }
       },
       {
         "changes": {
-          "src/billing.py": {
-            "after": "currency='PHP'",
-            "before": "currency='USD'",
+          "src/version.py": {
+            "after": "main value for src/version.py",
+            "before": "base value for src/version.py",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/billing.py": "modified"
+          "src/version.py": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Main update",
+        "message": "Main updates",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/billing.py": "currency='PHP'"
+          "docs/release.md": "old",
+          "src/version.py": "main value for src/version.py"
         }
       },
       {
         "changes": {
-          "src/billing.py": {
-            "after": "currency='EUR'",
-            "before": "currency='USD'",
+          "docs/release.md": {
+            "after": "Release 2.1 notes",
+            "before": "old",
+            "change_type": "modified"
+          },
+          "src/version.py": {
+            "after": "feature value for src/version.py",
+            "before": "base value for src/version.py",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/billing.py": "modified"
+          "docs/release.md": "modified",
+          "src/version.py": "modified"
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Feature branch update",
+        "message": "Updates on feature/release-notes",
         "order": 2,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/billing.py": "currency='EUR'"
+          "docs/release.md": "Release 2.1 notes",
+          "src/version.py": "feature value for src/version.py"
         }
       },
       {
         "author": "GIT it",
         "changes": {
-          "src/billing.py": {
-            "after": "<<<<<<< HEAD\ncurrency='PHP'\n=======\ncurrency='EUR'\n>>>>>>> feature/regional-currency\n",
-            "before": "currency='PHP'",
+          "docs/release.md": {
+            "after": "Release 2.1 notes",
+            "before": "old",
+            "change_type": "modified"
+          },
+          "src/version.py": {
+            "after": "VERSION = \"2.1.0\"\nCODENAME = \"Lantern\"",
+            "before": "main value for src/version.py",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/billing.py": "modified"
+          "docs/release.md": "modified",
+          "src/version.py": "modified"
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Merge branch 'feature/regional-currency'",
+        "message": "Merge branch 'feature/release-notes'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/billing.py": "<<<<<<< HEAD\ncurrency='PHP'\n=======\ncurrency='EUR'\n>>>>>>> feature/regional-currency\n"
+          "docs/release.md": "Release 2.1 notes",
+          "src/version.py": "VERSION = \"2.1.0\"\nCODENAME = \"Lantern\""
         }
       }
     ],
     "conflict_details": {},
     "conflict_files": [
-      "src/billing.py"
+      "src/version.py"
     ],
     "conflict_on_merge": true,
     "conflicts": [],
@@ -273294,23 +273765,39 @@ TARGET_STATES = json.loads(r"""
       "target": "c3",
       "type": "branch"
     },
-    "last_merge_branch": "feature/regional-currency",
+    "last_merge_branch": "feature/release-notes",
     "last_merge_conflict_paths": [
-      "src/billing.py"
+      "src/version.py"
     ],
     "last_merge_conflicted": true,
     "last_merge_created_commit": "c3",
     "last_merge_target": "c2",
-    "last_workspace_file_written": "src/billing.py",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "src/version.py"
+    ],
+    "last_mergetool_resolved_paths": [
+      "src/version.py"
+    ],
+    "last_mergetool_tool": "tool",
+    "last_workspace_file_written": "src/version.py",
     "operation_metadata": {
-      "last_merge_branch": "feature/regional-currency",
+      "last_merge_branch": "feature/release-notes",
       "last_merge_conflict_paths": [
-        "src/billing.py"
+        "src/version.py"
       ],
       "last_merge_conflicted": true,
       "last_merge_created_commit": "c3",
       "last_merge_target": "c2",
-      "last_workspace_file_written": "src/billing.py"
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "src/version.py"
+      ],
+      "last_mergetool_resolved_paths": [
+        "src/version.py"
+      ],
+      "last_mergetool_tool": "tool",
+      "last_workspace_file_written": "src/version.py"
     },
     "partial_hunks": {},
     "reflog": [
@@ -273331,104 +273818,104 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "mergetool-easy-config-copy": {
+  "mergetool-hard-take-theirs": {
     "branches": {
-      "feature/debug-config": "c2",
+      "feature/i18n-refresh": "c2",
       "main": "c3"
     },
     "commits": [
       {
         "changes": {
-          "src/config.py": {
-            "after": "debug=False",
+          "src/i18n.json": {
+            "after": "base value for src/i18n.json",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "src/config.py": "added"
+          "src/i18n.json": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Base commit",
+        "message": "Common base",
         "order": 0,
         "parents": [],
         "tree": {
-          "src/config.py": "debug=False"
+          "src/i18n.json": "base value for src/i18n.json"
         }
       },
       {
         "changes": {
-          "src/config.py": {
-            "after": "debug=False\nlog_level=INFO",
-            "before": "debug=False",
+          "src/i18n.json": {
+            "after": "main value for src/i18n.json",
+            "before": "base value for src/i18n.json",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/config.py": "modified"
+          "src/i18n.json": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Main update",
+        "message": "Main updates",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/config.py": "debug=False\nlog_level=INFO"
+          "src/i18n.json": "main value for src/i18n.json"
         }
       },
       {
         "changes": {
-          "src/config.py": {
-            "after": "debug=True\nlog_level=DEBUG",
-            "before": "debug=False",
+          "src/i18n.json": {
+            "after": "{\n  \"greeting\": \"Kumusta\",\n  \"farewell\": \"Paalam\"\n}",
+            "before": "base value for src/i18n.json",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/config.py": "modified"
+          "src/i18n.json": "modified"
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Feature branch update",
+        "message": "Updates on feature/i18n-refresh",
         "order": 2,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/config.py": "debug=True\nlog_level=DEBUG"
+          "src/i18n.json": "{\n  \"greeting\": \"Kumusta\",\n  \"farewell\": \"Paalam\"\n}"
         }
       },
       {
         "author": "GIT it",
         "changes": {
-          "src/config.py": {
-            "after": "<<<<<<< HEAD\ndebug=False\nlog_level=INFO\n=======\ndebug=True\nlog_level=DEBUG\n>>>>>>> feature/debug-config\n",
-            "before": "debug=False\nlog_level=INFO",
+          "src/i18n.json": {
+            "after": "{\n  \"greeting\": \"Kumusta\",\n  \"farewell\": \"Paalam\"\n}",
+            "before": "main value for src/i18n.json",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/config.py": "modified"
+          "src/i18n.json": "modified"
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Merge branch 'feature/debug-config'",
+        "message": "Merge branch 'feature/i18n-refresh'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/config.py": "<<<<<<< HEAD\ndebug=False\nlog_level=INFO\n=======\ndebug=True\nlog_level=DEBUG\n>>>>>>> feature/debug-config\n"
+          "src/i18n.json": "{\n  \"greeting\": \"Kumusta\",\n  \"farewell\": \"Paalam\"\n}"
         }
       }
     ],
     "conflict_details": {},
     "conflict_files": [
-      "src/config.py"
+      "src/i18n.json"
     ],
     "conflict_on_merge": true,
     "conflicts": [],
@@ -273437,23 +273924,39 @@ TARGET_STATES = json.loads(r"""
       "target": "c3",
       "type": "branch"
     },
-    "last_merge_branch": "feature/debug-config",
+    "last_merge_branch": "feature/i18n-refresh",
     "last_merge_conflict_paths": [
-      "src/config.py"
+      "src/i18n.json"
     ],
     "last_merge_conflicted": true,
     "last_merge_created_commit": "c3",
     "last_merge_target": "c2",
-    "last_workspace_file_written": "src/config.py",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "src/i18n.json"
+    ],
+    "last_mergetool_resolved_paths": [
+      "src/i18n.json"
+    ],
+    "last_mergetool_tool": "tool",
+    "last_workspace_file_written": "src/i18n.json",
     "operation_metadata": {
-      "last_merge_branch": "feature/debug-config",
+      "last_merge_branch": "feature/i18n-refresh",
       "last_merge_conflict_paths": [
-        "src/config.py"
+        "src/i18n.json"
       ],
       "last_merge_conflicted": true,
       "last_merge_created_commit": "c3",
       "last_merge_target": "c2",
-      "last_workspace_file_written": "src/config.py"
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "src/i18n.json"
+      ],
+      "last_mergetool_resolved_paths": [
+        "src/i18n.json"
+      ],
+      "last_mergetool_tool": "tool",
+      "last_workspace_file_written": "src/i18n.json"
     },
     "partial_hunks": {},
     "reflog": [
@@ -273474,104 +273977,133 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "mergetool-easy-navbar-copy": {
+  "mergetool-medium-api-limits": {
     "branches": {
-      "feature/navbar-rebrand": "c2",
+      "feature/api-limits": "c2",
       "main": "c3"
     },
     "commits": [
       {
         "changes": {
-          "src/components/Navbar.tsx": {
-            "after": "brand=AppName",
+          "config/cors.yml": {
+            "after": "base value for config/cors.yml",
+            "before": null,
+            "change_type": "added"
+          },
+          "config/limits.yml": {
+            "after": "base value for config/limits.yml",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "src/components/Navbar.tsx": "added"
+          "config/cors.yml": "added",
+          "config/limits.yml": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Base commit",
+        "message": "Common base",
         "order": 0,
         "parents": [],
         "tree": {
-          "src/components/Navbar.tsx": "brand=AppName"
+          "config/cors.yml": "base value for config/cors.yml",
+          "config/limits.yml": "base value for config/limits.yml"
         }
       },
       {
         "changes": {
-          "src/components/Navbar.tsx": {
-            "after": "brand=MyApp",
-            "before": "brand=AppName",
+          "config/cors.yml": {
+            "after": "main value for config/cors.yml",
+            "before": "base value for config/cors.yml",
+            "change_type": "modified"
+          },
+          "config/limits.yml": {
+            "after": "main value for config/limits.yml",
+            "before": "base value for config/limits.yml",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/components/Navbar.tsx": "modified"
+          "config/cors.yml": "modified",
+          "config/limits.yml": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Main update",
+        "message": "Main updates",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/components/Navbar.tsx": "brand=MyApp"
+          "config/cors.yml": "main value for config/cors.yml",
+          "config/limits.yml": "main value for config/limits.yml"
         }
       },
       {
         "changes": {
-          "src/components/Navbar.tsx": {
-            "after": "brand=BetaApp",
-            "before": "brand=AppName",
+          "config/cors.yml": {
+            "after": "feature value for config/cors.yml",
+            "before": "base value for config/cors.yml",
+            "change_type": "modified"
+          },
+          "config/limits.yml": {
+            "after": "feature value for config/limits.yml",
+            "before": "base value for config/limits.yml",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/components/Navbar.tsx": "modified"
+          "config/cors.yml": "modified",
+          "config/limits.yml": "modified"
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Feature branch update",
+        "message": "Updates on feature/api-limits",
         "order": 2,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/components/Navbar.tsx": "brand=BetaApp"
+          "config/cors.yml": "feature value for config/cors.yml",
+          "config/limits.yml": "feature value for config/limits.yml"
         }
       },
       {
         "author": "GIT it",
         "changes": {
-          "src/components/Navbar.tsx": {
-            "after": "<<<<<<< HEAD\nbrand=MyApp\n=======\nbrand=BetaApp\n>>>>>>> feature/navbar-rebrand\n",
-            "before": "brand=MyApp",
+          "config/cors.yml": {
+            "after": "cors:\n  origins:\n    - https://library.test",
+            "before": "main value for config/cors.yml",
+            "change_type": "modified"
+          },
+          "config/limits.yml": {
+            "after": "limits:\n  requests_per_minute: 60\n  burst: 10",
+            "before": "main value for config/limits.yml",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/components/Navbar.tsx": "modified"
+          "config/cors.yml": "modified",
+          "config/limits.yml": "modified"
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Merge branch 'feature/navbar-rebrand'",
+        "message": "Merge branch 'feature/api-limits'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/components/Navbar.tsx": "<<<<<<< HEAD\nbrand=MyApp\n=======\nbrand=BetaApp\n>>>>>>> feature/navbar-rebrand\n"
+          "config/cors.yml": "cors:\n  origins:\n    - https://library.test",
+          "config/limits.yml": "limits:\n  requests_per_minute: 60\n  burst: 10"
         }
       }
     ],
     "conflict_details": {},
     "conflict_files": [
-      "src/components/Navbar.tsx"
+      "config/limits.yml",
+      "config/cors.yml"
     ],
     "conflict_on_merge": true,
     "conflicts": [],
@@ -273580,23 +274112,45 @@ TARGET_STATES = json.loads(r"""
       "target": "c3",
       "type": "branch"
     },
-    "last_merge_branch": "feature/navbar-rebrand",
+    "last_merge_branch": "feature/api-limits",
     "last_merge_conflict_paths": [
-      "src/components/Navbar.tsx"
+      "config/cors.yml",
+      "config/limits.yml"
     ],
     "last_merge_conflicted": true,
     "last_merge_created_commit": "c3",
     "last_merge_target": "c2",
-    "last_workspace_file_written": "src/components/Navbar.tsx",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "config/cors.yml",
+      "config/limits.yml"
+    ],
+    "last_mergetool_resolved_paths": [
+      "config/cors.yml",
+      "config/limits.yml"
+    ],
+    "last_mergetool_tool": "tool",
+    "last_workspace_file_written": "config/cors.yml",
     "operation_metadata": {
-      "last_merge_branch": "feature/navbar-rebrand",
+      "last_merge_branch": "feature/api-limits",
       "last_merge_conflict_paths": [
-        "src/components/Navbar.tsx"
+        "config/cors.yml",
+        "config/limits.yml"
       ],
       "last_merge_conflicted": true,
       "last_merge_created_commit": "c3",
       "last_merge_target": "c2",
-      "last_workspace_file_written": "src/components/Navbar.tsx"
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "config/cors.yml",
+        "config/limits.yml"
+      ],
+      "last_mergetool_resolved_paths": [
+        "config/cors.yml",
+        "config/limits.yml"
+      ],
+      "last_mergetool_tool": "tool",
+      "last_workspace_file_written": "config/cors.yml"
     },
     "partial_hunks": {},
     "reflog": [
@@ -273617,104 +274171,133 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "mergetool-easy-profile-copy": {
+  "mergetool-medium-checkout-copy": {
     "branches": {
-      "feature/profile-copy": "c2",
+      "feature/checkout-copy": "c2",
       "main": "c3"
     },
     "commits": [
       {
         "changes": {
-          "src/profile.tsx": {
-            "after": "title=Profile",
+          "src/checkout.js": {
+            "after": "base value for src/checkout.js",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/receipt.js": {
+            "after": "base value for src/receipt.js",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "src/profile.tsx": "added"
+          "src/checkout.js": "added",
+          "src/receipt.js": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Base commit",
+        "message": "Common base",
         "order": 0,
         "parents": [],
         "tree": {
-          "src/profile.tsx": "title=Profile"
+          "src/checkout.js": "base value for src/checkout.js",
+          "src/receipt.js": "base value for src/receipt.js"
         }
       },
       {
         "changes": {
-          "src/profile.tsx": {
-            "after": "title=Account profile",
-            "before": "title=Profile",
+          "src/checkout.js": {
+            "after": "main value for src/checkout.js",
+            "before": "base value for src/checkout.js",
+            "change_type": "modified"
+          },
+          "src/receipt.js": {
+            "after": "main value for src/receipt.js",
+            "before": "base value for src/receipt.js",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/profile.tsx": "modified"
+          "src/checkout.js": "modified",
+          "src/receipt.js": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Main update",
+        "message": "Main updates",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/profile.tsx": "title=Account profile"
+          "src/checkout.js": "main value for src/checkout.js",
+          "src/receipt.js": "main value for src/receipt.js"
         }
       },
       {
         "changes": {
-          "src/profile.tsx": {
-            "after": "title=Member profile",
-            "before": "title=Profile",
+          "src/checkout.js": {
+            "after": "feature value for src/checkout.js",
+            "before": "base value for src/checkout.js",
+            "change_type": "modified"
+          },
+          "src/receipt.js": {
+            "after": "feature value for src/receipt.js",
+            "before": "base value for src/receipt.js",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/profile.tsx": "modified"
+          "src/checkout.js": "modified",
+          "src/receipt.js": "modified"
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Feature branch update",
+        "message": "Updates on feature/checkout-copy",
         "order": 2,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/profile.tsx": "title=Member profile"
+          "src/checkout.js": "feature value for src/checkout.js",
+          "src/receipt.js": "feature value for src/receipt.js"
         }
       },
       {
         "author": "GIT it",
         "changes": {
-          "src/profile.tsx": {
-            "after": "<<<<<<< HEAD\ntitle=Account profile\n=======\ntitle=Member profile\n>>>>>>> feature/profile-copy\n",
-            "before": "title=Account profile",
+          "src/checkout.js": {
+            "after": "title = \"Checkout\"\nbutton = \"Pay now\"",
+            "before": "main value for src/checkout.js",
+            "change_type": "modified"
+          },
+          "src/receipt.js": {
+            "after": "header = \"Receipt\"\nfooter = \"Thank you\"",
+            "before": "main value for src/receipt.js",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/profile.tsx": "modified"
+          "src/checkout.js": "modified",
+          "src/receipt.js": "modified"
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Merge branch 'feature/profile-copy'",
+        "message": "Merge branch 'feature/checkout-copy'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/profile.tsx": "<<<<<<< HEAD\ntitle=Account profile\n=======\ntitle=Member profile\n>>>>>>> feature/profile-copy\n"
+          "src/checkout.js": "title = \"Checkout\"\nbutton = \"Pay now\"",
+          "src/receipt.js": "header = \"Receipt\"\nfooter = \"Thank you\""
         }
       }
     ],
     "conflict_details": {},
     "conflict_files": [
-      "src/profile.tsx"
+      "src/checkout.js",
+      "src/receipt.js"
     ],
     "conflict_on_merge": true,
     "conflicts": [],
@@ -273723,23 +274306,45 @@ TARGET_STATES = json.loads(r"""
       "target": "c3",
       "type": "branch"
     },
-    "last_merge_branch": "feature/profile-copy",
+    "last_merge_branch": "feature/checkout-copy",
     "last_merge_conflict_paths": [
-      "src/profile.tsx"
+      "src/checkout.js",
+      "src/receipt.js"
     ],
     "last_merge_conflicted": true,
     "last_merge_created_commit": "c3",
     "last_merge_target": "c2",
-    "last_workspace_file_written": "src/profile.tsx",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "src/checkout.js",
+      "src/receipt.js"
+    ],
+    "last_mergetool_resolved_paths": [
+      "src/checkout.js",
+      "src/receipt.js"
+    ],
+    "last_mergetool_tool": "tool",
+    "last_workspace_file_written": "src/receipt.js",
     "operation_metadata": {
-      "last_merge_branch": "feature/profile-copy",
+      "last_merge_branch": "feature/checkout-copy",
       "last_merge_conflict_paths": [
-        "src/profile.tsx"
+        "src/checkout.js",
+        "src/receipt.js"
       ],
       "last_merge_conflicted": true,
       "last_merge_created_commit": "c3",
       "last_merge_target": "c2",
-      "last_workspace_file_written": "src/profile.tsx"
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "src/checkout.js",
+        "src/receipt.js"
+      ],
+      "last_mergetool_resolved_paths": [
+        "src/checkout.js",
+        "src/receipt.js"
+      ],
+      "last_mergetool_tool": "tool",
+      "last_workspace_file_written": "src/receipt.js"
     },
     "partial_hunks": {},
     "reflog": [
@@ -273760,104 +274365,133 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "mergetool-hard-medium-carryover": {
+  "mergetool-medium-db-names": {
     "branches": {
-      "feature/help-center": "c2",
+      "feature/db-rename": "c2",
       "main": "c3"
     },
     "commits": [
       {
         "changes": {
-          "src/routes.ts": {
-            "after": "route('/help')",
+          "schema/authors.sql": {
+            "after": "base value for schema/authors.sql",
+            "before": null,
+            "change_type": "added"
+          },
+          "schema/books.sql": {
+            "after": "base value for schema/books.sql",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "src/routes.ts": "added"
+          "schema/authors.sql": "added",
+          "schema/books.sql": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Base commit",
+        "message": "Common base",
         "order": 0,
         "parents": [],
         "tree": {
-          "src/routes.ts": "route('/help')"
+          "schema/authors.sql": "base value for schema/authors.sql",
+          "schema/books.sql": "base value for schema/books.sql"
         }
       },
       {
         "changes": {
-          "src/routes.ts": {
-            "after": "route('/support')",
-            "before": "route('/help')",
+          "schema/authors.sql": {
+            "after": "main value for schema/authors.sql",
+            "before": "base value for schema/authors.sql",
+            "change_type": "modified"
+          },
+          "schema/books.sql": {
+            "after": "main value for schema/books.sql",
+            "before": "base value for schema/books.sql",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/routes.ts": "modified"
+          "schema/authors.sql": "modified",
+          "schema/books.sql": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Main update",
+        "message": "Main updates",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/routes.ts": "route('/support')"
+          "schema/authors.sql": "main value for schema/authors.sql",
+          "schema/books.sql": "main value for schema/books.sql"
         }
       },
       {
         "changes": {
-          "src/routes.ts": {
-            "after": "route('/help-center')",
-            "before": "route('/help')",
+          "schema/authors.sql": {
+            "after": "feature value for schema/authors.sql",
+            "before": "base value for schema/authors.sql",
+            "change_type": "modified"
+          },
+          "schema/books.sql": {
+            "after": "feature value for schema/books.sql",
+            "before": "base value for schema/books.sql",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/routes.ts": "modified"
+          "schema/authors.sql": "modified",
+          "schema/books.sql": "modified"
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Feature branch update",
+        "message": "Updates on feature/db-rename",
         "order": 2,
         "parents": [
           "c0"
         ],
         "tree": {
-          "src/routes.ts": "route('/help-center')"
+          "schema/authors.sql": "feature value for schema/authors.sql",
+          "schema/books.sql": "feature value for schema/books.sql"
         }
       },
       {
         "author": "GIT it",
         "changes": {
-          "src/routes.ts": {
-            "after": "<<<<<<< HEAD\nroute('/support')\n=======\nroute('/help-center')\n>>>>>>> feature/help-center\n",
-            "before": "route('/support')",
+          "schema/authors.sql": {
+            "after": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);",
+            "before": "main value for schema/authors.sql",
+            "change_type": "modified"
+          },
+          "schema/books.sql": {
+            "after": "CREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);",
+            "before": "main value for schema/books.sql",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/routes.ts": "modified"
+          "schema/authors.sql": "modified",
+          "schema/books.sql": "modified"
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Merge branch 'feature/help-center'",
+        "message": "Merge branch 'feature/db-rename'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "src/routes.ts": "<<<<<<< HEAD\nroute('/support')\n=======\nroute('/help-center')\n>>>>>>> feature/help-center\n"
+          "schema/authors.sql": "CREATE TABLE authors (\n  id INTEGER PRIMARY KEY,\n  name TEXT NOT NULL\n);",
+          "schema/books.sql": "CREATE TABLE books (\n  id INTEGER PRIMARY KEY,\n  title TEXT NOT NULL\n);"
         }
       }
     ],
     "conflict_details": {},
     "conflict_files": [
-      "src/routes.ts"
+      "schema/books.sql",
+      "schema/authors.sql"
     ],
     "conflict_on_merge": true,
     "conflicts": [],
@@ -273866,23 +274500,45 @@ TARGET_STATES = json.loads(r"""
       "target": "c3",
       "type": "branch"
     },
-    "last_merge_branch": "feature/help-center",
+    "last_merge_branch": "feature/db-rename",
     "last_merge_conflict_paths": [
-      "src/routes.ts"
+      "schema/authors.sql",
+      "schema/books.sql"
     ],
     "last_merge_conflicted": true,
     "last_merge_created_commit": "c3",
     "last_merge_target": "c2",
-    "last_workspace_file_written": "src/routes.ts",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "schema/authors.sql",
+      "schema/books.sql"
+    ],
+    "last_mergetool_resolved_paths": [
+      "schema/authors.sql",
+      "schema/books.sql"
+    ],
+    "last_mergetool_tool": "tool",
+    "last_workspace_file_written": "schema/authors.sql",
     "operation_metadata": {
-      "last_merge_branch": "feature/help-center",
+      "last_merge_branch": "feature/db-rename",
       "last_merge_conflict_paths": [
-        "src/routes.ts"
+        "schema/authors.sql",
+        "schema/books.sql"
       ],
       "last_merge_conflicted": true,
       "last_merge_created_commit": "c3",
       "last_merge_target": "c2",
-      "last_workspace_file_written": "src/routes.ts"
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "schema/authors.sql",
+        "schema/books.sql"
+      ],
+      "last_mergetool_resolved_paths": [
+        "schema/authors.sql",
+        "schema/books.sql"
+      ],
+      "last_mergetool_tool": "tool",
+      "last_workspace_file_written": "schema/authors.sql"
     },
     "partial_hunks": {},
     "reflog": [
@@ -273903,104 +274559,133 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "mergetool-hard-migration": {
+  "mergetool-medium-docs-sync": {
     "branches": {
-      "feature/migration": "c2",
+      "feature/docs-sync": "c2",
       "main": "c3"
     },
     "commits": [
       {
         "changes": {
-          "db/migrations/001_users.sql": {
-            "after": "migration-base",
+          "docs/setup.md": {
+            "after": "base value for docs/setup.md",
+            "before": null,
+            "change_type": "added"
+          },
+          "docs/usage.md": {
+            "after": "base value for docs/usage.md",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
-          "db/migrations/001_users.sql": "added"
+          "docs/setup.md": "added",
+          "docs/usage.md": "added"
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Base commit",
+        "message": "Common base",
         "order": 0,
         "parents": [],
         "tree": {
-          "db/migrations/001_users.sql": "migration-base"
+          "docs/setup.md": "base value for docs/setup.md",
+          "docs/usage.md": "base value for docs/usage.md"
         }
       },
       {
         "changes": {
-          "db/migrations/001_users.sql": {
-            "after": "migration-main",
-            "before": "migration-base",
+          "docs/setup.md": {
+            "after": "main value for docs/setup.md",
+            "before": "base value for docs/setup.md",
+            "change_type": "modified"
+          },
+          "docs/usage.md": {
+            "after": "main value for docs/usage.md",
+            "before": "base value for docs/usage.md",
             "change_type": "modified"
           }
         },
         "files": {
-          "db/migrations/001_users.sql": "modified"
+          "docs/setup.md": "modified",
+          "docs/usage.md": "modified"
         },
         "id": "c1",
         "is_merge": false,
-        "message": "Main update",
+        "message": "Main updates",
         "order": 1,
         "parents": [
           "c0"
         ],
         "tree": {
-          "db/migrations/001_users.sql": "migration-main"
+          "docs/setup.md": "main value for docs/setup.md",
+          "docs/usage.md": "main value for docs/usage.md"
         }
       },
       {
         "changes": {
-          "db/migrations/001_users.sql": {
-            "after": "migration-feature",
-            "before": "migration-base",
+          "docs/setup.md": {
+            "after": "feature value for docs/setup.md",
+            "before": "base value for docs/setup.md",
+            "change_type": "modified"
+          },
+          "docs/usage.md": {
+            "after": "feature value for docs/usage.md",
+            "before": "base value for docs/usage.md",
             "change_type": "modified"
           }
         },
         "files": {
-          "db/migrations/001_users.sql": "modified"
+          "docs/setup.md": "modified",
+          "docs/usage.md": "modified"
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Feature branch update",
+        "message": "Updates on feature/docs-sync",
         "order": 2,
         "parents": [
           "c0"
         ],
         "tree": {
-          "db/migrations/001_users.sql": "migration-feature"
+          "docs/setup.md": "feature value for docs/setup.md",
+          "docs/usage.md": "feature value for docs/usage.md"
         }
       },
       {
         "author": "GIT it",
         "changes": {
-          "db/migrations/001_users.sql": {
-            "after": "<<<<<<< HEAD\nmigration-main\n=======\nmigration-feature\n>>>>>>> feature/migration\n",
-            "before": "migration-main",
+          "docs/setup.md": {
+            "after": "# Setup\nInstall Python 3.12.",
+            "before": "main value for docs/setup.md",
+            "change_type": "modified"
+          },
+          "docs/usage.md": {
+            "after": "# Usage\nRun the app with python main.py.",
+            "before": "main value for docs/usage.md",
             "change_type": "modified"
           }
         },
         "files": {
-          "db/migrations/001_users.sql": "modified"
+          "docs/setup.md": "modified",
+          "docs/usage.md": "modified"
         },
         "id": "c3",
         "is_merge": true,
-        "message": "Merge branch 'feature/migration'",
+        "message": "Merge branch 'feature/docs-sync'",
         "order": 3,
         "parents": [
           "c1",
           "c2"
         ],
         "tree": {
-          "db/migrations/001_users.sql": "<<<<<<< HEAD\nmigration-main\n=======\nmigration-feature\n>>>>>>> feature/migration\n"
+          "docs/setup.md": "# Setup\nInstall Python 3.12.",
+          "docs/usage.md": "# Usage\nRun the app with python main.py."
         }
       }
     ],
     "conflict_details": {},
     "conflict_files": [
-      "db/migrations/001_users.sql"
+      "docs/setup.md",
+      "docs/usage.md"
     ],
     "conflict_on_merge": true,
     "conflicts": [],
@@ -274009,881 +274694,45 @@ TARGET_STATES = json.loads(r"""
       "target": "c3",
       "type": "branch"
     },
-    "last_merge_branch": "feature/migration",
+    "last_merge_branch": "feature/docs-sync",
     "last_merge_conflict_paths": [
-      "db/migrations/001_users.sql"
+      "docs/setup.md",
+      "docs/usage.md"
     ],
     "last_merge_conflicted": true,
     "last_merge_created_commit": "c3",
     "last_merge_target": "c2",
-    "last_workspace_file_written": "db/migrations/001_users.sql",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "docs/setup.md",
+      "docs/usage.md"
+    ],
+    "last_mergetool_resolved_paths": [
+      "docs/setup.md",
+      "docs/usage.md"
+    ],
+    "last_mergetool_tool": "tool",
+    "last_workspace_file_written": "docs/usage.md",
     "operation_metadata": {
-      "last_merge_branch": "feature/migration",
+      "last_merge_branch": "feature/docs-sync",
       "last_merge_conflict_paths": [
-        "db/migrations/001_users.sql"
+        "docs/setup.md",
+        "docs/usage.md"
       ],
       "last_merge_conflicted": true,
       "last_merge_created_commit": "c3",
       "last_merge_target": "c2",
-      "last_workspace_file_written": "db/migrations/001_users.sql"
-    },
-    "partial_hunks": {},
-    "reflog": [
-      {
-        "message": "move HEAD",
-        "ref": "HEAD@{0}",
-        "target": "c3"
-      }
-    ],
-    "remote_branches": {},
-    "remote_tags": {},
-    "remotes": {},
-    "replaced_commits": {},
-    "repository_initialized": true,
-    "staging": {},
-    "stash_stack": [],
-    "tags": {},
-    "upstream_tracking": {},
-    "working_tree": {}
-  },
-  "mergetool-hard-pricing": {
-    "branches": {
-      "feature/pricing": "c2",
-      "main": "c3"
-    },
-    "commits": [
-      {
-        "changes": {
-          "src/pricing.rb": {
-            "after": "pricing-base",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "src/pricing.rb": "added"
-        },
-        "id": "c0",
-        "is_merge": false,
-        "message": "Base commit",
-        "order": 0,
-        "parents": [],
-        "tree": {
-          "src/pricing.rb": "pricing-base"
-        }
-      },
-      {
-        "changes": {
-          "src/pricing.rb": {
-            "after": "pricing-main",
-            "before": "pricing-base",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/pricing.rb": "modified"
-        },
-        "id": "c1",
-        "is_merge": false,
-        "message": "Main update",
-        "order": 1,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "src/pricing.rb": "pricing-main"
-        }
-      },
-      {
-        "changes": {
-          "src/pricing.rb": {
-            "after": "pricing-feature",
-            "before": "pricing-base",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/pricing.rb": "modified"
-        },
-        "id": "c2",
-        "is_merge": false,
-        "message": "Feature branch update",
-        "order": 2,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "src/pricing.rb": "pricing-feature"
-        }
-      },
-      {
-        "author": "GIT it",
-        "changes": {
-          "src/pricing.rb": {
-            "after": "<<<<<<< HEAD\npricing-main\n=======\npricing-feature\n>>>>>>> feature/pricing\n",
-            "before": "pricing-main",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/pricing.rb": "modified"
-        },
-        "id": "c3",
-        "is_merge": true,
-        "message": "Merge branch 'feature/pricing'",
-        "order": 3,
-        "parents": [
-          "c1",
-          "c2"
-        ],
-        "tree": {
-          "src/pricing.rb": "<<<<<<< HEAD\npricing-main\n=======\npricing-feature\n>>>>>>> feature/pricing\n"
-        }
-      }
-    ],
-    "conflict_details": {},
-    "conflict_files": [
-      "src/pricing.rb"
-    ],
-    "conflict_on_merge": true,
-    "conflicts": [],
-    "head": {
-      "name": "main",
-      "target": "c3",
-      "type": "branch"
-    },
-    "last_merge_branch": "feature/pricing",
-    "last_merge_conflict_paths": [
-      "src/pricing.rb"
-    ],
-    "last_merge_conflicted": true,
-    "last_merge_created_commit": "c3",
-    "last_merge_target": "c2",
-    "last_workspace_file_written": "src/pricing.rb",
-    "operation_metadata": {
-      "last_merge_branch": "feature/pricing",
-      "last_merge_conflict_paths": [
-        "src/pricing.rb"
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "docs/setup.md",
+        "docs/usage.md"
       ],
-      "last_merge_conflicted": true,
-      "last_merge_created_commit": "c3",
-      "last_merge_target": "c2",
-      "last_workspace_file_written": "src/pricing.rb"
-    },
-    "partial_hunks": {},
-    "reflog": [
-      {
-        "message": "move HEAD",
-        "ref": "HEAD@{0}",
-        "target": "c3"
-      }
-    ],
-    "remote_branches": {},
-    "remote_tags": {},
-    "remotes": {},
-    "replaced_commits": {},
-    "repository_initialized": true,
-    "staging": {},
-    "stash_stack": [],
-    "tags": {},
-    "upstream_tracking": {},
-    "working_tree": {}
-  },
-  "mergetool-hard-schema": {
-    "branches": {
-      "feature/schema": "c2",
-      "main": "c3"
-    },
-    "commits": [
-      {
-        "changes": {
-          "schema/orders.sql": {
-            "after": "schema-base",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "schema/orders.sql": "added"
-        },
-        "id": "c0",
-        "is_merge": false,
-        "message": "Base commit",
-        "order": 0,
-        "parents": [],
-        "tree": {
-          "schema/orders.sql": "schema-base"
-        }
-      },
-      {
-        "changes": {
-          "schema/orders.sql": {
-            "after": "schema-main",
-            "before": "schema-base",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "schema/orders.sql": "modified"
-        },
-        "id": "c1",
-        "is_merge": false,
-        "message": "Main update",
-        "order": 1,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "schema/orders.sql": "schema-main"
-        }
-      },
-      {
-        "changes": {
-          "schema/orders.sql": {
-            "after": "schema-feature",
-            "before": "schema-base",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "schema/orders.sql": "modified"
-        },
-        "id": "c2",
-        "is_merge": false,
-        "message": "Feature branch update",
-        "order": 2,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "schema/orders.sql": "schema-feature"
-        }
-      },
-      {
-        "author": "GIT it",
-        "changes": {
-          "schema/orders.sql": {
-            "after": "<<<<<<< HEAD\nschema-main\n=======\nschema-feature\n>>>>>>> feature/schema\n",
-            "before": "schema-main",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "schema/orders.sql": "modified"
-        },
-        "id": "c3",
-        "is_merge": true,
-        "message": "Merge branch 'feature/schema'",
-        "order": 3,
-        "parents": [
-          "c1",
-          "c2"
-        ],
-        "tree": {
-          "schema/orders.sql": "<<<<<<< HEAD\nschema-main\n=======\nschema-feature\n>>>>>>> feature/schema\n"
-        }
-      }
-    ],
-    "conflict_details": {},
-    "conflict_files": [
-      "schema/orders.sql"
-    ],
-    "conflict_on_merge": true,
-    "conflicts": [],
-    "head": {
-      "name": "main",
-      "target": "c3",
-      "type": "branch"
-    },
-    "last_merge_branch": "feature/schema",
-    "last_merge_conflict_paths": [
-      "schema/orders.sql"
-    ],
-    "last_merge_conflicted": true,
-    "last_merge_created_commit": "c3",
-    "last_merge_target": "c2",
-    "last_workspace_file_written": "schema/orders.sql",
-    "operation_metadata": {
-      "last_merge_branch": "feature/schema",
-      "last_merge_conflict_paths": [
-        "schema/orders.sql"
+      "last_mergetool_resolved_paths": [
+        "docs/setup.md",
+        "docs/usage.md"
       ],
-      "last_merge_conflicted": true,
-      "last_merge_created_commit": "c3",
-      "last_merge_target": "c2",
-      "last_workspace_file_written": "schema/orders.sql"
-    },
-    "partial_hunks": {},
-    "reflog": [
-      {
-        "message": "move HEAD",
-        "ref": "HEAD@{0}",
-        "target": "c3"
-      }
-    ],
-    "remote_branches": {},
-    "remote_tags": {},
-    "remotes": {},
-    "replaced_commits": {},
-    "repository_initialized": true,
-    "staging": {},
-    "stash_stack": [],
-    "tags": {},
-    "upstream_tracking": {},
-    "working_tree": {}
-  },
-  "mergetool-medium-easy-carryover": {
-    "branches": {
-      "feature/auth-timeout": "c2",
-      "main": "c3"
-    },
-    "commits": [
-      {
-        "changes": {
-          "src/auth.js": {
-            "after": "timeout=3000",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "src/auth.js": "added"
-        },
-        "id": "c0",
-        "is_merge": false,
-        "message": "Base commit",
-        "order": 0,
-        "parents": [],
-        "tree": {
-          "src/auth.js": "timeout=3000"
-        }
-      },
-      {
-        "changes": {
-          "src/auth.js": {
-            "after": "timeout=5000",
-            "before": "timeout=3000",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/auth.js": "modified"
-        },
-        "id": "c1",
-        "is_merge": false,
-        "message": "Main update",
-        "order": 1,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "src/auth.js": "timeout=5000"
-        }
-      },
-      {
-        "changes": {
-          "src/auth.js": {
-            "after": "timeout=2500",
-            "before": "timeout=3000",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/auth.js": "modified"
-        },
-        "id": "c2",
-        "is_merge": false,
-        "message": "Feature branch update",
-        "order": 2,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "src/auth.js": "timeout=2500"
-        }
-      },
-      {
-        "author": "GIT it",
-        "changes": {
-          "src/auth.js": {
-            "after": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n",
-            "before": "timeout=5000",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/auth.js": "modified"
-        },
-        "id": "c3",
-        "is_merge": true,
-        "message": "Merge branch 'feature/auth-timeout'",
-        "order": 3,
-        "parents": [
-          "c1",
-          "c2"
-        ],
-        "tree": {
-          "src/auth.js": "<<<<<<< HEAD\ntimeout=5000\n=======\ntimeout=2500\n>>>>>>> feature/auth-timeout\n"
-        }
-      }
-    ],
-    "conflict_details": {},
-    "conflict_files": [
-      "src/auth.js"
-    ],
-    "conflict_on_merge": true,
-    "conflicts": [],
-    "head": {
-      "name": "main",
-      "target": "c3",
-      "type": "branch"
-    },
-    "last_merge_branch": "feature/auth-timeout",
-    "last_merge_conflict_paths": [
-      "src/auth.js"
-    ],
-    "last_merge_conflicted": true,
-    "last_merge_created_commit": "c3",
-    "last_merge_target": "c2",
-    "last_workspace_file_written": "src/auth.js",
-    "operation_metadata": {
-      "last_merge_branch": "feature/auth-timeout",
-      "last_merge_conflict_paths": [
-        "src/auth.js"
-      ],
-      "last_merge_conflicted": true,
-      "last_merge_created_commit": "c3",
-      "last_merge_target": "c2",
-      "last_workspace_file_written": "src/auth.js"
-    },
-    "partial_hunks": {},
-    "reflog": [
-      {
-        "message": "move HEAD",
-        "ref": "HEAD@{0}",
-        "target": "c3"
-      }
-    ],
-    "remote_branches": {},
-    "remote_tags": {},
-    "remotes": {},
-    "replaced_commits": {},
-    "repository_initialized": true,
-    "staging": {},
-    "stash_stack": [],
-    "tags": {},
-    "upstream_tracking": {},
-    "working_tree": {}
-  },
-  "mergetool-medium-gateway": {
-    "branches": {
-      "feature/gateway": "c2",
-      "main": "c3"
-    },
-    "commits": [
-      {
-        "changes": {
-          "config/gateway.yml": {
-            "after": "gateway-base",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "config/gateway.yml": "added"
-        },
-        "id": "c0",
-        "is_merge": false,
-        "message": "Base commit",
-        "order": 0,
-        "parents": [],
-        "tree": {
-          "config/gateway.yml": "gateway-base"
-        }
-      },
-      {
-        "changes": {
-          "config/gateway.yml": {
-            "after": "gateway-main",
-            "before": "gateway-base",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "config/gateway.yml": "modified"
-        },
-        "id": "c1",
-        "is_merge": false,
-        "message": "Main update",
-        "order": 1,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "config/gateway.yml": "gateway-main"
-        }
-      },
-      {
-        "changes": {
-          "config/gateway.yml": {
-            "after": "gateway-feature",
-            "before": "gateway-base",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "config/gateway.yml": "modified"
-        },
-        "id": "c2",
-        "is_merge": false,
-        "message": "Feature branch update",
-        "order": 2,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "config/gateway.yml": "gateway-feature"
-        }
-      },
-      {
-        "author": "GIT it",
-        "changes": {
-          "config/gateway.yml": {
-            "after": "<<<<<<< HEAD\ngateway-main\n=======\ngateway-feature\n>>>>>>> feature/gateway\n",
-            "before": "gateway-main",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "config/gateway.yml": "modified"
-        },
-        "id": "c3",
-        "is_merge": true,
-        "message": "Merge branch 'feature/gateway'",
-        "order": 3,
-        "parents": [
-          "c1",
-          "c2"
-        ],
-        "tree": {
-          "config/gateway.yml": "<<<<<<< HEAD\ngateway-main\n=======\ngateway-feature\n>>>>>>> feature/gateway\n"
-        }
-      }
-    ],
-    "conflict_details": {},
-    "conflict_files": [
-      "config/gateway.yml"
-    ],
-    "conflict_on_merge": true,
-    "conflicts": [],
-    "head": {
-      "name": "main",
-      "target": "c3",
-      "type": "branch"
-    },
-    "last_merge_branch": "feature/gateway",
-    "last_merge_conflict_paths": [
-      "config/gateway.yml"
-    ],
-    "last_merge_conflicted": true,
-    "last_merge_created_commit": "c3",
-    "last_merge_target": "c2",
-    "last_workspace_file_written": "config/gateway.yml",
-    "operation_metadata": {
-      "last_merge_branch": "feature/gateway",
-      "last_merge_conflict_paths": [
-        "config/gateway.yml"
-      ],
-      "last_merge_conflicted": true,
-      "last_merge_created_commit": "c3",
-      "last_merge_target": "c2",
-      "last_workspace_file_written": "config/gateway.yml"
-    },
-    "partial_hunks": {},
-    "reflog": [
-      {
-        "message": "move HEAD",
-        "ref": "HEAD@{0}",
-        "target": "c3"
-      }
-    ],
-    "remote_branches": {},
-    "remote_tags": {},
-    "remotes": {},
-    "replaced_commits": {},
-    "repository_initialized": true,
-    "staging": {},
-    "stash_stack": [],
-    "tags": {},
-    "upstream_tracking": {},
-    "working_tree": {}
-  },
-  "mergetool-medium-policy": {
-    "branches": {
-      "feature/policy": "c2",
-      "main": "c3"
-    },
-    "commits": [
-      {
-        "changes": {
-          "src/policy.yml": {
-            "after": "policy-base",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "src/policy.yml": "added"
-        },
-        "id": "c0",
-        "is_merge": false,
-        "message": "Base commit",
-        "order": 0,
-        "parents": [],
-        "tree": {
-          "src/policy.yml": "policy-base"
-        }
-      },
-      {
-        "changes": {
-          "src/policy.yml": {
-            "after": "policy-main",
-            "before": "policy-base",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/policy.yml": "modified"
-        },
-        "id": "c1",
-        "is_merge": false,
-        "message": "Main update",
-        "order": 1,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "src/policy.yml": "policy-main"
-        }
-      },
-      {
-        "changes": {
-          "src/policy.yml": {
-            "after": "policy-feature",
-            "before": "policy-base",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/policy.yml": "modified"
-        },
-        "id": "c2",
-        "is_merge": false,
-        "message": "Feature branch update",
-        "order": 2,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "src/policy.yml": "policy-feature"
-        }
-      },
-      {
-        "author": "GIT it",
-        "changes": {
-          "src/policy.yml": {
-            "after": "<<<<<<< HEAD\npolicy-main\n=======\npolicy-feature\n>>>>>>> feature/policy\n",
-            "before": "policy-main",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/policy.yml": "modified"
-        },
-        "id": "c3",
-        "is_merge": true,
-        "message": "Merge branch 'feature/policy'",
-        "order": 3,
-        "parents": [
-          "c1",
-          "c2"
-        ],
-        "tree": {
-          "src/policy.yml": "<<<<<<< HEAD\npolicy-main\n=======\npolicy-feature\n>>>>>>> feature/policy\n"
-        }
-      }
-    ],
-    "conflict_details": {},
-    "conflict_files": [
-      "src/policy.yml"
-    ],
-    "conflict_on_merge": true,
-    "conflicts": [],
-    "head": {
-      "name": "main",
-      "target": "c3",
-      "type": "branch"
-    },
-    "last_merge_branch": "feature/policy",
-    "last_merge_conflict_paths": [
-      "src/policy.yml"
-    ],
-    "last_merge_conflicted": true,
-    "last_merge_created_commit": "c3",
-    "last_merge_target": "c2",
-    "last_workspace_file_written": "src/policy.yml",
-    "operation_metadata": {
-      "last_merge_branch": "feature/policy",
-      "last_merge_conflict_paths": [
-        "src/policy.yml"
-      ],
-      "last_merge_conflicted": true,
-      "last_merge_created_commit": "c3",
-      "last_merge_target": "c2",
-      "last_workspace_file_written": "src/policy.yml"
-    },
-    "partial_hunks": {},
-    "reflog": [
-      {
-        "message": "move HEAD",
-        "ref": "HEAD@{0}",
-        "target": "c3"
-      }
-    ],
-    "remote_branches": {},
-    "remote_tags": {},
-    "remotes": {},
-    "replaced_commits": {},
-    "repository_initialized": true,
-    "staging": {},
-    "stash_stack": [],
-    "tags": {},
-    "upstream_tracking": {},
-    "working_tree": {}
-  },
-  "mergetool-medium-router": {
-    "branches": {
-      "feature/routes": "c2",
-      "main": "c3"
-    },
-    "commits": [
-      {
-        "changes": {
-          "src/routes.ts": {
-            "after": "route-base",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "src/routes.ts": "added"
-        },
-        "id": "c0",
-        "is_merge": false,
-        "message": "Base commit",
-        "order": 0,
-        "parents": [],
-        "tree": {
-          "src/routes.ts": "route-base"
-        }
-      },
-      {
-        "changes": {
-          "src/routes.ts": {
-            "after": "route-main",
-            "before": "route-base",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/routes.ts": "modified"
-        },
-        "id": "c1",
-        "is_merge": false,
-        "message": "Main update",
-        "order": 1,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "src/routes.ts": "route-main"
-        }
-      },
-      {
-        "changes": {
-          "src/routes.ts": {
-            "after": "route-feature",
-            "before": "route-base",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/routes.ts": "modified"
-        },
-        "id": "c2",
-        "is_merge": false,
-        "message": "Feature branch update",
-        "order": 2,
-        "parents": [
-          "c0"
-        ],
-        "tree": {
-          "src/routes.ts": "route-feature"
-        }
-      },
-      {
-        "author": "GIT it",
-        "changes": {
-          "src/routes.ts": {
-            "after": "<<<<<<< HEAD\nroute-main\n=======\nroute-feature\n>>>>>>> feature/routes\n",
-            "before": "route-main",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/routes.ts": "modified"
-        },
-        "id": "c3",
-        "is_merge": true,
-        "message": "Merge branch 'feature/routes'",
-        "order": 3,
-        "parents": [
-          "c1",
-          "c2"
-        ],
-        "tree": {
-          "src/routes.ts": "<<<<<<< HEAD\nroute-main\n=======\nroute-feature\n>>>>>>> feature/routes\n"
-        }
-      }
-    ],
-    "conflict_details": {},
-    "conflict_files": [
-      "src/routes.ts"
-    ],
-    "conflict_on_merge": true,
-    "conflicts": [],
-    "head": {
-      "name": "main",
-      "target": "c3",
-      "type": "branch"
-    },
-    "last_merge_branch": "feature/routes",
-    "last_merge_conflict_paths": [
-      "src/routes.ts"
-    ],
-    "last_merge_conflicted": true,
-    "last_merge_created_commit": "c3",
-    "last_merge_target": "c2",
-    "last_workspace_file_written": "src/routes.ts",
-    "operation_metadata": {
-      "last_merge_branch": "feature/routes",
-      "last_merge_conflict_paths": [
-        "src/routes.ts"
-      ],
-      "last_merge_conflicted": true,
-      "last_merge_created_commit": "c3",
-      "last_merge_target": "c2",
-      "last_workspace_file_written": "src/routes.ts"
+      "last_mergetool_tool": "tool",
+      "last_workspace_file_written": "docs/usage.md"
     },
     "partial_hunks": {},
     "reflog": [
@@ -274948,7 +274797,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Isolate auth validation",
+        "message": "Fix auth validation",
         "order": 1,
         "parents": [
           "c1"
@@ -275150,7 +274999,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Isolate export formatting",
+        "message": "Fix export formatting",
         "order": 1,
         "parents": [
           "c1"
@@ -275352,7 +275201,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Isolate search ranking",
+        "message": "Fix search ranking",
         "order": 1,
         "parents": [
           "c1"
@@ -275464,7 +275313,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Commit auth validation path",
+        "message": "Fix auth validation and add its test",
         "order": 1,
         "parents": [
           "c1"
@@ -275595,7 +275444,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Commit export formatting path",
+        "message": "Fix export formatting and add its test",
         "order": 1,
         "parents": [
           "c1"
@@ -275726,7 +275575,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Commit search ranking path",
+        "message": "Fix search ranking and add its test",
         "order": 1,
         "parents": [
           "c1"
@@ -275948,7 +275797,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Fix parser bug and refactor token handling",
+        "message": "Fix parser blank-line bug",
         "order": 1,
         "parents": [
           "c1"
@@ -276051,7 +275900,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Commit dashboard filter change",
+        "message": "Fix dashboard filter",
         "order": 1,
         "parents": [
           "c1"
@@ -276155,7 +276004,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Commit payment rounding fix",
+        "message": "Fix payment rounding",
         "order": 1,
         "parents": [
           "c1"
@@ -276259,7 +276108,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Commit profile validation only",
+        "message": "Fix profile validation",
         "order": 1,
         "parents": [
           "c1"
@@ -279596,6 +279445,310 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {
       "main": "origin/main"
     },
+    "working_tree": {}
+  },
+  "rebase-hard-continue": {
+    "branches": {
+      "feature/rate-limits": "c5",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/limiter.py": {
+            "after": "LIMIT_NAME = 'legacy'",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/limiter.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Limiter baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/limiter.py": "LIMIT_NAME = 'legacy'"
+        }
+      },
+      {
+        "changes": {
+          "src/limiter.py": {
+            "after": "LIMIT_NAME = 'api'",
+            "before": "LIMIT_NAME = 'legacy'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/limiter.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Name the API limit",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/limiter.py": "LIMIT_NAME = 'api'"
+        }
+      },
+      {
+        "changes": {
+          "src/limiter.py": {
+            "after": "LIMIT_NAME = 'legacy'\nRETRY_COUNT = 3",
+            "before": "LIMIT_NAME = 'legacy'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/limiter.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add retry count",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/limiter.py": "LIMIT_NAME = 'legacy'\nRETRY_COUNT = 3"
+        }
+      },
+      {
+        "changes": {
+          "docs/limits.md": {
+            "after": "limits",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/limits.md": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Document rate limits",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "docs/limits.md": "limits",
+          "src/limiter.py": "LIMIT_NAME = 'legacy'\nRETRY_COUNT = 3"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/limiter.py": {
+            "after": "LIMIT_NAME = 'api'\nRETRY_COUNT = 3",
+            "before": "LIMIT_NAME = 'api'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/limiter.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Add retry count",
+        "order": 4,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/limiter.py": "LIMIT_NAME = 'api'\nRETRY_COUNT = 3"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "docs/limits.md": {
+            "after": "limits",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/limits.md": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Document rate limits",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "docs/limits.md": "limits",
+          "src/limiter.py": "LIMIT_NAME = 'api'\nRETRY_COUNT = 3"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/rate-limits",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_rebase_new_head": "c5",
+    "last_rebase_replayed_commits": [
+      "c4",
+      "c5"
+    ],
+    "last_workspace_file_written": "src/limiter.py",
+    "operation_metadata": {
+      "last_rebase_new_head": "c5",
+      "last_rebase_replayed_commits": [
+        "c4",
+        "c5"
+      ],
+      "last_workspace_file_written": "src/limiter.py"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "rebase-medium-abort": {
+    "branches": {
+      "feature/export-pdf": "c3",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "src/export.py": {
+            "after": "export = 'base'",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/export.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Export baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "src/export.py": "export = 'base'"
+        }
+      },
+      {
+        "changes": {
+          "src/export.py": {
+            "after": "export = 'main'",
+            "before": "export = 'base'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/export.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main export update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/export.py": "export = 'main'"
+        }
+      },
+      {
+        "changes": {
+          "src/export.py": {
+            "after": "export = 'pdf'",
+            "before": "export = 'base'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/export.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add PDF export",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/export.py": "export = 'pdf'"
+        }
+      },
+      {
+        "changes": {
+          "docs/pdf.md": {
+            "after": "PDF",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/pdf.md": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Document PDF export",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "docs/pdf.md": "PDF",
+          "src/export.py": "export = 'pdf'"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/export-pdf",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_rebase_aborted": true,
+    "operation_metadata": {
+      "last_rebase_aborted": true
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
     "working_tree": {}
   },
   "rec-easy-cap-ui": {
@@ -433507,7 +433660,7 @@ TARGET_STATES = json.loads(r"""
   "v21h-from-develop": {
     "branches": {
       "develop": "c3",
-      "feature/workspace": "c3",
+      "feature/workspace": "c2",
       "main": "c2"
     },
     "commits": [
@@ -433583,7 +433736,7 @@ TARGET_STATES = json.loads(r"""
     "conflicts": [],
     "head": {
       "name": "feature/workspace",
-      "target": "c3",
+      "target": "c2",
       "type": "branch"
     },
     "last_branch_created": "feature/workspace",
@@ -433702,6 +433855,7 @@ TARGET_STATES = json.loads(r"""
   "v21m-export": {
     "branches": {
       "feature/export": "c4",
+      "feature/export-docs": "c4",
       "main": "c4"
     },
     "commits": [
@@ -433829,6 +433983,7 @@ TARGET_STATES = json.loads(r"""
   "v21m-notifications": {
     "branches": {
       "feature/notifications": "c3",
+      "feature/notifications-docs": "c3",
       "main": "c3"
     },
     "commits": [
@@ -433931,6 +434086,7 @@ TARGET_STATES = json.loads(r"""
   "v21m-payments": {
     "branches": {
       "feature/payments": "c2",
+      "feature/payments-tests": "c2",
       "main": "c2"
     },
     "commits": [
@@ -439180,7 +439336,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Squash auth feature into main",
+        "message": "Add auth feature",
         "order": 3,
         "parents": [
           "c1"
@@ -439311,7 +439467,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Squash orders feature into develop",
+        "message": "Add orders feature",
         "order": 3,
         "parents": [
           "c1"
@@ -439442,7 +439598,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Squash parser feature into release/v2",
+        "message": "Add parser feature",
         "order": 3,
         "parents": [
           "c1"
@@ -439572,7 +439728,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Squash auth feature into main",
+        "message": "Add auth feature",
         "order": 3,
         "parents": [
           "c1"
@@ -439704,7 +439860,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Squash orders feature into develop",
+        "message": "Add orders feature",
         "order": 3,
         "parents": [
           "c1"
@@ -439836,7 +439992,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Squash parser feature into release/v2",
+        "message": "Add parser feature",
         "order": 3,
         "parents": [
           "c1"
@@ -439932,7 +440088,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Squash remote auth feature into main",
+        "message": "Add auth feature",
         "order": 2,
         "parents": [
           "c1"
@@ -440038,7 +440194,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Squash remote orders feature into develop",
+        "message": "Add orders feature",
         "order": 2,
         "parents": [
           "c1"
@@ -440144,7 +440300,7 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c0",
         "is_merge": false,
-        "message": "Squash remote parser feature into release/v2",
+        "message": "Add parser feature",
         "order": 2,
         "parents": [
           "c1"

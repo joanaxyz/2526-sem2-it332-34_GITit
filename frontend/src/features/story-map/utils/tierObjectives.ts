@@ -4,13 +4,20 @@ import { normalizeLevelContext } from '@/shared/level/utils/levelContext'
 /**
  * The one place a tier run becomes Objectives card rows.
  *
- * Tier runs carry no evaluated objective checklist yet, so the level's task is
- * the single objective, done once the run completes (the signal the outcome
- * modal uses). When the run payload gains `objective_checks`, map those rows
- * here; the card only reads {id, text, status}.
+ * The scenario's authored checklist is learner-facing briefing content. Until
+ * the evaluator reports per-row progress, rows complete together with the run.
+ * Legacy scenarios without a checklist keep the task as their single row.
  */
 export function tierObjectives(run: Pick<TierRun, 'status' | 'scenario_context'>): TierObjective[] {
-  const task = normalizeLevelContext(run.scenario_context).task.split('\n\nStarting point:')[0].trim()
-  if (!task) return []
-  return [{ id: 'task', text: task, status: run.status === 'completed' ? 'done' : 'pending' }]
+  const context = normalizeLevelContext(run.scenario_context)
+  const legacyTask = context.task.split('\n\nStarting point:')[0].trim()
+  const status = run.status === 'completed' ? 'done' : 'pending'
+  if (!context.objectiveChecks.length) {
+    return legacyTask ? [{ id: 'task', text: legacyTask, status }] : []
+  }
+  return context.objectiveChecks.map((text, index) => ({
+    id: `objective-${index + 1}`,
+    text,
+    status,
+  }))
 }
