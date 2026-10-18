@@ -77,7 +77,7 @@ function ModuleBreakdown() {
   if (!series.hasAnyData) {
     return (
       <p className="home-overview-module-empty">
-        No main-story runs recorded yet. Clear a level and these four charts fill in.
+        No Arcane Spire runs recorded yet. Finish a tier and these four charts fill in.
       </p>
     )
   }
@@ -86,16 +86,16 @@ function ModuleBreakdown() {
     <>
       <div className="home-overview-module-charts">
         <MiniColumnChart
-          label={`Levels finished per module: ${series.levelsFinished.map((point) => `${point.caption} ${point.display}`).join(', ')}`}
+          label={`Runs finished per module: ${series.levelsFinished.map((point) => `${point.caption} ${point.display}`).join(', ')}`}
           max={100}
           points={series.levelsFinished}
-          title="Levels finished"
+          title="Runs finished"
         />
         <MiniColumnChart
-          label={`Hard levels finished per module: ${series.hardLevelsFinished.map((point) => `${point.caption} ${point.display}`).join(', ')}`}
+          label={`Hard runs finished per module: ${series.hardLevelsFinished.map((point) => `${point.caption} ${point.display}`).join(', ')}`}
           max={100}
           points={series.hardLevelsFinished}
-          title="Hard levels finished"
+          title="Hard runs finished"
         />
         <MiniColumnChart
           label={`Retries that worked per module: ${series.retriesThatWorked.map((point) => `${point.caption} ${point.display}`).join(', ')}`}
@@ -128,12 +128,12 @@ export function HomeResultsPanel({ results }: { results: HomeResultsModel }) {
         Your record <em>how the finishes went</em>
       </header>
 
-      {/* Levels finished is absent on purpose: the citadel above already states it. */}
+      {/* Tier completions are absent on purpose: the Arcane Spire meter already states them. */}
       <div className="home-overview-kpi-row">
         <div data-tier={rateTier(results.hardClearRate)}>
           <span className="home-overview-mini-sigil" aria-hidden="true"><Swords /></span>
           <strong>{formatPercent(results.hardClearRate.value)}</strong>
-          <span>Hard levels finished</span>
+          <span>Hard runs finished</span>
           <small>{runCount(results.hardClearRate, 'hard runs')}</small>
         </div>
         <div data-tier={results.averageRetries.denominator ? 'neutral' : 'empty'}>
@@ -160,7 +160,7 @@ export function HomeResultsPanel({ results }: { results: HomeResultsModel }) {
 
       <section className="home-overview-modules" aria-label="Main story modules 1 to 4">
         <header className="ref-panel-head">
-          Main story <em>modules 1&ndash;4, practice runs only</em>
+          Arcane Spire <em>modules 1&ndash;4, practice runs only</em>
         </header>
         <ModuleBreakdown />
       </section>

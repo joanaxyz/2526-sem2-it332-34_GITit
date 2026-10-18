@@ -39,7 +39,7 @@ from players.services import get_or_create_player
 
 BACKEND = Path(__file__).resolve().parents[2]
 FRONTEND = BACKEND.parent / "frontend"
-LEGACY_STORY = "git-it-legacy"
+LEGACY_STORY = "arcane-spire"
 
 LEVEL_BY_TABLE = {
     "reversing-pushed-commits-safely": MODULE_4_REVERT_CASES,

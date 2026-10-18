@@ -49,7 +49,7 @@ describe('buildHomeStatsModel', () => {
       finishRate: { value: 76, numerator: 43, denominator: 57 },
     })
     // Hard trials won and the clear rate are gone: the record band's hard-run
-    // tile and the citadel already state them, and one screen states a fact once.
+    // tile and the Arcane Spire meter already state them, and one screen states a fact once.
     expect(model.results).toEqual({
       hardClearRate: { value: 62, numerator: 8, denominator: 13 },
       averageRetries: { value: 1.6, numerator: 74, denominator: 47 },
@@ -66,7 +66,7 @@ describe('buildHomeStatsModel', () => {
 
     expect(model.skills.rows).toHaveLength(18)
     expect(model.skills.overallMastery).toBe(0)
-    expect(model.skills.masteryStars).toBe(1)
+    expect(model.skills.masteryStars).toBe(0)
     // An empty window is drawn as an empty state, never as fourteen fake days.
     expect(model.progress.activity.points).toEqual([])
     expect(model.progress.activity).toMatchObject({
@@ -117,7 +117,7 @@ describe('buildHomeStatsModel', () => {
     })
   })
 
-  it('preserves fallbacks, clamps percentages, and applies the accuracy threshold', () => {
+  it('preserves command fallbacks, clamps percentages, and applies the accuracy threshold', () => {
     const home = structuredClone(richHomeFixture)
     const stats = structuredClone(richStatsFixture)
     stats.skill_profile = [
@@ -146,11 +146,21 @@ describe('buildHomeStatsModel', () => {
     expect(model.skills.overallMastery).toBe(65)
     expect(model.skills.masteryStars).toBe(2)
     expect(model.progress.story).toMatchObject({
-      levelsCompleted: 43,
+      levelsCompleted: 0,
       perfectClears: 30,
       finishRate: { value: 100 },
     })
     expect(model.results).toMatchObject({ accuracy: 95, commandsRun: 99, accuracyReady: false })
+  })
+
+  it('does not award a proficiency star before command mastery is earned', () => {
+    const stats = structuredClone(richStatsFixture)
+    stats.skill_profile = stats.skill_profile.map((axis) => ({ ...axis, value: 0 }))
+
+    const model = buildHomeStatsModel(richHomeFixture, stats)
+
+    expect(model.skills.overallMastery).toBe(0)
+    expect(model.skills.masteryStars).toBe(0)
   })
 
   it('does not mutate frozen source summaries or share KPI metric objects', () => {

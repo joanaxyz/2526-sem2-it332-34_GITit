@@ -85,4 +85,25 @@ describe('deriveAchievements', () => {
       unlocked: false,
     })
   })
+
+  it('unlocks the curriculum badge only for Arcane Spire completion', () => {
+    const retiredStory = structuredClone(home)
+    retiredStory.completed_stories = ['frostbound-citadel']
+    retiredStory.completed_story_slug = 'frostbound-citadel'
+
+    const retiredBadge = deriveAchievements(retiredStory, stats).find(
+      (achievement) => achievement.id === 'arcane-spire-master',
+    )
+
+    expect(retiredBadge?.unlocked).toBe(false)
+
+    const arcaneSpire = structuredClone(home)
+    arcaneSpire.completed_stories = ['arcane-spire']
+    arcaneSpire.completed_story_slug = 'arcane-spire'
+    const arcaneSpireBadge = deriveAchievements(arcaneSpire, stats).find(
+      (achievement) => achievement.id === 'arcane-spire-master',
+    )
+
+    expect(arcaneSpireBadge?.unlocked).toBe(true)
+  })
 })

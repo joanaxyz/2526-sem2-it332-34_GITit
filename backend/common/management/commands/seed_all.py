@@ -1,23 +1,18 @@
-"""Seed all official data with a safe, non-destructive default.
+"""Seed the sole official Arcane Spire curriculum and its derived data.
 
 Usage:
     python manage.py seed_all
-        Upsert official curriculum and command-library rows. Player progress is
-        preserved.
+        Upsert the Arcane Spire Module 0-4 curriculum and command-library rows.
+        Player progress is preserved.
 
-    python manage.py seed_all --reset --confirm-reset
-        Delete official curriculum rows and dependent run/progress rows before
-        rebuilding. This is intentionally verbose so accidental production
-        data loss is difficult.
-
-Production reset additionally requires ALLOW_DESTRUCTIVE_SEED_RESET=True.
+The retired multi-story seed owned the old reset implementation, so reset is
+now rejected rather than recreating those records or risking active progress.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
-from django.conf import settings
 from django.core.management import call_command
 from django.core.management.base import BaseCommand, CommandError
 
@@ -29,17 +24,12 @@ class Command(BaseCommand):
         parser.add_argument(
             "--reset",
             action="store_true",
-            help="Clear seeded curriculum and dependent player progress before seeding.",
+            help="Retired option; resets are refused to preserve active curriculum progress.",
         )
         parser.add_argument(
             "--confirm-reset",
             action="store_true",
             help="Required together with --reset to acknowledge destructive deletion.",
-        )
-        parser.add_argument(
-            "--validate",
-            action="store_true",
-            help="Validate curriculum shape, simulator support, and official solutions.",
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
@@ -52,32 +42,22 @@ class Command(BaseCommand):
             raise CommandError(
                 "Destructive reset refused. Re-run with both --reset and --confirm-reset."
             )
-        if reset and not settings.DEBUG and not settings.ALLOW_DESTRUCTIVE_SEED_RESET:
+        if reset:
             raise CommandError(
-                "Destructive reset is disabled when DJANGO_DEBUG=False. "
-                "Set ALLOW_DESTRUCTIVE_SEED_RESET=True only for an intentional, "
-                "time-bounded maintenance operation."
+                "seed_all reset is retired because it belonged to the removed "
+                "three-story curriculum. Use the non-destructive canonical seed."
             )
 
         verbosity = options.get("verbosity", 1)
-        self.stdout.write(self.style.MIGRATE_HEADING("1/4 Curriculum"))
-        call_command(
-            "seed_curriculum",
-            reset=reset,
-            validate=options.get("validate", False),
-            verbosity=verbosity,
-        )
-
-        self.stdout.write(self.style.MIGRATE_HEADING("2/4 Runebound Turret"))
+        self.stdout.write(self.style.MIGRATE_HEADING("1/3 Arcane Spire curriculum"))
         call_command("seed_legacy_modules", verbosity=verbosity)
 
-        self.stdout.write(self.style.MIGRATE_HEADING("3/4 Command library"))
+        self.stdout.write(self.style.MIGRATE_HEADING("2/3 Command library"))
         call_command("seed_command_library", verbosity=verbosity)
 
         # Last: drill content is derived from the command forms and authored
-        # solutions the three steps above have just written.
-        self.stdout.write(self.style.MIGRATE_HEADING("4/4 Squire's Drill"))
+        # solutions the two steps above have just written.
+        self.stdout.write(self.style.MIGRATE_HEADING("3/3 Squire's Drill"))
         call_command("seed_drills", verbosity=verbosity)
 
-        mode = "reset and seeded" if reset else "safely upserted"
-        self.stdout.write(self.style.SUCCESS(f"seed_all complete — {mode} official data."))
+        self.stdout.write(self.style.SUCCESS("seed_all complete — safely upserted official data."))
