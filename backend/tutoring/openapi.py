@@ -9,14 +9,27 @@ class CommandIntroductionFormSerializer(serializers.Serializer):
 
 
 class RepositoryChangeSerializer(serializers.Serializer):
-    kind = serializers.ChoiceField(choices=[
-        "repository", "commit", "branch", "head", "staging", "working_tree", "conflict",
-        "tag", "remote", "config", "stash", "operation",
-    ])
+    kind = serializers.ChoiceField(
+        choices=[
+            "repository",
+            "commit",
+            "branch",
+            "head",
+            "staging",
+            "working_tree",
+            "conflict",
+            "tag",
+            "remote",
+            "config",
+            "stash",
+            "operation",
+        ]
+    )
     text = serializers.CharField()
     # Absent on changes recorded before these fields existed.
     action = serializers.ChoiceField(
-        choices=["create", "delete", "move", "add", "remove", "set", "start", "finish"], required=False,
+        choices=["create", "delete", "move", "add", "remove", "set", "start", "finish"],
+        required=False,
     )
     subjects = serializers.ListField(child=serializers.CharField(), required=False)
     ref = serializers.CharField(required=False)

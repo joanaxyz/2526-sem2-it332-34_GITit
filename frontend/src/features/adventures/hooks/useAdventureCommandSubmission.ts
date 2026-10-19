@@ -52,6 +52,9 @@ function applyOptimisticState(run: AdventureRun, repositoryState: RepositorySnap
 function applyResponse(queryClient: QueryClient, key: ReturnType<typeof queryKeys.adventureRun>, response: AdventureCommandResponse) {
   const previous = queryClient.getQueryData<AdventureRun>(key)
   const payload = response.run
+  if (response.learned_skills?.length && isRunPatch(payload)) {
+    void queryClient.invalidateQueries({ queryKey: queryKeys.learnedSkills })
+  }
   const earnedCoins =
     (!('partial' in payload) && payload.is_passed && previous && !previous.is_passed) ||
     (payload.status === 'completed' && previous?.status !== 'completed')

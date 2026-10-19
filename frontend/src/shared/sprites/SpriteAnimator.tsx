@@ -90,7 +90,11 @@ export const SpriteAnimator = forwardRef<
     setAnim(animation)
     frameRef.current = 0
     segmentRef.current = null
-  }, [animation])
+    completeRef.current = null
+    // A completed one-shot pauses playback. Each new prop-driven pose must
+    // start again, just like an imperative setAnimation call does.
+    playingRef.current = autoPlay
+  }, [animation, autoPlay])
 
   function clampSegment(segment: FrameSegment, frameCount: number): FrameSegment {
     const to = Math.max(0, Math.min(frameCount - 1, segment.to))
@@ -159,10 +163,7 @@ export const SpriteAnimator = forwardRef<
   // The rAF frame-stepper. One loop per mounted animator; advances by
   // elapsed time so dropped frames never slow the walk cycle down.
   useEffect(() => {
-    if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      paintFrame(0)
-      return
-    }
+    const media = window.matchMedia?.('(prefers-reduced-motion: reduce)')
     let rafId = 0
     let lastTick = performance.now()
     paintFrame(frameRef.current)
@@ -193,8 +194,22 @@ export const SpriteAnimator = forwardRef<
       }
       rafId = requestAnimationFrame(step)
     }
-    rafId = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(rafId)
+    const syncMotion = () => {
+      cancelAnimationFrame(rafId)
+      if (media?.matches) {
+        frameRef.current = segmentRef.current?.from ?? 0
+        paintFrame(frameRef.current)
+      } else {
+        lastTick = performance.now()
+        rafId = requestAnimationFrame(step)
+      }
+    }
+    media?.addEventListener('change', syncMotion)
+    syncMotion()
+    return () => {
+      cancelAnimationFrame(rafId)
+      media?.removeEventListener('change', syncMotion)
+    }
   }, [anim, paintFrame])
 
   const displayScale = anim.displayScale ?? 1

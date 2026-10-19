@@ -79,7 +79,11 @@ def plan_introduction(run) -> Candidate | None:
         if not covered.get("diagnostic")
         for change in covered.get("effect") or ()
     )
-    seen = set(PlayerCommandIntroduction.objects.filter(player_id=run.player_id).values_list("teaching_key", flat=True))
+    seen = set(
+        PlayerCommandIntroduction.objects.filter(player_id=run.player_id).values_list(
+            "teaching_key", flat=True
+        )
+    )
     first_guide = not any(not key.startswith("concept:") for key in seen)
     return Candidate(
         form=lesson,
@@ -92,7 +96,9 @@ def plan_introduction(run) -> Candidate | None:
 
 
 def _next_lesson(run, command: str) -> FormGuide | None:
-    wave_forms = run.current_wave.command_forms.filter(is_published=True).select_related("command_skill")
+    wave_forms = run.current_wave.command_forms.filter(is_published=True).select_related(
+        "command_skill"
+    )
     form = resolve_form(command, preferred=wave_forms)
     if form is None:
         return None
@@ -110,17 +116,26 @@ def lesson_is_known(player_id: int, lesson: FormGuide) -> bool:
     introduced = PlayerCommandIntroduction.objects.filter(player_id=player_id)
     if introduced.filter(teaching_key=lesson.teaching_key).exists():
         return True
-    if lesson.technique is None and not is_variadic(lesson.usage_form) and any(
-        # A completed "several files" guide covers the one-file form too.
-        is_variadic(key.removeprefix("form:")) and same_shape(key.removeprefix("form:"), lesson.usage_form)
-        for key in introduced.filter(teaching_key__startswith=f"form:git {lesson.family} ").values_list(
-            "teaching_key", flat=True
+    if (
+        lesson.technique is None
+        and not is_variadic(lesson.usage_form)
+        and any(
+            # A completed "several files" guide covers the one-file form too.
+            is_variadic(key.removeprefix("form:"))
+            and same_shape(key.removeprefix("form:"), lesson.usage_form)
+            for key in introduced.filter(
+                teaching_key__startswith=f"form:git {lesson.family} "
+            ).values_list("teaching_key", flat=True)
         )
     ):
         return True
-    if lesson.technique is None and not is_variadic(lesson.usage_form) and SkillMastery.objects.filter(
-        player_id=player_id, command_form__usage_form=lesson.usage_form, solves__gt=0
-    ).exists():
+    if (
+        lesson.technique is None
+        and not is_variadic(lesson.usage_form)
+        and SkillMastery.objects.filter(
+            player_id=player_id, command_form__usage_form=lesson.usage_form, solves__gt=0
+        ).exists()
+    ):
         return True
     prefix = "git " if lesson.technique is not None else f"git {lesson.family}"
     used = (

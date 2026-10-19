@@ -61,20 +61,21 @@ class RepositoryFingerprinter:
         return {
             "initialized": bool(state.get("repository_initialized", True)),
             "head": head_signature,
-            "branches": {name: commits.identity(target) for name, target in _mapping(state, "branches")},
-            "tags": {name: commits.identity(_ref_target(target)) for name, target in _mapping(state, "tags")},
+            "branches": {
+                name: commits.identity(target) for name, target in _mapping(state, "branches")
+            },
+            "tags": {
+                name: commits.identity(_ref_target(target))
+                for name, target in _mapping(state, "tags")
+            },
             "remote_branches": {
                 name: commits.identity(_ref_target(target))
                 for name, target in _mapping(state, "remote_branches")
             },
             "remote_tags": sorted(name for name, _ in _mapping(state, "remote_tags")),
-            "remotes": {
-                name: (url if exact else None) for name, url in _mapping(state, "remotes")
-            },
+            "remotes": {name: (url if exact else None) for name, url in _mapping(state, "remotes")},
             "upstream_tracking": dict(_mapping(state, "upstream_tracking")),
-            "config": {
-                key: (value if exact else None) for key, value in _mapping(state, "config")
-            },
+            "config": {key: (value if exact else None) for key, value in _mapping(state, "config")},
             "staging": self._entries(state.get("staging"), exact=exact),
             "working_tree": self._entries(state.get("working_tree"), exact=exact),
             "conflicts": sorted(_paths(state.get("conflicts"))),
@@ -130,7 +131,9 @@ class _CommitIdentities:
                 stack.pop()
                 continue
             parents = [str(parent) for parent in self.by_id[current].get("parents") or []]
-            pending = [parent for parent in parents if parent in self.by_id and parent not in self.cache]
+            pending = [
+                parent for parent in parents if parent in self.by_id and parent not in self.cache
+            ]
             if pending:
                 stack.extend(pending)
                 continue
@@ -139,7 +142,9 @@ class _CommitIdentities:
             tree = commit.get("tree") or {}
             # Exact identity keeps the message so rewording (amend) is a real
             # step; coarse identity tolerates the learner's own wording.
-            content = [tree, str(commit.get("message") or "").strip()] if self.exact else sorted(tree)
+            content = (
+                [tree, str(commit.get("message") or "").strip()] if self.exact else sorted(tree)
+            )
             self.cache[current] = _digest(
                 [content, [self.cache.get(parent, f"?{parent}") for parent in parents]]
             )
@@ -164,7 +169,11 @@ def entry_status_class(value: object) -> str:
 
 def in_progress_operations(state: dict) -> list[str]:
     operations = []
-    if state.get("merge_parent") or state.get("conflict_on_merge") or state.get("merge_abort_state"):
+    if (
+        state.get("merge_parent")
+        or state.get("conflict_on_merge")
+        or state.get("merge_abort_state")
+    ):
         operations.append("merge")
     if state.get("cherry_pick_in_progress"):
         operations.append("cherry-pick")
@@ -230,7 +239,9 @@ def describe_transition(before: dict, after: dict) -> list[dict]:
         add("repository", "The folder becomes a Git repository.", "create")
 
     before_ids = {commit.get("id") for commit in before.get("commits") or []}
-    new_commits = [commit for commit in after.get("commits") or [] if commit.get("id") not in before_ids]
+    new_commits = [
+        commit for commit in after.get("commits") or [] if commit.get("id") not in before_ids
+    ]
     head_branch = normalizer.head_branch(after)
     before_staged = set(_mapping_keys(before.get("staging")))
     after_staged = set(_mapping_keys(after.get("staging")))
@@ -248,16 +259,25 @@ def describe_transition(before: dict, after: dict) -> list[dict]:
     for name in sorted(set(before_branches) - set(after_branches)):
         add("branch", f"Branch {name} is deleted.", "delete", [name])
     for name in sorted(set(before_branches) & set(after_branches)):
-        if before_branches[name] != after_branches[name] and not (new_commits and name == head_branch):
+        if before_branches[name] != after_branches[name] and not (
+            new_commits and name == head_branch
+        ):
             add("branch", f"Branch {name} moves to another commit.", "move", [name])
 
     before_head, after_head = before.get("head") or {}, after.get("head") or {}
-    if (before_head.get("type"), before_head.get("name")) != (after_head.get("type"), after_head.get("name")):
+    if (before_head.get("type"), before_head.get("name")) != (
+        after_head.get("type"),
+        after_head.get("name"),
+    ):
         if after_head.get("type") == "branch":
-            add("head", f"HEAD moves to {after_head.get('name')}.", "move", [after_head.get("name")])
+            add(
+                "head", f"HEAD moves to {after_head.get('name')}.", "move", [after_head.get("name")]
+            )
         else:
             add("head", "HEAD is detached at a commit.", "move")
-    elif after_head.get("type") != "branch" and before_head.get("target") != after_head.get("target"):
+    elif after_head.get("type") != "branch" and before_head.get("target") != after_head.get(
+        "target"
+    ):
         add("head", "The detached HEAD moves to another commit.", "move")
 
     before_working = set(_mapping_keys(before.get("working_tree")))
@@ -265,19 +285,41 @@ def describe_transition(before: dict, after: dict) -> list[dict]:
     newly_staged = after_staged - before_staged
     unstaged = before_staged - after_staged - committed_paths
     if newly_staged:
-        add("staging", f"{_join(newly_staged)} {_verb(newly_staged, 'is', 'are')} staged.", "add", newly_staged)
+        add(
+            "staging",
+            f"{_join(newly_staged)} {_verb(newly_staged, 'is', 'are')} staged.",
+            "add",
+            newly_staged,
+        )
     if unstaged:
-        add("staging", f"{_join(unstaged)} {_verb(unstaged, 'is', 'are')} unstaged.", "remove", unstaged)
+        add(
+            "staging",
+            f"{_join(unstaged)} {_verb(unstaged, 'is', 'are')} unstaged.",
+            "remove",
+            unstaged,
+        )
     # Staging moves a file out of the working tree; that is one change, not two.
     new_edits = after_working - before_working - unstaged
     cleaned = before_working - after_working - newly_staged
     if new_edits:
-        add("working_tree", f"{_join(new_edits)} {_verb(new_edits, 'has', 'have')} uncommitted edits.", "add",
-            new_edits)
+        add(
+            "working_tree",
+            f"{_join(new_edits)} {_verb(new_edits, 'has', 'have')} uncommitted edits.",
+            "add",
+            new_edits,
+        )
     if cleaned:
-        add("working_tree", f"Edits to {_join(cleaned)} are discarded or saved elsewhere.", "remove", cleaned)
+        add(
+            "working_tree",
+            f"Edits to {_join(cleaned)} are discarded or saved elsewhere.",
+            "remove",
+            cleaned,
+        )
 
-    before_conflicts, after_conflicts = set(_paths(before.get("conflicts"))), set(_paths(after.get("conflicts")))
+    before_conflicts, after_conflicts = (
+        set(_paths(before.get("conflicts"))),
+        set(_paths(after.get("conflicts"))),
+    )
     if after_conflicts - before_conflicts:
         opened = after_conflicts - before_conflicts
         add("conflict", f"Conflict to resolve in {_join(opened)}.", "add", opened)
@@ -285,25 +327,47 @@ def describe_transition(before: dict, after: dict) -> list[dict]:
         resolved = before_conflicts - after_conflicts
         add("conflict", f"Conflict resolved in {_join(resolved)}.", "remove", resolved)
 
-    _describe_names(add, before, after, "tags", "tag", "Tag {name} is created.", "Tag {name} is deleted.")
-    _describe_names(add, before, after, "remotes", "remote", "Remote {name} is added.", "Remote {name} is removed.")
-    before_remote, after_remote = dict(_mapping(before, "remote_branches")), dict(_mapping(after, "remote_branches"))
+    _describe_names(
+        add, before, after, "tags", "tag", "Tag {name} is created.", "Tag {name} is deleted."
+    )
+    _describe_names(
+        add,
+        before,
+        after,
+        "remotes",
+        "remote",
+        "Remote {name} is added.",
+        "Remote {name} is removed.",
+    )
+    before_remote, after_remote = (
+        dict(_mapping(before, "remote_branches")),
+        dict(_mapping(after, "remote_branches")),
+    )
     updated = sorted(
-        name for name in after_remote if name not in before_remote or before_remote[name] != after_remote[name]
+        name
+        for name in after_remote
+        if name not in before_remote or before_remote[name] != after_remote[name]
     )
     if updated:
         add("remote", f"{_join(updated)} {_verb(updated, 'is', 'are')} updated.", "move", updated)
     removed_remote = sorted(set(before_remote) - set(after_remote))
     if removed_remote:
-        add("remote", f"{_join(removed_remote)} {_verb(removed_remote, 'is', 'are')} removed.", "delete",
-            removed_remote)
+        add(
+            "remote",
+            f"{_join(removed_remote)} {_verb(removed_remote, 'is', 'are')} removed.",
+            "delete",
+            removed_remote,
+        )
 
     before_config, after_config = dict(_mapping(before, "config")), dict(_mapping(after, "config"))
     for key in sorted(after_config):
         if before_config.get(key) != after_config[key]:
             add("config", f"{key} is set.", "set", [key])
 
-    before_stash, after_stash = len(before.get("stash_stack") or []), len(after.get("stash_stack") or [])
+    before_stash, after_stash = (
+        len(before.get("stash_stack") or []),
+        len(after.get("stash_stack") or []),
+    )
     if after_stash > before_stash:
         add("stash", "Work is set aside in the stash.", "add")
     elif after_stash < before_stash:
@@ -399,7 +463,10 @@ def route_position(trajectory: dict | None, state: dict, history: Iterable[str] 
         matches = [
             index
             for index, step in enumerate(steps)
-            if any(position.get(strength) == current[strength] for position in step.get("positions") or [])
+            if any(
+                position.get(strength) == current[strength]
+                for position in step.get("positions") or []
+            )
         ]
         # The end of the route is one more position: a stash-and-pop cycle or a
         # metadata-only command (mergetool, prune) returns to a state that also

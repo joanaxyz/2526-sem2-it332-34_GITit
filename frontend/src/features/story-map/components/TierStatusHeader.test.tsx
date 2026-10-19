@@ -74,7 +74,7 @@ describe('TierStatusHeader', () => {
     expect(onSelectCommandGuide).toHaveBeenCalledWith('form:git init')
   })
 
-  it('marks the guide control active while the tutorial is visible', () => {
+  it('hides the floating mascot and history control while the guide is visible', () => {
     render(
       <TierStatusHeader
         run={run}
@@ -83,10 +83,9 @@ describe('TierStatusHeader', () => {
       />,
     )
 
-    const button = screen.getByRole('button', { name: 'Command guide is open' })
-    expect(button).toHaveClass('is-active')
-    expect(button).toHaveAttribute('aria-expanded', 'true')
-    expect(button).not.toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'Command guide is open' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Browse command guides' })).not.toBeInTheDocument()
+    expect(document.querySelector('.guide-mascot')).toHaveAttribute('inert')
   })
 
   it('reopens the current guide directly when several commands have been encountered', () => {

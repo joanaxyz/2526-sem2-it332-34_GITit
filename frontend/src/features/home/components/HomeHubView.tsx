@@ -1,5 +1,4 @@
 import { useCallback, type CSSProperties } from 'react'
-import { WorldMascot } from '@/shared/mascot/WorldMascot'
 import { useSearchParams } from 'react-router-dom'
 
 import { HomeFirstStepNudge } from '@/features/home/components/home-hub/HomeFirstStepNudge'
@@ -62,7 +61,6 @@ export function HomeHubView({
   return (
     <div className="home-ref-screen">
       <div className="home-ref-backdrop" style={homeBackdropStyle} aria-hidden="true" />
-      <WorldMascot surface="home" />
 
       <HomeViewSwitcher view={view} onSelectView={selectView} />
 

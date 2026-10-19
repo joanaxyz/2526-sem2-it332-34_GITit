@@ -4661,6 +4661,12 @@
             "AdventureCommandResponse": {
                 "type": "object",
                 "properties": {
+                    "learned_skills": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LearnedSkillResponse"
+                        }
+                    },
                     "run": {
                         "$ref": "#/components/schemas/AdventureCommandRunResponse"
                     },
@@ -4731,6 +4737,12 @@
             "AdventureLevelTierCommandResponse": {
                 "type": "object",
                 "properties": {
+                    "learned_skills": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LearnedSkillResponse"
+                        }
+                    },
                     "run": {
                         "$ref": "#/components/schemas/AdventureLevelTierCommandRunResponse"
                     },

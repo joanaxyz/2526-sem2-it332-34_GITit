@@ -8,6 +8,7 @@ import { queryKeys } from '@/shared/api/queryKeys'
 import { isExitCommand } from '@/shared/level-runtime/commands'
 import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import { battleEventsForSubmittedCommand } from '@/shared/level-runtime/commandBattle'
+import type { LearnedSkill } from '@/shared/skill-learning/useSkillLearnedQueue'
 
 export function createTierWorkspaceCommandHandler({
   runId,
@@ -20,6 +21,7 @@ export function createTierWorkspaceCommandHandler({
   setExitConfirmOpen,
   setWorkspaceEditorPath,
   queueOutcomeAnimation,
+  onSkillsLearned,
 }: {
   runId: number
   mutation: ReturnType<typeof useTierCommandSubmission>
@@ -31,6 +33,7 @@ export function createTierWorkspaceCommandHandler({
   setExitConfirmOpen: (open: boolean) => void
   setWorkspaceEditorPath: (path: string | null) => void
   queueOutcomeAnimation: (runId: number) => void
+  onSkillsLearned: (skills: LearnedSkill[]) => void
 }) {
   return (command: string) => {
     if (mutation.isPending) return
@@ -52,6 +55,7 @@ export function createTierWorkspaceCommandHandler({
           monsters: battleDirector.currentMonsters(),
           storyWorldSlug: runStorySlug(queryClient, runId),
         }))
+        onSkillsLearned(response.learned_skills ?? [])
         if (response.run.status === 'completed' || response.run.status === 'failed') {
           queueOutcomeAnimation(response.run.id)
         }

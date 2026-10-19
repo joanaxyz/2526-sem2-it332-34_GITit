@@ -19,16 +19,58 @@ from tutoring.services.forms import FormGuide, command_family
 # Families whose operands are all paths, so consecutive calls can be merged
 # into one command and several operands mean "several files".
 BATCHABLE_FAMILIES = frozenset({"add", "rm", "restore", "check-ignore"})
-PATH_FAMILIES = BATCHABLE_FAMILIES | {"reset", "checkout", "diff", "log", "stash", "ls-files", "clean"}
-REF_FAMILIES = frozenset({
-    "log", "show", "diff", "reset", "revert", "rebase", "switch", "checkout", "branch",
-    "cherry-pick", "merge", "tag", "rev-list", "shortlog", "rev-parse", "restore",
-})
+PATH_FAMILIES = BATCHABLE_FAMILIES | {
+    "reset",
+    "checkout",
+    "diff",
+    "log",
+    "stash",
+    "ls-files",
+    "clean",
+}
+REF_FAMILIES = frozenset(
+    {
+        "log",
+        "show",
+        "diff",
+        "reset",
+        "revert",
+        "rebase",
+        "switch",
+        "checkout",
+        "branch",
+        "cherry-pick",
+        "merge",
+        "tag",
+        "rev-list",
+        "shortlog",
+        "rev-parse",
+        "restore",
+    }
+)
 # Options whose value is a message, name, or count - never a path or ref to teach.
-_VALUE_OPTIONS = frozenset({
-    "-m", "--message", "-F", "--file", "--author", "--format", "--pretty", "-n", "--max-count",
-    "--grep", "-b", "-B", "-c", "-C", "--since", "--until", "--date", "--set-upstream-to",
-})
+_VALUE_OPTIONS = frozenset(
+    {
+        "-m",
+        "--message",
+        "-F",
+        "--file",
+        "--author",
+        "--format",
+        "--pretty",
+        "-n",
+        "--max-count",
+        "--grep",
+        "-b",
+        "-B",
+        "-c",
+        "-C",
+        "--since",
+        "--until",
+        "--date",
+        "--set-upstream-to",
+    }
+)
 # Options whose value *is* a ref, so ref techniques apply to it.
 _REF_VALUE_OPTIONS = frozenset({"--source", "-s", "--onto"})
 _DEFAULT_REMOTES = ("origin", "upstream")
@@ -145,40 +187,50 @@ TECHNIQUES: tuple[Technique, ...] = (
         "Match files with a pattern",
         "Quote a pattern like '*.css' and Git picks every file it fits.",
         lambda family: f"git {family} '<pattern>'",
-        lambda parsed, _state: parsed.family in PATH_FAMILIES
-        and any("*" in path or "?" in path for path in _paths(parsed)),
+        lambda parsed, _state: (
+            parsed.family in PATH_FAMILIES
+            and any("*" in path or "?" in path for path in _paths(parsed))
+        ),
     ),
     Technique(
         "path-separator",
         "Mark where file names start",
         "Everything after -- is read as a file path, even if it looks like a branch name.",
         lambda family: f"git {family} -- <path>",
-        lambda parsed, _state: parsed.family in PATH_FAMILIES and bool(parsed.paths_after_separator),
+        lambda parsed, _state: (
+            parsed.family in PATH_FAMILIES and bool(parsed.paths_after_separator)
+        ),
     ),
     Technique(
         "relative-commit",
         "Count back from a commit",
         "HEAD~2 is two commits before HEAD, and HEAD^ is the one right before it.",
         lambda family: f"git {family} HEAD~<n>",
-        lambda parsed, _state: parsed.family in REF_FAMILIES
-        and any(_RELATIVE_REF.fullmatch(ref) for ref in parsed.refs),
+        lambda parsed, _state: (
+            parsed.family in REF_FAMILIES
+            and any(_RELATIVE_REF.fullmatch(ref) for ref in parsed.refs)
+        ),
     ),
     Technique(
         "commit-range",
         "Name a range of commits",
         "a..b means the commits on b that are not on a.",
         lambda family: f"git {family} <from>..<to>",
-        lambda parsed, _state: parsed.family in REF_FAMILIES
-        and any(".." in ref and "..." not in ref for ref in parsed.refs),
+        lambda parsed, _state: (
+            parsed.family in REF_FAMILIES
+            and any(".." in ref and "..." not in ref for ref in parsed.refs)
+        ),
     ),
     Technique(
         "remote-branch",
         "Use a remote-tracking branch",
         "origin/main is where main was on origin the last time you fetched.",
         lambda family: f"git {family} <remote>/<branch>",
-        lambda parsed, state: parsed.family in REF_FAMILIES
-        and any(
-            ref.startswith(f"{remote}/") for ref in parsed.refs for remote in _remotes(state)
+        lambda parsed, state: (
+            parsed.family in REF_FAMILIES
+            and any(
+                ref.startswith(f"{remote}/") for ref in parsed.refs for remote in _remotes(state)
+            )
         ),
     ),
     Technique(
@@ -229,7 +281,11 @@ def batch_command(steps: list[dict], index: int) -> tuple[str, int]:
         if len(later.get("positions") or []) > 1:
             break  # an authored edit has to happen before this step
         parsed = parse_command(later["command"])
-        if parsed is None or parsed.family != first.family or _option_signature(later["command"]) != base:
+        if (
+            parsed is None
+            or parsed.family != first.family
+            or _option_signature(later["command"]) != base
+        ):
             break
         new_paths = [path for path in _paths(parsed) if path not in paths]
         if not new_paths:

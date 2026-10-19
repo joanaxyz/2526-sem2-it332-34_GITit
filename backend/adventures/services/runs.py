@@ -290,7 +290,7 @@ class AdventureRunService:
             run.save(update_fields=["library_opened"])
         return run
 
-    def _credit_mastery(self, *, player, level: AdventureLevel) -> bool:
+    def _credit_mastery(self, *, player, level: AdventureLevel) -> None:
         # Each wave in the cleared level counts as one distinct solve for every
         # form it exercises, mirroring the per-wave mastery targets.
         wave_counts = Counter(
@@ -301,18 +301,13 @@ class AdventureRunService:
             if form_id is not None
         )
         if not wave_counts:
-            return False
+            return
         targets = form_solve_targets(set(wave_counts))
-        newly_learned = False
         for form in CommandForm.objects.filter(id__in=wave_counts):
             row, _created = SkillMastery.objects.get_or_create(player=player, command_form=form)
-            if row.learned_at is None:
-                row.learned_at = timezone.now()
-                newly_learned = True
             row.solves += wave_counts[form.id]
             row.mastered = row.solves >= targets.get(form.id, 1)
-            row.save(update_fields=["solves", "mastered", "learned_at", "updated_at"])
-        return newly_learned
+            row.save(update_fields=["solves", "mastered", "updated_at"])
 
     def _all_required_levels_complete(self, *, player, adventure: AdventureLevel) -> bool:
         required_ids = set(

@@ -15,8 +15,11 @@ from tutoring.services.introductions import complete_introduction
 def locked_run(request, run_id):
     return get_object_or_404(
         AdventureLevelTierRun.objects.select_for_update(of=("self",)).select_related(
-            "current_wave", "selected_variant",
-        ), pk=run_id, player=get_or_create_player(request.user),
+            "current_wave",
+            "selected_variant",
+        ),
+        pk=run_id,
+        player=get_or_create_player(request.user),
     )
 
 
@@ -25,7 +28,8 @@ class IntroductionCompleteAPIView(APIView):
 
     @extend_schema(
         operation_id="command_introduction_complete",
-        request=IntroductionCompleteSerializer, responses={200: IntroductionCompleteResponseSerializer},
+        request=IntroductionCompleteSerializer,
+        responses={200: IntroductionCompleteResponseSerializer},
     )
     @transaction.atomic
     def post(self, request, run_id):

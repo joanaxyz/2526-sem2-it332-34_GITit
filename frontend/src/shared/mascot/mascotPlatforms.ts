@@ -2,25 +2,50 @@ export type MascotPlatform = { element: HTMLElement; left: number; right: number
 
 const PLATFORM_SELECTOR = '[data-mascot-platform], section, article, aside, [class*="panel"], [class*="card"], [class*="showcase"], [class*="roster"], [class*="surface"]'
 
-/** Container tops are physical ledges, measured in the mascot host's coordinates. */
+/** Container tops are physical ledges, measured in the viewport overlay's coordinates. */
 export function mascotPlatforms(root: HTMLElement, host: DOMRect): MascotPlatform[] {
   const seen = new Set<string>()
   return Array.from(root.querySelectorAll<HTMLElement>(PLATFORM_SELECTOR)).flatMap((element) => {
-    if (element.closest('.world-mascot, [hidden], [inert], [role="dialog"]')) return []
-    const rect = element.getBoundingClientRect()
-    const style = getComputedStyle(element)
-    if (rect.width < 70 || rect.height < 28 || rect.top < 65 || rect.top > innerHeight - 35 || style.visibility === 'hidden' || style.display === 'none') return []
-    const painted = parseFloat(style.borderTopWidth) > 0 ||
-      !['transparent', 'rgba(0, 0, 0, 0)', ''].includes(style.backgroundColor) || style.backgroundImage !== 'none'
-    if (!painted && !element.matches('[data-mascot-platform], section, article, aside')) return []
-    const left = Math.max(28, rect.left - host.left)
-    const right = Math.min(host.width - 28, rect.right - host.left)
-    const y = rect.top - host.top
-    const key = `${Math.round(left)}:${Math.round(right)}:${Math.round(y)}`
-    if (right - left < 45 || seen.has(key)) return []
+    const platform = mascotPlatform(element, root, host)
+    if (!platform) return []
+    const key = `${Math.round(platform.left)}:${Math.round(platform.right)}:${Math.round(platform.y)}`
+    if (seen.has(key)) return []
     seen.add(key)
-    return [{ element, left, right, y }]
+    return [platform]
   })
+}
+
+export function mascotPlatform(element: HTMLElement, root: HTMLElement, host: DOMRect): MascotPlatform | null {
+  if (!element.isConnected || element.closest('.world-mascot, [hidden], [inert], [aria-hidden="true"], [role="dialog"]')) return null
+  const rect = element.getBoundingClientRect()
+  const style = getComputedStyle(element)
+  const explicit = element.matches('[data-mascot-platform]')
+  if (rect.width < (explicit ? 28 : 70) || rect.height < 20 || rect.top < 65 || rect.top > innerHeight - 35 || style.visibility === 'hidden' || style.display === 'none') return null
+  const painted = parseFloat(style.borderTopWidth) > 0 ||
+    !['transparent', 'rgba(0, 0, 0, 0)', ''].includes(style.backgroundColor) || style.backgroundImage !== 'none'
+  if (!painted && !element.matches('[data-mascot-platform], section, article, aside')) return null
+  let left = Math.max(28, rect.left - host.left)
+  let right = Math.min(host.width - 28, rect.right - host.left)
+  // Scrollable rails can contain offscreen panels; only their visible top edges count.
+  for (let ancestor = element.parentElement; ancestor && root.contains(ancestor); ancestor = ancestor.parentElement) {
+    const overflow = getComputedStyle(ancestor)
+    const clipsX = /auto|scroll|hidden|clip/.test(overflow.overflowX)
+    const clipsY = /auto|scroll|hidden|clip/.test(overflow.overflowY)
+    if (!clipsX && !clipsY) continue
+    const clip = ancestor.getBoundingClientRect()
+    if (clipsY && (rect.top < clip.top - 1 || rect.top > clip.bottom)) return null
+    if (clipsX) { left = Math.max(left, clip.left - host.left); right = Math.min(right, clip.right - host.left) }
+  }
+  const y = rect.top - host.top
+  if (right - left < (explicit ? 28 : 45)) return null
+  return { element, left, right, y }
+}
+
+/** Clicking any part of a node lands at the center of its ring. */
+export function mascotPerch(platforms: MascotPlatform[], target: Element): MascotPlatform | null {
+  const node = target.closest('[data-mascot-perch]')
+  const ring = node?.querySelector('[data-mascot-platform]') ?? node
+  return platforms.find((platform) => platform.element === ring) ?? null
 }
 
 export function platformNear(platforms: MascotPlatform[], x: number, y: number): MascotPlatform | null {

@@ -11,6 +11,7 @@ const options = [{ value: 'git add', gloss: 'Stage' }, { value: 'git status', gl
 const collide = vi.fn()
 let frames: Map<number, FrameRequestCallback>
 let nextFrame: number
+let frameTime: number
 let reduced = false
 
 function Harness() {
@@ -24,7 +25,8 @@ function step(count: number) {
     for (let i = 0; i < count; i++) {
       const pending = [...frames.values()]
       frames.clear()
-      pending.forEach((callback) => callback(i * 40 + 40))
+      frameTime += 40
+      pending.forEach((callback) => callback(frameTime))
     }
   })
 }
@@ -35,6 +37,7 @@ describe('flight controls and collisions', () => {
     collide.mockReset()
     reduced = false
     nextFrame = 0
+    frameTime = 0
     frames = new Map()
     vi.stubGlobal('matchMedia', () => ({ matches: reduced, addEventListener: vi.fn(), removeEventListener: vi.fn() }))
     vi.stubGlobal('requestAnimationFrame', (callback: FrameRequestCallback) => {
@@ -91,6 +94,43 @@ describe('flight controls and collisions', () => {
     const before = projectile.style.transform
     step(20)
     expect(projectile.style.transform).not.toBe(before)
+  })
+
+  it.each([320, 360, 390, 640, 1000, 1180])('moves choices one quarter of a %ipx arena in seven seconds', (width) => {
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(width)
+    render(<DrillFlightArena options={options} verdict={null} lives={3} started
+      onStart={vi.fn()} onCollide={collide} voice="machine" />)
+    const projectile = screen.getByRole('button', { name: 'Fly to answer 1: git add' })
+    const x = () => Number(projectile.style.transform.match(/translate\(([\d.]+)px/)?.[1])
+    const start = x()
+    step(176)
+    expect((start - x()) / width).toBeCloseTo(0.25)
+    expect(collide).not.toHaveBeenCalled()
+  })
+
+  it('preserves choice position and crossing time when the arena resizes mid-flight', () => {
+    let resize = () => {}
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(callback: () => void) { resize = callback }
+      observe() {}
+      disconnect() {}
+    })
+    const width = vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(1000)
+    render(<DrillFlightArena options={options} verdict={null} lives={3} started
+      onStart={vi.fn()} onCollide={collide} voice="machine" />)
+    const projectile = screen.getByRole('button', { name: 'Fly to answer 1: git add' })
+    const x = () => Number(projectile.style.transform.match(/translate\(([\d.]+)px/)?.[1])
+    step(176)
+    const beforeResize = x() / 1000
+    act(() => {
+      width.mockReturnValue(360)
+      resize()
+    })
+    expect(x() / 360).toBeCloseTo(beforeResize)
+    const start = x()
+    step(175)
+    expect((start - x()) / 360).toBeCloseTo(0.25)
+    expect(collide).not.toHaveBeenCalled()
   })
 
   it('replaces a hit choice with its verdict and staggers a wrong hit', () => {

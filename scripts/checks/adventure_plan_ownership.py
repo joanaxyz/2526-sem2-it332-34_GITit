@@ -1082,9 +1082,7 @@ def _trusted_blueprint_generator_callables(
         and _read_only_helper_definition(
             common_tree,
             "v",
-            safe_method_receivers=frozenset(
-                {"SOLUTION_TRAJECTORIES", "TARGET_STATES"}
-            ),
+            safe_method_receivers=frozenset({"SOLUTION_TRAJECTORIES", "TARGET_STATES"}),
         )
     ):
         trusted.add("v")

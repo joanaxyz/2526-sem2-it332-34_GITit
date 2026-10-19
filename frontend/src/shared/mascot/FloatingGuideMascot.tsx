@@ -53,6 +53,7 @@ export function FloatingGuideMascot({ label, active = false, onActivate, buttonR
   }, [])
 
   return createPortal(<div className="guide-mascot" data-dragging={dragging || undefined}
+    aria-hidden={active || undefined} inert={active || undefined}
     style={{ left: position.x, top: position.y }}>
     <button ref={buttonRef} type="button" className={`guide-mascot__button${active ? ' is-active' : ''}`}
       aria-label={label} aria-expanded={active} data-command-guide-launcher data-tour-target={tourTarget}

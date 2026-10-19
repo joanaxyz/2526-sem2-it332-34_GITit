@@ -28,6 +28,8 @@ import { queryKeys } from '@/shared/api/queryKeys'
 import { usePersistentState } from '@/shared/utils/persistentState'
 import { WORKSPACE_BATTLE_STAGE_ROW } from '@/shared/level/workspaceLayout'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
+import { SkillLearnedOverlay } from '@/shared/skill-learning/SkillLearnedOverlay'
+import { useSkillLearnedQueue } from '@/shared/skill-learning/useSkillLearnedQueue'
 
 type AdventureWorkspaceSnapshot = {
   run: AdventureRun
@@ -61,6 +63,10 @@ export function AdventureSession({
   const queriedRun = query.data
   const queriedRunId = queriedRun?.id ?? null
   const queriedRunStatus = queriedRun?.status ?? null
+  const learnedSkills = useSkillLearnedQueue({
+    runId,
+    blocked: submitCommand.isPending || director.animating || exitNavigationRunId === runId,
+  })
   // The whole workspace waits on this: a stage that paints before its art is
   // decoded fades the arena, the companion and the foe in over the first frames.
   const assetsReady = useAdventureLevelAssets({
@@ -147,6 +153,7 @@ export function AdventureSession({
   const workspaceRun = run.current_attempt ? run : lastWorkspace?.run ?? run
   const attempt = run.current_attempt ?? workspaceRun.current_attempt
   const outcomeModalOpen =
+    !learnedSkills.pending &&
     !exitNavigationPending &&
     (run.status === 'completed' || run.status === 'failed') &&
     !submitCommand.isPending &&
@@ -171,6 +178,7 @@ export function AdventureSession({
   if (!attempt) {
     return (
       <div className="workspace-bg gameplay-workspace-screen">
+        <SkillLearnedOverlay skill={learnedSkills.skill} companionSlug={companionSlug} onClose={learnedSkills.dismiss} />
         <AdventureOutcomeModal
           open={outcomeModalOpen}
           run={run}
@@ -194,6 +202,7 @@ export function AdventureSession({
     setExitConfirmOpen,
     setLastWorkspace,
     queueOutcomeAnimation,
+    onSkillsLearned: learnedSkills.enqueue,
   })
 
   return (
@@ -250,7 +259,7 @@ export function AdventureSession({
         onCloseEditor={() => setWorkspaceEditorPath(null)}
         onWriteFile={(input) => writeFile.mutateAsync(input)}
       />
-      {tourOpen ? (
+      {tourOpen && !learnedSkills.pending ? (
         <AdventureWorkspaceTour
           key={`${tourKey}:${run.id}`}
           runId={run.id}
@@ -287,6 +296,7 @@ export function AdventureSession({
         onClose={() => setStartOverConfirmOpen(false)}
         onRestart={restart}
       />
+      <SkillLearnedOverlay skill={learnedSkills.skill} companionSlug={companionSlug} onClose={learnedSkills.dismiss} />
     </div>
   )
 }
