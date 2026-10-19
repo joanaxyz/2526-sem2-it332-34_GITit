@@ -36,6 +36,7 @@ from simulator.services import RepositorySnapshotService, RepositoryStateSimulat
 
 from .history import AdventureCommandHistoryCache
 from .runs import AdventureRunService
+from .skill_learning import learn_from_command
 
 
 class AdventureCommandService:
@@ -181,6 +182,7 @@ class AdventureCommandService:
         # command's outcome told the client it had spent nothing - refilling the
         # battle HP meter while the cleared wave was still playing its death beat.
         counted_after_command = attempt.counted_command_count
+        learned_skills = learn_from_command(player=attempt.player, result=result)
 
         run_transitioned = False
         if solved or failed:
@@ -216,6 +218,7 @@ class AdventureCommandService:
             "stderr": result.stderr,
             "exit_code": result.exit_code,
             "terminal_output": result.output,
+            "learned_skills": learned_skills,
             "command_classification": classification,
             "repository_state": repository_snapshot,
             "executed_commands": executed if result.processed else None,

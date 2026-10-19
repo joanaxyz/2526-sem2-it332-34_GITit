@@ -110,16 +110,14 @@
   }
 
   .home-sprite-stage {
-    --home-sprite-ground-bottom: 2.85rem;
+    --home-sprite-ground-bottom: 1.25rem;
+    --home-sprite-scale: 1;
+    height: clamp(20rem, calc(32vh + 4rem), 27rem);
     min-height: 12.75rem;
   }
 
   .home-sprite-rune {
     inset: 0.8rem 2.2rem 1.25rem;
-  }
-
-  .home-sprite-avatar {
-    transform: translateX(-50%) scale(0.78);
   }
 
   .home-sprite-pedestal {
@@ -203,19 +201,15 @@
   }
 
   .home-sprite-stage {
-    --home-sprite-ground-bottom: 3.65rem;
-    min-height: 22rem;
+    --home-sprite-ground-bottom: 2rem;
+    --home-sprite-scale: 1.05;
+    min-height: 26rem;
     align-items: end;
     padding-top: 4.4rem;
   }
 
   .home-sprite-rune {
     inset: 3.8rem 1.2rem 4rem;
-  }
-
-  .home-sprite-avatar {
-    transform: translateX(-50%) scale(0.68);
-    transform-origin: center bottom;
   }
 
   .home-sprite-pedestal {

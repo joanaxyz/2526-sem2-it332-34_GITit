@@ -22,6 +22,8 @@ import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { getStoryWorld } from '@/shared/story-worlds/registry'
 import { storyWorldStyle } from '@/shared/story-worlds/theme'
+import { WorldMascot } from '@/shared/mascot/WorldMascot'
+import { useMascotKnowledge } from '@/features/skills/hooks/useMascotKnowledge'
 
 const COMPACT_STORY_MAP_QUERY = '(max-width: 1120px)'
 
@@ -166,6 +168,7 @@ export function StoryMapPage() {
     () => chapters.find((chapter) => chapter.id === activeChapterId) ?? firstOpenChapter(chapters, !orientationRequested),
     [activeChapterId, chapters, orientationRequested],
   )
+  const mascotKnowledge = useMascotKnowledge(activeChapter ?? undefined)
 
   const overviewQuery = useQuery({
     queryKey: queryKeys.chapterOverview(activeChapter?.id ?? 0),
@@ -230,6 +233,7 @@ export function StoryMapPage() {
       style={storyWorldStyle(storyWorld)}
     >
       <div className="story-map-backdrop" style={storyMapStyle} aria-hidden="true" />
+      {!showingOrientation ? <WorldMascot surface="track" knowledge={mascotKnowledge} contextKey={`${storySlug}:${activeChapter.id}`} /> : null}
 
       <CompanionRequiredOverlay
         open={companionPromptOpen && !hasCompanion && !loadoutLoading}

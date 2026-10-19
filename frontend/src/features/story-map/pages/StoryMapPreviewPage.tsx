@@ -5,6 +5,7 @@ import {
 
 import { ChapterOverview } from '@/features/story-map/components/ChapterOverview'
 import { StoryAdventurePath } from '@/features/story-map/components/path/StoryAdventurePath'
+import { WorldMascot } from '@/shared/mascot/WorldMascot'
 import { GamePanel } from '@/shared/components/GamePanel'
 import type {
   AdventureLevelSummary,
@@ -214,6 +215,7 @@ export function Component() {
       <AppTopbar />
       <main className="app-main app-main--story-map">
         <div className="story-page-shell">
+          <WorldMascot surface="track" />
           <div className="story-map-backdrop" style={storyMapStyle} aria-hidden="true" />
           <div className="story-map-layout">
             <aside className="story-map-left" aria-label="Chapter tools">

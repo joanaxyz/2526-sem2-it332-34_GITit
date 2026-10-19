@@ -78,6 +78,7 @@ export function StoryPathLevelNode({
       <button
         type="button"
         className="story-path-node-button"
+        data-mascot-perch
         data-onboarding={level?.id === currentLevelId && !disabled ? 'next-level' : undefined}
         disabled={disabled}
         aria-label={
@@ -91,7 +92,7 @@ export function StoryPathLevelNode({
           if (level) onToggle(level.id)
         }}
       >
-        <span className="story-path-node-ring">
+        <span className="story-path-node-ring" data-mascot-platform>
           {state === 'locked' ? <Lock className="size-5" aria-hidden="true" /> : <span>{index + 1}</span>}
         </span>
         {state === 'cleared' ? (
@@ -154,6 +155,7 @@ export function StoryChallengeNode({
     <button
       type="button"
       className="story-path-node story-path-node--trial"
+      data-mascot-perch
       data-onboarding={trialCount > 0 ? 'challenges' : undefined}
       data-state={state}
       data-open={open || undefined}
@@ -171,7 +173,7 @@ export function StoryChallengeNode({
       aria-controls="story-challenge-panel"
       onClick={onToggle}
     >
-      <span className="story-path-node-ring">
+      <span className="story-path-node-ring" data-mascot-platform>
         {state === 'locked' ? (
           <Lock className="size-5" aria-hidden="true" />
         ) : (

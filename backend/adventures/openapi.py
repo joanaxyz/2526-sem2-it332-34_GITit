@@ -7,7 +7,11 @@ and validate that presenter output for OpenAPI generation.
 from drf_spectacular.utils import PolymorphicProxySerializer, extend_schema_field
 from rest_framework import serializers
 
-from common.openapi import GameplayRunStatusField, RuntimeStepResponseSerializer
+from common.openapi import (
+    GameplayRunStatusField,
+    LearnedSkillResponseSerializer,
+    RuntimeStepResponseSerializer,
+)
 from tutoring.openapi import CommandIntroductionResponseSerializer
 
 
@@ -74,6 +78,7 @@ class AdventureLevelLibraryResponseSerializer(serializers.Serializer):
 
 
 class AdventureCommandResponseSerializer(serializers.Serializer):
+    learned_skills = LearnedSkillResponseSerializer(many=True, required=False)
     run = AdventureCommandRunResponseField()
     solved = serializers.BooleanField()
     stdout = serializers.CharField(allow_blank=True)
@@ -147,6 +152,7 @@ class AdventureLevelTierRunResponseSerializer(serializers.Serializer):
 
 
 class AdventureLevelTierCommandResponseSerializer(serializers.Serializer):
+    learned_skills = LearnedSkillResponseSerializer(many=True, required=False)
     run = AdventureLevelTierCommandRunResponseSerializer()
     command_outcome = serializers.DictField()
     stdout = serializers.CharField(allow_blank=True)

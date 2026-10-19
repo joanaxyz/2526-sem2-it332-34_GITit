@@ -42,7 +42,7 @@ button.story-skill-reward:focus-visible {
 
 .story-reward-status {
   color: rgba(219, 234, 254, 0.7);
-  font-size: 0.65rem;
+  font-size: var(--text-2xs);
 }
 
 .story-skill-reward[data-claimed='true'] .story-reward-status {

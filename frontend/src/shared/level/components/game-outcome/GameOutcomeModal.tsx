@@ -5,18 +5,22 @@ import titlesImage from '@/assets/images/battle-outcome/titles.webp'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
 import { useLazyImage } from '@/shared/utils/useLazyImage'
+import { normalizeStarScore } from '@/shared/level/utils/starScore'
 
 import { GameOutcomeConfetti } from './GameOutcomeConfetti'
 import { GameOutcomeStatTile } from './GameOutcomeStatTile'
 
 // A single outcome shows exactly one star-arc image (the loss art, or one of
-// three win tiers), so each is imported lazily instead of bundling all four
+// six win tiers), so each is imported lazily instead of bundling every variant
 // upfront. `titlesImage` above is shown on every outcome, so it stays a
 // normal static import.
 const STAR_ART_LOADERS: Record<string, () => Promise<{ default: string }>> = {
   lose: () => import('@/assets/images/battle-outcome/lose-0.webp'),
+  'win-0.5': () => import('@/assets/images/battle-outcome/win-0.5.webp'),
   'win-1': () => import('@/assets/images/battle-outcome/win-1.webp'),
+  'win-1.5': () => import('@/assets/images/battle-outcome/win-1.5.webp'),
   'win-2': () => import('@/assets/images/battle-outcome/win-2.webp'),
+  'win-2.5': () => import('@/assets/images/battle-outcome/win-2.5.webp'),
   'win-3': () => import('@/assets/images/battle-outcome/win-3.webp'),
 }
 
@@ -80,9 +84,9 @@ export function GameOutcomeModal({
   className?: string
 }) {
   const isFailed = tone === 'failure'
-  const earnedStars = Number.isFinite(stars) ? Math.max(0, Math.min(3, Math.floor(stars ?? 0))) : null
+  const earnedStars = Number.isFinite(stars) ? normalizeStarScore(stars) : null
   const displayLabel = resultLabel ?? (isFailed ? 'Game Over' : 'You Won')
-  // Failure always shows the shattered arc; wins need at least one earned star
+  // Failure always shows the shattered arc; wins need a positive star score
   // (the arc art has no zero-star variant, so starless wins keep the icon crest).
   const starArtKey = isFailed ? 'lose' : earnedStars && earnedStars > 0 ? `win-${earnedStars}` : null
   const starArt = useLazyImage(starArtKey, STAR_ART_LOADERS)

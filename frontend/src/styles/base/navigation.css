@@ -93,7 +93,7 @@
   color: var(--text-primary);
 }
 
-/* The logo sits in a lit plate, so it reads as an inlaid emblem. */
+/* Let the emblem fill its slot without a second circular frame. */
 .app-brand-sigil {
   position: relative;
   display: grid;
@@ -101,25 +101,18 @@
   width: 2.45rem;
   height: 2.45rem;
   place-items: center;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.28);
-  border-radius: 999px;
-  background: #0a1729;
-  transition:
-    border-color var(--motion-normal) var(--ease-out),
-    box-shadow var(--motion-normal) var(--ease-out);
 }
 
 .app-brand-sigil img {
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 100%;
+  height: 100%;
   object-fit: contain;
   filter: drop-shadow(0 0 10px rgba(var(--theme-primary-rgb), 0.45));
 }
 
-.app-brand:hover .app-brand-sigil,
-.app-brand:focus-visible .app-brand-sigil {
-  border-color: rgba(var(--theme-primary-rgb), 0.7);
-  box-shadow: var(--glow-active);
+.app-brand:hover .app-brand-sigil img,
+.app-brand:focus-visible .app-brand-sigil img {
+  filter: drop-shadow(0 0 14px rgba(var(--theme-primary-rgb), 0.65));
 }
 
 .app-brand-copy {

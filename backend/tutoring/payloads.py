@@ -11,11 +11,15 @@ def tutor_payload(run):
         pending.delete()
         pending = None
     context_id = context_hash(run)
-    if (pending and pending.revision == run.total_attempts
-            and pending.context_hash == context_id
-            and not PlayerCommandIntroduction.objects.filter(
-                player_id=run.player_id, teaching_key=pending.teaching_key,
-            ).exists()):
+    if (
+        pending
+        and pending.revision == run.total_attempts
+        and pending.context_hash == context_id
+        and not PlayerCommandIntroduction.objects.filter(
+            player_id=run.player_id,
+            teaching_key=pending.teaching_key,
+        ).exists()
+    ):
         return {
             "context_id": f"{context_id}:{pending.teaching_key}:feedback",
             "teaching_key": pending.teaching_key,

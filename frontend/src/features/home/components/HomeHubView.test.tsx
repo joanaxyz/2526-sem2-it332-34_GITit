@@ -183,6 +183,14 @@ describe('HomeHubView contract', () => {
     window.sessionStorage.clear()
   })
 
+  it('shares earned knowledge through the mascot and dismisses it when the Home view changes', () => {
+    renderHub()
+    fireEvent.click(screen.getByRole('button', { name: 'Git-It mascot: share a Git tip' }))
+    expect(within(screen.getByRole('region', { name: 'Git knowledge' })).getByRole('status')).toHaveTextContent('Read the repository timeline.')
+    openView('Progress')
+    expect(screen.queryByRole('region', { name: 'Git knowledge' })).not.toBeInTheDocument()
+  })
+
   it('treats an invalid view as Profile and replaces only the view parameter', () => {
     const { router } = renderHub('/home?campaign=alpha&view=invalid')
 

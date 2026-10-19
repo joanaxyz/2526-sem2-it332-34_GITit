@@ -56,13 +56,25 @@ describe('floating command guide mascot', () => {
     expect(parseFloat(position.top) + 104).toBeLessThanOrEqual(220)
   })
 
-  it('can still be dragged while its guide is already open', () => {
+  it('hides while its guide is open and returns to the same position when closed', () => {
     const onActivate = vi.fn()
-    render(<FloatingGuideMascot label="Command guide is open" active onActivate={onActivate} />)
+    const view = render(<FloatingGuideMascot label="Open command guide" onActivate={onActivate} />)
     const button = screen.getByRole('button')
-    const before = button.parentElement!.getAttribute('style')
     drag(button)
-    expect(button.parentElement!.getAttribute('style')).not.toBe(before)
+    const launcher = button.parentElement!
+    const position = launcher.getAttribute('style')
+
+    view.rerender(<FloatingGuideMascot label="Command guide is open" active onActivate={onActivate} />)
+    expect(screen.queryByRole('button')).not.toBeInTheDocument()
+    expect(launcher).toHaveAttribute('aria-hidden', 'true')
+    expect(launcher).toHaveAttribute('inert')
+    expect(button).toBeInTheDocument()
+
+    view.rerender(<FloatingGuideMascot label="Open command guide" onActivate={onActivate} />)
+    expect(screen.getByRole('button')).toBe(button)
+    expect(launcher).not.toHaveAttribute('inert')
+    expect(launcher).not.toHaveAttribute('aria-hidden')
+    expect(launcher.getAttribute('style')).toBe(position)
     expect(onActivate).not.toHaveBeenCalled()
   })
 })

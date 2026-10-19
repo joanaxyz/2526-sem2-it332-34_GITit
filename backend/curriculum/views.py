@@ -1,16 +1,15 @@
+from drf_spectacular.utils import OpenApiTypes, extend_schema
+from rest_framework.exceptions import NotFound
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from common.exceptions import Locked
 from common.openapi import (
     CommandFormPreviewResponseSerializer,
     LearnedSkillsResponseSerializer,
 )
 from common.services.performance import timing
-from drf_spectacular.utils import OpenApiTypes, extend_schema
-from players.services import get_or_create_player
-from rest_framework.exceptions import NotFound
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
 from curriculum.models import Chapter
 from curriculum.selectors import (
     chapter_book,
@@ -37,6 +36,7 @@ from curriculum.serializers import (
     StorySerializer,
 )
 from curriculum.services import ChapterChestService
+from players.services import get_or_create_player
 
 
 def _player_for(request):

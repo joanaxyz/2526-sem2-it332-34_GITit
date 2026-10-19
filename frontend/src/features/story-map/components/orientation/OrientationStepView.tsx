@@ -3,6 +3,7 @@ import { useMemo, useState } from 'react'
 
 import type { OrientationStep } from '@/features/story-map/components/orientation/types'
 import { normalizeBuilderCommand } from '@/features/story-map/components/orientation/types'
+import { addToSet, BUILDER_TOKENS } from './orientationStepState'
 import {
   OrientationCommandLesson,
   OrientationStepAction as StepAction,
@@ -15,12 +16,6 @@ import { Button } from '@/shared/components/Button'
 import { MascotMessage } from '@/shared/mascot/MascotMessage'
 import { LiveDagPanel } from '@/shared/level/components/LiveDagPanel'
 import { cn } from '@/shared/utils/cn'
-
-const BUILDER_TOKENS = ['git', 'commit', 'log', 'status', '-m', '--oneline', '--graph', '--all', '"message"']
-
-function addToSet(current: Set<string>, value: string) {
-  return new Set([...current, value])
-}
 
 export function OrientationStepView({
   step,

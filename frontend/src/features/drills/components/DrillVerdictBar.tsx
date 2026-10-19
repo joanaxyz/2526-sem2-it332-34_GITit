@@ -1,9 +1,10 @@
 import { Check, X } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 
 import type { DrillCard, DrillRung, DrillSequence, DrillVerdict } from '@/features/drills/types'
 
 /**
- * Feedback for the continuous flight, with a check control for assembly rounds.
+ * Feedback for each flight question, with a check control for assembly rounds.
  *
  * A wrong answer is answered with authored truth rather than a red cross:
  * every distractor is a real command form, so the panel can say what the
@@ -17,7 +18,7 @@ import type { DrillCard, DrillRung, DrillSequence, DrillVerdict } from '@/featur
  * miss panel's three - a nod against an explanation, so the rhythm of a
  * clean run stays quick.
  *
- * The session advances after the impact animation; the third miss ends the flight.
+ * Feedback stays visible until the learner continues; the third miss leads to results.
  */
 export function DrillVerdictBar({
   verdict,
@@ -27,6 +28,7 @@ export function DrillVerdictBar({
   sequence,
   optionCount,
   onCheck,
+  onContinue,
   flightChoices = false,
   outOfLives = false,
 }: {
@@ -38,9 +40,15 @@ export function DrillVerdictBar({
   /** How many numbered choices the current question offers, if any. */
   optionCount: number
   onCheck: () => void
+  onContinue: () => void
   flightChoices?: boolean
   outOfLives?: boolean
 }) {
+  const continueRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (verdict) continueRef.current?.focus({ preventScroll: true })
+  }, [verdict])
+
   const tone = !verdict ? 'idle' : verdict.correct ? 'right' : 'wrong'
   const answerText = !card
     ? (sequence?.steps.join('  →  ') ?? '')
@@ -122,9 +130,14 @@ export function DrillVerdictBar({
         </p>
 
         {verdict ? (
-          <span className="drill-flight-footer-note" role="status">
-            {outOfLives ? 'Flight ended' : verdict.correct ? 'Next question incoming…' : 'Recovering…'}
-          </span>
+          <button
+            ref={continueRef}
+            type="button"
+            className="ui-button ui-button--default"
+            onClick={onContinue}
+          >
+            {outOfLives ? 'View results' : 'Continue'}
+          </button>
         ) : flightChoices ? <span className="drill-flight-footer-note">Collisions submit your answer</span> : (
           <button
             type="button"
