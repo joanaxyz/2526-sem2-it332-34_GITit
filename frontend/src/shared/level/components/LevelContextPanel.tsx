@@ -2,6 +2,8 @@ import { BookOpenText, Check, ClipboardList, Star } from 'lucide-react'
 import type { ComponentType, ReactNode } from 'react'
 
 import { TaskSealIcon } from '@/shared/level/components/workspaceIcons'
+import { StarRulesButton } from './StarRules'
+import type { LevelTourMode } from '@/shared/level/utils/levelTour'
 
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 import type { NormalizedLevelContext, ObjectiveCheck } from '@/shared/level/utils/levelContext'
@@ -31,13 +33,19 @@ const defaultLabels: LevelStoryCardLabels = {
   detailsAriaLabel: 'Values referenced by the story and task',
 }
 
-export function StarTriplet({ count, className }: { count: number; className?: string }) {
+export function StarTriplet({ count, className, mode = 'tier' }: {
+  count: number
+  className?: string
+  mode?: LevelTourMode
+}) {
   return (
-    <span className={cn('gameplay-header-stars', className)} aria-label={`${count} of 3 stars`}>
-      {Array.from({ length: 3 }).map((_, index) => (
-        <Star key={index} aria-hidden="true" className={index < count ? 'is-lit' : ''} />
-      ))}
-    </span>
+    <StarRulesButton label={`Star rules: ${count} of 3 stars`} mode={mode}>
+      <span className={cn('gameplay-header-stars', className)} aria-label={`${count} of 3 stars`}>
+        {Array.from({ length: 3 }).map((_, index) => (
+          <Star key={index} aria-hidden="true" className={index < count ? 'is-lit' : ''} />
+        ))}
+      </span>
+    </StarRulesButton>
   )
 }
 

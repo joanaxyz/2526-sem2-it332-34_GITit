@@ -87,23 +87,19 @@ class AdventureRunService:
     def current_attempt(self, *, run: AdventureRun) -> AdventureRun | None:
         return run if run.status == SESSION_STATUS_STARTED else None
 
-    def _is_perfect_score_eligible(self, *, attempt: AdventureRun) -> bool:
-        if attempt.is_replay:
-            return not AdventureLevelCompletion.objects.filter(
-                player=attempt.player,
-                adventure_level=attempt.level,
-                stars__gte=3,
-            ).exists()
-        return (
-            not AdventureRun.objects.filter(
-                player=attempt.player,
-                level=attempt.level,
-                is_replay=False,
-                status__in=(SESSION_STATUS_FAILED, SESSION_STATUS_COMPLETED),
-            )
-            .exclude(pk=attempt.pk)
-            .exists()
+    def _retry_count(self, *, attempt: AdventureRun) -> int:
+        # Plain adventures have no retry_index. Count failed attempts since the
+        # last completion; starting a replay after a win begins a fresh chain.
+        previous = AdventureRun.objects.filter(
+            player=attempt.player, level=attempt.level, pk__lt=attempt.pk
         )
+        last_completion = (
+            previous.filter(status=SESSION_STATUS_COMPLETED)
+            .order_by("-pk")
+            .values_list("pk", flat=True)
+            .first()
+        )
+        return previous.filter(status=SESSION_STATUS_FAILED, pk__gt=last_completion or 0).count()
 
     @transaction.atomic(savepoint=False)
     def record_wave_outcome(
@@ -124,7 +120,6 @@ class AdventureRunService:
             return {"advanced": False, "completed": False}
 
         wave = attempt.current_wave
-        perfect_score_eligible = self._is_perfect_score_eligible(attempt=attempt)
         if repository_state is not None:
             attempt.repository_state = repository_state
 
@@ -154,7 +149,7 @@ class AdventureRunService:
             solved=True,
             counted_commands=counted_command_count,
             budget=wave.min_counted_commands,
-            first_try=perfect_score_eligible,
+            retry_count=self._retry_count(attempt=attempt),
         )
         if run_wave is not None:
             run_wave.status = SESSION_STATUS_COMPLETED

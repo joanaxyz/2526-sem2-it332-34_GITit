@@ -1,7 +1,7 @@
 """Star-target (par) accounting shared by the curriculum seeders.
 
 Two stars require ``counted_commands <= min_counted_commands`` and three require
-that on the first try, so the target has to be at least what the authored
+that with at most one retry, so the target has to be at least what the authored
 solution costs. Authoring defaults and hand-written values drifted below that
 and locked levels at one star, so the seed derives the floor from the solution
 itself, classified by the same engine rule the runtime bills commands with:

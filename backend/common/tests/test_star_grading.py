@@ -26,19 +26,21 @@ from testing.runtime_factories import (
 
 
 @pytest.mark.parametrize(
-    "solved,counted,budget,first_try,expected",
+    "solved,counted,budget,retry_count,expected",
     [
-        (False, 0, 2, True, 0),
-        (True, 1, 2, True, 3),
-        (True, 2, 2, True, 3),
-        (True, 2, 2, False, 2),
-        (True, 3, 2, True, 1),
-        (True, 3, 2, False, 1),
+        (False, 0, 2, 0, 0),
+        (True, 1, 2, 0, 3),
+        (True, 2, 2, 1, 3),
+        (True, 2, 2, 2, 2),
+        (True, 2, 2, 3, 2),
+        (True, 3, 2, 0, 1),
+        (True, 3, 2, 1, 1),
+        (True, 3, 2, 2, 1),
     ],
 )
-def test_star_grades_follow_the_command_target(solved, counted, budget, first_try, expected):
+def test_star_grades_follow_the_command_target(solved, counted, budget, retry_count, expected):
     assert (
-        stars(solved=solved, counted_commands=counted, budget=budget, first_try=first_try)
+        stars(solved=solved, counted_commands=counted, budget=budget, retry_count=retry_count)
         == expected
     )
 
@@ -173,21 +175,27 @@ def test_worse_replay_keeps_the_best_saved_grade(grading_lane):
     assert _score_snapshot(context) == best
 
 
-def test_retry_after_failure_earns_two_stars_then_play_again_can_improve_it(grading_lane):
+@pytest.mark.parametrize("retry_count,expected", [(1, 3), (2, 2), (3, 2)])
+def test_retry_allowance_and_fresh_replay_grades(grading_lane, retry_count, expected):
     context = grading_lane
-    for _ in range(3):
-        _submit(context, context.run, "git nope")
-    assert context.run.status == "failed"
+    failed = context.run
+    for _ in range(retry_count):
+        for _ in range(3):
+            _submit(context, failed, "git nope")
+        assert failed.status == "failed"
+        retry = context.start(failed)
+        failed = retry
 
-    retry = context.start(context.run)
     _submit(context, retry, "git add README.md")
-    assert retry.stars == 2
-    assert _score_snapshot(context)[:2] == (2, 1)
+    assert retry.stars == expected
+    assert _score_snapshot(context)[:2] == (expected, 1)
+    transactions = list(CoinTransaction.objects.values_list("id", "amount", "award_key"))
 
     replay = context.start(retry)
     _submit(context, replay, "git add README.md")
     assert replay.stars == 3
     assert _score_snapshot(context)[:2] == (3, 1)
+    assert list(CoinTransaction.objects.values_list("id", "amount", "award_key")) == transactions
 
 
 @pytest.mark.parametrize("grading_lane", ["tier", "challenge"], indirect=True)

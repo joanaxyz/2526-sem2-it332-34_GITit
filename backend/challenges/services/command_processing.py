@@ -264,12 +264,11 @@ class ChallengeCommandProcessingService:
         run.status = SESSION_STATUS_COMPLETED
         run.completed_at = timezone.now()
         run.ended_at = run.completed_at
-        first_try = run.retry_index == 0
         run.stars = compute_stars(
             solved=True,
             counted_commands=run.counted_action_total,
             budget=run.min_counted_commands,
-            first_try=first_try,
+            retry_count=run.retry_index,
         )
         chest_pending = False
         if not run.is_replay:

@@ -1,7 +1,7 @@
 """Star targets must be reachable.
 
 Two stars require ``counted_commands <= min_counted_commands`` and three require
-that on the first try, so a target below the counted cost of the authored
+that with at most one retry, so a target below the counted cost of the authored
 solution locks the level at one star for every player, forever. This caught two
 seed bugs: blueprint waves whose "read-only" prefix heuristic handed mutating
 moves a ``<= 0 commands`` target (``git branch release`` is not read-only), and
