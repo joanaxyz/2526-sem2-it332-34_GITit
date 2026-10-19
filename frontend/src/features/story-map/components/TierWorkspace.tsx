@@ -5,7 +5,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
 import { TierExitConfirmModal } from '@/features/story-map/components/TierExitConfirmModal'
 import { TierStatusHeader } from '@/features/story-map/components/TierStatusHeader'
-import { TierStatsBar } from '@/features/story-map/components/tier-workspace/TierStatsBar'
 import { TierStoryModal } from '@/features/story-map/components/tier-workspace/TierStoryModal'
 import { TierOutcomeModal } from '@/features/story-map/components/TierOutcomeModal'
 import { TierStartOverConfirmModal } from '@/features/story-map/components/TierStartOverConfirmModal'
@@ -215,9 +214,6 @@ export function TierWorkspace() {
         currentCommandGuideKey={run.tutor?.teaching_key}
         commandGuideOpen={introductionOpen || Boolean(replayGuide)}
         onSelectCommandGuide={openCommandGuide}
-      />
-      <TierStatsBar
-        run={run}
         repoGraph={repoDrawer.drawerMode ? {
           open: repoDrawer.open,
           hasUpdate: repoDrawer.hasUpdate,

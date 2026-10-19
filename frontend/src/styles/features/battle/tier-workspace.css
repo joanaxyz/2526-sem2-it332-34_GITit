@@ -2,9 +2,10 @@
    tier-* class so the adventure and challenge workspaces keep the shared
    gameplay-* layout untouched. */
 
-/* Command bar, run status strip, then the workspace. */
+/* The compact status rail lives in the command bar, leaving the workspace the
+   full height below it. */
 .gameplay-workspace-screen.tier-workspace-screen {
-  grid-template-rows: 3.65rem auto minmax(0, 1fr);
+  grid-template-rows: 3.65rem minmax(0, 1fr);
 }
 
 /* Centre column: battle stage over the terminal. The battle row size is the
@@ -15,19 +16,19 @@
 
 .tier-stats-bar {
   display: flex;
+  flex: 0 1 auto;
+  align-items: center;
   justify-content: flex-end;
   min-width: 0;
-  border-bottom: 1px solid hsl(var(--border) / 0.55);
-  padding: var(--space-2) var(--space-4);
-  background: rgba(var(--theme-primary-rgb), 0.03);
+  padding: 0;
 }
 
 .tier-stats {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--space-2) var(--space-5);
+  gap: var(--space-2) var(--space-4);
   margin: 0;
 }
 
