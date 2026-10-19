@@ -1,12 +1,12 @@
 export type LevelTourMode = 'adventure' | 'challenge' | 'tier'
 
-// Versioned per mode: bumping one mode re-shows only that mode's tour, so a new
-// tier step does not replay the adventure and challenge tours for everyone.
+// Versioned per mode so a tour change replays only the affected onboarding.
 const LEVEL_TOUR_VERSIONS: Record<LevelTourMode, string> = {
-  adventure: 'v3',
-  challenge: 'v3',
-  tier: 'v4',
+  adventure: 'v5',
+  challenge: 'v5',
+  tier: 'v6',
 }
+export const levelTourModes: readonly LevelTourMode[] = ['adventure', 'challenge', 'tier']
 
 export function levelTourStorageKey(
   userId?: number | null,
@@ -21,6 +21,18 @@ function safeStorage() {
     return window.localStorage
   } catch {
     return null
+  }
+}
+
+/** Reopen every level tour for one account on this browser. */
+export function resetLevelTours(userId?: number | null): boolean {
+  const storage = safeStorage()
+  if (!storage) return false
+  try {
+    levelTourModes.forEach((mode) => storage.removeItem(levelTourStorageKey(userId, mode)))
+    return true
+  } catch {
+    return false
   }
 }
 

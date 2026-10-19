@@ -5,12 +5,13 @@ import titlesImage from '@/assets/images/battle-outcome/titles.webp'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
 import { useLazyImage } from '@/shared/utils/useLazyImage'
+import { normalizeStarScore } from '@/shared/level/utils/starScore'
 
 import { GameOutcomeConfetti } from './GameOutcomeConfetti'
 import { GameOutcomeStatTile } from './GameOutcomeStatTile'
 
-// A single outcome shows exactly one star-arc image (the loss art, or one of
-// three win tiers), so each is imported lazily instead of bundling all four
+// A single outcome shows exactly one star image (the loss art, or one of
+// three win tiers), so each is imported lazily instead of bundling every variant
 // upfront. `titlesImage` above is shown on every outcome, so it stays a
 // normal static import.
 const STAR_ART_LOADERS: Record<string, () => Promise<{ default: string }>> = {
@@ -80,10 +81,10 @@ export function GameOutcomeModal({
   className?: string
 }) {
   const isFailed = tone === 'failure'
-  const earnedStars = Number.isFinite(stars) ? Math.max(0, Math.min(3, Math.floor(stars ?? 0))) : null
+  const earnedStars = Number.isFinite(stars) ? normalizeStarScore(stars) : null
   const displayLabel = resultLabel ?? (isFailed ? 'Game Over' : 'You Won')
-  // Failure always shows the shattered arc; wins need at least one earned star
-  // (the arc art has no zero-star variant, so starless wins keep the icon crest).
+  // Failure always shows the unlit stars; wins need a positive star score.
+  // Starless wins keep the icon crest.
   const starArtKey = isFailed ? 'lose' : earnedStars && earnedStars > 0 ? `win-${earnedStars}` : null
   const starArt = useLazyImage(starArtKey, STAR_ART_LOADERS)
   const defaultAccent = isFailed ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'
@@ -92,7 +93,7 @@ export function GameOutcomeModal({
     <Modal
       open={open}
       title={title}
-      className={cn('game-outcome-shell w-full max-w-5xl overflow-hidden', className)}
+      className={cn('game-outcome-shell', className)}
       overlayClassName="game-outcome-backdrop"
       contentClassName="p-0"
       hideHeader
@@ -122,6 +123,8 @@ export function GameOutcomeModal({
             <img
               className={cn('game-outcome-star-art', !isFailed && 'game-outcome-sparkle-glow')}
               src={starArt}
+              width={1774}
+              height={887}
               alt={isFailed ? 'No stars earned' : `${earnedStars} of 3 stars earned`}
             />
           ) : (
@@ -134,7 +137,6 @@ export function GameOutcomeModal({
             className={cn(
               'game-outcome-title-art game-outcome-headline',
               isFailed && 'is-lost',
-              starArt && 'has-star-arc',
             )}
             role="img"
             aria-label={displayLabel}

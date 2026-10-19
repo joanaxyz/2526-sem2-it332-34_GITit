@@ -104,5 +104,6 @@ def concepts_for(changes: Iterable[dict], seen: set[str], *, first_guide: bool) 
             keys.insert(keys.index(key), "working-tree")
     fresh = [key for key in keys if concept_key(key) not in seen]
     return [
-        {"key": key, "title": CONCEPTS[key][0], "text": CONCEPTS[key][1]} for key in fresh[:MAX_CONCEPTS]
+        {"key": key, "title": CONCEPTS[key][0], "text": CONCEPTS[key][1]}
+        for key in fresh[:MAX_CONCEPTS]
     ]

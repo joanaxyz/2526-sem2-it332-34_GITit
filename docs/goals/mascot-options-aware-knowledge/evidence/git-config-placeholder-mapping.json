@@ -1,0 +1,65 @@
+[
+  {
+    "level": "Configure Identity and Aliases",
+    "id": "form:16:command",
+    "kind": "command",
+    "syntax": "git config --global user.name <name>",
+    "token": "",
+    "text": "Inspect and set Git identity and configuration values.",
+    "when_to_use": "Set global author name"
+  },
+  {
+    "level": "Configure Identity and Aliases",
+    "id": "form:16:option-global",
+    "kind": "option",
+    "syntax": "git config --global user.name <name>",
+    "token": "--global",
+    "text": "Writes or reads the user-wide Git configuration instead of only the current repository.",
+    "when_to_use": "Set global author name"
+  },
+  {
+    "level": "Configure Identity and Aliases",
+    "id": "form:16:argument-value",
+    "kind": "argument",
+    "syntax": "git config --global user.name <name>",
+    "token": "<value>",
+    "text": "Provides the value stored for a Git configuration key.",
+    "when_to_use": "Set global author name"
+  },
+  {
+    "level": "Configure Identity and Aliases",
+    "id": "form:19:command",
+    "kind": "command",
+    "syntax": "git config --global alias.<name> <command>",
+    "token": "",
+    "text": "Inspect and set Git identity and configuration values.",
+    "when_to_use": "Create a command alias"
+  },
+  {
+    "level": "Configure Identity and Aliases",
+    "id": "form:19:option-global",
+    "kind": "option",
+    "syntax": "git config --global alias.<name> <command>",
+    "token": "--global",
+    "text": "Writes or reads the user-wide Git configuration instead of only the current repository.",
+    "when_to_use": "Create a command alias"
+  },
+  {
+    "level": "Configure Identity and Aliases",
+    "id": "form:19:argument-key",
+    "kind": "argument",
+    "syntax": "git config --global alias.<name> <command>",
+    "token": "<key>",
+    "text": "Names the Git configuration setting being read or written.",
+    "when_to_use": "Create a command alias"
+  },
+  {
+    "level": "Configure Identity and Aliases",
+    "id": "form:19:argument-value",
+    "kind": "argument",
+    "syntax": "git config --global alias.<name> <command>",
+    "token": "<value>",
+    "text": "Provides the value stored for a Git configuration key.",
+    "when_to_use": "Create a command alias"
+  }
+]

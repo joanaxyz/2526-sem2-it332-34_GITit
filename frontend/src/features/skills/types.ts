@@ -9,4 +9,5 @@ export type LearnedSkill = {
   chapter_id: number
   chapter_number: number
   chapter_title: string
+  learned_at?: string
 }

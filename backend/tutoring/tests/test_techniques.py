@@ -42,7 +42,9 @@ def test_ordinary_commands_have_no_technique(command):
 
 
 def test_remote_branch_uses_the_repository_remotes():
-    assert keys("git merge team/main", {"remotes": {"team": "https://example.test"}}) == ["remote-branch"]
+    assert keys("git merge team/main", {"remotes": {"team": "https://example.test"}}) == [
+        "remote-branch"
+    ]
     assert keys("git merge team/main") == []
 
 

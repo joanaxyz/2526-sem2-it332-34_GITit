@@ -40,6 +40,7 @@ describe('ChallengeWorkspaceTour', () => {
     addTarget('data-tour-target', 'star-budget')
     addTarget('data-tour-target', 'command-budget')
     addTarget('data-tour-target', 'live-dag')
+    addTarget('data-tour-target', 'project-files')
     addTarget('data-command-input')
     const onClose = vi.fn()
 
@@ -66,24 +67,17 @@ describe('ChallengeWorkspaceTour', () => {
     fireEvent.click(screen.getByRole('button', { name: /next/i }))
     expect(await screen.findByRole('heading', { name: 'Watch the command limit' })).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: /next/i }))
-    expect(await screen.findByRole('heading', { name: 'Track repository state' })).toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: /next/i }))
-    expect(await screen.findByRole('heading', { name: 'Run a Git command' })).toBeInTheDocument()
-    expect(screen.queryByText('Compare the target')).not.toBeInTheDocument()
-    expect(screen.queryByText('Use the feedback')).not.toBeInTheDocument()
-    expect(screen.queryByText('Check project files')).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: /next/i }))
-    expect(await screen.findByRole('heading', { name: 'Complete the objective' })).toBeInTheDocument()
+    for (const heading of ['Read the repository diagrams', 'Browse project files', 'Run a Git command']) {
+      fireEvent.click(screen.getByRole('button', { name: /next/i }))
+      expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
+    }
     expect(screen.getByText('6 / 6')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /start challenge/i }))
     expect(onClose).toHaveBeenCalledOnce()
   }, 15_000)
 
-  it('uses the real budget anchors and includes available project, target, and feedback panels', async () => {
+  it('uses the real budget anchors and keeps the tour short when extra panels are available', async () => {
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
       x: 80, y: 100, left: 80, top: 100, right: 380, bottom: 260,
       width: 300, height: 160, toJSON: () => ({}),
@@ -114,18 +108,20 @@ describe('ChallengeWorkspaceTour', () => {
     expect(screen.queryByText('Attempts')).not.toBeInTheDocument()
 
     for (const heading of [
-      'Earn up to 3 stars', 'Watch the command limit', 'Track repository state',
-      'Compare the target', 'Check project files', 'Run a Git command',
-      'Use the feedback', 'Complete the objective',
+      'Earn up to 3 stars',
+      'Watch the command limit',
+      'Read the repository diagrams',
+      'Browse project files',
+      'Run a Git command',
     ]) {
       fireEvent.click(screen.getByRole('button', { name: /^next$/i }))
       expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
     }
-    expect(screen.getByText('9 / 9')).toBeInTheDocument()
+    expect(screen.getByText('6 / 6')).toBeInTheDocument()
 
     rerender(view({ ...run, counts: { ...run.counts, counted_action_total: 2 } }))
     expect(screen.getByText('2 / 5')).toBeInTheDocument()
-    expect(screen.getByRole('heading', { name: 'Complete the objective' })).toBeInTheDocument()
+    expect(screen.getByRole('heading', { name: 'Run a Git command' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: /start challenge/i }))
     expect(onClose).toHaveBeenCalledOnce()
   }, 15_000)

@@ -1,10 +1,11 @@
 import { RefreshCcw, X } from 'lucide-react'
 
-import gitLogoImage from '@/assets/images/GIT_logo.webp'
+import gitLogoImage from '@/assets/images/g34-icon.webp'
 import type { CommandIntroduction } from '@/features/story-map/api/commandIntroductionsApi'
 import { CommandGuideLauncher } from '@/features/story-map/components/CommandGuideLauncher'
+import { TierStatsBar } from '@/features/story-map/components/tier-workspace/TierStatsBar'
+import type { RepoGraphTrigger } from '@/features/story-map/components/tier-workspace/TierStatsBar'
 import { AudioControls } from '@/shared/audio/AudioControls'
-import { WorkspaceHeaderAccount } from '@/shared/level/components/WorkspaceHeaderAccount'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 
 /** Mirrors ChallengeStatusHeader for the adventure-tier run lifecycle. */
@@ -20,6 +21,7 @@ export function TierStatusHeader({
   currentCommandGuideKey,
   commandGuideOpen = false,
   onSelectCommandGuide,
+  repoGraph,
 }: {
   run: TierRun
   isExiting?: boolean
@@ -32,6 +34,7 @@ export function TierStatusHeader({
   currentCommandGuideKey?: string | null
   commandGuideOpen?: boolean
   onSelectCommandGuide?: (teachingKey: string) => void
+  repoGraph?: RepoGraphTrigger
 }) {
   const exitLabel = run.status === 'started' ? 'Exit' : 'Back'
   const canRetry = !run.replay && run.status === 'failed' && !!onRetry
@@ -61,11 +64,12 @@ export function TierStatusHeader({
       </a>
 
       <div className="gameplay-header-mission" aria-label="Current adventure">
-        <span>Adventure · {run.difficulty ?? 'Level'}</span>
         <strong>{run.tier.adventure_level_title}</strong>
       </div>
 
       <span className="gameplay-header-spacer" aria-hidden="true" />
+
+      <TierStatsBar run={run} repoGraph={repoGraph} />
 
       <AudioControls
         className="gameplay-header-audio-controls"
@@ -110,8 +114,6 @@ export function TierStatusHeader({
           {replayIsStartOver ? null : replayActionLabel}
         </button>
       ) : null}
-
-      <WorkspaceHeaderAccount />
     </header>
   )
 }

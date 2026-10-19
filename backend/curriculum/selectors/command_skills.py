@@ -1,6 +1,8 @@
 from __future__ import annotations
 
-from adventures.models import AdventureLevel, SkillMastery
+from django.db.models import Max
+
+from adventures.models import SkillMastery
 from curriculum.models import Chapter, CommandForm, CommandSkill
 
 
@@ -9,47 +11,24 @@ def learned_command_skills(*, player) -> list[dict]:
 
     SkillMastery is the player-to-command relationship. ``introduced`` means the
     learner has seen a command in an adventure; ``learned_at`` means they have
-    solved with it at least once. The spellbook uses learned_at so spells are
+    successfully executed it at least once. The spellbook uses learned_at so spells are
     earned incrementally during an adventure and never disappear if Leitner
     strength is later demoted.
     """
     if player is None:
         return []
-    skill_ids = set(
+    learned_at_by_skill_id = dict(
         SkillMastery.objects.filter(
             player=player,
             learned_at__isnull=False,
             command_form__is_published=True,
             command_form__command_skill__is_published=True,
         )
-        .values_list("command_form__command_skill_id", flat=True)
-        .distinct()
+        .values("command_form__command_skill_id")
+        .annotate(learned_at=Max("learned_at"))
+        .values_list("command_form__command_skill_id", "learned_at")
     )
-
-    # Legacy/data-repair fallback for saved runs that already passed before the
-    # permanent learned_at marker existed.
-    passed_adventures = (
-        AdventureLevel.objects.filter(
-            runs__player=player,
-            runs__is_replay=False,
-            runs__passed_at__isnull=False,
-            is_published=True,
-        )
-        .select_related("chapter")
-        .distinct()
-    )
-    fallback_form_ids = set(
-        CommandForm.objects.filter(
-            adventure_levels__in=passed_adventures,
-            is_published=True,
-        ).values_list("id", flat=True)
-    )
-    if fallback_form_ids:
-        skill_ids |= set(
-            CommandForm.objects.filter(id__in=fallback_form_ids).values_list(
-                "command_skill_id", flat=True
-            )
-        )
+    skill_ids = set(learned_at_by_skill_id)
 
     if not skill_ids:
         return []
@@ -79,6 +58,7 @@ def learned_command_skills(*, player) -> list[dict]:
                 "chapter_id": chapter.id if chapter else None,
                 "chapter_number": chapter.number if chapter else 0,
                 "chapter_title": chapter.title if chapter else "",
+                "learned_at": learned_at_by_skill_id[skill.id],
                 "_sort": (chapter.sort_order if chapter else 0, skill.sort_order, skill.id),
             }
         )

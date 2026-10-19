@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { CommandIntroduction } from '@/features/story-map/api/commandIntroductionsApi'
 import type { TierRun } from './tierWorkspaceTypes'
@@ -14,10 +14,15 @@ vi.mock('@/shared/level/components/WorkspaceHeaderAccount', () => ({
 
 import { TierStatusHeader } from './TierStatusHeader'
 
+afterEach(cleanup)
+
 const run = {
   status: 'started',
   replay: false,
   difficulty: 'easy',
+  stars: 2,
+  policy: { min_counted_commands: 1, max_counted_commands: 8 },
+  counts: { counted_action_total: 0 },
   tier: { adventure_level_title: 'Branching paths' },
 } as TierRun
 
@@ -33,7 +38,23 @@ const guides = [
 ]
 
 describe('TierStatusHeader', () => {
-  it('uses an icon-only button to reopen a single guide', () => {
+  it('keeps level stats in the header and opens star rules from its stars', async () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      x: 80, y: 100, left: 80, top: 100, right: 380, bottom: 260,
+      width: 300, height: 160, toJSON: () => ({}),
+    })
+    render(<TierStatusHeader run={run} />)
+
+    const header = screen.getByRole('banner', { name: 'Adventure command bar' })
+    expect(within(header).getByRole('group', { name: 'Level status' })).toBeInTheDocument()
+    expect(within(header).getByRole('button', { name: 'Star rules: 2 of 3 stars' })).toBeInTheDocument()
+    expect(within(header).queryByText('Adventure · easy')).not.toBeInTheDocument()
+
+    fireEvent.click(within(header).getByRole('button', { name: 'Star rules: 2 of 3 stars' }))
+    expect(await screen.findByRole('dialog', { name: 'How to earn stars' })).toBeInTheDocument()
+  })
+
+  it('uses the floating mascot to reopen a single guide', () => {
     const onSelectCommandGuide = vi.fn()
     render(
       <TierStatusHeader
@@ -47,6 +68,8 @@ describe('TierStatusHeader', () => {
     const button = screen.getByRole('button', { name: 'Open command guide' })
     expect(button).toHaveAttribute('data-command-guide-launcher')
     expect(button).not.toHaveTextContent('Command guide')
+    expect(button).toHaveClass('guide-mascot__button')
+    expect(button.closest('.gameplay-workspace-header')).toBeNull()
     fireEvent.click(button)
     expect(onSelectCommandGuide).toHaveBeenCalledWith('form:git init')
   })
@@ -62,7 +85,7 @@ describe('TierStatusHeader', () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: 'Choose command guide' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Browse command guides' }))
     expect(screen.getByRole('group', { name: 'Command guides' })).toBeInTheDocument()
     expect(screen.getByText('Initialize the current folder')).toBeInTheDocument()
     expect(screen.getByText('Stage a file')).toBeInTheDocument()
@@ -70,7 +93,7 @@ describe('TierStatusHeader', () => {
     expect(onSelectCommandGuide).toHaveBeenCalledWith('form:git init')
   })
 
-  it('marks the guide control active while the tutorial is visible', () => {
+  it('hides the floating mascot and history control while the guide is visible', () => {
     render(
       <TierStatusHeader
         run={run}
@@ -79,8 +102,17 @@ describe('TierStatusHeader', () => {
       />,
     )
 
-    const button = screen.getByRole('button', { name: 'Command guide is open' })
-    expect(button).toHaveClass('is-active')
-    expect(button).toBeDisabled()
+    expect(screen.queryByRole('button', { name: 'Command guide is open' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Browse command guides' })).not.toBeInTheDocument()
+    expect(document.querySelector('.guide-mascot')).toHaveAttribute('inert')
+  })
+
+  it('reopens the current guide directly when several commands have been encountered', () => {
+    const onSelectCommandGuide = vi.fn()
+    render(<TierStatusHeader run={run} commandGuides={guides}
+      currentCommandGuideKey={guides[0].teaching_key} onSelectCommandGuide={onSelectCommandGuide} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Open command guide' }))
+    expect(onSelectCommandGuide).toHaveBeenCalledWith(guides[0].teaching_key)
+    expect(screen.queryByRole('group', { name: 'Command guides' })).not.toBeInTheDocument()
   })
 })

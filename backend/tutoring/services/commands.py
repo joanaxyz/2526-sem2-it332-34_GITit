@@ -8,7 +8,11 @@ from tutoring.services.introductions import context_hash
 
 def current_feedback(run):
     pending = PendingCommandIntroduction.objects.filter(run=run).first()
-    if pending and pending.revision == run.total_attempts and pending.context_hash == context_hash(run):
+    if (
+        pending
+        and pending.revision == run.total_attempts
+        and pending.context_hash == context_hash(run)
+    ):
         return pending
     return None
 
@@ -104,5 +108,7 @@ def _advanced_route(run, candidate, execution) -> bool:
     history = [*TierCommandHistoryCache().history_for(run=run)]
     if not history or history[-1] != execution.result.normalized_command:
         history.append(execution.result.normalized_command)
-    position = route_position(run.selected_variant.solution_trajectory, execution.next_state, history)
+    position = route_position(
+        run.selected_variant.solution_trajectory, execution.next_state, history
+    )
     return position is not None and position > candidate.last_step_index

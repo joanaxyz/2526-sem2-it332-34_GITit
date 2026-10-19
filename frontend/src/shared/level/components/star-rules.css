@@ -1,0 +1,58 @@
+.star-rules-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  min-width: 44px;
+  padding: 0.25rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.star-rules-trigger:hover {
+  background: rgba(var(--theme-primary-rgb), 0.12);
+}
+
+.star-rules-trigger:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+}
+
+/* Keep the controls visible while longer explanations scroll inside the bubble. */
+.workspace-tour__card:has(.star-rules),
+.workspace-tour__card:has(.star-rules) .mascot-message__bubble {
+  max-height: min(calc(100svh - 2rem), var(--workspace-tour-room, 100svh));
+}
+
+.workspace-tour__card:has(.star-rules) :is(.workspace-tour__header, .workspace-tour__progress, .workspace-tour__actions) {
+  flex-shrink: 0;
+}
+
+.star-rules dl {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin: 0 0 0.85rem;
+}
+
+.star-rules dl > div {
+  display: grid;
+  grid-template-columns: 3.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+}
+
+.star-rules dt {
+  font-weight: 700;
+  color: hsl(var(--foreground));
+}
+
+.star-rules dd {
+  margin: 0;
+}
+
+.star-rules p + p {
+  margin-top: 0.75rem;
+}

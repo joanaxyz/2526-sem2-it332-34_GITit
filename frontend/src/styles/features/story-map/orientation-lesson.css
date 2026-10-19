@@ -207,10 +207,9 @@
   display: grid;
   gap: 0.55rem;
   padding-bottom: 1rem;
-  border-bottom: 1px solid var(--border-subtle);
 }
 
-.orientation-step-header > div > span {
+.orientation-step-copy > span {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
@@ -220,7 +219,7 @@
   font-weight: 700;
 }
 
-.orientation-step-header > div > span svg {
+.orientation-step-copy > span svg {
   width: 0.75rem;
   height: 0.75rem;
 }
@@ -234,12 +233,13 @@
   text-wrap: balance;
 }
 
-.orientation-step-header > p {
+.orientation-step-copy > p {
   max-width: 65ch;
   color: var(--text-secondary);
   font-size: var(--text-sm);
   line-height: 1.6;
   text-wrap: pretty;
+  margin: 0.55rem 0 0;
 }
 
 .orientation-step-content,

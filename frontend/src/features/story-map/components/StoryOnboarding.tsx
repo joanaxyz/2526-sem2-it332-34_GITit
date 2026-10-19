@@ -6,6 +6,7 @@ import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
 import { Button } from '@/shared/components/Button'
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
 import { Modal } from '@/shared/components/Modal'
+import { MascotMessage } from '@/shared/mascot/MascotMessage'
 import { HOME_ROUTE, SHOP_ROUTE } from '@/shared/navigation/routes'
 
 export function StoryOnboarding({
@@ -90,6 +91,7 @@ export function StoryOnboarding({
         contentClassName="story-onboarding-choice__content"
         onClose={skipOrientation}
       >
+        <MascotMessage>
         <p>
           New to Git? Take the short primer. Already know the basics? Go to the first chapter.
         </p>
@@ -102,6 +104,7 @@ export function StoryOnboarding({
           </Button>
         </div>
         <small>You can open the primer later from Chapters.</small>
+        </MascotMessage>
       </Modal>
 
       {ready && onboarding.phase === 'stories' ? (

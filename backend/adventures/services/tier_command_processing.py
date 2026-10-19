@@ -31,6 +31,7 @@ from practice.models import CommandStep
 from practice.services.scaffolding import FeedbackGenerationService, ScaffoldingService
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import AdventureLevelTierCompletion
+from progress.services.scored_completions import update_best_score
 from progress.wallet import WalletService
 from simulator.services import (
     RepositorySnapshotService,
@@ -40,6 +41,7 @@ from tutoring.services.commands import current_feedback, record_command_feedback
 from tutoring.services.planner import plan_introduction
 
 from .selectors import form_solve_targets
+from .skill_learning import learn_from_command
 from .tier_history import TierCommandHistoryCache
 
 
@@ -214,6 +216,7 @@ class AdventureLevelTierCommandProcessingService:
             )
         )
         rewards = None
+        learned_skills = learn_from_command(player=run.player, result=command_result)
         if solved:
             completed_fields, rewards = self._complete_run(run)
             update_fields.update(completed_fields)
@@ -262,6 +265,7 @@ class AdventureLevelTierCommandProcessingService:
                 counted_command_count=run.counted_action_total,
             ),
             "rewards": rewards,
+            "learned_skills": learned_skills,
         }
 
     def _complete_run(self, run: AdventureLevelTierRun) -> tuple[set[str], dict | None]:
@@ -281,12 +285,11 @@ class AdventureLevelTierCommandProcessingService:
         run.status = SESSION_STATUS_COMPLETED
         run.completed_at = timezone.now()
         run.ended_at = run.completed_at
-        first_try = run.retry_index == 0
         run.stars = compute_stars(
             solved=True,
             counted_commands=run.counted_action_total,
             budget=run.min_counted_commands,
-            first_try=first_try,
+            retry_count=run.retry_index,
         )
         rewards = None
         if not run.is_replay:
@@ -307,25 +310,8 @@ class AdventureLevelTierCommandProcessingService:
                         "counted_action_total": run.counted_action_total,
                     },
                 )
-                if not created and (
-                    run.stars > completion.stars
-                    or (
-                        run.stars == completion.stars
-                        and run.counted_action_total < completion.counted_action_total
-                    )
-                ):
-                    completion.tier_run = run
-                    completion.stars = run.stars
-                    completion.counted_action_total = run.counted_action_total
-                    completion.completed_at = run.completed_at
-                    completion.save(
-                        update_fields=[
-                            "tier_run",
-                            "stars",
-                            "counted_action_total",
-                            "completed_at",
-                        ]
-                    )
+                if not created:
+                    update_best_score(completion, run=run, run_field="tier_run")
                 if created:
                     mastery_advanced = self._credit_mastery(run)
                     level = run.tier.adventure_level
@@ -350,6 +336,13 @@ class AdventureLevelTierCommandProcessingService:
                         "chapter_chests_awarded": chapter_chests_awarded,
                         "mastery_advanced": mastery_advanced,
                     }
+        else:
+            completion = (
+                AdventureLevelTierCompletion.objects.select_for_update()
+                .filter(player=run.player, tier=run.tier)
+                .first()
+            )
+            update_best_score(completion, run=run, run_field="tier_run")
         return {"status", "completed_at", "ended_at", "stars"}, rewards
 
     def _credit_mastery(self, run: AdventureLevelTierRun) -> list[dict]:
@@ -362,11 +355,9 @@ class AdventureLevelTierCommandProcessingService:
         advanced = []
         for form in CommandForm.objects.filter(id__in=form_ids).select_related("command_skill"):
             row, _ = SkillMastery.objects.get_or_create(player=run.player, command_form=form)
-            if row.learned_at is None:
-                row.learned_at = timezone.now()
             row.solves += 1
             row.mastered = row.solves >= targets.get(form.id, 1)
-            row.save(update_fields=["solves", "mastered", "learned_at", "updated_at"])
+            row.save(update_fields=["solves", "mastered", "updated_at"])
             advanced.append(
                 {
                     "skill_slug": form.command_skill.slug,

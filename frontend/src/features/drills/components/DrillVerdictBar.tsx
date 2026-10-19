@@ -1,9 +1,10 @@
-import { ArrowRight, Check, X } from 'lucide-react'
+import { Check, X } from 'lucide-react'
+import { useEffect, useRef } from 'react'
 
 import type { DrillCard, DrillRung, DrillSequence, DrillVerdict } from '@/features/drills/types'
 
 /**
- * The single forward control, and where both outcomes are taught.
+ * Feedback for each flight question, with a check control for assembly rounds.
  *
  * A wrong answer is answered with authored truth rather than a red cross:
  * every distractor is a real command form, so the panel can say what the
@@ -17,7 +18,7 @@ import type { DrillCard, DrillRung, DrillSequence, DrillVerdict } from '@/featur
  * miss panel's three - a nod against an explanation, so the rhythm of a
  * clean run stays quick.
  *
- * Nothing here scolds and nothing ends: a missed card simply returns.
+ * Feedback stays visible until the learner continues; the third miss leads to results.
  */
 export function DrillVerdictBar({
   verdict,
@@ -27,7 +28,9 @@ export function DrillVerdictBar({
   sequence,
   optionCount,
   onCheck,
-  onAdvance,
+  onContinue,
+  flightChoices = false,
+  outOfLives = false,
 }: {
   verdict: DrillVerdict | null
   canCheck: boolean
@@ -37,8 +40,15 @@ export function DrillVerdictBar({
   /** How many numbered choices the current question offers, if any. */
   optionCount: number
   onCheck: () => void
-  onAdvance: () => void
+  onContinue: () => void
+  flightChoices?: boolean
+  outOfLives?: boolean
 }) {
+  const continueRef = useRef<HTMLButtonElement>(null)
+  useEffect(() => {
+    if (verdict) continueRef.current?.focus({ preventScroll: true })
+  }, [verdict])
+
   const tone = !verdict ? 'idle' : verdict.correct ? 'right' : 'wrong'
   const answerText = !card
     ? (sequence?.steps.join('  →  ') ?? '')
@@ -81,7 +91,7 @@ export function DrillVerdictBar({
               <code data-voice={answerVoice}>{answerText}</code>
               {answerGloss ? <em data-voice={glossVoice}>{answerGloss}</em> : null}
             </p>
-            <p className="drill-teach-note">This one comes back before the drill ends.</p>
+            <p className="drill-teach-note">{outOfLives ? 'Take another flight to practice this command.' : 'One life lost. This command returns for another pass.'}</p>
           </div>
         ) : null}
       </div>
@@ -101,7 +111,7 @@ export function DrillVerdictBar({
               <span className="drill-verdict-badge" aria-hidden="true">
                 <X />
               </span>
-              <span>Not this one</span>
+              <span>{outOfLives ? 'Out of lives' : 'Life lost'}</span>
             </>
           ) : null}
           {tone === 'idle' ? (
@@ -114,17 +124,21 @@ export function DrillVerdictBar({
                   <span aria-hidden="true"> · </span>
                 </>
               ) : null}
-              <kbd>Enter</kbd> to check
+              {flightChoices ? 'Fly into an answer' : <><kbd>Enter</kbd> to check</>}
             </span>
           ) : null}
         </p>
 
         {verdict ? (
-          <button type="button" className="ui-button ui-button--default" onClick={onAdvance}>
-            Continue
-            <ArrowRight aria-hidden="true" />
+          <button
+            ref={continueRef}
+            type="button"
+            className="ui-button ui-button--default"
+            onClick={onContinue}
+          >
+            {outOfLives ? 'View results' : 'Continue'}
           </button>
-        ) : (
+        ) : flightChoices ? <span className="drill-flight-footer-note">Collisions submit your answer</span> : (
           <button
             type="button"
             className="ui-button ui-button--default"

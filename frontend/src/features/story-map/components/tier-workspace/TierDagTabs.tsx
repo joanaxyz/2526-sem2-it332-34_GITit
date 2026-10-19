@@ -1,5 +1,5 @@
-import { useId, useRef, useState } from 'react'
-import type { KeyboardEvent } from 'react'
+import { useId, useLayoutEffect, useRef, useState } from 'react'
+import type { KeyboardEvent, PointerEvent } from 'react'
 
 import { TierDagStage } from '@/features/story-map/components/TierDagStage'
 import { TierDagLegend } from '@/features/story-map/components/TierDagLegend'
@@ -10,6 +10,11 @@ import type { RepositorySnapshot } from '@/shared/level/types'
 import { cn } from '@/shared/utils/cn'
 
 type DagTab = 'live' | 'expected'
+type DagViewMode = 'switch' | 'split'
+
+const MIN_SPLIT_PERCENT = 25
+const MAX_SPLIT_PERCENT = 75
+const DEFAULT_SPLIT_PERCENT = 50
 
 const TABS: { id: DagTab; label: string }[] = [
   { id: 'live', label: 'Live DAG' },
@@ -17,11 +22,9 @@ const TABS: { id: DagTab; label: string }[] = [
 ]
 
 /**
- * Live DAG and Expected State share one card behind tabs. Both React Flow
- * views stay mounted at the same size: the inactive pane is made transparent
- * and inert, so its measured size, zoom and pan survive, and it is refit when
- * shown. A counted command brings the learner back to the Live DAG, since
- * that is where its result appears.
+ * Live DAG and Expected State share one card. Switch mode keeps the existing
+ * tabs; split mode stacks both diagrams and lets the learner resize their
+ * viewports without changing either graph's zoom or pan.
  */
 export function TierDagTabs({
   snapshot,
@@ -33,7 +36,7 @@ export function TierDagTabs({
 }: {
   snapshot: RepositorySnapshot
   expectedState: RepositorySnapshot
-  /** The run's counted-command total; an increase switches back to the Live DAG. */
+  /** The run's counted-command total; an increase selects the Live DAG. */
   countedCommands: number
   animation: TierDagAnimationController
   /** Changes when the host reveals the card (e.g. a drawer opening); both views refit. */
@@ -43,23 +46,94 @@ export function TierDagTabs({
 }) {
   const baseId = useId()
   const [active, setActive] = useState<DagTab>('live')
+  const [viewMode, setViewMode] = useState<DagViewMode>('switch')
+  const [splitPercent, setSplitPercent] = useState(DEFAULT_SPLIT_PERCENT)
   const [activations, setActivations] = useState<Record<DagTab, number>>({ live: 0, expected: 0 })
   const [seenCountedCommands, setSeenCountedCommands] = useState(countedCommands)
   const tabRefs = useRef<Record<DagTab, HTMLButtonElement | null>>({ live: null, expected: null })
+  const splitterDrag = useRef<{ pointerId: number; startY: number; startPercent: number; availableHeight: number } | null>(null)
+  const panesRef = useRef<HTMLDivElement | null>(null)
+  const [splitMetrics, setSplitMetrics] = useState({ height: 0, splitterHeight: 0 })
   const tabId = (tab: DagTab) => `${baseId}-${tab}-tab`
   const panelId = (tab: DagTab) => `${baseId}-${tab}-panel`
 
   const select = (tab: DagTab) => {
-    if (tab === active) return
-    setActive(tab)
-    setActivations((counts) => ({ ...counts, [tab]: counts[tab] + 1 }))
+    if (tab === active && viewMode === 'switch') return
+    setViewMode('switch')
+    if (tab !== active) {
+      setActive(tab)
+      setActivations((counts) => ({ ...counts, [tab]: counts[tab] + 1 }))
+    }
   }
 
   // Adjusted during render (React's pattern for state derived from a changing
   // prop), so the switch lands in the same commit as the new repository state.
   if (countedCommands !== seenCountedCommands) {
     setSeenCountedCommands(countedCommands)
-    if (countedCommands > seenCountedCommands) select('live')
+    if (countedCommands > seenCountedCommands) {
+      if (viewMode === 'split') setActive('live')
+      else select('live')
+    }
+  }
+
+  useLayoutEffect(() => {
+    if (viewMode !== 'split' || !panesRef.current) return
+    const panes = panesRef.current
+    const measure = () => {
+      const height = panes.getBoundingClientRect().height
+      const splitterHeight = panes.querySelector('.tier-dag-splitter')?.getBoundingClientRect().height ?? 0
+      setSplitMetrics((current) => current.height === height && current.splitterHeight === splitterHeight
+        ? current
+        : { height, splitterHeight })
+    }
+    measure()
+    if (typeof ResizeObserver === 'undefined') {
+      window.addEventListener('resize', measure)
+      return () => window.removeEventListener('resize', measure)
+    }
+    const observer = new ResizeObserver(measure)
+    observer.observe(panes)
+    return () => observer.disconnect()
+  }, [viewMode])
+
+  const onSplitterPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.button !== 0) return
+    const panes = event.currentTarget.parentElement
+    if (!panes) return
+    const panesHeight = panes.getBoundingClientRect().height
+    const handleHeight = event.currentTarget.getBoundingClientRect().height
+    splitterDrag.current = {
+      pointerId: event.pointerId,
+      startY: event.clientY,
+      startPercent: splitPercent,
+      availableHeight: Math.max(1, panesHeight - handleHeight),
+    }
+    event.preventDefault()
+    event.stopPropagation()
+    event.currentTarget.setPointerCapture(event.pointerId)
+  }
+
+  const onSplitterPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    const drag = splitterDrag.current
+    if (!drag || drag.pointerId !== event.pointerId) return
+    const deltaPercent = ((event.clientY - drag.startY) / drag.availableHeight) * 100
+    setSplitPercent(clampSplitPercent(drag.startPercent + deltaPercent))
+  }
+
+  const stopSplitterDrag = (event: PointerEvent<HTMLDivElement>) => {
+    if (splitterDrag.current?.pointerId === event.pointerId) splitterDrag.current = null
+  }
+
+  const onSplitterKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+    const adjustment = event.shiftKey ? 5 : 2
+    const next = event.key === 'ArrowUp' ? splitPercent - adjustment
+      : event.key === 'ArrowDown' ? splitPercent + adjustment
+        : event.key === 'Home' ? MIN_SPLIT_PERCENT
+          : event.key === 'End' ? MAX_SPLIT_PERCENT
+            : null
+    if (next === null) return
+    event.preventDefault()
+    setSplitPercent(clampSplitPercent(next))
   }
 
   // WAI-ARIA tabs: arrows (and Home/End) move between tabs and select them.
@@ -78,41 +152,72 @@ export function TierDagTabs({
   }
 
   const paneProps = (tab: DagTab) => ({
-    role: 'tabpanel',
+    role: viewMode === 'split' ? 'region' : 'tabpanel',
     id: panelId(tab),
-    'aria-labelledby': tabId(tab),
-    className: cn('gameplay-pane tier-dag-pane', active === tab ? 'is-active' : 'is-inactive'),
-    inert: active !== tab,
+    ...(viewMode === 'split'
+      ? { 'aria-label': tab === 'live' ? 'Live DAG' : 'Expected state' }
+      : { 'aria-labelledby': tabId(tab) }),
+    className: cn(
+      'gameplay-pane tier-dag-pane',
+      viewMode === 'split' ? 'is-split' : active === tab ? 'is-active' : 'is-inactive',
+    ),
+    inert: viewMode !== 'split' && active !== tab,
   })
 
   return (
-    <section className="tier-dag-tabs" aria-label="Repository diagrams">
-      <div className="tier-dag-tablist workspace-panel-header">
-        <div className="tier-dag-toggle" role="tablist" aria-label="Repository view" data-active={active}>
-          {TABS.map((tab) => (
-            <button
-              key={tab.id}
-              ref={(element) => {
-                tabRefs.current[tab.id] = element
-              }}
-              type="button"
-              role="tab"
-              id={tabId(tab.id)}
-              className="tier-dag-tab"
-              aria-selected={active === tab.id}
-              aria-controls={panelId(tab.id)}
-              tabIndex={active === tab.id ? 0 : -1}
-              data-tour-target={tourAnchors && tab.id === 'expected' ? 'expected-state' : undefined}
-              onClick={() => select(tab.id)}
-              onKeyDown={onTabKeyDown}
-            >
-              {tab.label}
-            </button>
-          ))}
+    <section className={cn('tier-dag-tabs', viewMode === 'split' && 'is-split')} aria-label="Repository diagrams">
+      <div className="tier-dag-controls">
+        <div className="tier-dag-toggle tier-dag-layout-toggle" role="group" aria-label="DAG display mode" data-active={viewMode}>
+          <button
+            type="button"
+            className="tier-dag-tab"
+            aria-pressed={viewMode === 'switch'}
+            onClick={() => setViewMode('switch')}
+          >
+            Switch
+          </button>
+          <button
+            type="button"
+            className="tier-dag-tab"
+            aria-pressed={viewMode === 'split'}
+            onClick={() => setViewMode('split')}
+          >
+            Split
+          </button>
         </div>
+        {viewMode === 'switch' ? (
+          <div className="tier-dag-toggle tier-dag-view-toggle" role="tablist" aria-label="Repository view" data-active={active}>
+            {TABS.map((tab) => (
+              <button
+                key={tab.id}
+                ref={(element) => {
+                  tabRefs.current[tab.id] = element
+                }}
+                type="button"
+                role="tab"
+                id={tabId(tab.id)}
+                className="tier-dag-tab"
+                aria-selected={active === tab.id}
+                aria-controls={panelId(tab.id)}
+                tabIndex={active === tab.id ? 0 : -1}
+                data-tour-target={tourAnchors && tab.id === 'expected' ? 'expected-state' : undefined}
+                onClick={() => select(tab.id)}
+                onKeyDown={onTabKeyDown}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
 
-      <div className="tier-dag-panes">
+      <div
+        ref={panesRef}
+        className={cn('tier-dag-panes', viewMode === 'split' && 'is-split')}
+        style={viewMode === 'split'
+          ? { gridTemplateRows: `minmax(0, ${splitPercent}fr) 0.55rem minmax(0, ${100 - splitPercent}fr)` }
+          : undefined}
+      >
         <div {...paneProps('live')} data-tour-target={tourAnchors ? 'live-dag' : undefined}>
           <TierDagStage
             snapshot={snapshot}
@@ -121,9 +226,32 @@ export function TierDagTabs({
             className="h-full min-h-0"
             showHeader={false}
             refitKey={`${activations.live}:${refitToken ?? 0}`}
+            preserveViewportOnResize
           />
         </div>
-        <div {...paneProps('expected')}>
+        {viewMode === 'split' ? (
+          <div
+            className="tier-dag-splitter"
+            role="separator"
+            aria-label="Resize Live DAG and Expected State"
+            aria-orientation="horizontal"
+            aria-valuemin={MIN_SPLIT_PERCENT}
+            aria-valuemax={MAX_SPLIT_PERCENT}
+            aria-valuenow={Math.round(splitPercent)}
+            aria-valuetext={`Live DAG ${Math.round(splitPercent)}%, Expected state ${Math.round(100 - splitPercent)}%`}
+            tabIndex={0}
+            onPointerDown={onSplitterPointerDown}
+            onPointerMove={onSplitterPointerMove}
+            onPointerUp={stopSplitterDrag}
+            onPointerCancel={stopSplitterDrag}
+            onLostPointerCapture={stopSplitterDrag}
+            onKeyDown={onSplitterKeyDown}
+          />
+        ) : null}
+        <div
+          {...paneProps('expected')}
+          data-tour-target={tourAnchors && viewMode === 'split' ? 'expected-state' : undefined}
+        >
           <LiveDagPanel
             title="Expected State"
             snapshot={expectedState}
@@ -134,10 +262,18 @@ export function TierDagTabs({
             layoutDirection="vertical"
             showHeader={false}
             refitKey={`${activations.expected}:${refitToken ?? 0}`}
+            preserveViewportOnResize
+            canvasOffsetY={viewMode === 'split'
+              ? -(((splitMetrics.height - splitMetrics.splitterHeight) * splitPercent) / 100 + splitMetrics.splitterHeight)
+              : 0}
           />
         </div>
         <TierDagLegend />
       </div>
     </section>
   )
+}
+
+function clampSplitPercent(value: number) {
+  return Math.min(MAX_SPLIT_PERCENT, Math.max(MIN_SPLIT_PERCENT, value))
 }

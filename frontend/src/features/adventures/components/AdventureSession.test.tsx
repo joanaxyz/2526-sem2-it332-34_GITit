@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { queryKeys } from '@/shared/api/queryKeys'
 import { levelTourStorageKey } from '@/shared/level/utils/levelTour'
-import type { AdventureRun } from '@/features/adventures/types'
+import type { AdventureCommandResponse, AdventureRun } from '@/features/adventures/types'
 import { AdventureSession } from './AdventureSession'
 
 const mocks = vi.hoisted(() => ({
@@ -15,6 +15,15 @@ const mocks = vi.hoisted(() => ({
   // The real gate decodes sprite sheets, which jsdom never loads. Its own
   // behavior is covered in useAdventureLevelAssets.test.ts.
   useAdventureLevelAssets: vi.fn(() => true),
+  submitCommand: vi.fn(),
+}))
+
+vi.mock('@/features/adventures/hooks/useAdventureCommandSubmission', () => ({
+  useAdventureCommandSubmission: () => ({ isPending: false, mutate: mocks.submitCommand }),
+}))
+
+vi.mock('@/shared/player-loadout/usePlayerLoadout', () => ({
+  usePlayerLoadout: () => ({ companionSlug: 'white', companion: { label: 'White', sprites: { portrait: { src: '/white.png' } } }, isLoading: false }),
 }))
 
 vi.mock('@/features/adventures/hooks/useAdventureLevelAssets', () => ({
@@ -103,7 +112,9 @@ vi.mock('@/shared/level/components/ProjectStructurePanel', () => ({
 }))
 
 vi.mock('@/shared/level/components/TerminalPanel', () => ({
-  TerminalPanel: () => <div data-testid="terminal-panel" />,
+  TerminalPanel: ({ onCommand }: { onCommand: (command: string) => void }) => (
+    <div data-testid="terminal-panel"><button onClick={() => onCommand('git init')}>Run git init</button></div>
+  ),
 }))
 
 vi.mock('@/shared/level/components/WorkspaceEditorOverlay', () => ({
@@ -210,6 +221,62 @@ describe('AdventureSession', () => {
     window.localStorage.clear()
     vi.clearAllMocks()
     mocks.useAdventureLevelAssets.mockReturnValue(true)
+  })
+
+  it.each(['started', 'completed'] as const)('reveals a server-learned skill during a %s run before its outcome', async (status) => {
+    window.localStorage.setItem(levelTourStorageKey(null, 'adventure'), 'seen')
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
+    const workspace = {
+      query: { isLoading: false, isError: false, data: retryRun },
+      lines: [],
+      createFile: { isPending: false, mutateAsync: vi.fn() },
+      writeFile: { isPending: false, mutateAsync: vi.fn() },
+      renameFile: { isPending: false, mutateAsync: vi.fn() },
+      deleteFile: { isPending: false, mutateAsync: vi.fn() },
+    }
+    mocks.useAdventureRun.mockImplementation(() => workspace)
+    mocks.useStartAdventureRun.mockReturnValue({ isPending: false, mutate: vi.fn() })
+    mocks.submitCommand.mockImplementation((_command, options) => {
+      const nextRun = { ...retryRun, status } as AdventureRun
+      workspace.query.data = nextRun
+      options.onSuccess({
+        run: nextRun,
+        command_outcome: { processed: true, command_family: 'init', solved: status === 'completed' },
+        learned_skills: [{ id: 7, slug: 'git-init', title: 'Create a repository', base_command: 'git init', summary: '', chapter_number: 1, chapter_title: 'Foundations' }],
+      } as AdventureCommandResponse)
+    })
+
+    renderSession(queryClient)
+    expect(screen.queryByRole('dialog', { name: "You've learned a new skill" })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Run git init' }))
+
+    const reveal = await screen.findByRole('dialog', { name: "You've learned a new skill" })
+    expect(within(reveal).getByRole('img', { name: 'Create a repository skill' }).querySelector('image')).toHaveAttribute('href', '/cosmetics/companion/white/effects/skill-ice-25/init.png')
+    expect(within(reveal).getByRole('img', { name: 'Git it guide' })).toHaveAttribute('src', '/mascot/portrait.png')
+    expect(screen.queryByRole('button', { name: /try again/i })).not.toBeInTheDocument()
+    fireEvent.click(within(reveal).getByRole('img', { name: 'Create a repository skill' }))
+    expect(screen.queryByRole('dialog', { name: "You've learned a new skill" })).not.toBeInTheDocument()
+    if (status === 'completed') expect(screen.getByRole('button', { name: /try again/i })).toBeInTheDocument()
+    else expect(screen.queryByRole('button', { name: /try again/i })).not.toBeInTheDocument()
+  })
+
+  it('does not reveal a skill when a command response has no newly learned event', () => {
+    window.localStorage.setItem(levelTourStorageKey(null, 'adventure'), 'seen')
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
+    mocks.useAdventureRun.mockReturnValue({
+      query: { isLoading: false, isError: false, data: retryRun }, lines: [],
+      createFile: { isPending: false, mutateAsync: vi.fn() }, writeFile: { isPending: false, mutateAsync: vi.fn() },
+      renameFile: { isPending: false, mutateAsync: vi.fn() }, deleteFile: { isPending: false, mutateAsync: vi.fn() },
+    })
+    mocks.useStartAdventureRun.mockReturnValue({ isPending: false, mutate: vi.fn() })
+    mocks.submitCommand.mockImplementation((_command, options) => options.onSuccess({
+      run: retryRun, command_outcome: { processed: true, command_family: 'init', solved: false },
+    } as AdventureCommandResponse))
+
+    renderSession(queryClient)
+    fireEvent.click(screen.getByRole('button', { name: 'Run git init' }))
+    expect(mocks.submitCommand).toHaveBeenCalled()
+    expect(screen.queryByRole('dialog', { name: "You've learned a new skill" })).not.toBeInTheDocument()
   })
 
   it('holds the loading screen until the level art is decoded', () => {

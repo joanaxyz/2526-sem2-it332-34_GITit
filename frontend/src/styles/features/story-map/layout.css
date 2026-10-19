@@ -78,7 +78,7 @@
 
 .chapter-overview {
   height: 100%;
-  grid-template-rows: minmax(17rem, 1fr) minmax(8.5rem, 0.48fr) minmax(14rem, 0.85fr);
+  grid-template-rows: minmax(17rem, 1fr) auto minmax(14rem, 0.85fr);
 }
 
 .chapter-overview > .game-panel {

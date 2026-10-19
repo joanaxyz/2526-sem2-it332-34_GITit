@@ -9,7 +9,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 
-import gitLogoImage from '@/assets/images/GIT_logo.webp'
+import gitLogoImage from '@/assets/images/g34-icon.webp'
 import { AudioControls } from '@/shared/audio/AudioControls'
 import { authApi } from '@/shared/auth/authApi'
 import { useRank } from '@/shared/progress/rank'

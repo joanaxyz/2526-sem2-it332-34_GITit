@@ -39,6 +39,8 @@ export function LiveDagPanel({
   layoutDirection = 'vertical',
   showHeader = true,
   refitKey,
+  preserveViewportOnResize = false,
+  canvasOffsetY = 0,
 }: {
   title?: string
   snapshot: RepositorySnapshot
@@ -64,6 +66,10 @@ export function LiveDagPanel({
   showHeader?: boolean
   /** Changing this re-runs the fit, e.g. when a hidden-but-mounted view becomes visible again. */
   refitKey?: string | number
+  /** Keep the current zoom and pan when the canvas dimensions change. */
+  preserveViewportOnResize?: boolean
+  /** Move only the graph canvas visually; React Flow's zoom and pan stay unchanged. */
+  canvasOffsetY?: number
 }) {
   return (
     <RepositoryStateDiagram
@@ -80,6 +86,8 @@ export function LiveDagPanel({
       layoutDirection={layoutDirection}
       showHeader={showHeader}
       refitKey={refitKey}
+      preserveViewportOnResize={preserveViewportOnResize}
+      canvasOffsetY={canvasOffsetY}
     />
   )
 }
@@ -99,6 +107,8 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   layoutDirection = 'vertical',
   showHeader = true,
   refitKey,
+  preserveViewportOnResize = false,
+  canvasOffsetY = 0,
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -114,6 +124,8 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   layoutDirection?: DagLayoutDirection
   showHeader?: boolean
   refitKey?: string | number
+  preserveViewportOnResize?: boolean
+  canvasOffsetY?: number
 }) {
   const colors = VARIANT_COLORS[variant]
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
@@ -229,7 +241,10 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
           <RepositoryStateMap snapshot={normalizedSnapshot} />
           {showRepositoryDetails ? <RepositoryDetails snapshot={normalizedSnapshot} /> : null}
         </details>
-        <div className="relative repository-history-canvas">
+        <div
+          className="relative repository-history-canvas"
+          style={canvasOffsetY ? { transform: `translateY(${canvasOffsetY}px)` } : undefined}
+        >
           <div
             className="pointer-events-none absolute inset-0 z-0"
             style={{
@@ -273,6 +288,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
                 topologySignature={layoutSignature}
                 fitViewPadding={fitViewPadding}
                 zoomStorageKey={zoomStorageKey}
+                preserveViewportOnResize={preserveViewportOnResize}
               />
             </ReactFlow>
           </CommitActivationContext.Provider>
@@ -298,6 +314,8 @@ function RepositoryStateDiagram({
   layoutDirection = 'vertical',
   showHeader = true,
   refitKey,
+  preserveViewportOnResize = false,
+  canvasOffsetY = 0,
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -313,6 +331,8 @@ function RepositoryStateDiagram({
   layoutDirection?: DagLayoutDirection
   showHeader?: boolean
   refitKey?: string | number
+  preserveViewportOnResize?: boolean
+  canvasOffsetY?: number
 }) {
   return (
     <ReactFlowProvider>
@@ -331,6 +351,8 @@ function RepositoryStateDiagram({
         layoutDirection={layoutDirection}
         showHeader={showHeader}
         refitKey={refitKey}
+        preserveViewportOnResize={preserveViewportOnResize}
+        canvasOffsetY={canvasOffsetY}
       />
     </ReactFlowProvider>
   )

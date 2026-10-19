@@ -219,6 +219,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
         "AdventureRunPatchResponse": {"partial", "id", "status", "current_attempt"},
         "AdventureCommandResponse": {
             "run",
+            "learned_skills",
             "solved",
             "stdout",
             "stderr",
@@ -303,12 +304,13 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
         },
     }
     optional_fields = {
+        "AdventureCommandResponse": {"learned_skills"},
         "ChallengeCommandRunResponse": {
             "mastery_progress",
             "completion",
             "next_difficulty",
             "sibling_levels",
-        }
+        },
     }
     for schema_name, expected_fields in exact_fields.items():
         actual_fields, required_fields, _ = _response_schema_fields(schemas, schema_name)

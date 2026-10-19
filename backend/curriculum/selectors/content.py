@@ -1,7 +1,10 @@
 from __future__ import annotations
 
+from django.db.models import Prefetch
+
 from adventures.models import AdventureLevel
-from curriculum.models import ChapterLesson
+from curriculum.library import library_key_for_command
+from curriculum.models import ChapterLesson, CommandForm, LibraryEntry
 
 from .access import (
     _build_adventure_access,
@@ -9,7 +12,7 @@ from .access import (
     adventure_summary_payload,
     challenge_summary_payload,
 )
-from .book import lesson_summary_payload
+from .book import chapter_adventure_knowledge, lesson_summary_payload
 from .challenge_queries import challenge_queryset
 
 
@@ -24,7 +27,15 @@ def chapter_content_overview(*, player, chapter_id: int) -> dict:
     adventures = list(
         AdventureLevel.objects.filter(chapter_id=chapter_id, is_published=True)
         .select_related("chapter")
-        .prefetch_related("command_forms__command_skill")
+        .prefetch_related(
+            Prefetch(
+                "command_forms",
+                queryset=CommandForm.objects.select_related("command_skill").order_by(
+                    "sort_order", "id"
+                ),
+                to_attr="overview_forms",
+            )
+        )
         .order_by("sort_order", "id")
     )
     lessons = ChapterLesson.objects.filter(chapter_id=chapter_id, is_published=True).order_by(
@@ -32,6 +43,33 @@ def chapter_content_overview(*, player, chapter_id: int) -> dict:
     )
     challenges = list(challenge_queryset(chapter_id=chapter_id))
     adventure_access = _build_adventure_access(player=player, adventures=adventures)
+    eligible_forms_by_adventure_id = {
+        adventure.id: [
+            form
+            for form in adventure.overview_forms
+            if form.is_published and form.is_playable and form.command_skill.is_published
+        ]
+        for adventure in adventures
+    }
+    library_keys = {
+        library_key_for_command(form.command_skill.base_command)
+        for forms in eligible_forms_by_adventure_id.values()
+        for form in forms
+        if form.command_skill.base_command
+    }
+    entries_by_key = {
+        entry.command_key: entry
+        for entry in LibraryEntry.objects.filter(
+            command_key__in=library_keys, is_published=True
+        )
+    }
+    knowledge_by_adventure_id = {
+        adventure.id: chapter_adventure_knowledge(
+            forms=eligible_forms_by_adventure_id[adventure.id],
+            entries_by_key=entries_by_key,
+        )
+        for adventure in adventures
+    }
     required_adventure_ids = {adventure.id for adventure in adventures if adventure.is_required}
     adventure_passed = required_adventure_ids <= adventure_access.passed_adventure_ids
     access = _build_challenge_access(
@@ -43,7 +81,12 @@ def chapter_content_overview(*, player, chapter_id: int) -> dict:
     # The frontend map lays out its floating relics in code now (frontend), so the
     # overview is just the chapter's content lists.
     adventure_payloads = [
-        adventure_summary_payload(player=player, adventure=adventure, access=adventure_access)
+        adventure_summary_payload(
+            player=player,
+            adventure=adventure,
+            access=adventure_access,
+            knowledge=knowledge_by_adventure_id[adventure.id],
+        )
         for adventure in adventures
     ]
     return {

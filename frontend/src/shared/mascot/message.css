@@ -1,0 +1,62 @@
+.mascot-message {
+  --mascot-sender-width: 72px;
+  --mascot-bubble-bg: #102133;
+  --mascot-bubble-border: #395b77;
+  display: grid;
+  grid-template-columns: var(--mascot-sender-width) minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  min-width: 0;
+  color: hsl(var(--foreground));
+}
+.mascot-message__sender { display: flex; flex-direction: column; align-items: center; gap: 3px; padding-top: 8px; }
+.mascot-message__sender img { display: block; width: 100%; height: auto; aspect-ratio: 4 / 5; object-fit: contain; user-select: none; }
+.mascot-message__sender > span { color: #c6e4f7; font-size: var(--text-xs); font-weight: 700; line-height: 1.3; }
+.mascot-message__bubble {
+  position: relative;
+  min-width: 0;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--mascot-bubble-border);
+  border-radius: 14px;
+  background: var(--mascot-bubble-bg);
+}
+.mascot-message__bubble::before {
+  content: '';
+  position: absolute;
+  top: 28px;
+  left: -6px;
+  width: 10px;
+  height: 10px;
+  border-bottom: 1px solid var(--mascot-bubble-border);
+  border-left: 1px solid var(--mascot-bubble-border);
+  background: var(--mascot-bubble-bg);
+  transform: rotate(45deg);
+  pointer-events: none;
+}
+.mascot-message__bubble :where(p) { color: #bdd0df; line-height: 1.6; }
+.mascot-message__bubble :where(h2, h3, strong) { color: hsl(var(--foreground)); }
+
+/* A tour's transparent outer frame keeps the portrait beside its message. */
+.workspace-tour__conversation { --mascot-sender-width: 54px; gap: 10px; }
+.workspace-tour__card:not(.has-aside), .workspace-tour__pane.workspace-tour__main {
+  background: transparent;
+  box-shadow: none;
+}
+.workspace-tour__conversation > .mascot-message__bubble { display: flex; flex-direction: column; min-height: 0; padding: 0; }
+.workspace-tour__conversation .workspace-tour__message { display: block; min-height: 0; overflow-y: auto; padding: 0.75rem 0.85rem; }
+.workspace-tour__conversation .workspace-tour__header { padding-top: 0.65rem; }
+.workspace-tour__conversation .workspace-tour__eyebrow { font-family: var(--font-sans); font-size: var(--text-xs); letter-spacing: 0; text-transform: none; }
+.workspace-tour__conversation .workspace-tour__body { color: #bdd0df; }
+.workspace-tour__conversation .workspace-tour__actions { gap: 0.4rem; padding-top: 0.55rem; }
+.workspace-tour__conversation .workspace-tour__shortcut { display: none; }
+.workspace-tour__conversation .workspace-tour__next { margin-left: auto; box-shadow: none; }
+.workspace-tour__main > .mascot-message { min-height: 0; flex: 1 1 auto; }
+.workspace-tour__main .mascot-message__bubble { max-height: 100%; }
+.workspace-tour__main .workspace-tour__message { flex: 1 1 auto; }
+.workspace-tour__main :is(.workspace-tour__header, .workspace-tour__progress, .workspace-tour__actions) { flex: 0 0 auto; }
+
+@media (max-width: 600px) {
+  .mascot-message { --mascot-sender-width: 52px; gap: 10px; }
+  .mascot-message__bubble { padding: 0.85rem; }
+  .workspace-tour__conversation { --mascot-sender-width: 44px; }
+}

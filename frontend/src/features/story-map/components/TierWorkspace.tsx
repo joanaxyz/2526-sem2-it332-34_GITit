@@ -5,7 +5,6 @@ import { useQueryClient } from '@tanstack/react-query'
 import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
 import { TierExitConfirmModal } from '@/features/story-map/components/TierExitConfirmModal'
 import { TierStatusHeader } from '@/features/story-map/components/TierStatusHeader'
-import { TierStatsBar } from '@/features/story-map/components/tier-workspace/TierStatsBar'
 import { TierStoryModal } from '@/features/story-map/components/tier-workspace/TierStoryModal'
 import { TierOutcomeModal } from '@/features/story-map/components/TierOutcomeModal'
 import { TierStartOverConfirmModal } from '@/features/story-map/components/TierStartOverConfirmModal'
@@ -38,6 +37,8 @@ import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { usePersistentState } from '@/shared/utils/persistentState'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
+import { SkillLearnedOverlay } from '@/shared/skill-learning/SkillLearnedOverlay'
+import { useSkillLearnedQueue } from '@/shared/skill-learning/useSkillLearnedQueue'
 
 /** Mirrors ChallengeWorkspace.tsx for the adventure-tier run lifecycle - new
  * and parallel, ChallengeWorkspace itself is untouched. Its first-run tour is
@@ -88,6 +89,10 @@ export function TierWorkspace() {
   const latestRunRef = useRef<TierRun | null>(null)
   const bypassNavigationRunId = useRef<number | null>(null)
   const exitNavigationPending = exitNavigationRunId === runId
+  const learnedSkills = useSkillLearnedQueue({
+    runId,
+    blocked: mutation.isPending || dagAnimation.animating || battleDirector.animating || exitNavigationPending,
+  })
   const activeRunId = run?.status === 'started' ? run.id : null
   const navigationBlocker = useBlocker(({ currentLocation, nextLocation }) => {
     if (!activeRunId || bypassNavigationRunId.current === activeRunId) return false
@@ -153,6 +158,7 @@ export function TierWorkspace() {
   const story = tierStoryContent(run)
   const guideHidden = run.tutor?.phase === 'introduction' && run.tutor.teaching_key === hiddenGuideKey
   const introductionOpen = Boolean(run.tutor && guideAllowed
+    && !learnedSkills.pending
     && !mutation.isPending && !dagAnimation.animating && !battleDirector.animating
     && !guideHidden)
   const replayGuide = selectedGuideKey
@@ -181,10 +187,12 @@ export function TierWorkspace() {
     setExitConfirmOpen,
     setWorkspaceEditorPath,
     queueOutcomeAnimation,
+    onSkillsLearned: learnedSkills.enqueue,
   })
 
   const isReplaying = retryMutation.isPending || replayMutation.isPending
   const outcomeModalOpen =
+    !learnedSkills.pending &&
     !storyOpen && !introductionOpen && !replayGuide &&
     !exitNavigationPending &&
     (run.status === 'completed' || run.status === 'failed') &&
@@ -206,9 +214,6 @@ export function TierWorkspace() {
         currentCommandGuideKey={run.tutor?.teaching_key}
         commandGuideOpen={introductionOpen || Boolean(replayGuide)}
         onSelectCommandGuide={openCommandGuide}
-      />
-      <TierStatsBar
-        run={run}
         repoGraph={repoDrawer.drawerMode ? {
           open: repoDrawer.open,
           hasUpdate: repoDrawer.hasUpdate,
@@ -266,7 +271,7 @@ export function TierWorkspace() {
         <CommandIntroductionPanel key={`${run.id}:${run.tutor.context_id}`} run={run} tutor={run.tutor}
           onDismiss={() => setHiddenGuideKey(run.tutor?.teaching_key ?? null)} />
       ) : null}
-      {!introductionOpen && replayGuide ? (
+      {!learnedSkills.pending && !introductionOpen && replayGuide ? (
         <CommandIntroductionPanel
           key={`${run.id}:replay:${replayGuide.teaching_key}`}
           run={run}
@@ -297,7 +302,7 @@ export function TierWorkspace() {
         }
       />
       <TierStoryModal
-        open={storyOpen}
+        open={storyOpen && !learnedSkills.pending}
         title={story.title}
         intro={story.intro}
         startingPoint={story.startingPoint}
@@ -306,12 +311,12 @@ export function TierWorkspace() {
         expectedResult={story.expectedResult}
         onClose={autoOpen.closeStory}
       />
-      {tourOpen ? (
+      {tourOpen && !learnedSkills.pending ? (
         <TierWorkspaceTour
           key={`${user?.id ?? 'guest'}:tier:${run.id}`}
           runId={run.id}
           onClose={autoOpen.closeTour}
-          targetInDrawer={repoDrawer.drawerMode && Boolean(run.scaffolding.expected_state && run.expected_state)}
+          repoGraphInDrawer={repoDrawer.drawerMode}
         />
       ) : null}
       <TierExitConfirmModal
@@ -328,6 +333,7 @@ export function TierWorkspace() {
         onClose={() => setStartOverConfirmOpen(false)}
         onStartFresh={startFreshAttempt}
       />
+      <SkillLearnedOverlay skill={learnedSkills.skill} companionSlug={companionSlug} onClose={learnedSkills.dismiss} />
     </div>
   )
 }

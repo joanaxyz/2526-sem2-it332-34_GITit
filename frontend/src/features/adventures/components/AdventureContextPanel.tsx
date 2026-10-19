@@ -43,7 +43,7 @@ export function AdventureContextPanel({
       label: 'Stars',
       icon: StarSolidIcon,
       iconClass: 'lvlctx-icon--amber',
-      value: <StarTriplet count={run.stars || 0} />,
+      value: <StarTriplet count={run.stars || 0} mode="adventure" />,
     },
     {
       label: 'Commands',

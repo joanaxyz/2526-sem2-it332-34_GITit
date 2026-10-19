@@ -36,10 +36,21 @@ _OPTION_ALIASES = {
 }
 
 # Families whose first operand is a subcommand word, not a value.
-_SUBCOMMAND_FAMILIES = frozenset({
-    "stash", "remote", "worktree", "submodule", "bisect", "sparse-checkout", "notes",
-    "reflog", "lfs", "maintenance", "rerere",
-})
+_SUBCOMMAND_FAMILIES = frozenset(
+    {
+        "stash",
+        "remote",
+        "worktree",
+        "submodule",
+        "bisect",
+        "sparse-checkout",
+        "notes",
+        "reflog",
+        "lfs",
+        "maintenance",
+        "rerere",
+    }
+)
 
 # Learners who completed the first introductions before teaching keys became
 # syntax-based keep those completions.
@@ -164,7 +175,9 @@ def command_uses_form(command: str, usage_form: str) -> bool:
     if not command_matches_form(command, usage_form):
         return False
     if _VARIADIC_PLACEHOLDER.search(usage_form):
-        single = _VARIADIC_PLACEHOLDER.sub(lambda match: match.group(0).replace("...", ""), usage_form)
+        single = _VARIADIC_PLACEHOLDER.sub(
+            lambda match: match.group(0).replace("...", ""), usage_form
+        )
         return not command_matches_form(command, single)
     return True
 
@@ -195,7 +208,9 @@ def same_shape(left: str, right: str) -> bool:
 
 def _specificity(usage_form: str) -> tuple[int, int, int]:
     tokens = _canonical_tokens(usage_form, pattern=True)
-    literal = sum(1 for value, optional in tokens if not optional and not _PLACEHOLDER.search(value))
+    literal = sum(
+        1 for value, optional in tokens if not optional and not _PLACEHOLDER.search(value)
+    )
     optional = sum(1 for _, is_optional in tokens if is_optional)
     variadic = sum(1 for value, _ in tokens if _VARIADIC_PLACEHOLDER.fullmatch(value))
     return literal, -optional, -variadic
@@ -205,7 +220,12 @@ def _command_shape(command: str) -> str:
     tokens = _tokens(normalize_command(command))
     shape = tokens[:2]
     rest = tokens[2:]
-    if len(tokens) > 1 and tokens[1] in _SUBCOMMAND_FAMILIES and rest and not rest[0].startswith("-"):
+    if (
+        len(tokens) > 1
+        and tokens[1] in _SUBCOMMAND_FAMILIES
+        and rest
+        and not rest[0].startswith("-")
+    ):
         shape.append(rest.pop(0))
     for token in rest:
         if token.startswith("-") and token != "--":

@@ -87,7 +87,7 @@ export function GameOutcomeStatTile({
             <div
               className="game-outcome-stat-bar-fill"
               style={{
-                width: `${fillPercent}%`,
+                transform: `scaleX(${fillPercent / 100})`,
                 background: accentColor,
                 boxShadow: `0 0 10px color-mix(in srgb, ${accentColor} 70%, transparent)`,
               }}
