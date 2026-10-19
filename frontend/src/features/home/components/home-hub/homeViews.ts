@@ -9,10 +9,8 @@ import { Map, Sparkles, UserRound, type LucideIcon } from 'lucide-react'
  * things a player comes back to look at, and the companion is a prerequisite for
  * playing at all, so a player with none sees the gap immediately.
  *
- * Progress and Run results used to be separate categories, but they reported the
- * same facts under different names — the run meter and the "Levels finished"
- * tile were both the backend's one finish rate. They are one category now, and
- * each number is stated exactly once.
+ * Progress combines recent activity, active-curriculum context, and the
+ * Modules 1–4 practice record. Legacy Run results links land there too.
  */
 export type HomeView = 'profile' | 'progress' | 'skills'
 
@@ -33,7 +31,7 @@ export const HOME_VIEWS: readonly HomeViewOption[] = [
   {
     id: 'progress',
     label: 'Progress',
-    blurb: 'Your Arcane Spire progress, recent activity, and run record',
+    blurb: 'Your recent activity and practice goals across Arcane Spire',
     Icon: Map,
   },
   {

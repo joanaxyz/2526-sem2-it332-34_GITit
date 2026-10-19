@@ -84,7 +84,7 @@ CATALOG_FORMS = {
 def _ordered_waves():
     """Every blueprint wave in the exact order the seeder publishes them.
 
-    Mirrors ``seed_curriculum``: chapter sort order, then each chapter's
+    Mirrors ``seed_curriculum_fixture``: chapter sort order, then each chapter's
     sources in ADVENTURE_SOURCES order, then level list order, then wave
     list order.
     """

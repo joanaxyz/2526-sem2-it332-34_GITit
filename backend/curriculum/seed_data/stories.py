@@ -1,6 +1,6 @@
-"""Retired multi-story fixture used only by the standalone seed_curriculum command.
+"""Retired multi-story fixture used only by seed_curriculum_fixture in tests.
 
-Production seeding is owned by seed_legacy_modules and creates the sole active
+Production seeding is owned by seed_curriculum and creates the sole active
 Arcane Spire record from the Module 0-4 curriculum.
 """
 

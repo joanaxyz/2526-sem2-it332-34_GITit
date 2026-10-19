@@ -25,7 +25,7 @@ from django.core.management import call_command
 from adventures.models import AdventureLevelTierRun, AdventureLevelTierWaveVariant
 from common.constants import SESSION_STATUS_COMPLETED
 from common.runtime import counted_command_total
-from curriculum.management.commands.seed_legacy_modules import (
+from curriculum.management.commands.seed_curriculum import (
     DIFFICULTY_MAX_COUNTED_COMMANDS,
     MODULE_4_LEVELS,
     MODULE_4_REBASE_CASES,
@@ -39,7 +39,7 @@ from players.services import get_or_create_player
 
 BACKEND = Path(__file__).resolve().parents[2]
 FRONTEND = BACKEND.parent / "frontend"
-LEGACY_STORY = "arcane-spire"
+CURRICULUM_STORY_SLUG = "arcane-spire"
 
 LEVEL_BY_TABLE = {
     "reversing-pushed-commits-safely": MODULE_4_REVERT_CASES,
@@ -282,9 +282,9 @@ def test_committed_target_passes_strict_grading_and_start_state_does_not(case_id
 
 
 def test_seed_unpublishes_retired_duplicates_and_keeps_their_runs(db, django_user_model):
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
     wave = AdventureLevelTierWaveVariant.objects.get(
-        slug="re6", wave__tier__adventure_level__chapter__story__slug=LEGACY_STORY
+        slug="re6", wave__tier__adventure_level__chapter__story__slug=CURRICULUM_STORY_SLUG
     ).wave
     # A production database still holds the old copies, with runs on them.
     retired = AdventureLevelTierWaveVariant.objects.create(
@@ -301,7 +301,7 @@ def test_seed_unpublishes_retired_duplicates_and_keeps_their_runs(db, django_use
         status=SESSION_STATUS_COMPLETED,
     )
 
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
 
     retired.refresh_from_db()
     run.refresh_from_db()
@@ -313,12 +313,12 @@ def test_seed_unpublishes_retired_duplicates_and_keeps_their_runs(db, django_use
 
 def test_seeding_keeps_committed_target_states_on_every_rerun(db):
     """Re-seeding used to write target_state={} and needed a manual import."""
-    call_command("seed_legacy_modules", verbosity=0)
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
 
     targets = _committed_targets()
     variants = AdventureLevelTierWaveVariant.objects.filter(
-        wave__tier__adventure_level__chapter__story__slug=LEGACY_STORY
+        wave__tier__adventure_level__chapter__story__slug=CURRICULUM_STORY_SLUG
     )
     assert variants.exists()
     mismatched = [v.case_id for v in variants if v.target_state != targets.get(v.case_id)]
@@ -331,10 +331,10 @@ def test_no_two_variants_in_a_module_3_4_wave_share_start_and_target(db):
     TODO: extend to Modules 1-2 once their start-state-only overlaps are
     reviewed (they currently differ in target_state, so they would pass).
     """
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
     variants = AdventureLevelTierWaveVariant.objects.filter(
         is_published=True,
-        wave__tier__adventure_level__chapter__story__slug=LEGACY_STORY,
+        wave__tier__adventure_level__chapter__story__slug=CURRICULUM_STORY_SLUG,
         wave__tier__adventure_level__chapter__number__in=(3, 4),
     ).select_related("wave")
 

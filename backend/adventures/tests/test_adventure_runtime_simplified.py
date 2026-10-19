@@ -100,7 +100,7 @@ def complete_level(service, run):
 
 
 def test_old_adventure_launch_without_level_is_rejected(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     level = first_level()
     client = APIClient()
@@ -113,7 +113,7 @@ def test_old_adventure_launch_without_level_is_rejected(db, django_user_model):
 
 
 def test_discarding_active_adventure_deletes_run(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     level = first_level()
     run = AdventureRunService().start_run(player=get_or_create_player(user), level=level)
@@ -127,7 +127,7 @@ def test_discarding_active_adventure_deletes_run(db, django_user_model):
 
 
 def test_starting_adventure_level_discards_stale_active_run(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     level = first_level()
     stale = AdventureRunService().start_run(player=get_or_create_player(user), level=level)
@@ -143,7 +143,7 @@ def test_starting_adventure_level_discards_stale_active_run(db, django_user_mode
 
 
 def test_active_adventure_run_is_not_exposed_as_resumable_session(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     level = first_level()
     AdventureRunService().start_run(player=get_or_create_player(user), level=level)
@@ -158,7 +158,7 @@ def test_active_adventure_run_is_not_exposed_as_resumable_session(db, django_use
 
 
 def test_passed_run_unlocks_next_level_even_without_completion_row(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model, username="passed-unlocks-next")
     player = get_or_create_player(user)
     levels = list(
@@ -189,7 +189,7 @@ def test_passed_run_unlocks_next_level_even_without_completion_row(db, django_us
 
 
 def test_budget_exhaustion_fails_adventure_wave(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     level = first_level()
     run = AdventureRunService().start_run(player=get_or_create_player(user), level=level)
@@ -222,7 +222,7 @@ def test_budget_exhaustion_fails_adventure_wave(db, django_user_model):
 def test_first_repository_workflow_wave_does_not_complete_after_only_init(db, django_user_model):
     from adventures.models import AdventureWave
 
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     # The init+stage+commit workflow wave must not pass after only the first
     # command, no matter which level the blueprint places it in.
@@ -279,7 +279,7 @@ def test_first_snapshot_battle_progress_survives_invalid_commit_and_rewards_add(
 ):
     from adventures.models import AdventureWave
 
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model, username="first-snapshot-progress")
     wave = AdventureWave.objects.get(slug="ch1-adv-init-current-folder", is_published=True)
     run = AdventureRunService().start_run(
@@ -396,7 +396,7 @@ def _multi_wave_level():
 def test_wave_advance_response_returns_neutral_command_outcome(db, django_user_model):
     """Solving a non-final wave returns command_outcome only; battle animation
     state is now derived by the frontend and is not persisted or returned."""
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     level = _multi_wave_level()
     assert level is not None, "seed data should include a multi-wave level"
@@ -442,7 +442,7 @@ def test_wave_advance_response_returns_neutral_command_outcome(db, django_user_m
 
 
 def test_adventure_level_run_is_scoped_to_one_level(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     level = first_level()
     client = APIClient()
@@ -481,7 +481,7 @@ def test_adventure_level_run_is_scoped_to_one_level(db, django_user_model):
 
 
 def test_completing_level_records_level_and_adventure_completion(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     player = get_or_create_player(user)
     adventure = first_level()
@@ -510,7 +510,7 @@ def test_completing_level_records_level_and_adventure_completion(db, django_user
 
 
 def test_opening_level_library_filters_commands_and_penalizes_score(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     level = first_level()
     service = AdventureRunService()
@@ -548,7 +548,7 @@ def test_opening_level_library_filters_commands_and_penalizes_score(db, django_u
 
 
 def test_replay_can_restore_perfect_score_after_library_penalty(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     level = first_level()
     service = AdventureRunService()

@@ -16,7 +16,6 @@ import textwrap
 from pathlib import Path
 from typing import Any
 
-
 SCENARIO_RE = re.compile(
     r"^### (?P<number>\d+\.\d+\.\d+) (?P<title>.+?) · "
     r"(?P<difficulty>Easy|Medium|Hard)\s*$",
@@ -48,9 +47,7 @@ class ImportError(ValueError):
 
 
 def _clean_markdown_text(value: str) -> str:
-    lines = [
-        line.rstrip().removesuffix("  ").rstrip() for line in value.strip().splitlines()
-    ]
+    lines = [line.rstrip().removesuffix("  ").rstrip() for line in value.strip().splitlines()]
     return "\n".join(lines).strip()
 
 
@@ -145,9 +142,7 @@ def _evaluation(value: str) -> tuple[list[str], int, int, list[str]]:
         value,
     )
     if not budget:
-        raise ImportError(
-            "Evaluation is missing a minimum/maximum counted-command budget"
-        )
+        raise ImportError("Evaluation is missing a minimum/maximum counted-command budget")
     minimum, maximum = int(budget.group(1)), int(budget.group(2))
     if minimum < 0 or maximum < minimum:
         raise ImportError(f"Invalid counted-command budget: {minimum}..{maximum}")
@@ -159,9 +154,7 @@ def _evaluation(value: str) -> tuple[list[str], int, int, list[str]]:
     return bullets, minimum, maximum, seed_notes
 
 
-def parse_document(
-    text: str, *, enforce_bank_counts: bool = True
-) -> dict[str, dict[str, Any]]:
+def parse_document(text: str, *, enforce_bank_counts: bool = True) -> dict[str, dict[str, Any]]:
     matches = list(SCENARIO_RE.finditer(text))
     if enforce_bank_counts and len(matches) != 265:
         raise ImportError(f"Expected 265 scenarios, found {len(matches)}")
@@ -179,19 +172,13 @@ def parse_document(
             raise ImportError(f"Duplicate Variant ID: {variant_id}")
 
         blocks = _blocks(section)
-        missing = [
-            heading
-            for heading in REQUIRED_HEADINGS
-            if not blocks.get(heading, "").strip()
-        ]
+        missing = [heading for heading in REQUIRED_HEADINGS if not blocks.get(heading, "").strip()]
         if missing:
             raise ImportError(
                 f"Scenario {match.group('number')} ({variant_id}) is missing: {', '.join(missing)}"
             )
 
-        required_files = _required_files(
-            blocks.get("Required resolved file content", "")
-        )
+        required_files = _required_files(blocks.get("Required resolved file content", ""))
         answer_steps, commands, workspace_files = _answer_key(blocks["Answer Key"])
         required_pairs = {(item["path"], item["content"]) for item in required_files}
         edited_pairs = {(item["path"], item["content"]) for item in workspace_files}
@@ -253,7 +240,7 @@ def main(argv: list[str] | None = None) -> int:
             / "backend"
             / "curriculum"
             / "seed_data"
-            / "revised_legacy_scenarios.json"
+            / "scenario_bank.json"
         ),
     )
     parser.add_argument(
@@ -270,9 +257,7 @@ def main(argv: list[str] | None = None) -> int:
         return 1
 
     if args.check:
-        current = (
-            args.output.read_text(encoding="utf-8") if args.output.exists() else ""
-        )
+        current = args.output.read_text(encoding="utf-8") if args.output.exists() else ""
         if current != rendered:
             print(f"error: {args.output} is stale", file=sys.stderr)
             return 1

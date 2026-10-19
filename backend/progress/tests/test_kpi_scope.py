@@ -326,3 +326,35 @@ def test_admin_retry_success_rate_follows_staff_and_range_scope(tier, django_use
         "numerator": 1,
         "denominator": 1,
     }
+
+
+def test_learner_progress_matches_all_time_admin_player_kpis(tier, django_user_model):
+    user, learner = _player(django_user_model, "progress-parity")
+    service = MetricsService()
+    empty = service.performance_summary(player=learner)
+    assert empty == service.admin_player_performance_summary(player=learner)
+    assert all(metric["value"] is None for metric in empty["kpis"].values())
+    failure = _run(learner, tier, "a", SESSION_STATUS_FAILED, steps=(True, False))
+    _run(learner, tier, "b", SESSION_STATUS_FAILED, prior=failure)
+    _run(learner, tier, "a", SESSION_STATUS_COMPLETED)
+    service = MetricsService()
+    learner_summary = service.performance_summary(player=learner)
+    assert learner_summary == service.admin_player_performance_summary(
+        player=learner, kpi_range=ALL_TIME
+    )
+    assert learner_summary["kpis"]["scr"] == {"value": 33.3, "numerator": 1, "denominator": 3}
+    assert learner_summary["kpis"]["car"] == {"value": 75.0, "numerator": 3, "denominator": 4}
+    assert learner_summary["kpis"]["arc"] == {"value": 0.0, "numerator": 0, "denominator": 1}
+    assert learner_summary["kpis"]["rta"] == {"value": 0.0, "numerator": 0, "denominator": 1}
+    assert learner_summary["kpis"]["retry_success_rate"] == {
+        "value": 0.0,
+        "numerator": 0,
+        "denominator": 1,
+    }
+    assert learner_summary["modules"][0]["number"] == 3
+    learner_client = APIClient()
+    learner_client.force_authenticate(user=user)
+    assert learner_client.get("/api/progress/performance/").json() == learner_summary
+    admin_body = _staff_client(django_user_model).get(f"/api/admin/users/{user.id}/kpis/").json()
+    assert admin_body["kpis"] == learner_summary["kpis"]
+    assert admin_body["modules"] == learner_summary["modules"]

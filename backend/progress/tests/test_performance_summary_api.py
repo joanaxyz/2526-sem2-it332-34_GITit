@@ -12,7 +12,7 @@ from progress.services import MetricsService
 def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
     db, django_user_model
 ):
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
     user = django_user_model.objects.create_user(
         username="performance-reader",
         email="performance-reader@example.com",
@@ -103,7 +103,7 @@ def test_admin_aggregate_spans_learners_while_player_endpoint_stays_scoped(db, d
     union of every learner's Runebound attempts.
     """
 
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
     tier = AdventureLevelTier.objects.filter(
         adventure_level__chapter__story__slug="arcane-spire",
         adventure_level__chapter__number=1,

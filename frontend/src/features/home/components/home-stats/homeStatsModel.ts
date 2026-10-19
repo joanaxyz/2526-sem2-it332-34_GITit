@@ -50,9 +50,8 @@ export type HomeProgressModel = {
     levelsCompleted: number
     perfectClears: number
     /**
-     * The share of started runs that were finished. The backend derives
-     * `headline.finish_rate` and `kpis.scr` from the same two counts, so this is
-     * the screen's only finish-rate fact and the record band never restates it.
+     * Active-curriculum run context. The separate performance instrument uses
+     * the Modules 1–4 performance endpoint, with its own explicit scope.
      */
     finishRate: HomeRateMetric
   }
@@ -65,19 +64,9 @@ export type HomeSkillsModel = {
   masteryStars: number
 }
 
-/** Progress, lower band: this account's record across everything played. */
-export type HomeResultsModel = {
-  hardClearRate: HomeRateMetric
-  averageRetries: HomeRateMetric
-  accuracy: number | null
-  commandsRun: number
-  accuracyReady: boolean
-}
-
 export type HomeStatsModel = {
   progress: HomeProgressModel
   skills: HomeSkillsModel
-  results: HomeResultsModel
   achievements: Achievement[]
 }
 
@@ -177,15 +166,6 @@ export function buildHomeStatsModel(home: HomeSummary, stats: StatsSummary): Hom
       overallMastery,
       // Proficiency is earned: a learner at 0% must not receive a free star.
       masteryStars: Math.min(3, Math.ceil(overallMastery / 34)),
-    },
-    results: {
-      // `home.kpis.scr` is deliberately unused: it is the same finish rate the
-      // Arcane Spire meter already shows, and one fact per screen means one statement.
-      hardClearRate: { ...home.kpis.hlcr },
-      averageRetries: { ...home.kpis.arc },
-      accuracy: stats.headline.accuracy,
-      commandsRun: stats.headline.commands_run,
-      accuracyReady: stats.headline.commands_run >= 100,
     },
     achievements: deriveAchievements(home, stats),
   }

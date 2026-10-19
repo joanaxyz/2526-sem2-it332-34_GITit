@@ -27,7 +27,7 @@ def _first_seeded_chapter() -> Chapter:
 
 
 def test_chapter_overview_marks_first_adventure_level_unlocked(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = _make_user(django_user_model)
     player = get_or_create_player(user)
     chapter = _first_seeded_chapter()
@@ -42,7 +42,7 @@ def test_chapter_overview_marks_first_adventure_level_unlocked(db, django_user_m
 
 
 def test_chapter_overview_batch_loads_adventure_completions(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = _make_user(django_user_model, "track-query-student")
     player = get_or_create_player(user)
     chapter = _first_seeded_chapter()
@@ -59,7 +59,7 @@ def test_chapter_overview_batch_loads_adventure_completions(db, django_user_mode
 
 
 def test_chapter_overview_api_does_not_fall_back_to_locked_placeholders(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = _make_user(django_user_model, "track-api-student")
     client = APIClient()
     client.force_authenticate(user=user)
