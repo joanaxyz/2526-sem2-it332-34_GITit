@@ -1,5 +1,5 @@
 import { useId, useLayoutEffect, useRef, useState } from 'react'
-import type { KeyboardEvent, PointerEvent } from 'react'
+import type { CSSProperties, KeyboardEvent, PointerEvent } from 'react'
 
 import { TierDagStage } from '@/features/story-map/components/TierDagStage'
 import { TierDagLegend } from '@/features/story-map/components/TierDagLegend'
@@ -54,6 +54,8 @@ export function TierDagTabs({
   const splitterDrag = useRef<{ pointerId: number; startY: number; startPercent: number; availableHeight: number } | null>(null)
   const panesRef = useRef<HTMLDivElement | null>(null)
   const [splitMetrics, setSplitMetrics] = useState({ height: 0, splitterHeight: 0 })
+  const liveRowHeight = ((splitMetrics.height - splitMetrics.splitterHeight) * splitPercent) / 100
+  const expectedRowHeight = splitMetrics.height - splitMetrics.splitterHeight - liveRowHeight
   const tabId = (tab: DagTab) => `${baseId}-${tab}-tab`
   const panelId = (tab: DagTab) => `${baseId}-${tab}-panel`
 
@@ -162,6 +164,7 @@ export function TierDagTabs({
       viewMode === 'split' ? 'is-split' : active === tab ? 'is-active' : 'is-inactive',
     ),
     inert: viewMode !== 'split' && active !== tab,
+    'data-dag-pane': tab,
   })
 
   return (
@@ -215,7 +218,19 @@ export function TierDagTabs({
         ref={panesRef}
         className={cn('tier-dag-panes', viewMode === 'split' && 'is-split')}
         style={viewMode === 'split'
-          ? { gridTemplateRows: `minmax(0, ${splitPercent}fr) 0.55rem minmax(0, ${100 - splitPercent}fr)` }
+          ? {
+              gridTemplateRows: `minmax(0, ${splitPercent}fr) 0.55rem minmax(0, ${100 - splitPercent}fr)`,
+              // Both canvases span the whole split area and each pane only
+              // clips them, so dragging moves the divider like a blind
+              // without resizing or shifting either graph.
+              ...(splitMetrics.height > 0
+                ? {
+                    '--tier-dag-split-height': `${splitMetrics.height}px`,
+                    '--tier-dag-live-hidden': `${splitMetrics.height - liveRowHeight}px`,
+                    '--tier-dag-expected-hidden': `${splitMetrics.height - expectedRowHeight}px`,
+                  } as CSSProperties
+                : {}),
+            }
           : undefined}
       >
         <div {...paneProps('live')} data-tour-target={tourAnchors ? 'live-dag' : undefined}>
@@ -263,9 +278,6 @@ export function TierDagTabs({
             showHeader={false}
             refitKey={`${activations.expected}:${refitToken ?? 0}`}
             preserveViewportOnResize
-            canvasOffsetY={viewMode === 'split'
-              ? -(((splitMetrics.height - splitMetrics.splitterHeight) * splitPercent) / 100 + splitMetrics.splitterHeight)
-              : 0}
           />
         </div>
         <TierDagLegend />

@@ -109,7 +109,7 @@ export function CommitDetailsPanel({ data }: { data: CommitNodeData | null }) {
 
   return (
     <div
-      className="pointer-events-none absolute right-3 top-3 z-50 w-60 max-w-[calc(100%-1.5rem)] overflow-hidden rounded-md border border-border/80 bg-card/90 p-3 text-left text-xs shadow-2xl shadow-black/25 backdrop-blur-md"
+      className="commit-details-overlay pointer-events-none absolute right-3 top-3 z-50 w-60 max-w-[calc(100%-1.5rem)] overflow-hidden rounded-md border border-border/80 bg-card/90 p-3 text-left text-xs shadow-2xl shadow-black/25 backdrop-blur-md"
       data-testid="commit-details-overlay"
       role="tooltip"
     >

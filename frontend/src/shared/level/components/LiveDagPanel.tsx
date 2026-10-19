@@ -40,7 +40,6 @@ export function LiveDagPanel({
   showHeader = true,
   refitKey,
   preserveViewportOnResize = false,
-  canvasOffsetY = 0,
 }: {
   title?: string
   snapshot: RepositorySnapshot
@@ -68,8 +67,6 @@ export function LiveDagPanel({
   refitKey?: string | number
   /** Keep the current zoom and pan when the canvas dimensions change. */
   preserveViewportOnResize?: boolean
-  /** Move only the graph canvas visually; React Flow's zoom and pan stay unchanged. */
-  canvasOffsetY?: number
 }) {
   return (
     <RepositoryStateDiagram
@@ -87,7 +84,6 @@ export function LiveDagPanel({
       showHeader={showHeader}
       refitKey={refitKey}
       preserveViewportOnResize={preserveViewportOnResize}
-      canvasOffsetY={canvasOffsetY}
     />
   )
 }
@@ -108,7 +104,6 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   showHeader = true,
   refitKey,
   preserveViewportOnResize = false,
-  canvasOffsetY = 0,
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -125,7 +120,6 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   showHeader?: boolean
   refitKey?: string | number
   preserveViewportOnResize?: boolean
-  canvasOffsetY?: number
 }) {
   const colors = VARIANT_COLORS[variant]
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
@@ -241,10 +235,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
           <RepositoryStateMap snapshot={normalizedSnapshot} />
           {showRepositoryDetails ? <RepositoryDetails snapshot={normalizedSnapshot} /> : null}
         </details>
-        <div
-          className="relative repository-history-canvas"
-          style={canvasOffsetY ? { transform: `translateY(${canvasOffsetY}px)` } : undefined}
-        >
+        <div className="relative repository-history-canvas">
           <div
             className="pointer-events-none absolute inset-0 z-0"
             style={{
@@ -315,7 +306,6 @@ function RepositoryStateDiagram({
   showHeader = true,
   refitKey,
   preserveViewportOnResize = false,
-  canvasOffsetY = 0,
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -332,7 +322,6 @@ function RepositoryStateDiagram({
   showHeader?: boolean
   refitKey?: string | number
   preserveViewportOnResize?: boolean
-  canvasOffsetY?: number
 }) {
   return (
     <ReactFlowProvider>
@@ -352,7 +341,6 @@ function RepositoryStateDiagram({
         showHeader={showHeader}
         refitKey={refitKey}
         preserveViewportOnResize={preserveViewportOnResize}
-        canvasOffsetY={canvasOffsetY}
       />
     </ReactFlowProvider>
   )
