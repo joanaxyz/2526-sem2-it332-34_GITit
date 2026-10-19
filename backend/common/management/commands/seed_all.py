@@ -50,7 +50,7 @@ class Command(BaseCommand):
 
         verbosity = options.get("verbosity", 1)
         self.stdout.write(self.style.MIGRATE_HEADING("1/3 Arcane Spire curriculum"))
-        call_command("seed_legacy_modules", verbosity=verbosity)
+        call_command("seed_curriculum", verbosity=verbosity)
 
         self.stdout.write(self.style.MIGRATE_HEADING("2/3 Command library"))
         call_command("seed_command_library", verbosity=verbosity)

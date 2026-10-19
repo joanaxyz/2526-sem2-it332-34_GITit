@@ -10,7 +10,7 @@ def test_seed_all_is_non_destructive_by_default(mock_call_command):
     call_command("seed_all", verbosity=0)
 
     assert mock_call_command.call_args_list == [
-        mock.call("seed_legacy_modules", verbosity=0),
+        mock.call("seed_curriculum", verbosity=0),
         mock.call("seed_command_library", verbosity=0),
         mock.call("seed_drills", verbosity=0),
     ]

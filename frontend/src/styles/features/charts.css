@@ -192,18 +192,6 @@
   text-align: center;
 }
 
-/* ── Direct labels: the value stays readable without hovering ───────────── */
-.ref-chart-column-value {
-  fill: var(--text-primary);
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  font-weight: 700;
-}
-
-.ref-chart-column-value[data-empty='true'] {
-  fill: var(--text-tertiary);
-}
-
 .ref-chart .recharts-reference-dot .recharts-dot {
   fill: hsl(var(--warning));
   stroke: hsl(var(--background));
@@ -295,22 +283,6 @@
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
   font-weight: 700;
-}
-
-/* ── Small multiple ────────────────────────────────────────────────────── */
-.ref-chart-mini {
-  display: grid;
-  align-content: start;
-  gap: 0.35rem;
-  min-width: 0;
-  margin: 0;
-}
-
-.ref-chart-mini figcaption {
-  color: var(--text-secondary);
-  font-size: var(--text-2xs);
-  font-weight: 700;
-  text-wrap: balance;
 }
 
 /* Keyboard users get the same crosshair readout as a pointer (Recharts'

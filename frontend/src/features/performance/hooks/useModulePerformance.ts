@@ -4,10 +4,10 @@ import { performanceApi } from '@/features/performance/api/performanceApi'
 import { queryKeys } from '@/shared/api/queryKeys'
 
 /**
- * Module-level practice metrics for the main story's first four modules.
+ * Overall and per-module practice metrics for Arcane Spire Modules 1–4.
  *
- * Fetched on demand rather than with the rest of Home: only the Overview's
- * "Run results" view needs it, so the hub never waits on this request.
+ * Fetched on demand by Home Progress's practice record, so the hub never
+ * waits on this request.
  */
 export function useModulePerformance() {
   return useQuery({

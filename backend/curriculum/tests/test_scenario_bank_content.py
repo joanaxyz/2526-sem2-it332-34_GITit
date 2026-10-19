@@ -4,25 +4,25 @@ import pytest
 from django.core.management import call_command
 
 from adventures.models import AdventureLevelTierWaveVariant
-from curriculum.management.commands.seed_legacy_modules import LEGACY_MODULE_LEVELS
+from curriculum.management.commands.seed_curriculum import MODULE_LEVELS
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
-from curriculum.seed_data.revised_legacy_runtime import DISPLACED_REVISED_CASE_IDS
-from curriculum.seed_data.revised_legacy_scenarios import revised_legacy_scenarios
+from curriculum.seed_data.scenario_bank import scenario_bank
+from curriculum.seed_data.scenario_runtime import DISPLACED_REVISED_CASE_IDS
 from evaluation.services.state_based import StateBasedEvaluator
 
 
-def _legacy_cases() -> list[dict]:
+def _curriculum_cases() -> list[dict]:
     return [
         case
-        for level in LEGACY_MODULE_LEVELS
+        for level in MODULE_LEVELS
         for tier in level.get("tiers", {}).values()
         for case in tier["cases"]
     ]
 
 
 def test_revised_bank_uses_every_authored_variant_id_once():
-    cases = _legacy_cases()
-    content = revised_legacy_scenarios()
+    cases = _curriculum_cases()
+    content = scenario_bank()
 
     assert len(cases) == len(content) == 265
     assert len({case["case_id"] for case in cases}) == 265
@@ -32,7 +32,7 @@ def test_revised_bank_uses_every_authored_variant_id_once():
 
 
 def test_revised_bank_has_complete_learner_facing_content_without_staff_sections():
-    for case_id, item in revised_legacy_scenarios().items():
+    for case_id, item in scenario_bank().items():
         for field in (
             "label",
             "story",
@@ -62,7 +62,7 @@ def test_revised_bank_has_complete_learner_facing_content_without_staff_sections
 
 
 def test_revised_bank_preserves_required_resolved_files_and_answer_order():
-    manual = revised_legacy_scenarios()["manual-easy-auth-copy"]
+    manual = scenario_bank()["manual-easy-auth-copy"]
 
     assert manual["required_files"] == [
         {"path": "src/auth.js", "content": "timeout=5000\nretry=enabled"}
@@ -86,7 +86,7 @@ def test_every_revised_answer_key_satisfies_its_runtime_evaluation():
     evaluator = StateBasedEvaluator()
     failures = []
 
-    for case in _legacy_cases():
+    for case in _curriculum_cases():
         outcome = evaluator.evaluate(
             TARGET_STATES[case["case_id"]],
             case["state_requirements"],
@@ -100,11 +100,11 @@ def test_every_revised_answer_key_satisfies_its_runtime_evaluation():
 
 
 @pytest.mark.django_db
-def test_legacy_seed_persists_the_complete_revised_variant_contract():
-    call_command("seed_legacy_modules", verbosity=0)
+def test_curriculum_seed_persists_the_complete_scenario_contract():
+    call_command("seed_curriculum", verbosity=0)
 
     variant = AdventureLevelTierWaveVariant.objects.get(case_id="init-easy-invoice")
-    authored = revised_legacy_scenarios()["init-easy-invoice"]
+    authored = scenario_bank()["init-easy-invoice"]
     assert variant.label == authored["label"]
     assert variant.solution_commands == authored["solution_commands"]
     assert variant.scenario_context == {
@@ -136,7 +136,7 @@ def test_legacy_seed_persists_the_complete_revised_variant_contract():
 
 @pytest.mark.django_db
 def test_reseed_unpublishes_all_displaced_revised_ids():
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
 
     for displaced_id, replacement_id in DISPLACED_REVISED_CASE_IDS.items():
         replacement = AdventureLevelTierWaveVariant.objects.get(case_id=replacement_id)
@@ -157,7 +157,7 @@ def test_reseed_unpublishes_all_displaced_revised_ids():
             is_published=True,
         )
 
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
 
     displaced = AdventureLevelTierWaveVariant.objects.filter(case_id__in=DISPLACED_REVISED_CASE_IDS)
     assert displaced.count() == len(DISPLACED_REVISED_CASE_IDS)

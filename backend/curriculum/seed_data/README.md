@@ -1,8 +1,13 @@
 # Curriculum seed data
 
-This folder contains the authored curriculum fixtures used by `seed_curriculum`.
-The source-of-truth modules are the authored seed files such as `stories.py`,
-`chapters.py`, `lessons.py`, `adventure_levels.py`, and `challenges.py`.
+`seed_curriculum` seeds the current Arcane Spire Module 0-4 curriculum.
+`scenario_bank.json` owns its authored scenario contract, `scenario_bank.py`
+reads that contract, and `scenario_runtime.py` joins it to repository fixtures.
+The stable story/chapter/level scaffold is owned by the canonical command.
+
+The retired multi-story fixtures in `stories.py`, `chapters.py`, `lessons.py`,
+`adventure_levels.py`, and `challenges.py` are used by the explicitly named
+`seed_curriculum_fixture` command, which is disabled outside isolated tests.
 
 Generated artifacts are isolated under `generated/`.
 

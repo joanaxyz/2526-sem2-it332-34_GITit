@@ -19,7 +19,7 @@ Use these terms in product copy, code names, tests, and seed data:
 - `Companion` — a player-side battle/avatar cosmetic.
 - `GitCoin` — the reward currency.
 
-Deprecated labels from earlier refactors must not appear in active code or current documentation. Historical URL compatibility remains isolated in `frontend/src/shared/navigation/legacyRoutes.ts` and its test only.
+Deprecated labels from earlier refactors must not appear in active code or current documentation. Current URLs live in `frontend/src/shared/navigation/routes.ts`; obsolete aliases and their redirect handlers have been removed.
 
 ## Layer Ownership
 
@@ -178,35 +178,41 @@ python scripts/check_api_type_adoption.py
 
 ### Performance metrics
 
-The authenticated `GET /api/progress/performance/` endpoint is the source of truth for overall and per-module performance metrics. All attempt-based metrics exclude replay runs.
+The authenticated `GET /api/progress/performance/` endpoint returns the current player's Arcane Spire Modules 1–4 performance. `MetricsService._performance_summary_for_runs()` owns all executable formulas. Learner, Admin aggregate, and Admin per-player reads share that implementation; staff-console reads additionally exclude staff accounts and may apply a Manila-time date range. Replay runs are excluded.
 
-Internal KPI keys stay abbreviated; every learner-facing surface uses the plain-language label instead.
-
-| KPI | Learner-facing label | Formula | Empty-data behavior |
+| KPI | Learner label | Calculation | Overall goal |
 | --- | --- | --- | --- |
-| `scr` Scenario Completion Rate | Levels finished | completed attempts / all attempts | `value: null` when there are no attempts |
-| `car` Command Accuracy Rate | Commands accepted | processable submitted commands / all submitted commands | `value: null` when there are no commands |
-| `hlcr` Hard-Level Completion Rate | Hard levels finished | completed hard attempts / all hard attempts | `value: null` when there are no hard attempts |
-| `rtr` Retry Transfer Rate | Retries that worked | completed retry attempts / all retry attempts | `value: null` when there are no retry attempts |
-| `arc` Average Retry Count | Retries per finish | sum of `retry_index` for completed attempts / completed attempts | `value: null` when there are no completed attempts |
+| SCR | Runs finished | completed runs / started runs | ≥80% |
+| CAR | Commands accepted | processable commands / submitted commands | ≥70% |
+| HLCR | Hard runs cleared | completed hard runs / started hard runs | ≥70% |
+| ARC | Retries per finish | retry indices across completed runs / completed runs | ≤2 |
+| RTA | Changed retries cleared | successful eligible changed retries / eligible changed retries | ≥65% |
+| Retry success rate | Retry recovery | completed runs with a prior run / non-abandoned runs with a prior run | Supplementary; no target |
 
-A retry attempt is a run with `prior_run` set. CAR treats `Invalid` and `Unprocessable` command results as inaccurate; every other submitted command is processable. The response always includes Modules 0–4, including modules with no attempts, so the frontend can show an honest “No attempts yet” state.
+RTA covers Modules 3–4 only: the first retry directly after a failure is eligible only when the starting repository or target state changes structurally. Later retries in the same failure chain and runs still in progress are excluded; abandoned eligible retries count as unsuccessful. Retry recovery includes any run with a prior run, including repeats after success; it is separate from RTA. The deprecated `rtr` field remains a server compatibility alias of `retry_success_rate` and has no current UI consumer.
 
-There is no standalone Performance page. These metrics surface in **Home › Overview › Run results** (`/home?view=results`), under a `Main story` heading scoped to Modules 1–4; `/performance` redirects there. The view fetches the endpoint on demand through `features/performance/hooks/useModulePerformance`, so opening Home never waits on it. `features/performance` keeps the API wrapper, generated types, and that hook; the Admin analytics console reads the same contract types.
+No observations returns `value: null`, while a measured zero remains `0%` or `0.00`. CAR is overall-only; module data contains SCR/HLCR/ARC/retry success for Modules 1–4 and RTA for Modules 3–4. Learner module comparisons are descriptive and unscored; Admin owns the objective-specific Module 4 overrides.
+
+`features/performance/utils/performanceKpis.ts` owns display formulas, labels, evidence wording, targets, direction, and formatting for both learner and Admin presentation. It never recalculates a server KPI. There is no standalone Performance page or `/performance` route; learner performance lives in Home Progress. `HomeResultsPanel()` fetches on demand using `useModulePerformance`, owns loading/error/retry, and passes only ready `PerformanceSummary` data to `LearnerPerformanceInstrument`.
 
 ### Home Overview composition
 
-Overview shows one category at a time, chosen by a dropdown whose selection is mirrored in the `view` search parameter (`progress` is the default and is omitted from the URL).
+Home opens on Profile. The `view` search parameter selects `profile`, `progress`, or `skills`; saved `results` links resolve to Progress. `HomeHubView` owns that URL state and the category switcher.
 
 | Owner | Responsibility |
 | --- | --- |
-| `HomeStatsView.tsx` | Composition: builds the model once, owns the active-view state, renders the switcher and exactly one panel |
-| `home-stats/homeStatsModel.ts` | Pure model; one named slice per view (`progress`, `skills`, `results`, `achievements`) |
-| `home-stats/overviewViews.ts` | The category catalog: id, label, and the blurb shown beside the dropdown |
-| `home-stats/OverviewViewSwitcher.tsx` | The ARIA listbox dropdown |
-| `home-stats/Home{Progress,Skills,Results}Panel.tsx`, `HomeAchievementGallery.tsx` | One render owner per view, each taking only its own model slice |
+| `HomeStatsView.tsx` | Builds the pure model once and composes the active Progress or Skills bands |
+| `home-stats/homeStatsModel.ts` | Derives activity, active-curriculum context, skills, and achievements; no performance KPI model |
+| `home-hub/homeViews.ts` | Category catalog and legacy alias resolution |
+| `home-hub/HomeViewSwitcher.tsx` | Accessible category dropdown |
+| `home-stats/HomeProgressPanel.tsx` | Activity and active-curriculum finish-rate context; activity window control |
+| `home-stats/HomeResultsPanel.tsx` | No-prop query boundary for the performance instrument; recoverable loading/error states |
+| `performance/components/LearnerPerformanceInstrument.tsx` | Ready-data presentation; local measure selection, descriptive module comparison, native calculation disclosure |
+| `home-stats/HomeSkillsPanel.tsx` and `HomeAchievementGallery.tsx` | Skills display and achievement filtering from narrow model slices |
 
-`check_architecture_boundaries.py` enforces this shape: no view owner may see a raw `HomeSummary`/`StatsSummary`, reach back into the composition, or fetch its own summary data, and no file outside the composition may import a view owner.
+Activity Week/Month/Year affects only the activity request. KPI selection changes local presentation and issues no request. The instrument uses existing dark observatory tokens, meaningful goal traces, earned light, visible evidence, and reduced-motion transitions.
+
+`check_architecture_boundaries.py` enforces one-way composition, the no-prop results boundary, shared KPI semantics, no learner-to-Admin import, no mixed Home/Stats KPI fallback, and deletion of the old record tiles and four-chart module path.
 
 ## StoryWorld System
 
@@ -311,7 +317,7 @@ Backend tests must cover:
 Frontend tests must cover:
 
 - generated-contract API wrapper behavior
-- route compatibility isolation
+- current route destinations and removal of obsolete aliases
 - shop theme/companion display separation
 - auth refresh race behavior
 - battle outcome behavior derived from `command_outcome`
@@ -319,7 +325,7 @@ Frontend tests must cover:
 
 ## Compatibility
 
-Compatibility exists only for old bookmarks and must stay isolated to the route layer. It must not leak into API contracts, CSS tokens, shop data, seed data, or feature implementation.
+Retired URL aliases have no router registrations or redirect handlers. Navigation uses the current route definitions directly. Historical database identifiers and migrations remain stable; they do not define alternate product routes or seed commands.
 
 ## CI Guards
 

@@ -30,6 +30,7 @@ from scripts.checks.check_architecture_boundaries import (  # noqa: E402
     home_overview_achievement_import_violations,
     home_overview_css_source_violations,
     home_overview_source_violations,
+    performance_semantic_violations,
     strongly_connected_components,
 )
 
@@ -525,3 +526,37 @@ def test_home_overview_css_guard_rejects_legacy_and_misowned_rules():
 
 def test_home_overview_runtime_obeys_component_and_css_ownership():
     assert check_home_overview_ownership() == []
+
+
+def test_performance_guard_blocks_duplicate_semantics_and_learner_admin_coupling():
+    owner = f"{_FRONTEND}/src/features/performance/utils/performanceKpis.ts"
+    rogue = f"{_FRONTEND}/src/features/performance/components/LearnerPerformanceInstrument.tsx"
+    violations = performance_semantic_violations(
+        {
+            owner: "export const KPIS = []",
+            rogue: (
+                "import { KPIS } from '@/features/admin/utils/kpiCatalogue'\n"
+                "import { useModulePerformance } from '../hooks/useModulePerformance'\n"
+                "useModulePerformance(); const meta = {target: 80, formula: 'duplicated'}"
+            ),
+        }
+    )
+    assert any("must not import Admin" in row for row in violations)
+    assert any("only HomeResultsPanel" in row for row in violations)
+    assert any("display formulas" in row for row in violations)
+    assert any("overall targets" in row for row in violations)
+    assert any("must not own API or query state" in row for row in violations)
+
+
+def test_results_boundary_has_no_mixed_model_or_query_duplication():
+    root = Path(__file__).resolve().parents[3]
+    path = f"{_FRONTEND}/src/features/home/components/home-stats/HomeResultsPanel.tsx"
+    source = (root / path).read_text(encoding="utf-8")
+    assert home_overview_source_violations(source=source, path_label=path, role="results") == []
+    violations = home_overview_source_violations(
+        source=source + "\nconst bad = useModulePerformance(); const model: HomeResultsModel = {};",
+        path_label=path,
+        role="results",
+    )
+    assert any("one performance query" in row for row in violations)
+    assert any("mixed-scope results model" in row for row in violations)
