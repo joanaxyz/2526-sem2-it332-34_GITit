@@ -163,7 +163,7 @@ class AdventureLevelTierRunService:
 
         retry_index = prior_run.retry_index + 1 if prior_run else 0
         # Playing again after a clear starts a fresh scoring attempt. Failed
-        # replays still extend their retry chain and cannot earn a first-try star.
+        # replays still extend their retry chain for star grading.
         if is_replay and prior_run and prior_run.status == SESSION_STATUS_COMPLETED:
             retry_index = 0
         prior_reference = prior_run

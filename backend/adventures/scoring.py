@@ -2,17 +2,17 @@
 
   ★   cleared (solved)
   ★★  cleared within command budget (counted_commands <= min_counted_commands)
-  ★★★ first-try within budget (retry_index == 0, within budget)
+  ★★★ within budget with at most one retry
 
 Returns 0 when not solved.
 """
 
 
-def stars(*, solved: bool, counted_commands: int, budget: int, first_try: bool) -> int:
+def stars(*, solved: bool, counted_commands: int, budget: int, retry_count: int) -> int:
     if not solved:
         return 0
     within_budget = counted_commands <= budget
-    return 1 + int(within_budget) + int(within_budget and first_try)
+    return 1 + int(within_budget) + int(within_budget and retry_count <= 1)
 
 
 def apply_library_penalty(*, stars: int, library_opened: bool) -> int:
