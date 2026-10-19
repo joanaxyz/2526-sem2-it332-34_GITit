@@ -1,5 +1,5 @@
-import { fireEvent, render, screen } from '@testing-library/react'
-import { describe, expect, it, vi } from 'vitest'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { CommandIntroduction } from '@/features/story-map/api/commandIntroductionsApi'
 import type { TierRun } from './tierWorkspaceTypes'
@@ -13,6 +13,8 @@ vi.mock('@/shared/level/components/WorkspaceHeaderAccount', () => ({
 }))
 
 import { TierStatusHeader } from './TierStatusHeader'
+
+afterEach(cleanup)
 
 const run = {
   status: 'started',
@@ -33,7 +35,7 @@ const guides = [
 ]
 
 describe('TierStatusHeader', () => {
-  it('uses an icon-only button to reopen a single guide', () => {
+  it('uses the floating mascot to reopen a single guide', () => {
     const onSelectCommandGuide = vi.fn()
     render(
       <TierStatusHeader
@@ -47,6 +49,8 @@ describe('TierStatusHeader', () => {
     const button = screen.getByRole('button', { name: 'Open command guide' })
     expect(button).toHaveAttribute('data-command-guide-launcher')
     expect(button).not.toHaveTextContent('Command guide')
+    expect(button).toHaveClass('guide-mascot__button')
+    expect(button.closest('.gameplay-workspace-header')).toBeNull()
     fireEvent.click(button)
     expect(onSelectCommandGuide).toHaveBeenCalledWith('form:git init')
   })
@@ -62,7 +66,7 @@ describe('TierStatusHeader', () => {
       />,
     )
 
-    fireEvent.click(screen.getByRole('button', { name: 'Choose command guide' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Browse command guides' }))
     expect(screen.getByRole('group', { name: 'Command guides' })).toBeInTheDocument()
     expect(screen.getByText('Initialize the current folder')).toBeInTheDocument()
     expect(screen.getByText('Stage a file')).toBeInTheDocument()
@@ -81,6 +85,16 @@ describe('TierStatusHeader', () => {
 
     const button = screen.getByRole('button', { name: 'Command guide is open' })
     expect(button).toHaveClass('is-active')
-    expect(button).toBeDisabled()
+    expect(button).toHaveAttribute('aria-expanded', 'true')
+    expect(button).not.toBeDisabled()
+  })
+
+  it('reopens the current guide directly when several commands have been encountered', () => {
+    const onSelectCommandGuide = vi.fn()
+    render(<TierStatusHeader run={run} commandGuides={guides}
+      currentCommandGuideKey={guides[0].teaching_key} onSelectCommandGuide={onSelectCommandGuide} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Open command guide' }))
+    expect(onSelectCommandGuide).toHaveBeenCalledWith(guides[0].teaching_key)
+    expect(screen.queryByRole('group', { name: 'Command guides' })).not.toBeInTheDocument()
   })
 })

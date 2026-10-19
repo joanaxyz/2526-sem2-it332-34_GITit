@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { WorldMascot } from '@/shared/mascot/WorldMascot'
 
 import type { AdventureLevelSummary, ChallengeSummary } from '@/features/story-map/types'
 import { allChallengeTrials } from '@/features/story-map/utils/challengeUi'
@@ -293,6 +294,7 @@ export function StoryAdventurePath({
   return (
     <div className="story-adventure-path" ref={pathRef}>
       <div className="story-path-canvas" ref={canvasRef} style={{ width: pathWidth, height }}>
+        <WorldMascot surface="track" />
         <svg
           className="story-route-line"
           viewBox={`0 0 ${pathWidth} ${height}`}

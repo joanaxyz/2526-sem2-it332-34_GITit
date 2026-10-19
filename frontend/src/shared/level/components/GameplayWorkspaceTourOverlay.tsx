@@ -3,6 +3,7 @@ import type { CSSProperties, Dispatch, ReactNode, SetStateAction } from 'react'
 import { createPortal } from 'react-dom'
 
 import { Button } from '@/shared/components/Button'
+import { MascotMessage } from '@/shared/mascot/MascotMessage'
 
 import {
   DESKTOP_CARD_WIDTH,
@@ -117,7 +118,6 @@ export function GameplayWorkspaceTourOverlay({
   // Resolved steps keep the objects they were matched with; render the latest
   // content for the same step so a step can update in place (tabs, feedback).
   const shownStep = steps.find((step) => step.id === activeStep.id) ?? activeStep
-  const Icon = shownStep.icon
   const finalStep = activeIndex === availableSteps.length - 1
   // A long final CTA has priority over the optional keyboard hint. Keeping all
   // three footer items in this fixed-width card can push the action offscreen.
@@ -174,7 +174,7 @@ export function GameplayWorkspaceTourOverlay({
   ) : null
 
   const content = (
-    <>
+    <MascotMessage className="workspace-tour__conversation">
       <header className="workspace-tour__header">
         <div className="workspace-tour__meta">
           <span className="workspace-tour__eyebrow">{label}</span>
@@ -209,9 +209,6 @@ export function GameplayWorkspaceTourOverlay({
       </header>
 
       <div className="workspace-tour__message" aria-live="polite">
-        <span className="workspace-tour__icon" aria-hidden="true">
-          <Icon />
-        </span>
         <div>
           <h2 id={titleId}>{shownStep.title}</h2>
           <div id={bodyId} className="workspace-tour__body">{shownStep.body}</div>
@@ -261,7 +258,7 @@ export function GameplayWorkspaceTourOverlay({
           {finalStep ? null : <ArrowRight aria-hidden="true" />}
         </Button>
       </footer> : null}
-    </>
+    </MascotMessage>
   )
 
   return createPortal(

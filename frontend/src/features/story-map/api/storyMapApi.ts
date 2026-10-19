@@ -14,6 +14,14 @@ export const storyMapApi = {
     const query = storySlug ? `?story=${encodeURIComponent(storySlug)}` : ''
     return apiOperationRequest('chapters_list', `/chapters/${query}`)
   },
+  getChapterChests(chapterId: number) {
+    return apiOperationRequest('chapters_chests_retrieve', `/chapters/${chapterId}/chests/`)
+  },
+  openChapterChest(chapterId: number, threshold: number) {
+    return apiOperationRequest('chapters_chests_create', `/chapters/${chapterId}/chests/`, {
+      body: { threshold },
+    })
+  },
   getChapterOverview(chapterId: number) {
     return apiOperationRequest<'chapters_overview_retrieve', ChapterContentOverview>(
       'chapters_overview_retrieve',

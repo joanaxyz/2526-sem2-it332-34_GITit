@@ -43,6 +43,8 @@ export function DrillQuestion({
   round,
   verdict,
   onAnswer,
+  flightChoices = false,
+  flightSelection = null,
 }: {
   card: DrillCard | null
   rung: DrillRung | null
@@ -50,6 +52,8 @@ export function DrillQuestion({
   round: number
   verdict: DrillVerdict | null
   onAnswer: (answer: DrillAnswer | null) => void
+  flightChoices?: boolean
+  flightSelection?: string | null
 }) {
   const [selected, setSelected] = useState<string | null>(null)
   const [placedIds, setPlacedIds] = useState<string[]>([])
@@ -138,6 +142,7 @@ export function DrillQuestion({
   if (!card || !rung) return null
 
   const blankIndex = card.blank?.index ?? -1
+  const visibleSelection = flightChoices ? flightSelection : selected
 
   return (
     <section className="drill-question" ref={sectionRef} tabIndex={-1} aria-labelledby={askId}>
@@ -169,9 +174,9 @@ export function DrillQuestion({
                 <span
                   key={`slot-${index}`}
                   className="drill-gap"
-                  data-filled={selected ? '' : undefined}
+                  data-filled={visibleSelection ? '' : undefined}
                 >
-                  {selected ?? '   '}
+                  {visibleSelection ?? '   '}
                 </span>
               ) : (
                 <span key={`${token}-${index}`}>{token}</span>
@@ -198,7 +203,7 @@ export function DrillQuestion({
             onAnswer(values.length ? { kind: 'tokens', values } : null)
           }}
         />
-      ) : (
+      ) : flightChoices ? null : (
         <DrillChoiceBoard
           options={options}
           layout={rung === 'complete' ? 'chips' : 'rows'}

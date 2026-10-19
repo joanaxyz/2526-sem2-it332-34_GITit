@@ -206,6 +206,7 @@ export function AdventureSession({
         onRetry={restart}
         onStartOver={() => setStartOverConfirmOpen(true)}
         onOpenLibrary={() => setLevelLibraryOpen(true)}
+        libraryOpen={levelLibraryOpen}
       />
 
       <AdventureWorkspaceMain

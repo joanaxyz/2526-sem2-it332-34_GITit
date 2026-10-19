@@ -12,6 +12,7 @@ import { CommitAnatomyDiagram, CommitChainDiagram } from '@/features/story-map/c
 import { FourAreaPipelineDiagram } from '@/features/story-map/components/orientation/visuals/FourAreaPipelineDiagram'
 import { PlatformWorkspaceDiagram } from '@/features/story-map/components/orientation/visuals/PlatformWorkspaceDiagram'
 import { Button } from '@/shared/components/Button'
+import { MascotMessage } from '@/shared/mascot/MascotMessage'
 import { LiveDagPanel } from '@/shared/level/components/LiveDagPanel'
 import { cn } from '@/shared/utils/cn'
 
@@ -387,11 +388,13 @@ export function OrientationStepView({
   return (
     <section className="orientation-step" data-layout={layout} data-complete={completed || undefined} aria-labelledby={`orientation-step-${step.id}`}>
       <header className="orientation-step-header">
-        <div>
-          <span>{completed ? <><Check aria-hidden="true" /> Completed</> : 'Current interaction'}</span>
-          <h3 id={`orientation-step-${step.id}`}>{step.title}</h3>
-        </div>
-        <p>{step.prompt}</p>
+        <MascotMessage>
+          <div className="orientation-step-copy">
+            <span>{completed ? <><Check aria-hidden="true" /> Completed</> : 'Current interaction'}</span>
+            <h3 id={`orientation-step-${step.id}`}>{step.title}</h3>
+            <p>{step.prompt}</p>
+          </div>
+        </MascotMessage>
       </header>
       <div className="orientation-step-content">{content}</div>
     </section>

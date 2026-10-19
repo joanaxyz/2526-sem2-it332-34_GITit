@@ -17,7 +17,7 @@ import { AppTopbar } from '@/shared/navigation/AppNavigation'
 import { GitCommandIcon } from '@/shared/git/commandCatalog/commandIcons'
 import { DEFAULT_STORY_WORLD_SLUG, getStoryWorld } from '@/shared/story-worlds/registry'
 
-// Fixed, runtime-computed schedule - mirrors progress.chests.CHEST_SCHEDULE.
+// Fixed runtime schedule, matching curriculum.services.chests.CHEST_SCHEDULE.
 const PREVIEW_CHEST_SCHEDULE = [
   { threshold: 25, coins: 25 },
   { threshold: 50, coins: 60 },
@@ -217,7 +217,7 @@ export function Component() {
           <div className="story-map-backdrop" style={storyMapStyle} aria-hidden="true" />
           <div className="story-map-layout">
             <aside className="story-map-left" aria-label="Chapter tools">
-              <ChapterOverview chapter={activeChapter} />
+              <ChapterOverview chapter={activeChapter} preview />
             </aside>
 
             <section className="story-map-stage" aria-label="Preview story map">

@@ -2728,6 +2728,84 @@
                 }
             }
         },
+        "/api/chapters/{chapter_id}/chests/": {
+            "get": {
+                "operationId": "chapters_chests_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "chapters"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChapterChestRewards"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "chapters_chests_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "chapters"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChapterChestOpen"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChapterChestOpen"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChapterChestOpen"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChapterChestRewards"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/chapters/{chapter_id}/orientation/": {
             "get": {
                 "operationId": "chapters_orientation_list",
@@ -5493,6 +5571,19 @@
                     "visualization_snapshot"
                 ]
             },
+            "ChapterChestOpen": {
+                "type": "object",
+                "properties": {
+                    "threshold": {
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "threshold"
+                ]
+            },
             "ChapterChestReward": {
                 "type": "object",
                 "properties": {
@@ -5506,6 +5597,51 @@
                 "required": [
                     "coins",
                     "threshold"
+                ]
+            },
+            "ChapterChestRewards": {
+                "type": "object",
+                "properties": {
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ChapterChestState"
+                        }
+                    },
+                    "balance": {
+                        "type": "integer"
+                    },
+                    "coins_awarded": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "balance",
+                    "coins_awarded",
+                    "results"
+                ]
+            },
+            "ChapterChestState": {
+                "type": "object",
+                "properties": {
+                    "threshold": {
+                        "type": "integer"
+                    },
+                    "coins": {
+                        "type": "integer"
+                    },
+                    "unlocked": {
+                        "type": "boolean"
+                    },
+                    "claimed": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "claimed",
+                    "coins",
+                    "threshold",
+                    "unlocked"
                 ]
             },
             "ChapterLevelCompletion": {
