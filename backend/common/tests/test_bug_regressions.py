@@ -95,7 +95,7 @@ def test_published_content_cannot_hide_definition_edit_behind_visibility():
 
 @pytest.mark.django_db
 def test_active_run_constraints_and_completion_history_survive_deletion():
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     player = get_or_create_player(_user("run-safety"))
     level = AdventureLevel.objects.filter(is_published=True).order_by("id").first()
     assert level is not None
@@ -138,7 +138,7 @@ def test_active_run_constraints_and_completion_history_survive_deletion():
 
 @pytest.mark.django_db
 def test_completed_challenge_launch_is_server_derived_replay_and_cannot_lower_best_score():
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     player = get_or_create_player(_user("replay-safety"))
     level = (
         ChallengeLevel.objects.filter(

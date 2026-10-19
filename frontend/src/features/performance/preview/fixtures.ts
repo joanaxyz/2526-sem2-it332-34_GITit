@@ -1,67 +1,48 @@
-/**
- * DEV-ONLY DESIGN FIXTURES - never imported by production routes.
- *
- * The Overview's module band fetches its own summary, so without these the
- * design preview could only ever show that band's error state.
- */
+/** DEV-ONLY fixtures for the real Home preview. Counts aggregate across Modules 1–4. */
 import type { PerformanceSummary } from '@/features/performance/types'
 
-/** Mirrors the rich home preview player: strong early modules, thin late ones. */
 export const richPerformanceFixture: PerformanceSummary = {
   completed_sessions: 43,
   kpis: {
-    scr: { value: 76, numerator: 43, denominator: 57 },
+    scr: { value: 75.4, numerator: 43, denominator: 57 },
     car: { value: 91, numerator: 1080, denominator: 1187 },
-    hlcr: { value: 62, numerator: 8, denominator: 13 },
-    rta: { value: null, numerator: 0, denominator: 0 },
-    retry_success_rate: { value: 58, numerator: 11, denominator: 19 },
-    arc: { value: 1.6, numerator: 74, denominator: 47 },
+    hlcr: { value: 61.5, numerator: 8, denominator: 13 },
+    rta: { value: 60, numerator: 3, denominator: 5 },
+    retry_success_rate: { value: 63.6, numerator: 21, denominator: 33 },
+    arc: { value: 1.6, numerator: 69, denominator: 43 },
   },
   modules: [
     {
-      number: 0,
-      title: 'Module 0',
-      scr: { value: 100, numerator: 3, denominator: 3 },
-      hlcr: { value: null, numerator: 0, denominator: 0 },
-      rta: { value: null, numerator: 0, denominator: 0 },
-      retry_success_rate: { value: null, numerator: 0, denominator: 0 },
-      arc: { value: 1, numerator: 3, denominator: 3 },
-    },
-    {
-      number: 1,
-      title: 'Repository Foundations',
+      number: 1, title: 'Local Repository Foundations',
       scr: { value: 100, numerator: 11, denominator: 11 },
       hlcr: { value: 100, numerator: 3, denominator: 3 },
       rta: { value: null, numerator: 0, denominator: 0 },
-      retry_success_rate: { value: 80, numerator: 4, denominator: 5 },
+      retry_success_rate: { value: 83.3, numerator: 5, denominator: 6 },
       arc: { value: 1.18, numerator: 13, denominator: 11 },
     },
     {
-      number: 2,
-      title: 'Branching Basics',
-      scr: { value: 78, numerator: 7, denominator: 9 },
-      hlcr: { value: 67, numerator: 2, denominator: 3 },
+      number: 2, title: 'Branching and Collaboration',
+      scr: { value: 77.8, numerator: 14, denominator: 18 },
+      hlcr: { value: 66.7, numerator: 2, denominator: 3 },
       rta: { value: null, numerator: 0, denominator: 0 },
-      retry_success_rate: { value: 60, numerator: 3, denominator: 5 },
-      arc: { value: 1.71, numerator: 12, denominator: 7 },
+      retry_success_rate: { value: 60, numerator: 6, denominator: 10 },
+      arc: { value: 1.71, numerator: 24, denominator: 14 },
     },
     {
-      number: 3,
-      title: 'Merging & Conflicts',
-      scr: { value: 45, numerator: 5, denominator: 11 },
-      hlcr: { value: 33, numerator: 1, denominator: 3 },
-      rta: { value: null, numerator: 0, denominator: 0 },
-      retry_success_rate: { value: 44, numerator: 4, denominator: 9 },
-      arc: { value: 2.4, numerator: 12, denominator: 5 },
+      number: 3, title: 'Conflict Resolution',
+      scr: { value: 50, numerator: 10, denominator: 20 },
+      hlcr: { value: 33.3, numerator: 1, denominator: 3 },
+      rta: { value: 33.3, numerator: 1, denominator: 3 },
+      retry_success_rate: { value: 50, numerator: 6, denominator: 12 },
+      arc: { value: 2.4, numerator: 24, denominator: 10 },
     },
     {
-      number: 4,
-      title: 'Remote Work',
-      scr: { value: null, numerator: 0, denominator: 0 },
-      hlcr: { value: null, numerator: 0, denominator: 0 },
-      rta: { value: null, numerator: 0, denominator: 0 },
-      retry_success_rate: { value: null, numerator: 0, denominator: 0 },
-      arc: { value: null, numerator: 0, denominator: 0 },
+      number: 4, title: 'Advanced Recovery and History',
+      scr: { value: 100, numerator: 8, denominator: 8 },
+      hlcr: { value: 50, numerator: 2, denominator: 4 },
+      rta: { value: 100, numerator: 2, denominator: 2 },
+      retry_success_rate: { value: 80, numerator: 4, denominator: 5 },
+      arc: { value: 1, numerator: 8, denominator: 8 },
     },
   ],
 }

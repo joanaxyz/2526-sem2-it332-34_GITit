@@ -20,7 +20,9 @@ Use these terms consistently:
 - `Story world` — site/map visual bundle.
 - `Companion` — player-side battle/avatar cosmetic.
 
-Compatibility for old bookmarks is isolated in `frontend/src/shared/navigation/legacyRoutes.ts`. New code should not introduce deprecated product vocabulary.
+Current URLs are defined in `frontend/src/shared/navigation/routes.ts`. Retired URL aliases are removed rather than redirecting into unrelated pages. The active story opens at `/stories/arcane-spire`.
+
+Seed the current Arcane Spire curriculum with `cd backend && python manage.py seed_curriculum`, or run `python manage.py seed_all` to include the command library and drills. `seed_curriculum_fixture` is the retired multi-story fixture and is disabled outside isolated tests.
 
 ## Architecture Rules
 

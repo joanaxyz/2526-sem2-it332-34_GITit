@@ -151,5 +151,5 @@ Before merging content changes:
 ```bash
 python scripts/check_seed_targets.py
 python scripts/check_generated_targets_current.py
-cd backend && python -m pytest curriculum/tests/test_objective_soundness.py curriculum/tests/test_seed_curriculum_idempotency.py -q
+cd backend && python -m pytest curriculum/tests/test_objective_soundness.py curriculum/tests/test_curriculum_chapter_books.py curriculum/tests/test_curriculum_fixture_idempotency.py -q
 ```

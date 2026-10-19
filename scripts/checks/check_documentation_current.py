@@ -39,7 +39,7 @@ REQUIRED_ARCHITECTURE_SECTIONS = [
 ]
 
 REQUIRED_README_SNIPPETS = [
-    "frontend/src/shared/navigation/legacyRoutes.ts",
+    "frontend/src/shared/navigation/routes.ts",
     "python scripts/check_api_contract.py",
     "python scripts/check_documentation_current.py",
     "npm run api:type-adoption-check",

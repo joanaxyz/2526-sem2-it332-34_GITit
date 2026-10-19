@@ -61,7 +61,7 @@ def _authenticated_client_with_companion(django_user_model, username: str = "adv
 
 
 def test_starting_an_adventure_without_a_companion_is_locked(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     level = first_level()
     client = APIClient()
@@ -73,7 +73,7 @@ def test_starting_an_adventure_without_a_companion_is_locked(db, django_user_mod
 
 
 def test_buying_a_companion_unlocks_adventure_start(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     player = get_or_create_player(user)
     WalletService().award(player=player, amount=150, reason="test_seed", award_key="test-seed:blue")
@@ -89,7 +89,7 @@ def test_buying_a_companion_unlocks_adventure_start(db, django_user_model):
 
 
 def test_starting_a_later_level_does_not_require_sequential_completion(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     first, second = two_levels_in_one_adventure()
     assert first is not None and second is not None
     client, _player = _authenticated_client_with_companion(django_user_model)
@@ -100,7 +100,7 @@ def test_starting_a_later_level_does_not_require_sequential_completion(db, djang
 
 
 def test_completing_the_previous_level_unlocks_the_next_one(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     first, second = two_levels_in_one_adventure()
     assert first is not None and second is not None
     client, player = _authenticated_client_with_companion(django_user_model)

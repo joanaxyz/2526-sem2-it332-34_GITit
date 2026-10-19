@@ -48,15 +48,6 @@ describe('buildHomeStatsModel', () => {
       perfectClears: 26,
       finishRate: { value: 76, numerator: 43, denominator: 57 },
     })
-    // Hard trials won and the clear rate are gone: the record band's hard-run
-    // tile and the Arcane Spire meter already state them, and one screen states a fact once.
-    expect(model.results).toEqual({
-      hardClearRate: { value: 62, numerator: 8, denominator: 13 },
-      averageRetries: { value: 1.6, numerator: 74, denominator: 47 },
-      accuracy: 91,
-      commandsRun: 1187,
-      accuracyReady: true,
-    })
     expect(model.achievements).toHaveLength(19)
     expect(model.achievements.filter((achievement) => achievement.unlocked)).toHaveLength(16)
   })
@@ -81,7 +72,6 @@ describe('buildHomeStatsModel', () => {
       perfectClears: 0,
       finishRate: { value: null, numerator: 0, denominator: 0 },
     })
-    expect(model.results.accuracyReady).toBe(false)
   })
 
   it('plots exactly the window it was served, and labels monthly buckets by month', () => {
@@ -117,7 +107,7 @@ describe('buildHomeStatsModel', () => {
     })
   })
 
-  it('preserves command fallbacks, clamps percentages, and applies the accuracy threshold', () => {
+  it('preserves command fallbacks, clamps percentages, and keeps tier counts exact', () => {
     const home = structuredClone(richHomeFixture)
     const stats = structuredClone(richStatsFixture)
     stats.skill_profile = [
@@ -150,7 +140,6 @@ describe('buildHomeStatsModel', () => {
       perfectClears: 30,
       finishRate: { value: 100 },
     })
-    expect(model.results).toMatchObject({ accuracy: 95, commandsRun: 99, accuracyReady: false })
   })
 
   it('does not award a proficiency star before command mastery is earned', () => {
@@ -170,7 +159,5 @@ describe('buildHomeStatsModel', () => {
     const model = buildHomeStatsModel(home, stats)
 
     expect(model.progress.story.finishRate).not.toBe(stats.headline.finish_rate)
-    expect(model.results.hardClearRate).not.toBe(home.kpis.hlcr)
-    expect(model.results.averageRetries).not.toBe(home.kpis.arc)
   })
 })

@@ -27,8 +27,8 @@ export function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max)
 }
 
-export function mapUrlForRun(run: Pick<ChallengeRun, 'chapter'>) {
-  return storyPathWithQuery(undefined, `chapter=${run.chapter.id}`)
+export function mapUrlForRun(run: Pick<ChallengeRun, 'chapter' | 'story'>) {
+  return storyPathWithQuery(run.story?.slug, `chapter=${run.chapter.id}`)
 }
 
 export function constrainedTerminalPaneRatio(clientX: number, bounds: DOMRect) {

@@ -70,7 +70,7 @@ PROJECT_FILE_ACTIONS = {
 
 
 def test_seed_creates_chapter_owned_adventure_and_challenge_levels(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     playable_chapters = Chapter.objects.filter(
         slug__in=[spec["slug"] for spec in ARCANE_SPIRE_CHAPTERS]
@@ -106,7 +106,7 @@ def test_seed_uses_authored_wave_plans_beyond_chapter_one(db):
     outside the ledger is published."""
     from curriculum.seed_data.adventures import ADVENTURE_SOURCES
 
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     official_chapter_slugs = [
         spec["slug"]
@@ -141,7 +141,7 @@ def test_seed_uses_authored_wave_plans_beyond_chapter_one(db):
 
 
 def test_seed_publishes_every_blueprint_ledger_entry(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     expected_waves = {
         wave["slug"]
@@ -233,7 +233,7 @@ def test_seed_publishes_every_blueprint_ledger_entry(db):
 def test_first_wave_of_curriculum_is_playable_and_story_first(db):
     """Whatever wave a brand-new player meets first must carry a story with no
     command spoilers, an objective checklist, and an empty synthesized task."""
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     first_level = (
         AdventureLevel.objects.filter(
@@ -254,7 +254,7 @@ def test_first_wave_of_curriculum_is_playable_and_story_first(db):
 
 
 def test_init_current_folder_wave_has_stateful_story_and_objectives(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     wave = AdventureWave.objects.get(slug="ch1-adv-init-current-folder", is_published=True)
     assert wave.task == ""
@@ -291,7 +291,7 @@ def test_advanced_stories_do_not_publish_one_command_level_nodes(db):
     levels. This prevents the advanced maps from degrading into flashcards.
     """
 
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     levels = (
         AdventureLevel.objects.filter(

@@ -1,7 +1,7 @@
 # GIT it! — All-level command cheat sheet
 
 > Historical reference for the retired multi-story fixture. Production uses
-> only the Module 0-4 Arcane Spire curriculum seeded by `seed_legacy_modules`.
+> only the Module 0-4 Arcane Spire curriculum seeded by `seed_curriculum`.
 
 Generated from the live seeded curriculum on 2026-07-17. Covers **240 levels**, **582 waves**, and **1294 authored variants** across all three stories.
 

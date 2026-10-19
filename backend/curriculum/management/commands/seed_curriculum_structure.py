@@ -140,10 +140,8 @@ class SeedCurriculumStructureMixin:
             ],
         )
         by_slug.update(admin_by_slug)
-        # Retire stale chapters only inside the stories whose chapter trees are
-        # owned by this seed. The separately imported Runebound Turret story is
-        # present in STORIES for catalog visibility, but its Module 0-4 chapters
-        # are owned by seed_legacy_modules and must survive a canonical reseed.
+        # This retired fixture owns only the chapter trees listed in CHAPTERS.
+        # Preserve seed-owned rows belonging to any other curriculum.
         managed_story_slugs = {spec.get("story", "arcane-spire") for spec in CHAPTERS}
         Chapter.objects.filter(
             management_source=MANAGEMENT_SOURCE_SEED,

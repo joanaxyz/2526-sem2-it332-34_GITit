@@ -68,7 +68,7 @@ def first_challenge_level():
 
 
 def test_challenge_summary_shape_has_levels_with_three_trials(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     level = first_challenge_level()
 
     assert level is not None
@@ -78,7 +78,7 @@ def test_challenge_summary_shape_has_levels_with_three_trials(db):
 
 
 def test_challenge_trial_launch_uses_trial_owned_variant(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model)
     level = first_challenge_level()
     trial = level.trials.get(difficulty="easy")
@@ -100,7 +100,7 @@ def test_challenge_trial_launch_uses_trial_owned_variant(db, django_user_model):
 
 
 def test_challenge_retry_rotates_within_same_trial(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model, "retry")
     level = first_challenge_level()
     trial = level.trials.get(difficulty="easy")
@@ -128,7 +128,7 @@ def test_challenge_retry_rotates_within_same_trial(db, django_user_model):
 
 
 def test_discarding_active_challenge_deletes_run(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model, "discard-challenge")
     level = first_challenge_level()
     trial = level.trials.get(difficulty="easy")
@@ -149,7 +149,7 @@ def test_discarding_active_challenge_deletes_run(db, django_user_model):
 
 
 def test_starting_challenge_discards_stale_active_run(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model, "stale-challenge")
     level = first_challenge_level()
     trial = level.trials.get(difficulty="easy")
@@ -176,7 +176,7 @@ def test_starting_challenge_discards_stale_active_run(db, django_user_model):
 
 
 def test_retrying_active_challenge_discards_prior_run(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model, "retry-active")
     level = first_challenge_level()
     trial = level.trials.get(difficulty="easy")
@@ -199,7 +199,7 @@ def test_retrying_active_challenge_discards_prior_run(db, django_user_model):
 
 
 def test_active_challenge_run_is_not_exposed_as_resumable_session(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model, "active-hidden")
     level = first_challenge_level()
     trial = level.trials.get(difficulty="easy")
@@ -226,7 +226,7 @@ def test_active_challenge_run_is_not_exposed_as_resumable_session(db, django_use
 
 
 def test_medium_unlocks_after_easy_trial_completion(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = make_user(django_user_model, "medium")
     level = first_challenge_level()
     easy = level.trials.get(difficulty="easy")

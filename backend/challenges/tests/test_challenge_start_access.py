@@ -12,7 +12,7 @@ def test_starting_a_challenge_does_not_require_a_companion(
     django_user_model,
     monkeypatch,
 ):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     monkeypatch.setattr(ChallengeRunService, "_ensure_unlocked", lambda self, **kwargs: None)
     user = django_user_model.objects.create_user(
         username="repository-puzzler",
