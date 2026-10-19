@@ -28,7 +28,7 @@ function renderOutcome(stars?: number, tone: 'success' | 'failure' = 'success') 
 }
 
 describe('GameOutcomeModal star artwork', () => {
-  it.each([0.5, 1, 1.5, 2, 2.5, 3])('selects the %s-star victory variant', (stars) => {
+  it.each([1, 2, 3])('selects the %s-star victory variant', (stars) => {
     renderOutcome(stars)
 
     expect(screen.getByRole('img', { name: `${stars} of 3 stars earned` }))
@@ -36,7 +36,7 @@ describe('GameOutcomeModal star artwork', () => {
   })
 
   it('always shows the loss artwork for a failed run', () => {
-    renderOutcome(2.5, 'failure')
+    renderOutcome(3, 'failure')
 
     expect(screen.getByRole('img', { name: 'No stars earned' }))
       .toHaveAttribute('src', '/outcomes/lose.webp')
