@@ -14,7 +14,7 @@ type TierStat = {
 }
 
 /** The drawer trigger, present only while the layout puts the graph in a drawer. */
-type RepoGraphTrigger = {
+export type RepoGraphTrigger = {
   open: boolean
   hasUpdate: boolean
   controls: string
@@ -61,7 +61,7 @@ export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: Rep
   ]
 
   return (
-    <section className="tier-stats-bar" aria-label="Level status">
+    <div className="tier-stats-bar" role="group" aria-label="Level status">
       <dl className="tier-stats">
         {stats.map((stat) => (
           <div className="tier-stat" key={stat.label}>
@@ -94,6 +94,6 @@ export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: Rep
           ) : null}
         </button>
       ) : null}
-    </section>
+    </div>
   )
 }

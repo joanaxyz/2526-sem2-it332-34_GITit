@@ -1,4 +1,4 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { CommandIntroduction } from '@/features/story-map/api/commandIntroductionsApi'
@@ -20,6 +20,9 @@ const run = {
   status: 'started',
   replay: false,
   difficulty: 'easy',
+  stars: 2,
+  policy: { min_counted_commands: 1, max_counted_commands: 8 },
+  counts: { counted_action_total: 0 },
   tier: { adventure_level_title: 'Branching paths' },
 } as TierRun
 
@@ -35,6 +38,22 @@ const guides = [
 ]
 
 describe('TierStatusHeader', () => {
+  it('keeps level stats in the header and opens star rules from its stars', async () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      x: 80, y: 100, left: 80, top: 100, right: 380, bottom: 260,
+      width: 300, height: 160, toJSON: () => ({}),
+    })
+    render(<TierStatusHeader run={run} />)
+
+    const header = screen.getByRole('banner', { name: 'Adventure command bar' })
+    expect(within(header).getByRole('group', { name: 'Level status' })).toBeInTheDocument()
+    expect(within(header).getByRole('button', { name: 'Star rules: 2 of 3 stars' })).toBeInTheDocument()
+    expect(within(header).queryByText('Adventure · easy')).not.toBeInTheDocument()
+
+    fireEvent.click(within(header).getByRole('button', { name: 'Star rules: 2 of 3 stars' }))
+    expect(await screen.findByRole('dialog', { name: 'How to earn stars' })).toBeInTheDocument()
+  })
+
   it('uses the floating mascot to reopen a single guide', () => {
     const onSelectCommandGuide = vi.fn()
     render(
