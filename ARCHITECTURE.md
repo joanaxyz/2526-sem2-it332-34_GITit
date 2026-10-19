@@ -381,6 +381,11 @@ second `core.py` export layer:
 Chapter completion reward policy and orchestration live in
 `backend/curriculum/services/chests.py`; the progress wallet remains the durable
 currency-ledger owner.
+`GET /api/chapters/{id}/chests/` reports eligibility from persisted completion
+and collection from credited wallet keys. `POST` to the same endpoint opens an
+earned milestone by threshold and recovers an unpaid reward through the same
+idempotent wallet key used by automatic completion payouts. The map displays
+closed, available, and opened chest assets from this server state.
 - `command_skills.py` for command-skill query and learned-spellbook rows.
 - `book.py` for Chapter Book payloads.
 - `challenge_queries.py` for challenge query shape.

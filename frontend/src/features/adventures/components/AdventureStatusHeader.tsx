@@ -1,4 +1,5 @@
-import { BookOpen, RefreshCcw, X } from 'lucide-react'
+import { RefreshCcw, X } from 'lucide-react'
+import { FloatingGuideMascot } from '@/shared/mascot/FloatingGuideMascot'
 
 import gitLogoImage from '@/assets/images/GIT_logo.webp'
 import type { AdventureRun } from '@/features/adventures/types'
@@ -13,6 +14,7 @@ export function AdventureStatusHeader({
   onRetry,
   onStartOver,
   onOpenLibrary,
+  libraryOpen = false,
 }: {
   run: AdventureRun
   isExiting: boolean
@@ -21,6 +23,7 @@ export function AdventureStatusHeader({
   onRetry: () => void
   onStartOver: () => void
   onOpenLibrary: () => void
+  libraryOpen?: boolean
 }) {
   const exitLabel = run.status === 'started' ? 'Exit' : 'Back'
   const canRetry = !run.replay && run.status === 'failed'
@@ -64,16 +67,7 @@ export function AdventureStatusHeader({
         buttonClassName="gameplay-header-button gameplay-header-icon-button gameplay-header-audio"
       />
 
-      <button
-        type="button"
-        className="gameplay-header-button gameplay-header-icon-button"
-        title={guideLabel}
-        aria-label={guideLabel}
-        data-tour-target="level-guide"
-        onClick={onOpenLibrary}
-      >
-        <BookOpen aria-hidden="true" />
-      </button>
+      <FloatingGuideMascot label={guideLabel} active={libraryOpen} onActivate={onOpenLibrary} tourTarget="level-guide" />
       {canRetry ? (
         <button type="button" className="gameplay-header-button" disabled={isRetrying} onClick={onRetry}>
           <RefreshCcw aria-hidden="true" />

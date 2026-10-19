@@ -1,8 +1,9 @@
-import { useEffect } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
 
 import { DrillQuestion } from '@/features/drills/components/DrillQuestion'
+import { DrillFlightArena } from '@/features/drills/components/DrillFlightArena'
 import { DrillProgressTrack } from '@/features/drills/components/DrillProgressTrack'
 import { DrillSummary } from '@/features/drills/components/DrillSummary'
 import { DrillVerdictBar } from '@/features/drills/components/DrillVerdictBar'
@@ -10,23 +11,29 @@ import { useDrillSession } from '@/features/drills/hooks/useDrillSession'
 import type { DrillPlan } from '@/features/drills/types'
 import { choicePoolFor } from '@/features/drills/utils/drillChoices'
 import { drillExitPath } from '@/features/drills/utils/drillRoutes'
+import { seededShuffle } from '@/features/drills/utils/drillShuffle'
 
 const CHOICE_KEYS = ['1', '2', '3', '4']
 
-/**
- * The drill loop, composed.
- *
- * Keyboard-first by design: the habit this rung is building is typing Git
- * at a prompt, so the hands never need to leave the keyboard here either.
- * Digits pick, Enter checks and then continues, Escape leaves.
- */
+/** Flight collisions answer pick-one rounds; production rounds keep their assembly checkpoint. */
 export function DrillSession({ plan }: { plan: DrillPlan }) {
   const navigate = useNavigate()
   const session = useDrillSession(plan)
+  const [started, setStarted] = useState(false)
   const { ask, card, verdict, check, advance, answer } = session
   const exitPath = drillExitPath(plan)
   const rung = ask?.kind === 'card' ? ask.rung : null
-  const optionCount = choicePoolFor(card, rung).length
+  const options = useMemo(() => seededShuffle(choicePoolFor(card, rung), `${card?.key}:${rung}:${session.round}`), [card, rung, session.round])
+  const optionCount = options.length
+  const advanceRef = useRef(advance)
+  advanceRef.current = advance
+
+  useEffect(() => {
+    if (!verdict) return
+    const timer = window.setTimeout(() => advanceRef.current(),
+      session.lives === 0 ? 1800 : verdict.correct ? 950 : 2300)
+    return () => window.clearTimeout(timer)
+  }, [session.lives, verdict])
 
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
@@ -38,31 +45,33 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
         navigate(exitPath)
         return
       }
-      if (event.key === 'Enter') {
+      if (session.finished || event.repeat) return
+      if (event.key === 'Enter' && !(target instanceof HTMLButtonElement) && !(target instanceof HTMLAnchorElement)) {
         event.preventDefault()
-        if (verdict) advance()
-        else check()
+        if (verdict) return
+        if (!started) document.querySelector<HTMLButtonElement>('.drill-flight-intro button')?.click()
+        else if (!optionCount) check()
         return
       }
-      if (typing || session.finished) return
+      if (typing) return
       if (CHOICE_KEYS.includes(event.key)) {
-        const board = document.querySelector('.drill-choices')
+        const board = document.querySelector('.drill-flight-projectiles')
         const buttons = board?.querySelectorAll<HTMLButtonElement>('button:not(:disabled)')
         buttons?.[Number(event.key) - 1]?.click()
       }
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [advance, check, exitPath, navigate, session.finished, verdict])
+  }, [advance, check, exitPath, navigate, optionCount, session.finished, started, verdict])
 
   return (
-    <div className="drill-screen">
+    <div className="drill-screen drill-screen--flight">
       {/* Identity and progress share one band. They were two, and the rail
           that sat below cost a whole row of a screen that cannot scroll -
           on a laptop that row came out of the question. */}
       <header className="drill-header">
         <div className="drill-identity">
-          <p className="drill-wordmark">Squire&rsquo;s Drill</p>
+          <p className="drill-wordmark">GIT it! <span>Flight Drill</span></p>
           {/* The summary titles itself with the level, so carrying it up
               here too would print the same string twice a hundred pixels
               apart. */}
@@ -103,18 +112,27 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
             answered={session.answered}
             shaky={session.shaky}
             saveFailed={session.saveFailed}
-            onRestart={session.restart}
+            gameOver={session.gameOver}
+            onRestart={() => { setStarted(false); session.restart() }}
           />
         ) : (
+          <div className="drill-flight-round">
+          <DrillFlightArena round={session.round}
+            options={options} verdict={verdict} lives={session.lives} started={started}
+            onStart={() => setStarted(true)} onCollide={session.collide}
+            voice={rung === 'read' ? 'prose' : 'machine'} />
           <DrillQuestion
-            key={session.round}
+            key={`question-${session.round}`}
             card={card}
             rung={rung}
             sequence={session.sequence}
             round={session.round}
             verdict={verdict}
             onAnswer={session.setAnswer}
+            flightChoices={optionCount > 0}
+            flightSelection={answer?.kind === 'choice' ? answer.value : null}
           />
+          </div>
         )}
       </main>
 
@@ -127,7 +145,8 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
           sequence={session.sequence}
           optionCount={optionCount}
           onCheck={check}
-          onAdvance={advance}
+          flightChoices={optionCount > 0}
+          outOfLives={session.lives === 0}
         />
       )}
     </div>
