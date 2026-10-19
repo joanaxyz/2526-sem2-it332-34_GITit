@@ -15,7 +15,7 @@ describe('level tour storage', () => {
     expect(hasSeenLevelTour(7, 'challenge')).toBe(false)
     expect(hasSeenLevelTour(8, 'adventure')).toBe(false)
     expect(levelTourStorageKey(7, 'adventure')).toBe(
-      'git-it-practice-workspace-tour:v4:7:adventure',
+      'git-it-practice-workspace-tour:v5:7:adventure',
     )
   })
 
@@ -24,7 +24,7 @@ describe('level tour storage', () => {
 
     expect(hasSeenLevelTour(11)).toBe(true)
     expect(hasSeenLevelTour(11, 'adventure')).toBe(false)
-    expect(window.localStorage.getItem('git-it-practice-workspace-tour:v4:11:challenge')).toBe(
+    expect(window.localStorage.getItem('git-it-practice-workspace-tour:v5:11:challenge')).toBe(
       'seen',
     )
   })
@@ -44,7 +44,7 @@ describe('level tour storage', () => {
     window.localStorage.setItem('git-it-practice-workspace-tour:v4:7:tier', 'seen')
     markLevelTourSeen(7, 'adventure')
 
-    expect(levelTourStorageKey(7, 'tier')).toBe('git-it-practice-workspace-tour:v5:7:tier')
+    expect(levelTourStorageKey(7, 'tier')).toBe('git-it-practice-workspace-tour:v6:7:tier')
     expect(hasSeenLevelTour(7, 'tier')).toBe(false)
     expect(hasSeenLevelTour(7, 'adventure')).toBe(true)
   })
