@@ -3,9 +3,9 @@ export type LevelTourMode = 'adventure' | 'challenge' | 'tier'
 // Versioned per mode: bumping one mode re-shows only that mode's tour, so a new
 // tier step does not replay the adventure and challenge tours for everyone.
 const LEVEL_TOUR_VERSIONS: Record<LevelTourMode, string> = {
-  adventure: 'v4',
-  challenge: 'v4',
-  tier: 'v5',
+  adventure: 'v5',
+  challenge: 'v5',
+  tier: 'v6',
 }
 
 export function levelTourStorageKey(
