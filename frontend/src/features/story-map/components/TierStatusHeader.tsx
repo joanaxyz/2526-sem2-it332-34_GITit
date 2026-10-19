@@ -6,7 +6,6 @@ import { CommandGuideLauncher } from '@/features/story-map/components/CommandGui
 import { TierStatsBar } from '@/features/story-map/components/tier-workspace/TierStatsBar'
 import type { RepoGraphTrigger } from '@/features/story-map/components/tier-workspace/TierStatsBar'
 import { AudioControls } from '@/shared/audio/AudioControls'
-import { WorkspaceHeaderAccount } from '@/shared/level/components/WorkspaceHeaderAccount'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 
 /** Mirrors ChallengeStatusHeader for the adventure-tier run lifecycle. */
@@ -115,8 +114,6 @@ export function TierStatusHeader({
           {replayIsStartOver ? null : replayActionLabel}
         </button>
       ) : null}
-
-      <WorkspaceHeaderAccount />
     </header>
   )
 }

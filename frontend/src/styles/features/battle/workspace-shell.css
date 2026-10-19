@@ -104,8 +104,11 @@
 }
 
 .gameplay-header-icon-button {
+  align-self: center;
   width: var(--control-height-sm);
+  height: var(--control-height-sm);
   min-width: var(--control-height-sm);
+  min-height: var(--control-height-sm);
   padding-inline: 0;
 }
 
@@ -271,6 +274,12 @@
   display: inline-flex;
   align-items: stretch;
   gap: 0.25rem;
+}
+
+@media (min-width: 1281px) {
+  .tier-stats-bar + .gameplay-header-audio-controls {
+    margin-left: var(--space-3);
+  }
 }
 
 .gameplay-header-mission {

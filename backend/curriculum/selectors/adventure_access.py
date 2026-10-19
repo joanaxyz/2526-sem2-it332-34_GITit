@@ -1,7 +1,10 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
+from datetime import datetime
 from typing import TYPE_CHECKING
+
+from django.db.models import Max
 
 from adventures.models import AdventureLevel, AdventureLevelTier, AdventureRun
 from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
@@ -29,6 +32,7 @@ class AdventureAccessContext:
     """
 
     completion_by_adventure_id: dict[int, AdventureLevelCompletion] = field(default_factory=dict)
+    passed_at_by_adventure_id: dict[int, datetime] = field(default_factory=dict)
     passed_adventure_ids: set[int] = field(default_factory=set)
     locked_adventure_ids: set[int] = field(default_factory=set)
     lock_reasons: dict[int, str] = field(default_factory=dict)
@@ -44,18 +48,23 @@ def _build_adventure_access(*, player, adventures: list[AdventureLevel]) -> Adve
         return AdventureAccessContext()
 
     completion_by_adventure_id: dict[int, AdventureLevelCompletion] = {}
+    passed_at_by_adventure_id: dict[int, datetime] = {}
     passed_adventure_ids: set[int] = set()
     if player is not None:
         from progress.models import AdventureLevelCompletion, AdventureLevelTierCompletion
 
         adventure_ids = [adventure.id for adventure in adventures]
-        passed_adventure_ids = set(
+        passed_at_by_adventure_id = dict(
             AdventureRun.objects.filter(
                 player=player,
                 level_id__in=adventure_ids,
                 passed_at__isnull=False,
-            ).values_list("level_id", flat=True)
+            )
+            .values("level_id")
+            .annotate(passed_at=Max("passed_at"))
+            .values_list("level_id", "passed_at")
         )
+        passed_adventure_ids = set(passed_at_by_adventure_id)
         completion_by_adventure_id = {
             completion.adventure_level_id: completion
             for completion in AdventureLevelCompletion.objects.filter(
@@ -73,10 +82,19 @@ def _build_adventure_access(*, player, adventures: list[AdventureLevel]) -> Adve
         }
         for level_id, completion in tier_level_completions.items():
             completion_by_adventure_id.setdefault(level_id, completion)
+        completion_timestamps = dict(passed_at_by_adventure_id)
+        completion_timestamps.update(
+            {
+                level_id: completion.completed_at
+                for level_id, completion in completion_by_adventure_id.items()
+            }
+        )
+        passed_at_by_adventure_id = completion_timestamps
         passed_adventure_ids |= completion_by_adventure_id.keys()
 
     return AdventureAccessContext(
         completion_by_adventure_id=completion_by_adventure_id,
+        passed_at_by_adventure_id=passed_at_by_adventure_id,
         passed_adventure_ids=passed_adventure_ids,
         drillable_adventure_ids=drillable_level_ids(
             level_ids=[adventure.id for adventure in adventures]
@@ -111,6 +129,7 @@ def adventure_summary_payload(
     player,
     adventure: AdventureLevel,
     access: AdventureAccessContext | None = None,
+    knowledge: list[dict] | None = None,
 ) -> dict:
     if access is None:
         chapter_adventures = list(
@@ -132,10 +151,12 @@ def adventure_summary_payload(
         "title": adventure.title,
         "description": adventure.description,
         "command": ", ".join(_level_commands(adventure)),
+        "knowledge": knowledge or [],
         "is_passed": is_passed,
         "locked": adventure.id in access.locked_adventure_ids,
         "lock_reason": access.lock_reasons.get(adventure.id, ""),
         "completion": _completion_payload(completion),
+        "passed_at": access.passed_at_by_adventure_id.get(adventure.id),
         "drill": drill_access_payload(
             available=adventure.id in access.drillable_adventure_ids,
             progress=access.drill_progress_by_adventure_id.get(adventure.id),

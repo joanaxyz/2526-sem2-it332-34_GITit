@@ -13,7 +13,7 @@ import { StoryOnboarding } from '@/features/story-map/components/StoryOnboarding
 import { StoryCompanionPanel, StorySkillFocusPanel } from '@/features/story-map/components/StorySidePanels'
 import { storyMapApi } from '@/features/story-map/api/storyMapApi'
 import { useStories } from '@/features/story-map/hooks/useStories'
-import { chapterTitle, firstOpenChapter } from '@/features/story-map/utils/storyMapChapter'
+import { chapterTitle, firstOpenChapter, mascotKnowledgeFocusLevelId } from '@/features/story-map/utils/storyMapChapter'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
@@ -168,8 +168,6 @@ export function StoryMapPage() {
     () => chapters.find((chapter) => chapter.id === activeChapterId) ?? firstOpenChapter(chapters, !orientationRequested),
     [activeChapterId, chapters, orientationRequested],
   )
-  const mascotKnowledge = useMascotKnowledge(activeChapter ?? undefined)
-
   const overviewQuery = useQuery({
     queryKey: queryKeys.chapterOverview(activeChapter?.id ?? 0),
     queryFn: () => storyMapApi.getChapterOverview(activeChapter!.id),
@@ -179,6 +177,11 @@ export function StoryMapPage() {
     enabled: Boolean(activeChapter) && !activeChapter?.is_orientation,
     staleTime: 2 * 60 * 1000,
   })
+  const mapLevels = overviewQuery.data?.adventures
+  const currentLevelId = mascotKnowledgeFocusLevelId(mapLevels ?? [], activeChapter?.locked ?? true)
+  const mascotKnowledge = useMascotKnowledge(activeChapter ?? undefined, mapLevels
+    ? { currentLevelId, levels: mapLevels }
+    : undefined)
 
   if (chaptersQuery.isLoading || (orientationRequested && orientationLessonsQuery.isPending)) {
     return <LoadingScreen description="Preparing the story map." label="Loading map" />
@@ -233,7 +236,11 @@ export function StoryMapPage() {
       style={storyWorldStyle(storyWorld)}
     >
       <div className="story-map-backdrop" style={storyMapStyle} aria-hidden="true" />
-      {!showingOrientation ? <WorldMascot surface="track" knowledge={mascotKnowledge} contextKey={`${storySlug}:${activeChapter.id}`} /> : null}
+      {!showingOrientation ? <WorldMascot
+        surface="track"
+        knowledge={mascotKnowledge}
+        contextKey={`${storySlug}:${activeChapter.id}:${currentLevelId ?? 'complete'}`}
+      /> : null}
 
       <CompanionRequiredOverlay
         open={companionPromptOpen && !hasCompanion && !loadoutLoading}

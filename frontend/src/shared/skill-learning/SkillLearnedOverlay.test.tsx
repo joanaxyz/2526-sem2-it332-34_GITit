@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from 'vitest'
 import { SkillLearnedOverlay } from './SkillLearnedOverlay'
 import { useSkillLearnedQueue, type LearnedSkill } from './useSkillLearnedQueue'
 
-const init: LearnedSkill = { id: 1, slug: 'git-init', base_command: 'git init', title: 'Create a repository', summary: '', chapter_number: 1, chapter_title: 'Foundations' }
+const init: LearnedSkill = { id: 1, slug: 'git-init', base_command: 'git init', title: 'Create a repository', summary: '', chapter_number: 1, chapter_title: 'Foundations', learned_at: '2026-01-01T00:00:00Z' }
 const add: LearnedSkill = { ...init, id: 2, slug: 'git-add', base_command: 'git add', title: 'Stage changes' }
 
 afterEach(cleanup)

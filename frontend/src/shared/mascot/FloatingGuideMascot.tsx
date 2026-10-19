@@ -1,5 +1,7 @@
 import { type ReactNode, type Ref, useEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { GuideCharacterPortrait } from './GuideCharacterPortrait'
+import { useGuideMascotVisibility } from './useGuideMascotVisibility'
 import './guide-launcher.css'
 
 const POSITION_KEY = 'git-it:guide-mascot-position:v1'
@@ -39,6 +41,7 @@ export function FloatingGuideMascot({ label, active = false, onActivate, buttonR
   children?: ReactNode
   tourTarget?: string
 }) {
+  const guideMascotVisible = useGuideMascotVisibility()
   const [position, setPosition] = useState(initialPosition)
   const [dragging, setDragging] = useState(false)
   const positionRef = useRef(position)
@@ -47,10 +50,13 @@ export function FloatingGuideMascot({ label, active = false, onActivate, buttonR
   const suppressClick = useRef(false)
 
   useEffect(() => {
+    if (!guideMascotVisible) return
     const resize = () => setPosition((current) => clamp(current))
     window.addEventListener('resize', resize)
     return () => window.removeEventListener('resize', resize)
-  }, [])
+  }, [guideMascotVisible])
+
+  if (!guideMascotVisible) return null
 
   return createPortal(<div className="guide-mascot" data-dragging={dragging || undefined}
     aria-hidden={active || undefined} inert={active || undefined}
@@ -103,7 +109,7 @@ export function FloatingGuideMascot({ label, active = false, onActivate, buttonR
         if (suppressClick.current) { suppressClick.current = false; return }
         if (!active) onActivate()
       }}>
-      <img src="/mascot/portrait.png" alt="" width={72} height={90} draggable={false} />
+      <GuideCharacterPortrait className="guide-mascot__portrait" alt="" width={72} height={90} />
       <span>Guide</span>
     </button>
     {children}

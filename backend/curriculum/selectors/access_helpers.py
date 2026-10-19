@@ -8,7 +8,10 @@ from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
 def _level_commands(level: AdventureLevel) -> list[str]:
     """Distinct base commands a level exercises (for the read-only overview)."""
     commands: list[str] = []
-    for form in level.command_forms.all():
+    forms = getattr(level, "overview_forms", None)
+    if forms is None:
+        forms = level.command_forms.all()
+    for form in forms:
         command = form.command_skill.base_command
         if command not in commands:
             commands.append(command)

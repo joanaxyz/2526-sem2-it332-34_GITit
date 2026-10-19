@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { KeyRound, LogOut, MonitorCog, Save, ShieldCheck, UserRound } from 'lucide-react'
+import { Eye, GraduationCap, KeyRound, LogOut, MonitorCog, RotateCcw, Save, ShieldCheck, UserRound } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -11,6 +11,10 @@ import { queryKeys } from '@/shared/api/queryKeys'
 import { useServerFieldErrors } from '@/shared/api/useServerFieldErrors'
 import { authApi } from '@/shared/auth/authApi'
 import { useAuthStore } from '@/shared/auth/useAuth'
+import { setGuideMascotVisibility } from '@/shared/mascot/guideMascotVisibility'
+import { useGuideMascotVisibility } from '@/shared/mascot/useGuideMascotVisibility'
+import { resetLevelTours } from '@/shared/level/utils/levelTour'
+import { resetTierStories } from '@/shared/level/utils/tierStorySeen'
 import {
   applyPreferences,
   persistPreferences,
@@ -35,6 +39,7 @@ export function SettingsPage() {
   const queryClient = useQueryClient()
   const navigate = useNavigate()
   const preferences = useQuery({ queryKey: queryKeys.preferences, queryFn: preferencesApi.get })
+  const guideMascotVisible = useGuideMascotVisibility()
   const preferenceMutation = useMutation({
     mutationFn: preferencesApi.update,
     onSuccess: (data) => {
@@ -89,6 +94,21 @@ export function SettingsPage() {
     preferenceMutation.mutate(payload)
   }
 
+  function updateGuideMascotVisibility(visible: boolean) {
+    if (setGuideMascotVisibility(visible)) toast.success('Guide mascot setting saved on this device')
+    else toast.error('Could not save guide mascot setting in this browser')
+  }
+
+  function replayLevelOnboarding() {
+    const toursReset = resetLevelTours(user?.id)
+    const storiesReset = resetTierStories(user?.id)
+    if (toursReset && storiesReset) {
+      toast.success('Level onboarding will replay the next time you open a level')
+    } else {
+      toast.error('Could not reset level onboarding in this browser')
+    }
+  }
+
   return (
     <section className="settings-page" aria-labelledby="settings-title">
       <header className="settings-hero">
@@ -96,7 +116,7 @@ export function SettingsPage() {
         <div>
           <p>Player preferences</p>
           <h1 id="settings-title">Settings</h1>
-          <p>Manage your account security and motion preferences.</p>
+          <p>Manage your account security and learning experience.</p>
         </div>
       </header>
 
@@ -136,6 +156,40 @@ export function SettingsPage() {
               </label>
             </div>
             {preferenceMutation.isError ? <p className="settings-error">{preferenceMutation.error.message}</p> : null}
+          </div>
+        </section>
+
+        <section className="settings-section" aria-labelledby="guide-settings-title">
+          <div className="settings-section__head">
+            <p className="settings-eyebrow" id="guide-settings-title"><Eye aria-hidden="true" />Guide</p>
+            <p className="settings-section__desc">Show or hide the floating Git-It mascot.</p>
+          </div>
+          <div className="settings-section__body">
+            <label className="settings-toggle">
+              <input
+                type="checkbox"
+                role="switch"
+                checked={guideMascotVisible}
+                onChange={(event) => updateGuideMascotVisibility(event.target.checked)}
+              />
+              <span>Show floating mascot</span>
+            </label>
+            <p className="settings-note">Turn this off to remove the floating mascot from the map and guide launcher. Guide messages use your companion’s portrait when equipped; drills still use Git-It. Saved on this device.</p>
+          </div>
+        </section>
+
+        <section className="settings-section" aria-labelledby="level-onboarding-settings-title">
+          <div className="settings-section__head">
+            <p className="settings-eyebrow" id="level-onboarding-settings-title"><GraduationCap aria-hidden="true" />Level onboarding</p>
+            <p className="settings-section__desc">Replay Adventure, Challenge, and Tier walkthroughs and Tier story introductions.</p>
+          </div>
+          <div className="settings-section__body">
+            <div className="settings-session-actions">
+              <button type="button" onClick={replayLevelOnboarding} disabled={!user}>
+                <RotateCcw aria-hidden="true" />Replay level onboarding
+              </button>
+            </div>
+            <p className="settings-note">Walkthroughs and Tier story introductions will replay the next time you enter a level. This reset applies on this device.</p>
           </div>
         </section>
 

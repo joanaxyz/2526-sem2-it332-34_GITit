@@ -10,6 +10,7 @@ export function TierDagStage({
   className,
   showHeader,
   refitKey,
+  preserveViewportOnResize = false,
 }: {
   snapshot: RepositorySnapshot
   animation: TierDagAnimationController
@@ -17,6 +18,7 @@ export function TierDagStage({
   className?: string
   showHeader?: boolean
   refitKey?: string | number
+  preserveViewportOnResize?: boolean
 }) {
   return (
     <section
@@ -38,6 +40,7 @@ export function TierDagStage({
         layoutDirection="vertical"
         showHeader={showHeader}
         refitKey={refitKey}
+        preserveViewportOnResize={preserveViewportOnResize}
       />
     </section>
   )

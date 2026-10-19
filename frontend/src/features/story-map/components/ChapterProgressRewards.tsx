@@ -76,7 +76,9 @@ export function ChapterProgressRewards({ chapter, preview = false }: {
                 {chest.claimed ? <Check aria-hidden="true" /> : null}{chest.threshold}%
               </span>
               <span className="story-skill-reward-amount"><GitCoinIcon className="size-3" />+{chest.coins}</span>
-              <span className="story-reward-status">{pending ? 'Opening…' : label}</span>
+              {label !== 'Locked' ? (
+                <span className="story-reward-status">{pending ? 'Opening…' : label}</span>
+              ) : null}
             </button>
           )
         })}

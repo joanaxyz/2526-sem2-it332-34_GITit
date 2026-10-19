@@ -73,6 +73,7 @@ class LearnedSkillResponseSerializer(serializers.Serializer):
     chapter_id = serializers.IntegerField(required=False, allow_null=True)
     chapter_number = serializers.IntegerField()
     chapter_title = serializers.CharField(allow_blank=True)
+    learned_at = serializers.DateTimeField()
 
 
 class LearnedSkillsResponseSerializer(serializers.Serializer):

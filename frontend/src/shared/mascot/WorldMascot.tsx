@@ -4,6 +4,7 @@ import { MascotSprite, type MascotPose } from './MascotSprite'
 import { mascotPerch, mascotPlatform, mascotPlatforms, mascotTilt, platformNear, type MascotPlatform } from './mascotPlatforms'
 import { warmImages } from '@/shared/sprites/preload'
 import { MascotKnowledgeBubble } from './MascotKnowledgeBubble'
+import { useGuideMascotVisibility } from './useGuideMascotVisibility'
 import { INTRODUCTORY_TIPS, mascotSpeechPosition, type MascotKnowledgeTip } from './mascotKnowledge'
 import './mascot.css'
 
@@ -17,6 +18,7 @@ export function WorldMascot({ surface, knowledge = [], contextKey = surface }: {
   knowledge?: readonly MascotKnowledgeTip[]
   contextKey?: string
 }) {
+  const guideMascotVisible = useGuideMascotVisibility()
   const scopeRef = useRef<HTMLSpanElement>(null)
   const hostRef = useRef<HTMLDivElement>(null)
   const actorRef = useRef<HTMLButtonElement>(null)
@@ -50,7 +52,7 @@ export function WorldMascot({ surface, knowledge = [], contextKey = surface }: {
     const host = hostRef.current
     const parent = scopeRef.current?.parentElement
     const actor = actorRef.current
-    if (!host || !parent || !actor) return
+    if (!host || !parent || !actor || !guideMascotVisible) return
     void warmImages(['idle', 'float', 'fly', 'walk', 'run', 'land', 'take-off'].map((name) => `/mascot/${name}.png`))
     const media = window.matchMedia?.('(prefers-reduced-motion: reduce)')
     let reduced = media?.matches ?? false
@@ -238,11 +240,13 @@ export function WorldMascot({ surface, knowledge = [], contextKey = surface }: {
       window.removeEventListener('resize', keepVisible)
       observer?.disconnect()
     }
-  }, [surface])
+  }, [guideMascotVisible, surface])
+
+  if (!guideMascotVisible) return null
 
   return <><span ref={scopeRef} hidden />{createPortal(<div ref={hostRef} className="world-mascot" data-surface={surface}>
     <button ref={actorRef} type="button" className="world-mascot-actor" data-pose={pose}
-      aria-label="Git-It mascot: share a Git tip"
+      aria-label="Learning guide: share a Git tip"
       aria-expanded={Boolean(tip)} aria-controls={tip ? bubbleId : undefined}
       title="Click for a tip from your learning journey · Click the page to move me"
       onClick={nextTip}>

@@ -1,5 +1,6 @@
 import { Modal } from '@/shared/components/Modal'
 import { CompanionSkillPortrait } from '@/shared/cosmetics/CompanionSkillPortrait'
+import { GuideCharacterPortrait } from '@/shared/mascot/GuideCharacterPortrait'
 import type { LearnedSkill } from './useSkillLearnedQueue'
 import './skill-learned.css'
 
@@ -22,7 +23,7 @@ export function SkillLearnedOverlay({ skill, companionSlug, onClose }: {
       {skill ? (
         <section className="skill-learned-reveal" key={skill.base_command}>
           <div className="skill-learned-announcement">
-            <img className="skill-learned-mascot" src="/mascot/portrait.png" alt="Git it guide" draggable={false} />
+            <GuideCharacterPortrait className="skill-learned-mascot" alt="Learning guide" />
             <p>You've learned a new skill</p>
           </div>
           <CompanionSkillPortrait
