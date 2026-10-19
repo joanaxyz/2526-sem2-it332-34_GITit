@@ -1,12 +1,12 @@
 """Chapter progress reward policy and orchestration."""
 
-from progress.wallet import WalletService
 from rest_framework.exceptions import ValidationError
 
 from curriculum.selectors.progress_counts import (
     chapter_completion_count_map,
     chapter_completion_denominator_map,
 )
+from progress.wallet import WalletService
 
 CHEST_SCHEDULE = [
     {"threshold": 25, "coins": 25},

@@ -4,6 +4,7 @@ import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import type { TerminalLine } from '@/shared/level/types'
 import { battleEventsForSubmittedCommand } from '@/shared/level-runtime/commandBattle'
 import { isExitCommand } from '@/shared/level-runtime/commands'
+import type { LearnedSkill } from '@/shared/skill-learning/useSkillLearnedQueue'
 
 type AdventureWorkspaceSnapshot = {
   run: AdventureRun
@@ -19,6 +20,7 @@ export function createAdventureWorkspaceCommandHandler({
   setExitConfirmOpen,
   setLastWorkspace,
   queueOutcomeAnimation,
+  onSkillsLearned,
 }: {
   attempt: AdventureAttempt | null | undefined
   run: AdventureRun
@@ -28,6 +30,7 @@ export function createAdventureWorkspaceCommandHandler({
   setExitConfirmOpen: (open: boolean) => void
   setLastWorkspace: (snapshot: AdventureWorkspaceSnapshot) => void
   queueOutcomeAnimation: (runId: number) => void
+  onSkillsLearned: (skills: LearnedSkill[]) => void
 }) {
   return (command: string) => {
     if (!attempt || run.status !== 'started') return
@@ -53,6 +56,7 @@ export function createAdventureWorkspaceCommandHandler({
           storyWorldSlug:
             responseStory?.world_slug ?? responseStory?.slug ?? run.story?.world_slug ?? run.story?.slug,
         }))
+        onSkillsLearned(response.learned_skills ?? [])
         if (finishRunStatus === 'completed' || finishRunStatus === 'failed') {
           queueOutcomeAnimation(finishRunId)
         }

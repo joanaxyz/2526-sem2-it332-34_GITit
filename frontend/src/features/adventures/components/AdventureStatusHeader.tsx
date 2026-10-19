@@ -1,7 +1,7 @@
 import { RefreshCcw, X } from 'lucide-react'
 import { FloatingGuideMascot } from '@/shared/mascot/FloatingGuideMascot'
 
-import gitLogoImage from '@/assets/images/GIT_logo.webp'
+import gitLogoImage from '@/assets/images/g34-icon.webp'
 import type { AdventureRun } from '@/features/adventures/types'
 import { AudioControls } from '@/shared/audio/AudioControls'
 import { WorkspaceHeaderAccount } from '@/shared/level/components/WorkspaceHeaderAccount'

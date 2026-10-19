@@ -42,7 +42,10 @@ _OPTIONS: dict[tuple[str | None, str], str] = {
     ("rebase", "--continue"): "carry on after fixing a conflict",
     ("rebase", "--abort"): "cancel the rebase and go back",
     ("push", "-u"): "remember this remote branch for later pushes and pulls",
-    ("push", "--force-with-lease"): "overwrite the remote branch, but only if nobody else changed it",
+    (
+        "push",
+        "--force-with-lease",
+    ): "overwrite the remote branch, but only if nobody else changed it",
     ("log", "--oneline"): "show one line per commit",
     ("log", "--graph"): "draw how branches split and join",
     ("log", "--all"): "include every branch",
@@ -106,7 +109,11 @@ def _describe_bare(family: str, token: str) -> str:
         return "this folder and everything inside it"
     if token.startswith("-"):
         option = token.split("=", 1)[0]
-        return _OPTIONS.get((family, option)) or _OPTIONS.get((None, option)) or "an option that changes how it works"
+        return (
+            _OPTIONS.get((family, option))
+            or _OPTIONS.get((None, option))
+            or "an option that changes how it works"
+        )
     names = _PLACEHOLDER.findall(token)
     if names and _PLACEHOLDER.fullmatch(token.removesuffix("...")):
         name = names[0].removesuffix("...")
@@ -114,7 +121,5 @@ def _describe_bare(family: str, token: str) -> str:
         several = token.endswith("...") or names[0].endswith("...")
         return f"you fill this in: {meaning}" + (", one or more" if several else "")
     if names:
-        return "you fill in the " + " and ".join(
-            f"<{name}> part" for name in names
-        )
+        return "you fill in the " + " and ".join(f"<{name}> part" for name in names)
     return "type this exactly"

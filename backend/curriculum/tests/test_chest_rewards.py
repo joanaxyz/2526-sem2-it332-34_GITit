@@ -1,12 +1,12 @@
 import pytest
+from rest_framework.test import APIClient
+
 from adventures.models import AdventureLevel
 from common.exceptions import Locked
-from progress.models import AdventureLevelCompletion, CoinTransaction, Wallet
-from rest_framework.test import APIClient
-from testing.runtime_factories import api_client_for, create_stage_readme_adventure_run, make_user
-
 from curriculum.models import Story
 from curriculum.services import CHEST_SCHEDULE, ChapterChestService
+from progress.models import AdventureLevelCompletion, CoinTransaction, Wallet
+from testing.runtime_factories import api_client_for, create_stage_readme_adventure_run, make_user
 
 pytestmark = pytest.mark.django_db
 

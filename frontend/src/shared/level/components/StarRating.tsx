@@ -1,6 +1,7 @@
 import { Star } from 'lucide-react'
 
 import { cn } from '@/shared/utils/cn'
+import { normalizeStarScore } from '@/shared/level/utils/starScore'
 
 const STAR_VALUES = [1, 2, 3] as const
 
@@ -30,8 +31,18 @@ export function StarRating({
   className?: string
   label?: string
 }) {
-  if (fillStates) {
-    const earned = fillStates.filter((state) => state === 'full').length
+  const safeStars = normalizeStarScore(stars)
+  const resolvedFillStates = fillStates ?? (safeStars % 1 !== 0
+    ? STAR_VALUES.map((value): StarFillState => {
+      if (value <= safeStars) return 'full'
+      return value - 0.5 === safeStars ? 'half' : 'empty'
+    })
+    : undefined)
+  if (resolvedFillStates) {
+    const earned = STAR_VALUES.reduce<number>((total, _, index) => {
+      const state = resolvedFillStates[index]
+      return total + (state === 'full' ? 1 : state === 'half' ? 0.5 : 0)
+    }, 0)
     return (
       <span
         role="img"
@@ -39,7 +50,7 @@ export function StarRating({
         className={cn('inline-flex items-center gap-0.5', size === 'lg' && 'gap-1.5', className)}
       >
         {STAR_VALUES.map((value, index) => {
-          const fillState = fillStates[index] ?? 'empty'
+          const fillState = resolvedFillStates[index] ?? 'empty'
           return (
             <span key={value} className="star-rating-slot" style={{ position: 'relative' }}>
               <Star aria-hidden="true" className={cn(SIZE_CLASS[size], 'star-empty')} />
@@ -61,8 +72,7 @@ export function StarRating({
     )
   }
 
-  const safeStars = Number.isFinite(stars) ? (stars as number) : 0
-  const earned = Math.max(0, Math.min(3, Math.floor(safeStars)))
+  const earned = safeStars
 
   return (
     <span

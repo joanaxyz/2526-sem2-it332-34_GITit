@@ -224,6 +224,7 @@ class AdventureRunSubmitCommandAPIView(APIView):
             {
                 "run": run_payload,
                 "solved": result["solved"],
+                "learned_skills": result["learned_skills"],
                 "stdout": result["stdout"],
                 "stderr": result["stderr"],
                 "exit_code": result["exit_code"],
@@ -433,6 +434,7 @@ class AdventureLevelTierCommandSubmitAPIView(APIView):
                 "stderr": result["stderr"],
                 "exit_code": result["exit_code"],
                 "command_family": result["command_family"],
+                "learned_skills": result["learned_skills"],
                 "diagnostic_metadata": result["diagnostic_metadata"],
                 "step": {
                     "id": result["step"].id,

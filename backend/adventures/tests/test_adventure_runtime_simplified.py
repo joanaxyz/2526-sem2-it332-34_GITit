@@ -659,11 +659,11 @@ def test_level_completion_credits_one_solve_per_wave(db, django_user_model):
     wave(drills, "drill-draft", is_published=False)
 
     service = AdventureRunService()
-    assert service._credit_mastery(player=player, level=drills) is True
+    service._credit_mastery(player=player, level=drills)
     row = SkillMastery.objects.get(player=player, command_form=form)
     assert row.solves == 3
     assert row.mastered is True  # target = 3 published waves, all credited at once
-    assert row.learned_at is not None
+    assert row.learned_at is None  # Only actual successful command use teaches a skill.
 
     # Crediting again (as a replay would never do) still counts waves, so the
     # guard against re-crediting lives at the call site: is_replay attempts

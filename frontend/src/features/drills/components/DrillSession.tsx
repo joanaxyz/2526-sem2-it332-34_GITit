@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { X } from 'lucide-react'
 
@@ -25,16 +25,6 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
   const rung = ask?.kind === 'card' ? ask.rung : null
   const options = useMemo(() => seededShuffle(choicePoolFor(card, rung), `${card?.key}:${rung}:${session.round}`), [card, rung, session.round])
   const optionCount = options.length
-  const advanceRef = useRef(advance)
-  advanceRef.current = advance
-
-  useEffect(() => {
-    if (!verdict) return
-    const timer = window.setTimeout(() => advanceRef.current(),
-      session.lives === 0 ? 1800 : verdict.correct ? 950 : 2300)
-    return () => window.clearTimeout(timer)
-  }, [session.lives, verdict])
-
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return
@@ -45,11 +35,15 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
         navigate(exitPath)
         return
       }
-      if (session.finished || event.repeat) return
+      if (session.finished) return
+      if (event.repeat) {
+        if (event.key === 'Enter') event.preventDefault()
+        return
+      }
       if (event.key === 'Enter' && !(target instanceof HTMLButtonElement) && !(target instanceof HTMLAnchorElement)) {
         event.preventDefault()
-        if (verdict) return
-        if (!started) document.querySelector<HTMLButtonElement>('.drill-flight-intro button')?.click()
+        if (verdict) advance()
+        else if (!started) document.querySelector<HTMLButtonElement>('.drill-flight-intro button')?.click()
         else if (!optionCount) check()
         return
       }
@@ -145,6 +139,7 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
           sequence={session.sequence}
           optionCount={optionCount}
           onCheck={check}
+          onContinue={advance}
           flightChoices={optionCount > 0}
           outOfLives={session.lives === 0}
         />

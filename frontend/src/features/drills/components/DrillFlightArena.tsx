@@ -6,6 +6,9 @@ import { warmImages } from '@/shared/sprites/preload'
 
 type Point = { x: number; y: number }
 
+// Keep reading time consistent: one arena width every 28 seconds, even on phones.
+const CHOICE_CROSSING_SECONDS = 28
+
 export function DrillFlightArena({ options, verdict, lives, started, onStart, onCollide, voice, round = 0 }: {
   round?: number
   options: DrillChoice[]
@@ -135,7 +138,7 @@ export function DrillFlightArena({ options, verdict, lives, started, onStart, on
         const node = choiceRefs.current[index]
         if (!node) continue
         const halfWidth = node.offsetWidth / 2
-        let x = (projectileX.current[index] ?? width * 0.77) - Math.max(22, width / 28) * dt
+        let x = (projectileX.current[index] ?? width * 0.77) - (width / CHOICE_CROSSING_SECONDS) * dt
         // Uncaught answers loop back into the continuous stream.
         if (x < -halfWidth - 60) x = width + halfWidth + 80
         projectileX.current[index] = x

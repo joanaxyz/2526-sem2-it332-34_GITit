@@ -38,7 +38,7 @@ async function advanceTime(ms: number) {
   await act(async () => { await vi.advanceTimersByTimeAsync(ms) })
 }
 
-describe('continuous flight session', () => {
+describe('flight session with learner-paced questions', () => {
   beforeEach(() => {
     vi.useFakeTimers()
     vi.stubGlobal('matchMedia', () => ({ matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn() }))
@@ -46,19 +46,23 @@ describe('continuous flight session', () => {
   })
   afterEach(() => { cleanup(); client?.clear(); vi.useRealTimers(); vi.unstubAllGlobals() })
 
-  it('replaces the hit with Correct and automatically serves the next question in the same arena', async () => {
+  it('keeps correct feedback visible until Continue serves the next question in the same arena', async () => {
     mount()
     const actor = document.querySelector('.drill-flight-actor')
     fireEvent.click(screen.getByRole('button', { name: /Fly to answer \d: git add$/ }))
     expect(screen.getByRole('button', { name: 'Correct' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Continue' })).not.toBeInTheDocument()
-    await advanceTime(950)
+    expect(screen.getByRole('button', { name: 'Continue' })).toHaveFocus()
+    await advanceTime(10000)
+    expect(screen.getByRole('heading', { name: 'Which command does this?' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Correct' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
     expect(screen.getByRole('heading', { name: 'Fill the missing piece.' })).toBeInTheDocument()
     expect(document.querySelector('.drill-flight-actor')).toBe(actor)
     expect(screen.getByLabelText('3 of 3 lives remaining')).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Continue' })).not.toBeInTheDocument()
   })
 
-  it('recovers from wrong hits automatically and plays death before opening results', async () => {
+  it('waits for Continue after wrong hits and View results after the last life', async () => {
     mount()
     for (let lives = 2; lives >= 0; lives--) {
       fireEvent.click(screen.getByRole('button', { name: /Fly to answer \d: git status$/ }))
@@ -66,16 +70,47 @@ describe('continuous flight session', () => {
       expect(screen.getByLabelText(`${lives} of 3 lives remaining`)).toBeInTheDocument()
       if (lives > 0) {
         expect(screen.getByTestId('pose')).toHaveTextContent('float')
-        await advanceTime(2300)
+        await advanceTime(10000)
+        expect(screen.getByRole('button', { name: 'Wrong' })).toBeDisabled()
+        fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
       }
     }
     expect(screen.getByTestId('pose')).toHaveTextContent('die')
-    await advanceTime(1200)
+    await advanceTime(10000)
     expect(screen.getByTestId('pose')).toHaveTextContent('die')
-    await advanceTime(600)
+    expect(screen.queryByRole('button', { name: 'Drill again' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'View results' })).toHaveFocus()
+    fireEvent.click(screen.getByRole('button', { name: 'View results' }))
     expect(screen.getByRole('button', { name: 'Drill again' })).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Continue' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Drill again' }))
     expect(screen.getByLabelText('3 of 3 lives remaining')).toBeInTheDocument()
+  })
+
+  it('supports Enter to continue and ignores a held Enter key', () => {
+    mount()
+    fireEvent.click(screen.getByRole('button', { name: /Fly to answer \d: git add$/ }))
+    const continueButton = screen.getByRole('button', { name: 'Continue' })
+    expect(fireEvent.keyDown(continueButton, { key: 'Enter', repeat: true })).toBe(false)
+    expect(screen.getByRole('heading', { name: 'Which command does this?' })).toBeInTheDocument()
+    fireEvent.keyDown(window, { key: 'Enter' })
+    expect(screen.getByRole('heading', { name: 'Fill the missing piece.' })).toBeInTheDocument()
+  })
+
+  it('waits for Continue after checking an assembled answer before opening the summary', async () => {
+    mount()
+    fireEvent.click(screen.getByRole('button', { name: /Fly to answer \d: git add$/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: /Fly to answer \d: add$/ }))
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'git' }))
+    fireEvent.click(screen.getByRole('button', { name: 'add' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Check' }))
+    expect(screen.getByRole('button', { name: 'Continue' })).toHaveFocus()
+    await advanceTime(10000)
+    expect(screen.getByRole('heading', { name: 'Build the command.' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Drill again' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    expect(screen.getByRole('button', { name: 'Drill again' })).toBeInTheDocument()
   })
 })

@@ -6,6 +6,8 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom'
 import { storyMapApi } from '@/features/story-map/api/storyMapApi'
 import type { LearningChapter, Story } from '@/features/story-map/types'
 import { COMPANIONS } from '@/shared/cosmetics/companions/registry'
+import { skillsApi } from '@/features/skills/api/skillsApi'
+import { queryKeys } from '@/shared/api/queryKeys'
 
 import { StoryMapPage } from './StoryMapPage'
 
@@ -133,6 +135,7 @@ describe('StoryMapPage responsive rails', () => {
       error: null,
     })
     vi.spyOn(storyMapApi, 'listChapters').mockResolvedValue([chapter])
+    vi.spyOn(skillsApi, 'listLearned').mockResolvedValue({ results: [] })
     vi.spyOn(storyMapApi, 'listOrientationLessons').mockResolvedValue([])
     vi.spyOn(storyMapApi, 'getChapterOverview').mockResolvedValue({
       chapter_id: chapter.id,
@@ -145,6 +148,25 @@ describe('StoryMapPage responsive rails', () => {
   afterEach(() => {
     cleanup()
     vi.restoreAllMocks()
+  })
+
+  it('matches mascot knowledge to the active chapter using the earned spellbook', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    queryClient.setQueryData(queryKeys.learnedSkills, { results: [
+      { id: 1, slug: 'git-init', base_command: 'git init', title: 'Initialize', summary: 'Create Git metadata.', chapter_id: chapter.id, chapter_number: 1, chapter_title: chapter.title },
+      { id: 2, slug: 'git-merge', base_command: 'git merge', title: 'Merge', summary: 'Combine branches.', chapter_id: 3, chapter_number: 3, chapter_title: 'Merging' },
+    ] })
+    render(<QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={['/stories/arcane-spire']}>
+        <Routes><Route path="/stories/:storySlug" element={<StoryMapPage />} /></Routes>
+      </MemoryRouter>
+    </QueryClientProvider>)
+    await screen.findByText('Story path')
+    fireEvent.click(screen.getByRole('button', { name: 'Git-It mascot: share a Git tip' }))
+    expect(screen.getByRole('status')).toHaveTextContent('Create Git metadata.')
+    fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))
+    expect(screen.getByRole('status')).not.toHaveTextContent('Combine branches.')
+    queryClient.clear()
   })
 
   it('keeps closed compact rails out of the accessibility tree and restores them when opened', async () => {

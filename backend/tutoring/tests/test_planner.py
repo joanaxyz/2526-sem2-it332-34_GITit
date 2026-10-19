@@ -58,28 +58,44 @@ def test_known_forms_stay_quiet_and_never_skip_ahead(teaching_run):
 
 def test_a_form_used_successfully_before_counts_as_known(teaching_run):
     other = AdventureLevelTierRun.objects.create(
-        player=teaching_run.player, tier=teaching_run.tier, current_wave=teaching_run.current_wave,
-        selected_variant=teaching_run.selected_variant, repository_state={}, max_counted_commands=12,
+        player=teaching_run.player,
+        tier=teaching_run.tier,
+        current_wave=teaching_run.current_wave,
+        selected_variant=teaching_run.selected_variant,
+        repository_state={},
+        max_counted_commands=12,
         status="completed",
     )
     CommandStep.objects.create(
-        adventure_tier_run=other, command_text="git init", normalized_command="git init",
-        was_processable=True, result_category="target_not_yet_matched",
-        command_classification="counted", attempt_number=1,
+        adventure_tier_run=other,
+        command_text="git init",
+        normalized_command="git init",
+        was_processable=True,
+        result_category="target_not_yet_matched",
+        command_classification="counted",
+        attempt_number=1,
     )
     assert tutor_payload(teaching_run) is None
 
 
 def test_a_failed_earlier_attempt_does_not_count_as_known(teaching_run):
     other = AdventureLevelTierRun.objects.create(
-        player=teaching_run.player, tier=teaching_run.tier, current_wave=teaching_run.current_wave,
-        selected_variant=teaching_run.selected_variant, repository_state={}, max_counted_commands=12,
+        player=teaching_run.player,
+        tier=teaching_run.tier,
+        current_wave=teaching_run.current_wave,
+        selected_variant=teaching_run.selected_variant,
+        repository_state={},
+        max_counted_commands=12,
         status="failed",
     )
     CommandStep.objects.create(
-        adventure_tier_run=other, command_text="git init", normalized_command="git init",
-        was_processable=False, result_category="unprocessable",
-        command_classification="unprocessable", attempt_number=1,
+        adventure_tier_run=other,
+        command_text="git init",
+        normalized_command="git init",
+        was_processable=False,
+        result_category="unprocessable",
+        command_classification="unprocessable",
+        attempt_number=1,
     )
     assert tutor_payload(teaching_run)["teaching_key"] == INIT
 
@@ -91,14 +107,22 @@ def test_practised_mastery_counts_as_known(teaching_run):
 
 
 def test_off_route_repository_is_silent(teaching_run):
-    move_to(teaching_run, initialized_state(teaching_run.selected_variant.initial_state, branch="trunk"))
+    move_to(
+        teaching_run, initialized_state(teaching_run.selected_variant.initial_state, branch="trunk")
+    )
     assert tutor_payload(teaching_run) is None
 
 
 def test_diagnostic_solution_steps_are_skipped(teaching_run):
     variant = teaching_run.selected_variant
     states, final = solution_states(variant.initial_state)
-    commands = ["git status", "git init", "git add README.md", "git add app.py", "git commit -m 'Save work'"]
+    commands = [
+        "git status",
+        "git init",
+        "git add README.md",
+        "git add app.py",
+        "git commit -m 'Save work'",
+    ]
     variant.solution_trajectory = trajectory_for(commands, [states[0], *states], final)
     assert tutor_payload(teaching_run)["teaching_key"] == INIT
 
@@ -122,14 +146,26 @@ def test_any_seeded_command_is_taught_even_without_a_wave_form(teaching_run):
 
     payload = tutor_payload(teaching_run)
     assert payload["command_form"]["usage_form"] == "git switch -c <value>"
-    assert {"kind": "branch", "text": "Branch feature is created.", "action": "create",
-            "subjects": ["feature"]} in payload["needs"]
+    assert {
+        "kind": "branch",
+        "text": "Branch feature is created.",
+        "action": "create",
+        "subjects": ["feature"],
+    } in payload["needs"]
 
     # Once the catalog has the form, its authored syntax and label are used.
-    skill = CommandSkill.objects.create(slug="git-switch", title="git switch", base_command="git switch",
-                                        summary="Move HEAD to another branch.")
-    CommandForm.objects.create(command_skill=skill, slug="create", usage_form="git switch -c <branch>",
-                               label="Create and switch")
+    skill = CommandSkill.objects.create(
+        slug="git-switch",
+        title="git switch",
+        base_command="git switch",
+        summary="Move HEAD to another branch.",
+    )
+    CommandForm.objects.create(
+        command_skill=skill,
+        slug="create",
+        usage_form="git switch -c <branch>",
+        label="Create and switch",
+    )
     payload = tutor_payload(teaching_run)
     assert payload["teaching_key"] == "form:git switch -c <branch>"
     assert payload["title"] == "Create and switch"
@@ -164,7 +200,10 @@ def test_back_to_back_steps_are_offered_as_one_command(teaching_run):
     payload = tutor_payload(teaching_run)
     assert payload["title"] == "Stage selected paths"
     assert payload["command_form"]["usage_form"] == "git add <path>..."
-    assert [change["text"] for change in payload["needs"]] == ["README.md is staged.", "app.py is staged."]
+    assert [change["text"] for change in payload["needs"]] == [
+        "README.md is staged.",
+        "app.py is staged.",
+    ]
 
 
 def test_a_known_command_still_introduces_an_unseen_technique(teaching_run):
@@ -207,5 +246,6 @@ def test_beginners_get_plain_words_once_and_a_part_by_part_reading(teaching_run)
     payload = tutor_payload(teaching_run)
     assert [concept["key"] for concept in payload["concepts"]] == ["working-tree", "staging-area"]
     assert payload["anatomy"][2] == {
-        "token": "<path>...", "text": "you fill this in: a file or folder path, one or more",
+        "token": "<path>...",
+        "text": "you fill this in: a file or folder path, one or more",
     }

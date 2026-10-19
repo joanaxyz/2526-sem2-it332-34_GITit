@@ -127,7 +127,7 @@ export function StoryLevelTierPanel({
           aria-label={
             drill.cleared
               ? `Squire's Drill for ${level.title}: cleared, best ${drill.best_accuracy} percent. Drill again.`
-              : `Squire's Drill for ${level.title}: rehearse this level's commands.`
+              : `Squire's Drill for ${level.title}: start rehearsing this level's commands.`
           }
           onClick={onOpenDrill}
         >
@@ -149,7 +149,7 @@ export function StoryLevelTierPanel({
             </span>
           </span>
           <span className="story-level-tier-row-action">
-            {drill.cleared ? 'Again' : 'Drill'}
+            {drill.cleared ? 'Again' : 'Start'}
           </span>
         </button>
       ) : null}

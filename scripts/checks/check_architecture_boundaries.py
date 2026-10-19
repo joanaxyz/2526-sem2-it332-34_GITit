@@ -1707,7 +1707,13 @@ def performance_semantic_violations(sources: dict[str, str]) -> list[str]:
         if path != owner and "/preview/" not in path:
             if re.search(r"\bformula\s*:\s*['\"]", source):
                 violations.append(f"{path}: display formulas belong to performanceKpis")
-            if path.endswith(("LearnerKpiPanel.tsx", "AdminAnalyticsPage.tsx", "LearnerPerformanceInstrument.tsx")):
+            if path.endswith(
+                (
+                    "LearnerKpiPanel.tsx",
+                    "AdminAnalyticsPage.tsx",
+                    "LearnerPerformanceInstrument.tsx",
+                )
+            ):
                 if re.search(r"\btarget\s*:\s*\d", source):
                     violations.append(f"{path}: overall targets belong to performanceKpis")
         if path.endswith("/LearnerPerformanceInstrument.tsx"):
