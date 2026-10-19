@@ -20,22 +20,27 @@
   .home-overview-stat-subgrid { grid-template-columns: minmax(0, 1fr); }
   .home-overview-mastery-orb .ref-chart-radar { max-width: 24rem; margin-inline: auto; }
   .home-overview-story-block { border-top: 1px solid rgba(var(--theme-primary-rgb), 0.14); border-left: 0; padding-top: 0.9rem; padding-left: 0; }
+  .performance-instrument { grid-template-columns: minmax(0, 1fr); gap: 1.7rem; }
+  .performance-detail { padding-top: 1.2rem; }
 }
 
 @media (max-width: 760px) {
   .home-overview-command-row { grid-template-columns: 1.6rem minmax(6rem, 1fr) 3rem; gap: 0.45rem; }
   .home-overview-command-meter { grid-column: 2 / 4; }
-  .home-overview-kpi-row { grid-template-columns: minmax(0, 1fr); }
-  .home-overview-kpi-row > div { padding-inline: 0; }
-  .home-overview-kpi-row > div + div { border-top: 1px solid hsl(var(--border) / 0.45); border-left: 0; padding-block: 0.65rem; }
 }
 
 @media (max-width: 620px) {
   .home-overview-standing,
   .ref-panel.home-overview-stats-panel,
   .home-overview-achievements-panel { padding: 0.85rem; }
-  .home-overview-module-charts,
-  .home-overview-module-loading { gap: 0.9rem 1rem; }
+  .performance-signal { grid-template-columns: 2rem minmax(0, 1fr) auto; gap: 0.6rem; padding-inline: 0.3rem; }
+  .performance-signal-icon { width: 2rem; height: 2rem; }
+  .performance-signal-chevron { display: none; }
+  .performance-signal-name { font-size: 0.8125rem; }
+  .performance-signal-evidence { font-size: 0.6875rem; }
+  .performance-signal-reading { min-width: 6rem; }
+  .performance-signal-reading strong { font-size: 1.125rem; }
+  .performance-band-heading h2 { font-size: 1.4rem; }
 }
 
 @media (max-width: 480px) {

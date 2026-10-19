@@ -52,19 +52,19 @@ def _identity_snapshot() -> dict[str, list[str]]:
     }
 
 
-def test_seed_curriculum_is_idempotent_without_reset(db):
-    call_command("seed_curriculum")
+def test_curriculum_fixture_is_idempotent_without_reset(db):
+    call_command("seed_curriculum_fixture")
     first_counts = _counts()
     first_identity = _identity_snapshot()
 
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     assert _counts() == first_counts
     assert _identity_snapshot() == first_identity
 
 
-def test_seed_curriculum_preserves_complete_admin_owned_rows(db, django_user_model):
-    call_command("seed_curriculum")
+def test_curriculum_fixture_preserves_complete_admin_owned_rows(db, django_user_model):
+    call_command("seed_curriculum_fixture")
 
     admin_story = Story.objects.get(slug=STORIES[0]["slug"])
     admin_story.title = "Operator-owned story title"
@@ -148,7 +148,7 @@ def test_seed_curriculum_preserves_complete_admin_owned_rows(db, django_user_mod
         management_source=MANAGEMENT_SOURCE_ADMIN,
     )
 
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     admin_story.refresh_from_db()
     assert admin_story.title == "Operator-owned story title"

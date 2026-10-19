@@ -19,7 +19,7 @@ import {
   type SpecificObjective,
   type Status,
 } from '@/features/admin/utils/kpiCatalogue'
-import { kpiEvidence } from '@/features/admin/utils/kpiEvidence'
+import { formatMetricValue, kpiEvidence, metricTargetStatus } from '@/features/performance/utils/performanceKpis'
 import { ALL_TIME } from '@/features/admin/utils/kpiRange'
 import type { PerformanceModule } from '@/features/performance/types'
 import { queryKeys } from '@/shared/api/queryKeys'
@@ -28,8 +28,7 @@ import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 function status(r: Rate, target: number, up: boolean): Status {
-  if (r.value === null || r.denominator === 0) return 'none'
-  return (up ? r.value >= target : r.value <= target) ? 'met' : 'miss'
+  return metricTargetStatus(r, target, up)
 }
 
 // A multi-metric SO misses if any metric misses, is met only when every metric
@@ -54,8 +53,7 @@ function soStatus(so: SpecificObjective, data: SoData): Status {
 }
 
 function fmtRate(r: Rate, pct: boolean): string {
-  if (r.value === null) return '—'
-  return pct ? `${r.value}%` : r.value.toFixed(2)
+  return formatMetricValue(r.value, pct)
 }
 
 function barW(r: Rate, target: number, up: boolean): number {

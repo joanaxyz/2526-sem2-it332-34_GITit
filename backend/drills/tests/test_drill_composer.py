@@ -30,7 +30,7 @@ def _levels_with_forms(limit: int = 40) -> list[AdventureLevel]:
 
 
 def test_every_seeded_level_with_command_forms_composes_a_drill(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     levels = _levels_with_forms()
 
     assert levels, "seeding should produce levels that teach command forms"
@@ -44,7 +44,7 @@ def test_every_seeded_level_with_command_forms_composes_a_drill(db):
 
 
 def test_choices_are_real_sibling_forms_never_the_answer(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     for level in _levels_with_forms(20):
         for card in compose_level_drill(level)["cards"]:
@@ -63,7 +63,7 @@ def test_choices_are_real_sibling_forms_never_the_answer(db):
 
 
 def test_blank_hides_one_real_token_with_same_kind_options(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     checked = 0
     for level in _levels_with_forms(20):
@@ -87,7 +87,7 @@ def test_blank_hides_one_real_token_with_same_kind_options(db):
 
 
 def test_token_bank_can_always_build_the_answer(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     for level in _levels_with_forms(20):
         for card in compose_level_drill(level)["cards"]:
@@ -98,7 +98,7 @@ def test_token_bank_can_always_build_the_answer(db):
 
 
 def test_sequence_finale_uses_an_authored_solution(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     sequences = [compose_level_drill(level)["sequence"] for level in _levels_with_forms(20)]
     found = [sequence for sequence in sequences if sequence]
@@ -116,7 +116,7 @@ def test_an_unwired_level_still_drills_what_its_solutions_type(db):
     whose solutions are full of Git and whose form list is empty. Those are
     exactly the levels a learner needs a drill for, so the authored
     solutions stand in for the missing wiring."""
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     level = _levels_with_forms(1)[0]
     level.command_forms.clear()
     for wave in level.waves.all():
@@ -132,7 +132,7 @@ def test_an_unwired_level_still_drills_what_its_solutions_type(db):
 
 
 def test_a_level_with_nothing_to_teach_composes_no_cards(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     level = _levels_with_forms(1)[0]
     level.command_forms.clear()
     for wave in level.waves.all():

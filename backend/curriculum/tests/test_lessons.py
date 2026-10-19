@@ -8,7 +8,7 @@ from shop.models import Entitlement
 
 
 def test_seed_creates_published_lessons_with_pages(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     lessons = list(ChapterLesson.objects.filter(is_published=True))
     assert lessons, "the seed should author at least one published lesson"
@@ -18,7 +18,7 @@ def test_seed_creates_published_lessons_with_pages(db):
 
 
 def test_chapter_overview_includes_lesson_pages(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     lesson = ChapterLesson.objects.filter(is_published=True).select_related("chapter").first()
     overview = chapter_content_overview(player=None, chapter_id=lesson.chapter_id)
@@ -30,7 +30,7 @@ def test_chapter_overview_includes_lesson_pages(db):
 
 
 def test_overview_endpoint_and_unauthored_chapter_is_empty(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = django_user_model.objects.create_user(
         username="reader",
         email="reader@example.com",

@@ -1,4 +1,4 @@
-from curriculum.management.commands.seed_legacy_modules import (
+from curriculum.management.commands.seed_curriculum import (
     MODULE_1_LEVELS,
     required_case_details,
 )

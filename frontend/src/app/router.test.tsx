@@ -1,6 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { cleanup, render, screen } from '@testing-library/react'
-import { RouterProvider } from 'react-router-dom'
+import { RouterProvider, matchRoutes } from 'react-router-dom'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { useAuthStore } from '@/shared/auth/useAuth'
@@ -24,8 +24,6 @@ describe('app entry routing', () => {
   it.each([
     ['/', 'Story map', '/stories/arcane-spire'],
     ['/home', 'Home', '/home'],
-    // The standalone Performance page is gone; its link now lands on Home.
-    ['/performance', 'Home', '/home'],
   ])('opens %s at the correct destination', async (entry, title, expectedPath) => {
     useAuthStore.setState({
       accessToken: 'test-token',
@@ -35,5 +33,39 @@ describe('app entry routing', () => {
     render(<QueryClientProvider client={client}><RouterProvider router={router} /></QueryClientProvider>)
     expect(await screen.findByRole('heading', { name: title })).toBeInTheDocument()
     expect(router.state.location.pathname).toBe(expectedPath)
+  })
+
+  it.each([
+    '/tower',
+    '/towers',
+    '/towers/arcane-spire',
+    '/tower/shared/1',
+    '/tower/editor',
+    '/tower/editor/official',
+    '/tower/editor/1',
+    '/archive',
+    '/archive/shared/1',
+    '/archive/editor',
+    '/archive/editor/1',
+    '/my-tower',
+    '/design-preview/tower',
+    '/performance',
+    '/gallery',
+    '/dashboard',
+    '/stats',
+    '/store',
+  ])('does not register the retired URL %s', (pathname) => {
+    expect(matchRoutes(router.routes, pathname)).toBeNull()
+  })
+
+  it.each([
+    '/stories/arcane-spire',
+    '/shop',
+    '/level-editor',
+    '/level-editor/new/adventure',
+    '/adventure-level-tiers/1/runs',
+    '/admin/analytics',
+  ])('keeps the current URL %s registered', (pathname) => {
+    expect(matchRoutes(router.routes, pathname)).not.toBeNull()
   })
 })

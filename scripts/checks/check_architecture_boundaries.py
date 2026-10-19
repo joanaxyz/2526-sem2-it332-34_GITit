@@ -90,10 +90,8 @@ HOME_HUB_LINE_LIMITS = {
 }
 
 # Home Overview is one composition over a pure model and one owner per band. The
-# composition picks the active view; each owner renders exactly one named model
-# slice and never sees a raw summary. Progress is one plaque of two bands
-# (standing, then the record behind it) because the two used to be separate
-# categories restating each other's numbers.
+# composition picks the active view. Progress/skills render pure model slices;
+# results owns the on-demand performance query and delegates ready rendering.
 HOME_STATS_DIR = "frontend/src/features/home/components/home-stats"
 HOME_STATS_VIEW = "frontend/src/features/home/components/HomeStatsView.tsx"
 HOME_STATS_MODEL = f"{HOME_STATS_DIR}/homeStatsModel.ts"
@@ -115,7 +113,7 @@ HOME_OVERVIEW_PANELS = {
 HOME_OVERVIEW_PANEL_PROPS = {
     "progress": ("progress", "activityWindow", "onSelectActivityWindow"),
     "skills": ("skills",),
-    "results": ("results",),
+    "results": (),
     "gallery": ("achievements",),
 }
 HOME_STATS_LINE_LIMITS = {
@@ -1223,6 +1221,11 @@ def home_overview_source_violations(
             achievement_ledger,
             "frontend/src/features/stats/types",
         )
+    elif role == "results":
+        required_imports = (
+            "frontend/src/features/performance/hooks/useModulePerformance",
+            "frontend/src/features/performance/components/LearnerPerformanceInstrument",
+        )
     elif role == "gallery":
         required_imports = (achievement_ledger,)
     elif role in panel_roles:
@@ -1251,6 +1254,9 @@ def home_overview_source_violations(
         )
     elif role == "model":
         forbidden_markers = (
+            "HomeResultsModel",
+            "accuracyReady",
+            "home.kpis",
             "Link",
             "document",
             "home-overview-",
@@ -1327,7 +1333,9 @@ def home_overview_source_violations(
         for panel_role, (_, component, prop) in HOME_OVERVIEW_PANELS.items():
             prop_names, tag_body = jsx_component_props(source, component)
             expected = HOME_OVERVIEW_PANEL_PROPS[panel_role]
-            if sorted(prop_names) != sorted(expected) or f"{prop}={{model.{prop}}}" not in tag_body:
+            if sorted(prop_names) != sorted(expected) or (
+                expected and f"{prop}={{model.{prop}}}" not in tag_body
+            ):
                 violations.append(
                     f"{path_label}: {component} must receive {sorted(expected)}, with {prop} "
                     f"from the matching model slice"
@@ -1338,7 +1346,6 @@ def home_overview_source_violations(
             "HomeStatsModel",
             "HomeProgressModel",
             "HomeSkillsModel",
-            "HomeResultsModel",
         ):
             if not re.search(rf"\bexport\s+type\s+{exported_type}\b", source):
                 violations.append(f"{path_label}: model must export {exported_type}")
@@ -1388,9 +1395,9 @@ def home_overview_source_violations(
             "home-overview-mastery-orb",
         ),
         "results": (
-            "home-overview-kpi-row",
-            "home-overview-modules",
+            "LearnerPerformanceInstrument",
             "useModulePerformance",
+            "performance.refetch",
         ),
         "gallery": (
             "useState",
@@ -1402,6 +1409,11 @@ def home_overview_source_violations(
     for marker in owned_markers:
         if marker not in source:
             violations.append(f"{path_label}: Home Overview {role} must own {marker}")
+    if role == "results":
+        if len(re.findall(r"\buseModulePerformance\s*\(", source)) != 1:
+            violations.append(f"{path_label}: results must own one performance query")
+        if "HomeResultsModel" in source or "model.results" in source:
+            violations.append(f"{path_label}: mixed-scope results model is displaced")
     return violations
 
 
@@ -1652,6 +1664,56 @@ def check_home_overview_ownership() -> list[str]:
         violations.append(
             f"{achievement_utility}: displaced latestAchievement helper must stay deleted"
         )
+    performance_paths = (
+        FRONTEND_SRC / "features/home",
+        FRONTEND_SRC / "features/performance",
+        FRONTEND_SRC / "features/admin",
+    )
+    performance_sources = {
+        rel(path): path.read_text(encoding="utf-8")
+        for directory in performance_paths
+        for path in iter_files(directory, TS_SUFFIXES)
+        if ".test." not in path.name
+    }
+    violations.extend(performance_semantic_violations(performance_sources))
+    return violations
+
+
+def performance_semantic_violations(sources: dict[str, str]) -> list[str]:
+    """Keep KPI definitions shared and the learner record's request singular."""
+    violations: list[str] = []
+    owner = "frontend/src/features/performance/utils/performanceKpis.ts"
+    displaced = (
+        "frontend/src/features/admin/utils/kpiEvidence.ts",
+        "frontend/src/features/performance/utils/moduleColumns.ts",
+    )
+    for path in displaced:
+        if path in sources:
+            violations.append(f"{path}: displaced KPI owner must stay deleted")
+    if owner not in sources:
+        violations.append(f"{owner}: shared KPI definitions are required")
+    for path, source in sources.items():
+        if "home-overview-kpi-row" in source or "home-overview-module-charts" in source:
+            violations.append(f"{path}: mixed-scope KPI rendering is displaced")
+        learner = "/features/home/" in path or "/features/performance/" in path
+        if learner:
+            for module in ts_module_specifiers(source):
+                canonical = canonical_ts_module_reference(module=module, path_label=path)
+                if ts_module_matches_boundary(canonical, "frontend/src/features/admin"):
+                    violations.append(f"{path}: learner KPIs must not import Admin semantics")
+            if path != HOME_RESULTS_PANEL and not path.endswith("/hooks/useModulePerformance.ts"):
+                if re.search(r"\buseModulePerformance\s*\(", source):
+                    violations.append(f"{path}: only HomeResultsPanel owns the performance query")
+        if path != owner and "/preview/" not in path:
+            if re.search(r"\bformula\s*:\s*['\"]", source):
+                violations.append(f"{path}: display formulas belong to performanceKpis")
+            if path.endswith(("LearnerKpiPanel.tsx", "AdminAnalyticsPage.tsx", "LearnerPerformanceInstrument.tsx")):
+                if re.search(r"\btarget\s*:\s*\d", source):
+                    violations.append(f"{path}: overall targets belong to performanceKpis")
+        if path.endswith("/LearnerPerformanceInstrument.tsx"):
+            for module in ts_module_specifiers(source):
+                if "/api/" in module or "/hooks/" in module or module == "@tanstack/react-query":
+                    violations.append(f"{path}: ready instrument must not own API or query state")
     return violations
 
 

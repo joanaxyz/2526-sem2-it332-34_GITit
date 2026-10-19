@@ -24,7 +24,7 @@ from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from curriculum.management.commands.seed_legacy_modules import LEGACY_MODULE_LEVELS
+from curriculum.management.commands.seed_curriculum import MODULE_LEVELS
 from curriculum.seed_data.adventure_levels import ADVENTURE_LEVELS
 from curriculum.seed_data.challenges import CHALLENGES
 from simulator.trajectory import build_solution_trajectory
@@ -95,7 +95,9 @@ class Command(BaseCommand):
                     raise CommandError(
                         f"generated/{path.name} is stale - run `python manage.py generate_targets`."
                     )
-            self.stdout.write(self.style.SUCCESS("Generated targets and trajectories are up to date."))
+            self.stdout.write(
+                self.style.SUCCESS("Generated targets and trajectories are up to date.")
+            )
             return
 
         for path, rendered, summary in outputs:
@@ -132,10 +134,10 @@ class Command(BaseCommand):
                         variant,
                         max_counted_commands=level.get("max_counted_commands") or 0,
                     )
-        # Legacy module tiers author their cases inline (no *_template suffix)
+        # Current module tiers author their cases inline (no *_template suffix)
         # rather than through the variant-spec helpers, so normalize the two
         # key names the collector reads.
-        for level in LEGACY_MODULE_LEVELS:
+        for level in MODULE_LEVELS:
             for tier in level.get("tiers", {}).values():
                 for case in tier.get("cases", []):
                     add(

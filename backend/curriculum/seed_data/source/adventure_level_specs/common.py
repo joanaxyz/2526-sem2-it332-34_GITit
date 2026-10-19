@@ -202,7 +202,7 @@ def v(
         # `.get` (not `[case_id]`) so the seed imports before targets exist - the
         # `generate_targets` command imports these specs to read initial_state +
         # solution_commands, then computes the targets. A genuinely missing target
-        # is caught downstream (builders + seed_curriculum reject an empty target).
+        # is caught downstream (builders + seed_curriculum_fixture reject an empty target).
         "target_state_template": TARGET_STATES.get(case_id, {}),
         "solution_commands_template": solution,
         "solution_trajectory_template": SOLUTION_TRAJECTORIES.get(case_id, {}),
