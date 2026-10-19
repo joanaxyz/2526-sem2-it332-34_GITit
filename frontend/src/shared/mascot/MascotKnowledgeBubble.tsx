@@ -29,12 +29,22 @@ export function MascotKnowledgeBubble({ id, tip, bubbleRef, onNext, onDismiss }:
 
   return <div id={id} ref={bubbleRef} className="mascot-knowledge" role="region" aria-label="Git knowledge">
     <div className="mascot-knowledge__heading">
-      <span>{tip.source}</span>
       <button type="button" aria-label="Dismiss tip" onClick={() => onDismiss(true)}><X size={16} aria-hidden="true" /></button>
     </div>
-    <div role="status" aria-live="polite" aria-atomic="true">
-      {tip.command ? <code className="mascot-knowledge__command">{tip.command}</code> : null}
+    <div
+      role="status"
+      aria-live="polite"
+      aria-atomic="true"
+      className={!tip.kind ? 'mascot-knowledge__content--plain' : undefined}
+    >
+      {tip.kind ? <span className="mascot-knowledge__kind">{tip.kind}</span> : null}
+      {tip.title ? <div className="mascot-knowledge__title">{tip.title}</div> : null}
+      {tip.token ? <code className="mascot-knowledge__token">{tip.token}</code> : null}
+      {tip.syntax || tip.command
+        ? <code className="mascot-knowledge__command">{tip.syntax || tip.command}</code>
+        : null}
       <p>{tip.text}</p>
+      {tip.whenToUse ? <p className="mascot-knowledge__cue"><strong>Use this when:</strong> {tip.whenToUse}</p> : null}
     </div>
     <button type="button" className="mascot-knowledge__next" onClick={onNext}>Another tip <ArrowRight size={14} aria-hidden="true" /></button>
   </div>

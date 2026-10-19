@@ -112,7 +112,7 @@ export type ApiSchemas = {
   "IntroductionCompleteResponse": { "tutor": ApiSchemas["CommandIntroductionResponse"] | null }
   "KeyEnum": "shop-purchases"
   "KindA5eEnum": "adventure" | "challenge" | "lesson"
-  "LearnedSkillResponse": { "base_command": string; "chapter_id"?: number | null; "chapter_number": number; "chapter_title": string; "id": number; "slug": string; "summary": string; "title": string }
+  "LearnedSkillResponse": { "base_command": string; "chapter_id"?: number | null; "chapter_number": number; "chapter_title": string; "id": number; "learned_at": string; "slug": string; "summary": string; "title": string }
   "LearnedSkillsResponse": { "results": Array<ApiSchemas["LearnedSkillResponse"]> }
   "LevelDrillPlanResponse": { "available": boolean; "cards": Array<ApiSchemas["DrillCard"]>; "level": ApiSchemas["DrillLevel"]; "progress": ApiSchemas["DrillProgress"]; "resume": ApiSchemas["DrillResume"] | null; "sequence": ApiSchemas["DrillSequence"] | null }
   "Login": { "identifier": string; "password": string }

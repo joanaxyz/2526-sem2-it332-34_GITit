@@ -2,7 +2,6 @@ import { RefreshCcw, X } from 'lucide-react'
 
 import gitLogoImage from '@/assets/images/g34-icon.webp'
 import { AudioControls } from '@/shared/audio/AudioControls'
-import { WorkspaceHeaderAccount } from '@/shared/level/components/WorkspaceHeaderAccount'
 import type { ChallengeRun } from '@/features/challenges/types'
 
 // Level type, difficulty, stars, and reward live in the Level Context panel —
@@ -95,8 +94,6 @@ export function ChallengeStatusHeader({
           {replayIsStartOver ? null : replayActionLabel}
         </button>
       ) : null}
-
-      <WorkspaceHeaderAccount />
     </header>
   )
 }

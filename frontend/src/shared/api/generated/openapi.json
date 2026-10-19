@@ -7069,6 +7069,10 @@
                     },
                     "chapter_title": {
                         "type": "string"
+                    },
+                    "learned_at": {
+                        "type": "string",
+                        "format": "date-time"
                     }
                 },
                 "required": [
@@ -7076,6 +7080,7 @@
                     "chapter_number",
                     "chapter_title",
                     "id",
+                    "learned_at",
                     "slug",
                     "summary",
                     "title"

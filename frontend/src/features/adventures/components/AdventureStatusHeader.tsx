@@ -4,7 +4,6 @@ import { FloatingGuideMascot } from '@/shared/mascot/FloatingGuideMascot'
 import gitLogoImage from '@/assets/images/g34-icon.webp'
 import type { AdventureRun } from '@/features/adventures/types'
 import { AudioControls } from '@/shared/audio/AudioControls'
-import { WorkspaceHeaderAccount } from '@/shared/level/components/WorkspaceHeaderAccount'
 
 export function AdventureStatusHeader({
   run,
@@ -99,8 +98,6 @@ export function AdventureStatusHeader({
           {replayIsStartOver ? null : replayActionLabel}
         </button>
       ) : null}
-
-      <WorkspaceHeaderAccount />
     </header>
   )
 }

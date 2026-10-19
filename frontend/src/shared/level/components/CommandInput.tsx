@@ -2,7 +2,6 @@ import { Check, ClipboardPaste } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
 import type { FormEvent, KeyboardEvent } from 'react'
 
-// A bare prompt line, like the reference mock: Enter submits, no button chrome.
 export function CommandInput({
   prompt,
   cwd,
@@ -141,6 +140,15 @@ export function CommandInput({
         autoFocus
         placeholder={processing ? 'Processing command' : 'Type a git or shell command'}
       />
+      <button
+        type="submit"
+        className="command-input-submit"
+        aria-label="Run command"
+        title="Run command"
+        disabled={disabled || runDisabled}
+      >
+        Enter
+      </button>
       <button
         type="button"
         className="command-input-paste"
