@@ -11,6 +11,7 @@ export function FitViewOnTopologyChange({
   topologySignature,
   fitViewPadding,
   zoomStorageKey,
+  preserveViewportOnResize = false,
 }: {
   /** Includes presentation inputs such as layout direction. */
   fitSignature: string
@@ -18,15 +19,22 @@ export function FitViewOnTopologyChange({
   topologySignature: string
   fitViewPadding: number
   zoomStorageKey?: string
+  /** Ignore canvas-size changes after the initial fit; topology and explicit refits still apply. */
+  preserveViewportOnResize?: boolean
 }) {
   const { fitView, getEdges, getNodes } = useReactFlow()
   const viewportSizeSignature = useStore(
     (state) => `${Math.round(state.width)}x${Math.round(state.height)}`,
   )
   const previousSignature = useRef<string | null>(null)
-  const currentSignature = `${fitSignature}:${viewportSizeSignature}:${fitViewPadding}`
+  const viewportIsReady = viewportSizeSignature.split('x').every((dimension) => Number(dimension) > 0)
+  const currentSignature = `${fitSignature}:${preserveViewportOnResize ? 'fixed-viewport' : viewportSizeSignature}:${fitViewPadding}`
 
   useEffect(() => {
+    // A split pane can mount before its parent receives a real size. Wait for
+    // the first measurable canvas, then ignore later size changes so a drag
+    // behaves like moving a window over the same graph viewport.
+    if (preserveViewportOnResize && !viewportIsReady) return
     if (previousSignature.current === currentSignature) return
     let frameId = 0
     let attempts = 0
@@ -68,7 +76,7 @@ export function FitViewOnTopologyChange({
       cancelled = true
       window.cancelAnimationFrame(frameId)
     }
-  }, [currentSignature, fitView, fitViewPadding, getEdges, getNodes, topologySignature, zoomStorageKey])
+  }, [currentSignature, fitView, fitViewPadding, getEdges, getNodes, preserveViewportOnResize, topologySignature, viewportIsReady, viewportSizeSignature, zoomStorageKey])
 
   return null
 }

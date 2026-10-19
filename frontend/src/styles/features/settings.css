@@ -76,25 +76,48 @@
 }
 .settings-fields input[readonly] { opacity: .78; }
 .settings-note { margin: .75rem 0 0; color: var(--text-tertiary); font-size: var(--text-xs); line-height: 1.5; }
+.settings-toggle { display: inline-flex; width: fit-content; align-items: center; gap: .7rem; color: var(--text-primary); font-size: var(--text-sm); font-weight: 700; cursor: pointer; }
+.settings-toggle input {
+  appearance: none;
+  position: relative;
+  width: 2.65rem;
+  height: 1.5rem;
+  flex: 0 0 auto;
+  margin: 0;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  background: var(--control-bg);
+  cursor: pointer;
+  transition: background var(--motion-normal) var(--ease-out), border-color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out);
+}
+.settings-toggle input::after { content: ""; position: absolute; top: .16rem; left: .16rem; width: 1.05rem; height: 1.05rem; border-radius: 50%; background: var(--text-secondary); transition: transform var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out); }
+.settings-toggle input:checked { border-color: rgb(var(--theme-primary-rgb)); background: rgba(var(--theme-primary-rgb), .24); }
+.settings-toggle input:checked::after { transform: translateX(1.14rem); background: rgb(var(--theme-primary-rgb)); }
+.settings-toggle input:focus-visible { outline: none; box-shadow: var(--control-focus-ring); }
+.settings-toggle input:disabled { opacity: .55; cursor: not-allowed; }
 .settings-password-form { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: .8rem; align-items: end; }
 .settings-password-form small, .settings-error { color: hsl(var(--destructive)); }
 .settings-error { grid-column: 1 / -1; margin: 0; font-size: var(--text-sm); }
 .settings-primary-action, .settings-session-actions button {
-  min-height: var(--control-height-lg);
+  min-height: var(--control-height-md);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: .5rem;
+  gap: .45rem;
   border: 1px solid var(--control-border);
   border-radius: var(--control-radius);
   background: var(--control-bg);
   color: var(--text-secondary);
-  padding: 0 .9rem;
+  padding: 0 .78rem;
   cursor: pointer;
+  font-size: var(--text-sm);
   font-weight: 700;
+  line-height: 1;
   transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out), opacity var(--motion-normal) var(--ease-out);
 }
+.settings-primary-action svg, .settings-session-actions button svg { width: 1rem; height: 1rem; flex: 0 0 auto; }
 .settings-primary-action {
+  justify-self: start;
   border-color: var(--control-primary-border);
   background: var(--control-primary-bg);
   color: var(--control-primary-text);

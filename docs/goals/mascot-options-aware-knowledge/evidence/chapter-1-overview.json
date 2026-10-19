@@ -1,0 +1,255 @@
+{
+  "request": "GET /api/chapters/1/overview/",
+  "chapter_id": 1,
+  "focus_level": {
+    "id": 1,
+    "title": "Start a Repository",
+    "locked": false,
+    "is_passed": false
+  },
+  "current_focus_knowledge": [
+    {
+      "id": "form:1:command",
+      "kind": "command",
+      "command": "git init",
+      "title": "Initialize the current folder",
+      "token": "",
+      "syntax": "git init",
+      "text": "Create Git metadata in the current directory or a named directory.",
+      "when_to_use": "Initialize the current folder"
+    },
+    {
+      "id": "form:2:command",
+      "kind": "command",
+      "command": "git init",
+      "title": "Initialize a named folder",
+      "token": "",
+      "syntax": "git init <directory>",
+      "text": "Create Git metadata in the current directory or a named directory.",
+      "when_to_use": "Initialize a named folder"
+    },
+    {
+      "id": "form:2:argument-directory",
+      "kind": "argument",
+      "command": "git init",
+      "title": "Destination directory",
+      "token": "<directory>",
+      "syntax": "git init <directory>",
+      "text": "Initializes the named folder instead of the current working directory.",
+      "when_to_use": "Initialize a named folder"
+    },
+    {
+      "id": "form:3:command",
+      "kind": "command",
+      "command": "git init",
+      "title": "Choose the first branch name",
+      "token": "",
+      "syntax": "git init -b <branch>",
+      "text": "Create Git metadata in the current directory or a named directory.",
+      "when_to_use": "Choose the first branch name"
+    },
+    {
+      "id": "form:3:option-b-initial-branch",
+      "kind": "option",
+      "command": "git init",
+      "title": "Initial branch name",
+      "token": "-b / --initial-branch",
+      "syntax": "git init -b <branch>",
+      "text": "Names the first branch instead of accepting the default branch name.",
+      "when_to_use": "Choose the first branch name"
+    }
+  ],
+  "cases": {
+    "git_init_initial_branch": {
+      "id": "form:3:option-b-initial-branch",
+      "kind": "option",
+      "command": "git init",
+      "title": "Initial branch name",
+      "token": "-b / --initial-branch",
+      "syntax": "git init -b <branch>",
+      "text": "Names the first branch instead of accepting the default branch name.",
+      "when_to_use": "Choose the first branch name"
+    },
+    "git_add_path": {
+      "id": "form:56:argument-path",
+      "kind": "argument",
+      "command": "git add",
+      "title": "Path argument",
+      "token": "<path>",
+      "syntax": "git add <file>",
+      "text": "Limits the command to the exact file or directory named by the scenario.",
+      "when_to_use": "Stage one file"
+    },
+    "git_clone_depth": {
+      "id": "form:8:option-depth",
+      "kind": "option",
+      "command": "git clone",
+      "title": "Shallow history",
+      "token": "--depth",
+      "syntax": "git clone --depth <n> <url>",
+      "text": "Copies only the requested amount of recent history from the remote.",
+      "when_to_use": "Clone shallow history"
+    },
+    "git_clone_number": {
+      "id": "form:8:argument-number",
+      "kind": "argument",
+      "command": "git clone",
+      "title": "Numeric value",
+      "token": "<number>",
+      "syntax": "git clone --depth <n> <url>",
+      "text": "Provides the requested count, such as clone depth or log length.",
+      "when_to_use": "Clone shallow history"
+    },
+    "git_log_number": {
+      "id": "form:32:argument-number",
+      "kind": "argument",
+      "command": "git log",
+      "title": "Numeric value",
+      "token": "<number>",
+      "syntax": "git log -n <count>",
+      "text": "Provides the requested count, such as clone depth or log length.",
+      "when_to_use": "Limit history output"
+    },
+    "git_config_alias_key": {
+      "id": "form:19:argument-key",
+      "kind": "argument",
+      "command": "git config",
+      "title": "Configuration key",
+      "token": "<key>",
+      "syntax": "git config --global alias.<name> <command>",
+      "text": "Names the Git configuration setting being read or written.",
+      "when_to_use": "Create a command alias"
+    },
+    "git_config_alias_value": {
+      "id": "form:19:argument-value",
+      "kind": "argument",
+      "command": "git config",
+      "title": "Configuration value",
+      "token": "<value>",
+      "syntax": "git config --global alias.<name> <command>",
+      "text": "Provides the value stored for a Git configuration key.",
+      "when_to_use": "Create a command alias"
+    }
+  },
+  "level_order": [
+    {
+      "id": 1,
+      "title": "Start a Repository",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 5
+    },
+    {
+      "id": 2,
+      "title": "Read the Workspace",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 2
+    },
+    {
+      "id": 3,
+      "title": "Stage and Commit",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 6
+    },
+    {
+      "id": 4,
+      "title": "The First Snapshot",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 9
+    },
+    {
+      "id": 5,
+      "title": "Practice Fresh Starts",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 8
+    },
+    {
+      "id": 6,
+      "title": "Read History",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 13
+    },
+    {
+      "id": 7,
+      "title": "Inspect Commits",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 9
+    },
+    {
+      "id": 8,
+      "title": "History Details",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 12
+    },
+    {
+      "id": 9,
+      "title": "Status at a Glance",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 11
+    },
+    {
+      "id": 10,
+      "title": "Copy a Project",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 13
+    },
+    {
+      "id": 11,
+      "title": "Inspect What You Cloned",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 16
+    },
+    {
+      "id": 12,
+      "title": "Clone Drills",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 24
+    },
+    {
+      "id": 13,
+      "title": "Configure Identity and Aliases",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 15
+    },
+    {
+      "id": 14,
+      "title": "Ignore Noise",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 9
+    },
+    {
+      "id": 15,
+      "title": "Founding Workflows",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 25
+    },
+    {
+      "id": 16,
+      "title": "Fresh Start Drills",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 19
+    },
+    {
+      "id": 17,
+      "title": "Inspection Drills",
+      "locked": false,
+      "is_passed": false,
+      "knowledge_count": 22
+    }
+  ]
+}

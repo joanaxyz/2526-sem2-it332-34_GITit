@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from django.db.models import Max
+
 from adventures.models import SkillMastery
 from curriculum.models import Chapter, CommandForm, CommandSkill
 
@@ -15,16 +17,18 @@ def learned_command_skills(*, player) -> list[dict]:
     """
     if player is None:
         return []
-    skill_ids = set(
+    learned_at_by_skill_id = dict(
         SkillMastery.objects.filter(
             player=player,
             learned_at__isnull=False,
             command_form__is_published=True,
             command_form__command_skill__is_published=True,
         )
-        .values_list("command_form__command_skill_id", flat=True)
-        .distinct()
+        .values("command_form__command_skill_id")
+        .annotate(learned_at=Max("learned_at"))
+        .values_list("command_form__command_skill_id", "learned_at")
     )
+    skill_ids = set(learned_at_by_skill_id)
 
     if not skill_ids:
         return []
@@ -54,6 +58,7 @@ def learned_command_skills(*, player) -> list[dict]:
                 "chapter_id": chapter.id if chapter else None,
                 "chapter_number": chapter.number if chapter else 0,
                 "chapter_title": chapter.title if chapter else "",
+                "learned_at": learned_at_by_skill_id[skill.id],
                 "_sort": (chapter.sort_order if chapter else 0, skill.sort_order, skill.id),
             }
         )

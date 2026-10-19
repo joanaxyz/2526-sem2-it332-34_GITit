@@ -24,6 +24,17 @@ type AdventureLevelDrillAccess = {
   best_accuracy: number
 }
 
+export type AdventureKnowledgeItem = {
+  id: string
+  kind: 'command' | 'option' | 'argument'
+  command: string
+  title: string
+  token?: string
+  syntax: string
+  text: string
+  when_to_use: string
+}
+
 type AdventureSummary = {
   item_type: 'adventure'
   id: number
@@ -31,9 +42,13 @@ type AdventureSummary = {
   title: string
   description: string
   command: string
+  /** Authored tips for this level; visible before the learner masters them. */
+  knowledge?: AdventureKnowledgeItem[]
   locked: boolean
   lock_reason: string
   completion: LevelCompletionSummary | null
+  /** First-clear timestamp, including passed runs without a completion row. */
+  passed_at?: string | null
   // Stable across re-runs: true once the level has ever been passed. Drives
   // the challenge gate and progress so a post-pass replay can't relock anything.
   is_passed: boolean

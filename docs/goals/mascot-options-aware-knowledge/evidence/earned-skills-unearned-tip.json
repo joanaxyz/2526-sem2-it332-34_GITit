@@ -1,0 +1,7 @@
+{
+  "data": {
+    "results": []
+  },
+  "request": "GET /api/skills/learned/",
+  "status": 200
+}

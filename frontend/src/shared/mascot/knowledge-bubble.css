@@ -1,6 +1,6 @@
 .mascot-knowledge {
   position: absolute;
-  width: min(296px, calc(100vw - 24px));
+  width: min(320px, calc(100vw - 24px));
   box-sizing: border-box;
   max-height: calc(100dvh - 24px);
   overflow-y: auto;
@@ -27,13 +27,19 @@
   pointer-events: none;
 }
 .mascot-knowledge[data-below]::after { transform: translate(-50%, -50%) rotate(225deg); }
-.mascot-knowledge__heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: hsl(var(--muted-foreground)); font-weight: 600; }
+.mascot-knowledge__heading { position: absolute; top: 8px; right: 8px; z-index: 1; }
 .mascot-knowledge button { display: inline-flex; align-items: center; justify-content: center; gap: 6px; min-height: 32px; padding: 4px; border: 0; border-radius: var(--radius-sm); background: transparent; color: hsl(var(--foreground)); font: inherit; cursor: pointer; }
-.mascot-knowledge__heading button { width: 32px; flex-shrink: 0; margin: -4px -6px -4px 0; }
+.mascot-knowledge__heading button { width: 24px; min-height: 24px; margin: 0; }
 .mascot-knowledge button:hover { background: hsl(var(--primary) / 0.15); }
 .mascot-knowledge button:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.mascot-knowledge__content--plain { padding-top: 20px; }
+.mascot-knowledge__kind { display: block; margin-top: 0; padding-right: 28px; color: hsl(var(--primary)); font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
+.mascot-knowledge__title { margin-top: 2px; font-weight: 650; line-height: 1.35; }
+.mascot-knowledge__token { display: inline-block; margin-top: 4px; color: hsl(var(--primary)); font: 600 var(--text-xs) / 1.5 var(--font-mono); overflow-wrap: anywhere; }
 .mascot-knowledge__command { display: block; margin-top: 8px; color: hsl(var(--foreground)); font: 600 var(--text-sm) / 1.5 var(--font-mono); overflow-wrap: anywhere; }
 .mascot-knowledge p { margin: 6px 0 8px; overflow-wrap: anywhere; text-wrap: pretty; }
+.mascot-knowledge .mascot-knowledge__cue { margin-top: 8px; padding-top: 8px; border-top: 1px solid hsl(var(--border)); color: hsl(var(--muted-foreground)); }
+.mascot-knowledge__cue strong { color: hsl(var(--foreground)); }
 .mascot-knowledge .mascot-knowledge__next { color: hsl(var(--foreground)); font-weight: 600; padding-inline: 6px; margin-left: -6px; }
 @keyframes mascot-knowledge-appear { from { opacity: 0; } to { opacity: 1; } }
 @media (prefers-reduced-motion: reduce) { .mascot-knowledge { animation: none; } }
