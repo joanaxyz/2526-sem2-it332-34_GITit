@@ -1,8 +1,9 @@
-import { BookOpen, Check } from 'lucide-react'
+import { Check } from 'lucide-react'
 import { type CSSProperties, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { CommandIntroduction } from '@/features/story-map/api/commandIntroductionsApi'
+import { FloatingGuideMascot } from '@/shared/mascot/FloatingGuideMascot'
 
 export function CommandGuideLauncher({
   guides,
@@ -27,10 +28,13 @@ export function CommandGuideLauncher({
     const triggerRect = trigger.getBoundingClientRect()
     const viewportGap = 12
     const width = Math.min(320, window.innerWidth - viewportGap * 2)
+    const below = window.innerHeight - triggerRect.bottom - viewportGap * 2
+    const above = triggerRect.top - viewportGap * 2
+    const upward = below < 240 && above > below
     setPickerStyle({
       left: Math.max(viewportGap, Math.min(triggerRect.right - width, window.innerWidth - viewportGap - width)),
-      maxHeight: Math.max(180, window.innerHeight - triggerRect.bottom - viewportGap * 2),
-      top: triggerRect.bottom + 8,
+      maxHeight: Math.max(100, upward ? above : below),
+      ...(upward ? { bottom: window.innerHeight - triggerRect.top + 8 } : { top: triggerRect.bottom + 8 }),
       width,
     })
   }, [])
@@ -45,6 +49,7 @@ export function CommandGuideLauncher({
     const closeOnOutsidePointer = (event: PointerEvent) => {
       const target = event.target as Node
       if (triggerRef.current?.contains(target) || pickerRef.current?.contains(target)) return
+      if (target instanceof Element && target.closest('.guide-mascot')) return
       setPickerOpen(false)
     }
     const closeOnEscape = (event: KeyboardEvent) => {
@@ -73,9 +78,7 @@ export function CommandGuideLauncher({
   const hasSelection = guides.length > 1
   const label = guideOpen
     ? 'Command guide is open'
-    : hasSelection
-      ? 'Choose command guide'
-      : 'Open command guide'
+    : 'Open command guide'
 
   const selectGuide = (teachingKey: string) => {
     setPickerOpen(false)
@@ -83,24 +86,15 @@ export function CommandGuideLauncher({
   }
 
   return (
-    <div className="gameplay-header-guide-picker">
-      <button
-        ref={triggerRef}
-        type="button"
-        className={`gameplay-header-button gameplay-header-icon-button gameplay-header-command-guide${guideOpen ? ' is-active' : ''}`}
-        aria-label={label}
-        aria-controls={hasSelection ? pickerId : undefined}
-        aria-expanded={hasSelection ? pickerOpen : undefined}
-        title={label}
-        data-command-guide-launcher
-        disabled={guideOpen}
-        onClick={() => {
-          if (hasSelection) setPickerOpen((open) => !open)
-          else selectGuide(guides[0].teaching_key)
-        }}
-      >
-        <BookOpen aria-hidden="true" />
-      </button>
+    <>
+      <FloatingGuideMascot buttonRef={triggerRef} label={label} active={guideOpen}
+        onDragStart={() => setPickerOpen(false)}
+        onActivate={() => selectGuide(guides.find((guide) => guide.teaching_key === currentGuideKey)?.teaching_key ?? guides[guides.length - 1].teaching_key)}>
+        {hasSelection ? <button type="button" className="guide-mascot__history"
+          aria-label="Browse command guides" aria-controls={pickerId} aria-expanded={pickerOpen}
+          title={`Browse ${guides.length} command guides`} disabled={guideOpen}
+          onClick={() => setPickerOpen((open) => !open)}>{guides.length}</button> : null}
+      </FloatingGuideMascot>
 
       {pickerOpen && pickerStyle ? createPortal(
         <div
@@ -142,6 +136,6 @@ export function CommandGuideLauncher({
         </div>,
         document.body,
       ) : null}
-    </div>
+    </>
   )
 }

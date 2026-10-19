@@ -1,14 +1,14 @@
 .app-onboarding-banner {
-  display: flex;
-  align-items: center;
-  gap: 0.85rem;
+  display: block;
   margin-block: 0.75rem 1.25rem;
-  padding: 1rem;
-  border: 1px solid var(--panel-border);
-  border-radius: var(--radius-lg);
-  background: var(--panel-bg-raised);
+  padding: 0;
+  border: 0;
+  background: transparent;
   color: var(--text-primary);
 }
+
+.app-onboarding-banner .mascot-message__bubble { display: flex; align-items: center; gap: 1rem; }
+.app-onboarding-banner__copy { min-width: 0; }
 
 .app-onboarding-banner > svg {
   width: 1.25rem;
@@ -50,7 +50,24 @@
 .story-onboarding-choice {
   width: min(100%, 34rem);
   max-width: 34rem;
+  overflow: visible;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
 }
+
+.story-onboarding-choice .app-modal-header {
+  margin-left: 84px;
+  border: 1px solid #395b77;
+  border-bottom: 0;
+  border-radius: 14px 14px 0 0;
+  background: #102133;
+  padding: 1rem 1.1rem 0.3rem;
+}
+.story-onboarding-choice .app-modal-content { padding: 0; }
+.story-onboarding-choice .mascot-message__bubble { display: grid; gap: 1rem; border-top: 0; border-radius: 0 0 14px 14px; }
+.story-onboarding-choice .mascot-message__bubble::before { top: 18px; }
 
 .story-onboarding-choice__content {
   display: grid;
@@ -122,4 +139,9 @@
 @media (max-width: 700px) {
   .app-onboarding-banner { flex-wrap: wrap; align-items: flex-start; }
   .app-onboarding-banner__actions { width: 100%; }
+  .app-onboarding-banner .mascot-message__bubble { flex-direction: column; align-items: stretch; }
+}
+
+@media (max-width: 600px) {
+  .story-onboarding-choice .app-modal-header { margin-left: 62px; padding-inline: 0.85rem; }
 }

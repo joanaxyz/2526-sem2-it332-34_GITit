@@ -17,6 +17,7 @@ export function Modal({
   contentClassName,
   overlayClassName,
   hideHeader = false,
+  dismissOnClick = false,
 }: {
   open: boolean
   title: string
@@ -26,6 +27,7 @@ export function Modal({
   contentClassName?: string
   overlayClassName?: string
   hideHeader?: boolean
+  dismissOnClick?: boolean
 }) {
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement | null>(null)
@@ -65,6 +67,12 @@ export function Modal({
       aria-modal="true"
       className={cn('app-modal-overlay', overlayClassName)}
       role="dialog"
+      onClick={dismissOnClick ? onClose : undefined}
+      onKeyDown={dismissOnClick ? (event) => {
+        if (event.key !== 'Enter' && event.key !== ' ') return
+        event.preventDefault()
+        if (!event.repeat) onClose()
+      } : undefined}
     >
       <Card className={cn('app-modal-card', className ?? 'app-modal-card--default')}>
         {hideHeader ? (

@@ -66,7 +66,10 @@ export type ApiSchemas = {
   "ChallengeRunResponse": { "challenge": { [key: string]: JsonValue }; "chapter": { [key: string]: JsonValue }; "completed_at": string | null; "completion": { [key: string]: JsonValue } | null; "counts": { [key: string]: JsonValue }; "difficulty": string | null; "expected_state": { [key: string]: JsonValue } | null; "failure_reason": string | null; "id": number; "mastery_progress": { [key: string]: JsonValue }; "next_difficulty": { [key: string]: JsonValue } | null; "policy": { [key: string]: JsonValue }; "replay": boolean; "repository_state": { [key: string]: JsonValue }; "reward_coins": number; "scaffolding": { [key: string]: JsonValue }; "scenario_context": { [key: string]: JsonValue }; "sibling_levels": Array<{ [key: string]: JsonValue }>; "stars": number; "status": ApiSchemas["GameplayRunStatus"]; "steps": Array<ApiSchemas["ChallengeRunStepResponse"]>; "story": { [key: string]: JsonValue } | null; "variant": { [key: string]: JsonValue }; "visualization": { [key: string]: JsonValue } }
   "ChallengeRunStart": { "prior_run_id"?: number | null; "replay"?: boolean; "source_entry_point"?: ApiSchemas["SourceEntryPointEnum"] }
   "ChallengeRunStepResponse": { "command_classification": string; "command_text": string; "contextual_feedback": string; "created_at": string; "id": number; "result_category": string; "terminal_output": string; "visualization_snapshot": { [key: string]: JsonValue } }
+  "ChapterChestOpen": { "threshold": number }
   "ChapterChestReward": { "coins": number; "threshold": number }
+  "ChapterChestRewards": { "balance": number; "coins_awarded": number; "results": Array<ApiSchemas["ChapterChestState"]> }
+  "ChapterChestState": { "claimed": boolean; "coins": number; "threshold": number; "unlocked": boolean }
   "ChapterLevelCompletion": { "denominator": number; "numerator": number; "value": number }
   "ChapterList": { "adventure_level_count": number; "challenge_count": number; "chest_schedule": Array<ApiSchemas["ChapterChestReward"]>; "command_skill_count": number; "description": string; "id": number; "is_orientation": boolean; "is_playable": boolean; "level_completion": ApiSchemas["ChapterLevelCompletion"]; "lock_reason": string; "locked": boolean; "number": number; "slug": string; "sort_order": number; "story": ApiSchemas["ChapterStory"] | null; "title": string }
   "ChapterOrientationComplete": { "highest_step_seen": number }
@@ -222,6 +225,7 @@ export type ApiPath =
   | "/api/challenge-trials/{trial_id}/runs/"
   | "/api/chapters/"
   | "/api/chapters/{chapter_id}/book/"
+  | "/api/chapters/{chapter_id}/chests/"
   | "/api/chapters/{chapter_id}/orientation/"
   | "/api/chapters/{chapter_id}/overview/"
   | "/api/command-forms/{form_id}/preview/"
@@ -303,6 +307,7 @@ export type ApiMethodByPath = {
   "/api/challenge-trials/{trial_id}/runs/": "POST"
   "/api/chapters/": "GET"
   "/api/chapters/{chapter_id}/book/": "GET"
+  "/api/chapters/{chapter_id}/chests/": "GET" | "POST"
   "/api/chapters/{chapter_id}/orientation/": "GET"
   "/api/chapters/{chapter_id}/overview/": "GET"
   "/api/command-forms/{form_id}/preview/": "GET"
@@ -403,6 +408,8 @@ export const apiOperations = {
   challenge_trials_runs_create: { method: "POST", path: "/api/challenge-trials/{trial_id}/runs/", operationId: "challenge_trials_runs_create", tags: ["challenge-trials"] },
   chapters_list: { method: "GET", path: "/api/chapters/", operationId: "chapters_list", tags: ["chapters"] },
   chapters_book_retrieve: { method: "GET", path: "/api/chapters/{chapter_id}/book/", operationId: "chapters_book_retrieve", tags: ["chapters"] },
+  chapters_chests_retrieve: { method: "GET", path: "/api/chapters/{chapter_id}/chests/", operationId: "chapters_chests_retrieve", tags: ["chapters"] },
+  chapters_chests_create: { method: "POST", path: "/api/chapters/{chapter_id}/chests/", operationId: "chapters_chests_create", tags: ["chapters"] },
   chapters_orientation_list: { method: "GET", path: "/api/chapters/{chapter_id}/orientation/", operationId: "chapters_orientation_list", tags: ["chapters"] },
   chapters_overview_retrieve: { method: "GET", path: "/api/chapters/{chapter_id}/overview/", operationId: "chapters_overview_retrieve", tags: ["chapters"] },
   command_forms_preview_retrieve: { method: "GET", path: "/api/command-forms/{form_id}/preview/", operationId: "command_forms_preview_retrieve", tags: ["command-forms"] },
@@ -507,6 +514,8 @@ export type ApiRequestBodyByOperation = {
   challenge_trials_runs_create: ApiSchemas["ChallengeRunStart"]
   chapters_list: null
   chapters_book_retrieve: null
+  chapters_chests_retrieve: null
+  chapters_chests_create: ApiSchemas["ChapterChestOpen"]
   chapters_orientation_list: null
   chapters_overview_retrieve: null
   command_forms_preview_retrieve: null
@@ -608,6 +617,8 @@ export type ApiResponseBodyByOperation = {
   challenge_trials_runs_create: ApiSchemas["ChallengeRunResponse"]
   chapters_list: Array<ApiSchemas["ChapterList"]>
   chapters_book_retrieve: { [key: string]: JsonValue }
+  chapters_chests_retrieve: ApiSchemas["ChapterChestRewards"]
+  chapters_chests_create: ApiSchemas["ChapterChestRewards"]
   chapters_orientation_list: Array<ApiSchemas["ChapterOrientationLessonList"]>
   chapters_overview_retrieve: { [key: string]: JsonValue }
   command_forms_preview_retrieve: ApiSchemas["CommandFormPreviewResponse"]

@@ -90,7 +90,10 @@ export function useDrillSession(plan: DrillPlan) {
   )
   const ask = currentAsk(queue)
   const card = ask?.kind === 'card' ? (cardsByKey[ask.cardKey] ?? null) : null
-  const finished = isFinished(queue)
+  // Misses are already checkpointed, so lives survive leaving and resuming.
+  const gameOver = queue.answered - queue.correct >= 3
+  const lives = Math.max(0, 3 - (queue.answered - queue.correct) - (verdict && !verdict.correct ? 1 : 0))
+  const finished = isFinished(queue) || gameOver
 
   // Derived rather than written inside `advance`, so the map survives a
   // restored checkpoint and a StrictMode double-render alike: it only ever
@@ -157,10 +160,10 @@ export function useDrillSession(plan: DrillPlan) {
       // Only a session where every card topped its ladder counts as a
       // clear; running out of attempts still records the attempt and the
       // weak spots, but must not mark the level drilled.
-      completed: allMastered(queue),
+      completed: !gameOver && allMastered(queue),
       shaky_form_keys: shakyKeys(queue),
     })
-  }, [finished, queue, report])
+  }, [finished, gameOver, queue, report])
 
   // Checkpoint after every answer rather than on a timer: the queue only
   // moves when a question is answered, and a save that lands one question
@@ -168,7 +171,7 @@ export function useDrillSession(plan: DrillPlan) {
   // Fire-and-forget - a failed checkpoint must never interrupt the drill.
   const checkpoint = useCallback(
     (next: DrillQueueState) => {
-      if (isFinished(next)) return
+      if (isFinished(next) || next.answered - next.correct >= 3) return
       saveRun.mutate({
         cards: next.cards as unknown as Record<string, Record<string, never>>,
         queue: next.queue,
@@ -181,13 +184,22 @@ export function useDrillSession(plan: DrillPlan) {
   )
 
   const check = useCallback(() => {
-    if (!ask || verdict) return
+    if (!ask || verdict || finished) return
     setVerdict(
       ask.kind === 'sequence'
         ? gradeSequence(plan.sequence?.steps ?? [], answer)
         : gradeCard(cardsByKey[ask.cardKey], ask.rung, answer),
     )
-  }, [answer, ask, cardsByKey, plan.sequence, verdict])
+  }, [answer, ask, cardsByKey, finished, plan.sequence, verdict])
+
+  // Collisions commit and grade the same value in one event, avoiding a
+  // stale React selection when a projectile hits between renders.
+  const collide = useCallback((value: string) => {
+    if (ask?.kind !== 'card' || verdict || finished) return
+    const picked: DrillAnswer = { kind: 'choice', value }
+    setAnswer(picked)
+    setVerdict(gradeCard(cardsByKey[ask.cardKey], ask.rung, picked))
+  }, [ask, cardsByKey, finished, verdict])
 
   const advance = useCallback(() => {
     if (!verdict) return
@@ -264,9 +276,12 @@ export function useDrillSession(plan: DrillPlan) {
     setAnswer,
     verdict,
     check,
+    collide,
     advance,
     restart,
     finished,
+    lives,
+    gameOver,
     rail,
     round,
     accuracy: accuracy(queue),

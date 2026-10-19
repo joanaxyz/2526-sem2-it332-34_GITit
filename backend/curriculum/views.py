@@ -1,14 +1,16 @@
-from drf_spectacular.utils import OpenApiTypes, extend_schema
-from rest_framework.exceptions import NotFound
-from rest_framework.response import Response
-from rest_framework.views import APIView
-
 from common.exceptions import Locked
 from common.openapi import (
     CommandFormPreviewResponseSerializer,
     LearnedSkillsResponseSerializer,
 )
 from common.services.performance import timing
+from drf_spectacular.utils import OpenApiTypes, extend_schema
+from players.services import get_or_create_player
+from rest_framework.exceptions import NotFound
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
 from curriculum.models import Chapter
 from curriculum.selectors import (
     chapter_book,
@@ -26,13 +28,15 @@ from curriculum.selectors import (
     stories_completed_map,
 )
 from curriculum.serializers import (
+    ChapterChestOpenSerializer,
+    ChapterChestRewardsSerializer,
     ChapterListSerializer,
     ChapterOrientationCompleteSerializer,
     ChapterOrientationLessonDetailSerializer,
     ChapterOrientationLessonListSerializer,
     StorySerializer,
 )
-from players.services import get_or_create_player
+from curriculum.services import ChapterChestService
 
 
 def _player_for(request):
@@ -93,6 +97,29 @@ class ChapterListAPIView(APIView):
             },
         )
         return Response(serializer.data)
+
+
+class ChapterChestsAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    @extend_schema(responses={200: ChapterChestRewardsSerializer})
+    def get(self, request, chapter_id: int):
+        player, chapter = _require_unlocked_chapter(request, chapter_id)
+        return Response(ChapterChestService().reward_summary(player=player, chapter=chapter))
+
+    @extend_schema(
+        request=ChapterChestOpenSerializer,
+        responses={200: ChapterChestRewardsSerializer},
+    )
+    def post(self, request, chapter_id: int):
+        player, chapter = _require_unlocked_chapter(request, chapter_id)
+        serializer = ChapterChestOpenSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        return Response(
+            ChapterChestService().open_chest(
+                player=player, chapter=chapter, threshold=serializer.validated_data["threshold"]
+            )
+        )
 
 
 class ChapterContentOverviewAPIView(APIView):

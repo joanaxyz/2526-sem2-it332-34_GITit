@@ -6,6 +6,14 @@ from progress.models import CoinTransaction, Wallet
 
 
 class WalletService:
+    def awarded_keys(self, *, player, award_keys: list[str]) -> set[str]:
+        """Read credited reward keys without inferring payment from progress."""
+        return set(
+            CoinTransaction.objects.filter(
+                player=player, award_key__in=award_keys, amount__gt=0
+            ).values_list("award_key", flat=True)
+        )
+
     def award(self, *, player, amount: int, reason: str, award_key: str) -> bool:
         """Credit GitCoins once per (player, award_key).
 

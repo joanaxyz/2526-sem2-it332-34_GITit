@@ -15,6 +15,7 @@ export const queryKeys = {
   shopCatalog: ['shop-catalog'] as const,
   preferences: ['player-preferences'] as const,
   chapterOverview: (chapterId: number | null | undefined) => ['chapter-overview', chapterId] as const,
+  chapterChests: (chapterId: number) => ['chapter-chests', chapterId] as const,
   learnedSkills: ['learned-skills'] as const,
   levelDrill: (levelId: number | null | undefined) => ['level-drill', levelId] as const,
   chapterBook: (chapterId: number | null | undefined) => ['chapter-book', chapterId] as const,
@@ -43,4 +44,5 @@ export const queryKeys = {
 
 export const queryKeyRoots = {
   chapterOverview: ['chapter-overview'] as const,
+  chapterChests: ['chapter-chests'] as const,
 }
