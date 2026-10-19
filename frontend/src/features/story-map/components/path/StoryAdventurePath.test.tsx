@@ -258,6 +258,14 @@ describe('StoryAdventurePath level callout', () => {
     return { ...result, node }
   }
 
+  it('awards a map star only for a completed difficulty', () => {
+    openCallout()
+
+    // Easy is complete; Medium has one of two clears and still earns no star.
+    expect(screen.getByRole('img', { name: 'Stage and Commit: 1 of 3' })).toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: 'Stage and Commit: 1.5 of 3' })).not.toBeInTheDocument()
+  })
+
   it('marks exactly one tier as the next action and locks the rest', () => {
     openCallout()
 
