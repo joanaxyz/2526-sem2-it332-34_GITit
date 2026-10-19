@@ -45,11 +45,17 @@ describe('AdventureWorkspaceTour', () => {
     expect(await screen.findByRole('heading', { name: 'Review the objective' })).toBeInTheDocument()
     expect(screen.getByText('1 / 5')).toBeInTheDocument()
     expect(screen.getByText('≤ 2 commands')).toBeInTheDocument()
-    for (const heading of ['Earn up to 3 stars', 'Watch the command limit', 'Run a Git command']) {
+    for (const heading of [
+      'Earn up to 3 stars',
+      'Watch the command limit',
+      'See command results',
+      'Browse project files',
+      'Run a Git command',
+    ]) {
       fireEvent.click(screen.getByRole('button', { name: /^next$/i }))
       expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
     }
-    expect(screen.getByText('4 / 4')).toBeInTheDocument()
+    expect(screen.getByText('6 / 6')).toBeInTheDocument()
 
     rerender(view({
       ...attempt,

@@ -39,7 +39,7 @@ describe('TierWorkspaceTour', () => {
     vi.restoreAllMocks()
   })
 
-  it('covers the objective, scoring, command limit and terminal in four steps', async () => {
+  it('introduces the objective, scoring, diagrams, files, and terminal in six steps', async () => {
     addRequiredTierTargets()
     const onClose = vi.fn()
 
@@ -50,7 +50,13 @@ describe('TierWorkspaceTour', () => {
     ).toBeInTheDocument()
     expect(screen.getByText('Level quick tour')).toBeVisible()
 
-    for (const heading of ['Earn up to 3 stars', 'Watch the command limit', 'Run a Git command']) {
+    for (const heading of [
+      'Earn up to 3 stars',
+      'Watch the command limit',
+      'Read the repository diagrams',
+      'Browse project files',
+      'Run a Git command',
+    ]) {
       fireEvent.click(screen.getByRole('button', { name: /^next$/i }))
       expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
       if (heading === 'Earn up to 3 stars') {
@@ -60,13 +66,13 @@ describe('TierWorkspaceTour', () => {
     }
     expect(screen.queryByText('Compare the target')).not.toBeInTheDocument()
     expect(screen.queryByText('Use the feedback')).not.toBeInTheDocument()
-    expect(screen.getByText('4 / 4')).toBeInTheDocument()
+    expect(screen.getByText('6 / 6')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /start level/i }))
     expect(onClose).toHaveBeenCalledOnce()
   }, 15_000)
 
-  it('stays at four steps even when optional panels are available', async () => {
+  it('keeps the tour focused when optional panels are available', async () => {
     addRequiredTierTargets()
     addTarget('data-tour-target', 'expected-state')
     addTarget('data-tour-target', 'feedback')
@@ -76,35 +82,52 @@ describe('TierWorkspaceTour', () => {
     expect(
       await screen.findByRole('heading', { name: 'Review the objective' }, { timeout: ASYNC_ASSERTION_TIMEOUT }),
     ).toBeInTheDocument()
-    for (const heading of ['Earn up to 3 stars', 'Watch the command limit', 'Run a Git command']) {
+    for (const heading of [
+      'Earn up to 3 stars',
+      'Watch the command limit',
+      'Read the repository diagrams',
+      'Browse project files',
+      'Run a Git command',
+    ]) {
       fireEvent.click(screen.getByRole('button', { name: /^next$/i }))
       expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
     }
-    expect(screen.getByText('4 / 4')).toBeInTheDocument()
+    expect(screen.getByText('6 / 6')).toBeInTheDocument()
   }, 15_000)
 
-  async function openCommandStep(targetInDrawer?: boolean) {
+async function openCommandStep(repoGraphInDrawer?: boolean) {
     addRequiredTierTargets()
-    render(<TierWorkspaceTour runId={43} onClose={vi.fn()} targetInDrawer={targetInDrawer} />)
+  render(<TierWorkspaceTour runId={43} onClose={vi.fn()} repoGraphInDrawer={repoGraphInDrawer} />)
     await screen.findByRole('heading', { name: 'Review the objective' }, { timeout: ASYNC_ASSERTION_TIMEOUT })
-    for (const heading of ['Earn up to 3 stars', 'Watch the command limit', 'Run a Git command']) {
+    for (const heading of [
+      'Earn up to 3 stars',
+      'Watch the command limit',
+      'Read the repository diagrams',
+      'Browse project files',
+      'Run a Git command',
+    ]) {
       fireEvent.click(screen.getByRole('button', { name: /^next$/i }))
       await screen.findByRole('heading', { name: heading })
     }
   }
 
-  it('mentions the target graph on the command step when the target sits in the drawer', async () => {
+  it('introduces the live diagram from the Repo graph button in drawer mode', async () => {
     await openCommandStep(true)
 
-    expect(screen.getByText(/compare it with the target graph/)).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^back$/i }))
+    expect(screen.getByRole('heading', { name: 'Browse project files' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^back$/i }))
+    expect(screen.getByRole('heading', { name: 'Read the repository diagrams' })).toBeInTheDocument()
+    expect(screen.getByText(/Open Repo graph to see the live commits/)).toBeInTheDocument()
+    expect(screen.getByText(/compare its repository shape/)).toBeInTheDocument()
   }, 15_000)
 
-  it('keeps the plain command step text when there is no target in a drawer', async () => {
+  it('uses the visible diagram target when the graph is not in a drawer', async () => {
     await openCommandStep()
 
-    expect(
-      screen.getByText(/Use project files and the repository diagrams to check your work/),
-    ).toBeInTheDocument()
-    expect(screen.queryByText(/target graph/)).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: /^back$/i }))
+    fireEvent.click(screen.getByRole('button', { name: /^back$/i }))
+    expect(screen.getByRole('heading', { name: 'Read the repository diagrams' })).toBeInTheDocument()
+    expect(screen.getByText(/If a target diagram is shown/)).toBeInTheDocument()
   }, 15_000)
 })

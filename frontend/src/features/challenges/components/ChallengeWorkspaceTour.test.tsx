@@ -40,6 +40,7 @@ describe('ChallengeWorkspaceTour', () => {
     addTarget('data-tour-target', 'star-budget')
     addTarget('data-tour-target', 'command-budget')
     addTarget('data-tour-target', 'live-dag')
+    addTarget('data-tour-target', 'project-files')
     addTarget('data-command-input')
     const onClose = vi.fn()
 
@@ -66,9 +67,11 @@ describe('ChallengeWorkspaceTour', () => {
     fireEvent.click(screen.getByRole('button', { name: /next/i }))
     expect(await screen.findByRole('heading', { name: 'Watch the command limit' })).toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: /next/i }))
-    expect(await screen.findByRole('heading', { name: 'Run a Git command' })).toBeInTheDocument()
-    expect(screen.getByText('4 / 4')).toBeInTheDocument()
+    for (const heading of ['Read the repository diagrams', 'Browse project files', 'Run a Git command']) {
+      fireEvent.click(screen.getByRole('button', { name: /next/i }))
+      expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
+    }
+    expect(screen.getByText('6 / 6')).toBeInTheDocument()
 
     fireEvent.click(screen.getByRole('button', { name: /start challenge/i }))
     expect(onClose).toHaveBeenCalledOnce()
@@ -104,11 +107,17 @@ describe('ChallengeWorkspaceTour', () => {
     expect(screen.getByText('≤ 2 commands')).toBeInTheDocument()
     expect(screen.queryByText('Attempts')).not.toBeInTheDocument()
 
-    for (const heading of ['Earn up to 3 stars', 'Watch the command limit', 'Run a Git command']) {
+    for (const heading of [
+      'Earn up to 3 stars',
+      'Watch the command limit',
+      'Read the repository diagrams',
+      'Browse project files',
+      'Run a Git command',
+    ]) {
       fireEvent.click(screen.getByRole('button', { name: /^next$/i }))
       expect(await screen.findByRole('heading', { name: heading })).toBeInTheDocument()
     }
-    expect(screen.getByText('4 / 4')).toBeInTheDocument()
+    expect(screen.getByText('6 / 6')).toBeInTheDocument()
 
     rerender(view({ ...run, counts: { ...run.counts, counted_action_total: 2 } }))
     expect(screen.getByText('2 / 5')).toBeInTheDocument()

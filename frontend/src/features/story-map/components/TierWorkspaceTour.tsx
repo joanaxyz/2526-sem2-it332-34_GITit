@@ -1,4 +1,4 @@
-import { ScrollText, Star, TerminalSquare } from 'lucide-react'
+import { FolderTree, GitBranch, ScrollText, Star, TerminalSquare } from 'lucide-react'
 
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
 import { StarRulesContent } from '@/shared/level/components/StarRules'
@@ -29,29 +29,45 @@ const steps = [
     placement: 'bottom',
   },
   {
+    id: 'tier-diagram',
+    selector: '[data-tour-target="live-dag"]',
+    icon: GitBranch,
+    title: 'Read the repository diagrams',
+    body: 'The live diagram shows your commits, branches, and HEAD. If a target diagram is shown, compare its repository shape with the live one as you work.',
+    placement: 'bottom',
+  },
+  {
+    id: 'tier-project',
+    selector: '[data-tour-target="project-files"]',
+    icon: FolderTree,
+    title: 'Browse project files',
+    body: 'Open files here to inspect or edit them when the objective depends on their contents. Save edits, then use Git commands if the task asks you to stage or commit.',
+    placement: 'right',
+  },
+  {
     id: 'tier-terminal',
     selector: '[data-command-input]',
     icon: TerminalSquare,
     title: 'Run a Git command',
-    body: 'Type a command and press Enter. Use project files and the repository diagrams to check your work. Your objective is checked automatically after each valid command; there is no Submit button.',
+    body: 'Type a command and press Enter. Your objective is checked automatically after each valid command; there is no Submit button.',
     placement: 'top',
   },
 ] satisfies readonly WorkspaceTourStep[]
 
-const stepsWithDrawer = steps.map((step) => step.id === 'tier-terminal'
-  ? { ...step, body: 'Type a command and press Enter. Use Repo graph to open the live diagram and compare it with the target graph. Your objective is checked automatically after each valid command; there is no Submit button.' }
+const stepsWithDrawer = steps.map((step) => step.id === 'tier-diagram'
+  ? { ...step, body: 'Open Repo graph to see the live commits, branches, and HEAD. If a target diagram is shown, compare its repository shape with the live one as you work.' }
   : step)
 
-export function TierWorkspaceTour({ runId, onClose, targetInDrawer = false }: {
+export function TierWorkspaceTour({ runId, onClose, repoGraphInDrawer = false }: {
   runId: number
   onClose: () => void
-  targetInDrawer?: boolean
+  repoGraphInDrawer?: boolean
 }) {
   return (
     <GameplayWorkspaceTour
       label="Level quick tour"
       finishLabel="Start level"
-      steps={targetInDrawer ? stepsWithDrawer : steps}
+      steps={repoGraphInDrawer ? stepsWithDrawer : steps}
       refreshKey={runId}
       onClose={onClose}
     />

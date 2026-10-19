@@ -1,4 +1,4 @@
-import { ScrollText, Star, TerminalSquare } from 'lucide-react'
+import { FolderTree, ScrollText, Star, Swords, TerminalSquare } from 'lucide-react'
 
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
 import { StarRulesContent } from '@/shared/level/components/StarRules'
@@ -29,11 +29,27 @@ const steps = [
     placement: 'right',
   },
   {
+    id: 'adventure-battle',
+    selector: '[data-testid="battle-stage"]',
+    icon: Swords,
+    title: 'See command results',
+    body: 'Valid repository changes play out on this stage, so the battle reflects the state you create.',
+    placement: 'bottom',
+  },
+  {
+    id: 'adventure-project',
+    selector: '[data-tour-target="project-files"]',
+    icon: FolderTree,
+    title: 'Browse project files',
+    body: 'Open files here to inspect or edit them when the task depends on their contents. This tree shows the current workspace.',
+    placement: 'right',
+  },
+  {
     id: 'adventure-terminal',
     selector: '[data-command-input]',
     icon: TerminalSquare,
     title: 'Run a Git command',
-    body: 'Type a command and press Enter. Use project files and the repository diagrams to check your work. Your objective is checked automatically after each valid command; there is no Submit button.',
+    body: 'Type a command and press Enter. Your objective is checked automatically after each valid command; there is no Submit button.',
     placement: 'top',
   },
 ] satisfies readonly WorkspaceTourStep[]
