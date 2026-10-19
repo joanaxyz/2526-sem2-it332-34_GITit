@@ -1,28 +1,9 @@
 import { Check, Lock, Play, Swords } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
-import type { AdventureLevelSummary, AdventureLevelTierAccess } from '@/features/story-map/types'
+import type { AdventureLevelSummary } from '@/features/story-map/types'
 import { adventureLevelCleared } from '@/features/story-map/utils/storyMapChapter'
-import { StarRating, type StarFillState } from '@/shared/level/components/StarRating'
-
-const DIFFICULTY_ORDER = ['easy', 'medium', 'hard'] as const
-
-// Node-level star display only: one star per difficulty tier (easy/medium/
-// hard, in that order), full once that tier is completed, half while a wave
-// is in progress on it, empty otherwise. Distinct from the numeric `stars`
-// grade used by the tier-popup and challenge-trial-card StarRating call
-// sites, which this deliberately leaves untouched.
-function tierStarFillStates(tiers: AdventureLevelTierAccess[]): StarFillState[] {
-  return DIFFICULTY_ORDER.map((difficulty) => {
-    const tier = tiers.find((candidate) => candidate.difficulty === difficulty)
-    if (!tier) return 'empty'
-    if (tier.completion) return 'full'
-    if (tier.wave_progress.completed > 0 && tier.wave_progress.completed < tier.wave_progress.total) {
-      return 'half'
-    }
-    return 'empty'
-  })
-}
+import { StarRating } from '@/shared/level/components/StarRating'
 
 type PathPoint = { x: number; y: number }
 
@@ -61,8 +42,10 @@ export function StoryPathLevelNode({
     ? 'loading'
     : 'locked'
   const hasTiers = Boolean(level && level.tiers.length > 0)
-  const starFillStates = level && hasTiers ? tierStarFillStates(level.tiers) : undefined
-  const stars = level?.completion?.stars ?? 0
+  // Tiered map nodes earn one whole star per completed difficulty.
+  const stars = level && hasTiers
+    ? level.tiers.filter((tier) => tier.completion).length
+    : level?.completion?.stars ?? 0
   const disabled = !level || state === 'locked' || state === 'loading'
   const selected = Boolean(level && selectedLevelId === level.id)
   const closing = Boolean(level && closingLevelId === level.id && !selected)
@@ -117,8 +100,7 @@ export function StoryPathLevelNode({
 
       {state === 'locked' || state === 'loading' ? null : (
         <StarRating
-          stars={starFillStates ? undefined : stars}
-          fillStates={starFillStates}
+          stars={stars}
           size="sm"
           className="story-path-stars"
           label={level?.title ?? 'Level'}

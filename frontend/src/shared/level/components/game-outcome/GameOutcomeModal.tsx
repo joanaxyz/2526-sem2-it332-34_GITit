@@ -11,16 +11,13 @@ import { GameOutcomeConfetti } from './GameOutcomeConfetti'
 import { GameOutcomeStatTile } from './GameOutcomeStatTile'
 
 // A single outcome shows exactly one star image (the loss art, or one of
-// six win tiers), so each is imported lazily instead of bundling every variant
+// three win tiers), so each is imported lazily instead of bundling every variant
 // upfront. `titlesImage` above is shown on every outcome, so it stays a
 // normal static import.
 const STAR_ART_LOADERS: Record<string, () => Promise<{ default: string }>> = {
   lose: () => import('@/assets/images/battle-outcome/lose-0.webp'),
-  'win-0.5': () => import('@/assets/images/battle-outcome/win-0.5.webp'),
   'win-1': () => import('@/assets/images/battle-outcome/win-1.webp'),
-  'win-1.5': () => import('@/assets/images/battle-outcome/win-1.5.webp'),
   'win-2': () => import('@/assets/images/battle-outcome/win-2.webp'),
-  'win-2.5': () => import('@/assets/images/battle-outcome/win-2.5.webp'),
   'win-3': () => import('@/assets/images/battle-outcome/win-3.webp'),
 }
 
@@ -86,7 +83,7 @@ export function GameOutcomeModal({
   const isFailed = tone === 'failure'
   const earnedStars = Number.isFinite(stars) ? normalizeStarScore(stars) : null
   const displayLabel = resultLabel ?? (isFailed ? 'Game Over' : 'You Won')
-  // Failure always shows the cracked stars; wins need a positive star score.
+  // Failure always shows the unlit stars; wins need a positive star score.
   // Starless wins keep the icon crest.
   const starArtKey = isFailed ? 'lose' : earnedStars && earnedStars > 0 ? `win-${earnedStars}` : null
   const starArt = useLazyImage(starArtKey, STAR_ART_LOADERS)
