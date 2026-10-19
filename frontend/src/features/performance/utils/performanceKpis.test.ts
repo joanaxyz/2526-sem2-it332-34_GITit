@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { kpiEvidence } from './kpiEvidence'
+import { formatKpi, kpiEvidence, metricStatus } from './performanceKpis'
 
 const rate = (numerator: number, denominator: number) => ({
   value: denominator ? (numerator / denominator) * 100 : null,
@@ -9,6 +9,15 @@ const rate = (numerator: number, denominator: number) => ({
 })
 
 describe('kpiEvidence', () => {
+  it('keeps zero, missing observations, reversed retry goals, and supplementary context distinct', () => {
+    expect(formatKpi('scr', { value: 0, numerator: 0, denominator: 2 })).toBe('0%')
+    expect(formatKpi('scr', rate(0, 0))).toBe('—')
+    expect(metricStatus('scr', { value: 0, numerator: 0, denominator: 2 })).toBe('miss')
+    expect(metricStatus('arc', { value: 0, numerator: 0, denominator: 2 })).toBe('met')
+    expect(metricStatus('arc', { value: 2.1, numerator: 21, denominator: 10 })).toBe('miss')
+    expect(metricStatus('rta', rate(0, 0))).toBe('none')
+    expect(metricStatus('retry_success_rate', rate(4, 5))).toBe('none')
+  })
   it.each([
     ['scr', rate(3, 10), '3 of 10 sessions completed'],
     ['car', rate(22, 125), '22 processable / 125 submitted commands'],

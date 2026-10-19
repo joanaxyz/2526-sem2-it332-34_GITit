@@ -137,7 +137,7 @@ def test_chapter_chest_awards_gitcoins_when_progress_crosses_threshold(
 
 
 def test_chest_schedule_is_the_same_fixed_runtime_constant_for_every_chapter(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     from curriculum.services import CHEST_SCHEDULE
 
     user = make_user(django_user_model, "chest-schedule-reader")

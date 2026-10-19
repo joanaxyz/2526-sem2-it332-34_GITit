@@ -82,7 +82,7 @@ def test_mapping_covers_exactly_the_official_car_objectives():
 
 
 def test_every_mapped_level_exists_in_seeded_legacy_content(db):
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
     published = set(
         AdventureLevel.objects.filter(
             chapter__story__slug=MetricsService.PERFORMANCE_STORY_SLUG, is_published=True

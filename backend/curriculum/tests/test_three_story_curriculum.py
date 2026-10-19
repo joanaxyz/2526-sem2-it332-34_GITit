@@ -181,7 +181,7 @@ def test_command_catalog_expands_beyond_the_original_command_families():
 
 
 def test_seed_creates_story_books_and_playable_fieldwork(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     assert list(Story.objects.values_list("slug", flat=True)) == [
         "git-it-legacy",
@@ -211,7 +211,7 @@ def test_seed_creates_story_books_and_playable_fieldwork(db):
 
 
 def test_story_api_exposes_difficulty_and_prerequisite(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = django_user_model.objects.create_user(
         username="three-story-reader",
         email="three-story-reader@example.com",
@@ -238,7 +238,7 @@ def test_story_api_exposes_difficulty_and_prerequisite(db, django_user_model):
 
 
 def test_advanced_chapters_respect_story_access(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     user = django_user_model.objects.create_user(
         username="advanced-reader",
         email="advanced-reader@example.com",
@@ -265,7 +265,7 @@ def test_advanced_chapters_respect_story_access(db, django_user_model):
 
 
 def test_engine_supported_advanced_diagnostics_are_seeded_as_playable(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     seeded = {
         f"{skill_slug}/{form_slug}"

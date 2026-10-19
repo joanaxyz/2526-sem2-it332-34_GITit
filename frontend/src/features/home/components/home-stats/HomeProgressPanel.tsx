@@ -111,7 +111,7 @@ export function HomeProgressPanel({
           className={`home-overview-stat-block home-overview-story-block${finished >= 100 && attempted ? ' is-complete' : ''}`}
         >
           <header className="ref-panel-head">
-            Arcane Spire runs finished <em>active curriculum only</em>
+            Overall finish rate <em>active curriculum, all modules</em>
           </header>
           <div className="home-overview-story-body">
             <div className="home-overview-story-sigil" aria-hidden="true">

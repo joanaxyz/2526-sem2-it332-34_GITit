@@ -5,11 +5,6 @@ import { ADMIN_SECTIONS } from '@/features/admin/utils/adminSections'
 import { AuthLayout } from '@/app/layouts/AuthLayout'
 import { HomeLayout } from '@/app/layouts/HomeLayout'
 import { LevelLayout } from '@/app/layouts/LevelLayout'
-import {
-  LegacySharedStoryRedirect,
-  LegacyStoryEditorRedirect,
-  LegacyStoryRouteRedirect,
-} from '@/app/LegacyRedirects'
 import { Protected } from '@/app/Protected'
 import { RequireCompanion } from '@/app/RequireCompanion'
 import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage'
@@ -26,21 +21,11 @@ import {
   DESIGN_PREVIEW_STORY_MAP_ROUTE,
   ADMIN_ROUTES,
   HOME_ROUTE,
-  LEGACY_PERFORMANCE_ROUTE,
-  OVERVIEW_RESULTS_ROUTE,
   SHOP_ROUTE,
   STORIES_ROUTE,
   STORY_DETAIL_ROUTE,
   storyPath,
-  storyPathWithQuery,
 } from '@/shared/navigation/routes'
-import {
-  LEGACY_ARCHIVE_ROUTE,
-  LEGACY_DESIGN_PREVIEW_STORY_ROUTE,
-  LEGACY_MY_STORY_ROUTE,
-  LEGACY_STORY_ROUTE,
-  LEGACY_STORIES_ROUTE,
-} from '@/shared/navigation/legacyRoutes'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 /**
@@ -90,7 +75,6 @@ const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
         path: DESIGN_PREVIEW_STORY_MAP_ROUTE,
         lazy: () => import('@/features/story-map/pages/StoryMapPreviewPage'),
       },
-      { path: LEGACY_DESIGN_PREVIEW_STORY_ROUTE, element: <Navigate replace to={DESIGN_PREVIEW_STORY_MAP_ROUTE} /> },
     ]
   : []
 
@@ -105,9 +89,6 @@ const appRoutes: RouteObject[] = [
       { path: '/reset-password/:uid/:token', element: <ResetPasswordPage /> },
     ],
   },
-  // Legacy shared-map links redirect to the canonical story map.
-  { path: `${LEGACY_STORY_ROUTE}/shared/:designId`, element: <Navigate replace to={storyPath()} /> },
-  { path: `${LEGACY_ARCHIVE_ROUTE}/shared/:designId`, element: <LegacySharedStoryRedirect /> },
   {
     element: (
       <Protected>
@@ -119,9 +100,6 @@ const appRoutes: RouteObject[] = [
       { path: HOME_ROUTE, element: <HomePage /> },
       // Browsing Home, Stories, and repository-only challenges does not require
       // a companion. Adventure play remains protected below.
-      { path: LEGACY_STORY_ROUTE, element: <Navigate replace to={storyPath()} /> },
-      { path: LEGACY_STORIES_ROUTE, element: <Navigate replace to={STORIES_ROUTE} /> },
-      { path: `${LEGACY_STORIES_ROUTE}/:storySlug`, element: <LegacyStoryRouteRedirect /> },
       {
         path: STORIES_ROUTE,
         lazy: async () => ({
@@ -134,12 +112,6 @@ const appRoutes: RouteObject[] = [
           Component: (await import('@/features/story-map/pages/StoryMapPage')).StoryMapPage,
         }),
       },
-      { path: LEGACY_ARCHIVE_ROUTE, element: <Navigate replace to={storyPath()} /> },
-      { path: LEGACY_MY_STORY_ROUTE, element: <Navigate replace to={storyPathWithQuery(undefined, 'view=mine')} /> },
-      { path: '/gallery', element: <Navigate replace to={HOME_ROUTE} /> },
-      { path: '/dashboard', element: <Navigate replace to={HOME_ROUTE} /> },
-      { path: '/stats', element: <Navigate replace to={`${HOME_ROUTE}?tab=overview`} /> },
-      { path: LEGACY_PERFORMANCE_ROUTE, element: <Navigate replace to={OVERVIEW_RESULTS_ROUTE} /> },
       {
         path: '/level-editor',
         lazy: async () => ({
@@ -170,7 +142,6 @@ const appRoutes: RouteObject[] = [
           Component: (await import('@/features/authoring/pages/ContentEditorPage')).ContentEditorPage,
         }),
       },
-      { path: '/store', element: <Navigate replace to={SHOP_ROUTE} /> },
       {
         path: SHOP_ROUTE,
         lazy: async () => ({
@@ -183,23 +154,6 @@ const appRoutes: RouteObject[] = [
           Component: (await import('@/features/settings/pages/SettingsPage')).SettingsPage,
         }),
       },
-    ],
-  },
-  // Legacy map-editor routes are kept as redirects while the old editor URLs age out.
-  {
-    element: (
-      <Protected>
-        <Outlet />
-      </Protected>
-    ),
-    children: [
-      // Editing has been removed: story maps are rendered from curriculum + story-world data.
-      { path: `${LEGACY_STORY_ROUTE}/editor`, element: <Navigate replace to={storyPath()} /> },
-      { path: `${LEGACY_STORY_ROUTE}/editor/official`, element: <Navigate replace to={storyPath()} /> },
-      { path: `${LEGACY_STORY_ROUTE}/editor/:designId`, element: <Navigate replace to={storyPath()} /> },
-      // Legacy editor route removal target: 2026-09-30.
-      { path: `${LEGACY_ARCHIVE_ROUTE}/editor`, element: <LegacyStoryEditorRedirect /> },
-      { path: `${LEGACY_ARCHIVE_ROUTE}/editor/:designId`, element: <LegacyStoryEditorRedirect /> },
     ],
   },
   // Staff-only admin console (its own full-screen shell; AdminLayout redirects

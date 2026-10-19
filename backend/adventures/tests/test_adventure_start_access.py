@@ -50,7 +50,7 @@ def first_wave_level():
 
 
 def test_tier_start_requires_a_companion_like_the_wave_path(db, django_user_model):
-    call_command("seed_legacy_modules")
+    call_command("seed_curriculum")
     tier = first_easy_tier()
     assert tier is not None
     client, player = make_player(django_user_model, companion=False)
@@ -62,7 +62,7 @@ def test_tier_start_requires_a_companion_like_the_wave_path(db, django_user_mode
 
 
 def test_tier_start_succeeds_once_a_companion_is_owned(db, django_user_model):
-    call_command("seed_legacy_modules")
+    call_command("seed_curriculum")
     tier = first_easy_tier()
     client, _player = make_player(django_user_model)
 
@@ -72,7 +72,7 @@ def test_tier_start_succeeds_once_a_companion_is_owned(db, django_user_model):
 
 
 def test_tier_start_refuses_an_unpublished_level(db, django_user_model):
-    call_command("seed_legacy_modules")
+    call_command("seed_curriculum")
     tier = first_easy_tier()
     level = tier.adventure_level
     level.is_published = False
@@ -85,7 +85,7 @@ def test_tier_start_refuses_an_unpublished_level(db, django_user_model):
 
 
 def test_tier_start_refuses_an_unpublished_chapter(db, django_user_model):
-    call_command("seed_legacy_modules")
+    call_command("seed_curriculum")
     tier = first_easy_tier()
     chapter = tier.adventure_level.chapter
     chapter.is_published = False
@@ -98,7 +98,7 @@ def test_tier_start_refuses_an_unpublished_chapter(db, django_user_model):
 
 
 def test_wave_start_refuses_an_unpublished_chapter(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
     level = first_wave_level()
     assert level is not None
     chapter = level.chapter

@@ -1,5 +1,5 @@
 import pytest
-from django.core.management import call_command
+from django.core.management import call_command, get_commands
 from django.core.management.base import CommandError
 from django.test import override_settings
 
@@ -32,15 +32,16 @@ EXPECTED_COMMANDS = {
 }
 
 
-def _legacy_chapters():
+def _curriculum_chapters():
     return {
         chapter.number: chapter
         for chapter in Chapter.objects.filter(story__slug="arcane-spire").order_by("number")
     }
 
 
+@override_settings(ALLOW_RETIRED_CURRICULUM_FIXTURE_SEED=False)
 def test_canonical_curriculum_uses_arcane_spire_identity_and_visual_assets(db):
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
 
     story = Story.objects.get(slug="arcane-spire")
 
@@ -48,9 +49,16 @@ def test_canonical_curriculum_uses_arcane_spire_identity_and_visual_assets(db):
     assert story.world_slug == "arcane-spire"
 
 
+def test_only_current_and_explicit_fixture_seed_commands_are_registered():
+    commands = get_commands()
+    assert commands["seed_curriculum"] == "curriculum"
+    assert commands["seed_curriculum_fixture"] == "curriculum"
+    assert "seed_legacy_modules" not in commands
+
+
 def test_canonical_seed_creates_only_the_unchanged_module_tree(db):
-    call_command("seed_legacy_modules", verbosity=0)
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
 
     assert list(Story.objects.values_list("slug", "title", "world_slug")) == [
         ("arcane-spire", "The Arcane Spire", "arcane-spire")
@@ -65,11 +73,11 @@ def test_canonical_seed_creates_only_the_unchanged_module_tree(db):
     )
 
 
-def test_legacy_modules_seed_complete_rich_field_guides(db):
-    call_command("seed_legacy_modules", verbosity=0)
+def test_curriculum_modules_seed_complete_rich_field_guides(db):
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_command_library", verbosity=0)
 
-    chapters = _legacy_chapters()
+    chapters = _curriculum_chapters()
     listed_counts = {
         chapter.number: chapter.command_skill_count
         for chapter in published_chapters(story_slug="arcane-spire")
@@ -89,15 +97,15 @@ def test_legacy_modules_seed_complete_rich_field_guides(db):
         assert all(len(command["pages"]) > 1 for command in book["commands"])
 
 
-def test_legacy_field_guide_seed_is_idempotent(db):
-    call_command("seed_legacy_modules", verbosity=0)
+def test_curriculum_field_guide_seed_is_idempotent(db):
+    call_command("seed_curriculum", verbosity=0)
     first = list(
         CommandForm.objects.filter(chapter__story__slug="arcane-spire")
         .order_by("command_skill__slug", "slug")
         .values_list("id", "command_skill__slug", "slug", "chapter__number")
     )
 
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
     second = list(
         CommandForm.objects.filter(chapter__story__slug="arcane-spire")
         .order_by("command_skill__slug", "slug")
@@ -107,8 +115,8 @@ def test_legacy_field_guide_seed_is_idempotent(db):
     assert second == first
 
 
-def test_legacy_levels_seed_gamification_rewards_and_skill_forms(db):
-    call_command("seed_legacy_modules", verbosity=0)
+def test_curriculum_levels_seed_gamification_rewards_and_skill_forms(db):
+    call_command("seed_curriculum", verbosity=0)
 
     levels = list(
         AdventureLevel.objects.filter(chapter__story__slug="arcane-spire")
@@ -128,11 +136,11 @@ def test_legacy_levels_seed_gamification_rewards_and_skill_forms(db):
 
 
 def test_retired_curriculum_seed_cannot_overwrite_canonical_field_guides(db):
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
     with pytest.raises(CommandError, match="retired three-story fixture"):
-        call_command("seed_curriculum", verbosity=0)
+        call_command("seed_curriculum_fixture", verbosity=0)
 
-    chapters = _legacy_chapters()
+    chapters = _curriculum_chapters()
     assert all(chapter.is_published for chapter in chapters.values())
     for module_number, expected_commands in EXPECTED_COMMANDS.items():
         book = chapter_book(chapter_id=chapters[module_number].id)
@@ -142,4 +150,4 @@ def test_retired_curriculum_seed_cannot_overwrite_canonical_field_guides(db):
 @override_settings(ALLOW_RETIRED_CURRICULUM_FIXTURE_SEED=False)
 def test_retired_curriculum_seed_is_disabled_outside_tests(db):
     with pytest.raises(CommandError, match="disabled outside the test suite"):
-        call_command("seed_curriculum", verbosity=0)
+        call_command("seed_curriculum_fixture", verbosity=0)

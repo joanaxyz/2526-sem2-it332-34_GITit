@@ -15,7 +15,7 @@ def make_user(django_user_model, username: str = "climber"):
 
 
 def test_story_without_a_prerequisite_is_never_locked(db, django_user_model):
-    call_command("seed_legacy_modules")
+    call_command("seed_curriculum")
     user = make_user(django_user_model)
     player = get_or_create_player(user)
     story = Story.objects.get(slug="arcane-spire")
@@ -54,7 +54,7 @@ def test_story_is_gated_only_by_its_prerequisite(db, django_user_model):
 
 
 def test_story_list_api_reports_lock_state_without_pricing(db, django_user_model):
-    call_command("seed_legacy_modules")
+    call_command("seed_curriculum")
     user = make_user(django_user_model)
     client = APIClient()
     client.force_authenticate(user=user)

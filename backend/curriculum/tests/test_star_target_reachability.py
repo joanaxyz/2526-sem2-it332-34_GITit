@@ -50,7 +50,7 @@ def _required_counted(variants) -> int:
 
 
 def test_seeded_adventure_waves_have_reachable_star_targets(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     unreachable = []
     for wave in AdventureWave.objects.filter(is_published=True).prefetch_related("variants"):
@@ -68,7 +68,7 @@ def test_seeded_adventure_waves_have_reachable_star_targets(db):
 
 
 def test_seeded_challenge_trials_have_reachable_star_targets(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum_fixture")
 
     unreachable = []
     for trial in ChallengeTrial.objects.filter(is_published=True).prefetch_related("variants"):

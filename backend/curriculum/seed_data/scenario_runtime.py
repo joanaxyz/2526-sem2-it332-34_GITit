@@ -1,9 +1,8 @@
-"""Join the revised scenario contract to deterministic simulator fixtures.
+"""Join the current scenario contract to deterministic simulator fixtures.
 
-The archived seed still contains useful repository setup for unchanged
-exercises.  It is deliberately demoted here: document-authored IDs, commands,
-file edits, budgets, and learner content always replace archived values.  Only
-scenarios whose exercise itself changed need a focused runtime override.
+The level scaffold supplies repository setup for each exercise. Authored IDs,
+commands, file edits, budgets, and learner content come from the scenario bank.
+Exercises with a different repository shape receive a focused runtime override.
 """
 
 from __future__ import annotations
@@ -12,8 +11,7 @@ import copy
 import shlex
 from typing import Any
 
-from curriculum.seed_data.revised_legacy_scenarios import revised_legacy_scenarios
-
+from curriculum.seed_data.scenario_bank import scenario_bank
 
 DISPLACED_REVISED_CASE_IDS = {
     "bh8": "rebase-hard-continue",
@@ -530,7 +528,7 @@ def _rebase_continue() -> dict[str, Any]:
 
 
 def _runtime_overrides() -> dict[str, dict[str, Any]]:
-    content = revised_legacy_scenarios()
+    content = scenario_bank()
     mergetool_specs = {
         "mergetool-easy-cache-ttl": ("feature/cache-ttl", False, None),
         "mergetool-easy-mail-footer": ("feature/mail-footer", False, None),
@@ -670,7 +668,7 @@ def _canonicalize_requirements(case: dict[str, Any]) -> None:
     case["state_requirements"] = requirements
 
 
-def apply_revised_legacy_bank(levels: list[dict[str, Any]]) -> list[dict[str, Any]]:
+def apply_scenario_bank(levels: list[dict[str, Any]]) -> list[dict[str, Any]]:
     """Mutate the archived level objects into the canonical revised bank.
 
     Pairing is by authored scenario number/order, never by an old alias ID.
@@ -678,7 +676,7 @@ def apply_revised_legacy_bank(levels: list[dict[str, Any]]) -> list[dict[str, An
     document-owned field and all genuinely revised runtime exercises.
     """
 
-    canonical = list(revised_legacy_scenarios().items())
+    canonical = list(scenario_bank().items())
     slots = [
         (difficulty, tier, index, case)
         for level in levels
@@ -687,7 +685,7 @@ def apply_revised_legacy_bank(levels: list[dict[str, Any]]) -> list[dict[str, An
     ]
     if len(slots) != len(canonical) or len(canonical) != 265:
         raise RuntimeError(
-            f"Revised bank/legacy slot mismatch: {len(canonical)} canonical, {len(slots)} slots"
+            f"Scenario bank/seed slot mismatch: {len(canonical)} canonical, {len(slots)} slots"
         )
 
     for (difficulty, tier, index, archived), (case_id, authored) in zip(

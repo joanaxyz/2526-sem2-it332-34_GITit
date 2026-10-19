@@ -3,42 +3,38 @@ import { Activity, Command, RotateCcw } from 'lucide-react'
 
 import { adminApi } from '@/features/admin/api/adminApi'
 import { PageHeading, StatTile } from '@/features/admin/components/adminUi'
-import { type EvidenceKey, kpiEvidence } from '@/features/admin/utils/kpiEvidence'
+import { KPIS, type EvidenceKey, formatMetricValue, kpiEvidence, metricTargetStatus } from '@/features/performance/utils/performanceKpis'
 import type { PerformanceModule, RateMetric } from '@/features/performance/types'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
-// Diagnostic Arcane Spire metrics are staff-only: they describe simulator and
-// retry behaviour, not learner outcomes, so they never appear in the player UI.
+// Admin presents the same server metrics across all learners.
 type DiagnosticMetric = 'rta' | 'arc'
 
 function formatPercent(metric: RateMetric) {
-  return metric.value === null ? '--' : `${Math.round(metric.value)}%`
+  return formatMetricValue(metric.value === null ? null : Math.round(metric.value), true, '--')
 }
 
 function formatScalar(metric: RateMetric) {
-  return metric.value === null ? '--' : metric.value.toFixed(2)
+  return formatMetricValue(metric.value, false, '--')
 }
 
 type RateMetricLike = { value: number | null; numerator: number; denominator: number }
 
-const ALL_KPI_META = [
-  { key: 'scr',  label: 'SCR',  full: 'Scenario Completion Rate',   target: 80,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '1–4' },
-  { key: 'car',  label: 'CAR',  full: 'Command Accuracy Rate',       target: 70,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '1–4' },
-  { key: 'hlcr', label: 'HLCR', full: 'Hard-Level Completion Rate',  target: 70,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '1–3 (≥65% M4)' },
-  { key: 'arc',  label: 'ARC',  full: 'Average Retry Count',         target: 2,   higherIsBetter: false, unit: '',   format: 'decimal', modules: '1–3 (≤3 M4)' },
-  { key: 'rta',  label: 'RTA',  full: 'Retry Transfer Accuracy',     target: 65,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '3–4' },
-] as const satisfies readonly { key: EvidenceKey; [field: string]: unknown }[]
+const ALL_KPI_META = KPIS.map((kpi) => ({
+  key: kpi.key, label: kpi.abbr, full: 'longName' in kpi ? kpi.longName : kpi.name, target: kpi.target,
+  higherIsBetter: kpi.up, unit: kpi.pct ? '%' : '', format: kpi.pct ? 'percent' : 'decimal',
+  modules: kpi.key === 'rta' ? '3–4' : kpi.key === 'hlcr' ? '1–3 (≥65% M4)' : kpi.key === 'arc' ? '1–3 (≤3 M4)' : '1–4',
+}))
 
 function fmtRate(value: number | null, format: string): string {
-  if (value === null) return '--'
-  return format === 'percent' ? `${value}%` : value.toFixed(2)
+  return formatMetricValue(value, format === 'percent', '--')
 }
 
-function kpiStatus(value: number | null, target: number, higherIsBetter: boolean): 'met' | 'missed' | 'empty' {
-  if (value === null) return 'empty'
-  return (higherIsBetter ? value >= target : value <= target) ? 'met' : 'missed'
+function kpiStatus(rate: RateMetric, target: number, higherIsBetter: boolean): 'met' | 'missed' | 'empty' {
+  const status = metricTargetStatus(rate, target, higherIsBetter)
+  return status === 'none' ? 'empty' : status === 'miss' ? 'missed' : 'met'
 }
 
 function StatusCell({ rate, target, higherIsBetter, format, evidenceKey }: {
@@ -49,7 +45,7 @@ function StatusCell({ rate, target, higherIsBetter, format, evidenceKey }: {
   evidenceKey: EvidenceKey
 }) {
   if (!rate) return <td className="px-3 py-2 text-center text-muted-foreground text-xs">--</td>
-  const status = kpiStatus(rate.value, target, higherIsBetter)
+  const status = kpiStatus(rate, target, higherIsBetter)
   const color = status === 'met' ? 'text-green-400 font-bold' : status === 'missed' ? 'text-red-400 font-bold' : 'text-muted-foreground'
   const bg = status === 'met' ? 'bg-green-400/10' : status === 'missed' ? 'bg-red-400/10' : ''
   return (
