@@ -25,6 +25,7 @@ import '@/styles/features/auth.css'
 import '@/styles/features/settings.css'
 import '@/styles/features/onboarding.css'
 import '@/styles/features/admin.css'
+import '@/styles/cursors.css'
 
 initializePreferences()
 initializeGuideMascotVisibility()
