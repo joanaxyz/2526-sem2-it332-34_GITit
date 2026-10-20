@@ -108,11 +108,7 @@ def _reword_then_commit_fix(
                     changes_exclude_tokens=[debug],
                     changes_exclude=[staged_log, stray],
                 ),
-                {
-                    "type": "operation_metadata_equals",
-                    "key": "last_amend_replaced_commit",
-                    "value": "c2",
-                },
+                {"type": "branch_history_excludes", "branch": "main", "commits": ["c2"]},
                 {"type": "partial_hunks_left_in_working_tree", "paths": {path: [debug]}},
             ],
         },
@@ -319,8 +315,8 @@ def _abort_then_tool_merge(*, wrong: str, right: str, path: str, resolved: str) 
             {"type": "commit_has_parent", "branch": "main", "parent": "c3"},
             {"type": "branch_history_excludes", "branch": "main", "commits": ["c2"]},
             {"type": "commit_tree_contains", "branch": "main", "tree": {path: resolved}},
-            {"type": "operation_metadata_equals", "key": "last_mergetool_tool", "value": "meld"},
             conflict_free=True,
+            config={"merge.tool": "meld"},
         ),
     }
 
@@ -352,7 +348,6 @@ def _recover_lost_work(*, branch: str, path: str, fix: str) -> dict[str, Any]:
             f"recovery/{branch}",
             {"type": "branch_points_to", "branch": f"recovery/{branch}", "commit": "c3"},
             {"type": "branch_points_to", "branch": "main", "commit": "c0"},
-            {"type": "required_command_sequence", "commands": ["git reflog", "git show c3"]},
         ),
     }
 
@@ -441,7 +436,6 @@ def _move_branch_onto_main(*, name: str, branch: str, path: str) -> dict[str, An
                 "tree": {path: f"{path} v2", "src/app.py": "app main"},
             },
             {"type": "remote_branch_matches_local", "remote_branch": f"origin/{feature}", "branch": feature},
-            {"type": "operation_metadata_equals", "key": "force_with_lease", "value": True},
             conflict_free=True,
         ),
     }

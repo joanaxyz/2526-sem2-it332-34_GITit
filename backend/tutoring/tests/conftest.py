@@ -35,6 +35,7 @@ def initialized_state(state, branch="main", directory=None):
     state = deepcopy(state)
     state.update(
         repository_initialized=True,
+        repository_root=directory or ".",
         branches={branch: None},
         head={"type": "branch", "name": branch, "target": None},
     )
@@ -105,7 +106,6 @@ def teaching_run(db, django_user_model):
         tier=tier,
         slug="teaching",
         max_counted_commands=12,
-        required_successful_attempts=2,
     )
     skills = {}
     for slug, form, usage_form, label in [

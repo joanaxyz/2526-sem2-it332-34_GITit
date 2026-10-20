@@ -70,12 +70,12 @@ WAVES: ModuleWaves = {
                 ),
             ),
             WaveSpec(
-                "re-run-init-safely",
-                "Re-run init safely",
+                "nested-project-folder",
+                "A nested project folder",
                 TRANSFER,
                 (
-                    "init-hard-safe-rerun",
-                    "init-hard-safe-rerun-handbook",
+                    "init-hard-nested-service",
+                    "init-hard-nested-course",
                 ),
             ),
         ),

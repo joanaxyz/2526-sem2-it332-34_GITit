@@ -31,7 +31,9 @@ class AdventureAccessContext:
     batch-loaded once so building the overview never issues a query per level.
     """
 
-    completion_by_adventure_id: dict[int, AdventureLevelTierCompletion] = field(default_factory=dict)
+    completion_by_adventure_id: dict[int, AdventureLevelTierCompletion] = field(
+        default_factory=dict
+    )
     passed_at_by_adventure_id: dict[int, datetime] = field(default_factory=dict)
     passed_adventure_ids: set[int] = field(default_factory=set)
     locked_adventure_ids: set[int] = field(default_factory=set)
@@ -183,14 +185,12 @@ def _ordered_adventure_tiers(tiers: list[AdventureLevelTier]) -> list[AdventureL
 
 @dataclass(frozen=True)
 class AdventureTierAccessContext:
-    """Batch-loaded per-tier facts: completion rows, each tier's wave (holding
-    required_successful_attempts), and the player's current run (holding
-    successful_clears) - so building a level's tier payloads costs a fixed
-    handful of queries.
+    """Batch-loaded per-tier facts: completion rows, each tier's published
+    waves, and the player's progress row (holding the cleared wave slugs) -
+    so building a level's tier payloads costs a fixed handful of queries.
 
     A tier is an ordered set of waves; "progress" counts the learner's cleared
-    waves (adventures/services/tier_waves.py), each wave counting its
-    required clears."""
+    waves (adventures/tier_waves.py)."""
 
     completions: dict[int, object] = field(default_factory=dict)
     waves: dict[int, list] = field(default_factory=dict)
@@ -214,7 +214,7 @@ def _build_adventure_tier_access(
     waves: dict[int, list] = {}
     for wave in (
         AdventureLevelTierWave.objects.filter(tier_id__in=tier_ids, is_published=True)
-        .only("id", "tier_id", "slug", "title", "sort_order", "required_successful_attempts")
+        .only("id", "tier_id", "slug", "title", "sort_order")
         .order_by("sort_order", "id")
     ):
         waves.setdefault(wave.tier_id, []).append(wave)

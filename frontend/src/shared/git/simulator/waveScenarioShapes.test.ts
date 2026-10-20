@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { executeGitCommand } from '@/shared/git/simulator/engine'
+import { executeGitCommand, executeTerminalCommand } from '@/shared/git/simulator/engine'
 import { writeWorkspaceFile } from '@/shared/git/simulator/workspaceFiles'
 import type { MutableRepositoryState } from '@/shared/git/simulator/types'
 import type { RepositoryValue } from '@/shared/level/types'
@@ -53,6 +53,56 @@ function remoteMain(overrides: Partial<MutableRepositoryState> = {}) {
 }
 
 describe('wave plan scenario shapes', () => {
+  it('rejects a plain push of rewritten history and accepts a lease or force (state-only grading)', () => {
+    const rewritten = state({
+      commits: [
+        { id: 'c1', message: 'Base', parents: [], tree: { ...base } },
+        { id: 'c2', message: 'Fix stuff', parents: ['c1'], tree: { ...base, 'src/client.py': 'retry' } },
+        { id: 'c3', message: 'Add retry to API client', parents: ['c1'], tree: { ...base, 'src/client.py': 'retry' } },
+      ],
+      branches: { main: 'c1', 'feature/api-retry': 'c3' },
+      head: { type: 'branch', name: 'feature/api-retry' },
+      remotes: { origin: 'https://example.test/team/api.git' },
+      remote_branches: { 'origin/feature/api-retry': 'c2' },
+      upstream_tracking: { 'feature/api-retry': 'origin/feature/api-retry' },
+    })
+    expect(executeGitCommand(rewritten, 'git push origin feature/api-retry').processed).toBe(false)
+    for (const push of ['git push --force-with-lease origin feature/api-retry', 'git push --force origin feature/api-retry']) {
+      const result = executeGitCommand(rewritten, push)
+      expect(result.processed).toBe(true)
+      expect((result.next_state.remote_branches as Record<string, string>)['origin/feature/api-retry']).toBe('c3')
+    }
+    // A lease refuses once the server moved after the last fetch.
+    const moved = { ...rewritten, remote_updates: { 'origin/feature/api-retry': 'c2b' } }
+    expect(executeGitCommand(moved, 'git push --force-with-lease origin feature/api-retry').processed).toBe(false)
+  })
+
+  it('records where a repository was created, including from inside its folder (1.1)', () => {
+    const workspace = state({
+      repository_initialized: false,
+      working_tree: { 'services/billing-api/app.py': { status: 'untracked', content: 'app' } } as unknown as MutableRepositoryState['working_tree'],
+    })
+    const named = executeTerminalCommand(workspace, 'git init -b trunk services/billing-api', { cwd: '' })
+    expect(named.execution.next_state.repository_root).toBe('services/billing-api')
+    const inside = executeTerminalCommand(workspace, 'git init -b trunk', { cwd: 'services/billing-api' })
+    expect(inside.execution.next_state.repository_root).toBe('services/billing-api')
+    const here = executeGitCommand(workspace, 'git init -b trunk')
+    expect(here.next_state.repository_root).toBe('.')
+  })
+
+  it("records each switch in the HEAD reflog, as Git does (2.3 round trips)", () => {
+    const feature = state({
+      commits: [{ id: 'c1', message: 'Base', parents: [], tree: { ...base } }],
+      branches: { main: 'c1', 'feature/payments': 'c1' },
+      head: { type: 'branch', name: 'feature/payments' },
+    })
+    const { state: done } = run(feature, ['git switch main', 'git switch feature/payments'])
+    expect(done.reflog?.map((entry) => entry.message)).toEqual([
+      'checkout: moving from feature/payments to main',
+      'checkout: moving from main to feature/payments',
+    ])
+  })
+
   it('stacks two --no-commit picks and commits them together (3.3 Medium)', () => {
     const release = state({
       commits: [

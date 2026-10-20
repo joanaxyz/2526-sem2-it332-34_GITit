@@ -59,21 +59,11 @@ describe('ordered wave outcomes', () => {
     expect(
       screen.getByText('Wave 1 of 2 cleared — next: Publish and track. Clear it to earn 25 GitCoins.'),
     ).toBeInTheDocument()
-  })
-
-  it('keeps the clear count for a single wave that needs several clears', () => {
-    render(
-      <TierOutcomeModal
-        open
-        run={clearedWave({
-          wave: { index: 1, total: 1, title: '' },
-          progress: { completed: 2, total: 3, cleared: false, next_wave: { index: 1, slug: 'w', title: '' } },
-        })}
-        onClose={() => {}}
-        onBackToMap={() => {}}
-      />,
-    )
-    expect(screen.getByText('Scenario cleared')).toBeInTheDocument()
-    expect(screen.getByText(/2 of 3 clears done for this difficulty/)).toBeInTheDocument()
+    // A partial clear does not claim the tier is complete.
+    const props = shown.mock.calls.at(-1)?.[0]
+    expect(props).toMatchObject({ title: 'Wave complete' })
+    render(<>{props?.badges}</>)
+    expect(screen.getByText('Easy wave 1 of 2')).toBeInTheDocument()
+    expect(screen.queryByText('Easy complete')).not.toBeInTheDocument()
   })
 })

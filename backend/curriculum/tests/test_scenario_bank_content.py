@@ -4,12 +4,14 @@ import pytest
 from django.core.management import call_command
 
 from adventures.models import AdventureLevelTierWaveVariant
-from curriculum.management.commands.seed_curriculum import MODULE_LEVELS
+from curriculum.management.commands.seed_curriculum import MODULE_LEVELS, Command, ev
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
 from curriculum.seed_data.scenario_bank import scenario_bank
-from curriculum.seed_data.scenario_runtime import DISPLACED_REVISED_CASE_IDS
-from curriculum.seed_data.source.scenario_fixtures import extension_cases
+from curriculum.seed_data.scenario_runtime import DISPLACED_REVISED_CASE_IDS, UNPLACED_CASE_IDS
+from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES
+from curriculum.seed_data.source.scenario_fixtures import extension_case
 from curriculum.seed_data.source.wave_plan import MODULE_WAVE_PLAN
+from evaluation.services.rule_builders import rules_from_state_requirements
 from evaluation.services.state_based import StateBasedEvaluator
 
 
@@ -89,6 +91,8 @@ def test_every_revised_answer_key_satisfies_its_runtime_evaluation():
     failures = []
 
     for case in _curriculum_cases():
+        if case["case_id"] in UNPLACED_CASE_IDS:
+            continue
         outcome = evaluator.evaluate(
             TARGET_STATES[case["case_id"]],
             case["state_requirements"],
@@ -101,12 +105,72 @@ def test_every_revised_answer_key_satisfies_its_runtime_evaluation():
     assert failures == []
 
 
-def test_every_wave_and_gate_answer_key_satisfies_its_evaluation_and_the_start_does_not():
-    """The scenarios written for the wave plan and the gates (``wave_scenarios.md``)."""
+# Grading reads repository state only: no typed-command checks, no records of
+# how an operation ran. Equivalent Git routes must pass.
+ROUTE_RULES = {
+    "required_command",
+    "forbidden_command",
+    "required_command_sequence",
+    "commit_replaced_by_amend",
+    "commit_not_followed_by_extra_commit",
+    "operation_metadata_equals",
+    "operation_metadata_not_equals",
+    "operation_metadata_contains",
+    "operation_metadata_absent",
+    "operation_metadata_path_matches",
+}
+
+
+def _published_cases() -> dict[str, dict]:
+    """Every case a learner can be served: each planned wave variant and gate trial."""
+    pool = {case["case_id"]: case for case in _curriculum_cases()}
+    case_ids = [
+        case_id
+        for tiers in MODULE_WAVE_PLAN.values()
+        for waves in tiers.values()
+        for wave in waves
+        for case_id in wave.variants
+    ]
+    case_ids += [
+        case_id
+        for gate in CHALLENGE_GATES.values()
+        for trial in gate["trials"].values()
+        for case_id in trial
+    ]
+    return {case_id: pool.get(case_id) or extension_case(case_id) for case_id in case_ids}
+
+
+def test_published_scenarios_are_graded_on_repository_state_only():
+    offending = {}
+    for case_id, case in _published_cases().items():
+        spec = ev(case["state_requirements"])
+        kinds = {rule["type"] for rule in rules_from_state_requirements(case["state_requirements"])}
+        route = sorted(kinds & ROUTE_RULES)
+        if route or spec["process_requirements"]["required_commands"]:
+            offending[case_id] = route
+    assert offending == {}
+
+
+def test_published_checklists_promise_only_what_state_grading_checks():
+    route_words = ("process check", "command-history", "used a lease", "guarded (checked) force")
+    offending = {
+        case_id: checks
+        for case_id, case in _published_cases().items()
+        if (
+            checks := [
+                check
+                for check in Command._variant_defaults(case)["scenario_context"]["objective_checks"]
+                if any(word in check for word in route_words)
+            ]
+        )
+    }
+    assert offending == {}
+
+
+def test_every_published_answer_key_passes_and_no_starting_state_does():
     evaluator = StateBasedEvaluator()
     failures = []
-
-    for case_id, case in extension_cases().items():
+    for case_id, case in _published_cases().items():
         solved = evaluator.evaluate(
             TARGET_STATES[case_id],
             case["state_requirements"],
@@ -123,8 +187,8 @@ def test_every_wave_and_gate_answer_key_satisfies_its_evaluation_and_the_start_d
         )
         if untouched.target_matched:
             failures.append((case_id, "the starting state already passes"))
-
     assert failures == []
+
 
 @pytest.mark.django_db
 def test_curriculum_seed_persists_the_complete_scenario_contract():
@@ -172,8 +236,7 @@ def test_curriculum_seed_persists_the_complete_scenario_contract():
         for tier in level["tiers"].values()
     )
     assert (
-        AdventureLevelTierWaveVariant.objects.filter(is_published=True).count()
-        == planned + pooled
+        AdventureLevelTierWaveVariant.objects.filter(is_published=True).count() == planned + pooled
     )
 
 

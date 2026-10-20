@@ -28,6 +28,8 @@ class InitCloneRemoteVerificationMixin:
         reinitialized = bool(previous_state.get("repository_initialized"))
         expected = copy.deepcopy(previous_state)
         expected["repository_initialized"] = True
+        if not reinitialized:
+            expected["repository_root"] = directory if directory is not None else "."
         expected["head"] = {
             "type": "branch",
             "name": branch,
@@ -72,6 +74,7 @@ class InitCloneRemoteVerificationMixin:
         remote_name = "origin"
         expected = copy.deepcopy(previous_state)
         expected["repository_initialized"] = True
+        expected["repository_root"] = directory
         expected["remotes"] = {remote_name: url}
         expected["remote_branches"] = {}
         self._apply_remote_fixture_branches(expected)
@@ -279,6 +282,10 @@ class InitCloneRemoteVerificationMixin:
                 )
             commit_id = (previous_state.get("branches") or {}).get(branch)
             remote_key = f"{remote}/{branch}"
+            if self._push_is_rejected(previous_state, parts, remote_key, commit_id):
+                raise BadRequest(
+                    "Git rejects the submitted push: the remote has work it would drop."
+                )
             expected_remote_branches[remote_key] = commit_id
             if remote_key in expected_remote_updates:
                 expected_remote_updates[remote_key] = commit_id
@@ -296,6 +303,24 @@ class InitCloneRemoteVerificationMixin:
             raise BadRequest("execution.next_state does not match the submitted git push command.")
         if (next_state.get("remote_updates") or {}) != expected_remote_updates:
             raise BadRequest("execution.next_state does not match the submitted git push command.")
+
+    def _push_is_rejected(
+        self, state: dict, parts: list[str], remote_key: str, commit_id: str | None
+    ) -> bool:
+        """Mirror the browser: a plain push must contain the server's tip, and a
+        lease push fails once the server moved after the last fetch."""
+        fetched = (state.get("remote_branches") or {}).get(remote_key)
+        updates = state.get("remote_updates") or {}
+        server = updates.get(remote_key) if remote_key in updates else fetched
+        if "--force" in parts or "-f" in parts:
+            return False
+        if any(
+            part == "--force-with-lease" or part.startswith("--force-with-lease=") for part in parts
+        ):
+            return server != fetched
+        return (
+            bool(server) and commit_id != server and not self._is_ancestor(state, server, commit_id)
+        )
 
     def _expected_fetch_state(self, *, command: str, previous_state: dict) -> dict:
         parts = parse_git_command(command) or []

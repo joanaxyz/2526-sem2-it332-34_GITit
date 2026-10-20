@@ -1,5 +1,5 @@
 {
-  "generated_by": "real browser Git engine via curriculum.services.solution_replay.replay_solutions",
+  "generated_by": "python -m testing.regenerate_kpi_routes (real browser Git engine)",
   "cases": {
     "practice": {
       "initial_state": {
@@ -118,6 +118,7 @@
         "last_init_reinitialized": false,
         "repository_reinitialized": false
       },
+      "repository_root": ".",
       "last_init_branch": "main",
       "last_init_initial_branch": "main",
       "last_init_directory": null,
@@ -194,6 +195,7 @@
         "last_init_reinitialized": false,
         "repository_reinitialized": false
       },
+      "repository_root": ".",
       "last_init_branch": "main",
       "last_init_initial_branch": "main",
       "last_init_directory": null,
@@ -238,7 +240,10 @@
             "partial_hunks": {},
             "replaced_commits": {},
             "operation_metadata": {}
-          }
+          },
+          "normalized_command": "git init",
+          "command_family": "init",
+          "exit_code": 0
         },
         {
           "command": "git add .",
@@ -282,6 +287,7 @@
               "last_init_reinitialized": false,
               "repository_reinitialized": false
             },
+            "repository_root": ".",
             "last_init_branch": "main",
             "last_init_initial_branch": "main",
             "last_init_directory": null,
@@ -289,7 +295,10 @@
             "last_init_quiet": false,
             "last_init_reinitialized": false,
             "repository_reinitialized": false
-          }
+          },
+          "normalized_command": "git add .",
+          "command_family": "add",
+          "exit_code": 0
         },
         {
           "command": "git commit -m \"First\"",
@@ -333,6 +342,7 @@
               "last_init_reinitialized": false,
               "repository_reinitialized": false
             },
+            "repository_root": ".",
             "last_init_branch": "main",
             "last_init_initial_branch": "main",
             "last_init_directory": null,
@@ -340,7 +350,10 @@
             "last_init_quiet": false,
             "last_init_reinitialized": false,
             "repository_reinitialized": false
-          }
+          },
+          "normalized_command": "git commit -m First",
+          "command_family": "commit",
+          "exit_code": 0
         }
       ],
       "final": {
@@ -404,6 +417,7 @@
           "last_init_reinitialized": false,
           "repository_reinitialized": false
         },
+        "repository_root": ".",
         "last_init_branch": "main",
         "last_init_initial_branch": "main",
         "last_init_directory": null,
@@ -452,7 +466,10 @@
             "partial_hunks": {},
             "replaced_commits": {},
             "operation_metadata": {}
-          }
+          },
+          "normalized_command": "git init",
+          "command_family": "init",
+          "exit_code": 0
         },
         {
           "command": "git add .",
@@ -500,6 +517,7 @@
               "last_init_reinitialized": false,
               "repository_reinitialized": false
             },
+            "repository_root": ".",
             "last_init_branch": "main",
             "last_init_initial_branch": "main",
             "last_init_directory": null,
@@ -507,7 +525,10 @@
             "last_init_quiet": false,
             "last_init_reinitialized": false,
             "repository_reinitialized": false
-          }
+          },
+          "normalized_command": "git add .",
+          "command_family": "add",
+          "exit_code": 0
         },
         {
           "command": "git commit -m \"First\"",
@@ -555,6 +576,7 @@
               "last_init_reinitialized": false,
               "repository_reinitialized": false
             },
+            "repository_root": ".",
             "last_init_branch": "main",
             "last_init_initial_branch": "main",
             "last_init_directory": null,
@@ -562,7 +584,10 @@
             "last_init_quiet": false,
             "last_init_reinitialized": false,
             "repository_reinitialized": false
-          }
+          },
+          "normalized_command": "git commit -m First",
+          "command_family": "commit",
+          "exit_code": 0
         }
       ],
       "final": {
@@ -633,6 +658,7 @@
           "last_init_reinitialized": false,
           "repository_reinitialized": false
         },
+        "repository_root": ".",
         "last_init_branch": "main",
         "last_init_initial_branch": "main",
         "last_init_directory": null,

@@ -186,7 +186,6 @@ def create_stage_readme_tier_run(
         title="Stage README",
         min_counted_commands=1,
         max_counted_commands=3,
-        required_successful_attempts=1,
         is_published=True,
     )
     states = stage_readme_states()

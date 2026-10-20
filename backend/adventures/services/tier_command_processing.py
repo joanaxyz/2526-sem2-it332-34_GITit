@@ -1,10 +1,10 @@
 from django.db import transaction
-from django.db.models import Max, Q
+from django.db.models import Max
 from django.utils import timezone
 
 from adventures.models import AdventureLevelTierProgress, AdventureLevelTierRun, SkillMastery
 from adventures.rewards import award_tier_reward
-from adventures.tier_waves import cleared_slugs, next_wave, published_waves, solved_wave_runs
+from adventures.tier_waves import cleared_slugs, next_wave, published_waves
 from common.constants import (
     COMMAND_COUNTED,
     DIFFICULTY_EASY,
@@ -55,12 +55,11 @@ class AdventureLevelTierCommandProcessingService:
     """Mirrors challenges.services.command_processing.ChallengeCommandProcessingService.
 
     The single behavioral divergence is completion: a ChallengeTrial needs
-    one successful attempt, but an AdventureLevelTierWave needs
-    required_successful_attempts successes across separate runs. See
-    _complete_run below - it always ends the run on solve (mirroring
-    ChallengeRun: one row per attempt, never a long-lived looping run), but
-    only writes AdventureLevelTierCompletion once the running
-    AdventureLevelTierProgress counter reaches that threshold.
+    one successful attempt, but an AdventureLevelTier is an ordered set of
+    waves, each cleared by its own run. See _complete_run below - it always
+    ends the run on solve (mirroring ChallengeRun: one row per attempt, never
+    a long-lived looping run), but only writes AdventureLevelTierCompletion
+    once AdventureLevelTierProgress holds every published wave.
     """
 
     def __init__(self) -> None:
@@ -317,9 +316,8 @@ class AdventureLevelTierCommandProcessingService:
         every published wave is cleared. Returns the saved field names.
 
         A tier is an ordered set of waves (see ``tier_waves``). A graded solve
-        clears its wave once that wave has been solved
-        ``required_successful_attempts`` times, which credits the forms the
-        learner typed. The run that clears the last wave writes
+        clears its wave and credits the forms the learner typed. The run that
+        clears the last wave writes
         AdventureLevelTierCompletion and pays the tier's reward. Progress
         lives on AdventureLevelTierProgress because each run is one attempt;
         every solved run ends as COMPLETED, mirroring ChallengeRun."""
@@ -328,11 +326,15 @@ class AdventureLevelTierCommandProcessingService:
         run.status = SESSION_STATUS_COMPLETED
         run.completed_at = timezone.now()
         run.ended_at = run.completed_at
-        run.stars = 0 if run.is_transfer else compute_stars(
-            solved=True,
-            counted_commands=run.counted_action_total,
-            budget=run.min_counted_commands,
-            retry_count=run.retry_index,
+        run.stars = (
+            0
+            if run.is_transfer
+            else compute_stars(
+                solved=True,
+                counted_commands=run.counted_action_total,
+                budget=run.min_counted_commands,
+                retry_count=run.retry_index,
+            )
         )
         rewards = None
         if run.is_transfer:
@@ -350,11 +352,7 @@ class AdventureLevelTierCommandProcessingService:
                 wave = next_wave(waves, progress) or wave
             cleared = cleared_slugs(progress)
             mastery_advanced: list[dict] = []
-            wave_cleared = wave.slug not in cleared and (
-                # This run is not saved as completed yet.
-                solved_wave_runs(player=run.player, wave=wave) + 1
-                >= wave.required_successful_attempts
-            )
+            wave_cleared = wave.slug not in cleared
             if wave_cleared:
                 cleared.append(wave.slug)
                 progress.cleared_wave_slugs = cleared
@@ -426,13 +424,12 @@ class AdventureLevelTierCommandProcessingService:
     def _credit_mastery(self, run: AdventureLevelTierRun, wave_forms) -> list[dict]:
         """One solve for every published form the wave's clears actually used.
 
-        Called once per cleared wave. The commands come from every solved,
-        non-replay run of that wave, so a wave that needs several clears
-        credits each form a learner typed in any of them - and nothing they
-        did not type, which would otherwise suppress that form's guide later.
+        Called once per cleared wave, with the clearing run's commands: it
+        credits each form the learner typed - and nothing they did not type,
+        which would otherwise suppress that form's guide later.
         ``wave_forms`` (the wave's published forms) only break resolver ties.
         """
-        forms = forms_used_by(_wave_clear_commands(run), preferred=wave_forms)
+        forms = forms_used_by(_processed_commands(run), preferred=wave_forms)
         if not forms:
             return []
         targets = form_solve_targets({form.id for form in forms})
@@ -479,20 +476,10 @@ def tier_stars(*, run: AdventureLevelTierRun, waves, wave=None) -> int:
     return min(best.get(wave.id, 0) for wave in waves)
 
 
-def _wave_clear_commands(run: AdventureLevelTierRun) -> list[str]:
-    """Processed commands of this run and the player's earlier clears of its wave."""
-    earlier = AdventureLevelTierRun.objects.filter(
-        player=run.player,
-        current_wave=run.current_wave,
-        status=SESSION_STATUS_COMPLETED,
-        is_replay=False,
-        is_transfer=False,
-    ).exclude(id=run.id)
+def _processed_commands(run: AdventureLevelTierRun) -> list[str]:
+    """The run's processed commands, in submission order."""
     steps = (
-        CommandStep.objects.filter(
-            Q(adventure_tier_run=run) | Q(adventure_tier_run__in=earlier),
-            was_processable=True,
-        )
+        CommandStep.objects.filter(adventure_tier_run=run, was_processable=True)
         .order_by("id")
         .values_list("normalized_command", "command_text")
     )
@@ -500,10 +487,16 @@ def _wave_clear_commands(run: AdventureLevelTierRun) -> list[str]:
 
 
 def _uses_contextual_feedback(run: AdventureLevelTierRun) -> bool:
-    return not run.is_transfer and ScaffoldingService().supports_for_tier(run.tier.difficulty)["contextual_feedback"]
+    return (
+        not run.is_transfer
+        and ScaffoldingService().supports_for_tier(run.tier.difficulty)["contextual_feedback"]
+    )
 
 
 def _visible_target_state(run: AdventureLevelTierRun) -> dict | None:
-    if not run.is_transfer and ScaffoldingService().supports_for_tier(run.tier.difficulty)["expected_state"]:
+    if (
+        not run.is_transfer
+        and ScaffoldingService().supports_for_tier(run.tier.difficulty)["expected_state"]
+    ):
         return run.selected_variant.target_state
     return None

@@ -55,7 +55,6 @@ def test_adventure_compile_writes_direct_level_variants(db, django_user_model):
 
     assert level.command_forms.filter(usage_form="git status").exists()
     assert wave.command_forms.filter(usage_form="git status").exists()
-    assert wave.required_successful_attempts == 1
     assert AdventureLevelTierWaveVariant.objects.filter(wave=wave, is_published=True).count() == 2
 
 
@@ -69,13 +68,17 @@ def test_recompiling_an_adventure_unpublishes_removed_waves_instead_of_deleting(
         slug="recompiled-adventure",
         title="Recompiled",
         command_family="git status",
-        definition={"levels": [{"slug": "level-1", "title": "Level 1", "waves": [_wave("a"), _wave("b")]}]},
+        definition={
+            "levels": [{"slug": "level-1", "title": "Level 1", "waves": [_wave("a"), _wave("b")]}]
+        },
     )
     compiler = ContentRuntimeCompiler()
     first = compiler.compile(content=content)
     tier = first.adventure.tiers.get(difficulty="easy")
 
-    content.definition = {"levels": [{"slug": "level-1", "title": "Level 1", "waves": [_wave("a")]}]}
+    content.definition = {
+        "levels": [{"slug": "level-1", "title": "Level 1", "waves": [_wave("a")]}]
+    }
     content.save(update_fields=["definition"])
     second = compiler.compile(content=content)
 

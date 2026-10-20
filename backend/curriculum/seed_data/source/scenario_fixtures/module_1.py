@@ -16,45 +16,22 @@ from curriculum.seed_data.source.scenario_fixtures.shapes import (
 )
 
 
-def _init_rerun() -> dict[str, Any]:
-    tree = {"README.md": "handbook-readme-v1", "drafts/intro.md": "intro-v1"}
+def _init_nested(*, root: str, branch: str, siblings: list[str]) -> dict[str, Any]:
+    """A workspace of several projects; only ``root`` becomes a repository."""
+    files = {f"{root}/README.md": f"{root}-readme", f"{root}/app.py": f"{root}-app"}
+    files.update({f"{sibling}/README.md": f"{sibling}-readme" for sibling in siblings})
     return {
         "initial_state": repo(
-            commits=[
-                commit("c1", "Create handbook outline", [], tree),
-                commit(
-                    "c2",
-                    "Add onboarding checklist",
-                    ["c1"],
-                    {**tree, "checklists/onboarding.md": "onboarding-v1"},
-                ),
-            ],
-            branches={"main": "c2"},
-            working_tree={"drafts/intro.md": modified("intro-welcome-rewrite")},
+            initialized=False,
+            working_tree={path: untracked(content) for path, content in files.items()},
         ),
         "state_requirements": {
             "repository_initialized": True,
-            "head_branch": "main",
-            "branch_points_to": {"main": "c2"},
+            "repository_root": root,
+            "head_branch": branch,
             "staging_empty": True,
-            "working_tree_contains": ["drafts/intro.md"],
-            "rules": [
-                {"type": "commit_count_equals", "count": 2},
-                {
-                    "type": "working_tree_contains_tokens",
-                    "paths": {"drafts/intro.md": ["intro-welcome-rewrite"]},
-                },
-                {
-                    "type": "operation_metadata_equals",
-                    "key": "last_init_current_directory",
-                    "value": True,
-                },
-                {
-                    "type": "operation_metadata_equals",
-                    "key": "last_init_reinitialized",
-                    "value": True,
-                },
-            ],
+            "working_tree_contains": sorted(files),
+            "rules": [{"type": "commit_count_equals", "count": 0}],
         },
     }
 
@@ -84,13 +61,8 @@ def _shallow_clone(
             "working_tree_clean": True,
             "rules": [
                 {"type": "commit_count_equals", "count": depth},
-                {"type": "operation_metadata_equals", "key": "last_clone_depth", "value": depth},
-                {
-                    "type": "operation_metadata_equals",
-                    "key": "last_clone_destination",
-                    "value": destination,
-                },
             ],
+            "repository_root": destination,
         },
     }
 
@@ -264,11 +236,7 @@ def _reword_then_commit(
                     tree_excludes=[new_path],
                 ),
                 tip("main", message_equals=new_message, changes_include=[new_path]),
-                {
-                    "type": "operation_metadata_equals",
-                    "key": "last_amend_replaced_commit",
-                    "value": "c2",
-                },
+                {"type": "branch_history_excludes", "branch": "main", "commits": ["c2"]},
             ],
         },
     }
@@ -360,7 +328,12 @@ def _capstone(
 
 FIXTURES: dict[str, dict[str, Any]] = {
     # 1.1 Initializing Repositories
-    "init-hard-safe-rerun-handbook": _init_rerun(),
+    "init-hard-nested-service": _init_nested(
+        root="services/billing-api", branch="trunk", siblings=["services/search-api", "docs"]
+    ),
+    "init-hard-nested-course": _init_nested(
+        root="courses/git-basics", branch="main", siblings=["courses/sql-basics", "templates"]
+    ),
     # 1.2 Cloning Repositories
     "clone-medium-shallow-metrics": _shallow_clone(
         url="https://example.test/data/metrics-dash.git",

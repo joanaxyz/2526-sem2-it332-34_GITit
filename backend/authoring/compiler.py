@@ -208,7 +208,6 @@ class ContentRuntimeCompiler:
                             or 8
                         ),
                         "objective_checks": authored_wave.get("objective_checks") or [],
-                        "required_successful_attempts": 1,
                         "is_published": True,
                     },
                 )

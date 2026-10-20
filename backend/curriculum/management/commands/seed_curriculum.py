@@ -37,7 +37,7 @@ from curriculum.seed_data.command_catalog import COMMAND_CATALOG
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
 from curriculum.seed_data.generated.generated_trajectories import SOLUTION_TRAJECTORIES
 from curriculum.seed_data.scenario_bank import scenario_for_case
-from curriculum.seed_data.scenario_runtime import apply_scenario_bank
+from curriculum.seed_data.scenario_runtime import apply_scenario_bank, graded_checks
 from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES, GATE_MAX_COUNTED_COMMANDS
 from curriculum.seed_data.source.scenario_fixtures import extension_case
 from curriculum.seed_data.source.wave_plan import MODULE_WAVE_PLAN, WaveSpec
@@ -789,15 +789,11 @@ ORIENTATION_LESSON_SPECS: list[dict[str, Any]] = [
 # ---------------------------------------------------------------------------
 # Module 1 - Local Repository Foundations
 #
-# Source: seed_module1_scenarios.py. SESSION_COUNTS default is
-# {easy: 3, medium: 2, hard: 2}; the only override anywhere in the file is
-# init_scenario()'s EASY difficulty (required_attempts=1), applied below via
-# each tier's own "required_successful_attempts" key when present.
+# Source: seed_module1_scenarios.py. These specs hold each level's archived
+# repository fixtures; the wave plan (source/wave_plan/) places them.
 # "Inspecting Repository State" (diagnostic_scenario) has no difficulties in
 # the source - it becomes a level with an empty "tiers" list.
 # ---------------------------------------------------------------------------
-
-MODULE_1_SESSION_COUNTS_DEFAULT = {"easy": 3, "medium": 2, "hard": 2}
 
 # "Inspecting Repository State" (the old diagnostic-only scenario, zero
 # difficulties in the source - see seed_module1_scenarios.py:diagnostic_scenario())
@@ -823,7 +819,6 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
         "description": "Create Git metadata in an existing or named project folder.",
         "tiers": {
             "easy": {
-                "required_successful_attempts": 1,  # explicit override in source
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["easy"],
                 "story": "Initialize the current folder with the requested first-branch behavior.",
                 "task": "Make the current folder a Git repository, but do not stage files or create a commit.",
@@ -4788,12 +4783,9 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
 # ---------------------------------------------------------------------------
 # Module 2 - Branching and Collaboration
 #
-# Source: seed_module2_scenarios.py. SESSION_COUNTS = {easy:3, medium:2,
-# hard:2}; NO overrides anywhere in this file - every tier uses the plain
-# default. All 9 anchors are wired (no dead scenarios in this module).
+# Source: seed_module2_scenarios.py. All 9 anchors are wired (no dead
+# scenarios in this module); the wave plan places their cases.
 # ---------------------------------------------------------------------------
-
-MODULE_2_SESSION_COUNTS_DEFAULT = {"easy": 3, "medium": 2, "hard": 2}
 
 MODULE_2_LEVELS: list[dict[str, Any]] = [
     {
@@ -9620,9 +9612,8 @@ MODULE_2_LEVELS: list[dict[str, Any]] = [
 # ---------------------------------------------------------------------------
 # Module 3 - Conflict Resolution
 #
-# Source: seed_module3_scenarios.py. NO SESSION_COUNTS constant - each of the
-# 9 scenario/difficulty required_successful_attempts values is a hardcoded
-# literal at its own diff()/call site (see extraction). Confirmed dead code
+# Source: seed_module3_scenarios.py; the wave plan places these cases.
+# Confirmed dead code
 # excluded per prior agreement: prevention_case, capstone_case,
 # accept_ours_easy/theirs_medium/side_hard, merge_abort_easy/medium/hard,
 # diagnostic_easy/medium/hard, and their unused target rules - none of these
@@ -9638,7 +9629,6 @@ MODULE_3_LEVELS: list[dict[str, Any]] = [
         "description": "Resolve conflict content, stage it, and complete the merge.",
         "tiers": {
             "easy": {
-                "required_successful_attempts": 3,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["easy"],
                 "story": "Complete a single-file manual conflict resolution.",
                 "task": "Stage the resolved file and complete the merge commit.",
@@ -9950,7 +9940,6 @@ MODULE_3_LEVELS: list[dict[str, Any]] = [
                 ],
             },
             "medium": {
-                "required_successful_attempts": 3,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["medium"],
                 "story": "Resolve conflict content in a slightly larger branch context.",
                 "task": "Commit the clean resolved content with the requested message.",
@@ -10132,7 +10121,6 @@ MODULE_3_LEVELS: list[dict[str, Any]] = [
                 ],
             },
             "hard": {
-                "required_successful_attempts": 2,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["hard"],
                 "story": "Resolve conflict situations based on the requested outcome.",
                 "task": "Produce the clean target state for the conflicted merge.",
@@ -10387,7 +10375,6 @@ MODULE_3_LEVELS: list[dict[str, Any]] = [
         "description": "Configure and run a merge tool to resolve conflicts.",
         "tiers": {
             "easy": {
-                "required_successful_attempts": 2,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["easy"],
                 "story": "Resolve the conflict and finish the merge with the shortest valid workflow.",
                 "task": "Merge the named source branch, resolve the conflicted file, stage it, and commit.",
@@ -10699,7 +10686,6 @@ MODULE_3_LEVELS: list[dict[str, Any]] = [
                 ],
             },
             "medium": {
-                "required_successful_attempts": 2,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["medium"],
                 "story": "Resolve branch conflicts with different file types.",
                 "task": "Merge the named source branch, resolve the conflicted file, stage it, and commit.",
@@ -10940,7 +10926,6 @@ MODULE_3_LEVELS: list[dict[str, Any]] = [
                 ],
             },
             "hard": {
-                "required_successful_attempts": 2,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["hard"],
                 "story": "Resolve the merge conflict without extra scaffolding.",
                 "task": "Merge the named source branch, resolve the conflicted file, stage it, and commit.",
@@ -11195,7 +11180,6 @@ MODULE_3_LEVELS: list[dict[str, Any]] = [
         "description": "Apply selected commits without merging an entire branch.",
         "tiers": {
             "easy": {
-                "required_successful_attempts": 3,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["easy"],
                 "story": "Cherry-pick one named fix onto the current release branch.",
                 "task": "Apply the selected commit as a new commit on the current branch.",
@@ -11474,7 +11458,6 @@ MODULE_3_LEVELS: list[dict[str, Any]] = [
                 ],
             },
             "medium": {
-                "required_successful_attempts": 3,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["medium"],
                 "story": "Cherry-pick either directly or into the index for review.",
                 "task": "Reach the requested cherry-pick state.",
@@ -11701,7 +11684,6 @@ MODULE_3_LEVELS: list[dict[str, Any]] = [
                 ],
             },
             "hard": {
-                "required_successful_attempts": 2,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["hard"],
                 "story": "Choose between completing and aborting cherry-pick states.",
                 "task": "Reach the requested selective-application outcome.",
@@ -11938,10 +11920,8 @@ MODULE_3_LEVELS: list[dict[str, Any]] = [
 # ---------------------------------------------------------------------------
 # Module 4 - Advanced Recovery and History
 #
-# Source: seed_module4_scenarios.py. NO SESSION_COUNTS constant - each of the
-# 9 scenario/difficulty required_successful_attempts values is a hardcoded
-# literal at its own difficulty_spec(..., required_attempts=N) call site (see
-# extraction). Hard-reset cases are still generated from one template per
+# Source: seed_module4_scenarios.py; the wave plan places these cases.
+# Hard-reset cases are still generated from one template per
 # difficulty (the recovery branch and incident text vary per case). Revert
 # and rebase cases are authored explicitly below: the source generator loop
 # produced five exact copies per tier, so a retry replayed the same puzzle.
@@ -12926,7 +12906,6 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
         "description": "Recover lost work after a destructive reset.",
         "tiers": {
             "easy": {
-                "required_successful_attempts": 2,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["easy"],
                 "story": "You are a junior engineer handling a low-pressure rollback incident after a shallow mistaken reset.",
                 "task": "Find the most recent lost tip and restore it to the requested recovery branch.",
@@ -12936,7 +12915,6 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
                 ],
             },
             "medium": {
-                "required_successful_attempts": 1,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["medium"],
                 "story": "You are the sprint lead responding to a deeper mistaken reset with limited guidance from teammates.",
                 "task": "Trace the correct history entry and restore the branch to the requested recovery point.",
@@ -12946,7 +12924,6 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
                 ],
             },
             "hard": {
-                "required_successful_attempts": 1,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["hard"],
                 "story": "You are the incident commander recovering critical work from a noisy reset trail under release pressure.",
                 "task": "Disambiguate noisy history evidence and recover exactly the requested lost tip branch.",
@@ -12964,7 +12941,6 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
         "description": "Use revert to preserve shared history.",
         "tiers": {
             "easy": {
-                "required_successful_attempts": 2,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["easy"],
                 "story": "You are a developer handling a straightforward rollback request right after a bad push.",
                 "task": "Append the rollback commit for the target change and ensure remote main is updated.",
@@ -12972,7 +12948,6 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
                 "cases": MODULE_4_REVERT_CASES["easy"],
             },
             "medium": {
-                "required_successful_attempts": 1,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["medium"],
                 "story": "You are supporting QA during regression triage, and the bad change is buried in published history.",
                 "task": "Identify the correct published change to roll back and synchronize the shared branch.",
@@ -12980,7 +12955,6 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
                 "cases": MODULE_4_REVERT_CASES["medium"],
             },
             "hard": {
-                "required_successful_attempts": 1,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["hard"],
                 "story": "You are the release owner during a high-stakes deploy window with strict rollback constraints.",
                 "task": "Roll back both faulty published changes, keep the good change between them, and publish once without rewriting shared history.",
@@ -12996,7 +12970,6 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
         "description": "Finish a full rebase recovery workflow.",
         "tiers": {
             "easy": {
-                "required_successful_attempts": 2,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["easy"],
                 "story": "You are finishing a normal sprint task where your feature branch simply drifted from main.",
                 "task": "Recover the branch onto the current main line and confirm the repository is clean.",
@@ -13004,7 +12977,6 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
                 "cases": MODULE_4_REBASE_CASES["easy"],
             },
             "medium": {
-                "required_successful_attempts": 1,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["medium"],
                 "story": "You are coordinating with reviewers who need a refined commit sequence before acceptance.",
                 "task": "Your branch was started from the wrong base. Move only its own commits onto main, leaving the other branch's work behind, with a linear history.",
@@ -13012,7 +12984,6 @@ MODULE_4_LEVELS: list[dict[str, Any]] = [
                 "cases": MODULE_4_REBASE_CASES["medium"],
             },
             "hard": {
-                "required_successful_attempts": 1,
                 "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS["hard"],
                 "story": "You are driving final release cleanup, and branch integrity checks are stricter than usual.",
                 "task": "A rebase dropped one of your commits: recover the original branch from the reflog, then rebase all of it onto main with a linear history.",
@@ -13055,21 +13026,12 @@ class Command(BaseCommand):
         chapters = self._seed_chapters(story)
         self._seed_orientation_lessons(chapters[0])
         self._seed_field_guide_commands(story=story, chapters=chapters)
-        self._seed_adventure_levels(chapters[1], MODULE_1_LEVELS, MODULE_1_SESSION_COUNTS_DEFAULT)
-        self._seed_adventure_levels(chapters[2], MODULE_2_LEVELS, MODULE_2_SESSION_COUNTS_DEFAULT)
-        # Module 3 has no SESSION_COUNTS constant in the source - every tier
-        # sets its own required_successful_attempts explicitly. The fallback
-        # dict below is never actually used (Python still evaluates
-        # dict[key] eagerly as the .get() default arg, so it must contain
-        # every difficulty key even though none of them are consulted).
-        self._seed_adventure_levels(
-            chapters[3], MODULE_3_LEVELS, {"easy": 0, "medium": 0, "hard": 0}
-        )
-        # Module 4 has no SESSION_COUNTS constant either - same reasoning as
-        # Module 3's fallback dict above.
-        self._seed_adventure_levels(
-            chapters[4], MODULE_4_LEVELS, {"easy": 0, "medium": 0, "hard": 0}
-        )
+        for chapter, level_specs in zip(
+            chapters[1:],
+            (MODULE_1_LEVELS, MODULE_2_LEVELS, MODULE_3_LEVELS, MODULE_4_LEVELS),
+            strict=True,
+        ):
+            self._seed_adventure_levels(chapter, level_specs)
         self._seed_challenge_gates(chapters)
         self.stdout.write(
             self.style.SUCCESS(
@@ -13206,7 +13168,6 @@ class Command(BaseCommand):
         self,
         chapter: Chapter,
         level_specs: list[dict[str, Any]],
-        session_counts_default: dict[str, int],
     ) -> None:
         for level_spec in level_specs:
             level, _ = AdventureLevel.objects.update_or_create(
@@ -13227,13 +13188,9 @@ class Command(BaseCommand):
             )
             planned = MODULE_WAVE_PLAN.get(level_spec["slug"])
             if planned is None:
-                # Transitional: a level not yet in the wave plan keeps one wave
-                # per tier that repeats its pool, until its module cuts over.
-                forms = self._level_forms(level_spec, chapter_forms, catalog=self._form_catalog)
-                level.command_forms.set(forms)
-                for difficulty, tier_spec in level_spec["tiers"].items():
-                    self._seed_tier(level, difficulty, tier_spec, session_counts_default, forms)
-                continue
+                raise CommandError(
+                    f"{level_spec['slug']} has no waves in source/wave_plan/; every level needs a plan."
+                )
             cases = self._planned_cases(level_spec, planned)
             # A spiral wave reviews earlier levels' forms; they are not this level's.
             taught = {
@@ -13313,10 +13270,8 @@ class Command(BaseCommand):
         return {
             "label": revised["label"],
             "initial_state": case["initial_state"],
-            "evaluation_spec": ev(
-                case["state_requirements"],
-                required=case.get("required_commands", []),
-            ),
+            # Graded on repository state only, never on the commands typed.
+            "evaluation_spec": ev(case["state_requirements"]),
             "target_state": TARGET_STATES.get(case["case_id"], {}),
             "solution_commands": case["solution_commands"],
             "solution_workspace_files": case.get("solution_workspace_files", []),
@@ -13335,7 +13290,7 @@ class Command(BaseCommand):
                 "starting_point": revised["starting_point"],
                 "real_world_context": revised["real_world_context"],
                 "task": revised["task"],
-                "objective_checks": revised["objective_checks"],
+                "objective_checks": graded_checks(revised["objective_checks"]),
                 "expected_result": revised["expected_result"],
                 "details": required_values,
             },
@@ -13372,7 +13327,12 @@ class Command(BaseCommand):
             )
             level.command_forms.set(
                 self._level_forms(
-                    {"tiers": {difficulty: {"cases": cases} for difficulty, cases in cases_by_difficulty.items()}},
+                    {
+                        "tiers": {
+                            difficulty: {"cases": cases}
+                            for difficulty, cases in cases_by_difficulty.items()
+                        }
+                    },
                     chapter_forms,
                     catalog=self._form_catalog,
                 )
@@ -13448,55 +13408,6 @@ class Command(BaseCommand):
             shared = used if shared is None else shared & used
         return [form for form in level_forms if form.id in (shared or set())]
 
-    def _seed_tier(
-        self,
-        level: AdventureLevel,
-        difficulty: str,
-        tier_spec: dict[str, Any],
-        session_counts_default: dict[str, int],
-        forms: list[CommandForm],
-    ) -> None:
-        tier, _ = AdventureLevelTier.objects.update_or_create(
-            adventure_level=level,
-            difficulty=difficulty,
-            defaults={"is_published": True},
-        )
-        required_successful_attempts = tier_spec.get(
-            "required_successful_attempts", session_counts_default[difficulty]
-        )
-        # One wave per tier: the old system tracked required *successful
-        # attempts* of a single repeatable exercise (drawing a fresh variant
-        # each attempt), not a sequence of distinct waves.
-        wave, _ = AdventureLevelTierWave.objects.update_or_create(
-            tier=tier,
-            slug=f"{level.slug}-{difficulty}",
-            defaults={
-                "title": level.title,
-                "sort_order": 0,
-                "story": tier_spec["story"],
-                "task": tier_spec["task"],
-                "min_counted_commands": tier_spec["min_counted_commands"],
-                "max_counted_commands": tier_spec["max_counted_commands"],
-                "objective_checks": [],
-                "required_successful_attempts": required_successful_attempts,
-                "is_published": True,
-            },
-        )
-        wave.command_forms.set(
-            self._wave_forms(forms, tier_spec["cases"], catalog=self._form_catalog)
-        )
-        for case in tier_spec["cases"]:
-            AdventureLevelTierWaveVariant.objects.update_or_create(
-                wave=wave,
-                slug=case["case_id"],
-                defaults=self._variant_defaults(case),
-            )
-        # Any variant displaced by the canonical revised bank stays available
-        # to historical runs (PROTECT) but can no longer be selected.
-        wave.variants.exclude(slug__in=[case["case_id"] for case in tier_spec["cases"]]).update(
-            is_published=False
-        )
-
     def _seed_planned_tier(
         self,
         level: AdventureLevel,
@@ -13535,7 +13446,6 @@ class Command(BaseCommand):
                     ),
                     "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS[difficulty],
                     "objective_checks": [],
-                    "required_successful_attempts": 1,
                     "is_published": True,
                 },
             )

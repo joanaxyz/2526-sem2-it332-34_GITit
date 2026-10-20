@@ -1,2087 +1,515 @@
-# GIT it! — All-level command cheat sheet
-
-Generated from the live seeded curriculum on 2026-07-17. Covers **240 levels**, **582 waves**, and **1294 authored variants** across all three stories.
-
-Use the sequence for the variant whose story details, file names, branch names, commit IDs, or URLs match the level shown in the frontend. Commands on one row must be submitted left-to-right.
-
-## Quick totals
-
-| Story | Levels | Waves |
-|---|---:|---:|
-| The Arcane Spire | 69 | 364 |
-| Frostbound Citadel | 106 | 139 |
-| Neon Backstreets | 65 | 79 |
-
-## The Arcane Spire
-
-### Chapter 01: Repository Foundations
-
-#### Level 1: Start a Repository
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Create repository metadata | All variants | `git init` |
-| 2. Initialize named folder | All variants | `git init project` |
-| 3. Choose first branch | All variants | `git init -b main` |
-
-#### Level 2: Read the Workspace
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read plain status | All variants | `git status` |
-| 2. Read an unstaged change | All variants | `git diff` |
-| 3. Read before touching | All variants | `git status` → `git diff` |
-
-#### Level 3: Stage and Commit
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Stage one file | All variants | `git add README.md` |
-| 2. Commit staged work | All variants | `git commit -m 'Save staged work'` |
-| 3. Stage the whole folder | All variants | `git add .` |
-| 4. First save workflow | All variants | `git status` → `git add README.md` → `git commit -m 'Save first feature'` |
-
-#### Level 4: The First Snapshot
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Initialize current folder | All variants | `git init` → `git add .` → `git commit -m 'Initial commit'` |
-| 2. Read the staged snapshot | All variants | `git diff --staged` |
-| 3. Diff before staging | All variants | `git diff` → `git add README.md` → `git commit -m 'Save reviewed edit'` |
-| 4. Diff staged work | All variants | `git diff --staged` → `git commit -m 'Save staged edit'` |
-| 5. Save folder work | All variants | `git add .` → `git commit -m 'Save folder work'` |
-
-#### Level 5: Practice Fresh Starts
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Found a docs site | All variants | `git init` → `git add .` → `git commit -m 'Publish docs seed'` |
-| 2. Set up a named tool folder | All variants | `git init tool-kit` → `git add .` → `git commit -m 'Tool kit start'` |
-| 3. Start history on trunk | All variants | `git init -b trunk` → `git add .` → `git commit -m 'Start on trunk'` |
-
-#### Level 6: Read History
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read compact history | All variants | `git log --oneline` |
-| 2. Graph every ref | All variants | `git log --oneline --graph --all` |
-| 3. Limit history output | All variants | `git log -n 2` |
-| 4. Compact history | All variants | `git log --oneline` → `git add REVIEW.md` → `git commit -m 'Add review note'` |
-| 5. Graph history | All variants | `git log --oneline --graph --all` → `git add GRAPH.md` → `git commit -m 'Document branch tip'` |
-
-#### Level 7: Inspect Commits
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Inspect the newest snapshot | All variants | `git show` |
-| 2. Inspect a named snapshot | All variants | `git show c0` |
-| 3. List a snapshot's paths | All variants | `git show --name-only c0` |
-| 4. Show a commit | All variants | `git show c0` → `git add CHANGELOG.md` → `git commit -m 'Add changelog note'` |
-
-#### Level 8: History Details
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read history as patches | All variants | `git log -p` |
-| 2. Read history change summaries | All variants | `git log --stat` |
-| 3. Detailed history audit | All variants | `git log -n 1` → `git log -p` → `git log --stat` → `git show --name-only c0` → `git add AUDIT.md` → `git commit -m 'Add audit note'` |
-| 4. Audit then record findings | All variants | `git log --stat` → `git show` → `git add AUDIT.md` → `git commit -m 'Record audit findings'` |
-
-#### Level 9: Status at a Glance
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read compact status | All variants | `git status -s` |
-| 2. Read script-stable status | All variants | `git status --porcelain` |
-| 3. Compact script status | All variants | `git status -s` → `git status --porcelain` → `git add README.md` → `git commit -m 'Save compact status work'` |
-| 4. Glance then save everything | All variants | `git status -s` → `git add .` → `git commit -m 'Save inspected work'` → `git log --oneline` |
-
-#### Level 10: Copy a Project
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Copy a remote project | All variants | `git clone https://example.test/team/app.git` |
-| 2. Copy into a chosen folder | All variants | `git clone https://example.test/team/app.git starter-copy` |
-| 3. Copy a specific branch | All variants | `git clone -b starter https://example.test/team/app.git` |
-| 4. Copy only recent history | All variants | `git clone --depth 1 https://example.test/team/app.git` |
-
-#### Level 11: Inspect What You Cloned
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Clone default folder | All variants | `git clone https://example.test/team/app.git` → `git status` |
-| 2. Clone named folder | All variants | `git clone https://example.test/team/app.git app-copy` → `git log --oneline` |
-| 3. Clone specific branch | All variants | `git clone -b starter https://example.test/team/app.git` → `git status` |
-| 4. Clone shallow history | All variants | `git clone --depth 1 https://example.test/team/app.git` → `git log --oneline` |
-
-#### Level 12: Clone Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Copy to a lab folder and verify | All variants | `git clone https://example.test/team/app.git app-lab` → `git status` |
-| 2. Copy a branch and map it | All variants | `git clone -b starter https://example.test/team/app.git` → `git log --oneline --graph --all` |
-| 3. Shallow copy, shallow read | All variants | `git clone --depth 1 https://example.test/team/app.git` → `git log -n 1` |
-| 4. Copy then open the newest snapshot | All variants | `git clone https://example.test/team/app.git` → `git show` |
-| 5. Fresh workspace, not a copy | All variants | `git init scratch-pad` → `git status` |
-
-#### Level 13: Configure Identity and Aliases
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Set user name | All variants | `git config --global user.name 'Learner A'` |
-| 2. Set user email | All variants | `git config --global user.email learner-a@example.test` |
-| 3. List effective settings | All variants | `git config --list` |
-| 4. Create a status shortcut | All variants | `git config --global alias.st status` |
-| 5. List config | All variants | `git config --list` → `git add README.md` → `git commit -m 'Save verified identity'` |
-| 6. Create alias | All variants | `git config --global alias.st status` → `git config --list` → `git add README.md` → `git commit -m 'Save alias setup'` |
-
-#### Level 14: Ignore Noise
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. See what Git ignores | All variants | `git status --ignored` |
-| 2. Trace an ignore rule | All variants | `git check-ignore -v build.log` |
-| 3. Write ignore rule | All variants | `git status --ignored` → `git add .gitignore src/app.py` → `git commit -m 'Ignore build output'` |
-| 4. Explain ignore rule | All variants | `git check-ignore -v build.log` → `git add src/app.py` → `git commit -m 'Save source without build log'` |
-
-#### Level 15: Founding Workflows
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Found a project with identity | All variants | `git init` → `git config --global user.name 'Learner A'` → `git config --global user.email learner-a@example.test` → `git add .` → `git commit -m 'Initial commit'` |
-| 2. Initialize, inspect, save, verify | All variants | `git init` → `git status` → `git add .` → `git commit -m 'First snapshot'` → `git log --oneline` |
-| 3. Found a studio workspace | All variants | `git init studio` → `git status` → `git add .` → `git commit -m 'Studio setup'` |
-| 4. Review every angle, then save | All variants | `git status` → `git diff` → `git add README.md` → `git diff --staged` → `git commit -m 'Save reviewed work'` |
-| 5. Build history in two snapshots | All variants | `git init` → `git add README.md` → `git commit -m 'Add readme'` → `git add .` → `git commit -m 'Add source'` → `git log --oneline` |
-| 6. Adopt ignore rules end to end | All variants | `git status --ignored` → `git check-ignore -v build.log` → `git add .gitignore src/app.py` → `git commit -m 'Adopt ignore rules'` |
-
-#### Level 16: Fresh Start Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Create an archive workspace | All variants | `git init archive-lab` → `git status -s` |
-| 2. Found a field-notes workspace | All variants | `git init field-notes` → `git add .` → `git commit -m 'Field notes start'` |
-| 3. Begin on the release line | All variants | `git init -b release` → `git status` |
-| 4. Docs history on its own line | All variants | `git init -b docs-main` → `git add .` → `git commit -m 'Docs baseline'` |
-| 5. Branch copy, compact check | All variants | `git clone -b starter https://example.test/team/app.git` → `git status -s` |
-| 6. Shallow copy, open the tip | All variants | `git clone --depth 1 https://example.test/team/app.git` → `git show` |
-
-#### Level 17: Inspection Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Script check mid-snapshot | All variants | `git status --porcelain` |
-| 2. Set up a fresh machine | All variants | `git config --global user.name 'Learner C'` → `git config --global user.email learner-c@example.test` → `git config --list` |
-| 3. Create a history shortcut | All variants | `git config --global alias.lg log` → `git config --list` |
-| 4. Describe the latest change | All variants | `git show c1` → `git add CHANGELOG.md` → `git commit -m 'Describe latest change'` |
-| 5. Patch review, then a note | All variants | `git log -p` → `git add REVIEW.md` → `git commit -m 'Record patch review'` |
-| 6. Path audit, then a note | All variants | `git show --name-only c0` → `git add AUDIT.md` → `git commit -m 'List first commit paths'` |
-
-### Chapter 02: Tracking Changes and Snapshots
-
-#### Level 1: See What Changed
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. List changed paths only | All variants | `git diff --name-only` |
-| 2. Review both sides of the index | All variants | `git diff` → `git add README.md` → `git diff --staged` |
-| 3. Triage from paths to patches | All variants | `git status -s` → `git diff --name-only` → `git diff` |
-
-#### Level 2: Choose What Enters the Snapshot
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Stage all changes | All variants | `git add -A` |
-| 2. Stage tracked only | All variants | `git add -u` |
-| 3. Stage selected hunks | All variants | `git add -p src/app.py` |
-| 4. Changed paths only | All variants | `git diff --name-only` → `git add README.md` → `git commit -m 'Save selected path'` |
-
-#### Level 3: Precision Staging Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Sweep tracked edits into a commit | All variants | `git status --porcelain` → `git add -u` → `git commit -m 'Save tracked work'` |
-| 2. Stage everything, verify the landing | All variants | `git status -s` → `git add -A` → `git commit -m 'Save everything'` → `git log --oneline` |
-| 3. Ship only the fix hunk | All variants | `git add -p src/app.py` → `git diff --staged` → `git commit -m 'Ship only the fix'` |
-| 4. Stage tracked, prove the rest stayed | All variants | `git status --porcelain` → `git add -u` |
-| 5. Batch stage, script check | All variants | `git add -A` → `git status --porcelain` |
-| 6. Paths first, then sweep | All variants | `git diff --name-only` → `git add -u` → `git commit -m 'Save listed paths'` |
-
-#### Level 4: Shape Two Snapshots
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Split messy work | All variants | `git add -p src/app.py` → `git commit -m 'Save app fix'` → `git add -A` → `git commit -m 'Save remaining cleanup'` |
-| 2. Split a batch by path list | All variants | `git diff --name-only` → `git add README.md` → `git commit -m 'Save the real edit'` → `git add -A` → `git commit -m 'Save the rest'` |
-| 3. Sweep tracked edits deliberately | All variants | `git status -s` → `git diff --name-only` → `git add -u` → `git diff --staged` → `git commit -m 'Sweep tracked edits'` |
-| 4. Stage a folder, prove it, seal it | All variants | `git add -A` → `git diff --staged` → `git commit -m 'Save the whole batch'` |
-
-#### Level 5: Commit Tracked Work Directly
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Commit tracked directly | All variants | `git commit -a -m 'Save tracked edits'` |
-| 2. Direct commit, verified landing | All variants | `git status -s` → `git commit -a -m 'Ship tracked fix'` → `git log --oneline` |
-| 3. Direct commit, sized audit | All variants | `git commit -a -m 'Record tracked update'` → `git log --stat` |
-
-#### Level 6: Amend Local History
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Amend message or content | All variants | `git commit --amend -m 'Clarify local commit'` |
-| 2. Fold staged work into the last commit | All variants | `git commit --amend --no-edit` |
-| 3. Amend without message change | All variants | `git add README.md` → `git commit --amend --no-edit` |
-| 4. Inspect, then rewrite in place | All variants | `git show` → `git log -n 1` → `git commit --amend -m 'Describe the shell update'` |
-| 5. Fix identity, restamp the commit | All variants | `git config --global user.name 'Learner E'` → `git config --global user.email learner-e@example.test` → `git commit --amend --no-edit` |
-| 6. Amend, then audit the rewrite | All variants | `git add README.md` → `git commit --amend --no-edit` → `git show` → `git log -p` |
-
-#### Level 7: Sealing Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Review, script-check, seal | All variants | `git diff` → `git status --porcelain` → `git commit -a -m 'Save the reviewed pass'` |
-| 2. Rename the snapshot, prove it | All variants | `git commit --amend -m 'Name the feature properly'` → `git show` |
-| 3. Audit sizes, then seal the note | All variants | `git log --stat` → `git log -p` → `git show --name-only c0` → `git commit -a -m 'Record audit pass'` |
-| 4. Quick save, quick look | All variants | `git commit -a -m 'Note the tweak'` → `git show` |
-| 5. Confirm scope, then rewrite | All variants | `git log -n 1` → `git commit --amend -m 'Describe the auth work'` |
-| 6. Sweep, fold, audit | All variants | `git add -u` → `git commit --amend --no-edit` → `git log --stat` |
-
-#### Level 8: Fix Staging Mistakes
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Unstage one file | All variants | `git restore --staged README.md` |
-| 2. Discard working edit | All variants | `git restore README.md` |
-| 3. Repair before commit | All variants | `git status` → `git restore --staged scratch.txt` → `git restore debug.log` → `git add -p src/app.py` → `git commit -m 'Commit real fix'` |
-| 4. Unstage, re-read, discard | All variants | `git restore --staged README.md` → `git diff` → `git restore README.md` |
-| 5. Script-check, then repair | All variants | `git status --porcelain` → `git restore --staged scratch.txt` → `git restore debug.log` → `git add -p src/app.py` → `git commit -m 'Keep only the real fix'` |
-
-#### Level 9: Remove or Stop Tracking Files
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Stage a file's removal | All variants | `git rm old.txt` |
-| 2. Stop tracking, keep the file | All variants | `git rm --cached .env` |
-| 3. Stop tracking a directory | All variants | `git rm -r --cached dist` |
-| 4. Remove tracked file | All variants | `git rm old.txt` → `git commit -m 'Remove obsolete file'` |
-| 5. Untrack local file | All variants | `git rm --cached .env` → `git commit -m 'Stop tracking local config'` |
-| 6. Untrack generated directory | All variants | `git rm -r --cached dist` → `git add .gitignore` → `git commit -m 'Stop tracking build output'` |
-| 7. Clean tracked junk | All variants | `git rm old.txt` → `git rm --cached .env` → `git add .gitignore` → `git commit -m 'Clean tracked junk'` |
-
-#### Level 10: Verify the Cleanup
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Untrack, protect, prove | All variants | `git rm --cached .env` → `git add .gitignore` → `git commit -m 'Ignore local config'` → `git status --ignored` |
-| 2. Untrack, then trace the shield | All variants | `git rm --cached .env` → `git add .gitignore` → `git commit -m 'Stop tracking secrets'` → `git status --ignored` → `git check-ignore -v .env` |
-| 3. Preview a directory untracking | All variants | `git rm -r --cached dist` → `git status --porcelain` |
-| 4. Drop build output, verify twice | All variants | `git rm -r --cached dist` → `git add .gitignore` → `git commit -m 'Drop build output'` → `git status --ignored` → `git check-ignore -v dist/app.js` |
-| 5. Untrack artifacts, trace the rule | All variants | `git rm -r --cached dist` → `git add .gitignore` → `git commit -m 'Ignore build artifacts'` → `git check-ignore -v dist/app.css` |
-| 6. Remove, then audit the origin | All variants | `git rm old.txt` → `git commit -m 'Drop the obsolete file'` → `git show --name-only c0` |
-
-#### Level 11: Undo Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Glance, then discard | All variants | `git status -s` → `git restore README.md` |
-| 2. Script-check, then unstage | All variants | `git status --porcelain` → `git restore --staged README.md` |
-| 3. Hand back a pristine machine | All variants | `git config --global user.name 'Learner D'` → `git config --global user.email learner-d@example.test` → `git config --list` → `git restore --staged README.md` → `git restore README.md` |
-| 4. Unstage junk, sweep the real work | All variants | `git restore --staged scratch.txt` → `git add -u` → `git commit -m 'Stage the right batch'` |
-| 5. Confirm, then retire a file | All variants | `git status --porcelain` → `git rm old.txt` → `git commit -m 'Retire the old notes'` |
-| 6. Untrack and see the shield | All variants | `git rm --cached .env` → `git status --ignored` |
-| 7. Untrack the regenerating bundle | All variants | `git rm -r --cached dist` → `git commit -m 'Untrack generated output'` |
-
-### Chapter 03: Branch Navigation
-
-#### Level 1: Create and Inspect Branches
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. List branches | All variants | `git branch` |
-| 2. Create branch | All variants | `git branch release` |
-| 3. Create branch at start | All variants | `git branch hotfix c0` |
-| 4. Verbose branches | All variants | `git branch -v` |
-| 5. Survey, then add a pointer | All variants | `git branch` → `git branch feature/audit` |
-| 6. Compare tips, pin the archive | All variants | `git branch -v` → `git branch archive c1` |
-
-#### Level 2: Move HEAD
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Step onto another branch | All variants | `git switch feature/ui` |
-| 2. Create and step on in one move | All variants | `git switch -c feature/new` |
-| 3. The older create-and-switch spelling | All variants | `git checkout -b legacy/feature` |
-| 4. Inspect detached | All variants | `git switch --detach c0` |
-
-#### Level 3: Move HEAD Safely
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Switch existing | All variants | `git switch feature/ui` → `git add README.md` → `git commit -m 'Work on feature'` |
-| 2. Switch create | All variants | `git switch -c feature/new` → `git add README.md` → `git commit -m 'Start new feature'` |
-| 3. Checkout legacy create | All variants | `git checkout -b legacy/feature` → `git add README.md` → `git commit -m 'Start legacy branch'` |
-| 4. Map the graph, then move | All variants | `git log --oneline --graph --all` → `git branch` → `git switch feature/ui` |
-| 5. Inspect detached, report on main | All variants | `git switch --detach c1` → `git show` → `git switch main` → `git add README.md` → `git commit -m 'Record inspection'` |
-
-#### Level 4: Start Lines Deliberately
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. New project on the trunk line | All variants | `git init -b trunk` → `git add .` → `git commit -m 'Trunk baseline'` → `git branch` |
-| 2. Baseline, then a kickoff line | All variants | `git init -b main` → `git add .` → `git commit -m 'Product baseline'` → `git branch feature/kickoff` |
-| 3. A shortcut for moving around | All variants | `git config --global alias.sw switch` → `git config --list` → `git switch feature/ui` |
-
-#### Level 5: Branch Workflows with Clean Snapshots
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Branch for feature | All variants | `git status` → `git switch -c feature/report` → `git add -p src/app.py` → `git commit -m 'Add report feature'` |
-| 2. Branch from release | All variants | `git branch hotfix c0` → `git switch hotfix` → `git add README.md` → `git commit -m 'Patch release note'` |
-| 3. Recover detached work | All variants | `git switch --detach c0` → `git add README.md` → `git commit -m 'Detached useful work'` → `git branch rescue HEAD` → `git switch rescue` |
-| 4. New line, then map the result | All variants | `git switch -c feature/notes` → `git add README.md` → `git commit -m 'Draft notes'` → `git log --oneline --graph --all` |
-| 5. Hotfix the legacy way | All variants | `git checkout -b hotfix/legacy` → `git add README.md` → `git commit -m 'Legacy hotfix'` → `git branch -v` |
-
-#### Level 6: Delete Branch Pointers Deliberately
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Delete merged branch | All variants | `git branch -d old` |
-| 2. Force delete scratch branch | All variants | `git branch -D scratch` |
-| 3. Branch cleanup workflow | All variants | `git log --oneline --graph --all` → `git branch -v` → `git branch -d old` → `git branch -D scratch` |
-| 4. Survey, then retire a pointer | All variants | `git branch` → `git branch -d old` |
-| 5. Compare tips, then force-remove | All variants | `git branch -v` → `git branch -D scratch` |
-
-#### Level 7: Branch Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Stage two environments | All variants | `git branch staging` → `git branch qa` → `git branch` → `git branch -v` |
-| 2. One pointer per task | All variants | `git branch task/login` → `git branch task/search` → `git branch task/profile` → `git branch` |
-| 3. Tour the lines, land on old | All variants | `git branch` → `git switch feature/ui` → `git switch old` |
-| 4. Legacy spelling, quick fix line | All variants | `git checkout -b fix/typo` → `git branch -v` |
-| 5. Detached audit of an old tip | All variants | `git switch --detach c1` → `git show` |
-| 6. Pin the release history | All variants | `git branch release/v1 c0` → `git branch release/v2 c1` → `git branch integration` → `git branch` |
-
-#### Level 8: Cleanup Gauntlet
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Retire both kinds of clutter | All variants | `git branch` → `git branch -d old` → `git branch -D scratch` |
-| 2. Retire, then verify the list | All variants | `git branch -d old` → `git branch -v` |
-| 3. Force-remove, then redraw | All variants | `git branch -D scratch` → `git log --oneline --graph --all` |
-| 4. Prune one, pin one | All variants | `git branch -d old` → `git branch keep c1` → `git branch` |
-| 5. Force-remove, read the story | All variants | `git branch -D scratch` → `git log --oneline` |
-
-### Chapter 04: Merging and Conflict Resolution
-
-#### Level 1: Understand Merge Shape
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Find merge base | All variants | `git merge-base main feature/profile` |
-| 2. Merge fast-forward | All variants | `git merge feature/profile` |
-| 3. Merge no fast-forward | All variants | `git merge --no-ff feature/profile` |
-| 4. Stage a branch as one snapshot | All variants | `git merge --squash feature/profile` |
-| 5. Merge squash | All variants | `git merge --squash feature/profile` → `git commit -m 'Squash profile feature'` |
-
-#### Level 2: Merge Real Histories
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Find the base, then integrate | All variants | `git merge-base main feature/profile` → `git merge feature/profile` |
-| 2. Map, measure, merge visibly | All variants | `git log --oneline --graph --all` → `git merge-base main feature/profile` → `git merge --no-ff feature/profile` |
-| 3. Branch out, merge back | All variants | `git switch -c feature/notes` → `git add README.md` → `git commit -m 'Notes update'` → `git switch main` → `git merge feature/notes` |
-| 4. Policy: keep the branch visible | All variants | `git merge --no-ff feature/profile` → `git log --oneline --graph --all` |
-| 5. Verify the fast-forward, then take it | All variants | `git branch -v` → `git merge-base main feature/profile` → `git merge feature/profile` |
-
-#### Level 3: Abort and Retry
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Abort conflicted merge | All variants | `git merge --abort` |
-| 2. Retry correct merge | All variants | `git merge --abort` → `git switch main` → `git merge feature/profile` |
-| 3. Read, back out, confirm | All variants | `git log --oneline --graph --all` → `git merge --abort` → `git status` |
-| 4. Script-check the damage, then retreat | All variants | `git status --porcelain` → `git merge --abort` → `git status` |
-
-#### Level 4: Read the Conflict
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read our side of the conflict | All variants | `git diff --ours src/auth.js` |
-| 2. Read their side of the conflict | All variants | `git diff --theirs src/auth.js` |
-| 3. List unmerged files | All variants | `git ls-files -u` |
-| 4. Diff conflict base | All variants | `git diff --base src/auth.js` |
-| 5. Diff conflict sides | All variants | `git diff --ours src/auth.js` → `git diff --theirs src/auth.js` |
-| 6. Base, ours, theirs: full picture | All variants | `git diff --base src/auth.js` → `git diff --ours src/auth.js` → `git diff --theirs src/auth.js` |
-| 7. Launch mergetool | All variants | `git mergetool` |
-
-#### Level 5: Choose a Side
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Keep our version | All variants | `git checkout --ours src/auth.js` |
-| 2. Take the incoming version | All variants | `git checkout --theirs src/auth.js` |
-| 3. Finish a resolved merge | All variants | `git merge --continue` |
-
-#### Level 6: Resolve Conflicts and Finish
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Take ours | All variants | `git checkout --ours src/auth.js` → `git add src/auth.js` → `git merge --continue` |
-| 2. Take theirs | All variants | `git checkout --theirs src/auth.js` → `git add src/auth.js` → `git merge --continue` |
-| 3. Manual mixed resolution | All variants | `git ls-files -u` → `git diff --ours src/auth.js` → `git diff --theirs src/auth.js` → `git checkout --theirs src/auth.js` → `git add src/auth.js` → `git merge --continue` |
-| 4. Two-file conflict workflow | All variants | `git checkout --ours src/auth.js` → `git add src/auth.js` → `git merge --continue` |
-
-#### Level 7: Evidence-First Resolutions
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Compare both, keep ours | All variants | `git diff --ours src/auth.js` → `git diff --theirs src/auth.js` → `git checkout --ours src/auth.js` → `git add src/auth.js` → `git merge --continue` |
-| 2. Full evidence, incoming wins | All variants | `git diff --base src/auth.js` → `git diff --ours src/auth.js` → `git diff --theirs src/auth.js` → `git checkout --theirs src/auth.js` → `git add src/auth.js` → `git merge --continue` |
-| 3. Tool-assisted resolution | All variants | `git mergetool` → `git add src/auth.js` → `git merge --continue` |
-| 4. Inherited resolution, finish it | All variants | `git status` → `git merge --continue` → `git log --oneline --graph --all` |
-| 5. List, choose incoming, finish | All variants | `git ls-files -u` → `git checkout --theirs src/auth.js` → `git add src/auth.js` → `git merge --continue` |
-
-#### Level 8: Merge Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Squash, seal, read the story | All variants | `git merge --squash feature/profile` → `git commit -m 'Fold profile work'` → `git log --oneline` |
-| 2. Squash, inspect, then seal | All variants | `git merge --squash feature/profile` → `git diff --staged` → `git commit -m 'Land squashed feature'` |
-| 3. Squash with a state check | All variants | `git merge --squash feature/profile` → `git status` → `git commit -m 'Squash with checks'` |
-| 4. Find the split, open it | All variants | `git merge-base main feature/profile` → `git show c0` |
-| 5. Refuse the silent fast-forward | All variants | `git merge-base main feature/profile` → `git merge --no-ff feature/profile` → `git log --oneline --graph --all` |
-| 6. Scope it, then abandon it | All variants | `git ls-files -u` → `git merge --abort` |
-| 7. Base first, then the tool | All variants | `git diff --base src/auth.js` → `git mergetool` |
-| 8. Read every version, then the tool | All variants | `git diff --base src/auth.js` → `git diff --ours src/auth.js` → `git diff --theirs src/auth.js` → `git mergetool` |
-
-#### Level 9: Resolution Gauntlet
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Resolve, finish, map the join | All variants | `git checkout --ours src/auth.js` → `git add src/auth.js` → `git merge --continue` → `git log --oneline --graph --all` |
-| 2. Verify, keep ours, finish | All variants | `git diff --ours src/auth.js` → `git checkout --ours src/auth.js` → `git add src/auth.js` → `git merge --continue` |
-| 3. Verify, take theirs, finish | All variants | `git diff --theirs src/auth.js` → `git checkout --theirs src/auth.js` → `git add src/auth.js` → `git merge --continue` |
-| 4. Tool, stage, finish, confirm | All variants | `git mergetool` → `git add src/auth.js` → `git merge --continue` → `git status` |
-| 5. Scope, tool, finish, map | All variants | `git ls-files -u` → `git mergetool` → `git add src/auth.js` → `git merge --continue` → `git log --oneline --graph --all` |
-| 6. Abandon, then survey the field | All variants | `git ls-files -u` → `git diff --base src/auth.js` → `git merge --abort` → `git log --oneline --graph --all` |
-
-#### Level 10: Integration Capstones
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Isolate, finish, integrate visibly | All variants | `git switch -c feature/banner` → `git add README.md` → `git commit -m 'Banner work'` → `git switch main` → `git merge --no-ff feature/banner` |
-| 2. Insurance first, then integrate | All variants | `git merge-base main feature/profile` → `git branch backup/main` → `git merge feature/profile` → `git log --oneline` |
-| 3. Compact landing | All variants | `git merge --squash feature/profile` → `git commit -m 'Compact the feature'` |
-| 4. Integrate, map, tidy up | All variants | `git merge --no-ff feature/profile` → `git log --oneline --graph --all` → `git branch -d feature/profile` |
-| 5. Another service lands | All variants | `git merge feature/profile` → `git log --oneline --graph --all` |
-
-### Chapter 05: Undoing and Recovery
-
-#### Level 1: Read Recovery Clues
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read reflog | All variants | `git reflog` |
-| 2. Two views of recent history | All variants | `git reflog` → `git log --oneline` |
-| 3. Interrogate the suspect commit | All variants | `git log -n 2` → `git show c2` |
-| 4. Full patches, then the path list | All variants | `git log -p` → `git show --name-only c2` |
-| 5. Stand inside the suspect commit | All variants | `git switch --detach c2` → `git show` |
-
-#### Level 2: Move Private History Back
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Reset hard to commit | All variants | `git reset --hard c1` |
-| 2. Reset hard parent | All variants | `git reset --hard HEAD~1` |
-| 3. Branch before reset | All variants | `git branch backup HEAD` → `git reset --hard HEAD~1` |
-| 4. Confirm the target, then step back | All variants | `git show c2` → `git reset --hard c1` |
-| 5. Preview the past, then adopt it | All variants | `git switch --detach c1` → `git switch main` → `git reset --hard HEAD~1` |
-| 6. Safety net, then the rewrite | All variants | `git branch safety-net` → `git reset --hard c1` |
-| 7. The smallest undo that works | All variants | `git log -n 1` → `git commit --amend -m 'Correct the release note'` |
-| 8. Fold the fix, keep the history | All variants | `git status -s` → `git add README.md` → `git commit --amend --no-edit` |
-
-#### Level 3: Private History Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read, then step back by name | All variants | `git log --oneline` → `git reset --hard c1` |
-| 2. Check, then step back one | All variants | `git status` → `git reset --hard HEAD~1` |
-| 3. Record the before, then step back | All variants | `git reflog` → `git reset --hard HEAD~1` |
-| 4. A removal, regretted entirely | All variants | `git rm old.txt` → `git commit -m 'Retire junk note'` → `git reset --hard HEAD~1` |
-| 5. A shortcut for stepping back | All variants | `git config --global alias.undo reset` → `git config --list` |
-
-#### Level 4: Undo Shared Work Safely
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Revert one commit | All variants | `git revert c2` |
-| 2. Revert no edit | All variants | `git revert --no-edit c2` |
-| 3. Revert then fix | All variants | `git revert c2` → `git add README.md` → `git commit -m 'Add safer replacement'` |
-| 4. Fast reversal, quick read | All variants | `git revert --no-edit c2` → `git log --oneline` |
-| 5. Reverse, then open the result | All variants | `git revert --no-edit c2` → `git show` |
-| 6. Reverse, then size the damage | All variants | `git revert --no-edit c2` → `git log --stat` |
-| 7. Map the shared line, then reverse | All variants | `git log --oneline --graph --all` → `git revert c2` |
-
-#### Level 5: Recover After a Mistake
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Recover lost tip | All variants | `git reflog` → `git branch recovered c2` → `git switch recovered` |
-| 2. Restore main from reflog | All variants | `git reflog` → `git reset --hard HEAD@{0}` |
-| 3. Choose reset or revert | All variants | `git log --oneline --graph --all` → `git show c2` → `git revert c2` |
-| 4. What the log forgot | All variants | `git reflog` → `git log --oneline` |
-| 5. Restore the tip, mark it safe | All variants | `git reflog` → `git reset --hard HEAD@{0}` → `git branch confirmed` |
-| 6. Reverse, then read the room | All variants | `git revert --no-edit c2` → `git status` |
-| 7. Reflog first, reverse fast | All variants | `git reflog` → `git revert --no-edit c2` |
-| 8. Reverse on a dedicated line | All variants | `git switch -c fix/rollback` → `git revert c2` |
-| 9. Reverse, then map the record | All variants | `git revert c2` → `git log --oneline --graph --all` |
-
-### Chapter 06: Temporary Work and Patch Movement
-
-#### Level 1: Shelve Local Work
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Stash current work | All variants | `git stash` |
-| 2. List stashes | All variants | `git stash list` |
-| 3. Stash before switch | All variants | `git status` → `git stash` → `git switch hotfix/navbar` |
-
-#### Level 2: Restore Stashed Work
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Pop stash | All variants | `git stash pop` |
-| 2. Apply stash | All variants | `git stash apply` |
-| 3. Drop stash | All variants | `git stash drop` |
-| 4. Stash restore commit | All variants | `git stash` → `git switch hotfix/navbar` → **Project Files:** edit `README.md`, set content to `"base\nUrgent navbar fix\n"`, and click **Save** → `git add README.md` → `git commit -m 'Commit urgent fix'` → `git switch main` → `git stash pop` → `git add src/app.py` → `git commit -m 'Save restored WIP'` |
-
-#### Level 3: Manage the Stash Stack
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Check the shelf, then restore | All variants | `git stash list` → `git stash pop` |
-| 2. Check the shelf, restore a copy | All variants | `git stash list` → `git stash apply` |
-| 3. Check the shelf, then clear it | All variants | `git stash list` → `git stash drop` → `git status` |
-| 4. Restore a copy, land it | All variants | `git stash apply` → `git add src/app.py` → `git commit -m 'Land restored work'` |
-| 5. Restore, verify, then clear | All variants | `git stash apply` → `git stash drop` |
-| 6. One full shelf cycle | All variants | `git stash` → `git stash list` → `git stash pop` |
-
-#### Level 4: Interruption Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Interrupt, fix, restore carefully | All variants | `git stash` → `git switch hotfix/navbar` → **Project Files:** edit `README.md`, set content to `"base\nQuick navbar patch\n"`, and click **Save** → `git add README.md` → `git commit -m 'Quick navbar patch'` → `git switch main` → `git stash apply` → `git stash drop` |
-| 2. Clear the shelf, prove it | All variants | `git stash drop` → `git stash list` |
-| 3. Restore onto a fresh line | All variants | `git switch -c feature/wip-landing` → `git stash pop` → `git add src/app.py` → `git commit -m 'Land WIP on its own line'` |
-| 4. Old spelling, careful restore | All variants | `git checkout -b review/stash-check` → `git stash apply` |
-| 5. Glance, then clear the shelf | All variants | `git status -s` → `git stash drop` |
-
-#### Level 5: Move One Commit
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Cherry-pick one | All variants | `git cherry-pick c2` |
-| 2. Cherry-pick no commit | All variants | `git cherry-pick --no-commit c2` |
-| 3. Abort cherry-pick | All variants | `git cherry-pick --abort` |
-
-#### Level 6: Patch Movement Workflows
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Pick then adjust | All variants | `git cherry-pick --no-commit c2` → **Project Files:** edit `src/auth.py`, set content to `"guard\nadapted=True\n"`, and click **Save** → `git add src/auth.py` → `git commit -m 'Adapt picked fix'` |
-| 2. Stash and pick | All variants | `git stash` → `git cherry-pick c2` → `git stash pop` → `git add README.md` → `git commit -m 'Restore WIP after pick'` |
-| 3. Abort then pick right commit | All variants | `git cherry-pick --abort` → `git cherry-pick c2` |
-
-#### Level 7: Transplant Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Transplant, then read the record | All variants | `git cherry-pick c2` → `git log --oneline` |
-| 2. Open it first, then transplant | All variants | `git show c2` → `git cherry-pick c2` |
-| 3. Stage the patch, review, seal | All variants | `git cherry-pick --no-commit c2` → `git diff --staged` → `git commit -m 'Reviewed transplant'` |
-| 4. Combine the patch with local work | All variants | `git cherry-pick --no-commit c2` → `git add README.md` → `git commit -m 'Fix plus local note'` |
-| 5. Read the wreck, back out | All variants | `git status` → `git cherry-pick --abort` |
-| 6. Back out, then read the record | All variants | `git cherry-pick --abort` → `git log --oneline` |
-
-#### Level 8: Transplant Capstones
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Abort, then transplant carefully | All variants | `git cherry-pick --abort` → `git cherry-pick --no-commit c2` → **Project Files:** edit `src/auth.py`, set content to `"guard\nadapted_after_abort=True\n"`, and click **Save** → `git add src/auth.py` → `git commit -m 'Adapted after abort'` |
-| 2. Script-check, retreat, confirm | All variants | `git status --porcelain` → `git cherry-pick --abort` → `git status` |
-| 3. Transplant, then open the result | All variants | `git cherry-pick c2` → `git show` |
-| 4. Stage the patch, script-check it | All variants | `git cherry-pick --no-commit c2` → `git status --porcelain` |
-
-### Chapter 07: Remotes and Collaboration
-
-#### Level 1: Inspect Remote Setup
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. List remotes | All variants | `git remote` |
-| 2. List remote URLs | All variants | `git remote -v` |
-| 3. Remote inspection workflow | All variants | `git remote -v` → `git log --oneline --graph --all` → `git status` |
-| 4. Names first, state second | All variants | `git remote` → `git status` |
-| 5. Identity before collaboration | All variants | `git config --global user.name 'Learner B'` → `git config --global user.email learner-b@example.test` → `git config --list` → `git remote -v` |
-| 6. A shortcut for remote checks | All variants | `git config --global alias.rv remote` → `git remote -v` |
-
-#### Level 2: Fresh Machine
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Copy down, check the wiring | All variants | `git clone https://example.test/team/app.git` → `git remote` |
-| 2. Named copy, verified URLs | All variants | `git clone https://example.test/team/app.git team-app` → `git remote -v` |
-| 3. Branch copy, wired and checked | All variants | `git clone -b starter https://example.test/team/app.git` → `git remote` |
-| 4. Shallow copy, full wiring | All variants | `git clone --depth 1 https://example.test/team/app.git` → `git remote -v` |
-| 5. Copy, then branch the old way | All variants | `git clone https://example.test/team/app.git` → `git checkout -b feature/onboarding` |
-| 6. Sandbox copy, sandbox line | All variants | `git clone https://example.test/team/app.git sandbox` → `git switch -c experiment/sandbox` |
-| 7. Copy, check, read the story | All variants | `git clone https://example.test/team/app.git` → `git status` → `git log --oneline` |
-| 8. Review copy, recent entries | All variants | `git clone https://example.test/team/app.git review-copy` → `git log -n 2` |
-| 9. Starter branch, newest snapshot | All variants | `git clone -b starter https://example.test/team/app.git` → `git show` |
-| 10. CI copy, script-stable check | All variants | `git clone --depth 1 https://example.test/team/app.git` → `git status --porcelain` |
-
-#### Level 3: Fetch Before Acting
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Fetch origin | All variants | `git fetch origin` |
-| 2. Fetch prune | All variants | `git fetch --prune` |
-| 3. Fetch then branch | All variants | `git fetch origin` → `git branch feature/from-origin origin/main` → `git switch feature/from-origin` |
-| 4. Refresh, then map both worlds | All variants | `git fetch origin` → `git log --oneline --graph --all` |
-| 5. Check the wiring, prune the dead | All variants | `git remote -v` → `git fetch --prune` |
-| 6. Prune, then admire the graph | All variants | `git fetch --prune` → `git log --oneline --graph --all` |
-| 7. Names, prune, state | All variants | `git remote` → `git fetch --prune` → `git status` |
-
-#### Level 4: Pull and Integrate
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Pull default | All variants | `git pull` |
-| 2. Pull rebase | All variants | `git pull --rebase` |
-| 3. Pull with local work safe | All variants | `git stash` → `git pull --rebase` → `git stash pop` |
-| 4. Sync, then read what arrived | All variants | `git pull` → `git log --oneline` |
-| 5. Confirm clean, then sync | All variants | `git status` → `git pull` |
-| 6. Look before you integrate | All variants | `git fetch origin` → `git log --oneline --graph --all` → `git pull` |
-| 7. Replay, then read the new order | All variants | `git pull --rebase` → `git log --oneline` |
-| 8. Verify the source, then sync | All variants | `git remote -v` → `git pull` |
-
-#### Level 5: Upstream Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. The morning sync | All variants | `git status -s` → `git pull` |
-| 2. Sync, then open the newest work | All variants | `git pull` → `git show` |
-| 3. Replay, then check the top two | All variants | `git pull --rebase` → `git log -n 2` |
-| 4. Replay, then confirm calm | All variants | `git pull --rebase` → `git status` |
-| 5. Land the feature before sharing | All variants | `git merge feature/profile` → `git log --oneline` |
-| 6. State check, then integrate | All variants | `git status` → `git merge feature/profile` |
-| 7. Insurance pointer, then integrate | All variants | `git branch pre-merge-backup` → `git merge feature/profile` |
-
-#### Level 6: Publish Work
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Push set upstream | All variants | `git push -u origin feature/payment` |
-| 2. Push current | All variants | `git push` |
-| 3. Force with lease | All variants | `git push --force-with-lease` |
-| 4. Delete remote branch | All variants | `git push origin --delete feature/payment` |
-| 5. Read the unshared work, then share | All variants | `git log -n 1` → `git push` |
-| 6. Check, then share | All variants | `git status` → `git push` |
-| 7. Share, then confirm calm | All variants | `git push` → `git status` |
-| 8. Verify target, publish with tracking | All variants | `git remote -v` → `git push -u origin feature/payment` |
-| 9. Publish, then read the record | All variants | `git push -u origin feature/payment` → `git log --oneline` |
-| 10. First share, then the state | All variants | `git push -u origin feature/payment` → `git status` |
-
-#### Level 7: Publish Drills
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Publish a rewrite, safely | All variants | `git log -n 1` → `git push --force-with-lease` |
-| 2. Rewrite, then lease it out | All variants | `git commit --amend -m 'Payment: final copy'` → `git push --force-with-lease` |
-| 3. Lease out, then confirm calm | All variants | `git push --force-with-lease` → `git status` |
-| 4. Lease out, read the record | All variants | `git push --force-with-lease` → `git log --oneline` |
-| 5. Verify, then retire remotely | All variants | `git remote -v` → `git push origin --delete feature/payment` |
-| 6. Retire remotely, sweep locally | All variants | `git push origin --delete feature/payment` → `git fetch --prune` |
-| 7. Retire, then redraw | All variants | `git push origin --delete feature/payment` → `git log --oneline --graph --all` |
-| 8. Retire, then count the remotes | All variants | `git push origin --delete feature/payment` → `git remote` |
-| 9. State first, then retire | All variants | `git status` → `git push origin --delete feature/payment` |
-| 10. Share the fix, read the record | All variants | `git push` → `git log --oneline` |
-| 11. Confirm the destination, then ship | All variants | `git remote -v` → `git push` |
-| 12. Know the wiring, then publish | All variants | `git remote` → `git push -u origin feature/payment` |
-
-#### Level 8: Full Collaboration Loops
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Branch publish merge cleanup | All variants | `git fetch origin` → `git switch -c feature/review` → `git add README.md` → `git commit -m 'Add review work'` → `git push -u origin feature/review` → `git fetch --prune` |
-| 2. Sync diverged work | All variants | `git fetch origin` → `git pull --rebase` → `git push` |
-| 3. Rewrite and lease | All variants | `git fetch origin` → `git commit --amend -m 'Correct local history'` → `git push --force-with-lease` |
-| 4. The daily loop | All variants | `git pull` → **Project Files:** edit `README.md`, set content to `"remote update\nlocal daily note\n"`, and click **Save** → `git add README.md` → `git commit -m 'Daily update'` → `git push` |
-| 5. Morning sync, evening ship | All variants | `git status -s` → `git pull` → **Project Files:** edit `README.md`, set content to `"remote update\nevening work\n"`, and click **Save** → `git add README.md` → `git commit -m 'Evening ship'` → `git push` |
-| 6. Sync, branch, build, publish | All variants | `git pull` → `git switch -c feature/metrics` → **Project Files:** edit `README.md`, set content to `"remote update\nmetrics seed\n"`, and click **Save** → `git add README.md` → `git commit -m 'Metrics seed'` → `git push -u origin feature/metrics` |
-| 7. Pointer, move, build, publish | All variants | `git pull` → `git branch feature/alerts` → `git switch feature/alerts` → **Project Files:** edit `README.md`, set content to `"remote update\nalerts seed\n"`, and click **Save** → `git add README.md` → `git commit -m 'Alerts seed'` → `git push -u origin feature/alerts` |
-| 8. Publish, then map both worlds | All variants | `git push -u origin feature/payment` → `git log --oneline --graph --all` |
-| 9. Glance, share, read the record | All variants | `git status -s` → `git push` → `git log --oneline` |
-| 10. Read, then publish with tracking | All variants | `git log --oneline` → `git push -u origin feature/payment` |
-
-### Chapter 08: Complete the Guild Handoff
-
-#### Level 1: Prepare the Chronicle for Review
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Prepare the Chronicle for Review | Record the map repair on a branch, then fast-forward it | `git status` → `git log --oneline --graph --all` → `git switch -c repair/handoff-1-maps` → `git add maps/northern-route.md` → `git commit -m 'Restore route maps'` → `git switch main` → `git merge repair/handoff-1-maps` → `git log --oneline --graph --all` |
-|  | Repair from the earlier stable crystal and preserve the merge | `git status` → `git show i1` → `git switch -c repair/handoff-1-lens i1` → `git add src/lens.py` → `git commit -m 'Correct signal lens'` → `git switch main` → `git merge --no-ff repair/handoff-1-lens` → `git log --oneline --graph --all` |
-|  | Review the repair branch and hand it over as one snapshot | `git status` → `git switch -c repair/handoff-1-index` → `git add src/index.py` → `git commit -m 'Draft rebuilt index'` → `git switch main` → `git merge --squash repair/handoff-1-index` → `git commit -m 'Rebuild archive index'` → `git log --oneline --graph --all` |
-|  | Finish the relay repair and publish the reviewed main branch | `git remote -v` → `git fetch origin` → `git status` → `git switch -c repair/handoff-1-relay` → `git add src/relay.py` → `git commit -m 'Prepare Guild relay'` → `git switch main` → `git merge repair/handoff-1-relay` → `git push` → `git log --oneline --graph --all` |
-
-#### Level 2: Complete the Signal-Chamber Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Complete the Signal-Chamber Handoff | Record the map repair on a branch, then fast-forward it | `git status` → `git log --oneline --graph --all` → `git switch -c repair/handoff-2-maps` → `git add maps/northern-route.md` → `git commit -m 'Restore route maps'` → `git switch main` → `git merge repair/handoff-2-maps` → `git log --oneline --graph --all` |
-|  | Repair from the earlier stable crystal and preserve the merge | `git status` → `git show i1` → `git switch -c repair/handoff-2-lens i1` → `git add src/lens.py` → `git commit -m 'Correct signal lens'` → `git switch main` → `git merge --no-ff repair/handoff-2-lens` → `git log --oneline --graph --all` |
-|  | Review the repair branch and hand it over as one snapshot | `git status` → `git switch -c repair/handoff-2-index` → `git add src/index.py` → `git commit -m 'Draft rebuilt index'` → `git switch main` → `git merge --squash repair/handoff-2-index` → `git commit -m 'Rebuild archive index'` → `git log --oneline --graph --all` |
-|  | Finish the relay repair and publish the reviewed main branch | `git remote -v` → `git fetch origin` → `git status` → `git switch -c repair/handoff-2-relay` → `git add src/relay.py` → `git commit -m 'Prepare Guild relay'` → `git switch main` → `git merge repair/handoff-2-relay` → `git push` → `git log --oneline --graph --all` |
-
-
-## Frostbound Citadel
-
-### Chapter 01: Temper the Commit
-
-#### Level 1: Audit and Stage the Patch
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Measure the pending change | All variants | `git diff --stat` |
-| 2. Check the change for whitespace errors | All variants | `git diff --check` |
-| 3. Stage the change hunk by hunk | All variants | `git add -p src/app.ts` |
-| 4. Stage tracked edits only | All variants | `git add -u` |
-
-#### Level 2: Rewrite the Tip
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Rewrite the unpublished tip commit | All variants | `git commit --amend -m 'Temper the relay tip'` |
-| 2. Fold staged work into the tip commit | All variants | `git commit --amend --no-edit` |
-
-#### Level 3: Step Back with Intent
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Step the branch back, keep the work | First team's repository | `git reset --soft m1` |
-|  | Second team's repository | `git reset --soft n1` |
-| 2. Step back and unstage everything | First team's repository | `git reset --mixed m1` |
-|  | Second team's repository | `git reset --mixed n1` |
-| 3. Discard the broken state completely | First team's repository | `git reset --hard m1` |
-|  | Second team's repository | `git reset --hard n1` |
-
-#### Level 4: Restore and Mark Known-Good
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Bring back one file from an old commit | First team's repository | `git restore --source m0 src/app.ts` |
-|  | Second team's repository | `git restore --source n0 src/app.ts` |
-| 2. Tag the known-good commit | All variants | `git tag relay-checkpoint` |
-
-#### Level 5: Measure, then stage precisely
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Measure, then stage precisely | All variants | `git diff --stat` → `git add -p src/app.ts` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 6: Check whitespace, then stage
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Check whitespace, then stage | All variants | `git diff --check` → `git add -p src/app.ts` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 7: Measure, then stage tracked edits
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Measure, then stage tracked edits | All variants | `git diff --stat` → `git add -u` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 8: Fold the fix into the tip commit
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Fold the fix into the tip commit | All variants | `git diff --check` → `git add -u` → `git commit --amend -m 'Fold the field fix into the tip'` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 9: Absorb staged notes and fix the message
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Absorb staged notes and fix the message | All variants | `git diff --stat` → `git commit --amend -m 'Clarify the relay tip'` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 10: Fold hunks in, keep the message
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Fold hunks in, keep the message | All variants | `git add -p src/app.ts` → `git commit --amend --no-edit` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 11: Check, then fold without renaming
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Check, then fold without renaming | All variants | `git diff --check` → `git commit --amend --no-edit` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 12: Step back softly from the bad tip
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Step back softly from the bad tip | First team's repository | `git diff --stat` → `git reset --soft m1` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git diff --stat` → `git reset --soft n1` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 13: Step back in two layers
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Step back in two layers | First team's repository | `git reset --soft m1` → `git reset --mixed m0` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git reset --soft n1` → `git reset --mixed n0` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 14: Unstage the broken commit for rework
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Unstage the broken commit for rework | First team's repository | `git diff --stat` → `git reset --mixed m1` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git diff --stat` → `git reset --mixed n1` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 15: Discard the rejected work entirely
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Discard the rejected work entirely | First team's repository | `git diff --check` → `git reset --hard m1` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git diff --check` → `git reset --hard n1` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 16: Reset hard, then recover one file
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Reset hard, then recover one file | First team's repository | `git reset --hard m1` → `git restore --source m0 src/app.ts` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git reset --hard n1` → `git restore --source n0 src/app.ts` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 17: Compare today's file with the original
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Compare today's file with the original | First team's repository | `git restore --source m0 src/app.ts` → `git diff --stat` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git restore --source n0 src/app.ts` → `git diff --stat` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 18: Separate the Frozen Patch
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Separate the Frozen Patch | Author the repair from pending work | `git diff --stat` → `git status` → `git switch -c incident/fc-temper-the-commit-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-temper-the-commit-1 incident'` → `git tag fc-temper-the-commit-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git diff --stat` → `git log --oneline --graph --all` → `git switch -c incident/fc-temper-the-commit-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-temper-the-commit-1 repair'` → `git tag fc-temper-the-commit-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git diff --stat` → `git merge-base main feature/work` → `git switch -c incident/fc-temper-the-commit-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-temper-the-commit-1 repair'` → `git tag fc-temper-the-commit-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git diff --stat` → `git log --oneline --graph --all` → `git switch -c incident/fc-temper-the-commit-1-reverted main` → `git revert --no-edit d2` → `git tag fc-temper-the-commit-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 19: Rebuild the Review Boundary
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Rebuild the Review Boundary | Author the repair from pending work | `git diff --check` → `git status` → `git switch -c incident/fc-temper-the-commit-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-temper-the-commit-2 incident'` → `git tag fc-temper-the-commit-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git diff --check` → `git log --oneline --graph --all` → `git switch -c incident/fc-temper-the-commit-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-temper-the-commit-2 repair'` → `git tag fc-temper-the-commit-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git diff --check` → `git merge-base main feature/work` → `git switch -c incident/fc-temper-the-commit-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-temper-the-commit-2 repair'` → `git tag fc-temper-the-commit-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git diff --check` → `git log --oneline --graph --all` → `git switch -c incident/fc-temper-the-commit-2-reverted main` → `git revert --no-edit d2` → `git tag fc-temper-the-commit-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 20: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/fc-temper-the-commit-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-temper-the-commit-3 incident'` → `git tag fc-temper-the-commit-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-temper-the-commit-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-temper-the-commit-3 repair'` → `git tag fc-temper-the-commit-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/fc-temper-the-commit-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-temper-the-commit-3 repair'` → `git tag fc-temper-the-commit-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-temper-the-commit-3-reverted main` → `git revert --no-edit d2` → `git tag fc-temper-the-commit-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 02: Choose the Integration
-
-#### Level 1: Compare and Choose the Integration
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Count the commits in a range | First team's repository | `git rev-list --count m0..main` |
-|  | Second team's repository | `git rev-list --count n0..main` |
-| 2. Compare a branch from where it started | All variants | `git diff main...feature/work` |
-| 3. Merge with a visible merge commit | All variants | `git merge --no-ff feature/work` |
-| 4. Squash a branch into one staged change | All variants | `git merge --squash feature/work` |
-
-#### Level 2: Review the branch, then merge visibly
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Review the branch, then merge visibly | All variants | `git diff main...feature/work` → `git merge --no-ff feature/work` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 3: Count the range, then merge visibly
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Count the range, then merge visibly | First team's repository | `git rev-list --count m0..main` → `git merge --no-ff feature/work` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git rev-list --count n0..main` → `git merge --no-ff feature/work` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Review, then squash to one change
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Review, then squash to one change | All variants | `git diff main...feature/work` → `git merge --squash feature/work` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 5: Count, then squash deliberately
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Count, then squash deliberately | First team's repository | `git rev-list --count m0..main` → `git merge --squash feature/work` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git rev-list --count n0..main` → `git merge --squash feature/work` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 6: Choose the Safe Gate
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Choose the Safe Gate | Author the repair from pending work | `git rev-list --count a0..main` → `git status` → `git switch -c incident/fc-choose-the-integration-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-choose-the-integration-1 incident'` → `git tag fc-choose-the-integration-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git rev-list --count b0..main` → `git log --oneline --graph --all` → `git switch -c incident/fc-choose-the-integration-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-choose-the-integration-1 repair'` → `git tag fc-choose-the-integration-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git rev-list --count c0..main` → `git merge-base main feature/work` → `git switch -c incident/fc-choose-the-integration-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-choose-the-integration-1 repair'` → `git tag fc-choose-the-integration-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git rev-list --count d0..main` → `git log --oneline --graph --all` → `git switch -c incident/fc-choose-the-integration-1-reverted main` → `git revert --no-edit d2` → `git tag fc-choose-the-integration-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 7: Preserve the Integration Record
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Preserve the Integration Record | Author the repair from pending work | `git merge-base main feature/work` → `git status` → `git switch -c incident/fc-choose-the-integration-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-choose-the-integration-2 incident'` → `git tag fc-choose-the-integration-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git merge-base main feature/work` → `git log --oneline --graph --all` → `git switch -c incident/fc-choose-the-integration-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-choose-the-integration-2 repair'` → `git tag fc-choose-the-integration-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git merge-base main feature/work` → `git merge-base main feature/work` → `git switch -c incident/fc-choose-the-integration-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-choose-the-integration-2 repair'` → `git tag fc-choose-the-integration-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git merge-base main feature/work` → `git log --oneline --graph --all` → `git switch -c incident/fc-choose-the-integration-2-reverted main` → `git revert --no-edit d2` → `git tag fc-choose-the-integration-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 8: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/fc-choose-the-integration-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-choose-the-integration-3 incident'` → `git tag fc-choose-the-integration-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-choose-the-integration-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-choose-the-integration-3 repair'` → `git tag fc-choose-the-integration-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/fc-choose-the-integration-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-choose-the-integration-3 repair'` → `git tag fc-choose-the-integration-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-choose-the-integration-3-reverted main` → `git revert --no-edit d2` → `git tag fc-choose-the-integration-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 03: Survive the Conflict
-
-#### Level 1: Map the Conflict
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Preview a merge without running it | All variants | `git merge-tree main feature/work` |
-| 2. List the conflicted index entries | All variants | `git ls-files -u` |
-| 3. Compare the conflict against the base | All variants | `git diff --base src/relay.conf` |
-
-#### Level 2: Compare Both Sides
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Compare against our side | All variants | `git diff --ours src/relay.conf` |
-| 2. Compare against their side | All variants | `git diff --theirs src/relay.conf` |
-
-#### Level 3: Resolve or Retreat
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Resolve by taking our side | All variants | `git checkout --ours src/relay.conf` |
-| 2. Resolve by taking their side | All variants | `git checkout --theirs src/relay.conf` |
-| 3. Abort the conflicted merge | All variants | `git merge --abort` |
-| 4. Finish the resolved merge | All variants | `git merge --continue` |
-
-#### Level 4: Inspect the conflict, then keep our change
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Inspect the conflict, then keep our change | All variants | `git ls-files -u` → `git diff --ours src/relay.conf` → `git checkout --ours src/relay.conf` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 5: Inspect the conflict, then adopt their change
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Inspect the conflict, then adopt their change | All variants | `git ls-files -u` → `git diff --theirs src/relay.conf` → `git checkout --theirs src/relay.conf` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 6: Check the base, then abort
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Check the base, then abort | All variants | `git diff --base src/relay.conf` → `git merge --abort` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 7: Confirm the state, then finish the merge
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Confirm the state, then finish the merge | All variants | `git status` → `git merge --continue` → `git log --oneline --graph --all` |
-
-#### Level 8: Resolve, stage, and finish
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Resolve, stage, and finish | All variants | `git checkout --ours src/relay.conf` → `git add src/relay.conf` → `git merge --continue` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 9: Start resolving, then stand down
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Start resolving, then stand down | All variants | `git ls-files -u` → `git checkout --theirs src/relay.conf` → `git merge --abort` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 10: Read the conflict from base and their side
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read the conflict from base and their side | All variants | `git diff --base src/relay.conf` → `git diff --theirs src/relay.conf` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 11: Weigh both sides of the conflict
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Weigh both sides of the conflict | All variants | `git diff --ours src/relay.conf` → `git diff --theirs src/relay.conf` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 12: Forecast the Collision
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Forecast the Collision | Author the repair from pending work | `git merge-tree main feature/work` → `git status` → `git switch -c incident/fc-survive-the-conflict-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-survive-the-conflict-1 incident'` → `git tag fc-survive-the-conflict-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git merge-tree main feature/work` → `git log --oneline --graph --all` → `git switch -c incident/fc-survive-the-conflict-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-survive-the-conflict-1 repair'` → `git tag fc-survive-the-conflict-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git merge-tree main feature/work` → `git merge-base main feature/work` → `git switch -c incident/fc-survive-the-conflict-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-survive-the-conflict-1 repair'` → `git tag fc-survive-the-conflict-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git merge-tree main feature/work` → `git log --oneline --graph --all` → `git switch -c incident/fc-survive-the-conflict-1-reverted main` → `git revert --no-edit d2` → `git tag fc-survive-the-conflict-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 13: Resolve the Shared Rune
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Resolve the Shared Rune | Author the repair from pending work | `git merge-base main feature/work` → `git status` → `git switch -c incident/fc-survive-the-conflict-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-survive-the-conflict-2 incident'` → `git tag fc-survive-the-conflict-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git merge-base main feature/work` → `git log --oneline --graph --all` → `git switch -c incident/fc-survive-the-conflict-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-survive-the-conflict-2 repair'` → `git tag fc-survive-the-conflict-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git merge-base main feature/work` → `git merge-base main feature/work` → `git switch -c incident/fc-survive-the-conflict-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-survive-the-conflict-2 repair'` → `git tag fc-survive-the-conflict-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git merge-base main feature/work` → `git log --oneline --graph --all` → `git switch -c incident/fc-survive-the-conflict-2-reverted main` → `git revert --no-edit d2` → `git tag fc-survive-the-conflict-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 14: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/fc-survive-the-conflict-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-survive-the-conflict-3 incident'` → `git tag fc-survive-the-conflict-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-survive-the-conflict-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-survive-the-conflict-3 repair'` → `git tag fc-survive-the-conflict-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/fc-survive-the-conflict-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-survive-the-conflict-3 repair'` → `git tag fc-survive-the-conflict-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-survive-the-conflict-3-reverted main` → `git revert --no-edit d2` → `git tag fc-survive-the-conflict-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 04: Move the Patch
-
-#### Level 1: Inspect and Shelve the Patch
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Compare two versions of a patch series | First team's repository | `git range-diff m0..old/series m0..feature/work` |
-|  | Second team's repository | `git range-diff n0..old/series n0..feature/work` |
-| 2. Shelve unfinished work, untracked included | All variants | `git stash push -u -m 'Shelve relay draft'` |
-| 3. Look inside a stash entry | All variants | `git stash show stash@{0}` |
-
-#### Level 2: Recover or Retreat
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Restore stashed work, keep the copy | All variants | `git stash apply stash@{0}` |
-| 2. Restore stashed work and remove the entry | All variants | `git stash pop stash@{0}` |
-| 3. Delete a stale stash entry | All variants | `git stash drop stash@{0}` |
-| 4. Back out of a stuck cherry-pick | All variants | `git cherry-pick --abort` |
-
-#### Level 3: Stash the work, then check the entry
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Stash the work, then check the entry | All variants | `git stash push -u -m 'Shelve probe wiring'` → `git stash show stash@{0}` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Check the entry, then restore carefully
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Check the entry, then restore carefully | All variants | `git stash show stash@{0}` → `git stash apply stash@{0}` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 5: Park the work, then take it back
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Park the work, then take it back | All variants | `git stash push -u -m 'Park the relay sweep'` → `git stash pop stash@{0}` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 6: Check the entry one last time, then delete it
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Check the entry one last time, then delete it | All variants | `git stash show stash@{0}` → `git stash drop stash@{0}` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 7: Restore the work, then clear the entry
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Restore the work, then clear the entry | All variants | `git stash apply stash@{0}` → `git stash drop stash@{0}` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 8: Confirm the entry, then pop it
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Confirm the entry, then pop it | All variants | `git stash show stash@{0}` → `git stash pop stash@{0}` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 9: Confirm the damage, then back out
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Confirm the damage, then back out | All variants | `git status` → `git cherry-pick --abort` → `git log --oneline --graph --all` |
-
-#### Level 10: Abort the cherry-pick immediately
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Abort the cherry-pick immediately | All variants | `git cherry-pick --abort` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 11: Carry the Relay Patch
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Carry the Relay Patch | Author the repair from pending work | `git range-diff a0..old/series a0..feature/work` → `git status` → `git switch -c incident/fc-move-the-patch-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-move-the-patch-1 incident'` → `git tag fc-move-the-patch-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git range-diff b0..old/series b0..feature/work` → `git log --oneline --graph --all` → `git switch -c incident/fc-move-the-patch-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-move-the-patch-1 repair'` → `git tag fc-move-the-patch-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git range-diff c0..old/series c0..feature/work` → `git merge-base main feature/work` → `git switch -c incident/fc-move-the-patch-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-move-the-patch-1 repair'` → `git tag fc-move-the-patch-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git range-diff d0..old/series d0..feature/work` → `git log --oneline --graph --all` → `git switch -c incident/fc-move-the-patch-1-reverted main` → `git revert --no-edit d2` → `git tag fc-move-the-patch-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 12: Recover the Interrupted Transfer
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Recover the Interrupted Transfer | Author the repair from pending work | `git show a3` → `git status` → `git switch -c incident/fc-move-the-patch-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-move-the-patch-2 incident'` → `git tag fc-move-the-patch-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git show b3` → `git log --oneline --graph --all` → `git switch -c incident/fc-move-the-patch-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-move-the-patch-2 repair'` → `git tag fc-move-the-patch-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git show c3` → `git merge-base main feature/work` → `git switch -c incident/fc-move-the-patch-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-move-the-patch-2 repair'` → `git tag fc-move-the-patch-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git show d3` → `git log --oneline --graph --all` → `git switch -c incident/fc-move-the-patch-2-reverted main` → `git revert --no-edit d2` → `git tag fc-move-the-patch-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 13: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/fc-move-the-patch-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-move-the-patch-3 incident'` → `git tag fc-move-the-patch-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-move-the-patch-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-move-the-patch-3 repair'` → `git tag fc-move-the-patch-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/fc-move-the-patch-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-move-the-patch-3 repair'` → `git tag fc-move-the-patch-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-move-the-patch-3-reverted main` → `git revert --no-edit d2` → `git tag fc-move-the-patch-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 05: Reforge the Branch
-
-#### Level 1: Rebase or Stand Down
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Rebase the branch onto today's main | All variants | `git rebase main` |
-| 2. Abort a rebase that went wrong | All variants | `git rebase --abort` |
-
-#### Level 2: Rebase, then prove nothing was lost
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Rebase, then prove nothing was lost | First team's repository | `git rebase main` → `git range-diff m0..old/series m0..feature/work` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git rebase main` → `git range-diff n0..old/series n0..feature/work` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 3: Read the history, then rebase
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read the history, then rebase | All variants | `git log --oneline --graph --all` → `git rebase main` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Compare the series, then call it off
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Compare the series, then call it off | First team's repository | `git range-diff m0..old/series m0..feature/work` → `git rebase --abort` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git range-diff n0..old/series n0..feature/work` → `git rebase --abort` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 5: Abort the rebase and report
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Abort the rebase and report | All variants | `git rebase --abort` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 6: Reforge the Review Series
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Reforge the Review Series | Author the repair from pending work | `git range-diff a0..old/series a0..feature/work` → `git status` → `git switch -c incident/fc-reforge-the-branch-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-reforge-the-branch-1 incident'` → `git tag fc-reforge-the-branch-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git range-diff b0..old/series b0..feature/work` → `git log --oneline --graph --all` → `git switch -c incident/fc-reforge-the-branch-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-reforge-the-branch-1 repair'` → `git tag fc-reforge-the-branch-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git range-diff c0..old/series c0..feature/work` → `git merge-base main feature/work` → `git switch -c incident/fc-reforge-the-branch-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-reforge-the-branch-1 repair'` → `git tag fc-reforge-the-branch-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git range-diff d0..old/series d0..feature/work` → `git log --oneline --graph --all` → `git switch -c incident/fc-reforge-the-branch-1-reverted main` → `git revert --no-edit d2` → `git tag fc-reforge-the-branch-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 7: Prove the Rewrite
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Prove the Rewrite | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/fc-reforge-the-branch-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-reforge-the-branch-2 incident'` → `git tag fc-reforge-the-branch-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-reforge-the-branch-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-reforge-the-branch-2 repair'` → `git tag fc-reforge-the-branch-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/fc-reforge-the-branch-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-reforge-the-branch-2 repair'` → `git tag fc-reforge-the-branch-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-reforge-the-branch-2-reverted main` → `git revert --no-edit d2` → `git tag fc-reforge-the-branch-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 8: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/fc-reforge-the-branch-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-reforge-the-branch-3 incident'` → `git tag fc-reforge-the-branch-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-reforge-the-branch-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-reforge-the-branch-3 repair'` → `git tag fc-reforge-the-branch-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/fc-reforge-the-branch-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-reforge-the-branch-3 repair'` → `git tag fc-reforge-the-branch-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-reforge-the-branch-3-reverted main` → `git revert --no-edit d2` → `git tag fc-reforge-the-branch-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 06: Govern the Remote
-
-#### Level 1: Inspect and Refresh Remotes
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read the upstream tracking table | All variants | `git branch -vv` |
-| 2. Fetch from every remote | All variants | `git fetch --all` |
-| 3. Fetch and remove stale tracking refs | All variants | `git fetch --prune` |
-
-#### Level 2: Integrate Under Guard
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Pull only if it can fast-forward | All variants | `git pull --ff-only` |
-| 2. Pull with rebase | All variants | `git pull --rebase` |
-
-#### Level 3: Publish with Guardrails
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Publish rewritten history safely | All variants | `git push --force-with-lease` |
-| 2. Delete a branch on the remote | All variants | `git push origin --delete old-experiment` |
-| 3. Point origin at a new URL | All variants | `git remote set-url origin https://relay.frost.test/operations.git` |
-
-#### Level 4: Read tracking, then fetch everything
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read tracking, then fetch everything | All variants | `git branch -vv` → `git fetch --all` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 5: Read tracking, then prune stale refs
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read tracking, then prune stale refs | All variants | `git branch -vv` → `git fetch --prune` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 6: Fetch everything, then pull safely
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Fetch everything, then pull safely | All variants | `git fetch --all` → `git pull --ff-only` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 7: Read tracking, then pull with rebase
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read tracking, then pull with rebase | All variants | `git branch -vv` → `git pull --rebase` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 8: Check tracking, then publish the rewrite
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Check tracking, then publish the rewrite | All variants | `git branch -vv` → `git push --force-with-lease` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 9: Fetch first, then take the lease
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Fetch first, then take the lease | All variants | `git fetch --all` → `git push --force-with-lease` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 10: Prune first, then delete the branch
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Prune first, then delete the branch | All variants | `git fetch --prune` → `git push origin --delete old-experiment` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 11: Check tracking, then delete deliberately
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Check tracking, then delete deliberately | All variants | `git branch -vv` → `git push origin --delete old-experiment` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 12: Change the URL, then verify tracking
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Change the URL, then verify tracking | All variants | `git remote set-url origin https://relay.frost.test/operations.git` → `git branch -vv` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 13: Switch to the mirror URL
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Switch to the mirror URL | All variants | `git status` → `git remote set-url origin https://mirror.frost.test/operations.git` → `git log --oneline --graph --all` |
-
-#### Level 14: Prune, then pull under the guard
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Prune, then pull under the guard | All variants | `git fetch --prune` → `git pull --ff-only` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 15: Fetch everything, then pull with rebase
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Fetch everything, then pull with rebase | All variants | `git fetch --all` → `git pull --rebase` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 16: Read the Signal Towers
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read the Signal Towers | Author the repair from pending work | `git branch -vv` → `git status` → `git switch -c incident/fc-govern-the-remote-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-govern-the-remote-1 incident'` → `git tag fc-govern-the-remote-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git branch -vv` → `git log --oneline --graph --all` → `git switch -c incident/fc-govern-the-remote-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-govern-the-remote-1 repair'` → `git tag fc-govern-the-remote-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git branch -vv` → `git merge-base main feature/work` → `git switch -c incident/fc-govern-the-remote-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-govern-the-remote-1 repair'` → `git tag fc-govern-the-remote-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git branch -vv` → `git log --oneline --graph --all` → `git switch -c incident/fc-govern-the-remote-1-reverted main` → `git revert --no-edit d2` → `git tag fc-govern-the-remote-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 17: Publish Without Overwriting
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Publish Without Overwriting | Author the repair from pending work | `git remote -v` → `git status` → `git switch -c incident/fc-govern-the-remote-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-govern-the-remote-2 incident'` → `git tag fc-govern-the-remote-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git remote -v` → `git log --oneline --graph --all` → `git switch -c incident/fc-govern-the-remote-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-govern-the-remote-2 repair'` → `git tag fc-govern-the-remote-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git remote -v` → `git merge-base main feature/work` → `git switch -c incident/fc-govern-the-remote-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-govern-the-remote-2 repair'` → `git tag fc-govern-the-remote-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git remote -v` → `git log --oneline --graph --all` → `git switch -c incident/fc-govern-the-remote-2-reverted main` → `git revert --no-edit d2` → `git tag fc-govern-the-remote-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 18: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/fc-govern-the-remote-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-govern-the-remote-3 incident'` → `git tag fc-govern-the-remote-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-govern-the-remote-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-govern-the-remote-3 repair'` → `git tag fc-govern-the-remote-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/fc-govern-the-remote-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-govern-the-remote-3 repair'` → `git tag fc-govern-the-remote-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-govern-the-remote-3-reverted main` → `git revert --no-edit d2` → `git tag fc-govern-the-remote-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 07: Deliver the Release
-
-#### Level 1: Read the Release History
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Summarize commits by author | All variants | `git shortlog` |
-| 2. Count commits per author | All variants | `git shortlog -sn` |
-| 3. Name the current commit from its tags | All variants | `git describe --tags` |
-
-#### Level 2: Mark and Publish the Release
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Create an annotated release tag | All variants | `git tag -a v1.1 -m 'Heat core release candidate'` |
-| 2. Delete an outdated tag | All variants | `git tag -d v1.0` |
-| 3. Publish all tags | All variants | `git push --tags` |
-
-#### Level 3: Check the current name, then tag
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Check the current name, then tag | All variants | `git describe --tags` → `git tag -a v1.1 -m 'Signed relay candidate'` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Tag the hotfix, then publish the tags
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Tag the hotfix, then publish the tags | All variants | `git tag -a v1.2 -m 'Relay hotfix marker'` → `git push --tags` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 5: Credit the authors, then delete the tag
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Credit the authors, then delete the tag | All variants | `git shortlog` → `git tag -d v1.0` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 6: Check the name, then delete the stale tag
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Check the name, then delete the stale tag | All variants | `git describe --tags` → `git tag -d v1.0` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 7: Count contributions, then publish the tags
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Count contributions, then publish the tags | All variants | `git shortlog -sn` → `git push --tags` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 8: Assemble the release record
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Assemble the release record | All variants | `git shortlog` → `git describe --tags` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 9: Assemble the Release Evidence
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Assemble the Release Evidence | Author the repair from pending work | `git shortlog -sn` → `git status` → `git switch -c incident/fc-deliver-the-release-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-deliver-the-release-1 incident'` → `git tag fc-deliver-the-release-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git shortlog -sn` → `git log --oneline --graph --all` → `git switch -c incident/fc-deliver-the-release-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-deliver-the-release-1 repair'` → `git tag fc-deliver-the-release-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git shortlog -sn` → `git merge-base main feature/work` → `git switch -c incident/fc-deliver-the-release-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-deliver-the-release-1 repair'` → `git tag fc-deliver-the-release-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git shortlog -sn` → `git log --oneline --graph --all` → `git switch -c incident/fc-deliver-the-release-1-reverted main` → `git revert --no-edit d2` → `git tag fc-deliver-the-release-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 10: Mark the Candidate
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Mark the Candidate | Author the repair from pending work | `git describe --tags` → `git status` → `git switch -c incident/fc-deliver-the-release-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-deliver-the-release-2 incident'` → `git tag fc-deliver-the-release-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git describe --tags` → `git log --oneline --graph --all` → `git switch -c incident/fc-deliver-the-release-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-deliver-the-release-2 repair'` → `git tag fc-deliver-the-release-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git describe --tags` → `git merge-base main feature/work` → `git switch -c incident/fc-deliver-the-release-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-deliver-the-release-2 repair'` → `git tag fc-deliver-the-release-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git describe --tags` → `git log --oneline --graph --all` → `git switch -c incident/fc-deliver-the-release-2-reverted main` → `git revert --no-edit d2` → `git tag fc-deliver-the-release-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 11: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/fc-deliver-the-release-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-deliver-the-release-3 incident'` → `git tag fc-deliver-the-release-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-deliver-the-release-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-deliver-the-release-3 repair'` → `git tag fc-deliver-the-release-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/fc-deliver-the-release-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-deliver-the-release-3 repair'` → `git tag fc-deliver-the-release-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-deliver-the-release-3-reverted main` → `git revert --no-edit d2` → `git tag fc-deliver-the-release-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 08: Hunt the Frozen Regression
-
-#### Level 1: Run and Preserve the Search
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Find the bad commit automatically | All variants | `git bisect run heat-relay-test` |
-| 2. Read the bisect record | All variants | `git bisect log` |
-
-#### Level 2: Run the search, then keep the record
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Run the search, then keep the record | All variants | `git bisect run heat-relay-test` → `git bisect log` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 3: Confirm with a second test script
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Confirm with a second test script | All variants | `git bisect run relay-freeze-test` → `git bisect log` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Read the history, then run the search
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read the history, then run the search | All variants | `git log --oneline --graph --all` → `git bisect run heat-relay-test` → `git status` |
-
-#### Level 5: Reproduce yesterday's search
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Reproduce yesterday's search | All variants | `git bisect run heat-relay-test` → `git bisect log` → `git log --oneline --graph --all` → `git status` |
-
-#### Level 6: Find the First Frozen Failure
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Find the First Frozen Failure | Author the repair from pending work | `git bisect run test-suite` → `git status` → `git switch -c incident/fc-hunt-the-regression-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-hunt-the-regression-1 incident'` → `git tag fc-hunt-the-regression-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git bisect run test-suite` → `git log --oneline --graph --all` → `git switch -c incident/fc-hunt-the-regression-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-hunt-the-regression-1 repair'` → `git tag fc-hunt-the-regression-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git bisect run test-suite` → `git merge-base main feature/work` → `git switch -c incident/fc-hunt-the-regression-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-hunt-the-regression-1 repair'` → `git tag fc-hunt-the-regression-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git bisect run test-suite` → `git log --oneline --graph --all` → `git switch -c incident/fc-hunt-the-regression-1-reverted main` → `git revert --no-edit d2` → `git tag fc-hunt-the-regression-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 7: Repair the Located Regression
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Repair the Located Regression | Author the repair from pending work | `git bisect log` → `git status` → `git switch -c incident/fc-hunt-the-regression-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-hunt-the-regression-2 incident'` → `git tag fc-hunt-the-regression-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git bisect log` → `git log --oneline --graph --all` → `git switch -c incident/fc-hunt-the-regression-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-hunt-the-regression-2 repair'` → `git tag fc-hunt-the-regression-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git bisect log` → `git merge-base main feature/work` → `git switch -c incident/fc-hunt-the-regression-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-hunt-the-regression-2 repair'` → `git tag fc-hunt-the-regression-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git bisect log` → `git log --oneline --graph --all` → `git switch -c incident/fc-hunt-the-regression-2-reverted main` → `git revert --no-edit d2` → `git tag fc-hunt-the-regression-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 8: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/fc-hunt-the-regression-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-hunt-the-regression-3 incident'` → `git tag fc-hunt-the-regression-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-hunt-the-regression-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-hunt-the-regression-3 repair'` → `git tag fc-hunt-the-regression-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/fc-hunt-the-regression-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-hunt-the-regression-3 repair'` → `git tag fc-hunt-the-regression-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-hunt-the-regression-3-reverted main` → `git revert --no-edit d2` → `git tag fc-hunt-the-regression-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 09: Publish the Restored Core
-
-#### Level 1: Verify the Release Record
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify a release tag's signature | All variants | `git verify-tag v1.0` |
-| 2. List every ref and its target | All variants | `git show-ref` |
-
-#### Level 2: Verify the tag, then list the refs
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the tag, then list the refs | All variants | `git verify-tag v1.0` → `git show-ref` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 3: List the refs, then prove the tag
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. List the refs, then prove the tag | All variants | `git show-ref` → `git verify-tag v1.0` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Audit the Restored Core
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Audit the Restored Core | Author the repair from pending work | `git verify-tag v1.0` → `git status` → `git switch -c incident/fc-publish-the-core-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-publish-the-core-1 incident'` → `git tag fc-publish-the-core-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git verify-tag v1.0` → `git log --oneline --graph --all` → `git switch -c incident/fc-publish-the-core-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-publish-the-core-1 repair'` → `git tag fc-publish-the-core-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git verify-tag v1.0` → `git merge-base main feature/work` → `git switch -c incident/fc-publish-the-core-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-publish-the-core-1 repair'` → `git tag fc-publish-the-core-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git verify-tag v1.0` → `git log --oneline --graph --all` → `git switch -c incident/fc-publish-the-core-1-reverted main` → `git revert --no-edit d2` → `git tag fc-publish-the-core-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 5: Publish the Final Heat History
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Publish the Final Heat History | Author the repair from pending work | `git show-ref` → `git status` → `git switch -c incident/fc-publish-the-core-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-publish-the-core-2 incident'` → `git tag fc-publish-the-core-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git show-ref` → `git log --oneline --graph --all` → `git switch -c incident/fc-publish-the-core-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-publish-the-core-2 repair'` → `git tag fc-publish-the-core-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git show-ref` → `git merge-base main feature/work` → `git switch -c incident/fc-publish-the-core-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-publish-the-core-2 repair'` → `git tag fc-publish-the-core-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git show-ref` → `git log --oneline --graph --all` → `git switch -c incident/fc-publish-the-core-2-reverted main` → `git revert --no-edit d2` → `git tag fc-publish-the-core-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 6: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/fc-publish-the-core-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve fc-publish-the-core-3 incident'` → `git tag fc-publish-the-core-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-publish-the-core-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant fc-publish-the-core-3 repair'` → `git tag fc-publish-the-core-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/fc-publish-the-core-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate fc-publish-the-core-3 repair'` → `git tag fc-publish-the-core-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/fc-publish-the-core-3-reverted main` → `git revert --no-edit d2` → `git tag fc-publish-the-core-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-
-## Neon Backstreets
-
-### Chapter 01: Speak the Revision Language
-
-#### Level 1: Locate and Resolve
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Resolve a revision to a commit id | All variants | `git rev-parse HEAD~1` |
-| 2. Locate the repository root | All variants | `git rev-parse --show-toplevel` |
-
-#### Level 2: Locate the root, then resolve the revision
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Locate the root, then resolve the revision | All variants | `git rev-parse --show-toplevel` → `git rev-parse HEAD~1` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 3: Pin the audit coordinates
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Pin the audit coordinates | All variants | `git rev-parse --show-toplevel` → `git rev-parse main` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Resolve the Incident Coordinates
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Resolve the Incident Coordinates | Author the repair from pending work | `git rev-parse HEAD~1` → `git status` → `git switch -c incident/sn-revision-language-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-revision-language-1 incident'` → `git tag sn-revision-language-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git rev-parse HEAD~1` → `git log --oneline --graph --all` → `git switch -c incident/sn-revision-language-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-revision-language-1 repair'` → `git tag sn-revision-language-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git rev-parse HEAD~1` → `git merge-base main feature/work` → `git switch -c incident/sn-revision-language-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-revision-language-1 repair'` → `git tag sn-revision-language-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git rev-parse HEAD~1` → `git log --oneline --graph --all` → `git switch -c incident/sn-revision-language-1-reverted main` → `git revert --no-edit d2` → `git tag sn-revision-language-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 5: Name the Exact History Set
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Name the Exact History Set | Author the repair from pending work | `git rev-list --count a0..main` → `git status` → `git switch -c incident/sn-revision-language-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-revision-language-2 incident'` → `git tag sn-revision-language-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git rev-list --count b0..main` → `git log --oneline --graph --all` → `git switch -c incident/sn-revision-language-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-revision-language-2 repair'` → `git tag sn-revision-language-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git rev-list --count c0..main` → `git merge-base main feature/work` → `git switch -c incident/sn-revision-language-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-revision-language-2 repair'` → `git tag sn-revision-language-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git rev-list --count d0..main` → `git log --oneline --graph --all` → `git switch -c incident/sn-revision-language-2-reverted main` → `git revert --no-edit d2` → `git tag sn-revision-language-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 6: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/sn-revision-language-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-revision-language-3 incident'` → `git tag sn-revision-language-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-revision-language-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-revision-language-3 repair'` → `git tag sn-revision-language-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/sn-revision-language-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-revision-language-3 repair'` → `git tag sn-revision-language-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-revision-language-3-reverted main` → `git revert --no-edit d2` → `git tag sn-revision-language-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 02: Read the Hidden History
-
-#### Level 1: Search the Hidden History
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Find who last changed each line | All variants | `git blame src/app.ts` |
-| 2. Search the tracked content | All variants | `git grep stable` |
-| 3. Read a file as it was in an old commit | First team's repository | `git show m1:src/app.ts` |
-|  | Second team's repository | `git show n1:src/app.ts` |
-
-#### Level 2: Search first, then trace the line
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Search first, then trace the line | All variants | `git grep stable` → `git blame src/app.ts` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 3: Read the old version, then the evidence trail
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read the old version, then the evidence trail | First team's repository | `git show m1:src/app.ts` → `git blame src/app.ts` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git show n1:src/app.ts` → `git blame src/app.ts` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Search today, then read the old snapshot
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Search today, then read the old snapshot | First team's repository | `git grep stable` → `git show m1:src/app.ts` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git grep stable` → `git show n1:src/app.ts` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 5: Trace the Changed Line
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Trace the Changed Line | Author the repair from pending work | `git blame src/app.ts` → `git status` → `git switch -c incident/sn-hidden-history-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-hidden-history-1 incident'` → `git tag sn-hidden-history-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git blame src/app.ts` → `git log --oneline --graph --all` → `git switch -c incident/sn-hidden-history-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-hidden-history-1 repair'` → `git tag sn-hidden-history-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git blame src/app.ts` → `git merge-base main feature/work` → `git switch -c incident/sn-hidden-history-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-hidden-history-1 repair'` → `git tag sn-hidden-history-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git blame src/app.ts` → `git log --oneline --graph --all` → `git switch -c incident/sn-hidden-history-1-reverted main` → `git revert --no-edit d2` → `git tag sn-hidden-history-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 6: Search the Archive for the Fault
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Search the Archive for the Fault | Author the repair from pending work | `git grep stable` → `git status` → `git switch -c incident/sn-hidden-history-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-hidden-history-2 incident'` → `git tag sn-hidden-history-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git grep stable` → `git log --oneline --graph --all` → `git switch -c incident/sn-hidden-history-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-hidden-history-2 repair'` → `git tag sn-hidden-history-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git grep stable` → `git merge-base main feature/work` → `git switch -c incident/sn-hidden-history-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-hidden-history-2 repair'` → `git tag sn-hidden-history-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git grep stable` → `git log --oneline --graph --all` → `git switch -c incident/sn-hidden-history-2-reverted main` → `git revert --no-edit d2` → `git tag sn-hidden-history-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 7: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/sn-hidden-history-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-hidden-history-3 incident'` → `git tag sn-hidden-history-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-hidden-history-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-hidden-history-3 repair'` → `git tag sn-hidden-history-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/sn-hidden-history-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-hidden-history-3 repair'` → `git tag sn-hidden-history-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-hidden-history-3-reverted main` → `git revert --no-edit d2` → `git tag sn-hidden-history-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 03: Hunt the First Broken Commit
-
-#### Level 1: Automate the Regression Search
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Automate the Regression Search | Author the repair from pending work | `git bisect run integration-test` → `git status` → `git switch -c incident/sn-first-broken-commit-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-first-broken-commit-1 incident'` → `git tag sn-first-broken-commit-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git bisect run integration-test` → `git log --oneline --graph --all` → `git switch -c incident/sn-first-broken-commit-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-first-broken-commit-1 repair'` → `git tag sn-first-broken-commit-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git bisect run integration-test` → `git merge-base main feature/work` → `git switch -c incident/sn-first-broken-commit-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-first-broken-commit-1 repair'` → `git tag sn-first-broken-commit-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git bisect run integration-test` → `git log --oneline --graph --all` → `git switch -c incident/sn-first-broken-commit-1-reverted main` → `git revert --no-edit d2` → `git tag sn-first-broken-commit-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 2: Preserve the Bisect Evidence
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Preserve the Bisect Evidence | Author the repair from pending work | `git bisect log` → `git status` → `git switch -c incident/sn-first-broken-commit-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-first-broken-commit-2 incident'` → `git tag sn-first-broken-commit-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git bisect log` → `git log --oneline --graph --all` → `git switch -c incident/sn-first-broken-commit-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-first-broken-commit-2 repair'` → `git tag sn-first-broken-commit-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git bisect log` → `git merge-base main feature/work` → `git switch -c incident/sn-first-broken-commit-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-first-broken-commit-2 repair'` → `git tag sn-first-broken-commit-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git bisect log` → `git log --oneline --graph --all` → `git switch -c incident/sn-first-broken-commit-2-reverted main` → `git revert --no-edit d2` → `git tag sn-first-broken-commit-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 3: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/sn-first-broken-commit-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-first-broken-commit-3 incident'` → `git tag sn-first-broken-commit-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-first-broken-commit-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-first-broken-commit-3 repair'` → `git tag sn-first-broken-commit-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/sn-first-broken-commit-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-first-broken-commit-3 repair'` → `git tag sn-first-broken-commit-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-first-broken-commit-3-reverted main` → `git revert --no-edit d2` → `git tag sn-first-broken-commit-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 04: Master Repeated Conflict
-
-#### Level 1: Read the Resolution Memory
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. List the recorded conflict paths | All variants | `git rerere status` |
-| 2. Inspect the recorded resolutions | All variants | `git rerere diff` |
-
-#### Level 2: Audit the recorded resolution
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Audit the recorded resolution | All variants | `git rerere status` → `git rerere diff` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 3: Pre-flight the conflict memory
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Pre-flight the conflict memory | All variants | `git rerere diff` → `git rerere status` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Inspect the Resolution Memory
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Inspect the Resolution Memory | Author the repair from pending work | `git rerere status` → `git status` → `git switch -c incident/sn-repeated-conflict-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-repeated-conflict-1 incident'` → `git tag sn-repeated-conflict-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git rerere status` → `git log --oneline --graph --all` → `git switch -c incident/sn-repeated-conflict-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-repeated-conflict-1 repair'` → `git tag sn-repeated-conflict-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git rerere status` → `git merge-base main feature/work` → `git switch -c incident/sn-repeated-conflict-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-repeated-conflict-1 repair'` → `git tag sn-repeated-conflict-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git rerere status` → `git log --oneline --graph --all` → `git switch -c incident/sn-repeated-conflict-1-reverted main` → `git revert --no-edit d2` → `git tag sn-repeated-conflict-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 5: Reuse the Proven Conflict Repair
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Reuse the Proven Conflict Repair | Author the repair from pending work | `git rerere diff` → `git status` → `git switch -c incident/sn-repeated-conflict-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-repeated-conflict-2 incident'` → `git tag sn-repeated-conflict-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git rerere diff` → `git log --oneline --graph --all` → `git switch -c incident/sn-repeated-conflict-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-repeated-conflict-2 repair'` → `git tag sn-repeated-conflict-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git rerere diff` → `git merge-base main feature/work` → `git switch -c incident/sn-repeated-conflict-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-repeated-conflict-2 repair'` → `git tag sn-repeated-conflict-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git rerere diff` → `git log --oneline --graph --all` → `git switch -c incident/sn-repeated-conflict-2-reverted main` → `git revert --no-edit d2` → `git tag sn-repeated-conflict-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 6: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/sn-repeated-conflict-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-repeated-conflict-3 incident'` → `git tag sn-repeated-conflict-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-repeated-conflict-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-repeated-conflict-3 repair'` → `git tag sn-repeated-conflict-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/sn-repeated-conflict-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-repeated-conflict-3 repair'` → `git tag sn-repeated-conflict-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-repeated-conflict-3-reverted main` → `git revert --no-edit d2` → `git tag sn-repeated-conflict-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 05: Work Across Many Realities
-
-#### Level 1: Map the Parallel Workspaces
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. List the attached worktrees | All variants | `git worktree list` |
-| 2. List the sparse checkout paths | All variants | `git sparse-checkout list` |
-| 3. Check the submodule state | All variants | `git submodule status` |
-
-#### Level 2: Map the whole workspace setup
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Map the whole workspace setup | All variants | `git worktree list` → `git sparse-checkout list` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 3: Audit the dependency pins
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Audit the dependency pins | All variants | `git submodule status` → `git worktree list` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Explain the missing files
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Explain the missing files | All variants | `git sparse-checkout list` → `git submodule status` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 5: Run the morning floor check
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Run the morning floor check | All variants | `git worktree list` → `git sparse-checkout list` → `git submodule status` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 6: Map the Parallel Work Floors
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Map the Parallel Work Floors | Author the repair from pending work | `git worktree list` → `git status` → `git switch -c incident/sn-many-realities-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-many-realities-1 incident'` → `git tag sn-many-realities-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git worktree list` → `git log --oneline --graph --all` → `git switch -c incident/sn-many-realities-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-many-realities-1 repair'` → `git tag sn-many-realities-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git worktree list` → `git merge-base main feature/work` → `git switch -c incident/sn-many-realities-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-many-realities-1 repair'` → `git tag sn-many-realities-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git worktree list` → `git log --oneline --graph --all` → `git switch -c incident/sn-many-realities-1-reverted main` → `git revert --no-edit d2` → `git tag sn-many-realities-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 7: Repair the Reduced Workspace
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Repair the Reduced Workspace | Author the repair from pending work | `git sparse-checkout list` → `git status` → `git switch -c incident/sn-many-realities-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-many-realities-2 incident'` → `git tag sn-many-realities-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git sparse-checkout list` → `git log --oneline --graph --all` → `git switch -c incident/sn-many-realities-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-many-realities-2 repair'` → `git tag sn-many-realities-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git sparse-checkout list` → `git merge-base main feature/work` → `git switch -c incident/sn-many-realities-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-many-realities-2 repair'` → `git tag sn-many-realities-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git sparse-checkout list` → `git log --oneline --graph --all` → `git switch -c incident/sn-many-realities-2-reverted main` → `git revert --no-edit d2` → `git tag sn-many-realities-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 8: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/sn-many-realities-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-many-realities-3 incident'` → `git tag sn-many-realities-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-many-realities-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-many-realities-3 repair'` → `git tag sn-many-realities-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/sn-many-realities-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-many-realities-3 repair'` → `git tag sn-many-realities-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-many-realities-3-reverted main` → `git revert --no-edit d2` → `git tag sn-many-realities-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 06: Configure Git's Behavior
-
-#### Level 1: Audit the Effective Behavior
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read one configuration value | All variants | `git config --get user.name` |
-| 2. Audit the effective configuration | All variants | `git config --get user.name` → `git config --list` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 2: Audit the Effective Configuration
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Audit the Effective Configuration | Author the repair from pending work | `git config --get user.name` → `git status` → `git switch -c incident/sn-enchant-behavior-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-enchant-behavior-1 incident'` → `git tag sn-enchant-behavior-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git config --get user.name` → `git log --oneline --graph --all` → `git switch -c incident/sn-enchant-behavior-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-enchant-behavior-1 repair'` → `git tag sn-enchant-behavior-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git config --get user.name` → `git merge-base main feature/work` → `git switch -c incident/sn-enchant-behavior-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-enchant-behavior-1 repair'` → `git tag sn-enchant-behavior-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git config --get user.name` → `git log --oneline --graph --all` → `git switch -c incident/sn-enchant-behavior-1-reverted main` → `git revert --no-edit d2` → `git tag sn-enchant-behavior-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 3: Correct the Automation Contract
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Correct the Automation Contract | Author the repair from pending work | `git config --list` → `git status` → `git switch -c incident/sn-enchant-behavior-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-enchant-behavior-2 incident'` → `git tag sn-enchant-behavior-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git config --list` → `git log --oneline --graph --all` → `git switch -c incident/sn-enchant-behavior-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-enchant-behavior-2 repair'` → `git tag sn-enchant-behavior-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git config --list` → `git merge-base main feature/work` → `git switch -c incident/sn-enchant-behavior-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-enchant-behavior-2 repair'` → `git tag sn-enchant-behavior-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git config --list` → `git log --oneline --graph --all` → `git switch -c incident/sn-enchant-behavior-2-reverted main` → `git revert --no-edit d2` → `git tag sn-enchant-behavior-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 4: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/sn-enchant-behavior-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-enchant-behavior-3 incident'` → `git tag sn-enchant-behavior-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-enchant-behavior-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-enchant-behavior-3 repair'` → `git tag sn-enchant-behavior-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/sn-enchant-behavior-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-enchant-behavior-3 repair'` → `git tag sn-enchant-behavior-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-enchant-behavior-3-reverted main` → `git revert --no-edit d2` → `git tag sn-enchant-behavior-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 07: Guard the Archive
-
-#### Level 1: Inspect and Verify the Commit
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify a commit's signature | First team's repository | `git verify-commit m1` |
-|  | Second team's repository | `git verify-commit n1` |
-| 2. Inspect and verify the release commit | First team's repository | `git show m1` → `git verify-commit m1` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git show n1` → `git verify-commit n1` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 2: Verify the Release Identity
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Release Identity | Author the repair from pending work | `git verify-commit a1` → `git status` → `git switch -c incident/sn-guard-the-archive-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-guard-the-archive-1 incident'` → `git tag sn-guard-the-archive-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git verify-commit b1` → `git log --oneline --graph --all` → `git switch -c incident/sn-guard-the-archive-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-guard-the-archive-1 repair'` → `git tag sn-guard-the-archive-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git verify-commit c1` → `git merge-base main feature/work` → `git switch -c incident/sn-guard-the-archive-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-guard-the-archive-1 repair'` → `git tag sn-guard-the-archive-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git verify-commit d1` → `git log --oneline --graph --all` → `git switch -c incident/sn-guard-the-archive-1-reverted main` → `git revert --no-edit d2` → `git tag sn-guard-the-archive-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 3: Quarantine the Untrusted Ref
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Quarantine the Untrusted Ref | Author the repair from pending work | `git verify-tag v1.0` → `git status` → `git switch -c incident/sn-guard-the-archive-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-guard-the-archive-2 incident'` → `git tag sn-guard-the-archive-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git verify-tag v1.0` → `git log --oneline --graph --all` → `git switch -c incident/sn-guard-the-archive-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-guard-the-archive-2 repair'` → `git tag sn-guard-the-archive-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git verify-tag v1.0` → `git merge-base main feature/work` → `git switch -c incident/sn-guard-the-archive-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-guard-the-archive-2 repair'` → `git tag sn-guard-the-archive-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git verify-tag v1.0` → `git log --oneline --graph --all` → `git switch -c incident/sn-guard-the-archive-2-reverted main` → `git revert --no-edit d2` → `git tag sn-guard-the-archive-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 4: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/sn-guard-the-archive-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-guard-the-archive-3 incident'` → `git tag sn-guard-the-archive-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-guard-the-archive-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-guard-the-archive-3 repair'` → `git tag sn-guard-the-archive-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/sn-guard-the-archive-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-guard-the-archive-3 repair'` → `git tag sn-guard-the-archive-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-guard-the-archive-3-reverted main` → `git revert --no-edit d2` → `git tag sn-guard-the-archive-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 08: Restore and Maintain the Archive
-
-#### Level 1: Measure and Recover the Store
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Run a full integrity check | All variants | `git fsck --full` |
-| 2. Measure the object store | All variants | `git count-objects -vH` |
-| 3. Read one ref's movement history | All variants | `git reflog show main` |
-| 4. Recover the known-good state | First team's repository | `git reset --hard m1` |
-|  | Second team's repository | `git reset --hard n1` |
-
-#### Level 2: Read the reflog, then recover
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read the reflog, then recover | First team's repository | `git reflog show main` → `git reset --hard m1` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git reflog show main` → `git reset --hard n1` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 3: Produce the storage health report
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Produce the storage health report | All variants | `git fsck --full` → `git count-objects -vH` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Check integrity, then recover the branch
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Check integrity, then recover the branch | First team's repository | `git fsck --full` → `git reset --hard m1` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git fsck --full` → `git reset --hard n1` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 5: Audit the ref movement
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Audit the ref movement | All variants | `git reflog show main` → `git count-objects -vH` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 6: Inspect the Object Store
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Inspect the Object Store | Author the repair from pending work | `git fsck --full` → `git status` → `git switch -c incident/sn-restore-maintain-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-restore-maintain-1 incident'` → `git tag sn-restore-maintain-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git fsck --full` → `git log --oneline --graph --all` → `git switch -c incident/sn-restore-maintain-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-restore-maintain-1 repair'` → `git tag sn-restore-maintain-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git fsck --full` → `git merge-base main feature/work` → `git switch -c incident/sn-restore-maintain-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-restore-maintain-1 repair'` → `git tag sn-restore-maintain-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git fsck --full` → `git log --oneline --graph --all` → `git switch -c incident/sn-restore-maintain-1-reverted main` → `git revert --no-edit d2` → `git tag sn-restore-maintain-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 7: Recover Before Maintenance
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Recover Before Maintenance | Author the repair from pending work | `git count-objects -vH` → `git status` → `git switch -c incident/sn-restore-maintain-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-restore-maintain-2 incident'` → `git tag sn-restore-maintain-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git count-objects -vH` → `git log --oneline --graph --all` → `git switch -c incident/sn-restore-maintain-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-restore-maintain-2 repair'` → `git tag sn-restore-maintain-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git count-objects -vH` → `git merge-base main feature/work` → `git switch -c incident/sn-restore-maintain-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-restore-maintain-2 repair'` → `git tag sn-restore-maintain-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git count-objects -vH` → `git log --oneline --graph --all` → `git switch -c incident/sn-restore-maintain-2-reverted main` → `git revert --no-edit d2` → `git tag sn-restore-maintain-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 8: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/sn-restore-maintain-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-restore-maintain-3 incident'` → `git tag sn-restore-maintain-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-restore-maintain-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-restore-maintain-3 repair'` → `git tag sn-restore-maintain-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/sn-restore-maintain-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-restore-maintain-3 repair'` → `git tag sn-restore-maintain-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-restore-maintain-3-reverted main` → `git revert --no-edit d2` → `git tag sn-restore-maintain-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 11: Enter Git's Machinery
-
-#### Level 1: Trace HEAD to the Object
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Read what HEAD points to | All variants | `git symbolic-ref HEAD` |
-| 2. Decode a raw object | First team's repository | `git cat-file -p m1` |
-|  | Second team's repository | `git cat-file -p n1` |
-
-#### Level 2: Follow HEAD down to its object
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Follow HEAD down to its object | First team's repository | `git symbolic-ref HEAD` → `git cat-file -p m1` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git symbolic-ref HEAD` → `git cat-file -p n1` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 3: Decode the object and prove its type
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Decode the object and prove its type | First team's repository | `git cat-file -t m1` → `git cat-file -p m1` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git cat-file -t n1` → `git cat-file -p n1` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Trace HEAD to Its Ref
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Trace HEAD to Its Ref | Author the repair from pending work | `git symbolic-ref HEAD` → `git status` → `git switch -c incident/sn-git-machinery-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-git-machinery-1 incident'` → `git tag sn-git-machinery-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git symbolic-ref HEAD` → `git log --oneline --graph --all` → `git switch -c incident/sn-git-machinery-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-git-machinery-1 repair'` → `git tag sn-git-machinery-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git symbolic-ref HEAD` → `git merge-base main feature/work` → `git switch -c incident/sn-git-machinery-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-git-machinery-1 repair'` → `git tag sn-git-machinery-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git symbolic-ref HEAD` → `git log --oneline --graph --all` → `git switch -c incident/sn-git-machinery-1-reverted main` → `git revert --no-edit d2` → `git tag sn-git-machinery-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 5: Repair the Visible Reference
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Repair the Visible Reference | Author the repair from pending work | `git show-ref` → `git status` → `git switch -c incident/sn-git-machinery-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-git-machinery-2 incident'` → `git tag sn-git-machinery-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git show-ref` → `git log --oneline --graph --all` → `git switch -c incident/sn-git-machinery-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-git-machinery-2 repair'` → `git tag sn-git-machinery-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git show-ref` → `git merge-base main feature/work` → `git switch -c incident/sn-git-machinery-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-git-machinery-2 repair'` → `git tag sn-git-machinery-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git show-ref` → `git log --oneline --graph --all` → `git switch -c incident/sn-git-machinery-2-reverted main` → `git revert --no-edit d2` → `git tag sn-git-machinery-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 6: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/sn-git-machinery-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-git-machinery-3 incident'` → `git tag sn-git-machinery-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-git-machinery-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-git-machinery-3 repair'` → `git tag sn-git-machinery-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/sn-git-machinery-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-git-machinery-3 repair'` → `git tag sn-git-machinery-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-git-machinery-3-reverted main` → `git revert --no-edit d2` → `git tag sn-git-machinery-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 09: Serve the City's Repositories
-
-#### Level 1: Audit the Served Ref Set
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Enumerate every ref, formatted | All variants | `git for-each-ref` |
-| 2. Audit the served reference set | All variants | `git show-ref` → `git for-each-ref` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 2: Audit the Served Refs
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Audit the Served Refs | Author the repair from pending work | `git for-each-ref` → `git status` → `git switch -c incident/sn-serve-the-city-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-serve-the-city-1 incident'` → `git tag sn-serve-the-city-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git for-each-ref` → `git log --oneline --graph --all` → `git switch -c incident/sn-serve-the-city-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-serve-the-city-1 repair'` → `git tag sn-serve-the-city-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git for-each-ref` → `git merge-base main feature/work` → `git switch -c incident/sn-serve-the-city-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-serve-the-city-1 repair'` → `git tag sn-serve-the-city-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git for-each-ref` → `git log --oneline --graph --all` → `git switch -c incident/sn-serve-the-city-1-reverted main` → `git revert --no-edit d2` → `git tag sn-serve-the-city-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 3: Repair the Synchronization Boundary
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Repair the Synchronization Boundary | Author the repair from pending work | `git show-ref` → `git status` → `git switch -c incident/sn-serve-the-city-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-serve-the-city-2 incident'` → `git tag sn-serve-the-city-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git show-ref` → `git log --oneline --graph --all` → `git switch -c incident/sn-serve-the-city-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-serve-the-city-2 repair'` → `git tag sn-serve-the-city-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git show-ref` → `git merge-base main feature/work` → `git switch -c incident/sn-serve-the-city-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-serve-the-city-2 repair'` → `git tag sn-serve-the-city-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git show-ref` → `git log --oneline --graph --all` → `git switch -c incident/sn-serve-the-city-2-reverted main` → `git revert --no-edit d2` → `git tag sn-serve-the-city-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 4: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/sn-serve-the-city-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-serve-the-city-3 incident'` → `git tag sn-serve-the-city-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-serve-the-city-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-serve-the-city-3 repair'` → `git tag sn-serve-the-city-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/sn-serve-the-city-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-serve-the-city-3 repair'` → `git tag sn-serve-the-city-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-serve-the-city-3-reverted main` → `git revert --no-edit d2` → `git tag sn-serve-the-city-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 10: Migrate the Civic Grid
-
-#### Level 1: Inspect the Migrated Objects
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Check what kind of object an id names | First team's repository | `git cat-file -t m1` |
-|  | Second team's repository | `git cat-file -t n1` |
-| 2. List what a commit's tree contains | First team's repository | `git ls-tree m1` |
-|  | Second team's repository | `git ls-tree n1` |
-
-#### Level 2: Verify one migrated commit end to end
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify one migrated commit end to end | First team's repository | `git cat-file -t m1` → `git ls-tree m1` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git cat-file -t n1` → `git ls-tree n1` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 3: Compare two commits' layouts
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Compare two commits' layouts | First team's repository | `git ls-tree m0` → `git ls-tree m1` → `git status` → `git log --oneline --graph --all` |
-|  | Second team's repository | `git ls-tree n0` → `git ls-tree n1` → `git status` → `git log --oneline --graph --all` |
-
-#### Level 4: Inspect the Migration Objects
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Inspect the Migration Objects | Author the repair from pending work | `git cat-file -t a1` → `git status` → `git switch -c incident/sn-migrate-the-grid-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-migrate-the-grid-1 incident'` → `git tag sn-migrate-the-grid-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git cat-file -t b1` → `git log --oneline --graph --all` → `git switch -c incident/sn-migrate-the-grid-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-migrate-the-grid-1 repair'` → `git tag sn-migrate-the-grid-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git cat-file -t c1` → `git merge-base main feature/work` → `git switch -c incident/sn-migrate-the-grid-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-migrate-the-grid-1 repair'` → `git tag sn-migrate-the-grid-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git cat-file -t d1` → `git log --oneline --graph --all` → `git switch -c incident/sn-migrate-the-grid-1-reverted main` → `git revert --no-edit d2` → `git tag sn-migrate-the-grid-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 5: Verify the Imported History
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Imported History | Author the repair from pending work | `git ls-tree a1` → `git status` → `git switch -c incident/sn-migrate-the-grid-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-migrate-the-grid-2 incident'` → `git tag sn-migrate-the-grid-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git ls-tree b1` → `git log --oneline --graph --all` → `git switch -c incident/sn-migrate-the-grid-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-migrate-the-grid-2 repair'` → `git tag sn-migrate-the-grid-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git ls-tree c1` → `git merge-base main feature/work` → `git switch -c incident/sn-migrate-the-grid-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-migrate-the-grid-2 repair'` → `git tag sn-migrate-the-grid-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git ls-tree d1` → `git log --oneline --graph --all` → `git switch -c incident/sn-migrate-the-grid-2-reverted main` → `git revert --no-edit d2` → `git tag sn-migrate-the-grid-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 6: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/sn-migrate-the-grid-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-migrate-the-grid-3 incident'` → `git tag sn-migrate-the-grid-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-migrate-the-grid-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-migrate-the-grid-3 repair'` → `git tag sn-migrate-the-grid-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/sn-migrate-the-grid-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-migrate-the-grid-3 repair'` → `git tag sn-migrate-the-grid-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-migrate-the-grid-3-reverted main` → `git revert --no-edit d2` → `git tag sn-migrate-the-grid-3-reverted` → `git show` → `git log --oneline --graph --all` |
-
-### Chapter 12: Open the Command Laboratory
-
-#### Level 1: Classify the Remaining Interfaces
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Classify the Remaining Interfaces | Author the repair from pending work | `git for-each-ref` → `git status` → `git switch -c incident/sn-command-laboratory-1-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-command-laboratory-1 incident'` → `git tag sn-command-laboratory-1-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git for-each-ref` → `git log --oneline --graph --all` → `git switch -c incident/sn-command-laboratory-1-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-command-laboratory-1 repair'` → `git tag sn-command-laboratory-1-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git for-each-ref` → `git merge-base main feature/work` → `git switch -c incident/sn-command-laboratory-1-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-command-laboratory-1 repair'` → `git tag sn-command-laboratory-1-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git for-each-ref` → `git log --oneline --graph --all` → `git switch -c incident/sn-command-laboratory-1-reverted main` → `git revert --no-edit d2` → `git tag sn-command-laboratory-1-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 2: Prove the Final Ref Transition
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Prove the Final Ref Transition | Author the repair from pending work | `git rev-parse HEAD` → `git status` → `git switch -c incident/sn-command-laboratory-2-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-command-laboratory-2 incident'` → `git tag sn-command-laboratory-2-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git rev-parse HEAD` → `git log --oneline --graph --all` → `git switch -c incident/sn-command-laboratory-2-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-command-laboratory-2 repair'` → `git tag sn-command-laboratory-2-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git rev-parse HEAD` → `git merge-base main feature/work` → `git switch -c incident/sn-command-laboratory-2-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-command-laboratory-2 repair'` → `git tag sn-command-laboratory-2-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git rev-parse HEAD` → `git log --oneline --graph --all` → `git switch -c incident/sn-command-laboratory-2-reverted main` → `git revert --no-edit d2` → `git tag sn-command-laboratory-2-reverted` → `git show` → `git log --oneline --graph --all` |
-
-#### Level 3: Verify the Operational Handoff
-
-| Wave | Variant | Command sequence |
-|---:|---|---|
-| 1. Verify the Operational Handoff | Author the repair from pending work | `git log --oneline --graph --all` → `git status` → `git switch -c incident/sn-command-laboratory-3-authored` → `git add src/repair.ts` → `git diff --staged` → `git commit -m 'Resolve sn-command-laboratory-3 incident'` → `git tag sn-command-laboratory-3-authored` → `git log --oneline --graph --all` |
-|  | Transplant the isolated patch | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-command-laboratory-3-transplanted main` → `git cherry-pick --no-commit b3` → `git status` → `git commit -m 'Transplant sn-command-laboratory-3 repair'` → `git tag sn-command-laboratory-3-transplanted` → `git log --oneline --graph --all` |
-|  | Integrate the divergent repair as one reviewed snapshot | `git log --oneline --graph --all` → `git merge-base main feature/work` → `git switch -c incident/sn-command-laboratory-3-integrated main` → `git merge --squash feature/work` → `git status` → `git commit -m 'Integrate sn-command-laboratory-3 repair'` → `git tag sn-command-laboratory-3-integrated` → `git log --oneline --graph --all` |
-|  | Reverse the shared failure additively | `git log --oneline --graph --all` → `git log --oneline --graph --all` → `git switch -c incident/sn-command-laboratory-3-reverted main` → `git revert --no-edit d2` → `git tag sn-command-laboratory-3-reverted` → `git show` → `git log --oneline --graph --all` |
+# GIT it! — Level answer sheet (STAFF ONLY)
+
+Generated from the wave plan by `python scripts/curriculum/render_level_cheat_sheet.py`;
+do not edit by hand. Covers 21 levels, 132 waves and 349 variants in Modules 1–4,
+plus each module's Challenge Gate.
+
+A tier's waves play in order. The first variant listed is a first-time learner's;
+a retry rotates within the same wave. Commands run left to right, and file edits
+happen in Project Files at the point shown.
+
+## Module 1 — Local Repository Foundations
+
+### Initializing Repositories
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Track this folder (debut) | `init-easy-current-empty` Initialize the current folder | `git init -b main` |
+|  | `init-easy-trunk-branch` Initialize with trunk as the first branch | `git init --initial-branch=trunk` |
+| Easy 2. Start a new project folder (practice) | `init-easy-invoice` Initialize invoice-tracker | `git init -b main invoice-tracker` |
+|  | `init-med-oss` Initialize oss-contrib | `git init -b main oss-contrib` |
+| Medium 1. Folder and branch from the brief (practice) | `init-medium-docs-site` Initialize docs-site | `git init -b main docs-site` |
+|  | `init-medium-trunk-api-playground` Initialize api-playground with trunk | `git init -b trunk api-playground` |
+| Medium 2. Existing files stay untracked (practice) | `init-medium-existing-files` Initialize field-notes with existing files | `git init -b main field-notes` |
+|  | `init-hard-ci` Initialize ci-configs | `git init -b main ci-configs` |
+| Hard 1. Only the right subfolder (transfer) | `init-hard-research-log` Initialize research-log subfolder only | `git init -b main research-log` |
+|  | `init-hard-ui-kit` Initialize ui-kit with trunk | `git init --initial-branch=trunk ui-kit` |
+| Hard 2. A nested project folder (transfer) | `init-hard-nested-service` Set up the billing service inside the services folder | `git init -b trunk services/billing-api` |
+|  | `init-hard-nested-course` Set up the Git basics course inside the courses folder | `git init -b main courses/git-basics` |
+
+### Cloning Remote Repositories
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Clone a repository (debut) | `clone-easy-docs-portal` Clone docs-portal | `git clone https://example.test/training/docs-portal.git` |
+|  | `clone-easy-oss-ssh` Clone oss-toolkit via SSH | `git clone git@github.com:open-dev/oss-toolkit.git` |
+| Easy 2. Clone into a named folder (debut) | `clone-easy-api-lab` Clone api-lab into api-workshop | `git clone https://example.test/training/api-lab.git api-workshop` |
+|  | `clone-easy-corp` Clone audit-logs into audit-logs-local | `git clone https://git.corp.example/it/audit-logs.git audit-logs-local` |
+| Easy 3. Clone a specific branch (debut) | `clone-easy-profile-starter` Clone profile-site at the starter branch | `git clone -b starter https://example.test/training/profile-site.git` |
+|  | `clone-med-feature` Clone backend-api at feature/auth | `git clone -b feature/auth https://github.com/acme-startup/backend-api.git` |
+|  | `clone-medium-cli-starter-folder` Clone cli-tool at starter into cli-starter-lab | `git clone --branch starter https://example.test/tools/cli-tool.git cli-starter-lab` |
+| Medium 1. SSH address, named folder (practice) | `clone-medium-analytics-ssh` Clone analytics-lab via SSH into analytics-worktree | `git clone git@example.test:training/analytics-lab.git analytics-worktree` |
+|  | `clone-hard-research-log-ssh` Clone research-log via SSH into research-log-lab | `git clone git@example.test:docs/research-log.git research-log-lab` |
+| Medium 2. Shallow history (debut) | `clone-medium-css-kit-shallow` Shallow clone css-kit | `git clone --depth 1 https://example.test/frontend/css-kit.git` |
+|  | `clone-medium-shallow-metrics` Shallow copy of the metrics dashboard | `git clone --depth 1 https://example.test/data/metrics-dash.git metrics-review` |
+| Hard 1. Shallow copy of one branch (transfer) | `clone-hard-mobile-ui-shallow-branch` Shallow clone mobile-ui at starter into mobile-ui-lab | `git clone --depth 1 -b starter https://example.test/frontend/mobile-ui.git mobile-ui-lab` |
+|  | `clone-hard-lab-notebook-depth-branch` Shallow clone lab-notebook at review into notebook-review | `git clone --depth 1 --branch review https://example.test/docs/lab-notebook.git notebook-review` |
+| Hard 2. Shallow review copy over SSH (transfer) | `clone-hard-ssh-shallow` Shallow SSH clone of oss-toolkit into oss-review | `git clone --depth 1 git@github.com:open-dev/oss-toolkit.git oss-review` |
+|  | `clone-hard-shallow-ssh-audit` Two commits of the audit rules over SSH | `git clone --depth 2 git@example.test:security/audit-rules.git rules-review` |
+
+### Staging and Committing
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Stage and commit one change (debut) | `commit-easy-form-validation` Commit form validation update | `git add src/form.js` → `git commit -m "Update form validation"` |
+|  | `commit-easy-readme-setup` Commit README clarification | `git add README.md` → `git commit -m "Clarify setup steps"` |
+|  | `commit-easy-navbar-spacing` Commit navbar spacing fix | `git add styles/navbar.css` → `git commit -m "Adjust navbar spacing"` |
+|  | `commit-easy-auth-dir` Commit the auth module directory | `git add src/auth/` → `git commit -m "Add auth module"` |
+| Easy 2. Stage several files at once (debut) | `commit-easy-initial` Initial commit for library-system | `git add README.md main.py requirements.txt` → `git commit -m "Initial commit"` |
+|  | `commit-med-docker` Commit Docker configuration | `git add Dockerfile .env.example` → `git commit -m "Add Docker configuration"` |
+| Medium 1. A two-file change (practice) | `commit-medium-profile-card` Commit profile card layout | `git add src/profile-card.js styles/profile-card.css` → `git commit -m "Update profile card layout"` |
+|  | `commit-medium-search-results` Commit search results view | `git add src/search.js templates/search.html` → `git commit -m "Refine search results view"` |
+|  | `commit-medium-export-flow` Commit export flow update | `git add src/export.py docs/export.md` → `git commit -m "Document export flow update"` |
+| Medium 2. First snapshot of a new project (spiral) | `commit-medium-new-project-portfolio` First snapshot of the portfolio | `git init -b main` → `git add index.html styles.css` → `git commit -m "Initial portfolio"` |
+|  | `commit-medium-new-project-recipes` Start tracking the recipe notes | `git init -b main` → `git add recipes.md shopping.md` → `git commit -m "Start recipe notes"` |
+| Hard 1. Leave the distractor out (transfer) | `commit-hard-selective` Commit handler fix, leave experimental file out | `git add api/handler.py` → `git commit -m "Fix request handler null check"` |
+|  | `commit-hard-profile-distractor` Commit profile card change, leave notes out | `git add src/profile-card.js` → `git commit -m "Update profile card behavior"` |
+|  | `commit-hard-export-distractor` Commit export fix, leave scratch output out | `git add src/export.py` → `git commit -m "Fix export validation"` |
+| Hard 2. Two targets, two distractors (transfer) | `commit-hard-parser` Commit parser and tests, leave debug/scratch files out | `git add src/parser.py tests/test_parser.py` → `git commit -m "Add parser module with unit tests"` |
+|  | `commit-hard-search-two-targets-one-distractor` Commit search ranking display, leave notes out | `git add src/search.js templates/search.html` → `git commit -m "Refine search ranking display"` |
+
+### Partial Staging
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Stage one hunk (debut) | `partial-easy-billing` Stage the billing fix hunk only | `git add -p src/billing.py` → `git commit -m "Fix billing calculation rounding error"` |
+|  | `partial-easy-auth-validation` Stage the auth validation hunk only | `git add -p src/auth.py` → `git commit -m "Fix auth validation"` |
+|  | `partial-easy-export-format` Stage the export formatting hunk only | `git add -p src/export.py` → `git commit -m "Fix export formatting"` |
+| Easy 2. Another file, another hunk (practice) | `partial-easy-routes` Stage the routes handler hunk only | `git add -p src/routes.py` → `git commit -m "Update API route handlers"` |
+|  | `partial-easy-search-ranking` Stage the search ranking hunk only | `git add -p src/search.py` → `git commit -m "Fix search ranking"` |
+| Medium 1. One hunk out of many (practice) | `partial-med-three-hunk` Stage only the parser bug fix hunk | `git add -p src/parser.py` → `git commit -m "Fix parser blank-line bug"` |
+|  | `partial-medium-profile-validation` Stage only the profile validation hunk | `git add -p src/profile.py` → `git commit -m "Fix profile validation"` |
+|  | `partial-medium-payment-rounding` Stage only the payment rounding hunk | `git add -p src/payment.py` → `git commit -m "Fix payment rounding"` |
+|  | `partial-medium-dashboard-filter` Stage only the dashboard filter hunk | `git add -p src/dashboard.js` → `git commit -m "Fix dashboard filter"` |
+| Medium 2. A hunk and a whole file (spiral) | `partial-medium-hunk-plus-test` The rounding fix and its test | `git add -p src/cart.py` → `git add tests/test_cart.py` → `git commit -m "Fix cart total rounding"` |
+|  | `partial-medium-hunk-plus-doc` The quoting fix and its documentation | `git add -p src/export.py` → `git add docs/export.md` → `git commit -m "Fix CSV quoting"` |
+| Hard 1. Hunks across code and tests (transfer) | `partial-hard-terraform` Stage only the network Terraform hunk | `git add -p terraform/main.tf` → `git commit -m "Update network Terraform configuration"` |
+|  | `partial-hard-auth-cross-file` Stage validation hunks across auth code and tests | `git add -p src/auth.py` → `git add -p tests/test_auth.py` → `git commit -m "Fix auth validation and add its test"` |
+|  | `partial-hard-search-cross-file` Stage ranking hunks across search code and tests | `git add -p src/search.py` → `git add -p tests/test_search.py` → `git commit -m "Fix search ranking and add its test"` |
+|  | `partial-hard-export-cross-file` Stage formatting hunks across export code and tests | `git add -p src/export.py` → `git add -p tests/test_export.py` → `git commit -m "Fix export formatting and add its test"` |
+| Hard 2. Split one file into two commits (compose) | `partial-hard-split-two-commits-api` Split the API changes into two commits | `git add -p src/api.py` → `git commit -m "Fix token expiry check"` → `git add src/api.py` → `git commit -m "Tidy API logging"` |
+|  | `partial-hard-split-two-commits-ui` Split the menu changes into two commits | `git add -p src/menu.js` → `git commit -m "Fix menu focus trap"` → `git add src/menu.js` → `git commit -m "Rename menu helpers"` |
+
+### Amending Commits
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Fix the last commit message (debut) | `amend-easy-typo` Fix a typo in the last commit message | `git commit --amend -m "Initial commit"` |
+|  | `amend-easy-login-copy-message` Clarify a vague commit message | `git commit --amend -m "Clarify login copy"` |
+|  | `amend-easy-readme-message` Clarify the README commit message | `git commit --amend -m "Clarify setup requirements"` |
+|  | `amend-easy-navbar-message` Clarify the navbar commit message | `git commit --amend -m "Adjust navbar spacing"` |
+|  | `amend-hard-convention` Correct a verbose passive-voice commit message | `git commit --amend -m "Update Terraform staging environment configuration"` |
+| Easy 2. Add the forgotten file (practice) | `amend-easy-forgot` Add a forgotten file to the last commit | `git add src/logout.py` → `git commit --amend -m "Add auth module"` |
+|  | `amend-medium-profile-missing-css` Add missing profile CSS to the last commit | `git add styles/profile-card.css` → `git commit --amend -m "Update profile card layout"` |
+| Medium 1. Amend content and message (practice) | `amend-med-both` Add changelog and correct the commit message | `git add docs/CHANGELOG.md` → `git commit --amend -m "Add parser feature and update changelog"` |
+|  | `amend-medium-export-doc` Add missing export docs to the last commit | `git add docs/export.md` → `git commit --amend -m "Document export flow update"` |
+|  | `amend-medium-search-template` Add missing search template to the last commit | `git add templates/search.html` → `git commit --amend -m "Refine search results view"` |
+| Medium 2. Amend in one hunk (spiral) | `amend-medium-hunk-into-last-checkout` Fold the missing guard into the last commit | `git add -p src/checkout.py` → `git commit --amend -m "Validate checkout totals"` |
+|  | `amend-medium-hunk-into-last-search` Fold the exact-match ranking into the last commit | `git add -p src/search.py` → `git commit --amend -m "Rank exact matches first"` |
+| Hard 1. Missing file and wrong message (transfer) | `amend-hard-profile-message-and-layout` Add missing CSS and correct the commit message | `git add styles/profile-layout.css` → `git commit --amend -m "Polish profile card layout"` |
+|  | `amend-hard-auth-message-and-test` Add missing test and correct the commit message | `git add tests/test_auth.py` → `git commit --amend -m "Add auth validation coverage"` |
+|  | `amend-hard-export-message-and-doc` Add missing docs and correct the commit message | `git add docs/export.md` → `git commit --amend -m "Document export validation behavior"` |
+| Hard 2. Fix the last message, then commit the rest (compose) | `amend-hard-fix-message-then-commit-api` Reword, then document the rate limiter | `git commit --amend -m "Add rate limiter"` → `git add docs/limits.md` → `git commit -m "Document rate limits"` |
+|  | `amend-hard-fix-message-then-commit-docs` Reword, then add the install FAQ | `git commit --amend -m "Document install steps"` → `git add docs/faq.md` → `git commit -m "Add install FAQ"` |
+
+### Unstaging and Discarding Changes
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Unstage but keep the edit (debut) | `restore-easy-unstage` Unstage notes.txt without discarding it | `git restore --staged notes.txt` |
+|  | `restore-easy-unstage-app` Unstage src/app.py without discarding it | `git restore --staged src/app.py` |
+|  | `restore-easy-unstage-guide` Unstage docs/guide.md without discarding it | `git restore --staged docs/guide.md` |
+|  | `restore-easy-unstage-css` Unstage styles/site.css without discarding it | `git restore --staged styles/site.css` |
+| Easy 2. Throw away a working change (debut) | `restore-easy-discard` Discard experimental config.py changes | `git restore config.py` |
+|  | `restore-easy-discard-theme` Throw away the neon theme | `git restore styles/theme.css` |
+| Medium 1. Unstage one, discard another (compose) | `restore-med-unstage-discard` Unstage experimental.py, discard README.md changes | `git restore --staged experimental.py` → `git restore README.md` |
+|  | `restore-medium-app-debug` Preserve app.py, discard debug.log | `git restore --staged src/app.py` → `git restore debug.log` |
+|  | `restore-medium-docs-scratch` Preserve guide.md, discard scratch.txt | `git restore --staged docs/guide.md` → `git restore tmp/scratch.txt` |
+|  | `restore-medium-css-build` Preserve source CSS, discard generated dist CSS | `git restore --staged styles/site.css` → `git restore dist/site.css` |
+| Medium 2. Fix the staging, then commit (spiral) | `restore-medium-unstage-then-commit-login` Unstage the to-do list, then commit the login fix | `git restore --staged notes/todo.md` → `git commit -m "Fix login redirect"` |
+|  | `restore-medium-unstage-then-commit-cart` Unstage the ideas file, then commit the badge fix | `git restore --staged scratch/ideas.txt` → `git commit -m "Fix cart badge count"` |
+| Hard 1. Several to unstage, one to discard (transfer) | `restore-hard-cleanup` Unstage two files, discard experimental.py | `git restore --staged debug.log scratch/notes.txt` → `git restore api/experimental.py` |
+|  | `restore-hard-mixed-profile` Unstage two files, discard debug log | `git restore --staged src/profile-card.js notes/profile-ideas.md` → `git restore debug/profile.log` |
+|  | `restore-hard-mixed-export` Unstage two files, discard generated output | `git restore --staged src/export.py notes/export-plan.md` → `git restore tmp/export-output.txt` |
+|  | `restore-hard-mixed-search` Unstage two files, discard debug search log | `git restore --staged src/search.js notes/search.md` → `git restore debug/search.log` |
+| Hard 2. Clean up, then commit only the fix (spiral) | `restore-hard-capstone-report` Clean up before the report fix | `git restore --staged debug.log` → `git restore tmp/output.txt` → `git add -p src/report.py` → `git commit -m "Fix report totals"` |
+|  | `restore-hard-capstone-invoice` Clean up before the invoice fix | `git restore --staged notes/invoice-ideas.md` → `git restore build/invoice.html` → `git add -p src/invoice.py` → `git commit -m "Fix invoice due date"` |
+
+### Challenge Gate — Foundations Gate
+
+| Trial | Variant | Answer key |
+|---|---|---|
+| Easy | `gate1-easy-first-snapshot-field-log` Start the field log | `git init -b main` → `git add notes.md readings.csv` → `git commit -m "Start field log"` |
+|  | `gate1-easy-first-snapshot-quiz` Start the quiz app | `git init -b main` → `git add index.html quiz.js` → `git commit -m "Start quiz app"` |
+| Medium | `gate1-medium-complete-last-commit-search` Finish the search page commit | `git restore --staged notes.txt` → `git add templates/search.html` → `git add -p src/search.py` → `git commit --amend -m "Add search page"` |
+|  | `gate1-medium-complete-last-commit-upload` Finish the file upload commit | `git restore --staged scratch.md` → `git add docs/upload.md` → `git add -p src/upload.py` → `git commit --amend -m "Add file upload"` |
+| Hard | `gate1-hard-reword-then-commit-export` Reword, tidy up and commit the export fix | `git restore --staged tmp/run.log` → `git commit --amend -m "Add export"` → `git restore cache/report.json` → `git add -p src/export.py` → `git add docs/export.md` → `git commit -m "Fix export headers"` |
+|  | `gate1-hard-reword-then-commit-billing` Reword, tidy up and commit the billing fix | `git restore --staged logs/billing.log` → `git commit --amend -m "Add billing"` → `git restore cache/invoices.json` → `git add -p src/billing.py` → `git add docs/billing.md` → `git commit -m "Fix billing tax"` |
+
+## Module 2 — Branching and Collaboration
+
+### Creating and Switching Branches
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Create a branch and switch to it (debut) | `v21e-auth` Create feature/auth and switch to it | `git switch -c feature/auth` |
+|  | `v21e-login` Create bugfix/login and switch to it | `git switch -c bugfix/login` |
+|  | `v21e-ui` Create experiment/ui and switch to it | `git switch -c experiment/ui` |
+|  | `bc-easy-capstone-db` Create feature/database-models and switch to it | `git switch -c feature/database-models` |
+|  | `bc-easy-corp-hotfix` Create hotfix/session-timeout and switch to it | `git switch -c hotfix/session-timeout` |
+| Easy 2. Go back to main (debut) | `switch-easy-back-to-main-docs` Back to main after the docs refresh | `git switch main` |
+|  | `switch-easy-back-to-main-api` Back to main after the API keys model | `git switch main` |
+| Medium 1. Create a branch without switching (debut) | `v21m-payments` Create feature/payments and a test branch from the 2-commit main tip | `git branch feature/payments-tests` → `git switch -c feature/payments` |
+|  | `v21m-notifications` Create feature/notifications and a docs branch from the 3-commit main tip | `git branch feature/notifications-docs` → `git switch -c feature/notifications` |
+|  | `v21m-export` Create feature/export and a docs branch from the 4-commit main tip | `git branch feature/export-docs` → `git switch -c feature/export` |
+| Medium 2. Start from another branch's tip (practice) | `bc-med-oss-develop` Create feature/docs-update from develop's tip | `git switch -c feature/docs-update` |
+|  | `v21h-from-develop` Create feature/workspace from main's tip while on develop | `git switch -c feature/workspace main` |
+| Hard 1. Start from an older commit (transfer) | `v21h-hotfix-c1` Create hotfix/critical at c1 (not HEAD) | `git switch -c hotfix/critical c1` |
+|  | `v21h-detach-save` Create saved-work at the detached HEAD position | `git switch -c saved-work` |
+| Hard 2. Save detached work, then go back (transfer) | `bc-hard-review-snap` Create review/v1-snapshot at c1, then return to main | `git switch -c review/v1-snapshot` → `git switch main` |
+|  | `switch-hard-detached-save-and-return` Keep the spike, then head to develop | `git switch -c archive/spike-results` → `git switch develop` |
+
+### Branch Naming Conventions
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Follow the naming convention (practice) | `bn-easy-corp-jira` Create PROJ-418/password-reset | `git switch -c PROJ-418/password-reset` |
+|  | `bn-easy-startup-feat` Create feature/shopping-cart | `git switch -c feature/shopping-cart` |
+|  | `bn-easy-oss-user` Create jdelacruz/fix-parser-edge-case | `git switch -c jdelacruz/fix-parser-edge-case` |
+|  | `bn-easy-cap-initials` Create feature/jm/database-models | `git switch -c feature/jm/database-models` |
+|  | `bn-easy-free-client` Create client/55-contact-form-redesign | `git switch -c client/55-contact-form-redesign` |
+| Easy 2. Delete a merged branch (debut) | `bn-easy-delete-merged-typo` Delete the merged typo branch | `git branch -d fix/readme-typo` |
+|  | `bn-easy-delete-merged-spike` Delete the merged search spike | `git branch -d spike/old-search` |
+| Medium 1. Build the name from the brief (practice) | `bn-med-corp-notif` Construct and create PROJ-512/email-notification | `git switch -c PROJ-512/email-notification` |
+|  | `bn-med-startup-bugfix` Construct and create bugfix/login-redirect | `git switch -c bugfix/login-redirect` |
+|  | `bn-med-devops-scope` Construct and create infra/api-gateway/log-rotation | `git switch -c infra/api-gateway/log-rotation` |
+|  | `bn-med-oss-infer` Infer the convention and create fix/tokenizer-crash | `git switch -c fix/tokenizer-crash` |
+| Medium 2. Replace a badly named branch (compose) | `bn-hard-oss-rename` Replace myFix with fix/renderer-memory-leak | `git branch -d myFix` → `git switch -c fix/renderer-memory-leak` |
+|  | `bn-hard-corp-rename` Replace auth-update with PROJ-301/auth-module-update | `git branch -d auth-update` → `git switch -c PROJ-301/auth-module-update` |
+| Hard 1. Fix the name, keep the convention (transfer) | `bn-hard-startup-prefix` Replace fix/cart-total with bugfix/cart-total | `git branch -d fix/cart-total` → `git switch -c bugfix/cart-total` |
+|  | `bn-hard-qa-camel` Replace test/LoginFlow with test/login-flow | `git branch -d test/LoginFlow` → `git switch -c test/login-flow` |
+| Hard 2. Start the fix on a well-named branch (spiral) | `bn-hard-named-branch-commit-parser` Start the parser fix on a proper branch | `git restore debug.log` → `git switch -c fix/parser-unicode` → `git add src/parser.py` → `git commit -m "Handle unicode identifiers"` |
+|  | `bn-hard-named-branch-commit-billing` Start the invoice fix on a ticket branch | `git restore tmp/billing-dump.txt` → `git switch -c PROJ-733/invoice-rounding` → `git add src/billing.py` → `git commit -m "Round invoice totals"` |
+
+### Stashing Work in Progress
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Shelve work and switch (debut) | `v23e-auth` Stash auth work and switch to main | `git stash` → `git switch main` |
+|  | `v23e-notify` Stash notify work and switch to develop | `git stash` → `git switch develop` |
+|  | `v23e-cache` Stash cache work and switch to release/v2 | `git stash` → `git switch release/v2` |
+|  | `stash-easy-cap-review` Stash models work and switch to review/groupmate-branch | `git stash` → `git switch review/groupmate-branch` |
+|  | `stash-easy-docs-switch` Stash docs work and switch to release/stable | `git stash` → `git switch release/stable` |
+| Easy 2. Bring the shelved work back (debut) | `stash-easy-pop-search` Bring back the search ranking draft | `git stash pop` |
+|  | `stash-easy-pop-profile` Bring back the profile avatar draft | `git stash pop` |
+| Medium 1. Stash, visit, return, restore (compose) | `v23m-to-main` Stash payments work, check main, restore | `git stash` → `git switch main` → `git switch feature/payments` → `git stash pop` |
+|  | `v23m-to-hotfix` Stash orders work, check hotfix, restore | `git stash` → `git switch hotfix/fix-tax` → `git switch feature/orders` → `git stash pop` |
+|  | `v23m-to-release` Stash analytics work, check release/v2, restore | `git stash` → `git switch release/v2` → `git switch feature/analytics` → `git stash pop` |
+|  | `stash-med-corp-named` Stash billing work, check hotfix/tax-fix, restore | `git stash` → `git switch hotfix/tax-fix` → `git switch feature/billing` → `git stash pop` |
+| Medium 2. Discard a cancelled draft (debut) | `v23h-dropped-auth` Check main while the auth rework is cancelled | `git stash` → `git switch main` → `git switch feature/auth-rework` → `git stash drop` |
+|  | `v23h-dropped-api` Check hotfix/urgent while the api-v2 draft is cancelled | `git stash` → `git switch hotfix/urgent` → `git switch feature/api-v2` → `git stash drop` |
+| Hard 1. Two stashes, keep the right one (transfer) | `stash-hard-oss-multi` Discard one abandoned stash and restore the other | `git stash drop stash@{0}` → `git stash pop` |
+|  | `stash-hard-two-stashes-reports` Two drafts in the stash, keep the real one | `git stash drop stash@{0}` → `git stash pop` |
+| Hard 2. Cancelled work, clean exit (transfer) | `v23h-dropped-refactor` Check release/v1 while the refactor is cancelled | `git stash` → `git switch release/v1` → `git switch feature/refactor` → `git stash drop` |
+|  | `stash-hard-cancelled-experiment` Check the release, then drop the layout experiment | `git stash` → `git switch release/v3` → `git switch feature/experiment` → `git stash drop` |
+
+### Pushing to a Remote
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Publish a branch (debut) | `v24e-auth` Push feature/auth to origin | `git push origin feature/auth` |
+|  | `v24e-orders` Push feature/orders to origin | `git push origin feature/orders` |
+|  | `v24e-parser` Push feature/parser to origin | `git push origin feature/parser` |
+|  | `push-easy-cap-auth` Push feature/user-auth to origin | `git push origin feature/user-auth` |
+|  | `push-easy-free-landing` Push feature/client-landing to origin | `git push origin feature/client-landing` |
+| Easy 2. Publish and track (debut) | `v24m-auth` Push feature/auth and set its upstream | `git push -u origin feature/auth` |
+|  | `v24m-orders` Push feature/orders and set its upstream | `git push -u origin feature/orders` |
+|  | `v24m-parser` Push feature/parser and set its upstream | `git push -u origin feature/parser` |
+|  | `push-med-docs-track` Push feature/v2-migration-guide and set its upstream | `git push -u origin feature/v2-migration-guide` |
+| Medium 1. Branch, commit, publish (spiral) | `push-medium-branch-commit-publish-search` Branch, commit and publish the search filters | `git switch -c feature/search-filters` → `git add src/filters.js` → `git commit -m "Add search filters"` → `git push -u origin feature/search-filters` |
+|  | `push-medium-branch-commit-publish-invoices` Branch, commit and publish the invoice PDF export | `git switch -c feature/invoice-pdf` → `git add src/invoice_pdf.py` → `git commit -m "Add invoice PDF export"` → `git push -u origin feature/invoice-pdf` |
+| Medium 2. Republish rewritten history safely (debut) | `v24h-auth` Publish rewritten feature/auth without overwriting a teammate's work | `git push --force-with-lease origin feature/auth` |
+|  | `v24h-orders` Publish rewritten feature/orders without overwriting a teammate's work | `git push --force-with-lease origin feature/orders` |
+| Hard 1. Amend a published commit, republish (spiral) | `push-hard-amend-then-lease-api` Reword a published commit and republish safely | `git commit --amend -m "Add retry to API client"` → `git push --force-with-lease origin feature/api-retry` |
+|  | `push-hard-amend-then-lease-docs` Reword the SSO docs commit and republish | `git commit --amend -m "Document SSO setup"` → `git push --force-with-lease origin docs/sso` |
+| Hard 2. Rewritten branch, careful publish (transfer) | `v24h-parser` Publish rewritten feature/parser without overwriting a teammate's work | `git push --force-with-lease origin feature/parser` |
+|  | `push-hard-devops-fwl` Publish rewritten feature/pipeline-config without overwriting a teammate's work | `git push --force-with-lease origin feature/pipeline-config` |
+
+### Fetching and Pulling from a Remote
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. See what's new on origin (debut) | `v25e-main` Fetch to update origin/main tracking | `git fetch origin` |
+|  | `v25e-feature` Fetch to update origin/feature/auth tracking | `git fetch origin` |
+|  | `v25e-develop` Fetch to update origin/develop tracking | `git fetch origin` |
+|  | `fetch-easy-cap-check` Fetch to update origin/feature/models tracking | `git fetch origin` |
+|  | `fetch-easy-corp-list` Fetch to update origin/release/v2 tracking | `git fetch origin` |
+| Easy 2. Bring the new commits in (debut) | `v25m-main` Pull origin/main into local main | `git pull origin main` |
+|  | `v25m-feature` Pull origin/feature/auth into local feature/auth | `git pull origin feature/auth` |
+|  | `v25m-develop` Pull origin/develop into local develop | `git pull origin develop` |
+|  | `pull-med-free-client` Pull origin/staging into local staging | `git pull origin staging` |
+| Medium 1. Review before integrating (compose) | `v25h-main` Review incoming work on main, then update main | `git fetch origin` → `git log --oneline main..origin/main` → `git pull origin main` |
+|  | `v25h-feature` Review incoming work on feature/auth, then update it | `git fetch origin` → `git log --oneline feature/auth..origin/feature/auth` → `git pull origin feature/auth` |
+| Medium 2. Update, then branch from fresh main (spiral) | `pull-medium-update-then-branch-ui` Update main, then start dark mode | `git pull origin main` → `git switch -c feature/dark-mode` |
+|  | `pull-medium-update-then-branch-api` Update main, then start the webhooks | `git pull origin main` → `git switch -c feature/webhooks` |
+| Hard 1. Review incoming work (transfer) | `v25h-develop` Review incoming work on develop, then update it | `git fetch origin` → `git log --oneline develop..origin/develop` → `git pull origin develop` |
+|  | `fetch-hard-oss-review` Review incoming work on release/next, then update it | `git fetch origin` → `git log --oneline release/next..origin/release/next` → `git pull origin release/next` |
+| Hard 2. Pull with local work in progress (spiral) | `pull-hard-stash-pull-pop-docs` Update main without losing your guide edits | `git stash` → `git pull origin main` → `git stash pop` |
+|  | `pull-hard-stash-pull-pop-app` Update develop without losing your timeout setting | `git stash` → `git pull origin develop` → `git stash pop` |
+
+### Reconciling Diverged Local and Remote Histories
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Pull, then push again (practice) | `v26e-auth` Reconcile and push feature/auth | `git pull origin feature/auth` → `git push origin feature/auth` |
+|  | `v26e-payments` Reconcile and push feature/payments | `git pull origin feature/payments` → `git push origin feature/payments` |
+|  | `v26e-hotfix` Reconcile and push hotfix/critical | `git pull origin hotfix/critical` → `git push origin hotfix/critical` |
+|  | `rec-easy-cap-ui` Reconcile and push feature/ui-layout | `git pull origin feature/ui-layout` → `git push origin feature/ui-layout` |
+|  | `rec-easy-docs-chapter` Reconcile and push main | `git pull origin main` → `git push origin main` |
+| Easy 2. Fetch, merge the remote branch, push (debut) | `v26m-auth` Fetch, merge, push feature/auth | `git fetch origin` → `git merge origin/feature/auth` → `git push origin feature/auth` |
+|  | `v26m-payments` Fetch, merge, push feature/payments | `git fetch origin` → `git merge origin/feature/payments` → `git push origin feature/payments` |
+| Medium 1. Reconcile a teammate's branch (practice) | `v26m-hotfix` Fetch, merge, push hotfix/critical | `git fetch origin` → `git merge origin/hotfix/critical` → `git push origin hotfix/critical` |
+|  | `rec-med-qa-testrunner` Fetch, merge, push feature/test-runner-v2 | `git fetch origin` → `git merge origin/feature/test-runner-v2` → `git push origin feature/test-runner-v2` |
+| Medium 2. Commit, reconcile, publish (spiral) | `rec-medium-commit-then-reconcile-docs` Commit the setup docs, reconcile and publish | `git restore --staged notes/draft.md` → `git commit -m "Document local setup"` → `git pull origin main` → `git push origin main` |
+|  | `rec-medium-commit-then-reconcile-api` Commit the health check, reconcile and publish | `git restore --staged scratch/payload.json` → `git commit -m "Add health check"` → `git pull origin develop` → `git push origin develop` |
+| Hard 1. Reconcile from the wrong branch (transfer) | `v26h-auth` Reconcile and publish feature/auth from the wrong branch | `git switch feature/auth` → `git fetch origin` → `git merge origin/feature/auth` → `git push origin feature/auth` |
+|  | `v26h-payments` Reconcile and publish feature/payments from the wrong branch | `git switch feature/payments` → `git fetch origin` → `git merge origin/feature/payments` → `git push origin feature/payments` |
+| Hard 2. Reconcile and publish under pressure (transfer) | `v26h-hotfix` Reconcile and publish hotfix/critical from the wrong branch | `git switch hotfix/critical` → `git fetch origin` → `git merge origin/hotfix/critical` → `git push origin hotfix/critical` |
+|  | `rec-hard-corp-audit` Reconcile and publish the audit branch from develop | `git switch feature/compliance-audit` → `git fetch origin` → `git merge origin/feature/compliance-audit` → `git push origin feature/compliance-audit` |
+
+### Completing Branch Merges
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Fast-forward merge (practice) | `v27e-auth` Fast-forward merge feature/auth into main | `git merge feature/auth` |
+|  | `v27e-payments` Fast-forward merge feature/payments into develop | `git merge feature/payments` |
+|  | `v27e-hotfix` Fast-forward merge hotfix/fix-critical into release/v2 | `git merge hotfix/fix-critical` |
+|  | `merge-easy-cap-docs` Fast-forward merge docs/readme-update into staging | `git merge docs/readme-update` |
+|  | `merge-easy-free-contact` Fast-forward merge feature/contact-form into integration | `git merge feature/contact-form` |
+| Easy 2. Keep a visible merge commit (debut) | `v27m-auth` No-ff merge feature/auth into main | `git merge --no-ff feature/auth` |
+|  | `v27m-payments` No-ff merge feature/payments into develop | `git merge --no-ff feature/payments` |
+| Medium 1. Merge with a merge commit (practice) | `v27m-hotfix` No-ff merge hotfix/fix-critical into release/v2 | `git merge --no-ff hotfix/fix-critical` |
+|  | `merge-med-corp-sso` No-ff merge feature/sso-integration into release/v1 | `git merge --no-ff feature/sso-integration` |
+| Medium 2. Finish the feature, then land it (spiral) | `merge-medium-commit-switch-noff-reports` Finish the monthly report, then land it | `git add src/reports.py` → `git commit -m "Add monthly report"` → `git switch main` → `git merge --no-ff feature/reports` |
+|  | `merge-medium-commit-switch-noff-auth` Finish the MFA prompt, then land it on develop | `git add src/mfa.py` → `git commit -m "Add MFA prompt"` → `git switch develop` → `git merge --no-ff feature/mfa` |
+| Hard 1. Land from the wrong branch (transfer) | `v27h-auth` Land feature/auth on main from the wrong branch, with a visible merge | `git switch main` → `git merge --no-ff feature/auth` |
+|  | `v27h-payments` Land feature/payments on develop from the wrong branch, with a visible merge | `git switch develop` → `git merge --no-ff feature/payments` |
+|  | `v27h-hotfix` Land hotfix/critical on release/v1 from the wrong branch, with a visible merge | `git switch release/v1` → `git merge --no-ff hotfix/critical` |
+|  | `merge-hard-devops-cert` Land hotfix/cert-renewal on release/stable from the wrong branch, with a visible merge | `git switch release/stable` → `git merge --no-ff hotfix/cert-renewal` |
+| Hard 2. Land, publish, tidy up (spiral) | `merge-hard-land-publish-tidy-search` Land the search page, publish and tidy up | `git switch main` → `git merge --no-ff feature/search` → `git push origin main` → `git branch -d feature/search` |
+|  | `merge-hard-land-publish-tidy-billing` Land the rounding hotfix on the release, publish and tidy up | `git switch release/v2` → `git merge --no-ff hotfix/billing-rounding` → `git push origin release/v2` → `git branch -d hotfix/billing-rounding` |
+
+### Squash Merging
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Squash a branch into one commit (debut) | `v28e-auth` Squash-merge feature/auth into main | `git merge --squash feature/auth` → `git commit -m "Add auth feature"` |
+|  | `v28e-orders` Squash-merge feature/orders into develop | `git merge --squash feature/orders` → `git commit -m "Add orders feature"` |
+|  | `v28e-parser` Squash-merge feature/parser into release/v2 | `git merge --squash feature/parser` → `git commit -m "Add parser feature"` |
+|  | `squash-easy-cap-report` Squash-merge feature/report-generator into integration | `git merge --squash feature/report-generator` → `git commit -m "Add report generator module"` |
+|  | `squash-easy-free-payment` Squash-merge feature/payment-flow into staging | `git merge --squash feature/payment-flow` → `git commit -m "Add payment flow"` |
+| Easy 2. Squash, then force-delete the branch (debut) | `v28h-auth` Land feature/auth as one commit and clean up | `git merge --squash feature/auth` → `git commit -m "Add auth feature"` → `git branch -D feature/auth` |
+|  | `v28h-orders` Land feature/orders as one commit and clean up | `git merge --squash feature/orders` → `git commit -m "Add orders feature"` → `git branch -D feature/orders` |
+| Medium 1. Squash a teammate's remote branch (practice) | `v28m-auth` Fetch then squash-merge origin/feature/auth into main | `git fetch origin` → `git merge --squash origin/feature/auth` → `git commit -m "Add auth feature"` |
+|  | `v28m-orders` Fetch then squash-merge origin/feature/orders into develop | `git fetch origin` → `git merge --squash origin/feature/orders` → `git commit -m "Add orders feature"` |
+|  | `v28m-parser` Fetch then squash-merge origin/feature/parser into release/v2 | `git fetch origin` → `git merge --squash origin/feature/parser` → `git commit -m "Add parser feature"` |
+|  | `squash-med-corp-gdpr` Fetch then squash-merge origin/feature/gdpr-export into staging | `git fetch origin` → `git merge --squash origin/feature/gdpr-export` → `git commit -m "Add GDPR data export endpoint"` |
+| Medium 2. Squash and publish (spiral) | `squash-medium-squash-publish-onboarding` Squash the onboarding flow and publish | `git merge --squash feature/onboarding` → `git commit -m "Add onboarding flow"` → `git push origin main` |
+|  | `squash-medium-squash-publish-export` Squash the CSV export and publish | `git merge --squash feature/export-csv` → `git commit -m "Add CSV export"` → `git push origin develop` |
+| Hard 1. One commit, no leftovers (transfer) | `v28h-parser` Land feature/parser as one commit and clean up | `git merge --squash feature/parser` → `git commit -m "Add parser feature"` → `git branch -D feature/parser` |
+|  | `squash-hard-devops-log` Land feature/log-rotation as one commit and clean up | `git merge --squash feature/log-rotation` → `git commit -m "Add log rotation configuration"` → `git branch -D feature/log-rotation` |
+| Hard 2. Squash-land from another branch (spiral) | `squash-hard-switch-squash-cleanup-cli` Squash the CLI colours from their branch and clean up | `git switch main` → `git merge --squash feature/cli-colors` → `git commit -m "Add CLI colors"` → `git branch -D feature/cli-colors` |
+|  | `squash-hard-switch-squash-cleanup-ui` Squash the toast notifications onto develop and clean up | `git switch develop` → `git merge --squash feature/toast-ui` → `git commit -m "Add toast notifications"` → `git branch -D feature/toast-ui` |
+
+### Deleting and Recovering Remote Branches
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Delete a remote branch (debut) | `v29e-auth` Delete origin/feature/auth | `git push origin --delete feature/auth` |
+|  | `v29e-orders` Delete origin/feature/orders | `git push origin --delete feature/orders` |
+|  | `v29e-parser` Delete origin/feature/parser | `git push origin --delete feature/parser` |
+|  | `rb-easy-cap-group` Delete origin/feature/group-auth | `git push origin --delete feature/group-auth` |
+|  | `rb-easy-corp-sprint` Delete origin/feature/sprint12-compliance | `git push origin --delete feature/sprint12-compliance` |
+| Easy 2. Prune stale remote-tracking refs (debut) | `v29m-auth` Prune stale origin/feature/auth ref | `git fetch --prune origin` |
+|  | `v29m-orders` Prune stale origin/feature/orders ref | `git fetch --prune origin` |
+|  | `v29m-parser` Prune stale origin/feature/parser ref | `git fetch --prune origin` |
+|  | `rb-med-free-prune` Prune stale origin/feature/old-landing ref | `git fetch --prune origin` |
+| Medium 1. Retire a branch everywhere (compose) | `v29h-auth` Retire feature/auth on origin and locally | `git push origin --delete feature/auth` → `git branch -d feature/auth` |
+|  | `v29h-orders` Retire feature/orders on origin and locally | `git push origin --delete feature/orders` → `git branch -d feature/orders` |
+| Medium 2. Land and retire (spiral) | `rb-medium-land-and-retire-search` Land the search page and retire its remote branch | `git merge --no-ff feature/search` → `git push origin main` → `git push origin --delete feature/search` |
+|  | `rb-medium-land-and-retire-billing` Land the billing summary and retire its remote branch | `git merge --no-ff feature/billing` → `git push origin main` → `git push origin --delete feature/billing` |
+| Hard 1. Retire safely (transfer) | `v29h-parser` Retire feature/parser on origin and locally | `git push origin --delete feature/parser` → `git branch -d feature/parser` |
+|  | `rb-hard-oss-full` Retire feature/oss-contribution on origin and locally | `git push origin --delete feature/oss-contribution` → `git branch -d feature/oss-contribution` |
+| Hard 2. Fetch, land, publish, retire, prune (spiral) | `rb-hard-capstone-release-notes` Release notes: fetch, land, publish, retire, prune | `git fetch origin` → `git merge --no-ff origin/feature/release-notes` → `git push origin main` → `git push origin --delete feature/release-notes` → `git fetch --prune origin` |
+|  | `rb-hard-capstone-payments` Payments v2: fetch, land, publish, retire, prune | `git fetch origin` → `git merge --no-ff origin/feature/payments-v2` → `git push origin main` → `git push origin --delete feature/payments-v2` → `git fetch --prune origin` |
+
+### Challenge Gate — Collaboration Gate
+
+| Trial | Variant | Answer key |
+|---|---|---|
+| Easy | `gate2-easy-fresh-branch-search` Start the search filters from a fresh main | `git switch main` → `git pull origin main` → `git switch -c feature/search-filters` |
+|  | `gate2-easy-fresh-branch-invoices` Start the invoice export from a fresh main | `git switch main` → `git pull origin main` → `git switch -c feature/invoice-pdf` |
+| Medium | `gate2-medium-stash-and-sync-reports` Update main without losing the chart work | `git stash` → `git switch main` → `git pull origin main` → `git switch feature/reports` → `git stash pop` |
+|  | `gate2-medium-stash-and-sync-profile` Update main without losing the avatar work | `git stash` → `git switch main` → `git pull origin main` → `git switch feature/profile` → `git stash pop` |
+| Hard | `gate2-hard-land-and-retire-filters` Land the search filters and retire the branch | `git switch main` → `git pull origin main` → `git merge --squash feature/filters` → `git commit -m "Add search filters"` → `git push origin main` → `git branch -D feature/filters` → `git push origin --delete feature/filters` |
+|  | `gate2-hard-land-and-retire-export` Land the CSV export and retire the branch | `git switch main` → `git pull origin main` → `git merge --squash feature/export` → `git commit -m "Add CSV export"` → `git push origin main` → `git branch -D feature/export` → `git push origin --delete feature/export` |
+
+## Module 3 — Conflict Resolution
+
+### Resolving Merge Conflicts Manually
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Resolve one conflicted file (debut) | `manual-easy-auth-copy` Resolve src/auth.js | `git merge feature/auth-timeout` → *edit `src/auth.js`* → `git add src/auth.js` → `git commit --no-edit` |
+|  | `manual-easy-profile-copy` Resolve src/profile.tsx | `git merge feature/profile-copy` → *edit `src/profile.tsx`* → `git add src/profile.tsx` → `git commit --no-edit` |
+|  | `manual-easy-billing-copy` Resolve src/billing.py | `git merge feature/regional-currency` → *edit `src/billing.py`* → `git add src/billing.py` → `git commit --no-edit` |
+| Easy 2. Resolve another file (practice) | `manual-easy-config-copy` Resolve src/config.py | `git merge feature/debug-config` → *edit `src/config.py`* → `git add src/config.py` → `git commit --no-edit` |
+|  | `manual-easy-navbar-copy` Resolve src/components/Navbar.tsx | `git merge feature/navbar-rebrand` → *edit `src/components/Navbar.tsx`* → `git add src/components/Navbar.tsx` → `git commit --no-edit` |
+| Easy 3. Back out of a merge (debut) | `manual-easy-abort-wrong-branch` Back out of the legacy theme merge | `git merge --abort` |
+|  | `manual-easy-abort-too-early` Back out of the payments merge until review ends | `git merge --abort` |
+| Medium 1. Resolve config conflicts (practice) | `manual-medium-router` Resolve src/routes.ts | `git merge feature/routes` → *edit `src/routes.ts`* → `git add src/routes.ts` → `git commit --no-edit` |
+|  | `manual-medium-policy` Resolve src/policy.yml | `git merge feature/policy` → *edit `src/policy.yml`* → `git add src/policy.yml` → `git commit --no-edit` |
+|  | `manual-medium-gateway` Resolve config/gateway.yml | `git merge feature/gateway` → *edit `config/gateway.yml`* → `git add config/gateway.yml` → `git commit --no-edit` |
+| Medium 2. A pull that conflicts (spiral) | `manual-medium-pull-conflict-readme` A pull that conflicts in the README | `git pull origin main` → *edit `README.md`* → `git add README.md` → `git commit --no-edit` → `git push origin main` |
+|  | `manual-medium-pull-conflict-config` A pull that conflicts in the app config | `git pull origin develop` → *edit `config/app.yml`* → `git add config/app.yml` → `git commit --no-edit` → `git push origin develop` |
+| Hard 1. Resolve with less guidance (transfer) | `manual-hard-pricing` Resolve src/pricing.rb | `git merge feature/pricing` → *edit `src/pricing.rb`* → `git add src/pricing.rb` → `git commit --no-edit` |
+|  | `manual-hard-schema` Resolve schema/orders.sql | `git merge feature/schema` → *edit `schema/orders.sql`* → `git add schema/orders.sql` → `git commit --no-edit` |
+|  | `manual-hard-migration` Resolve db/migrations/001_users.sql | `git merge feature/migration` → *edit `db/migrations/001_users.sql`* → `git add db/migrations/001_users.sql` → `git commit --no-edit` |
+| Hard 2. Abort the wrong merge, resolve the right one (transfer) | `manual-hard-abort-redo` Abort a wrong merge, then resolve the right one | `git merge --abort` → `git merge feature/help-center` → *edit `src/routes.ts`* → `git add src/routes.ts` → `git commit --no-edit` |
+|  | `manual-hard-abort-redo-payments` Abort the v1 payments merge and merge v2 | `git merge --abort` → `git merge feature/payments-v2` → *edit `src/payments.py`* → `git add src/payments.py` → `git commit --no-edit` |
+
+### Resolving Conflicts Using a Merge Tool
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Resolve in the merge tool (debut) | `mergetool-easy-cache-ttl` Resolve src/cache.py in the merge tool | `git merge feature/cache-ttl` → `git mergetool` → *edit `src/cache.py`* → `git commit --no-edit` |
+|  | `mergetool-easy-mail-footer` Resolve src/mailer.py in the merge tool | `git merge feature/mail-footer` → `git mergetool` → *edit `src/mailer.py`* → `git commit --no-edit` |
+|  | `mergetool-easy-upload-limit` Resolve src/limits.js in the merge tool | `git merge feature/upload-limit` → `git mergetool` → *edit `src/limits.js`* → `git commit --no-edit` |
+| Easy 2. Another conflict, same tool (practice) | `mergetool-easy-app-locale` Resolve config/app.ini in the merge tool | `git merge feature/app-locale` → `git mergetool` → *edit `config/app.ini`* → `git commit --no-edit` |
+|  | `mergetool-easy-labels` Resolve src/labels.ts in the merge tool | `git merge feature/labels-fil` → `git mergetool` → *edit `src/labels.ts`* → `git commit --no-edit` |
+| Medium 1. Two files in one pass (practice) | `mergetool-medium-checkout-copy` Resolve two checkout files in the merge tool | `git merge feature/checkout-copy` → `git mergetool` → *edit `src/checkout.js`* → *edit `src/receipt.js`* → `git commit --no-edit` |
+|  | `mergetool-medium-api-limits` Resolve rate-limit and CORS settings in the merge tool | `git merge feature/api-limits` → `git mergetool` → *edit `config/limits.yml`* → *edit `config/cors.yml`* → `git commit --no-edit` |
+|  | `mergetool-medium-db-names` Resolve two schema files in the merge tool | `git merge feature/db-rename` → `git mergetool` → *edit `schema/books.sql`* → *edit `schema/authors.sql`* → `git commit --no-edit` |
+|  | `mergetool-medium-docs-sync` Resolve two documentation files in the merge tool | `git merge feature/docs-sync` → `git mergetool` → *edit `docs/setup.md`* → *edit `docs/usage.md`* → `git commit --no-edit` |
+| Medium 2. Set up the team's tool first (debut) | `mergetool-hard-choose-tool` Resolve src/prices.py when no merge tool is set up | `git config merge.tool meld` → `git merge feature/pricing-v2` → `git mergetool` → *edit `src/prices.py`* → `git commit --no-edit` |
+|  | `mergetool-medium-configure-tool-billing` Set up the team's merge tool, then merge | `git config merge.tool meld` → `git merge feature/billing-copy` → `git mergetool` → *edit `src/billing_copy.txt`* → `git commit --no-edit` |
+| Hard 1. Judge which side to keep (transfer) | `mergetool-hard-one-of-two` Resolve only the conflicted file after a partial merge | `git merge feature/release-notes` → `git mergetool` → *edit `src/version.py`* → `git commit --no-edit` |
+|  | `mergetool-hard-take-theirs` Keep the incoming version of src/i18n.json | `git merge feature/i18n-refresh` → `git mergetool` → *edit `src/i18n.json`* → `git commit --no-edit` |
+| Hard 2. No leftovers (transfer) | `mergetool-hard-no-leftovers` Resolve src/auth.js and leave no backup files behind | `git config mergetool.keepBackup false` → `git merge feature/auth-timeout` → `git mergetool` → *edit `src/auth.js`* → `git commit --no-edit` |
+|  | `mergetool-hard-no-backup-api` Merge the API version without backup files | `git config mergetool.keepBackup false` → `git merge feature/api-v3` → `git mergetool` → *edit `src/api_version.py`* → `git commit --no-edit` |
+
+### Cherry-Picking Commits
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Copy one commit (debut) | `cherry-easy-login-timeout` Cherry-pick c1 onto release-1.0 | `git cherry-pick c1` |
+|  | `cherry-easy-invoice-rounding` Cherry-pick c1 onto release-1.1 | `git cherry-pick c1` |
+|  | `cherry-easy-export-null` Cherry-pick c1 onto release-2.0 | `git cherry-pick c1` |
+|  | `cherry-easy-rate-limit` Cherry-pick c1 onto release-1.2 | `git cherry-pick c1` |
+|  | `cherry-easy-null-check` Cherry-pick c1 onto release-2.1 | `git cherry-pick c1` |
+|  | `cherry-medium-login-timeout` Cherry-pick c1 and c2 onto release-1.0 | `git cherry-pick c1` → `git cherry-pick c2` |
+|  | `cherry-medium-invoice-rounding` Cherry-pick the newest invoice fix onto release-1.1 | `git cherry-pick feature/invoice-rounding` |
+| Easy 2. Record where it came from (debut) | `cherry-hard-trace-source` Cherry-pick c1 onto release-finalize and record its source | `git cherry-pick -x c1` |
+|  | `cherry-easy-trace-source-hotfix` Backport the retry fix and note its source | `git cherry-pick -x c2` |
+| Easy 3. Pick without committing (debut) | `cherry-medium-no-commit` Cherry-pick c1 into the index (no commit) on release-review | `git cherry-pick --no-commit c1` |
+|  | `cherry-medium-staged-review` Cherry-pick c1 into the index (no commit) on release-staged | `git cherry-pick --no-commit c1` |
+| Medium 1. Resolve and continue (debut) | `cherry-hard-export-conflict` Cherry-pick c1 onto release-2.0 and resolve the conflict | `git cherry-pick c1` → *edit `src/export.py`* → `git add src/export.py` → `git cherry-pick --continue` |
+|  | `cherry-medium-conflict-continue-auth` Resolve and continue the lockout backport | `git cherry-pick c1` → *edit `src/auth.py`* → `git add src/auth.py` → `git cherry-pick --continue` |
+| Medium 2. Cancel a stopped pick (debut) | `cherry-hard-abort-conflict` Cancel a cherry-pick that stopped on a conflict | `git cherry-pick --abort` |
+|  | `cherry-medium-abort-stopped-pick` Cancel the stopped cart backport | `git cherry-pick --abort` |
+| Medium 3. Two fixes, one reviewed commit (compose) | `cherry-medium-two-fixes-one-commit-login` Two login fixes, one reviewed backport | `git cherry-pick --no-commit c2` → `git cherry-pick --no-commit c3` → `git commit -m "Backport login fixes"` |
+|  | `cherry-medium-two-fixes-one-commit-tax` Two tax fixes, one reviewed backport | `git cherry-pick --no-commit c1` → `git cherry-pick --no-commit c4` → `git commit -m "Backport tax fixes"` |
+| Hard 1. Backport to two releases (transfer) | `cherry-hard-two-releases` Cherry-pick c1 onto both release-1.2 and release-1.1 | `git switch release-1.2` → `git cherry-pick c1` → `git switch release-1.1` → `git cherry-pick c1` |
+|  | `cherry-hard-two-releases-security` Backport the session fix to both releases | `git switch release-2.1` → `git cherry-pick c3` → `git switch release-2.0` → `git cherry-pick c3` |
+| Hard 2. Abort the wrong pick, backport the right one (spiral) | `cherry-hard-backport-capstone-export` Wrong pick out, right fix in, with its source | `git cherry-pick --abort` → `git cherry-pick -x c4` → *edit `src/export.py`* → `git add src/export.py` → `git cherry-pick --continue` |
+|  | `cherry-hard-backport-capstone-login` Wrong pick out, right login fix in, with its source | `git cherry-pick --abort` → `git cherry-pick -x c4` → *edit `src/login.py`* → `git add src/login.py` → `git cherry-pick --continue` |
+
+### Challenge Gate — Conflict Gate
+
+| Trial | Variant | Answer key |
+|---|---|---|
+| Easy | `gate3-easy-merge-and-resolve-banner` Merge the banner and settle its conflict | `git merge feature/banner` → *edit `src/banner.html`* → `git add src/banner.html` → `git commit --no-edit` |
+|  | `gate3-easy-merge-and-resolve-footer` Merge the footer and settle its conflict | `git merge feature/footer` → *edit `src/footer.html`* → `git add src/footer.html` → `git commit --no-edit` |
+| Medium | `gate3-medium-backport-tax` Backport the tax fix with its origin noted | `git switch release/2.1` → `git cherry-pick -x c3` → *edit `src/tax.py`* → `git add src/tax.py` → `git cherry-pick --continue` |
+|  | `gate3-medium-backport-locale` Backport the date format fix with its origin noted | `git switch release/3.0` → `git cherry-pick -x c3` → *edit `src/locale.py`* → `git add src/locale.py` → `git cherry-pick --continue` |
+| Hard | `gate3-hard-abort-then-tool-merge-pricing` Back out the wrong merge and use the team's tool | `git merge --abort` → `git config merge.tool meld` → `git merge feature/pricing-v2` → `git mergetool` → *edit `src/prices.py`* → `git commit --no-edit` |
+|  | `gate3-hard-abort-then-tool-merge-copy` Back out the wrong merge and use the team's tool | `git merge --abort` → `git config merge.tool meld` → `git merge feature/checkout-copy` → `git mergetool` → *edit `src/checkout.js`* → `git commit --no-edit` |
+
+## Module 4 — Advanced Recovery and History
+
+### Recovering from Hard Resets
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Recover the lost tip (debut) | `e1` Recover an accidental reset | `git reflog` → `git show c3` → `git switch -c recovery/e1 c3` |
+|  | `e2` Recover after a script reset | `git reflog` → `git show c3` → `git switch -c recovery/e2 c3` |
+|  | `e3` Recover after resetting too far | `git reflog` → `git show c3` → `git switch -c recovery/e3 c3` |
+| Easy 2. Recover after another reset (practice) | `e4` Recover after a merge reset | `git reflog` → `git show c3` → `git switch -c recovery/e4 c3` |
+|  | `e5` Recover a debugging reset | `git reflog` → `git show c3` → `git switch -c recovery/e5 c3` |
+| Medium 1. Deeper in the reflog (practice) | `m1` Recover an accidental reset | `git reflog` → `git show c3` → `git switch -c recovery/m1 c3` |
+|  | `m2` Recover after a script reset | `git reflog` → `git show c3` → `git switch -c recovery/m2 c3` |
+|  | `m3` Recover after resetting too far | `git reflog` → `git show c3` → `git switch -c recovery/m3 c3` |
+|  | `m4` Recover after a merge reset | `git reflog` → `git show c3` → `git switch -c recovery/m4 c3` |
+|  | `m5` Recover a debugging reset | `git reflog` → `git show c3` → `git switch -c recovery/m5 c3` |
+| Medium 2. Recover and share it (spiral) | `reflog-medium-recover-and-publish-search` Recover the search ranking fix and publish it | `git reflog` → `git switch -c recovery/search-fix c4` → `git push -u origin recovery/search-fix` |
+|  | `reflog-medium-recover-and-publish-billing` Recover the billing summary and publish it | `git reflog` → `git switch -c recovery/billing c5` → `git push -u origin recovery/billing` |
+| Hard 1. Pick the right candidate (transfer) | `h1` Recover an accidental reset | `git reflog` → `git show c4` → `git show c3` → `git switch -c recovery/h1 c3` |
+|  | `h2` Recover after a script reset | `git reflog` → `git show c4` → `git show c3` → `git switch -c recovery/h2 c3` |
+|  | `h3` Recover after resetting too far | `git reflog` → `git show c4` → `git show c3` → `git switch -c recovery/h3 c3` |
+|  | `h4` Recover after a merge reset | `git reflog` → `git show c4` → `git show c3` → `git switch -c recovery/h4 c3` |
+|  | `h5` Recover a debugging reset | `git reflog` → `git show c4` → `git show c3` → `git switch -c recovery/h5 c3` |
+| Hard 2. Recover, then bring the fix to main (spiral) | `reflog-hard-recover-then-pick-auth` Bookmark the lost work, then bring only the auth fix to main | `git reflog` → `git show c4` → `git branch recovery/auth c4` → `git cherry-pick c4` |
+|  | `reflog-hard-recover-then-pick-export` Bookmark the lost work, then bring only the export fix to main | `git reflog` → `git show c4` → `git branch recovery/export c4` → `git cherry-pick c4` |
+
+### Reversing Pushed Commits Safely
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Undo a pushed commit safely (debut) | `re6` Revert c3 safely | `git revert c3` → `git push` |
+|  | `re7` Revert c2 safely | `git revert c2` → `git push` |
+|  | `re8` Revert c4 safely | `git revert c4` → `git push` |
+| Easy 2. Sync first, then revert (spiral) | `revert-easy-pull-then-revert-docs` Sync first, then undo the docs theme | `git pull origin main` → `git revert c3` → `git push` |
+|  | `revert-easy-pull-then-revert-api` Sync first, then undo the endpoint rename | `git pull origin main` → `git revert c4` → `git push` |
+| Medium 1. Find the culprit from the symptom (practice) | `rm6` Restore progressive tax withholding | `git log --oneline` → `git show c2` → `git revert c2` → `git push` |
+|  | `rm7` Stop the every-minute push notifications | `git log --oneline` → `git show c2` → `git revert c2` → `git push` |
+|  | `rm8` Restore relevance ranking in search | `git log --oneline` → `git show c1` → `git revert c1` → `git push` |
+| Medium 2. Revert on the release branch (spiral) | `revert-medium-release-branch-pricing` Undo the pricing change on release 2.1 | `git switch release/2.1` → `git revert c4` → `git push` |
+|  | `revert-medium-release-branch-auth` Undo the SSO requirement on release 1.8 | `git switch release/1.8` → `git revert c3` → `git push` |
+| Hard 1. Two faulty commits, one publish (transfer) | `rh6` Roll back two faulty checkout changes | `git revert c3` → `git revert c1` → `git push` |
+|  | `rh7` Roll back two faulty session changes | `git revert c3` → `git revert c1` → `git push` |
+|  | `rh8` Roll back two faulty site changes | `git revert c4` → `git revert c2` → `git push` |
+| Hard 2. Rewrite only what isn't published (spiral) | `revert-hard-amend-local-revert-pushed-shop` Reword the local commit, revert the published one | `git commit --amend -m "Add order export"` → `git revert c2` → `git push` |
+|  | `revert-hard-amend-local-revert-pushed-blog` Reword the local commit, revert the published feed change | `git commit --amend -m "Add RSS feed"` → `git revert c3` → `git push` |
+
+### Completing Rebase Recovery Sequences
+
+| Wave | Variant | Answer key |
+|---|---|---|
+| Easy 1. Replay your branch onto main (debut) | `be6` Rebase feature/recovery onto main | `git rebase main` → `git log --oneline --graph --all` |
+|  | `be7` Rebase feature/search-filters onto main | `git rebase main` → `git log --oneline --graph --all` |
+|  | `be8` Rebase feature/cli-flags onto main | `git rebase main` → `git log --oneline --graph --all` |
+| Easy 2. Abandon a stopped rebase (debut) | `rebase-medium-abort` Abandon a rebase that stopped on a conflict | `git rebase --abort` |
+|  | `rebase-easy-abort-stopped-docs` Abandon the stopped docs rebase | `git rebase --abort` |
+| Easy 3. Resolve and continue a rebase (debut) | `rebase-hard-continue` Finish a rebase after fixing a conflict | *edit `src/limiter.py`* → `git add src/limiter.py` → `git rebase --continue` |
+|  | `rebase-easy-continue-config` Resolve and continue the config loader rebase | *edit `config/app.yml`* → `git add config/app.yml` → `git rebase --continue` |
+| Medium 1. Move only your commits (debut) | `bm6` Move fix/footer-typo onto main | `git log --oneline --graph --all` → `git rebase --onto main feature/checkout-redesign fix/footer-typo` |
+|  | `bm7` Move hotfix/login-timeout onto main | `git log --oneline --graph --all` → `git rebase --onto main release/2.0-beta hotfix/login-timeout` |
+| Medium 2. Reset to the original tip, then rebase (debut) | `bh6` Recover the dropped commit on feature/cli-flags | `git reflog` → `git reset --hard c4` → `git rebase main` |
+|  | `bh7` Recover the dropped commit on hotfix/export-csv | `git reflog` → `git reset --hard c5` → `git rebase main` |
+| Hard 1. Continue the rebase, then publish safely (spiral) | `rebase-hard-continue-then-lease-search` Finish the search rebase and republish safely | *edit `src/search.py`* → `git add src/search.py` → `git rebase --continue` → `git push --force-with-lease origin feature/search` |
+|  | `rebase-hard-continue-then-lease-billing` Finish the billing rebase and republish safely | *edit `src/billing.py`* → `git add src/billing.py` → `git rebase --continue` → `git push --force-with-lease origin feature/billing` |
+| Hard 2. Abort, then move only your commits (transfer) | `rebase-hard-abort-then-onto-reports` Abort, then move only the reports commits | `git rebase --abort` → `git rebase --onto main spike/charts feature/reports` |
+|  | `rebase-hard-abort-then-onto-ui` Abort, then move only the table commits | `git rebase --abort` → `git rebase --onto main spike/new-grid feature/table-ui` |
+| Hard 3. Undo a bad rebase and republish (spiral) | `rebase-hard-reset-rebase-lease-cli` Undo a bad rebase of the CLI flags and republish | `git reflog` → `git reset --hard c6` → `git rebase main` → `git push --force-with-lease origin feature/cli-flags` |
+|  | `rebase-hard-reset-rebase-lease-api` Undo a bad rebase of the rate limiter and republish | `git reflog` → `git reset --hard c5` → `git rebase main` → `git push --force-with-lease origin feature/rate-limits` |
+
+### Challenge Gate — Recovery Gate
+
+| Trial | Variant | Answer key |
+|---|---|---|
+| Easy | `gate4-easy-recover-search-fix` Rescue the lost search fix | `git reflog` → `git show c3` → `git switch -c recovery/search c3` |
+|  | `gate4-easy-recover-receipt-fix` Rescue the lost receipt fix | `git reflog` → `git show c3` → `git switch -c recovery/receipts c3` |
+| Medium | `gate4-medium-drop-local-revert-published-banner` Drop the experiment, reverse the published banner | `git reset --hard c2` → `git revert c2` → `git push origin main` |
+|  | `gate4-medium-drop-local-revert-published-alerts` Drop the experiment, reverse the published alert change | `git reset --hard c2` → `git revert c2` → `git push origin main` |
+| Hard | `gate4-hard-move-branch-onto-main-receipts` Move the receipts branch off the release line | `git rebase --abort` → `git rebase --onto main release/1.0 feature/receipts` → `git push --force-with-lease origin feature/receipts` |
+|  | `gate4-hard-move-branch-onto-main-coupons` Move the coupons branch off the release line | `git rebase --abort` → `git rebase --onto main release/1.0 feature/coupons` → `git push --force-with-lease origin feature/coupons` |

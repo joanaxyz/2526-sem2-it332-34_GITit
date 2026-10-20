@@ -32,6 +32,12 @@ def routes():
 
 
 def bundle(user_model, *, username="kpi", required=3, module=3):
+    """A Hard tier of ``required`` single-clear waves, with real KPI routes.
+
+    The first wave holds the practice and the reserved transfer variant; each
+    later wave has its own practice variant. Returns the first wave and its
+    two variants.
+    """
     player = get_or_create_player(user_model.objects.create_user(username=username))
     story, _ = Story.objects.get_or_create(slug="arcane-spire", defaults={"title": "Arcane Spire"})
     chapter, _ = Chapter.objects.get_or_create(
@@ -48,19 +54,22 @@ def bundle(user_model, *, username="kpi", required=3, module=3):
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="hard")
     medium = AdventureLevelTier.objects.create(adventure_level=level, difficulty="medium")
     AdventureLevelTierCompletion.objects.create(player=player, tier=medium)
-    wave = AdventureLevelTierWave.objects.create(
-        tier=tier,
-        slug=f"wave-{username}",
-        required_successful_attempts=required,
-        min_counted_commands=3,
-        max_counted_commands=8,
-    )
+    waves = [
+        AdventureLevelTierWave.objects.create(
+            tier=tier,
+            slug=f"wave-{username}" if index == 0 else f"wave-{username}-{index + 1}",
+            sort_order=index,
+            min_counted_commands=3,
+            max_counted_commands=8,
+        )
+        for index in range(required)
+    ]
     cases, targets, _ = routes()
-    variants = []
-    for key in ("practice", "transfer"):
-        variant = AdventureLevelTierWaveVariant.objects.create(
+
+    def variant(wave, slug, key):
+        created = AdventureLevelTierWaveVariant.objects.create(
             wave=wave,
-            slug=f"{username}-{key}",
+            slug=slug,
             label=key,
             semantic_key=key,
             initial_state=cases[key]["initial_state"],
@@ -73,10 +82,14 @@ def bundle(user_model, *, username="kpi", required=3, module=3):
             if key == "transfer"
             else "",
         )
-        variant.ref_hash = ref_hash(variant)
-        variant.save(update_fields=["ref_hash"])
-        variants.append(variant)
-    return player, tier, wave, variants
+        created.ref_hash = ref_hash(created)
+        created.save(update_fields=["ref_hash"])
+        return created
+
+    variants = [variant(waves[0], f"{username}-{key}", key) for key in ("practice", "transfer")]
+    for index, wave in enumerate(waves[1:], start=2):
+        variant(wave, f"{username}-practice-{index}", "practice")
+    return player, tier, waves[0], variants
 
 
 def start(player, tier, **kwargs):

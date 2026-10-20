@@ -111,12 +111,11 @@ class AdventureLevelTierRunService:
                 )
 
         # Replay semantics are authoritative on the server, mirroring
-        # ChallengeRunService: once a tier has a completion (i.e. the
-        # required_successful_attempts threshold has been reached for this
-        # tier), every new direct launch is free play regardless of a stale
-        # or omitted client flag. Below the threshold, a solved attempt still
-        # counts toward AdventureLevelTierProgress even though it isn't a
-        # "completion" yet - see AdventureLevelTierCommandProcessingService.
+        # ChallengeRunService: once a tier has a completion (every published
+        # wave cleared), every new direct launch is free play regardless of a
+        # stale or omitted client flag. Before that, a solved attempt clears
+        # its wave on AdventureLevelTierProgress even though the tier is not
+        # complete yet - see AdventureLevelTierCommandProcessingService.
         is_replay = bool(is_replay or already_completed or (prior_run and prior_run.is_replay))
         if not is_replay:
             self._ensure_unlocked(player=player, tier=tier)
@@ -149,9 +148,13 @@ class AdventureLevelTierRunService:
                 wave = replay_wave(player=player, tier=tier, waves=waves)
                 selection_reference = self._latest_run_on_wave(player=player, wave=wave)
         else:
-            wave = next_wave(
-                waves, AdventureLevelTierProgress.objects.filter(player=player, tier=tier).first()
-            ) or waves[0]
+            wave = (
+                next_wave(
+                    waves,
+                    AdventureLevelTierProgress.objects.filter(player=player, tier=tier).first(),
+                )
+                or waves[0]
+            )
         # A run from another wave says nothing about which of this wave's
         # variants the learner has just seen.
         if (

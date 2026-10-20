@@ -17,7 +17,7 @@ from adventures.models import (
     SkillMastery,
 )
 from adventures.services import AdventureLevelTierRunService
-from adventures.services.tier_command_processing import _wave_clear_commands
+from adventures.services.tier_command_processing import _processed_commands
 from curriculum.models import Chapter, CommandForm, CommandSkill, Story
 from players.services import get_or_create_player
 from practice.models import CommandStep
@@ -52,7 +52,6 @@ def _init_level(player_name: str, django_user_model):
         slug="init-easy",
         min_counted_commands=1,
         max_counted_commands=12,
-        required_successful_attempts=1,
     )
     skill = CommandSkill.objects.create(slug="git-init", base_command="git init", title="Init")
     forms = {
@@ -87,6 +86,7 @@ def _initialized(state: dict) -> dict:
     initialized.update(
         {
             "repository_initialized": True,
+            "repository_root": ".",
             "branches": {"main": None},
             "head": {"type": "branch", "name": "main", "target": None},
             "remotes": {},
@@ -141,39 +141,28 @@ def test_a_cleared_wave_credits_only_the_forms_the_learner_typed(db, django_user
     assert not lesson_is_known(reads, branch_guide)
 
 
-def test_a_wave_clear_reads_every_solved_non_replay_run_of_that_wave(db, django_user_model):
+def test_a_wave_clear_credits_only_the_clearing_runs_processed_commands(db, django_user_model):
     _, player, tier, wave, _ = _init_level("credit-union", django_user_model)
     service = AdventureLevelTierRunService()
 
-    def run_with(status: str, command: str, **flags) -> AdventureLevelTierRun:
-        run = service.start_run(player=player, tier=tier, source_entry_point="level_page")
+    def step(run, command: str, *, processable: bool = True) -> None:
         CommandStep.objects.create(
             adventure_tier_run=run,
             player=player,
             command_text=command,
             normalized_command=command,
-            result_category="target_matched",
+            result_category="target_matched" if processable else "unprocessable",
             command_classification="counted",
             attempt_number=1,
-            was_processable=True,
+            was_processable=processable,
         )
-        AdventureLevelTierRun.objects.filter(id=run.id).update(status=status, **flags)
-        return run
 
-    run_with("completed", "git init project")
-    run_with("completed", "git init -b trunk", is_replay=True)
-    run_with("failed", "git init -q")
+    failed = service.start_run(player=player, tier=tier, source_entry_point="level_page")
+    step(failed, "git init -q")
+    AdventureLevelTierRun.objects.filter(id=failed.id).update(status="failed")
     current = service.start_run(player=player, tier=tier, source_entry_point="level_page")
-    CommandStep.objects.create(
-        adventure_tier_run=current,
-        player=player,
-        command_text="git init",
-        normalized_command="git init",
-        result_category="target_matched",
-        command_classification="counted",
-        attempt_number=1,
-        was_processable=True,
-    )
+    step(current, "git init")
+    step(current, "git start", processable=False)
 
     assert current.current_wave_id == wave.id
-    assert _wave_clear_commands(current) == ["git init project", "git init"]
+    assert _processed_commands(current) == ["git init"]

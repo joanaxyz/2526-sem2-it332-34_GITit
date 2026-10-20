@@ -39,14 +39,12 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
         slug="init-easy",
         min_counted_commands=1,
         max_counted_commands=12,
-        required_successful_attempts=1,
     )
     medium_wave = AdventureLevelTierWave.objects.create(
         tier=medium,
         slug="init-medium",
         min_counted_commands=1,
         max_counted_commands=10,
-        required_successful_attempts=1,
     )
     skill = CommandSkill.objects.create(
         slug="git-init",
@@ -132,6 +130,7 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
     initialized.update(
         {
             "repository_initialized": True,
+            "repository_root": ".",
             "branches": {"main": None},
             "head": {"type": "branch", "name": "main", "target": None},
             "commits": [],

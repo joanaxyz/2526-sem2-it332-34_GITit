@@ -140,12 +140,18 @@ backend awards or rejects persisted progress
 
 This keeps command submission responsive while preventing forged reward-affecting state.
 
+Completion is graded on the resulting repository state, never on the commands typed. The transition check above keeps that state honest; the scenario's `state_requirements` then decide whether it is solved, so any Git route that reaches the same state passes. Published curriculum scenarios use no typed-command rules (`required_command`, `required_command_sequence`) and no records of how an operation ran (`operation_metadata_*`); `curriculum/tests/test_scenario_bank_content.py` enforces it. Where a wrong route would reach the right state only because the simulator is more lenient than Git, the simulator is fixed instead. For that reason both engines:
+
+- record where `init` or `clone` put the repository (`repository_root`);
+- reject a push that would drop the server's commits, and a lease push once the server moved after the last fetch;
+- write Git's `checkout: moving from X to Y` HEAD reflog entry on every switch.
+
 ### Workspace Terminal Shell
 
 The terminal also runs a small shell (`frontend/src/shared/git/simulator/shell/`): `pwd ls cd tree cat echo clear` are read-only diagnostics, and `touch mkdir rmdir rm mv cp` plus `echo`/`cat` with `>`/`>>` change the working copy. Shell commands never spend the command budget. File-changing ones are replayed by `backend/common/git/shell_commands.py` from the persisted state through the same `workspace_files` helpers as the Project Files endpoints; the backend's replay, not the browser's `next_state`, becomes the run state.
 
 - The working directory belongs to the terminal, not the repository: it is stored per run on the frontend (`level-runtime/terminalCwd.ts`) and sent as `execution.cwd`. It never enters `repository_state`, so `cd` cannot affect evaluation such as `repository_state_unchanged`.
-- Git reads pathspecs relative to that directory. `gitPathspecs.ts` and `backend/common/git/git_pathspecs.py` rewrite them to project-root paths before simulation and transition verification.
+- Git reads pathspecs relative to that directory. `gitPathspecs.ts` and `backend/common/git/git_pathspecs.py` rewrite them to project-root paths before simulation and transition verification, including the folder `git init` and `git clone` create a repository in.
 - Folders with no files live in the optional `directories` list of `repository_state` (omitted when empty). Git ignores them; the Project Files tree shows them, and it hides deleted files unless they are conflicted. A folder emptied by deleting its last file stays on disk.
 
 ## API Contract
@@ -305,10 +311,11 @@ database honestly has none rather than synthesising it per request.
 ## Adventure Tiers and Challenge Gates
 
 - Each `AdventureLevel` has Easy, Medium, and Hard `AdventureLevelTier`s. A tier holds ordered `AdventureLevelTierWave`s, and each wave holds ordered variants.
-- An `AdventureLevelTierRun` is one attempt at one wave. A wave is cleared after `required_successful_attempts` solves; `AdventureLevelTierProgress.cleared_wave_slugs` records the cleared waves, and the tier completes (`AdventureLevelTierCompletion`) once every published wave is cleared. Starting a tier plays the next uncleared wave; replay cycles through the waves (`adventures/tier_waves.py`, `services/tier_runs.py`, `services/tier_variants.py`).
+- `seed_data/source/wave_plan/` owns placement: each level's waves per tier, in play order, with their roles and variants. `seed_curriculum` upserts them by slug and unpublishes the waves and variants it no longer names; runs keep their rows.
+- An `AdventureLevelTierRun` is one attempt at one wave. One solve clears a wave; `AdventureLevelTierProgress.cleared_wave_slugs` records the cleared waves, and the tier completes (`AdventureLevelTierCompletion`) once every published wave is cleared. Starting a tier plays the next uncleared wave, and a retry rotates variants within that wave; replay cycles through the waves (`adventures/tier_waves.py`, `services/tier_runs.py`, `services/tier_variants.py`). A solve on a wave that a reseed unpublished clears the learner's next uncleared wave.
 - A tier's stars are the lowest of its waves' best stars. A run's star budget comes from its variant, falling back to the wave's (`services/tier_budget.py`).
-- Each wave clear credits mastery to the wave's command forms that the player's solved commands used (`tutoring.services.forms.forms_used_by`).
-- `adventures/rewards.py` owns the GitCoin ladder: Easy 25, Medium 35, Hard 50 once per tier, and 50/75/100 for Challenge Gate trials, all through idempotent wallet keys. `award_missing_tier_rewards` backfills tiers completed before the ladder existed.
+- Each wave clear credits mastery to the published forms the clearing run's commands used (`tutoring.services.forms.forms_used_by`), so a guide the learner has not earned keeps firing.
+- `adventures/rewards.py` owns the GitCoin ladder: Easy 25, Medium 35, Hard 50 once per tier, and 50/75/100 for Challenge Gate trials, all through idempotent wallet keys. The one-time cutover commands `award_missing_tier_rewards` and `map_partial_tier_progress` backfill rewards and partial progress (`deploy/CURRICULUM_WAVES_RESEED.md`).
 - A level counts as passed on the map and in chapter progress once its Easy tier is complete. Chapter completion counts each published level once plus each published gate trial.
 - `seed_curriculum` seeds one Challenge Gate per module from `source/challenge_gates.py`: Easy, Medium, and Hard trials with two variants each. A trial opens once every required level of the module has completed its tier of the same difficulty (`cleared_tier_difficulties`).
 - Authored adventures compile to one Easy tier with ordered waves (`authoring/compiler.py`).
@@ -321,7 +328,7 @@ database honestly has none rather than synthesising it per request.
 
 Rules:
 
-- Humans edit `MODULE_LEVELS` in `seed_curriculum`, the scenario Markdown compiled by `scripts/curriculum/import_revised_scenarios.py`, and the fixtures and gate composition under `backend/curriculum/seed_data/source/`.
+- Humans edit `MODULE_LEVELS` in `seed_curriculum`, the scenario Markdown compiled by `scripts/curriculum/import_revised_scenarios.py`, and the wave plan, fixtures and gate composition under `backend/curriculum/seed_data/source/`.
 - `generate_targets` replays every module case and extension scenario, and fails unless the backend transition verifier accepts each replayed command (`solution_replay.verify_backend_transitions`), so a published answer key can always be submitted live.
 - Humans do not edit files under `backend/curriculum/seed_data/generated/` directly.
 - After changing a variant initial state, solution commands, or workspace-file edits, run `cd backend && python manage.py generate_targets`. It rewrites both generated targets and trajectories.

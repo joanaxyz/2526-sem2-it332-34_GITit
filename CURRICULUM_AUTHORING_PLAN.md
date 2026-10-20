@@ -33,6 +33,8 @@ Adventure levels should follow this rhythm:
 
 Single-command waves are allowed only when they introduce a new command form or isolate a concept that would otherwise be confusing.
 
+The wave plan (`backend/curriculum/seed_data/source/wave_plan/`) gives every wave one of these roles: debut, practice, compose, spiral or transfer. [CONTENT_AUTHORING_GUIDE.md](CONTENT_AUTHORING_GUIDE.md) has the rules the plan must satisfy.
+
 ## Challenge Progression
 
 Each challenge should contain:

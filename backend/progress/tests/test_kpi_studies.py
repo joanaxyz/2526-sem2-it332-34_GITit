@@ -149,8 +149,8 @@ def test_changed_required_clears_are_missing_evidence_not_failed_mastery(
     study = create_study(
         slug="changed-requirement", player_ids=[player.id], tier_ids=[tier.id], cutoff=cutoff
     )
-    wave.required_successful_attempts = 1
-    wave.save(update_fields=["required_successful_attempts"])
+    # A reseed now gives the tier a single wave: mastery means something else.
+    tier.waves.exclude(id=wave.id).update(is_published=False)
     end(start(player, tier))
     monkeypatch.setattr(
         "progress.services.studies.timezone.now", lambda: cutoff + timedelta(seconds=1)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 from typing import Any
 
+from curriculum.seed_data.scenario_runtime import visit_rule
 from curriculum.seed_data.source.scenario_fixtures.shapes import (
     clean,
     commit,
@@ -183,6 +184,7 @@ def _cancelled_experiment() -> dict[str, Any]:
             {"type": "stash_stack_empty"},
             points_to("feature/experiment", "c3"),
             points_to("release/v3", "c2"),
+            visit_rule("feature/experiment", "release/v3"),
         ),
     }
 
@@ -230,9 +232,8 @@ def _amend_then_lease(
         "state_requirements": clean(
             branch,
             tip(branch, message_equals=right, parent_equals="c1", tree_contains={path: f"{path}-v1"}),
-            {"type": "operation_metadata_equals", "key": "last_amend_replaced_commit", "value": "c2"},
+            {"type": "branch_history_excludes", "branch": branch, "commits": ["c2"]},
             matches_origin(branch),
-            {"type": "operation_metadata_equals", "key": "force_with_lease", "value": True},
         ),
     }
 

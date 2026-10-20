@@ -8624,6 +8624,84 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
+  "init-hard-nested-course": {
+    "final": {
+      "coarse": "1df18b66875a9fd6",
+      "exact": "44f3455c33f9674b"
+    },
+    "steps": [
+      {
+        "command": "git init -b main courses/git-basics",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "repository",
+            "subjects": [],
+            "text": "The folder becomes a Git repository."
+          },
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "main"
+            ],
+            "text": "Branch main is created."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "7d732a1956e9b2c8",
+            "exact": "cfb1de1307c445e1"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "init-hard-nested-service": {
+    "final": {
+      "coarse": "1f2bfbc8b308ddcc",
+      "exact": "6cef1a92af673cb7"
+    },
+    "steps": [
+      {
+        "command": "git init -b trunk services/billing-api",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "repository",
+            "subjects": [],
+            "text": "The folder becomes a Git repository."
+          },
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "trunk"
+            ],
+            "text": "Branch trunk is created."
+          },
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "trunk"
+            ],
+            "text": "HEAD moves to trunk."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "9b29c1a780445690",
+            "exact": "8c244b05f502aef7"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
   "init-hard-research-log": {
     "final": {
       "coarse": "e3dd3a744b629c50",
@@ -8673,26 +8751,6 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "360fc587e725f384",
             "exact": "756bb06a0ed5664c"
-          }
-        ]
-      }
-    ],
-    "version": 2
-  },
-  "init-hard-safe-rerun-handbook": {
-    "final": {
-      "coarse": "1507e33c53416ff7",
-      "exact": "65ab47c55b47d9e7"
-    },
-    "steps": [
-      {
-        "command": "git init",
-        "diagnostic": false,
-        "effect": [],
-        "positions": [
-          {
-            "coarse": "1507e33c53416ff7",
-            "exact": "65ab47c55b47d9e7"
           }
         ]
       }
@@ -14955,6 +15013,273 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
+  "rebase-easy-abort-stopped-docs": {
+    "final": {
+      "coarse": "26d82939c149c877",
+      "exact": "026200de584d1890"
+    },
+    "steps": [
+      {
+        "command": "git rebase --abort",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "branch",
+            "subjects": [
+              "feature/docs-search"
+            ],
+            "text": "Branch feature/docs-search moves to another commit."
+          },
+          {
+            "action": "remove",
+            "kind": "working_tree",
+            "subjects": [
+              "docs/index.md"
+            ],
+            "text": "Edits to docs/index.md are discarded or saved elsewhere."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "docs/index.md"
+            ],
+            "text": "Conflict resolved in docs/index.md."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "rebase"
+            ],
+            "text": "The rebase is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "f0e54f04819542f3",
+            "exact": "955062a04ce700d1"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rebase-easy-continue-config": {
+    "final": {
+      "coarse": "b670468cfdd70bca",
+      "exact": "0da2e0c445dd569b"
+    },
+    "steps": [
+      {
+        "command": "git add config/app.yml",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "config/app.yml"
+            ],
+            "text": "config/app.yml is staged."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "config/app.yml"
+            ],
+            "text": "Conflict resolved in config/app.yml."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "c7391d6c96c45c34",
+            "exact": "2b7e74229b97031b"
+          },
+          {
+            "coarse": "0f5839854a3629a2",
+            "exact": "bcce6d755e23d6ca"
+          }
+        ]
+      },
+      {
+        "command": "git rebase --continue",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/config-loader",
+            "subjects": [
+              "config/app.yml"
+            ],
+            "text": "2 new commits on feature/config-loader, saving config/app.yml."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "rebase"
+            ],
+            "text": "The rebase is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "c4ee4c66b3b2f1a0",
+            "exact": "5af74a7f85281dc2"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rebase-hard-abort-then-onto-reports": {
+    "final": {
+      "coarse": "8f03ea205fdde264",
+      "exact": "3fd271d16613f59f"
+    },
+    "steps": [
+      {
+        "command": "git rebase --abort",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "branch",
+            "subjects": [
+              "feature/reports"
+            ],
+            "text": "Branch feature/reports moves to another commit."
+          },
+          {
+            "action": "remove",
+            "kind": "working_tree",
+            "subjects": [
+              "src/charts.js"
+            ],
+            "text": "Edits to src/charts.js are discarded or saved elsewhere."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/charts.js"
+            ],
+            "text": "Conflict resolved in src/charts.js."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "rebase"
+            ],
+            "text": "The rebase is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "6c92f1689e9a9c57",
+            "exact": "e2a9e65a78dbe0ca"
+          }
+        ]
+      },
+      {
+        "command": "git rebase --onto main spike/charts feature/reports",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/reports",
+            "subjects": [],
+            "text": "2 new commits on feature/reports."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "bfa25018509b4a2b",
+            "exact": "8df8c9720331970f"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rebase-hard-abort-then-onto-ui": {
+    "final": {
+      "coarse": "ba75f8155d63ebba",
+      "exact": "aa9a910cde432e16"
+    },
+    "steps": [
+      {
+        "command": "git rebase --abort",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "branch",
+            "subjects": [
+              "feature/table-ui"
+            ],
+            "text": "Branch feature/table-ui moves to another commit."
+          },
+          {
+            "action": "remove",
+            "kind": "working_tree",
+            "subjects": [
+              "src/charts.js"
+            ],
+            "text": "Edits to src/charts.js are discarded or saved elsewhere."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/charts.js"
+            ],
+            "text": "Conflict resolved in src/charts.js."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "rebase"
+            ],
+            "text": "The rebase is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "792c876a3ea6cead",
+            "exact": "e923bb1ab38a4342"
+          }
+        ]
+      },
+      {
+        "command": "git rebase --onto main spike/new-grid feature/table-ui",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/table-ui",
+            "subjects": [],
+            "text": "2 new commits on feature/table-ui."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "9338a9977297880b",
+            "exact": "cd90e51e90259e6b"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
   "rebase-hard-continue": {
     "final": {
       "coarse": "ad4dc4e6408d644d",
@@ -15019,6 +15344,360 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "31d83afa7e87cb85",
             "exact": "134e787fe3f4e7e5"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rebase-hard-continue-then-lease-billing": {
+    "final": {
+      "coarse": "2c8855d343cde05c",
+      "exact": "d2b93fe54d6f8369"
+    },
+    "steps": [
+      {
+        "command": "git add src/billing.py",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/billing.py"
+            ],
+            "text": "src/billing.py is staged."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/billing.py"
+            ],
+            "text": "Conflict resolved in src/billing.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "2d1067146e0ac712",
+            "exact": "6cb318937069af31"
+          },
+          {
+            "coarse": "284f47d097b0b246",
+            "exact": "a72caab923aaf0a1"
+          }
+        ]
+      },
+      {
+        "command": "git rebase --continue",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/billing",
+            "subjects": [
+              "src/billing.py"
+            ],
+            "text": "2 new commits on feature/billing, saving src/billing.py."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "rebase"
+            ],
+            "text": "The rebase is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "5c1104ff49d86556",
+            "exact": "f39555a342919e5a"
+          }
+        ]
+      },
+      {
+        "command": "git push --force-with-lease origin feature/billing",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/feature/billing"
+            ],
+            "text": "origin/feature/billing is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "b0f9ac65a57c843d",
+            "exact": "7c30fc3d94866c48"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rebase-hard-continue-then-lease-search": {
+    "final": {
+      "coarse": "bfc4836cac923798",
+      "exact": "8029515dccb01c62"
+    },
+    "steps": [
+      {
+        "command": "git add src/search.py",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/search.py"
+            ],
+            "text": "src/search.py is staged."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/search.py"
+            ],
+            "text": "Conflict resolved in src/search.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e2f6dbc313087b1e",
+            "exact": "49204f2bb0acbe5f"
+          },
+          {
+            "coarse": "859bc9ffe314af6e",
+            "exact": "76cbb9f05acaf136"
+          }
+        ]
+      },
+      {
+        "command": "git rebase --continue",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/search",
+            "subjects": [
+              "src/search.py"
+            ],
+            "text": "2 new commits on feature/search, saving src/search.py."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "rebase"
+            ],
+            "text": "The rebase is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "5c30534d89dd2fde",
+            "exact": "82e9613b1fb5e71e"
+          }
+        ]
+      },
+      {
+        "command": "git push --force-with-lease origin feature/search",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/feature/search"
+            ],
+            "text": "origin/feature/search is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "da8e42dc3721a15b",
+            "exact": "105199bdbb741a58"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rebase-hard-reset-rebase-lease-api": {
+    "final": {
+      "coarse": "f570dd283740d604",
+      "exact": "6c5b0eae68843a82"
+    },
+    "steps": [
+      {
+        "command": "git reflog",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "25bab96c148f9bc7",
+            "exact": "a6810a008ea77fec"
+          }
+        ]
+      },
+      {
+        "command": "git reset --hard c5",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "branch",
+            "subjects": [
+              "feature/rate-limits"
+            ],
+            "text": "Branch feature/rate-limits moves to another commit."
+          },
+          {
+            "action": "start",
+            "kind": "operation",
+            "subjects": [
+              "merge"
+            ],
+            "text": "A merge is in progress."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "25bab96c148f9bc7",
+            "exact": "a6810a008ea77fec"
+          }
+        ]
+      },
+      {
+        "command": "git rebase main",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/rate-limits",
+            "subjects": [],
+            "text": "3 new commits on feature/rate-limits."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e812bb3d32b1a8e3",
+            "exact": "72005601ce6cfb2e"
+          }
+        ]
+      },
+      {
+        "command": "git push --force-with-lease origin feature/rate-limits",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/feature/rate-limits"
+            ],
+            "text": "origin/feature/rate-limits is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "c99fdc2339b999ac",
+            "exact": "1bdcb127a0ff8e84"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rebase-hard-reset-rebase-lease-cli": {
+    "final": {
+      "coarse": "b49373e617108892",
+      "exact": "7c28e979946208be"
+    },
+    "steps": [
+      {
+        "command": "git reflog",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "c75db88277292ec0",
+            "exact": "5817b8323697b399"
+          }
+        ]
+      },
+      {
+        "command": "git reset --hard c6",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "branch",
+            "subjects": [
+              "feature/cli-flags"
+            ],
+            "text": "Branch feature/cli-flags moves to another commit."
+          },
+          {
+            "action": "start",
+            "kind": "operation",
+            "subjects": [
+              "merge"
+            ],
+            "text": "A merge is in progress."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "c75db88277292ec0",
+            "exact": "5817b8323697b399"
+          }
+        ]
+      },
+      {
+        "command": "git rebase main",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/cli-flags",
+            "subjects": [],
+            "text": "3 new commits on feature/cli-flags."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "5574ff92133d3269",
+            "exact": "d399bfa5214a556d"
+          }
+        ]
+      },
+      {
+        "command": "git push --force-with-lease origin feature/cli-flags",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/feature/cli-flags"
+            ],
+            "text": "origin/feature/cli-flags is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "88473498b3fd8725",
+            "exact": "d20cd86be6c0dac3"
           }
         ]
       }
@@ -15534,6 +16213,282 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "1f26b570cbce745c",
             "exact": "49bd72af0dbe52b3"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "reflog-hard-recover-then-pick-auth": {
+    "final": {
+      "coarse": "c15245cc87618068",
+      "exact": "826a6068485c5cd3"
+    },
+    "steps": [
+      {
+        "command": "git reflog",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "e050c895e189a2ec",
+            "exact": "e38b22e1807e8747"
+          }
+        ]
+      },
+      {
+        "command": "git show c4",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "e050c895e189a2ec",
+            "exact": "e38b22e1807e8747"
+          }
+        ]
+      },
+      {
+        "command": "git branch recovery/auth c4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "recovery/auth"
+            ],
+            "text": "Branch recovery/auth is created."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e050c895e189a2ec",
+            "exact": "e38b22e1807e8747"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick c4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [],
+            "text": "New commit on main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "f33f260aee18c5cf",
+            "exact": "03b0b4c232bf0419"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "reflog-hard-recover-then-pick-export": {
+    "final": {
+      "coarse": "8eed5a1918b9b04c",
+      "exact": "6beb34e7da285d41"
+    },
+    "steps": [
+      {
+        "command": "git reflog",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "f43ad765eed19165",
+            "exact": "a2ea05a2264d6933"
+          }
+        ]
+      },
+      {
+        "command": "git show c4",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "f43ad765eed19165",
+            "exact": "a2ea05a2264d6933"
+          }
+        ]
+      },
+      {
+        "command": "git branch recovery/export c4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "recovery/export"
+            ],
+            "text": "Branch recovery/export is created."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "f43ad765eed19165",
+            "exact": "a2ea05a2264d6933"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick c4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [],
+            "text": "New commit on main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "4fc8ff6084bc6208",
+            "exact": "dc9d3a3e6d9a32b6"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "reflog-medium-recover-and-publish-billing": {
+    "final": {
+      "coarse": "200ba88851f63bc1",
+      "exact": "7f14e906bd4623da"
+    },
+    "steps": [
+      {
+        "command": "git reflog",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "c27674172a5b747c",
+            "exact": "9bc5248568266e31"
+          }
+        ]
+      },
+      {
+        "command": "git switch -c recovery/billing c5",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "recovery/billing"
+            ],
+            "text": "Branch recovery/billing is created."
+          },
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "recovery/billing"
+            ],
+            "text": "HEAD moves to recovery/billing."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "c27674172a5b747c",
+            "exact": "9bc5248568266e31"
+          }
+        ]
+      },
+      {
+        "command": "git push -u origin recovery/billing",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/recovery/billing"
+            ],
+            "text": "origin/recovery/billing is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "4c20ee7a7e1e4049",
+            "exact": "1753d6646be0aaf4"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "reflog-medium-recover-and-publish-search": {
+    "final": {
+      "coarse": "305dd2e4d064a700",
+      "exact": "a36c76363ae9e735"
+    },
+    "steps": [
+      {
+        "command": "git reflog",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "45b132c29956bc6f",
+            "exact": "b766c606627c33af"
+          }
+        ]
+      },
+      {
+        "command": "git switch -c recovery/search-fix c4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "recovery/search-fix"
+            ],
+            "text": "Branch recovery/search-fix is created."
+          },
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "recovery/search-fix"
+            ],
+            "text": "HEAD moves to recovery/search-fix."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "45b132c29956bc6f",
+            "exact": "b766c606627c33af"
+          }
+        ]
+      },
+      {
+        "command": "git push -u origin recovery/search-fix",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/recovery/search-fix"
+            ],
+            "text": "origin/recovery/search-fix is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "2f405f8fecd2e589",
+            "exact": "c76a6325ad89b652"
           }
         ]
       }
@@ -16384,6 +17339,428 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "a76c4afed56a3dee",
             "exact": "c9930c185f99e3ec"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "revert-easy-pull-then-revert-api": {
+    "final": {
+      "coarse": "276831129711554c",
+      "exact": "27a03e22cf8de2f9"
+    },
+    "steps": [
+      {
+        "command": "git pull origin main",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "branch",
+            "subjects": [
+              "main"
+            ],
+            "text": "Branch main moves to another commit."
+          },
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/main"
+            ],
+            "text": "origin/main is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e863fcd615b61fac",
+            "exact": "131035ca5a2af6ac"
+          }
+        ]
+      },
+      {
+        "command": "git revert c4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [],
+            "text": "New commit on main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "11b1a0c75f80264b",
+            "exact": "f87c4beb15e28bbc"
+          }
+        ]
+      },
+      {
+        "command": "git push",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/main"
+            ],
+            "text": "origin/main is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "dab1d5b592ad3f44",
+            "exact": "23f79e662ebbeae3"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "revert-easy-pull-then-revert-docs": {
+    "final": {
+      "coarse": "d9c8fd47ead05648",
+      "exact": "2aade5c9ba15e8d7"
+    },
+    "steps": [
+      {
+        "command": "git pull origin main",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "branch",
+            "subjects": [
+              "main"
+            ],
+            "text": "Branch main moves to another commit."
+          },
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/main"
+            ],
+            "text": "origin/main is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "6a2486cc2944f561",
+            "exact": "bc7ab571840df7e1"
+          }
+        ]
+      },
+      {
+        "command": "git revert c3",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [],
+            "text": "New commit on main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "0262d1db3a05adeb",
+            "exact": "cd129ba34bdb067d"
+          }
+        ]
+      },
+      {
+        "command": "git push",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/main"
+            ],
+            "text": "origin/main is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "6961a8e0c6450b15",
+            "exact": "aa615eb7d68514a2"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "revert-hard-amend-local-revert-pushed-blog": {
+    "final": {
+      "coarse": "534cbd393d7a2ceb",
+      "exact": "a71cefa9c34fc7ec"
+    },
+    "steps": [
+      {
+        "command": "git commit --amend -m \"Add RSS feed\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [],
+            "text": "New commit on main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "78c95d1df1b87723",
+            "exact": "ce817bf3773e6abd"
+          }
+        ]
+      },
+      {
+        "command": "git revert c3",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [],
+            "text": "New commit on main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "78c95d1df1b87723",
+            "exact": "ffce393ecba206e0"
+          }
+        ]
+      },
+      {
+        "command": "git push",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/main"
+            ],
+            "text": "origin/main is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "a1e913d92529e172",
+            "exact": "ce3dd885c04de3a2"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "revert-hard-amend-local-revert-pushed-shop": {
+    "final": {
+      "coarse": "bbc38282be17b232",
+      "exact": "57b627750dd5ee5c"
+    },
+    "steps": [
+      {
+        "command": "git commit --amend -m \"Add order export\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [],
+            "text": "New commit on main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "f33cd4dd9e8426ee",
+            "exact": "612341a773586956"
+          }
+        ]
+      },
+      {
+        "command": "git revert c2",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [],
+            "text": "New commit on main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "f33cd4dd9e8426ee",
+            "exact": "be8d028fac1b6ed8"
+          }
+        ]
+      },
+      {
+        "command": "git push",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/main"
+            ],
+            "text": "origin/main is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "2ed54f8a7dcf3910",
+            "exact": "4a92ac0b8c167512"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "revert-medium-release-branch-auth": {
+    "final": {
+      "coarse": "1d8c554fc0664098",
+      "exact": "bcaa3a7734ebe923"
+    },
+    "steps": [
+      {
+        "command": "git switch release/1.8",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "release/1.8"
+            ],
+            "text": "HEAD moves to release/1.8."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "7d2691fa6f405caf",
+            "exact": "0d3e786187ea8e9e"
+          }
+        ]
+      },
+      {
+        "command": "git revert c3",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "release/1.8",
+            "subjects": [],
+            "text": "New commit on release/1.8."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e08698c7b1318640",
+            "exact": "e7c008d893e30308"
+          }
+        ]
+      },
+      {
+        "command": "git push",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/release/1.8"
+            ],
+            "text": "origin/release/1.8 is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "06086683c8c242b6",
+            "exact": "50846c3afaf6d3aa"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "revert-medium-release-branch-pricing": {
+    "final": {
+      "coarse": "4e6404444b433052",
+      "exact": "3b91f84e55a04f54"
+    },
+    "steps": [
+      {
+        "command": "git switch release/2.1",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "release/2.1"
+            ],
+            "text": "HEAD moves to release/2.1."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "143ab4c441f08166",
+            "exact": "482c771f5c5a8bfe"
+          }
+        ]
+      },
+      {
+        "command": "git revert c4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "release/2.1",
+            "subjects": [],
+            "text": "New commit on release/2.1."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "7f81fae87a3095a9",
+            "exact": "e15e9b30d2782800"
+          }
+        ]
+      },
+      {
+        "command": "git push",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/release/2.1"
+            ],
+            "text": "origin/release/2.1 is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "13ddbeaa3d986013",
+            "exact": "d6f5a09343c378ec"
           }
         ]
       }

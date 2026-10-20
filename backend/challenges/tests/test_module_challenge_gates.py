@@ -5,7 +5,9 @@ from django.core.management import call_command
 
 from adventures.models import AdventureLevelTier
 from challenges.models import ChallengeLevel, ChallengeTrial
+from challenges.payloads import next_difficulty_payload
 from challenges.services.runs import ChallengeRunService
+from common.constants import SESSION_STATUS_COMPLETED
 from common.exceptions import Locked
 from curriculum.models import Chapter
 from curriculum.selectors.content import chapter_content_overview
@@ -95,6 +97,30 @@ def test_gate_trials_open_as_each_difficulty_is_cleared_on_every_level(db, djang
     _clear_tiers(player, chapter, "medium")
     assert _trial_statuses(player, chapter)["medium"] == "not_started"
     assert _trial_statuses(player, chapter)["hard"] == "locked"
+
+
+def test_a_cleared_gate_trial_offers_the_next_trial_only_once_it_opens(db, django_user_model):
+    call_command("seed_curriculum", verbosity=0)
+    player = get_or_create_player(
+        django_user_model.objects.create_user(username="gatewalker", password="pass12345")
+    )
+    chapter = _module_chapter(2)
+    trials = {trial.difficulty: trial for trial in _gate(2).trials.all()}
+    _clear_tiers(player, chapter, "easy")
+    run = ChallengeRunService().start_run(
+        player=player, trial=trials["easy"], source_entry_point="level_page"
+    )
+    run.status = SESSION_STATUS_COMPLETED
+    run.save(update_fields=["status"])
+    ChallengeTrialCompletion.objects.create(
+        player=player, challenge_trial=trials["easy"], challenge_run=run, stars=3
+    )
+
+    # Medium still needs every Medium tier, so the outcome must not offer it.
+    assert next_difficulty_payload(run) is None
+
+    _clear_tiers(player, chapter, "medium")
+    assert next_difficulty_payload(run) == {"id": trials["medium"].id, "difficulty": "medium"}
 
 
 def test_only_module_chapters_get_gates(db):
