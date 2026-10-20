@@ -275,17 +275,17 @@
     "scenario_number": "1.1.8",
     "difficulty": "hard",
     "label": "Initialize ci-configs",
-    "story": "The operations team has asked you to prepare ci-configs, a dedicated repository for pipeline configuration. Finn has already left a build file at pipelines/build.yml in the surrounding workspace, alongside material from other tasks. His handover message is impressively brief: “Please get the repository ready before the deployment meeting.” You look at the clock, then at the collection of folders. There is enough time to do this carefully, but not enough to untangle an oversized repository afterward. The requested project needs its own boundary, and the existing workspace files need to remain where they are while you prepare it.",
-    "starting_point": "You are in a workspace that contains pipelines/build.yml and folders from other tasks. The folder ci-configs does not exist yet.",
-    "real_world_context": "Pipeline configuration deserves a clear repository boundary. Initializing ci-configs alone avoids treating the surrounding deployment workspace as part of its history.",
-    "task": "Create a repository in a new ci-configs folder, with main as its first branch. Leave every other file in the workspace where it is.",
+    "story": "The operations team has asked you to prepare `ci-configs`, a dedicated repository for pipeline configuration. Finn has already left a build file at `pipelines/build.yml` in the surrounding workspace, alongside material from other tasks.\n\nHis handover message is impressively brief: **“Please get the repository ready before the deployment meeting.”**\n\nYou look at the clock, then at the collection of folders. There is enough time to do this carefully, but not enough to untangle an oversized repository afterward. The requested project needs **its own boundary**, and the existing workspace files need to remain where they are while you prepare it.",
+    "starting_point": "You are in a workspace that contains `pipelines/build.yml` and folders from other tasks. The folder `ci-configs` does not exist yet.",
+    "real_world_context": "Pipeline configuration deserves a **clear repository boundary**. Initializing `ci-configs` alone avoids treating the surrounding deployment workspace as part of its history.",
+    "task": "Create a repository in a new `ci-configs` folder, with `main` as its first branch. **Leave every other file in the workspace where it is.**",
     "required_files": [],
     "objective_checks": [
       "The folder ci-configs is a Git repository.",
       "The first branch is main.",
       "The rest of the workspace (including pipelines/build.yml) is not part of the repository and is unchanged."
     ],
-    "expected_result": "Only ci-configs is a repository, on main. Every other file is unchanged.",
+    "expected_result": "Only `ci-configs` is a repository, on `main`. **Every other file is unchanged.**",
     "answer_key": [
       {
         "kind": "command",

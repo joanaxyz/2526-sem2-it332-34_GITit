@@ -492,6 +492,65 @@ describe('GameplayWorkspaceTour', () => {
     expect(main.style.height).toBe('')
   })
 
+  it('lets a mouse move a card by dragging it and resize it from its edges', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 })
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 })
+    addTarget('first')
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.dataset.tourPane === 'main') return rect({ left: 220, top: 120, width: 352, height: 300 })
+      // The command card's visible edge is its bubble, right of the guide's portrait.
+      if (this.classList.contains('mascot-message__bubble')) return rect({ left: 284, top: 120, width: 288, height: 300 })
+      if (this.dataset.tourPane === 'aside') return rect({ left: 584, top: 120, width: 336, height: 200 })
+      return rect()
+    })
+
+    render(
+      <GameplayWorkspaceTour
+        label="Command guide"
+        steps={[step('first')]}
+        aside={<p>What changes</p>}
+        paneLabels={{ main: 'command card', aside: 'what changes card' }}
+        transformable
+        onClose={vi.fn()}
+      />,
+    )
+
+    await screen.findByRole('dialog', { name: 'first title' })
+    const card = (name: string) => screen.getByRole('button', { name }).closest<HTMLElement>('[data-tour-pane]')!
+    const main = card('Move command card')
+    const aside = card('Move what changes card')
+    const asideText = screen.getByText('What changes')
+    const mouse = { pointerType: 'mouse', button: 0 }
+    const reset = () => screen.queryByRole('button', { name: 'Reset command guide size and position' })
+
+    // A click is not a drag.
+    fireEvent.pointerDown(asideText, { ...mouse, clientX: 700, clientY: 200, pointerId: 1 })
+    fireEvent.pointerUp(window, { pointerId: 1 })
+    expect(reset()).not.toBeInTheDocument()
+
+    fireEvent.pointerDown(asideText, { ...mouse, clientX: 700, clientY: 200, pointerId: 2 })
+    fireEvent.pointerMove(window, { clientX: 650, clientY: 300, pointerId: 2 })
+    fireEvent.pointerUp(window, { pointerId: 2 })
+    expect(aside).toHaveStyle({ left: '534px', top: '220px' })
+    expect(reset()).toBeInTheDocument()
+
+    // The bubble's left edge resizes the command card; its right edge stays put.
+    fireEvent.pointerMove(main, { ...mouse, clientX: 286, clientY: 250 })
+    expect(main.dataset.resizeCursor).toBe('ew-resize')
+    fireEvent.pointerDown(main, { ...mouse, clientX: 286, clientY: 250, pointerId: 3 })
+    fireEvent.pointerMove(window, { clientX: 246, clientY: 250, pointerId: 3 })
+    fireEvent.pointerUp(window, { pointerId: 3 })
+    expect(main).toHaveStyle({ left: '180px', top: '120px', width: '392px', height: '300px' })
+
+    // Touch leaves the card body to scroll; it moves cards with the grip.
+    fireEvent.pointerDown(asideText, { pointerType: 'touch', button: 0, clientX: 700, clientY: 300, pointerId: 4 })
+    fireEvent.pointerMove(window, { clientX: 600, clientY: 300, pointerId: 4 })
+    fireEvent.pointerUp(window, { pointerId: 4 })
+    expect(aside).toHaveStyle({ left: '534px', top: '220px' })
+  })
+
   it('treats Skip as dismissal and restores focus to the launch control', async () => {
     addTarget('first')
     const onClose = vi.fn()

@@ -306,7 +306,7 @@ export function AppTopbar({ className }: { className?: string }) {
           <img src={gitLogoImage} alt="" />
         </span>
         <span className="app-brand-copy">
-          <strong>GIT it!</strong>
+          <strong>IT it!</strong>
         </span>
       </NavLink>
 

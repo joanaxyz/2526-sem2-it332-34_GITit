@@ -3,6 +3,7 @@ import type { ComponentType, ReactNode } from 'react'
 
 import { TaskSealIcon } from '@/shared/level/components/workspaceIcons'
 import { StarRulesButton } from './StarRules'
+import { ScenarioInline } from './ScenarioInline'
 import type { LevelTourMode } from '@/shared/level/utils/levelTour'
 
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
@@ -120,11 +121,11 @@ export function LevelStoryCard({
       ) : null}
       <CardContent className="lvlctx-body app-scrollbar">
         <Section icon={BookOpenText} title={sectionLabels.story} hidden={!context.story}>
-          <p className="lvlctx-story">{context.story}</p>
+          <p className="lvlctx-story"><ScenarioInline text={context.story} /></p>
         </Section>
 
         <Section icon={TaskSealIcon} title={sectionLabels.task} hidden={!context.task}>
-          <p className="lvlctx-task">{context.task}</p>
+          <p className="lvlctx-task"><ScenarioInline text={context.task} /></p>
         </Section>
 
         <Section icon={TaskSealIcon} title="Objective" hidden={!checks?.length}>

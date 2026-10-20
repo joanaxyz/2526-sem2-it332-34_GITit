@@ -43,7 +43,7 @@ function setup() {
     </button></section>
     <aside><section data-box="right" aria-label="Right panel" /></aside>
   </main>)
-  return { ...view, actor: screen.getByRole('button', { name: /Git-It mascot/ }), onSelectNode }
+  return { ...view, actor: screen.getByRole('button', { name: 'Learning guide: share a Git tip' }), onSelectNode }
 }
 
 describe('page-wide mascot landings', () => {

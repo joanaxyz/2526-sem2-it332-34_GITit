@@ -3,7 +3,9 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { WorldMascot } from './WorldMascot'
 import type { MascotKnowledgeTip } from './mascotKnowledge'
 
-vi.mock('./MascotSprite', () => ({ MascotSprite: () => <span /> }))
+vi.mock('./MascotSprite', () => ({
+  MascotSprite: ({ idleActions }: { idleActions?: boolean }) => <span data-testid="mascot-sprite" data-idle-actions={idleActions} />,
+}))
 vi.mock('@/shared/sprites/preload', () => ({ warmImages: vi.fn().mockResolvedValue(undefined) }))
 
 const knowledge: MascotKnowledgeTip[] = [
@@ -20,9 +22,14 @@ beforeEach(() => {
 })
 afterEach(() => { cleanup(); vi.unstubAllGlobals(); vi.restoreAllMocks() })
 
-const mascot = () => screen.getByRole('button', { name: 'Git-It mascot: share a Git tip' })
+const mascot = () => screen.getByRole('button', { name: 'Learning guide: share a Git tip' })
 
 describe('roaming mascot knowledge', () => {
+  it.each(['home', 'track'] as const)('enables random idle actions only on Home (%s)', (surface) => {
+    render(<main><WorldMascot surface={surface} /></main>)
+    expect(screen.getByTestId('mascot-sprite')).toHaveAttribute('data-idle-actions', String(surface === 'home'))
+  })
+
   it('shows a tip on click without flying away, and cycles through earned knowledge', () => {
     render(<main><WorldMascot surface="home" knowledge={knowledge} /></main>)
     const actor = mascot()
@@ -42,7 +49,7 @@ describe('roaming mascot knowledge', () => {
     const view = render(<main><WorldMascot surface="home" /></main>)
     fireEvent.click(mascot())
     expect(screen.getByRole('status')).toHaveTextContent('Git keeps a history of your project.')
-    expect(screen.getByText('Git basics')).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Git knowledge' })).toBeInTheDocument()
     view.rerender(<main><WorldMascot surface="home" knowledge={knowledge} /></main>)
     expect(screen.getByRole('status')).toHaveTextContent('Git keeps a history of your project.')
     fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))

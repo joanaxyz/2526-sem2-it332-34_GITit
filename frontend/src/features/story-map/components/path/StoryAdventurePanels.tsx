@@ -285,6 +285,8 @@ export function StoryTrialsPanel({
                     disabled={isLocked || loading}
                     style={{ '--trial-rgb': accent } as CSSProperties}
                     aria-label={`${challenge.title}: ${difficulty} challenge trial`}
+                    aria-description={loading ? 'Loading' : isLocked ? 'Locked' : undefined}
+                    aria-busy={loading || undefined}
                     onClick={() => {
                       if (!trial || !action) return
                       onOpenTrial(trial, action)
@@ -292,15 +294,19 @@ export function StoryTrialsPanel({
                   >
                     <span className="story-trial-medallion">
                       <img src={DIFFICULTY_ICONS[difficulty]} alt="" />
-                      {status === 'locked' || status === 'loading' ? (
-                        <Lock className="story-trial-lock" aria-hidden="true" />
-                      ) : null}
                     </span>
                     <span className="story-trial-copy">
                       <strong>{trial ? difficultyLabel(trial) : difficulty}</strong>
                       <StarRating stars={stars} size="sm" label={`${difficulty} stars`} />
-                      <span>{trial ? actionLabel(action, trial.status) : 'Locked'}</span>
+                      {status !== 'locked' ? (
+                        <span className="story-trial-action">
+                          {loading ? 'Loading…' : trial ? actionLabel(action, trial.status) : null}
+                        </span>
+                      ) : null}
                     </span>
+                    {status === 'locked' ? (
+                      <Lock className="story-trial-lock" aria-hidden="true" />
+                    ) : null}
                   </button>
                 )
               })}

@@ -1,13 +1,12 @@
-import { useEffect, useRef } from 'react'
+import { ArrowRight, Flag, Lightbulb, MapPin, Target } from 'lucide-react'
+import { useEffect, useId, useRef } from 'react'
 
-import { Button } from '@/shared/components/Button'
 import { Modal } from '@/shared/components/Modal'
+import { ScenarioInline } from '@/shared/level/components/ScenarioInline'
 
 /**
- * The level briefing. Every string comes from the run; each section is left
- * out when its text is missing. Escape and the close button come from Modal;
- * Ctrl/Cmd+Enter or the primary action start the level with the terminal
- * focused.
+ * An open briefing over the game world. Authored text stays intact; clicking
+ * anywhere or pressing Enter, Space or Escape returns focus to the terminal.
  */
 export function TierStoryModal({
   open,
@@ -29,6 +28,7 @@ export function TierStoryModal({
   expectedResult?: string
   onClose: () => void
 }) {
+  const headingId = useId()
   const onCloseRef = useRef(onClose)
   useEffect(() => {
     onCloseRef.current = onClose
@@ -39,64 +39,83 @@ export function TierStoryModal({
     requestAnimationFrame(() => document.querySelector<HTMLInputElement>('[data-command-input]')?.focus())
   }
 
-  useEffect(() => {
-    if (!open) return
-    function handleKeyDown(event: KeyboardEvent) {
-      if (event.key !== 'Enter' || !(event.ctrlKey || event.metaKey)) return
-      event.preventDefault()
-      onCloseRef.current()
-      requestAnimationFrame(() => document.querySelector<HTMLInputElement>('[data-command-input]')?.focus())
-    }
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [open])
-
   const context = realWorldContext?.trim()
   const startingPointText = startingPoint?.trim()
   const result = expectedResult?.trim()
-  const hasStory = Boolean(intro || startingPointText || task || context || result)
+  const paragraphs = intro.trim().split(/\n\s*\n/).filter(Boolean)
+  const taskText = task.trim()
+  const hasStory = Boolean(paragraphs.length || startingPointText || taskText || context || result)
 
   return (
     <Modal
       open={open}
       title={title}
-      onClose={onClose}
-      className="tier-story-modal w-full max-w-2xl"
+      onClose={start}
+      hideHeader
+      dismissOnClick
+      className="tier-story-modal"
+      overlayClassName="tier-story-overlay"
       contentClassName="tier-story-modal__body"
     >
-      {intro ? <p className="tier-story-modal__intro">{intro}</p> : null}
-      {startingPointText ? (
-        <section className="tier-story-modal__section" aria-labelledby="tier-story-starting-point">
-          <h3 id="tier-story-starting-point" className="tier-story-modal__heading">Starting point</h3>
-          <p>{startingPointText}</p>
-        </section>
-      ) : null}
-      {context ? (
-        <section className="tier-story-modal__section" aria-labelledby="tier-story-context">
-          <h3 id="tier-story-context" className="tier-story-modal__heading">Real-world context</h3>
-          <p>{context}</p>
-        </section>
-      ) : null}
-      {task ? (
-        <section className="tier-story-modal__section tier-story-modal__section--task" aria-labelledby="tier-story-task">
-          <h3 id="tier-story-task" className="tier-story-modal__heading">Your task</h3>
-          <p>{task}</p>
-        </section>
-      ) : null}
-      {result ? (
-        <section className="tier-story-modal__section" aria-labelledby="tier-story-expected-result">
-          <h3 id="tier-story-expected-result" className="tier-story-modal__heading">Expected result</h3>
-          <p>{result}</p>
-        </section>
-      ) : null}
-      {hasStory ? null : <p className="tier-story-modal__empty">No story is available for this level.</p>}
+      <div className="tier-story-modal__reading" onClick={(event) => {
+        // Selecting a path or passage should not dismiss the briefing.
+        if (window.getSelection()?.toString().trim()) event.stopPropagation()
+      }}>
+        <header className="tier-story-modal__header">
+          <p className="tier-story-modal__eyebrow">Mission briefing</p>
+          <p className="tier-story-modal__title" aria-hidden="true">{title}</p>
+        </header>
 
-      <div className="tier-story-modal__actions">
-        <Button type="button" onClick={start}>
-          Start coding
-          <kbd className="tier-story-modal__shortcut" aria-hidden="true">Ctrl+Enter</kbd>
-        </Button>
+        {taskText ? (
+          <section className="tier-story-modal__mission" aria-labelledby={`${headingId}-task`}>
+            <h3 id={`${headingId}-task`} className="tier-story-modal__heading"><Target aria-hidden="true" />Your task</h3>
+            <p><ScenarioInline text={taskText} /></p>
+          </section>
+        ) : null}
+
+        <div className={`tier-story-modal__spread${paragraphs.length ? ' has-story' : ''}${startingPointText || result ? ' has-reference' : ''}`}>
+          {paragraphs.length ? (
+            <section className="tier-story-modal__story" aria-labelledby={`${headingId}-situation`}>
+              <h3 id={`${headingId}-situation`} className="tier-story-modal__heading">The situation</h3>
+              <div className="tier-story-modal__prose">
+                {paragraphs.map((paragraph, index) => <p key={index}><ScenarioInline text={paragraph} /></p>)}
+              </div>
+            </section>
+          ) : null}
+
+          {startingPointText || result ? (
+            <div className="tier-story-modal__reference">
+              {startingPointText ? (
+                <section aria-labelledby={`${headingId}-starting-point`}>
+                  <h3 id={`${headingId}-starting-point`} className="tier-story-modal__heading"><MapPin aria-hidden="true" />Starting point</h3>
+                  <p><ScenarioInline text={startingPointText} /></p>
+                </section>
+              ) : null}
+              {result ? (
+                <section aria-labelledby={`${headingId}-expected-result`}>
+                  <h3 id={`${headingId}-expected-result`} className="tier-story-modal__heading"><Flag aria-hidden="true" />Expected result</h3>
+                  <p><ScenarioInline text={result} /></p>
+                </section>
+              ) : null}
+            </div>
+          ) : null}
+        </div>
+
+        {context ? (
+          <section className="tier-story-modal__context" aria-labelledby={`${headingId}-context`}>
+            <h3 id={`${headingId}-context`} className="tier-story-modal__heading"><Lightbulb aria-hidden="true" />Why this matters</h3>
+            <p><ScenarioInline text={context} /></p>
+          </section>
+        ) : null}
+        {hasStory ? null : <p className="tier-story-modal__empty">No story is available for this level.</p>}
       </div>
+
+      <footer className="tier-story-modal__footer">
+        <p className="tier-story-modal__continue">
+          Click anywhere to begin <ArrowRight aria-hidden="true" />
+        </p>
+        <span className="tier-story-modal__keyboard">or press <kbd>Enter</kbd></span>
+      </footer>
     </Modal>
   )
 }

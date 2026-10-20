@@ -250,7 +250,7 @@ export function WorldMascot({ surface, knowledge = [], contextKey = surface }: {
       aria-expanded={Boolean(tip)} aria-controls={tip ? bubbleId : undefined}
       title="Click for a tip from your learning journey · Click the page to move me"
       onClick={nextTip}>
-      <span ref={artRef} className="world-mascot-art"><MascotSprite pose={pose} size={144} flip={flip} /></span>
+      <span ref={artRef} className="world-mascot-art"><MascotSprite pose={pose} size={144} flip={flip} idleActions={surface === 'home'} /></span>
     </button>
     {tip ? <MascotKnowledgeBubble id={bubbleId} tip={tip} bubbleRef={bubbleRef} onNext={nextTip} onDismiss={dismissTip} /> : null}
   </div>, document.body)}</>

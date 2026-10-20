@@ -50,8 +50,13 @@
 .workspace-tour__conversation .workspace-tour__actions { gap: 0.4rem; padding-top: 0.55rem; }
 .workspace-tour__conversation .workspace-tour__shortcut { display: none; }
 .workspace-tour__conversation .workspace-tour__next { margin-left: auto; box-shadow: none; }
-.workspace-tour__main > .mascot-message { min-height: 0; flex: 1 1 auto; }
-.workspace-tour__main .mascot-message__bubble { max-height: 100%; }
+/* A movable card's bubble fills the card, so a resized card's edges are the bubble's. */
+:is(.workspace-tour__main, .workspace-tour__card.is-transformable:not(.has-aside)) > .mascot-message {
+  min-height: 0;
+  flex: 1 1 auto;
+  grid-template-rows: minmax(0, 1fr);
+}
+:is(.workspace-tour__main, .workspace-tour__card.is-transformable:not(.has-aside)) .mascot-message__bubble { align-self: stretch; }
 .workspace-tour__main .workspace-tour__message { flex: 1 1 auto; }
 .workspace-tour__main :is(.workspace-tour__header, .workspace-tour__progress, .workspace-tour__actions) { flex: 0 0 auto; }
 

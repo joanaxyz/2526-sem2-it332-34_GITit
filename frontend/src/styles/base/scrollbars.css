@@ -3,37 +3,59 @@
    own only layout/overflow; color, width, and thumb treatment live here. */
 :root {
   --scrollbar-size: 0.42rem;
+  --scrollbar-thumb-inset: 0.1rem;
   --scrollbar-track: rgba(2, 10, 24, 0.48);
   --scrollbar-thumb: rgba(var(--theme-primary-rgb), 0.42);
   --scrollbar-thumb-hover: rgba(var(--theme-primary-rgb), 0.68);
 }
 
-:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *) {
+:where(html, body, .app-scrollbar, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *) {
   scrollbar-width: thin;
   scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
 }
 
-:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *)::-webkit-scrollbar {
+:where(html, body, .app-scrollbar, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *)::-webkit-scrollbar {
   width: var(--scrollbar-size);
   height: var(--scrollbar-size);
 }
 
-:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *)::-webkit-scrollbar-track {
+:where(html, body, .app-scrollbar, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *)::-webkit-scrollbar-track {
   border-radius: 999px;
   background: var(--scrollbar-track);
 }
 
-:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *)::-webkit-scrollbar-thumb {
+:where(html, body, .app-scrollbar, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *)::-webkit-scrollbar-thumb {
   min-height: 2.5rem;
-  border: 0.1rem solid transparent;
+  border: var(--scrollbar-thumb-inset) solid transparent;
   border-radius: 999px;
   background: var(--scrollbar-thumb);
   background-clip: padding-box;
 }
 
-:where(html, body, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *)::-webkit-scrollbar-thumb:hover {
+:where(html, body, .app-scrollbar, .app-shell, .app-shell *, .app-modal-overlay, .app-modal-overlay *, .workspace-tour, .workspace-tour *)::-webkit-scrollbar-thumb:hover {
   background: var(--scrollbar-thumb-hover);
   background-clip: padding-box;
+}
+
+/* Compact workspace panes use a 4px thumb inside a 6px scroll track. */
+.gameplay-workspace .app-scrollbar {
+  --scrollbar-size: 0.375rem;
+  --scrollbar-thumb-inset: 1px;
+  --scrollbar-track: transparent;
+}
+
+@supports selector(::-webkit-scrollbar) {
+  /* Chromium's native `thin` setting overrides explicit scrollbar dimensions. */
+  .gameplay-workspace .app-scrollbar {
+    scrollbar-width: auto;
+    scrollbar-color: auto;
+  }
+
+  .gameplay-workspace .app-scrollbar::-webkit-scrollbar-button {
+    display: none;
+    width: 0;
+    height: 0;
+  }
 }
 
 .ui-scroll-y,

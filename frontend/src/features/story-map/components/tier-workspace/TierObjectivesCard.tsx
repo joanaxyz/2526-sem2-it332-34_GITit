@@ -1,9 +1,10 @@
-import { BookOpenText, Check, ClipboardList, X } from 'lucide-react'
+import { BookOpenText, Check, ClipboardList, Sparkle, X } from 'lucide-react'
 
 import type { TierObjective, TierObjectiveStatus } from '@/features/story-map/components/tierWorkspaceTypes'
 import { Button } from '@/shared/components/Button'
 import { Card, CardContent, CardHeader } from '@/shared/components/Card'
 import { CopyButton } from '@/shared/components/CopyButton'
+import { ScenarioInline } from '@/shared/level/components/ScenarioInline'
 import { cn } from '@/shared/utils/cn'
 
 const STATUS_LABEL: Record<TierObjectiveStatus, string> = {
@@ -14,7 +15,7 @@ const STATUS_LABEL: Record<TierObjectiveStatus, string> = {
 
 /**
  * Objectives for the current tier run: a scrolling checklist (plus any exact
- * values the scenario requires) above a Story button that stays pinned.
+ * values the scenario requires), with Story available in the pane header.
  */
 export function TierObjectivesCard({
   objectives,
@@ -30,6 +31,25 @@ export function TierObjectivesCard({
     <Card className="lvlctx tier-objectives shadow-none" data-tour-target="tier-brief">
       <CardHeader className="lvlctx-header workspace-panel-header">
         <span className="panel-eyebrow">Objectives</span>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          className="tier-story-button"
+          disabled={!onOpenStory}
+          onClick={onOpenStory}
+          data-tour-target="tier-story"
+          aria-haspopup="dialog"
+          title="Read the mission briefing"
+        >
+          <BookOpenText className="tier-story-button__book" aria-hidden="true" />
+          Story
+          <span className="tier-story-button__sparkles" aria-hidden="true">
+            <Sparkle className="tier-story-button__sparkle tier-story-button__sparkle--one" />
+            <Sparkle className="tier-story-button__sparkle tier-story-button__sparkle--two" />
+            <Sparkle className="tier-story-button__sparkle tier-story-button__sparkle--three" />
+          </span>
+        </Button>
       </CardHeader>
       <CardContent className="tier-objectives__body">
         <div className="tier-objectives__scroll app-scrollbar">
@@ -61,18 +81,6 @@ export function TierObjectivesCard({
             </section>
           ) : null}
         </div>
-
-        <Button
-          type="button"
-          variant="outline"
-          className="tier-story-button"
-          disabled={!onOpenStory}
-          onClick={onOpenStory}
-          data-tour-target="tier-story"
-        >
-          <BookOpenText aria-hidden="true" />
-          Story
-        </Button>
       </CardContent>
     </Card>
   )
@@ -85,7 +93,7 @@ function ObjectiveRow({ objective }: { objective: TierObjective }) {
       <span className="tier-objective__box" aria-hidden="true">
         {status === 'done' ? <Check /> : status === 'failed' ? <X /> : null}
       </span>
-      <span className="tier-objective__text">{objective.text}</span>
+      <span className="tier-objective__text"><ScenarioInline text={objective.text} /></span>
       <span className="sr-only">{STATUS_LABEL[status]}</span>
     </li>
   )

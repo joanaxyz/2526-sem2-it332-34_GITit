@@ -122,6 +122,10 @@
   filter: grayscale(0.35);
 }
 
+.story-trial-card[data-status='locked'] {
+  grid-template-columns: auto minmax(0, 1fr) auto;
+}
+
 .story-trial-medallion {
   position: relative;
   display: grid;
@@ -146,16 +150,10 @@
 }
 
 .story-trial-lock {
-  position: absolute;
-  right: -0.15rem;
-  top: -0.15rem;
-  width: 1.25rem;
-  height: 1.25rem;
-  padding: 0.22rem;
-  border-radius: 999px;
-  background: rgba(4, 10, 22, 0.92);
-  color: rgba(219, 234, 254, 0.74);
-  box-shadow: 0 0 8px rgba(0, 0, 0, 0.45);
+  width: 1.5rem;
+  height: 1.5rem;
+  justify-self: end;
+  color: rgba(219, 234, 254, 0.9);
 }
 
 .story-trial-copy {
@@ -173,7 +171,7 @@
   white-space: nowrap;
 }
 
-.story-trial-copy > span:last-child {
+.story-trial-action {
   width: fit-content;
   border: 1px solid rgba(var(--trial-rgb), 0.38);
   border-radius: 999px;

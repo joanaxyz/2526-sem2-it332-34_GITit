@@ -41,7 +41,7 @@ describe('SkillLearnedOverlay', () => {
     render(<Workspace />)
     const element = target === 'backdrop' ? screen.getByRole('dialog')
       : target === 'message' ? screen.getAllByText("You've learned a new skill").at(-1)!
-        : screen.getByRole('img', { name: target === 'mascot' ? 'Git it guide' : 'Create a repository skill' })
+        : screen.getByRole('img', { name: target === 'mascot' ? 'Learning guide' : 'Create a repository skill' })
     fireEvent.click(element)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   })

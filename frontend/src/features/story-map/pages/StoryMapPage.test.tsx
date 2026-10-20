@@ -162,7 +162,7 @@ describe('StoryMapPage responsive rails', () => {
       </MemoryRouter>
     </QueryClientProvider>)
     await screen.findByText('Story path')
-    fireEvent.click(screen.getByRole('button', { name: 'Git-It mascot: share a Git tip' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Learning guide: share a Git tip' }))
     expect(screen.getByRole('status')).toHaveTextContent('Create Git metadata.')
     fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))
     expect(screen.getByRole('status')).not.toHaveTextContent('Combine branches.')

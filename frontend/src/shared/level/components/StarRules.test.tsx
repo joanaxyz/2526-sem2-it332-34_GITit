@@ -20,7 +20,7 @@ describe('star rules reminder', () => {
     fireEvent.click(trigger)
 
     expect(await screen.findByRole('dialog', { name: 'How to earn stars' })).toBeInTheDocument()
-    expect(screen.getByAltText('Git-It mascot')).toBeInTheDocument()
+    expect(screen.getByAltText('Learning guide')).toBeInTheDocument()
     expect(screen.getByText('Finish within the Star target with no more than one retry.')).toBeInTheDocument()
     expect(screen.getByText('Finish within the Star target after two or more retries.')).toBeInTheDocument()
     expect(screen.getByText('Finish using more commands than the Star target.')).toBeInTheDocument()

@@ -30,6 +30,7 @@ export function DrillSummary({
   saveFailed,
   onRestart,
   gameOver = false,
+  fell = false,
 }: {
   plan: DrillPlan
   rail: DrillRailSegment[]
@@ -39,6 +40,7 @@ export function DrillSummary({
   saveFailed: boolean
   onRestart: () => void
   gameOver?: boolean
+  fell?: boolean
 }) {
   const byKey = new Map<string, DrillCard>(plan.cards.map((card) => [card.key, card]))
   const shakyCards = shaky.map((key) => byKey.get(key)).filter((card): card is DrillCard => !!card)
@@ -61,10 +63,10 @@ export function DrillSummary({
   return (
     <section className="drill-summary" aria-labelledby="drill-summary-title">
       <p className="drill-summary-eyebrow" data-tone={tone}>
-        {gameOver ? 'Out of lives' : tone === 'unfinished' ? 'Drill over' : 'Drill cleared'}
+        {fell ? 'Game over' : gameOver ? 'Out of lives' : tone === 'unfinished' ? 'Drill over' : 'Drill cleared'}
       </p>
       <h2 id="drill-summary-title">{plan.level.title}</h2>
-      <p className="drill-summary-lede">{gameOver ? 'Three hits ended this flight. Review the commands below and take off again with three fresh lives.' : lede}</p>
+      <p className="drill-summary-lede">{fell ? 'Blue fell through a gap in the path. Review the arrangement and build a safe crossing on your next run.' : gameOver ? 'Three hits ended this flight. Review the commands below and take off again with three fresh lives.' : lede}</p>
 
       <div className="drill-summary-tally">
         <DrillProgressTrack segments={rail} mode="record" />
