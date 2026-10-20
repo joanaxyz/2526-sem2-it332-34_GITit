@@ -1523,6 +1523,104 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
+  "bn-hard-clear-merged-release": {
+    "final": {
+      "coarse": "b8e4c0aa12ffbdaa",
+      "exact": "21b9870d62855101"
+    },
+    "steps": [
+      {
+        "command": "git branch -d release/1.4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "delete",
+            "kind": "branch",
+            "subjects": [
+              "release/1.4"
+            ],
+            "text": "Branch release/1.4 is deleted."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "39c8a2c71b86bdd0",
+            "exact": "e4859e07b86e4567"
+          }
+        ]
+      },
+      {
+        "command": "git branch -d hotfix/1.4.1",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "delete",
+            "kind": "branch",
+            "subjects": [
+              "hotfix/1.4.1"
+            ],
+            "text": "Branch hotfix/1.4.1 is deleted."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "fd38cf14d4ab0339",
+            "exact": "baaa02eca3ba5883"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "bn-hard-clear-merged-sprint": {
+    "final": {
+      "coarse": "8f19a7a7caaa792a",
+      "exact": "a67666a33d914a5e"
+    },
+    "steps": [
+      {
+        "command": "git branch -d feature/login-copy",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "delete",
+            "kind": "branch",
+            "subjects": [
+              "feature/login-copy"
+            ],
+            "text": "Branch feature/login-copy is deleted."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "5d456472c75102d5",
+            "exact": "b5bf4ac03d79b011"
+          }
+        ]
+      },
+      {
+        "command": "git branch -d fix/footer-link",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "delete",
+            "kind": "branch",
+            "subjects": [
+              "fix/footer-link"
+            ],
+            "text": "Branch fix/footer-link is deleted."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "625d55596fd5e763",
+            "exact": "102229b7293ca2b6"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
   "bn-hard-corp-rename": {
     "final": {
       "coarse": "19ed229e0ae082db",
@@ -2089,6 +2187,86 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "dffc79de2b73d4e4",
             "exact": "1a0e8a29f2b5cbb0"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "branch-hard-mark-audit-point": {
+    "final": {
+      "coarse": "6097a7017957324b",
+      "exact": "2a94c693888e6bfd"
+    },
+    "steps": [
+      {
+        "command": "git log --oneline",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "5747458b5aa5a569",
+            "exact": "745dfe9525021ffa"
+          }
+        ]
+      },
+      {
+        "command": "git branch audit/q3 c3",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "audit/q3"
+            ],
+            "text": "Branch audit/q3 is created."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "5747458b5aa5a569",
+            "exact": "745dfe9525021ffa"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "branch-hard-mark-release-point": {
+    "final": {
+      "coarse": "b473b7407252d623",
+      "exact": "a4053bb2370fc5cd"
+    },
+    "steps": [
+      {
+        "command": "git log --oneline",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "2fd85f1b38f74183",
+            "exact": "724f7d8b3ff7a69c"
+          }
+        ]
+      },
+      {
+        "command": "git branch release/1.0 c2",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "release/1.0"
+            ],
+            "text": "Branch release/1.0 is created."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "2fd85f1b38f74183",
+            "exact": "724f7d8b3ff7a69c"
           }
         ]
       }
@@ -2700,6 +2878,226 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "e71fe15e02ae4003",
             "exact": "8054e21c9b57192d"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "cherry-hard-review-backports-auth": {
+    "final": {
+      "coarse": "227f15e15512ec6f",
+      "exact": "f33799275640a0f9"
+    },
+    "steps": [
+      {
+        "command": "git log --oneline main",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "4f41ecb70e339590",
+            "exact": "0d4621764b207307"
+          }
+        ]
+      },
+      {
+        "command": "git switch release-2.2",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "release-2.2"
+            ],
+            "text": "HEAD moves to release-2.2."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "4f41ecb70e339590",
+            "exact": "0d4621764b207307"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick --no-commit c2",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/auth.py"
+            ],
+            "text": "src/auth.py is staged."
+          },
+          {
+            "action": "start",
+            "kind": "operation",
+            "subjects": [
+              "cherry-pick"
+            ],
+            "text": "A cherry-pick is in progress."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "9e0cc9e09f5920e5",
+            "exact": "fce482c5fa9ef59e"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick --no-commit c4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/token.py"
+            ],
+            "text": "src/token.py is staged."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "3d90459214c23853",
+            "exact": "4c466286cbdbac70"
+          }
+        ]
+      },
+      {
+        "command": "git commit -m \"Backport auth fixes\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "release-2.2",
+            "subjects": [
+              "src/auth.py",
+              "src/token.py"
+            ],
+            "text": "New commit on release-2.2, saving src/auth.py and src/token.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "9a01af0405917e37",
+            "exact": "d68f7d2509817626"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "cherry-hard-review-backports-export": {
+    "final": {
+      "coarse": "c1788ac87561ca19",
+      "exact": "33047c57e8a9f861"
+    },
+    "steps": [
+      {
+        "command": "git log --oneline main",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "5ca9fe76224eb188",
+            "exact": "9607872020c6f8e1"
+          }
+        ]
+      },
+      {
+        "command": "git switch release-3.0",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "release-3.0"
+            ],
+            "text": "HEAD moves to release-3.0."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "5ca9fe76224eb188",
+            "exact": "9607872020c6f8e1"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick --no-commit c1",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "src/export.py is staged."
+          },
+          {
+            "action": "start",
+            "kind": "operation",
+            "subjects": [
+              "cherry-pick"
+            ],
+            "text": "A cherry-pick is in progress."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "9053393cfa641a12",
+            "exact": "7f0af5e945ade0dc"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick --no-commit c3",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/csv_writer.py"
+            ],
+            "text": "src/csv_writer.py is staged."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "106a469930d63d73",
+            "exact": "33de0cdab65e3769"
+          }
+        ]
+      },
+      {
+        "command": "git commit -m \"Backport export fixes\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "release-3.0",
+            "subjects": [
+              "src/csv_writer.py",
+              "src/export.py"
+            ],
+            "text": "New commit on release-3.0, saving src/csv_writer.py and src/export.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "b1c6a24244947a77",
+            "exact": "10a8fb7e7380e8d1"
           }
         ]
       }
@@ -3432,6 +3830,73 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
+  "clone-easy-branch-folder-handbook": {
+    "final": {
+      "coarse": "1d84aff65dc14733",
+      "exact": "5d292fdb92c72206"
+    },
+    "steps": [
+      {
+        "command": "git clone -b draft https://example.test/docs/handbook.git handbook-draft",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "repository",
+            "subjects": [],
+            "text": "The folder becomes a Git repository."
+          },
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "draft",
+            "subjects": [],
+            "text": "3 new commits on draft."
+          },
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "draft"
+            ],
+            "text": "Branch draft is created."
+          },
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "draft"
+            ],
+            "text": "HEAD moves to draft."
+          },
+          {
+            "action": "create",
+            "kind": "remote",
+            "subjects": [
+              "origin"
+            ],
+            "text": "Remote origin is added."
+          },
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/draft",
+              "origin/main"
+            ],
+            "text": "origin/draft and origin/main are updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "d81aa3414a2a5b14",
+            "exact": "d81aa3414a2a5b14"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
   "clone-easy-corp": {
     "final": {
       "coarse": "8092a2aa10256bbb",
@@ -3661,6 +4126,64 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
               "origin/starter"
             ],
             "text": "origin/main and origin/starter are updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "d81aa3414a2a5b14",
+            "exact": "d81aa3414a2a5b14"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "clone-easy-style-guide": {
+    "final": {
+      "coarse": "3372fe573ad7a541",
+      "exact": "6b4d594a31e0dfec"
+    },
+    "steps": [
+      {
+        "command": "git clone https://example.test/design/style-guide.git",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "repository",
+            "subjects": [],
+            "text": "The folder becomes a Git repository."
+          },
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [],
+            "text": "2 new commits on main."
+          },
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "main"
+            ],
+            "text": "Branch main is created."
+          },
+          {
+            "action": "create",
+            "kind": "remote",
+            "subjects": [
+              "origin"
+            ],
+            "text": "Remote origin is added."
+          },
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/main"
+            ],
+            "text": "origin/main is updated."
           }
         ],
         "positions": [
@@ -4231,14 +4754,14 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
-  "clone-medium-shallow-metrics": {
+  "clone-medium-shallow-icons": {
     "final": {
-      "coarse": "eae21a244a23022f",
-      "exact": "037d787d06709468"
+      "coarse": "c62b0c43c59364ef",
+      "exact": "48121edbc9da6024"
     },
     "steps": [
       {
-        "command": "git clone --depth 1 https://example.test/data/metrics-dash.git metrics-review",
+        "command": "git clone --depth 1 https://example.test/design/icon-set.git",
         "diagnostic": false,
         "effect": [
           {
@@ -5157,6 +5680,60 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "a599039a11ee9a5b",
             "exact": "c183994255356a13"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "commit-medium-three-file-release": {
+    "final": {
+      "coarse": "9d1bbbd80a73e627",
+      "exact": "a9dad97b48894b1b"
+    },
+    "steps": [
+      {
+        "command": "git add CHANGELOG.md setup.py src/version.py",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "CHANGELOG.md",
+              "setup.py",
+              "src/version.py"
+            ],
+            "text": "CHANGELOG.md, setup.py and src/version.py are staged."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "dfd5b663acaaae96",
+            "exact": "c7c2340be41fd948"
+          }
+        ]
+      },
+      {
+        "command": "git commit -m \"Prepare 1.2 release\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "CHANGELOG.md",
+              "setup.py",
+              "src/version.py"
+            ],
+            "text": "New commit on main, saving CHANGELOG.md, setup.py and src/version.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "913f50a5ff618b7a",
+            "exact": "2f7dd30024fe4f21"
           }
         ]
       }
@@ -8546,6 +9123,111 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
+  "init-easy-new-folder-among-files": {
+    "final": {
+      "coarse": "24811e592c5208ef",
+      "exact": "2bb10c33fbff58c9"
+    },
+    "steps": [
+      {
+        "command": "git init -b main site-assets",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "repository",
+            "subjects": [],
+            "text": "The folder becomes a Git repository."
+          },
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "main"
+            ],
+            "text": "Branch main is created."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "2401c42718178390",
+            "exact": "077918af7a25464c"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "init-easy-plain-notes": {
+    "final": {
+      "coarse": "6f748c80914673b4",
+      "exact": "5ca1df24afc80a28"
+    },
+    "steps": [
+      {
+        "command": "git init",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "repository",
+            "subjects": [],
+            "text": "The folder becomes a Git repository."
+          },
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "main"
+            ],
+            "text": "Branch main is created."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "49faab340dcf6dc3",
+            "exact": "fcae66e7ebcd6923"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "init-easy-plain-recipes": {
+    "final": {
+      "coarse": "def2381a339e2151",
+      "exact": "1862b33baed43393"
+    },
+    "steps": [
+      {
+        "command": "git init",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "repository",
+            "subjects": [],
+            "text": "The folder becomes a Git repository."
+          },
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "main"
+            ],
+            "text": "Branch main is created."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "9d686acab2fe260e",
+            "exact": "c5be0ecaff54ded9"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
   "init-easy-trunk-branch": {
     "final": {
       "coarse": "7d26dd458bc3005e",
@@ -8899,6 +9581,41 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "4785e542413d27dc",
             "exact": "be647bf028f45745"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "init-medium-existing-sketches": {
+    "final": {
+      "coarse": "dded3d571acaffbd",
+      "exact": "11fb86ea75ad9d30"
+    },
+    "steps": [
+      {
+        "command": "git init -b main sketches",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "repository",
+            "subjects": [],
+            "text": "The folder becomes a Git repository."
+          },
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "main"
+            ],
+            "text": "Branch main is created."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "5fd358072f172cd1",
+            "exact": "950844adc069de46"
           }
         ]
       }
@@ -14439,6 +15156,104 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
+  "rb-easy-delete-then-prune-api": {
+    "final": {
+      "coarse": "7877612bd3a5cb6d",
+      "exact": "7523e1c5a4450cfc"
+    },
+    "steps": [
+      {
+        "command": "git push origin --delete feature/v1-api",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "delete",
+            "kind": "remote",
+            "subjects": [
+              "origin/feature/v1-api"
+            ],
+            "text": "origin/feature/v1-api is removed."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "41dbd6e8f15f6bd7",
+            "exact": "4230a104ee41fc49"
+          }
+        ]
+      },
+      {
+        "command": "git fetch --prune origin",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "delete",
+            "kind": "remote",
+            "subjects": [
+              "origin/spike/graphql"
+            ],
+            "text": "origin/spike/graphql is removed."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "3e49e05340c22d71",
+            "exact": "1dc740c5f5f051ed"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rb-easy-delete-then-prune-docs": {
+    "final": {
+      "coarse": "7877612bd3a5cb6d",
+      "exact": "c37bc4be2a2dc3ce"
+    },
+    "steps": [
+      {
+        "command": "git push origin --delete docs/old-faq",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "delete",
+            "kind": "remote",
+            "subjects": [
+              "origin/docs/old-faq"
+            ],
+            "text": "origin/docs/old-faq is removed."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "8c0b8a8a5a16dfd3",
+            "exact": "d39e692ad572d66e"
+          }
+        ]
+      },
+      {
+        "command": "git fetch --prune origin",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "delete",
+            "kind": "remote",
+            "subjects": [
+              "origin/feature/old-banner"
+            ],
+            "text": "origin/feature/old-banner is removed."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "cabe836c4b57753e",
+            "exact": "8aecc4d7384741e5"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
   "rb-hard-capstone-payments": {
     "final": {
       "coarse": "bb0ba4c93bd77d1e",
@@ -15130,6 +15945,146 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "c4ee4c66b3b2f1a0",
             "exact": "5af74a7f85281dc2"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rebase-easy-continue-routes": {
+    "final": {
+      "coarse": "405d6461f221d98d",
+      "exact": "3b16d469073e8ced"
+    },
+    "steps": [
+      {
+        "command": "git add src/routes.py",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/routes.py"
+            ],
+            "text": "src/routes.py is staged."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/routes.py"
+            ],
+            "text": "Conflict resolved in src/routes.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e1eda0a957b7b233",
+            "exact": "dd2a082c8df33a22"
+          },
+          {
+            "coarse": "c66f5b5b6c246619",
+            "exact": "e6d569b3b77d74bc"
+          }
+        ]
+      },
+      {
+        "command": "git rebase --continue",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/health-route",
+            "subjects": [
+              "src/routes.py"
+            ],
+            "text": "2 new commits on feature/health-route, saving src/routes.py."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "rebase"
+            ],
+            "text": "The rebase is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "91a63250b246deff",
+            "exact": "abe99194fd41f0f8"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rebase-easy-continue-styles": {
+    "final": {
+      "coarse": "c1af620e7a796875",
+      "exact": "d30dc4c42f2bffba"
+    },
+    "steps": [
+      {
+        "command": "git add styles/theme.css",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "styles/theme.css"
+            ],
+            "text": "styles/theme.css is staged."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "styles/theme.css"
+            ],
+            "text": "Conflict resolved in styles/theme.css."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "f9b0502d3c8c22de",
+            "exact": "22fa186790445bb1"
+          },
+          {
+            "coarse": "9a8e95a6096ed638",
+            "exact": "77c99efd4594c793"
+          }
+        ]
+      },
+      {
+        "command": "git rebase --continue",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/dark-theme",
+            "subjects": [
+              "styles/theme.css"
+            ],
+            "text": "2 new commits on feature/dark-theme, saving styles/theme.css."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "rebase"
+            ],
+            "text": "The rebase is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "a84c705d5f4f9287",
+            "exact": "921b42f519d306f8"
           }
         ]
       }
@@ -15863,6 +16818,224 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "c3dd25aa344fe4ed",
             "exact": "447c3d9657afea41"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rec-hard-commit-fetch-merge-billing": {
+    "final": {
+      "coarse": "7ea17d544c9cf890",
+      "exact": "2e922bfbbf3cb3b8"
+    },
+    "steps": [
+      {
+        "command": "git restore --staged tmp/invoice-dump.json",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "remove",
+            "kind": "staging",
+            "subjects": [
+              "tmp/invoice-dump.json"
+            ],
+            "text": "tmp/invoice-dump.json is unstaged."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "2eff60f5fe4523e9",
+            "exact": "0bb318a216673fe2"
+          }
+        ]
+      },
+      {
+        "command": "git commit -m \"Round invoice totals\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/billing",
+            "subjects": [
+              "src/rounding.py"
+            ],
+            "text": "New commit on feature/billing, saving src/rounding.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e842fdd88ab1239f",
+            "exact": "fd57cfe5ed5de3bb"
+          }
+        ]
+      },
+      {
+        "command": "git fetch origin",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/feature/billing"
+            ],
+            "text": "origin/feature/billing is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "72be575c4519bdf7",
+            "exact": "45f34a5d4f6b522e"
+          }
+        ]
+      },
+      {
+        "command": "git merge origin/feature/billing",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/billing",
+            "subjects": [],
+            "text": "New commit on feature/billing."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "bfb3af738bb7b020",
+            "exact": "ccb5a001c16054fa"
+          }
+        ]
+      },
+      {
+        "command": "git push origin feature/billing",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/feature/billing"
+            ],
+            "text": "origin/feature/billing is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "6f20f17f5232665c",
+            "exact": "d87940b82dff4b29"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "rec-hard-commit-fetch-merge-search": {
+    "final": {
+      "coarse": "51268143b7967b0e",
+      "exact": "9b9f76358497185f"
+    },
+    "steps": [
+      {
+        "command": "git restore --staged notes/plan.md",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "remove",
+            "kind": "staging",
+            "subjects": [
+              "notes/plan.md"
+            ],
+            "text": "notes/plan.md is unstaged."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "94a4caef7093cc49",
+            "exact": "deba20e70dbc1a3f"
+          }
+        ]
+      },
+      {
+        "command": "git commit -m \"Tune search ranking\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/search",
+            "subjects": [
+              "src/ranking.py"
+            ],
+            "text": "New commit on feature/search, saving src/ranking.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "4a8808671b4244f1",
+            "exact": "7849bee753673584"
+          }
+        ]
+      },
+      {
+        "command": "git fetch origin",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/feature/search"
+            ],
+            "text": "origin/feature/search is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "62fbb79818bcc502",
+            "exact": "2577366ed48bd1e8"
+          }
+        ]
+      },
+      {
+        "command": "git merge origin/feature/search",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/search",
+            "subjects": [],
+            "text": "New commit on feature/search."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "f58286e6e9dad746",
+            "exact": "f981c852b712c13a"
+          }
+        ]
+      },
+      {
+        "command": "git push origin feature/search",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/feature/search"
+            ],
+            "text": "origin/feature/search is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "54bc1976b04518d8",
+            "exact": "edf73fa2cdbd3b63"
           }
         ]
       }
@@ -18348,6 +19521,226 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
+  "squash-hard-remote-publish-tidy-docs": {
+    "final": {
+      "coarse": "6f84f0f143c62d46",
+      "exact": "b086c567f7394eb8"
+    },
+    "steps": [
+      {
+        "command": "git fetch origin",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/docs/api"
+            ],
+            "text": "origin/docs/api is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "d8978db550cc5d03",
+            "exact": "6546efa44f521bf8"
+          }
+        ]
+      },
+      {
+        "command": "git merge --squash origin/docs/api",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "docs/api.md"
+            ],
+            "text": "docs/api.md is staged."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "162e36e3b39e35f0",
+            "exact": "5b16b96884e7431d"
+          }
+        ]
+      },
+      {
+        "command": "git commit -m \"Document the API\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "docs/api.md"
+            ],
+            "text": "New commit on main, saving docs/api.md."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "2f52cf0cda46d81c",
+            "exact": "899c862e142e91d8"
+          }
+        ]
+      },
+      {
+        "command": "git push origin main",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/main"
+            ],
+            "text": "origin/main is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "ad6b154e702479cd",
+            "exact": "640b3921efeb60bc"
+          }
+        ]
+      },
+      {
+        "command": "git branch -D docs/api",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "delete",
+            "kind": "branch",
+            "subjects": [
+              "docs/api"
+            ],
+            "text": "Branch docs/api is deleted."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "75be5507a4e4d073",
+            "exact": "baf88cab0301a802"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "squash-hard-remote-publish-tidy-search": {
+    "final": {
+      "coarse": "1420fccf487c5cb3",
+      "exact": "3156fe0db7805e5c"
+    },
+    "steps": [
+      {
+        "command": "git fetch origin",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/feature/search"
+            ],
+            "text": "origin/feature/search is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "729bec15de809f67",
+            "exact": "21596b2f9001d6b6"
+          }
+        ]
+      },
+      {
+        "command": "git merge --squash origin/feature/search",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/search.js"
+            ],
+            "text": "src/search.js is staged."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "0b765a5281019a63",
+            "exact": "7c45f91a935ee45c"
+          }
+        ]
+      },
+      {
+        "command": "git commit -m \"Add search\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "src/search.js"
+            ],
+            "text": "New commit on main, saving src/search.js."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "a04077d224b8e377",
+            "exact": "949cd6c9b2e948f6"
+          }
+        ]
+      },
+      {
+        "command": "git push origin main",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/main"
+            ],
+            "text": "origin/main is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "55faf462a6257ddb",
+            "exact": "b74773259ac22033"
+          }
+        ]
+      },
+      {
+        "command": "git branch -D feature/search",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "delete",
+            "kind": "branch",
+            "subjects": [
+              "feature/search"
+            ],
+            "text": "Branch feature/search is deleted."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "8cd5437e52bd6f19",
+            "exact": "905ca73237ee7ea7"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
   "squash-hard-switch-squash-cleanup-cli": {
     "final": {
       "coarse": "621abd99826d1f24",
@@ -19064,6 +20457,156 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
+  "stash-hard-park-draft-billing": {
+    "final": {
+      "coarse": "22ccaae679146418",
+      "exact": "1c31dfd364ee259e"
+    },
+    "steps": [
+      {
+        "command": "git stash",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "remove",
+            "kind": "working_tree",
+            "subjects": [
+              "src/billing.py"
+            ],
+            "text": "Edits to src/billing.py are discarded or saved elsewhere."
+          },
+          {
+            "action": "add",
+            "kind": "stash",
+            "subjects": [],
+            "text": "Work is set aside in the stash."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "89dfd04b47db598b",
+            "exact": "aeda22016edc720c"
+          }
+        ]
+      },
+      {
+        "command": "git switch hotfix/tax",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "hotfix/tax"
+            ],
+            "text": "HEAD moves to hotfix/tax."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "22ccaae679146418",
+            "exact": "1c31dfd364ee259e"
+          }
+        ]
+      },
+      {
+        "command": "git switch feature/billing",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "feature/billing"
+            ],
+            "text": "HEAD moves to feature/billing."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "f55c3e456968d130",
+            "exact": "95e507dc30b3f8d6"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "stash-hard-park-draft-search": {
+    "final": {
+      "coarse": "3dc52c3b897d4ff4",
+      "exact": "67ada8b192314056"
+    },
+    "steps": [
+      {
+        "command": "git stash",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "remove",
+            "kind": "working_tree",
+            "subjects": [
+              "src/search.py"
+            ],
+            "text": "Edits to src/search.py are discarded or saved elsewhere."
+          },
+          {
+            "action": "add",
+            "kind": "stash",
+            "subjects": [],
+            "text": "Work is set aside in the stash."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "3dbf94da55a635ef",
+            "exact": "4358539d0c2a2c7b"
+          }
+        ]
+      },
+      {
+        "command": "git switch release/v4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "release/v4"
+            ],
+            "text": "HEAD moves to release/v4."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "3dc52c3b897d4ff4",
+            "exact": "67ada8b192314056"
+          }
+        ]
+      },
+      {
+        "command": "git switch feature/search",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "feature/search"
+            ],
+            "text": "HEAD moves to feature/search."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "4dcab3cf2bb7b3f1",
+            "exact": "da1545df51d911cd"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
   "stash-hard-two-stashes-reports": {
     "final": {
       "coarse": "20e2ecddbdc097a4",
@@ -19270,6 +20813,120 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "9cc7608416a1a107",
             "exact": "c6839fee6ab22317"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "switch-easy-branch-then-return-api": {
+    "final": {
+      "coarse": "bc8f2a2612d50fb8",
+      "exact": "0b155cdef41dc30c"
+    },
+    "steps": [
+      {
+        "command": "git switch -c feature/rate-limit",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "feature/rate-limit"
+            ],
+            "text": "Branch feature/rate-limit is created."
+          },
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "feature/rate-limit"
+            ],
+            "text": "HEAD moves to feature/rate-limit."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "3250584d1bcfa2f8",
+            "exact": "cd33ce61481079e8"
+          }
+        ]
+      },
+      {
+        "command": "git switch main",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "main"
+            ],
+            "text": "HEAD moves to main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "4414d3cade0be14b",
+            "exact": "e8b348870334c7ab"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "switch-easy-branch-then-return-docs": {
+    "final": {
+      "coarse": "db82867656fbac59",
+      "exact": "b4fe8a82fc297666"
+    },
+    "steps": [
+      {
+        "command": "git switch -c docs/faq",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "docs/faq"
+            ],
+            "text": "Branch docs/faq is created."
+          },
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "docs/faq"
+            ],
+            "text": "HEAD moves to docs/faq."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "0e754f4edb29cc3e",
+            "exact": "a171fffa8343fb9c"
+          }
+        ]
+      },
+      {
+        "command": "git switch main",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "main"
+            ],
+            "text": "HEAD moves to main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "9452aa1b57f44492",
+            "exact": "7102ca87986a19cf"
           }
         ]
       }

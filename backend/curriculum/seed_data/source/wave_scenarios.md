@@ -98,50 +98,177 @@ Minimum counted commands: 1 · Maximum counted commands: 8
 - Repository at `courses/git-basics`; HEAD on unborn `main`; no commits; nothing staged.
 - Every workspace file still present and untracked.
 
-### 1.2.14 Shallow copy of the metrics dashboard · Medium
+### 1.1.14 Start tracking the planning notes · Easy
 
-**Variant ID:** `clone-medium-shallow-metrics`
+**Variant ID:** `init-easy-plain-notes`
 
 **Story**
-Maeve asks you to check a chart bug in the metrics dashboard before tomorrow's stand-up. The project has a long history, but you only need to see what the code looks like today, and you already keep another copy of it elsewhere. Maeve suggests a separate folder named `metrics-review` so the two copies never get mixed up.
+Raven has been keeping the group's planning notes in one folder, and the notes already changed twice this week without anyone noticing. Before the next meeting, Raven wants Git watching the folder so later changes can be recorded. The notes themselves stay as they are for now.
 
-**Starting point:** You are in your workspace, outside any repository. No folder named `metrics-review` exists yet. The remote repository is reachable at the address in the task.
+**Starting point:** You are in the planning folder. It holds `notes.md` and is not a repository yet.
 
 **Real-World Context**
-A review that only needs the current files can skip the old history. A depth-one clone copies just the latest commit, and naming the destination keeps the review copy apart from your main one.
+`git init` turns the folder you are in into a repository. It creates Git's records and touches none of your files.
 
 **Your Task**
-Clone `https://example.test/data/metrics-dash.git` into a folder named `metrics-review`, copying only the latest commit.
+Turn the current folder into a Git repository. **Do not stage or commit `notes.md`.**
 
 **Objective Checklist**
 
-- [ ] A copy of metrics-dash exists in metrics-review.
-- [ ] The default branch (main) is checked out.
-- [ ] Only the latest commit was downloaded (history depth of 1).
-- [ ] origin points to the URL given in the task.
+- [ ] The current folder is a Git repository.
+- [ ] notes.md is still there and untracked.
+- [ ] Nothing is staged and no commit exists.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
-1. `git clone --depth 1 https://example.test/data/metrics-dash.git metrics-review` — Shallow clone into the named folder.
+1. `git init` — Turn the current folder into a repository.
 
 **Accepted Alternatives (STAFF ONLY)**
 
-- `--depth=1`; the option may come after the URL; the destination may be written `./metrics-review` or `metrics-review/`.
-- Common patterns that apply: P3, P38.
+- `git init .`; `git init -b main`.
 
 **Not accepted**
 
-- A full clone, a clone into the default folder name, or a different depth.
+- Staging or committing notes.md.
 
 **Expected Result**
-`metrics-review` is a copy of `metrics-dash` on `main`, with its history limited to the latest commit.
+The planning folder is a repository with no commits, and `notes.md` is untracked.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 1 · Maximum counted commands: 12
+
+- Repository at the workspace root; HEAD on unborn `main`; no commits; nothing staged.
+- notes.md present and untracked.
+
+### 1.1.15 Start tracking the family recipes · Easy
+
+**Variant ID:** `init-easy-plain-recipes`
+
+**Story**
+Sage is collecting the family's recipes in one folder before a reunion, and two cousins keep sending corrected versions. Sage wants Git to keep the history from now on. The recipe file stays exactly as it is for the moment.
+
+**Starting point:** You are in the recipes folder. It holds `recipes.md` and is not a repository yet.
+
+**Real-World Context**
+Starting a repository is the first step of version control: Git can only record changes in a folder it tracks.
+
+**Your Task**
+Turn the current folder into a Git repository. **Do not stage or commit `recipes.md`.**
+
+**Objective Checklist**
+
+- [ ] The current folder is a Git repository.
+- [ ] recipes.md is still there and untracked.
+- [ ] Nothing is staged and no commit exists.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git init` — Turn the current folder into a repository.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git init .`; `git init -b main`.
+
+**Not accepted**
+
+- Staging or committing recipes.md.
+
+**Expected Result**
+The recipes folder is a repository with no commits, and `recipes.md` is untracked.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 1 · Maximum counted commands: 12
+
+- Repository at the workspace root; HEAD on unborn `main`; no commits; nothing staged.
+- recipes.md present and untracked.
+
+### 1.1.16 A new repository for the site assets · Easy
+
+**Variant ID:** `init-easy-new-folder-among-files`
+
+**Story**
+The design team's workspace already holds a loose `design/logo.svg` that belongs to another project. Raven wants a separate repository for the website's assets, in a new `site-assets` folder, starting on `main`. The logo should stay where it is, outside the new repository.
+
+**Starting point:** You are at the top of the workspace. It holds `design/logo.svg` and no repository.
+
+**Real-World Context**
+`git init <folder>` creates the folder if needed and makes only that folder a repository, so nearby files stay out of it.
+
+**Your Task**
+Create a repository in a new `site-assets` folder with `main` as its first branch. **Leave `design/logo.svg` where it is.**
+
+**Objective Checklist**
+
+- [ ] site-assets is a Git repository on main.
+- [ ] The workspace itself is not a repository.
+- [ ] design/logo.svg is still in place, and nothing is staged or committed.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git init -b main site-assets` — Create the folder and initialize it on main.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `--initial-branch=main`; `mkdir site-assets`, `cd site-assets`, then `git init -b main`.
+
+**Not accepted**
+
+- Initializing the workspace, or moving the logo into the new repository.
+
+**Expected Result**
+`site-assets` is a repository on `main` with no commits, and the logo is untouched.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 1 · Maximum counted commands: 12
+
+- Repository at `site-assets`; HEAD on unborn `main`; no commits; nothing staged.
+- design/logo.svg still present.
+
+### 1.1.17 Put the sketches folder under version control · Medium
+
+**Variant ID:** `init-medium-existing-sketches`
+
+**Story**
+Sage has a `sketches` folder with an ideas list and a colour palette that the whole art club edits. Last week someone overwrote the palette and nobody could get it back. The folder should become a repository on `main` before the next session, without changing either file.
+
+**Starting point:** You are at the top of the workspace. The folder `sketches` holds `ideas.md` and `palette.txt`. It is not a repository yet.
+
+**Real-World Context**
+Initializing an existing folder leaves its files untracked. Nothing is recorded until someone stages and commits them on purpose.
+
+**Your Task**
+Make the existing `sketches` folder a Git repository with `main` as its first branch. **Do not stage or commit its files.**
+
+**Objective Checklist**
+
+- [ ] sketches is a Git repository on main.
+- [ ] ideas.md and palette.txt are unchanged and untracked.
+- [ ] Nothing is staged and no commit exists.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git init -b main sketches` — Initialize the existing folder on main.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `cd sketches` then `git init -b main`; `--initial-branch=main`.
+
+**Not accepted**
+
+- Initializing the workspace, a branch other than main, or staging the files.
+
+**Expected Result**
+`sketches` is a repository on `main` with no commits, and both files are untracked and unchanged.
 
 **Evaluation (STAFF ONLY)**
 
 Minimum counted commands: 1 · Maximum counted commands: 10
 
-- Repository at `metrics-review`; remote `origin` = the task URL; HEAD on `main` at the remote tip.
-- Clone depth 1 and exactly one commit present; clean working tree.
+- Repository at `sketches`; HEAD on unborn `main`; no commits; nothing staged.
+- Both files present with their original content.
 
 ### 1.2.15 Two commits of the audit rules over SSH · Hard
 
@@ -187,6 +314,132 @@ Minimum counted commands: 1 · Maximum counted commands: 8
 
 - Repository at `rules-review`; remote `origin` = the SSH address; HEAD on `main` at the remote tip.
 - Clone depth 2 and exactly two commits present; clean working tree.
+
+### 1.2.16 Clone the design style guide · Easy
+
+**Variant ID:** `clone-easy-style-guide`
+
+**Story**
+The design team keeps its style guide in a shared repository. Raven needs a local copy to check the colour tokens before the next review.
+
+**Starting point:** You are in an empty workspace. There is no local repository yet.
+
+**Real-World Context**
+`git clone <url>` copies a remote repository, with its history, into a new folder named after the repository.
+
+**Your Task**
+Clone the remote repository from `https://example.test/design/style-guide.git`.
+
+**Objective Checklist**
+
+- [ ] A local repository exists with origin pointing at the style guide.
+- [ ] main matches origin/main.
+- [ ] The working folder is clean.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git clone https://example.test/design/style-guide.git` — Copy the remote repository.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- Cloning into `style-guide` explicitly.
+
+**Not accepted**
+
+- Initializing an empty repository instead of cloning.
+
+**Expected Result**
+A `style-guide` folder holds the repository, on `main`, matching `origin/main`.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 1 · Maximum counted commands: 12
+
+- origin exists; main and origin/main point at the remote's tip; working tree clean.
+
+### 1.2.17 Clone the handbook draft into its own folder · Easy
+
+**Variant ID:** `clone-easy-branch-folder-handbook`
+
+**Story**
+Sage is reviewing the team handbook, but the new chapters only exist on the `draft` branch. Sage wants them in a folder called `handbook-draft`, so the copy is never mixed up with the published handbook.
+
+**Starting point:** You are in an empty workspace. There is no local repository yet.
+
+**Real-World Context**
+`git clone -b <branch> <url> <folder>` checks out a chosen branch and names the folder in one step.
+
+**Your Task**
+Clone `https://example.test/docs/handbook.git` into a local folder named `handbook-draft` with `draft` checked out.
+
+**Objective Checklist**
+
+- [ ] The repository is in handbook-draft.
+- [ ] The current branch is draft, matching origin/draft.
+- [ ] The working folder is clean.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git clone -b draft https://example.test/docs/handbook.git handbook-draft` — Clone the draft branch into the named folder.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `--branch draft`; options in any order before the URL.
+
+**Not accepted**
+
+- Cloning main, or cloning into another folder name.
+
+**Expected Result**
+`handbook-draft` holds the repository on `draft`, matching `origin/draft`.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 1 · Maximum counted commands: 12
+
+- Repository at `handbook-draft`; HEAD on draft at the remote's draft tip; working tree clean.
+
+### 1.2.18 A light copy of the icon set · Medium
+
+**Variant ID:** `clone-medium-shallow-icons`
+
+**Story**
+The icon set's history is long, and Raven only needs the current icons to build a mock-up. A full copy would take ages on the café Wi-Fi. Only the latest commit is needed.
+
+**Starting point:** You are in an empty workspace. There is no local repository yet.
+
+**Real-World Context**
+A shallow clone (`--depth <n>`) copies only the most recent commits, which is quicker when you don't need the history.
+
+**Your Task**
+Clone the remote repository from `https://example.test/design/icon-set.git` using a history depth of 1.
+
+**Objective Checklist**
+
+- [ ] The repository is cloned with origin pointing at the icon set.
+- [ ] main matches origin/main.
+- [ ] Only one commit of history was copied.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git clone --depth 1 https://example.test/design/icon-set.git` — Copy only the latest commit.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `--depth=1`; naming the folder `icon-set` explicitly.
+
+**Not accepted**
+
+- A full clone, or a depth other than 1.
+
+**Expected Result**
+An `icon-set` folder holds a one-commit copy of the repository on `main`.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 1 · Maximum counted commands: 10
+
+- Repository at `icon-set`; main at the remote's tip; exactly one commit.
 
 ### 1.3.15 First snapshot of the portfolio · Medium
 
@@ -281,6 +534,49 @@ Minimum counted commands: 3 · Maximum counted commands: 10
 
 - Repository initialized; HEAD on `main`; exactly one commit.
 - Latest commit `Start recipe notes` contains `recipes.md` and `shopping.md` and not `draft.txt`; `draft.txt` still untracked.
+
+### 1.3.17 Prepare the 1.2 release · Medium
+
+**Variant ID:** `commit-medium-three-file-release`
+
+**Story**
+Finn is cutting release 1.2. The changelog is new, and `setup.py` and `src/version.py` both carry the new version number. They belong in one commit, so the release is a single step in the history.
+
+**Starting point:** You are on `main`. `CHANGELOG.md` is new, and `setup.py` and `src/version.py` are modified. Nothing is staged.
+
+**Real-World Context**
+Related changes go into one commit, so anyone reading the history sees the release as a single, complete step.
+
+**Your Task**
+Stage `CHANGELOG.md`, `setup.py` and `src/version.py`, then create a commit with the message `Prepare 1.2 release`. Finish on `main`.
+
+**Objective Checklist**
+
+- [ ] The latest commit on main is "Prepare 1.2 release".
+- [ ] It contains all three files.
+- [ ] Nothing is left staged.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git add CHANGELOG.md setup.py src/version.py` — Stage the three release files.
+2. `git commit -m "Prepare 1.2 release"` — Record them together.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- Staging the files with separate `git add` commands, or `git add .`.
+
+**Not accepted**
+
+- Splitting the release across several commits.
+
+**Expected Result**
+`main` has one new commit, "Prepare 1.2 release", with all three files.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 10
+
+- Two commits on main; the tip holds the 1.2 content of all three files; nothing staged.
 
 ### 1.4.14 The rounding fix and its test · Medium
 
@@ -1032,6 +1328,176 @@ Minimum counted commands: 2 · Maximum counted commands: 8
 - `archive/spike-results` at `c3`; HEAD on `develop` at `c2`; `main` at `c1`.
 - Clean tree, nothing staged.
 
+### 2.1.17 Set up the FAQ branch, then head back · Easy
+
+**Variant ID:** `switch-easy-branch-then-return-docs`
+
+**Story**
+Mika will start the FAQ pages tomorrow and asked you to set up their branch today. Right now you need to stay on `main` to review a teammate's work. The new branch should start from the current `main`.
+
+**Starting point:** You are on `main`. No other branch exists.
+
+**Real-World Context**
+Creating a branch and switching back is cheap. The branch waits at its starting commit until someone works on it.
+
+**Your Task**
+Create `docs/faq` from the current tip of `main` and switch to it, then switch back to `main`.
+
+**Objective Checklist**
+
+- [ ] docs/faq exists at main's current commit.
+- [ ] You finish on main.
+- [ ] Nothing changed on main.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git switch -c docs/faq` — Create the branch and switch to it.
+2. `git switch main` — Go back to main.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git checkout -b docs/faq` then `git checkout main`; `git branch docs/faq`.
+
+**Not accepted**
+
+- Creating the branch from another commit, or finishing on docs/faq.
+
+**Expected Result**
+`docs/faq` points at `main`'s tip, and you are on `main`.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 12
+
+- docs/faq and main both at c1; HEAD on main; working tree clean.
+
+### 2.1.18 Set up the rate-limit branch, then head back · Easy
+
+**Variant ID:** `switch-easy-branch-then-return-api`
+
+**Story**
+Ana is picking up the API rate limiter after lunch and wants the branch ready. Until then you are on `main`, checking a bug report. The branch should start from the current `main`.
+
+**Starting point:** You are on `main`. No other branch exists.
+
+**Real-World Context**
+Teams often create a branch for upcoming work in advance and return to what they were doing.
+
+**Your Task**
+Create `feature/rate-limit` from the current tip of `main` and switch to it, then switch back to `main`.
+
+**Objective Checklist**
+
+- [ ] feature/rate-limit exists at main's current commit.
+- [ ] You finish on main.
+- [ ] Nothing changed on main.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git switch -c feature/rate-limit` — Create the branch and switch to it.
+2. `git switch main` — Go back to main.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git checkout -b feature/rate-limit` then `git checkout main`; `git branch feature/rate-limit`.
+
+**Not accepted**
+
+- Creating the branch from another commit, or finishing on feature/rate-limit.
+
+**Expected Result**
+`feature/rate-limit` points at `main`'s tip, and you are on `main`.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 12
+
+- feature/rate-limit and main both at c1; HEAD on main; working tree clean.
+
+### 2.1.19 Mark the 1.0 release without leaving main · Hard
+
+**Variant ID:** `branch-hard-mark-release-point`
+
+**Story**
+Support needs a permanent pointer to the code that shipped as 1.0, and `main` has already moved past it. Raven asks for a `release/1.0` branch on the commit named "Release 1.0 snapshot". You are mid-review on `main` and should stay there.
+
+**Starting point:** You are on `main`. Its history holds the "Release 1.0 snapshot" commit and later work.
+
+**Real-World Context**
+`git branch <name> <start-point>` creates a branch at any commit without switching to it.
+
+**Your Task**
+Create `release/1.0` at the "Release 1.0 snapshot" commit. **Stay on `main` and leave it where it is.**
+
+**Objective Checklist**
+
+- [ ] release/1.0 points at the "Release 1.0 snapshot" commit.
+- [ ] You are still on main, and main has not moved.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git log --oneline` — Find the release commit.
+2. `git branch release/1.0 c2` — Create the branch there without switching.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git switch -c release/1.0 c2` then `git switch main`; `main~1` as the start point.
+
+**Not accepted**
+
+- Creating the branch at main's tip, or moving main.
+
+**Expected Result**
+`release/1.0` marks the 1.0 snapshot, and `main` is unchanged.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 1 · Maximum counted commands: 10
+
+- release/1.0 at c2; main at c3; HEAD on main; working tree clean.
+
+### 2.1.20 Mark the Q3 audit point without leaving main · Hard
+
+**Variant ID:** `branch-hard-mark-audit-point`
+
+**Story**
+The auditors signed off on the code at the commit "Q3 audit sign-off", and the compliance team needs a branch there called `audit/q3`. Work on `main` has continued since. You are in the middle of checking `main` and should not leave it.
+
+**Starting point:** You are on `main`. Its history holds the "Q3 audit sign-off" commit and later work.
+
+**Real-World Context**
+A branch can mark any past commit, which is handy for audits and releases that need a stable name.
+
+**Your Task**
+Create `audit/q3` at the "Q3 audit sign-off" commit. **Stay on `main` and leave it where it is.**
+
+**Objective Checklist**
+
+- [ ] audit/q3 points at the "Q3 audit sign-off" commit.
+- [ ] You are still on main, and main has not moved.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git log --oneline` — Find the sign-off commit.
+2. `git branch audit/q3 c3` — Create the branch there without switching.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git switch -c audit/q3 c3` then `git switch main`; `main~1` as the start point.
+
+**Not accepted**
+
+- Creating the branch at main's tip, or moving main.
+
+**Expected Result**
+`audit/q3` marks the sign-off commit, and `main` is unchanged.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 1 · Maximum counted commands: 10
+
+- audit/q3 at c3; main at c4; HEAD on main; working tree clean.
+
 ### 2.2.14 Delete the merged typo branch · Easy
 
 **Variant ID:** `bn-easy-delete-merged-typo`
@@ -1220,6 +1686,92 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 - HEAD on `PROJ-733/invoice-rounding`, 2 commits; tip message `Round invoice totals`, tree has the fix and the committed sample file.
 - `main` at `c1`; clean tree, nothing staged.
 
+### 2.2.18 Clear out the sprint's merged branches · Hard
+
+**Variant ID:** `bn-hard-clear-merged-sprint`
+
+**Story**
+The sprint is over, and the branch list is getting long. `feature/login-copy` and `fix/footer-link` are already in `main`. `spike/dark-mode` is an experiment that never merged, and Finn still wants it. Raven asks for a tidy list before planning starts.
+
+**Starting point:** You are on `main` with `feature/login-copy`, `fix/footer-link` and `spike/dark-mode` beside it.
+
+**Real-World Context**
+`git branch -d` only deletes branches whose work is already merged, so housekeeping cannot lose unmerged work by accident.
+
+**Your Task**
+Delete the local branches that are already merged into `main`. **Keep `spike/dark-mode`.**
+
+**Objective Checklist**
+
+- [ ] feature/login-copy and fix/footer-link are gone.
+- [ ] spike/dark-mode still exists at its commit.
+- [ ] main has not moved, and you are on main.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git branch -d feature/login-copy` — Delete the first merged branch.
+2. `git branch -d fix/footer-link` — Delete the second.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- One `git branch -d feature/login-copy fix/footer-link`; `git branch --merged` to check first.
+
+**Not accepted**
+
+- Deleting spike/dark-mode, or using `-D` on it.
+
+**Expected Result**
+Only `main` and `spike/dark-mode` remain.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 10
+
+- Both merged branches absent; spike/dark-mode at c4; main at c3; HEAD on main.
+
+### 2.2.19 Clear out the release's merged branches · Hard
+
+**Variant ID:** `bn-hard-clear-merged-release`
+
+**Story**
+Release 1.4 and its hotfix are both in `main` now, but their branches are still lying around. `experiment/new-nav` is unmerged work that Ana will finish next month. The team wants only live branches in the list.
+
+**Starting point:** You are on `main` with `release/1.4`, `hotfix/1.4.1` and `experiment/new-nav` beside it.
+
+**Real-World Context**
+Deleting merged branches keeps the branch list readable without losing any history, because their commits stay reachable from main.
+
+**Your Task**
+Delete the local branches that are already merged into `main`. **Keep `experiment/new-nav`.**
+
+**Objective Checklist**
+
+- [ ] release/1.4 and hotfix/1.4.1 are gone.
+- [ ] experiment/new-nav still exists at its commit.
+- [ ] main has not moved, and you are on main.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git branch -d release/1.4` — Delete the merged release branch.
+2. `git branch -d hotfix/1.4.1` — Delete the merged hotfix branch.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- One `git branch -d release/1.4 hotfix/1.4.1`; `git branch --merged` to check first.
+
+**Not accepted**
+
+- Deleting experiment/new-nav, or using `-D` on it.
+
+**Expected Result**
+Only `main` and `experiment/new-nav` remain.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 10
+
+- Both merged branches absent; experiment/new-nav at c4; main at c3; HEAD on main.
+
 ### 2.3.14 Bring back the search ranking draft · Easy
 
 **Variant ID:** `stash-easy-pop-search`
@@ -1406,6 +1958,94 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 
 - HEAD on `feature/experiment` at `c3`; `release/v3` at `c2`.
 - Clean tree, nothing staged, stash list empty.
+
+### 2.3.18 Park the search draft while you check the release · Hard
+
+**Variant ID:** `stash-hard-park-draft-search`
+
+**Story**
+You are halfway through search facets on `feature/search` when Raven asks you to look over `release/v4`. The facets are not ready to commit, and you won't touch them again until tomorrow. Leave the branch clean, but keep the draft saved for later.
+
+**Starting point:** You are on `feature/search` with uncommitted edits to `src/search.py`.
+
+**Real-World Context**
+A stash can hold work for as long as you need. You don't have to restore it the moment you come back.
+
+**Your Task**
+Visit `release/v4` without carrying your edits along, then return to `feature/search`. **Finish with a clean working folder and the draft still saved in the stash.**
+
+**Objective Checklist**
+
+- [ ] You visited release/v4 and finished on feature/search.
+- [ ] The working folder is clean and no commit was made.
+- [ ] The stash holds one entry with the search draft.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git stash` — Shelve the draft.
+2. `git switch release/v4` — Check the release.
+3. `git switch feature/search` — Come back.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git stash push`; `git checkout` for the switches.
+
+**Not accepted**
+
+- Committing the draft, popping or dropping the stash.
+
+**Expected Result**
+You are back on a clean `feature/search`, and the stash holds the facets draft.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 10
+
+- HEAD on feature/search at c3; release/v4 at c2; the reflog shows the visit; one stash entry with src/search.py.
+
+### 2.3.19 Park the billing draft while you check the hotfix · Hard
+
+**Variant ID:** `stash-hard-park-draft-billing`
+
+**Story**
+You are drafting billing credits on `feature/billing` when Finn needs a second pair of eyes on `hotfix/tax`. The credits draft isn't finished and can wait until Monday. Your branch should be clean while the draft stays safe.
+
+**Starting point:** You are on `feature/billing` with uncommitted edits to `src/billing.py`.
+
+**Real-World Context**
+Stashing keeps unfinished work out of commits and out of other branches until you are ready for it.
+
+**Your Task**
+Visit `hotfix/tax` without carrying your edits along, then return to `feature/billing`. **Finish with a clean working folder and the draft still saved in the stash.**
+
+**Objective Checklist**
+
+- [ ] You visited hotfix/tax and finished on feature/billing.
+- [ ] The working folder is clean and no commit was made.
+- [ ] The stash holds one entry with the billing draft.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git stash` — Shelve the draft.
+2. `git switch hotfix/tax` — Check the hotfix.
+3. `git switch feature/billing` — Come back.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git stash push`; `git checkout` for the switches.
+
+**Not accepted**
+
+- Committing the draft, popping or dropping the stash.
+
+**Expected Result**
+You are back on a clean `feature/billing`, and the stash holds the credits draft.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 10
+
+- HEAD on feature/billing at c3; hotfix/tax at c2; the reflog shows the visit; one stash entry with src/billing.py.
 
 ### 2.4.14 Branch, commit and publish the search filters · Medium
 
@@ -1877,6 +2517,98 @@ Minimum counted commands: 4 · Maximum counted commands: 10
 - `develop` tip is a merge whose tree has `src/health.py`, `docs/contributing.md` and the committed `scratch/payload.json`; `develop~1` is `Add health check` (parent `c1`).
 - `origin/develop` = `develop`; `scratch/payload.json` modified with your edits; nothing staged.
 
+### 2.6.16 Commit the ranking fix and merge a teammate's push · Hard
+
+**Variant ID:** `rec-hard-commit-fetch-merge-search`
+
+**Story**
+Your ranking tweak is staged on `feature/search`, but so is `notes/plan.md`, which is only your to-do list. Meanwhile Mika pushed search docs to the same branch on `origin`. The branch on `origin` should end up with your fix and Mika's docs, and without your notes.
+
+**Starting point:** You are on `feature/search` with `src/ranking.py` and `notes/plan.md` staged. `origin/feature/search` has a newer commit from Mika.
+
+**Real-World Context**
+Fetching first lets you merge exactly what the server has, so your push lands on top of your teammate's work instead of being rejected.
+
+**Your Task**
+Commit only the ranking change with the message `Tune search ranking`, keeping your notes out of the commit. Then combine it with the newer `origin/feature/search` and publish `feature/search` to `origin`.
+
+**Objective Checklist**
+
+- [ ] A commit "Tune search ranking" holds src/ranking.py but not your notes.
+- [ ] feature/search includes Mika's commit, and origin/feature/search matches it.
+- [ ] notes/plan.md is still in your folder, uncommitted.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git restore --staged notes/plan.md` — Take the notes out of the commit.
+2. `git commit -m "Tune search ranking"` — Commit the fix.
+3. `git fetch origin` — Download Mika's commit.
+4. `git merge origin/feature/search` — Combine the two lines of work.
+5. `git push origin feature/search` — Publish the result.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git pull origin feature/search` in place of fetch and merge; `git reset notes/plan.md` to unstage.
+
+**Not accepted**
+
+- Committing the notes, or a force push.
+
+**Expected Result**
+`feature/search` on `origin` holds your fix and Mika's docs, and your notes are still local.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 5 · Maximum counted commands: 12
+
+- Tip is a merge containing the fix and Mika's docs; its first parent is "Tune search ranking"; origin matches; the notes edit is still in the working tree.
+
+### 2.6.17 Commit the rounding fix and merge a teammate's push · Hard
+
+**Variant ID:** `rec-hard-commit-fetch-merge-billing`
+
+**Story**
+You staged the invoice rounding fix on `feature/billing`, along with `tmp/invoice-dump.json` from a debugging session. Ana has since pushed billing docs to the branch on `origin`. The published branch needs your fix and Ana's docs, and the debug dump must stay out.
+
+**Starting point:** You are on `feature/billing` with `src/rounding.py` and `tmp/invoice-dump.json` staged. `origin/feature/billing` has a newer commit from Ana.
+
+**Real-World Context**
+A clean reconcile starts with a clean commit: leave scratch files out before you merge and publish.
+
+**Your Task**
+Commit only the rounding change with the message `Round invoice totals`, keeping the dump out of the commit. Then combine it with the newer `origin/feature/billing` and publish `feature/billing` to `origin`.
+
+**Objective Checklist**
+
+- [ ] A commit "Round invoice totals" holds src/rounding.py but not the dump.
+- [ ] feature/billing includes Ana's commit, and origin/feature/billing matches it.
+- [ ] tmp/invoice-dump.json is still in your folder, uncommitted.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git restore --staged tmp/invoice-dump.json` — Take the dump out of the commit.
+2. `git commit -m "Round invoice totals"` — Commit the fix.
+3. `git fetch origin` — Download Ana's commit.
+4. `git merge origin/feature/billing` — Combine the two lines of work.
+5. `git push origin feature/billing` — Publish the result.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git pull origin feature/billing` in place of fetch and merge; `git reset tmp/invoice-dump.json` to unstage.
+
+**Not accepted**
+
+- Committing the dump, or a force push.
+
+**Expected Result**
+`feature/billing` on `origin` holds your fix and Ana's docs, and the dump is still local.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 5 · Maximum counted commands: 12
+
+- Tip is a merge containing the fix and Ana's docs; its first parent is "Round invoice totals"; origin matches; the dump edit is still in the working tree.
+
 ### 2.7.14 Finish the monthly report, then land it · Medium
 
 **Variant ID:** `merge-medium-commit-switch-noff-reports`
@@ -2254,6 +2986,98 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 - `develop` has 2 commits; tip `Add toast notifications` (parent `c1`, not a merge) with the finished toasts.
 - `feature/toast-ui` absent; HEAD on `develop`; clean tree.
 
+### 2.8.18 Squash the teammate's search branch and tidy up · Hard
+
+**Variant ID:** `squash-hard-remote-publish-tidy-search`
+
+**Story**
+Mika finished the search feature on `origin/feature/search` in a string of WIP commits. The team wants it on `main` as one commit, "Add search", published to `origin`. Your own local `feature/search` is an old copy that nobody needs any more.
+
+**Starting point:** You are on `main`. Your local `feature/search` is behind `origin/feature/search`, and you haven't fetched Mika's latest commits.
+
+**Real-World Context**
+Squashing a teammate's branch gives main one clean commit. A stale local copy of that branch then has to go with `-D`, because Git never sees it as merged.
+
+**Your Task**
+Bring the latest `origin/feature/search` into `main` as one new commit with the message `Add search`, push `main` to `origin`, and delete your local `feature/search`.
+
+**Objective Checklist**
+
+- [ ] main has one new non-merge commit "Add search" with the finished feature.
+- [ ] origin/main matches main.
+- [ ] No local feature/search branch is left.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git fetch origin` — Download Mika's latest commits.
+2. `git merge --squash origin/feature/search` — Stage the whole feature as one change.
+3. `git commit -m "Add search"` — Record it.
+4. `git push origin main` — Publish main.
+5. `git branch -D feature/search` — Remove the stale local copy.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- Deleting the local branch before pushing.
+
+**Not accepted**
+
+- A regular merge, or squashing the stale local branch instead of the fetched one.
+
+**Expected Result**
+`main` has one "Add search" commit on `origin` too, and the stale branch is gone.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 5 · Maximum counted commands: 12
+
+- Tip "Add search" with parent c1 and the finished file; two commits on main; origin matches; feature/search absent.
+
+### 2.8.19 Squash the teammate's API docs and tidy up · Hard
+
+**Variant ID:** `squash-hard-remote-publish-tidy-docs`
+
+**Story**
+Ana wrote the API docs on `origin/docs/api` in many small commits. They should land on `main` as a single commit, "Document the API", and be published. Your local `docs/api` is an outdated copy from last week.
+
+**Starting point:** You are on `main`. Your local `docs/api` is behind `origin/docs/api`, and you haven't fetched Ana's latest commits.
+
+**Real-World Context**
+A squash keeps the main history readable. Fetching first makes sure you squash the teammate's latest work, not your stale copy.
+
+**Your Task**
+Bring the latest `origin/docs/api` into `main` as one new commit with the message `Document the API`, push `main` to `origin`, and delete your local `docs/api`.
+
+**Objective Checklist**
+
+- [ ] main has one new non-merge commit "Document the API" with the finished docs.
+- [ ] origin/main matches main.
+- [ ] No local docs/api branch is left.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git fetch origin` — Download Ana's latest commits.
+2. `git merge --squash origin/docs/api` — Stage the whole branch as one change.
+3. `git commit -m "Document the API"` — Record it.
+4. `git push origin main` — Publish main.
+5. `git branch -D docs/api` — Remove the stale local copy.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- Deleting the local branch before pushing.
+
+**Not accepted**
+
+- A regular merge, or squashing the stale local branch instead of the fetched one.
+
+**Expected Result**
+`main` has one "Document the API" commit on `origin` too, and the stale branch is gone.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 5 · Maximum counted commands: 12
+
+- Tip "Document the API" with parent c1 and the finished file; two commits on main; origin matches; docs/api absent.
+
 ### 2.9.14 Land the search page and retire its remote branch · Medium
 
 **Variant ID:** `rb-medium-land-and-retire-search`
@@ -2447,6 +3271,92 @@ Minimum counted commands: 5 · Maximum counted commands: 8
 
 - HEAD on `main`; tip is a merge whose tree has the final payments work; `origin/main` = `main`.
 - `origin/feature/payments-v2` and `origin/feature/legacy-checkout` absent; clean tree.
+
+### 2.9.18 Retire the old FAQ branch and prune the leftovers · Easy
+
+**Variant ID:** `rb-easy-delete-then-prune-docs`
+
+**Story**
+The old FAQ pages are merged, so `docs/old-faq` can go from `origin`. While you're tidying, Sage mentions she already deleted `feature/old-banner` on the server. Your copy still lists it.
+
+**Starting point:** You are on `main`. `origin` still has `docs/old-faq`. Your copy also lists `origin/feature/old-banner`, which no longer exists on the server.
+
+**Real-World Context**
+Deleting your own remote branches and pruning branches teammates removed are two halves of the same tidy-up.
+
+**Your Task**
+Delete `docs/old-faq` from `origin`, then remove the stale `origin/feature/old-banner` record from your copy.
+
+**Objective Checklist**
+
+- [ ] docs/old-faq no longer exists on origin.
+- [ ] origin/feature/old-banner is gone from your copy.
+- [ ] main is unchanged.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git push origin --delete docs/old-faq` — Delete the branch on origin.
+2. `git fetch --prune origin` — Drop the stale remote-tracking record.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git push origin :docs/old-faq`; `git remote prune origin`.
+
+**Not accepted**
+
+- Leaving either remote-tracking branch behind.
+
+**Expected Result**
+Neither `origin/docs/old-faq` nor `origin/feature/old-banner` is listed any more.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 12
+
+- Both remote-tracking branches absent; main at c1; working tree clean.
+
+### 2.9.19 Retire the v1 API branch and prune the leftovers · Easy
+
+**Variant ID:** `rb-easy-delete-then-prune-api`
+
+**Story**
+The v1 API work is merged, so `feature/v1-api` can go from `origin`. Finn already removed `spike/graphql` on the server last week, but your copy still shows it.
+
+**Starting point:** You are on `main`. `origin` still has `feature/v1-api`. Your copy also lists `origin/spike/graphql`, which no longer exists on the server.
+
+**Real-World Context**
+After a release, teams clear finished branches on the server and prune the stale records everyone's copies still show.
+
+**Your Task**
+Delete `feature/v1-api` from `origin`, then remove the stale `origin/spike/graphql` record from your copy.
+
+**Objective Checklist**
+
+- [ ] feature/v1-api no longer exists on origin.
+- [ ] origin/spike/graphql is gone from your copy.
+- [ ] main is unchanged.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git push origin --delete feature/v1-api` — Delete the branch on origin.
+2. `git fetch --prune origin` — Drop the stale remote-tracking record.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git push origin :feature/v1-api`; `git remote prune origin`.
+
+**Not accepted**
+
+- Leaving either remote-tracking branch behind.
+
+**Expected Result**
+Neither `origin/feature/v1-api` nor `origin/spike/graphql` is listed any more.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 12
+
+- Both remote-tracking branches absent; main at c1; working tree clean.
 
 ## Module 3 — Conflict Resolution
 
@@ -3279,6 +4189,98 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 
 - HEAD on `release-3.0`, 3 commits; tip (parent `c3`) message contains the fix and `cherry picked from commit c4`; tree `src/login.py` = the required content.
 - No cherry-pick in progress; no conflicts; clean tree.
+
+### 3.3.22 Backport the auth fixes as one reviewed commit · Hard
+
+**Variant ID:** `cherry-hard-review-backports-auth`
+
+**Story**
+Two fixes on `main`, one in `src/auth.py` and one in `src/token.py`, need to reach `release-2.2`. The release manager wants to review them as a single commit called "Backport auth fixes". The feature commits around them must not come along.
+
+**Starting point:** You are on `main`. `release-2.2` was cut from the baseline before any of main's later commits.
+
+**Real-World Context**
+Applying picks without committing lets you combine several fixes and review them before they become one commit.
+
+**Your Task**
+On `release-2.2`, apply the two auth fixes from `main` without committing either, then commit them together with the message `Backport auth fixes`. Finish on `release-2.2` and leave `main` unchanged.
+
+**Objective Checklist**
+
+- [ ] release-2.2 has one new commit "Backport auth fixes" on top of its old tip.
+- [ ] It carries both auth fixes and none of main's feature work.
+- [ ] main is unchanged, and you finish on release-2.2.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git log --oneline main` — Find the two fix commits.
+2. `git switch release-2.2` — Go to the release branch.
+3. `git cherry-pick --no-commit c2` — Apply the src/auth.py fix.
+4. `git cherry-pick --no-commit c4` — Apply the src/token.py fix.
+5. `git commit -m "Backport auth fixes"` — Record both as one commit.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `-n` for `--no-commit`; one `git cherry-pick --no-commit c2 c4`.
+
+**Not accepted**
+
+- Two separate commits, or picking the feature commits.
+
+**Expected Result**
+`release-2.2` has one reviewed commit with both auth fixes.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 4 · Maximum counted commands: 12
+
+- Tip "Backport auth fixes" with parent c5; both files fixed; src/new.py unchanged; three commits on release-2.2.
+
+### 3.3.23 Backport the export fixes as one reviewed commit · Hard
+
+**Variant ID:** `cherry-hard-review-backports-export`
+
+**Story**
+`release-3.0` needs two fixes from `main`: one in `src/export.py` and one in `src/csv_writer.py`. QA will only sign off on a single commit, "Backport export fixes". New feature work on `main` stays out of the release.
+
+**Starting point:** You are on `main`. `release-3.0` was cut from the baseline before any of main's later commits.
+
+**Real-World Context**
+Release branches take only the fixes they need. Combining picks into one commit keeps the release history short and reviewable.
+
+**Your Task**
+On `release-3.0`, apply the two export fixes from `main` without committing either, then commit them together with the message `Backport export fixes`. Finish on `release-3.0` and leave `main` unchanged.
+
+**Objective Checklist**
+
+- [ ] release-3.0 has one new commit "Backport export fixes" on top of its old tip.
+- [ ] It carries both export fixes and none of main's feature work.
+- [ ] main is unchanged, and you finish on release-3.0.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git log --oneline main` — Find the two fix commits.
+2. `git switch release-3.0` — Go to the release branch.
+3. `git cherry-pick --no-commit c1` — Apply the src/export.py fix.
+4. `git cherry-pick --no-commit c3` — Apply the src/csv_writer.py fix.
+5. `git commit -m "Backport export fixes"` — Record both as one commit.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `-n` for `--no-commit`; one `git cherry-pick --no-commit c1 c3`.
+
+**Not accepted**
+
+- Two separate commits, or picking the feature commits.
+
+**Expected Result**
+`release-3.0` has one reviewed commit with both export fixes.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 4 · Maximum counted commands: 12
+
+- Tip "Backport export fixes" with parent c5; both files fixed; src/new.py unchanged; three commits on release-3.0.
 
 ## Module 4 — Advanced Recovery and History
 
@@ -4181,6 +5183,122 @@ Minimum counted commands: 3 · Maximum counted commands: 8
 
 - HEAD on `feature/rate-limits`, 5 commits including `c1`, no merges; tree has all three changes and the fixed usage docs.
 - `origin/feature/rate-limits` = local; no rebase in progress; clean tree.
+
+### 4.3.18 Resolve and continue the dark theme rebase · Easy
+
+**Variant ID:** `rebase-easy-continue-styles`
+
+**Story**
+Your rebase of `feature/dark-theme` onto `main` stopped on `styles/theme.css`. `main` changed the accent colour to navy, and your branch added a dark surface colour. Mika wants both, so the file keeps `main`'s accent and your surface.
+
+**Starting point:** You are in the middle of rebasing `feature/dark-theme` onto `main`, stopped on a conflict in `styles/theme.css`.
+
+**Real-World Context**
+A stopped rebase waits for you: resolve the file, stage it, and continue, and Git replays the rest of your branch.
+
+**Your Task**
+Resolve `styles/theme.css` to the content below, stage it, and continue the rebase until it finishes.
+
+**Required resolved file content**
+
+`styles/theme.css`
+
+```
+--accent: navy;
+--surface: #111;
+```
+
+**Objective Checklist**
+
+- [ ] No rebase is in progress and no conflicts remain.
+- [ ] feature/dark-theme now sits on top of main's latest commit.
+- [ ] styles/theme.css contains exactly the required content, and the branch's later commit was replayed too.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. In the simulator's file editor, set `styles/theme.css` to exactly:
+
+   ```
+   --accent: navy;
+   --surface: #111;
+   ```
+2. `git add styles/theme.css` — Mark the file resolved.
+3. `git rebase --continue` — Replay the rest of the branch.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git status` along the way.
+
+**Not accepted**
+
+- Aborting the rebase, `git rebase --skip`, or committing the resolution as a separate commit.
+
+**Expected Result**
+`feature/dark-theme` is rebased onto `main` with both colours, and no rebase is in progress.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 12
+
+- No rebase in progress; four commits on feature/dark-theme including main's c1; the resolved theme and the replayed docs file are in the tip.
+
+### 4.3.19 Resolve and continue the health route rebase · Easy
+
+**Variant ID:** `rebase-easy-continue-routes`
+
+**Story**
+Rebasing `feature/health-route` onto `main` stopped on `src/routes.py`. `main` added a login route, and your branch added a health check. Both stay, so the file keeps `main`'s routes and your health check.
+
+**Starting point:** You are in the middle of rebasing `feature/health-route` onto `main`, stopped on a conflict in `src/routes.py`.
+
+**Real-World Context**
+Conflicts during a rebase are resolved one replayed commit at a time, then the rebase carries on by itself.
+
+**Your Task**
+Resolve `src/routes.py` to the content below, stage it, and continue the rebase until it finishes.
+
+**Required resolved file content**
+
+`src/routes.py`
+
+```
+ROUTES = ['/', '/login']
+HEALTH = '/health'
+```
+
+**Objective Checklist**
+
+- [ ] No rebase is in progress and no conflicts remain.
+- [ ] feature/health-route now sits on top of main's latest commit.
+- [ ] src/routes.py contains exactly the required content, and the branch's later commit was replayed too.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. In the simulator's file editor, set `src/routes.py` to exactly:
+
+   ```
+   ROUTES = ['/', '/login']
+   HEALTH = '/health'
+   ```
+2. `git add src/routes.py` — Mark the file resolved.
+3. `git rebase --continue` — Replay the rest of the branch.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git status` along the way.
+
+**Not accepted**
+
+- Aborting the rebase, `git rebase --skip`, or committing the resolution as a separate commit.
+
+**Expected Result**
+`feature/health-route` is rebased onto `main` with both routes, and no rebase is in progress.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 12
+
+- No rebase in progress; four commits on feature/health-route including main's c1; the resolved routes and the replayed test file are in the tip.
 
 ## Module 1 Challenge Gate — Foundations Gate
 

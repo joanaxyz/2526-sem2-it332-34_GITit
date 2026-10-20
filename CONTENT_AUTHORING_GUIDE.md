@@ -17,8 +17,9 @@ This guide explains how to author curriculum content that teaches Git through sc
 3. **Never repeat scenarios.** Commands repeat; narrative setup and initial repository state should not.
 4. **Challenges must change repository state.** A challenge trial should visibly change commits, branches, refs, or HEAD.
 5. **Author the ideal scenario.** If the simulator lacks a needed behavior, improve the simulator and verifier rather than weakening the curriculum.
-6. **Variants must test the same skill.** Two variants may use different file names/story details, but they should share the same learning goal and objective shape.
+6. **Variants are the same problem.** A retry must not hand the learner a different task. At Easy, variants change only names, paths, messages and story: the same steps, options, kinds of argument and starting repository. Medium may also change counts and option values (two files or three, `--depth 1` or `2`). Hard may also change the starting repository (distractors, which candidate is right). A variant never adds a step, an option or a kind of argument its siblings lack, such as an SSH address, a target folder, a start point or a folder pathspec. A scenario that differs becomes its own wave or stays unplaced.
 7. **Grade the repository, not the route.** Every requirement describes the resulting state: commits, branches, refs, files, config, remotes, stash, reflog. Do not require typed commands or check how an operation ran; an equivalent Git route must pass. A task that ends where it started (re-running `git init`, a stash round trip) needs evidence in state, such as the reflog entry a branch switch leaves, or it cannot be graded. The objective checklist promises only what the requirements check.
+8. **Start plain, then bring it back.** A level's first Easy wave uses the plainest form of its command (`git init` before `git init -b`). Each wave adds one new thing, so the guide shows one lesson at a time. Whatever Easy introduces comes back, unguided, later in Easy; whatever Medium introduces comes back in Medium or Hard.
 
 ## Adventure Authoring
 
@@ -29,7 +30,7 @@ waves, variants, and the difficulty a command form appears at may change.
 
 **Placement** lives in the wave plan,
 `backend/curriculum/seed_data/source/wave_plan/module_N.py`. For each level and
-tier it lists 2–3 waves in play order. Each wave has a stable slug (learners'
+tier it lists 2–3 waves in play order (Easy up to 4). Each wave has a stable slug (learners'
 progress names it), a title the learner sees, a role, and its variant IDs. The
 first variant is the one a first-time learner gets, and a retry rotates within
 the same wave. A run plays the learner's next uncleared wave, one solve clears
@@ -59,8 +60,8 @@ it with the real guide resolver):
    forms (`init`, `clone`) are exempt.
 4. Every scenario is placed exactly once, in its own level, and no two variants
    share both a starting repository and a target.
-5. A learner who never fails finishes Modules 1–4 in about 4.9 hours (the suite
-   fails above 5 h). It counts 1 min per wave, 0.4 min per typed command, 1 min
+5. A learner who never fails finishes Modules 1–4 in about 5.5 hours (the suite
+   fails above 335 minutes). It counts 1 min per wave, 0.4 min per typed command, 1 min
    per file edit, and 0.5 min per first-time guide. Re-measure before adding
    waves.
 

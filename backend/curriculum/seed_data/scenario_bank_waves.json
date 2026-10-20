@@ -79,42 +79,157 @@
     "maximum_counted_commands": 8,
     "seed_notes": []
   },
-  "clone-medium-shallow-metrics": {
-    "scenario_number": "1.2.14",
-    "difficulty": "medium",
-    "label": "Shallow copy of the metrics dashboard",
-    "story": "Maeve asks you to check a chart bug in the metrics dashboard before tomorrow's stand-up. The project has a long history, but you only need to see what the code looks like today, and you already keep another copy of it elsewhere. Maeve suggests a separate folder named `metrics-review` so the two copies never get mixed up.",
-    "starting_point": "You are in your workspace, outside any repository. No folder named `metrics-review` exists yet. The remote repository is reachable at the address in the task.",
-    "real_world_context": "A review that only needs the current files can skip the old history. A depth-one clone copies just the latest commit, and naming the destination keeps the review copy apart from your main one.",
-    "task": "Clone `https://example.test/data/metrics-dash.git` into a folder named `metrics-review`, copying only the latest commit.",
+  "init-easy-plain-notes": {
+    "scenario_number": "1.1.14",
+    "difficulty": "easy",
+    "label": "Start tracking the planning notes",
+    "story": "Raven has been keeping the group's planning notes in one folder, and the notes already changed twice this week without anyone noticing. Before the next meeting, Raven wants Git watching the folder so later changes can be recorded. The notes themselves stay as they are for now.",
+    "starting_point": "You are in the planning folder. It holds `notes.md` and is not a repository yet.",
+    "real_world_context": "`git init` turns the folder you are in into a repository. It creates Git's records and touches none of your files.",
+    "task": "Turn the current folder into a Git repository. **Do not stage or commit `notes.md`.**",
     "required_files": [],
     "objective_checks": [
-      "A copy of metrics-dash exists in metrics-review.",
-      "The default branch (main) is checked out.",
-      "Only the latest commit was downloaded (history depth of 1).",
-      "origin points to the URL given in the task."
+      "The current folder is a Git repository.",
+      "notes.md is still there and untracked.",
+      "Nothing is staged and no commit exists."
     ],
-    "expected_result": "`metrics-review` is a copy of `metrics-dash` on `main`, with its history limited to the latest commit.",
+    "expected_result": "The planning folder is a repository with no commits, and `notes.md` is untracked.",
     "answer_key": [
       {
         "kind": "command",
-        "command": "git clone --depth 1 https://example.test/data/metrics-dash.git metrics-review"
+        "command": "git init"
       }
     ],
     "solution_commands": [
-      "git clone --depth 1 https://example.test/data/metrics-dash.git metrics-review"
+      "git init"
     ],
     "solution_workspace_files": [],
     "accepted_alternatives": [
-      "`--depth=1`; the option may come after the URL; the destination may be written `./metrics-review` or `metrics-review/`.",
-      "Common patterns that apply: P3, P38."
+      "`git init .`; `git init -b main`."
     ],
     "not_accepted": [
-      "A full clone, a clone into the default folder name, or a different depth."
+      "Staging or committing notes.md."
     ],
     "evaluation": [
-      "Repository at `metrics-review`; remote `origin` = the task URL; HEAD on `main` at the remote tip.",
-      "Clone depth 1 and exactly one commit present; clean working tree."
+      "Repository at the workspace root; HEAD on unborn `main`; no commits; nothing staged.",
+      "notes.md present and untracked."
+    ],
+    "minimum_counted_commands": 1,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "init-easy-plain-recipes": {
+    "scenario_number": "1.1.15",
+    "difficulty": "easy",
+    "label": "Start tracking the family recipes",
+    "story": "Sage is collecting the family's recipes in one folder before a reunion, and two cousins keep sending corrected versions. Sage wants Git to keep the history from now on. The recipe file stays exactly as it is for the moment.",
+    "starting_point": "You are in the recipes folder. It holds `recipes.md` and is not a repository yet.",
+    "real_world_context": "Starting a repository is the first step of version control: Git can only record changes in a folder it tracks.",
+    "task": "Turn the current folder into a Git repository. **Do not stage or commit `recipes.md`.**",
+    "required_files": [],
+    "objective_checks": [
+      "The current folder is a Git repository.",
+      "recipes.md is still there and untracked.",
+      "Nothing is staged and no commit exists."
+    ],
+    "expected_result": "The recipes folder is a repository with no commits, and `recipes.md` is untracked.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git init"
+      }
+    ],
+    "solution_commands": [
+      "git init"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git init .`; `git init -b main`."
+    ],
+    "not_accepted": [
+      "Staging or committing recipes.md."
+    ],
+    "evaluation": [
+      "Repository at the workspace root; HEAD on unborn `main`; no commits; nothing staged.",
+      "recipes.md present and untracked."
+    ],
+    "minimum_counted_commands": 1,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "init-easy-new-folder-among-files": {
+    "scenario_number": "1.1.16",
+    "difficulty": "easy",
+    "label": "A new repository for the site assets",
+    "story": "The design team's workspace already holds a loose `design/logo.svg` that belongs to another project. Raven wants a separate repository for the website's assets, in a new `site-assets` folder, starting on `main`. The logo should stay where it is, outside the new repository.",
+    "starting_point": "You are at the top of the workspace. It holds `design/logo.svg` and no repository.",
+    "real_world_context": "`git init <folder>` creates the folder if needed and makes only that folder a repository, so nearby files stay out of it.",
+    "task": "Create a repository in a new `site-assets` folder with `main` as its first branch. **Leave `design/logo.svg` where it is.**",
+    "required_files": [],
+    "objective_checks": [
+      "site-assets is a Git repository on main.",
+      "The workspace itself is not a repository.",
+      "design/logo.svg is still in place, and nothing is staged or committed."
+    ],
+    "expected_result": "`site-assets` is a repository on `main` with no commits, and the logo is untouched.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git init -b main site-assets"
+      }
+    ],
+    "solution_commands": [
+      "git init -b main site-assets"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`--initial-branch=main`; `mkdir site-assets`, `cd site-assets`, then `git init -b main`."
+    ],
+    "not_accepted": [
+      "Initializing the workspace, or moving the logo into the new repository."
+    ],
+    "evaluation": [
+      "Repository at `site-assets`; HEAD on unborn `main`; no commits; nothing staged.",
+      "design/logo.svg still present."
+    ],
+    "minimum_counted_commands": 1,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "init-medium-existing-sketches": {
+    "scenario_number": "1.1.17",
+    "difficulty": "medium",
+    "label": "Put the sketches folder under version control",
+    "story": "Sage has a `sketches` folder with an ideas list and a colour palette that the whole art club edits. Last week someone overwrote the palette and nobody could get it back. The folder should become a repository on `main` before the next session, without changing either file.",
+    "starting_point": "You are at the top of the workspace. The folder `sketches` holds `ideas.md` and `palette.txt`. It is not a repository yet.",
+    "real_world_context": "Initializing an existing folder leaves its files untracked. Nothing is recorded until someone stages and commits them on purpose.",
+    "task": "Make the existing `sketches` folder a Git repository with `main` as its first branch. **Do not stage or commit its files.**",
+    "required_files": [],
+    "objective_checks": [
+      "sketches is a Git repository on main.",
+      "ideas.md and palette.txt are unchanged and untracked.",
+      "Nothing is staged and no commit exists."
+    ],
+    "expected_result": "`sketches` is a repository on `main` with no commits, and both files are untracked and unchanged.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git init -b main sketches"
+      }
+    ],
+    "solution_commands": [
+      "git init -b main sketches"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`cd sketches` then `git init -b main`; `--initial-branch=main`."
+    ],
+    "not_accepted": [
+      "Initializing the workspace, a branch other than main, or staging the files."
+    ],
+    "evaluation": [
+      "Repository at `sketches`; HEAD on unborn `main`; no commits; nothing staged.",
+      "Both files present with their original content."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 10,
@@ -159,6 +274,120 @@
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
+    "seed_notes": []
+  },
+  "clone-easy-style-guide": {
+    "scenario_number": "1.2.16",
+    "difficulty": "easy",
+    "label": "Clone the design style guide",
+    "story": "The design team keeps its style guide in a shared repository. Raven needs a local copy to check the colour tokens before the next review.",
+    "starting_point": "You are in an empty workspace. There is no local repository yet.",
+    "real_world_context": "`git clone <url>` copies a remote repository, with its history, into a new folder named after the repository.",
+    "task": "Clone the remote repository from `https://example.test/design/style-guide.git`.",
+    "required_files": [],
+    "objective_checks": [
+      "A local repository exists with origin pointing at the style guide.",
+      "main matches origin/main.",
+      "The working folder is clean."
+    ],
+    "expected_result": "A `style-guide` folder holds the repository, on `main`, matching `origin/main`.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git clone https://example.test/design/style-guide.git"
+      }
+    ],
+    "solution_commands": [
+      "git clone https://example.test/design/style-guide.git"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "Cloning into `style-guide` explicitly."
+    ],
+    "not_accepted": [
+      "Initializing an empty repository instead of cloning."
+    ],
+    "evaluation": [
+      "origin exists; main and origin/main point at the remote's tip; working tree clean."
+    ],
+    "minimum_counted_commands": 1,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "clone-easy-branch-folder-handbook": {
+    "scenario_number": "1.2.17",
+    "difficulty": "easy",
+    "label": "Clone the handbook draft into its own folder",
+    "story": "Sage is reviewing the team handbook, but the new chapters only exist on the `draft` branch. Sage wants them in a folder called `handbook-draft`, so the copy is never mixed up with the published handbook.",
+    "starting_point": "You are in an empty workspace. There is no local repository yet.",
+    "real_world_context": "`git clone -b <branch> <url> <folder>` checks out a chosen branch and names the folder in one step.",
+    "task": "Clone `https://example.test/docs/handbook.git` into a local folder named `handbook-draft` with `draft` checked out.",
+    "required_files": [],
+    "objective_checks": [
+      "The repository is in handbook-draft.",
+      "The current branch is draft, matching origin/draft.",
+      "The working folder is clean."
+    ],
+    "expected_result": "`handbook-draft` holds the repository on `draft`, matching `origin/draft`.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git clone -b draft https://example.test/docs/handbook.git handbook-draft"
+      }
+    ],
+    "solution_commands": [
+      "git clone -b draft https://example.test/docs/handbook.git handbook-draft"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`--branch draft`; options in any order before the URL."
+    ],
+    "not_accepted": [
+      "Cloning main, or cloning into another folder name."
+    ],
+    "evaluation": [
+      "Repository at `handbook-draft`; HEAD on draft at the remote's draft tip; working tree clean."
+    ],
+    "minimum_counted_commands": 1,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "clone-medium-shallow-icons": {
+    "scenario_number": "1.2.18",
+    "difficulty": "medium",
+    "label": "A light copy of the icon set",
+    "story": "The icon set's history is long, and Raven only needs the current icons to build a mock-up. A full copy would take ages on the café Wi-Fi. Only the latest commit is needed.",
+    "starting_point": "You are in an empty workspace. There is no local repository yet.",
+    "real_world_context": "A shallow clone (`--depth <n>`) copies only the most recent commits, which is quicker when you don't need the history.",
+    "task": "Clone the remote repository from `https://example.test/design/icon-set.git` using a history depth of 1.",
+    "required_files": [],
+    "objective_checks": [
+      "The repository is cloned with origin pointing at the icon set.",
+      "main matches origin/main.",
+      "Only one commit of history was copied."
+    ],
+    "expected_result": "An `icon-set` folder holds a one-commit copy of the repository on `main`.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git clone --depth 1 https://example.test/design/icon-set.git"
+      }
+    ],
+    "solution_commands": [
+      "git clone --depth 1 https://example.test/design/icon-set.git"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`--depth=1`; naming the folder `icon-set` explicitly."
+    ],
+    "not_accepted": [
+      "A full clone, or a depth other than 1."
+    ],
+    "evaluation": [
+      "Repository at `icon-set`; main at the remote's tip; exactly one commit."
+    ],
+    "minimum_counted_commands": 1,
+    "maximum_counted_commands": 10,
     "seed_notes": []
   },
   "commit-medium-new-project-portfolio": {
@@ -260,6 +489,49 @@
       "Latest commit `Start recipe notes` contains `recipes.md` and `shopping.md` and not `draft.txt`; `draft.txt` still untracked."
     ],
     "minimum_counted_commands": 3,
+    "maximum_counted_commands": 10,
+    "seed_notes": []
+  },
+  "commit-medium-three-file-release": {
+    "scenario_number": "1.3.17",
+    "difficulty": "medium",
+    "label": "Prepare the 1.2 release",
+    "story": "Finn is cutting release 1.2. The changelog is new, and `setup.py` and `src/version.py` both carry the new version number. They belong in one commit, so the release is a single step in the history.",
+    "starting_point": "You are on `main`. `CHANGELOG.md` is new, and `setup.py` and `src/version.py` are modified. Nothing is staged.",
+    "real_world_context": "Related changes go into one commit, so anyone reading the history sees the release as a single, complete step.",
+    "task": "Stage `CHANGELOG.md`, `setup.py` and `src/version.py`, then create a commit with the message `Prepare 1.2 release`. Finish on `main`.",
+    "required_files": [],
+    "objective_checks": [
+      "The latest commit on main is \"Prepare 1.2 release\".",
+      "It contains all three files.",
+      "Nothing is left staged."
+    ],
+    "expected_result": "`main` has one new commit, \"Prepare 1.2 release\", with all three files.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git add CHANGELOG.md setup.py src/version.py"
+      },
+      {
+        "kind": "command",
+        "command": "git commit -m \"Prepare 1.2 release\""
+      }
+    ],
+    "solution_commands": [
+      "git add CHANGELOG.md setup.py src/version.py",
+      "git commit -m \"Prepare 1.2 release\""
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "Staging the files with separate `git add` commands, or `git add .`."
+    ],
+    "not_accepted": [
+      "Splitting the release across several commits."
+    ],
+    "evaluation": [
+      "Two commits on main; the tip holds the 1.2 content of all three files; nothing staged."
+    ],
+    "minimum_counted_commands": 2,
     "maximum_counted_commands": 10,
     "seed_notes": []
   },
@@ -1037,6 +1309,176 @@
     "maximum_counted_commands": 8,
     "seed_notes": []
   },
+  "switch-easy-branch-then-return-docs": {
+    "scenario_number": "2.1.17",
+    "difficulty": "easy",
+    "label": "Set up the FAQ branch, then head back",
+    "story": "Mika will start the FAQ pages tomorrow and asked you to set up their branch today. Right now you need to stay on `main` to review a teammate's work. The new branch should start from the current `main`.",
+    "starting_point": "You are on `main`. No other branch exists.",
+    "real_world_context": "Creating a branch and switching back is cheap. The branch waits at its starting commit until someone works on it.",
+    "task": "Create `docs/faq` from the current tip of `main` and switch to it, then switch back to `main`.",
+    "required_files": [],
+    "objective_checks": [
+      "docs/faq exists at main's current commit.",
+      "You finish on main.",
+      "Nothing changed on main."
+    ],
+    "expected_result": "`docs/faq` points at `main`'s tip, and you are on `main`.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git switch -c docs/faq"
+      },
+      {
+        "kind": "command",
+        "command": "git switch main"
+      }
+    ],
+    "solution_commands": [
+      "git switch -c docs/faq",
+      "git switch main"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git checkout -b docs/faq` then `git checkout main`; `git branch docs/faq`."
+    ],
+    "not_accepted": [
+      "Creating the branch from another commit, or finishing on docs/faq."
+    ],
+    "evaluation": [
+      "docs/faq and main both at c1; HEAD on main; working tree clean."
+    ],
+    "minimum_counted_commands": 2,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "switch-easy-branch-then-return-api": {
+    "scenario_number": "2.1.18",
+    "difficulty": "easy",
+    "label": "Set up the rate-limit branch, then head back",
+    "story": "Ana is picking up the API rate limiter after lunch and wants the branch ready. Until then you are on `main`, checking a bug report. The branch should start from the current `main`.",
+    "starting_point": "You are on `main`. No other branch exists.",
+    "real_world_context": "Teams often create a branch for upcoming work in advance and return to what they were doing.",
+    "task": "Create `feature/rate-limit` from the current tip of `main` and switch to it, then switch back to `main`.",
+    "required_files": [],
+    "objective_checks": [
+      "feature/rate-limit exists at main's current commit.",
+      "You finish on main.",
+      "Nothing changed on main."
+    ],
+    "expected_result": "`feature/rate-limit` points at `main`'s tip, and you are on `main`.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git switch -c feature/rate-limit"
+      },
+      {
+        "kind": "command",
+        "command": "git switch main"
+      }
+    ],
+    "solution_commands": [
+      "git switch -c feature/rate-limit",
+      "git switch main"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git checkout -b feature/rate-limit` then `git checkout main`; `git branch feature/rate-limit`."
+    ],
+    "not_accepted": [
+      "Creating the branch from another commit, or finishing on feature/rate-limit."
+    ],
+    "evaluation": [
+      "feature/rate-limit and main both at c1; HEAD on main; working tree clean."
+    ],
+    "minimum_counted_commands": 2,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "branch-hard-mark-release-point": {
+    "scenario_number": "2.1.19",
+    "difficulty": "hard",
+    "label": "Mark the 1.0 release without leaving main",
+    "story": "Support needs a permanent pointer to the code that shipped as 1.0, and `main` has already moved past it. Raven asks for a `release/1.0` branch on the commit named \"Release 1.0 snapshot\". You are mid-review on `main` and should stay there.",
+    "starting_point": "You are on `main`. Its history holds the \"Release 1.0 snapshot\" commit and later work.",
+    "real_world_context": "`git branch <name> <start-point>` creates a branch at any commit without switching to it.",
+    "task": "Create `release/1.0` at the \"Release 1.0 snapshot\" commit. **Stay on `main` and leave it where it is.**",
+    "required_files": [],
+    "objective_checks": [
+      "release/1.0 points at the \"Release 1.0 snapshot\" commit.",
+      "You are still on main, and main has not moved."
+    ],
+    "expected_result": "`release/1.0` marks the 1.0 snapshot, and `main` is unchanged.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git log --oneline"
+      },
+      {
+        "kind": "command",
+        "command": "git branch release/1.0 c2"
+      }
+    ],
+    "solution_commands": [
+      "git log --oneline",
+      "git branch release/1.0 c2"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git switch -c release/1.0 c2` then `git switch main`; `main~1` as the start point."
+    ],
+    "not_accepted": [
+      "Creating the branch at main's tip, or moving main."
+    ],
+    "evaluation": [
+      "release/1.0 at c2; main at c3; HEAD on main; working tree clean."
+    ],
+    "minimum_counted_commands": 1,
+    "maximum_counted_commands": 10,
+    "seed_notes": []
+  },
+  "branch-hard-mark-audit-point": {
+    "scenario_number": "2.1.20",
+    "difficulty": "hard",
+    "label": "Mark the Q3 audit point without leaving main",
+    "story": "The auditors signed off on the code at the commit \"Q3 audit sign-off\", and the compliance team needs a branch there called `audit/q3`. Work on `main` has continued since. You are in the middle of checking `main` and should not leave it.",
+    "starting_point": "You are on `main`. Its history holds the \"Q3 audit sign-off\" commit and later work.",
+    "real_world_context": "A branch can mark any past commit, which is handy for audits and releases that need a stable name.",
+    "task": "Create `audit/q3` at the \"Q3 audit sign-off\" commit. **Stay on `main` and leave it where it is.**",
+    "required_files": [],
+    "objective_checks": [
+      "audit/q3 points at the \"Q3 audit sign-off\" commit.",
+      "You are still on main, and main has not moved."
+    ],
+    "expected_result": "`audit/q3` marks the sign-off commit, and `main` is unchanged.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git log --oneline"
+      },
+      {
+        "kind": "command",
+        "command": "git branch audit/q3 c3"
+      }
+    ],
+    "solution_commands": [
+      "git log --oneline",
+      "git branch audit/q3 c3"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git switch -c audit/q3 c3` then `git switch main`; `main~1` as the start point."
+    ],
+    "not_accepted": [
+      "Creating the branch at main's tip, or moving main."
+    ],
+    "evaluation": [
+      "audit/q3 at c3; main at c4; HEAD on main; working tree clean."
+    ],
+    "minimum_counted_commands": 1,
+    "maximum_counted_commands": 10,
+    "seed_notes": []
+  },
   "bn-easy-delete-merged-typo": {
     "scenario_number": "2.2.14",
     "difficulty": "easy",
@@ -1229,6 +1671,92 @@
     "maximum_counted_commands": 8,
     "seed_notes": []
   },
+  "bn-hard-clear-merged-sprint": {
+    "scenario_number": "2.2.18",
+    "difficulty": "hard",
+    "label": "Clear out the sprint's merged branches",
+    "story": "The sprint is over, and the branch list is getting long. `feature/login-copy` and `fix/footer-link` are already in `main`. `spike/dark-mode` is an experiment that never merged, and Finn still wants it. Raven asks for a tidy list before planning starts.",
+    "starting_point": "You are on `main` with `feature/login-copy`, `fix/footer-link` and `spike/dark-mode` beside it.",
+    "real_world_context": "`git branch -d` only deletes branches whose work is already merged, so housekeeping cannot lose unmerged work by accident.",
+    "task": "Delete the local branches that are already merged into `main`. **Keep `spike/dark-mode`.**",
+    "required_files": [],
+    "objective_checks": [
+      "feature/login-copy and fix/footer-link are gone.",
+      "spike/dark-mode still exists at its commit.",
+      "main has not moved, and you are on main."
+    ],
+    "expected_result": "Only `main` and `spike/dark-mode` remain.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git branch -d feature/login-copy"
+      },
+      {
+        "kind": "command",
+        "command": "git branch -d fix/footer-link"
+      }
+    ],
+    "solution_commands": [
+      "git branch -d feature/login-copy",
+      "git branch -d fix/footer-link"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "One `git branch -d feature/login-copy fix/footer-link`; `git branch --merged` to check first."
+    ],
+    "not_accepted": [
+      "Deleting spike/dark-mode, or using `-D` on it."
+    ],
+    "evaluation": [
+      "Both merged branches absent; spike/dark-mode at c4; main at c3; HEAD on main."
+    ],
+    "minimum_counted_commands": 2,
+    "maximum_counted_commands": 10,
+    "seed_notes": []
+  },
+  "bn-hard-clear-merged-release": {
+    "scenario_number": "2.2.19",
+    "difficulty": "hard",
+    "label": "Clear out the release's merged branches",
+    "story": "Release 1.4 and its hotfix are both in `main` now, but their branches are still lying around. `experiment/new-nav` is unmerged work that Ana will finish next month. The team wants only live branches in the list.",
+    "starting_point": "You are on `main` with `release/1.4`, `hotfix/1.4.1` and `experiment/new-nav` beside it.",
+    "real_world_context": "Deleting merged branches keeps the branch list readable without losing any history, because their commits stay reachable from main.",
+    "task": "Delete the local branches that are already merged into `main`. **Keep `experiment/new-nav`.**",
+    "required_files": [],
+    "objective_checks": [
+      "release/1.4 and hotfix/1.4.1 are gone.",
+      "experiment/new-nav still exists at its commit.",
+      "main has not moved, and you are on main."
+    ],
+    "expected_result": "Only `main` and `experiment/new-nav` remain.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git branch -d release/1.4"
+      },
+      {
+        "kind": "command",
+        "command": "git branch -d hotfix/1.4.1"
+      }
+    ],
+    "solution_commands": [
+      "git branch -d release/1.4",
+      "git branch -d hotfix/1.4.1"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "One `git branch -d release/1.4 hotfix/1.4.1`; `git branch --merged` to check first."
+    ],
+    "not_accepted": [
+      "Deleting experiment/new-nav, or using `-D` on it."
+    ],
+    "evaluation": [
+      "Both merged branches absent; experiment/new-nav at c4; main at c3; HEAD on main."
+    ],
+    "minimum_counted_commands": 2,
+    "maximum_counted_commands": 10,
+    "seed_notes": []
+  },
   "stash-easy-pop-search": {
     "scenario_number": "2.3.14",
     "difficulty": "easy",
@@ -1408,6 +1936,102 @@
     ],
     "minimum_counted_commands": 4,
     "maximum_counted_commands": 8,
+    "seed_notes": []
+  },
+  "stash-hard-park-draft-search": {
+    "scenario_number": "2.3.18",
+    "difficulty": "hard",
+    "label": "Park the search draft while you check the release",
+    "story": "You are halfway through search facets on `feature/search` when Raven asks you to look over `release/v4`. The facets are not ready to commit, and you won't touch them again until tomorrow. Leave the branch clean, but keep the draft saved for later.",
+    "starting_point": "You are on `feature/search` with uncommitted edits to `src/search.py`.",
+    "real_world_context": "A stash can hold work for as long as you need. You don't have to restore it the moment you come back.",
+    "task": "Visit `release/v4` without carrying your edits along, then return to `feature/search`. **Finish with a clean working folder and the draft still saved in the stash.**",
+    "required_files": [],
+    "objective_checks": [
+      "You visited release/v4 and finished on feature/search.",
+      "The working folder is clean and no commit was made.",
+      "The stash holds one entry with the search draft."
+    ],
+    "expected_result": "You are back on a clean `feature/search`, and the stash holds the facets draft.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git stash"
+      },
+      {
+        "kind": "command",
+        "command": "git switch release/v4"
+      },
+      {
+        "kind": "command",
+        "command": "git switch feature/search"
+      }
+    ],
+    "solution_commands": [
+      "git stash",
+      "git switch release/v4",
+      "git switch feature/search"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git stash push`; `git checkout` for the switches."
+    ],
+    "not_accepted": [
+      "Committing the draft, popping or dropping the stash."
+    ],
+    "evaluation": [
+      "HEAD on feature/search at c3; release/v4 at c2; the reflog shows the visit; one stash entry with src/search.py."
+    ],
+    "minimum_counted_commands": 3,
+    "maximum_counted_commands": 10,
+    "seed_notes": []
+  },
+  "stash-hard-park-draft-billing": {
+    "scenario_number": "2.3.19",
+    "difficulty": "hard",
+    "label": "Park the billing draft while you check the hotfix",
+    "story": "You are drafting billing credits on `feature/billing` when Finn needs a second pair of eyes on `hotfix/tax`. The credits draft isn't finished and can wait until Monday. Your branch should be clean while the draft stays safe.",
+    "starting_point": "You are on `feature/billing` with uncommitted edits to `src/billing.py`.",
+    "real_world_context": "Stashing keeps unfinished work out of commits and out of other branches until you are ready for it.",
+    "task": "Visit `hotfix/tax` without carrying your edits along, then return to `feature/billing`. **Finish with a clean working folder and the draft still saved in the stash.**",
+    "required_files": [],
+    "objective_checks": [
+      "You visited hotfix/tax and finished on feature/billing.",
+      "The working folder is clean and no commit was made.",
+      "The stash holds one entry with the billing draft."
+    ],
+    "expected_result": "You are back on a clean `feature/billing`, and the stash holds the credits draft.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git stash"
+      },
+      {
+        "kind": "command",
+        "command": "git switch hotfix/tax"
+      },
+      {
+        "kind": "command",
+        "command": "git switch feature/billing"
+      }
+    ],
+    "solution_commands": [
+      "git stash",
+      "git switch hotfix/tax",
+      "git switch feature/billing"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git stash push`; `git checkout` for the switches."
+    ],
+    "not_accepted": [
+      "Committing the draft, popping or dropping the stash."
+    ],
+    "evaluation": [
+      "HEAD on feature/billing at c3; hotfix/tax at c2; the reflog shows the visit; one stash entry with src/billing.py."
+    ],
+    "minimum_counted_commands": 3,
+    "maximum_counted_commands": 10,
     "seed_notes": []
   },
   "push-medium-branch-commit-publish-search": {
@@ -1908,6 +2532,122 @@
     "maximum_counted_commands": 10,
     "seed_notes": []
   },
+  "rec-hard-commit-fetch-merge-search": {
+    "scenario_number": "2.6.16",
+    "difficulty": "hard",
+    "label": "Commit the ranking fix and merge a teammate's push",
+    "story": "Your ranking tweak is staged on `feature/search`, but so is `notes/plan.md`, which is only your to-do list. Meanwhile Mika pushed search docs to the same branch on `origin`. The branch on `origin` should end up with your fix and Mika's docs, and without your notes.",
+    "starting_point": "You are on `feature/search` with `src/ranking.py` and `notes/plan.md` staged. `origin/feature/search` has a newer commit from Mika.",
+    "real_world_context": "Fetching first lets you merge exactly what the server has, so your push lands on top of your teammate's work instead of being rejected.",
+    "task": "Commit only the ranking change with the message `Tune search ranking`, keeping your notes out of the commit. Then combine it with the newer `origin/feature/search` and publish `feature/search` to `origin`.",
+    "required_files": [],
+    "objective_checks": [
+      "A commit \"Tune search ranking\" holds src/ranking.py but not your notes.",
+      "feature/search includes Mika's commit, and origin/feature/search matches it.",
+      "notes/plan.md is still in your folder, uncommitted."
+    ],
+    "expected_result": "`feature/search` on `origin` holds your fix and Mika's docs, and your notes are still local.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git restore --staged notes/plan.md"
+      },
+      {
+        "kind": "command",
+        "command": "git commit -m \"Tune search ranking\""
+      },
+      {
+        "kind": "command",
+        "command": "git fetch origin"
+      },
+      {
+        "kind": "command",
+        "command": "git merge origin/feature/search"
+      },
+      {
+        "kind": "command",
+        "command": "git push origin feature/search"
+      }
+    ],
+    "solution_commands": [
+      "git restore --staged notes/plan.md",
+      "git commit -m \"Tune search ranking\"",
+      "git fetch origin",
+      "git merge origin/feature/search",
+      "git push origin feature/search"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git pull origin feature/search` in place of fetch and merge; `git reset notes/plan.md` to unstage."
+    ],
+    "not_accepted": [
+      "Committing the notes, or a force push."
+    ],
+    "evaluation": [
+      "Tip is a merge containing the fix and Mika's docs; its first parent is \"Tune search ranking\"; origin matches; the notes edit is still in the working tree."
+    ],
+    "minimum_counted_commands": 5,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "rec-hard-commit-fetch-merge-billing": {
+    "scenario_number": "2.6.17",
+    "difficulty": "hard",
+    "label": "Commit the rounding fix and merge a teammate's push",
+    "story": "You staged the invoice rounding fix on `feature/billing`, along with `tmp/invoice-dump.json` from a debugging session. Ana has since pushed billing docs to the branch on `origin`. The published branch needs your fix and Ana's docs, and the debug dump must stay out.",
+    "starting_point": "You are on `feature/billing` with `src/rounding.py` and `tmp/invoice-dump.json` staged. `origin/feature/billing` has a newer commit from Ana.",
+    "real_world_context": "A clean reconcile starts with a clean commit: leave scratch files out before you merge and publish.",
+    "task": "Commit only the rounding change with the message `Round invoice totals`, keeping the dump out of the commit. Then combine it with the newer `origin/feature/billing` and publish `feature/billing` to `origin`.",
+    "required_files": [],
+    "objective_checks": [
+      "A commit \"Round invoice totals\" holds src/rounding.py but not the dump.",
+      "feature/billing includes Ana's commit, and origin/feature/billing matches it.",
+      "tmp/invoice-dump.json is still in your folder, uncommitted."
+    ],
+    "expected_result": "`feature/billing` on `origin` holds your fix and Ana's docs, and the dump is still local.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git restore --staged tmp/invoice-dump.json"
+      },
+      {
+        "kind": "command",
+        "command": "git commit -m \"Round invoice totals\""
+      },
+      {
+        "kind": "command",
+        "command": "git fetch origin"
+      },
+      {
+        "kind": "command",
+        "command": "git merge origin/feature/billing"
+      },
+      {
+        "kind": "command",
+        "command": "git push origin feature/billing"
+      }
+    ],
+    "solution_commands": [
+      "git restore --staged tmp/invoice-dump.json",
+      "git commit -m \"Round invoice totals\"",
+      "git fetch origin",
+      "git merge origin/feature/billing",
+      "git push origin feature/billing"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git pull origin feature/billing` in place of fetch and merge; `git reset tmp/invoice-dump.json` to unstage."
+    ],
+    "not_accepted": [
+      "Committing the dump, or a force push."
+    ],
+    "evaluation": [
+      "Tip is a merge containing the fix and Ana's docs; its first parent is \"Round invoice totals\"; origin matches; the dump edit is still in the working tree."
+    ],
+    "minimum_counted_commands": 5,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
   "merge-medium-commit-switch-noff-reports": {
     "scenario_number": "2.7.14",
     "difficulty": "medium",
@@ -2339,6 +3079,122 @@
     "maximum_counted_commands": 8,
     "seed_notes": []
   },
+  "squash-hard-remote-publish-tidy-search": {
+    "scenario_number": "2.8.18",
+    "difficulty": "hard",
+    "label": "Squash the teammate's search branch and tidy up",
+    "story": "Mika finished the search feature on `origin/feature/search` in a string of WIP commits. The team wants it on `main` as one commit, \"Add search\", published to `origin`. Your own local `feature/search` is an old copy that nobody needs any more.",
+    "starting_point": "You are on `main`. Your local `feature/search` is behind `origin/feature/search`, and you haven't fetched Mika's latest commits.",
+    "real_world_context": "Squashing a teammate's branch gives main one clean commit. A stale local copy of that branch then has to go with `-D`, because Git never sees it as merged.",
+    "task": "Bring the latest `origin/feature/search` into `main` as one new commit with the message `Add search`, push `main` to `origin`, and delete your local `feature/search`.",
+    "required_files": [],
+    "objective_checks": [
+      "main has one new non-merge commit \"Add search\" with the finished feature.",
+      "origin/main matches main.",
+      "No local feature/search branch is left."
+    ],
+    "expected_result": "`main` has one \"Add search\" commit on `origin` too, and the stale branch is gone.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git fetch origin"
+      },
+      {
+        "kind": "command",
+        "command": "git merge --squash origin/feature/search"
+      },
+      {
+        "kind": "command",
+        "command": "git commit -m \"Add search\""
+      },
+      {
+        "kind": "command",
+        "command": "git push origin main"
+      },
+      {
+        "kind": "command",
+        "command": "git branch -D feature/search"
+      }
+    ],
+    "solution_commands": [
+      "git fetch origin",
+      "git merge --squash origin/feature/search",
+      "git commit -m \"Add search\"",
+      "git push origin main",
+      "git branch -D feature/search"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "Deleting the local branch before pushing."
+    ],
+    "not_accepted": [
+      "A regular merge, or squashing the stale local branch instead of the fetched one."
+    ],
+    "evaluation": [
+      "Tip \"Add search\" with parent c1 and the finished file; two commits on main; origin matches; feature/search absent."
+    ],
+    "minimum_counted_commands": 5,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "squash-hard-remote-publish-tidy-docs": {
+    "scenario_number": "2.8.19",
+    "difficulty": "hard",
+    "label": "Squash the teammate's API docs and tidy up",
+    "story": "Ana wrote the API docs on `origin/docs/api` in many small commits. They should land on `main` as a single commit, \"Document the API\", and be published. Your local `docs/api` is an outdated copy from last week.",
+    "starting_point": "You are on `main`. Your local `docs/api` is behind `origin/docs/api`, and you haven't fetched Ana's latest commits.",
+    "real_world_context": "A squash keeps the main history readable. Fetching first makes sure you squash the teammate's latest work, not your stale copy.",
+    "task": "Bring the latest `origin/docs/api` into `main` as one new commit with the message `Document the API`, push `main` to `origin`, and delete your local `docs/api`.",
+    "required_files": [],
+    "objective_checks": [
+      "main has one new non-merge commit \"Document the API\" with the finished docs.",
+      "origin/main matches main.",
+      "No local docs/api branch is left."
+    ],
+    "expected_result": "`main` has one \"Document the API\" commit on `origin` too, and the stale branch is gone.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git fetch origin"
+      },
+      {
+        "kind": "command",
+        "command": "git merge --squash origin/docs/api"
+      },
+      {
+        "kind": "command",
+        "command": "git commit -m \"Document the API\""
+      },
+      {
+        "kind": "command",
+        "command": "git push origin main"
+      },
+      {
+        "kind": "command",
+        "command": "git branch -D docs/api"
+      }
+    ],
+    "solution_commands": [
+      "git fetch origin",
+      "git merge --squash origin/docs/api",
+      "git commit -m \"Document the API\"",
+      "git push origin main",
+      "git branch -D docs/api"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "Deleting the local branch before pushing."
+    ],
+    "not_accepted": [
+      "A regular merge, or squashing the stale local branch instead of the fetched one."
+    ],
+    "evaluation": [
+      "Tip \"Document the API\" with parent c1 and the finished file; two commits on main; origin matches; docs/api absent."
+    ],
+    "minimum_counted_commands": 5,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
   "rb-medium-land-and-retire-search": {
     "scenario_number": "2.9.14",
     "difficulty": "medium",
@@ -2557,6 +3413,92 @@
     ],
     "minimum_counted_commands": 5,
     "maximum_counted_commands": 8,
+    "seed_notes": []
+  },
+  "rb-easy-delete-then-prune-docs": {
+    "scenario_number": "2.9.18",
+    "difficulty": "easy",
+    "label": "Retire the old FAQ branch and prune the leftovers",
+    "story": "The old FAQ pages are merged, so `docs/old-faq` can go from `origin`. While you're tidying, Sage mentions she already deleted `feature/old-banner` on the server. Your copy still lists it.",
+    "starting_point": "You are on `main`. `origin` still has `docs/old-faq`. Your copy also lists `origin/feature/old-banner`, which no longer exists on the server.",
+    "real_world_context": "Deleting your own remote branches and pruning branches teammates removed are two halves of the same tidy-up.",
+    "task": "Delete `docs/old-faq` from `origin`, then remove the stale `origin/feature/old-banner` record from your copy.",
+    "required_files": [],
+    "objective_checks": [
+      "docs/old-faq no longer exists on origin.",
+      "origin/feature/old-banner is gone from your copy.",
+      "main is unchanged."
+    ],
+    "expected_result": "Neither `origin/docs/old-faq` nor `origin/feature/old-banner` is listed any more.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git push origin --delete docs/old-faq"
+      },
+      {
+        "kind": "command",
+        "command": "git fetch --prune origin"
+      }
+    ],
+    "solution_commands": [
+      "git push origin --delete docs/old-faq",
+      "git fetch --prune origin"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git push origin :docs/old-faq`; `git remote prune origin`."
+    ],
+    "not_accepted": [
+      "Leaving either remote-tracking branch behind."
+    ],
+    "evaluation": [
+      "Both remote-tracking branches absent; main at c1; working tree clean."
+    ],
+    "minimum_counted_commands": 2,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "rb-easy-delete-then-prune-api": {
+    "scenario_number": "2.9.19",
+    "difficulty": "easy",
+    "label": "Retire the v1 API branch and prune the leftovers",
+    "story": "The v1 API work is merged, so `feature/v1-api` can go from `origin`. Finn already removed `spike/graphql` on the server last week, but your copy still shows it.",
+    "starting_point": "You are on `main`. `origin` still has `feature/v1-api`. Your copy also lists `origin/spike/graphql`, which no longer exists on the server.",
+    "real_world_context": "After a release, teams clear finished branches on the server and prune the stale records everyone's copies still show.",
+    "task": "Delete `feature/v1-api` from `origin`, then remove the stale `origin/spike/graphql` record from your copy.",
+    "required_files": [],
+    "objective_checks": [
+      "feature/v1-api no longer exists on origin.",
+      "origin/spike/graphql is gone from your copy.",
+      "main is unchanged."
+    ],
+    "expected_result": "Neither `origin/feature/v1-api` nor `origin/spike/graphql` is listed any more.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git push origin --delete feature/v1-api"
+      },
+      {
+        "kind": "command",
+        "command": "git fetch --prune origin"
+      }
+    ],
+    "solution_commands": [
+      "git push origin --delete feature/v1-api",
+      "git fetch --prune origin"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git push origin :feature/v1-api`; `git remote prune origin`."
+    ],
+    "not_accepted": [
+      "Leaving either remote-tracking branch behind."
+    ],
+    "evaluation": [
+      "Both remote-tracking branches absent; main at c1; working tree clean."
+    ],
+    "minimum_counted_commands": 2,
+    "maximum_counted_commands": 12,
     "seed_notes": []
   },
   "manual-easy-abort-wrong-branch": {
@@ -3449,6 +4391,122 @@
     ],
     "minimum_counted_commands": 4,
     "maximum_counted_commands": 8,
+    "seed_notes": []
+  },
+  "cherry-hard-review-backports-auth": {
+    "scenario_number": "3.3.22",
+    "difficulty": "hard",
+    "label": "Backport the auth fixes as one reviewed commit",
+    "story": "Two fixes on `main`, one in `src/auth.py` and one in `src/token.py`, need to reach `release-2.2`. The release manager wants to review them as a single commit called \"Backport auth fixes\". The feature commits around them must not come along.",
+    "starting_point": "You are on `main`. `release-2.2` was cut from the baseline before any of main's later commits.",
+    "real_world_context": "Applying picks without committing lets you combine several fixes and review them before they become one commit.",
+    "task": "On `release-2.2`, apply the two auth fixes from `main` without committing either, then commit them together with the message `Backport auth fixes`. Finish on `release-2.2` and leave `main` unchanged.",
+    "required_files": [],
+    "objective_checks": [
+      "release-2.2 has one new commit \"Backport auth fixes\" on top of its old tip.",
+      "It carries both auth fixes and none of main's feature work.",
+      "main is unchanged, and you finish on release-2.2."
+    ],
+    "expected_result": "`release-2.2` has one reviewed commit with both auth fixes.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git log --oneline main"
+      },
+      {
+        "kind": "command",
+        "command": "git switch release-2.2"
+      },
+      {
+        "kind": "command",
+        "command": "git cherry-pick --no-commit c2"
+      },
+      {
+        "kind": "command",
+        "command": "git cherry-pick --no-commit c4"
+      },
+      {
+        "kind": "command",
+        "command": "git commit -m \"Backport auth fixes\""
+      }
+    ],
+    "solution_commands": [
+      "git log --oneline main",
+      "git switch release-2.2",
+      "git cherry-pick --no-commit c2",
+      "git cherry-pick --no-commit c4",
+      "git commit -m \"Backport auth fixes\""
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`-n` for `--no-commit`; one `git cherry-pick --no-commit c2 c4`."
+    ],
+    "not_accepted": [
+      "Two separate commits, or picking the feature commits."
+    ],
+    "evaluation": [
+      "Tip \"Backport auth fixes\" with parent c5; both files fixed; src/new.py unchanged; three commits on release-2.2."
+    ],
+    "minimum_counted_commands": 4,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "cherry-hard-review-backports-export": {
+    "scenario_number": "3.3.23",
+    "difficulty": "hard",
+    "label": "Backport the export fixes as one reviewed commit",
+    "story": "`release-3.0` needs two fixes from `main`: one in `src/export.py` and one in `src/csv_writer.py`. QA will only sign off on a single commit, \"Backport export fixes\". New feature work on `main` stays out of the release.",
+    "starting_point": "You are on `main`. `release-3.0` was cut from the baseline before any of main's later commits.",
+    "real_world_context": "Release branches take only the fixes they need. Combining picks into one commit keeps the release history short and reviewable.",
+    "task": "On `release-3.0`, apply the two export fixes from `main` without committing either, then commit them together with the message `Backport export fixes`. Finish on `release-3.0` and leave `main` unchanged.",
+    "required_files": [],
+    "objective_checks": [
+      "release-3.0 has one new commit \"Backport export fixes\" on top of its old tip.",
+      "It carries both export fixes and none of main's feature work.",
+      "main is unchanged, and you finish on release-3.0."
+    ],
+    "expected_result": "`release-3.0` has one reviewed commit with both export fixes.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git log --oneline main"
+      },
+      {
+        "kind": "command",
+        "command": "git switch release-3.0"
+      },
+      {
+        "kind": "command",
+        "command": "git cherry-pick --no-commit c1"
+      },
+      {
+        "kind": "command",
+        "command": "git cherry-pick --no-commit c3"
+      },
+      {
+        "kind": "command",
+        "command": "git commit -m \"Backport export fixes\""
+      }
+    ],
+    "solution_commands": [
+      "git log --oneline main",
+      "git switch release-3.0",
+      "git cherry-pick --no-commit c1",
+      "git cherry-pick --no-commit c3",
+      "git commit -m \"Backport export fixes\""
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`-n` for `--no-commit`; one `git cherry-pick --no-commit c1 c3`."
+    ],
+    "not_accepted": [
+      "Two separate commits, or picking the feature commits."
+    ],
+    "evaluation": [
+      "Tip \"Backport export fixes\" with parent c5; both files fixed; src/new.py unchanged; three commits on release-3.0."
+    ],
+    "minimum_counted_commands": 4,
+    "maximum_counted_commands": 12,
     "seed_notes": []
   },
   "reflog-medium-recover-and-publish-search": {
@@ -4396,6 +5454,128 @@
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 8,
+    "seed_notes": []
+  },
+  "rebase-easy-continue-styles": {
+    "scenario_number": "4.3.18",
+    "difficulty": "easy",
+    "label": "Resolve and continue the dark theme rebase",
+    "story": "Your rebase of `feature/dark-theme` onto `main` stopped on `styles/theme.css`. `main` changed the accent colour to navy, and your branch added a dark surface colour. Mika wants both, so the file keeps `main`'s accent and your surface.",
+    "starting_point": "You are in the middle of rebasing `feature/dark-theme` onto `main`, stopped on a conflict in `styles/theme.css`.",
+    "real_world_context": "A stopped rebase waits for you: resolve the file, stage it, and continue, and Git replays the rest of your branch.",
+    "task": "Resolve `styles/theme.css` to the content below, stage it, and continue the rebase until it finishes.",
+    "required_files": [
+      {
+        "path": "styles/theme.css",
+        "content": "--accent: navy;\n--surface: #111;"
+      }
+    ],
+    "objective_checks": [
+      "No rebase is in progress and no conflicts remain.",
+      "feature/dark-theme now sits on top of main's latest commit.",
+      "styles/theme.css contains exactly the required content, and the branch's later commit was replayed too."
+    ],
+    "expected_result": "`feature/dark-theme` is rebased onto `main` with both colours, and no rebase is in progress.",
+    "answer_key": [
+      {
+        "kind": "file_edit",
+        "path": "styles/theme.css",
+        "content": "--accent: navy;\n--surface: #111;",
+        "after_command_index": 0
+      },
+      {
+        "kind": "command",
+        "command": "git add styles/theme.css"
+      },
+      {
+        "kind": "command",
+        "command": "git rebase --continue"
+      }
+    ],
+    "solution_commands": [
+      "git add styles/theme.css",
+      "git rebase --continue"
+    ],
+    "solution_workspace_files": [
+      {
+        "mode": "write",
+        "path": "styles/theme.css",
+        "content": "--accent: navy;\n--surface: #111;",
+        "after_command_index": 0
+      }
+    ],
+    "accepted_alternatives": [
+      "`git status` along the way."
+    ],
+    "not_accepted": [
+      "Aborting the rebase, `git rebase --skip`, or committing the resolution as a separate commit."
+    ],
+    "evaluation": [
+      "No rebase in progress; four commits on feature/dark-theme including main's c1; the resolved theme and the replayed docs file are in the tip."
+    ],
+    "minimum_counted_commands": 2,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "rebase-easy-continue-routes": {
+    "scenario_number": "4.3.19",
+    "difficulty": "easy",
+    "label": "Resolve and continue the health route rebase",
+    "story": "Rebasing `feature/health-route` onto `main` stopped on `src/routes.py`. `main` added a login route, and your branch added a health check. Both stay, so the file keeps `main`'s routes and your health check.",
+    "starting_point": "You are in the middle of rebasing `feature/health-route` onto `main`, stopped on a conflict in `src/routes.py`.",
+    "real_world_context": "Conflicts during a rebase are resolved one replayed commit at a time, then the rebase carries on by itself.",
+    "task": "Resolve `src/routes.py` to the content below, stage it, and continue the rebase until it finishes.",
+    "required_files": [
+      {
+        "path": "src/routes.py",
+        "content": "ROUTES = ['/', '/login']\nHEALTH = '/health'"
+      }
+    ],
+    "objective_checks": [
+      "No rebase is in progress and no conflicts remain.",
+      "feature/health-route now sits on top of main's latest commit.",
+      "src/routes.py contains exactly the required content, and the branch's later commit was replayed too."
+    ],
+    "expected_result": "`feature/health-route` is rebased onto `main` with both routes, and no rebase is in progress.",
+    "answer_key": [
+      {
+        "kind": "file_edit",
+        "path": "src/routes.py",
+        "content": "ROUTES = ['/', '/login']\nHEALTH = '/health'",
+        "after_command_index": 0
+      },
+      {
+        "kind": "command",
+        "command": "git add src/routes.py"
+      },
+      {
+        "kind": "command",
+        "command": "git rebase --continue"
+      }
+    ],
+    "solution_commands": [
+      "git add src/routes.py",
+      "git rebase --continue"
+    ],
+    "solution_workspace_files": [
+      {
+        "mode": "write",
+        "path": "src/routes.py",
+        "content": "ROUTES = ['/', '/login']\nHEALTH = '/health'",
+        "after_command_index": 0
+      }
+    ],
+    "accepted_alternatives": [
+      "`git status` along the way."
+    ],
+    "not_accepted": [
+      "Aborting the rebase, `git rebase --skip`, or committing the resolution as a separate commit."
+    ],
+    "evaluation": [
+      "No rebase in progress; four commits on feature/health-route including main's c1; the resolved routes and the replayed test file are in the tip."
+    ],
+    "minimum_counted_commands": 2,
+    "maximum_counted_commands": 12,
     "seed_notes": []
   },
   "gate1-easy-first-snapshot-field-log": {

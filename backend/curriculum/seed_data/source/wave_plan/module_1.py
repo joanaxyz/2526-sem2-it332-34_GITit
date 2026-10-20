@@ -21,8 +21,17 @@ WAVES: ModuleWaves = {
     "initializing-a-local-repository": {
         "easy": (
             WaveSpec(
+                "start-tracking-this-folder",
+                "Start tracking this folder",
+                DEBUT,
+                (
+                    "init-easy-plain-notes",
+                    "init-easy-plain-recipes",
+                ),
+            ),
+            WaveSpec(
                 "track-this-folder",
-                "Track this folder",
+                "Choose the first branch",
                 DEBUT,
                 (
                     "init-easy-current-empty",
@@ -32,10 +41,19 @@ WAVES: ModuleWaves = {
             WaveSpec(
                 "new-project-folder",
                 "Start a new project folder",
-                PRACTICE,
+                DEBUT,
                 (
                     "init-easy-invoice",
                     "init-med-oss",
+                ),
+            ),
+            WaveSpec(
+                "new-folder-among-other-files",
+                "A new folder among other files",
+                PRACTICE,
+                (
+                    "init-hard-ci",
+                    "init-easy-new-folder-among-files",
                 ),
             ),
         ),
@@ -55,7 +73,7 @@ WAVES: ModuleWaves = {
                 PRACTICE,
                 (
                     "init-medium-existing-files",
-                    "init-hard-ci",
+                    "init-medium-existing-sketches",
                 ),
             ),
         ),
@@ -89,7 +107,7 @@ WAVES: ModuleWaves = {
                 DEBUT,
                 (
                     "clone-easy-docs-portal",
-                    "clone-easy-oss-ssh",
+                    "clone-easy-style-guide",
                 ),
             ),
             WaveSpec(
@@ -108,27 +126,35 @@ WAVES: ModuleWaves = {
                 (
                     "clone-easy-profile-starter",
                     "clone-med-feature",
+                ),
+            ),
+            WaveSpec(
+                "branch-into-named-folder",
+                "A branch into a named folder",
+                COMPOSE,
+                (
                     "clone-medium-cli-starter-folder",
+                    "clone-easy-branch-folder-handbook",
                 ),
             ),
         ),
         "medium": (
-            WaveSpec(
-                "ssh-into-named-folder",
-                "SSH address, named folder",
-                PRACTICE,
-                (
-                    "clone-medium-analytics-ssh",
-                    "clone-hard-research-log-ssh",
-                ),
-            ),
             WaveSpec(
                 "shallow-history",
                 "Shallow history",
                 DEBUT,
                 (
                     "clone-medium-css-kit-shallow",
-                    "clone-medium-shallow-metrics",
+                    "clone-medium-shallow-icons",
+                ),
+            ),
+            WaveSpec(
+                "ssh-into-named-folder",
+                "SSH address, named folder",
+                DEBUT,
+                (
+                    "clone-medium-analytics-ssh",
+                    "clone-hard-research-log-ssh",
                 ),
             ),
         ),
@@ -164,7 +190,6 @@ WAVES: ModuleWaves = {
                     "commit-easy-form-validation",
                     "commit-easy-readme-setup",
                     "commit-easy-navbar-spacing",
-                    "commit-easy-auth-dir",
                 ),
             ),
             WaveSpec(
@@ -172,22 +197,21 @@ WAVES: ModuleWaves = {
                 "Stage several files at once",
                 DEBUT,
                 (
-                    "commit-easy-initial",
                     "commit-med-docker",
+                    "commit-medium-profile-card",
                 ),
             ),
-        ),
-        "medium": (
             WaveSpec(
                 "a-two-file-change",
                 "A two-file change",
                 PRACTICE,
                 (
-                    "commit-medium-profile-card",
                     "commit-medium-search-results",
                     "commit-medium-export-flow",
                 ),
             ),
+        ),
+        "medium": (
             WaveSpec(
                 "first-snapshot-of-a-new-project",
                 "First snapshot of a new project",
@@ -195,6 +219,15 @@ WAVES: ModuleWaves = {
                 (
                     "commit-medium-new-project-portfolio",
                     "commit-medium-new-project-recipes",
+                ),
+            ),
+            WaveSpec(
+                "a-bigger-change",
+                "A bigger change",
+                PRACTICE,
+                (
+                    "commit-easy-initial",
+                    "commit-medium-three-file-release",
                 ),
             ),
         ),
@@ -253,6 +286,7 @@ WAVES: ModuleWaves = {
                     "partial-medium-profile-validation",
                     "partial-medium-payment-rounding",
                     "partial-medium-dashboard-filter",
+                    "partial-hard-terraform",
                 ),
             ),
             WaveSpec(
@@ -271,7 +305,6 @@ WAVES: ModuleWaves = {
                 "Hunks across code and tests",
                 TRANSFER,
                 (
-                    "partial-hard-terraform",
                     "partial-hard-auth-cross-file",
                     "partial-hard-search-cross-file",
                     "partial-hard-export-cross-file",
@@ -310,6 +343,8 @@ WAVES: ModuleWaves = {
                 (
                     "amend-easy-forgot",
                     "amend-medium-profile-missing-css",
+                    "amend-medium-export-doc",
+                    "amend-medium-search-template",
                 ),
             ),
         ),
@@ -320,8 +355,7 @@ WAVES: ModuleWaves = {
                 PRACTICE,
                 (
                     "amend-med-both",
-                    "amend-medium-export-doc",
-                    "amend-medium-search-template",
+                    "amend-hard-profile-message-and-layout",
                 ),
             ),
             WaveSpec(
@@ -340,7 +374,6 @@ WAVES: ModuleWaves = {
                 "Missing file and wrong message",
                 TRANSFER,
                 (
-                    "amend-hard-profile-message-and-layout",
                     "amend-hard-auth-message-and-test",
                     "amend-hard-export-message-and-doc",
                 ),
@@ -360,6 +393,15 @@ WAVES: ModuleWaves = {
     "unstaging-and-discarding-changes": {
         "easy": (
             WaveSpec(
+                "throw-away-a-working-change",
+                "Throw away a working change",
+                DEBUT,
+                (
+                    "restore-easy-discard",
+                    "restore-easy-discard-theme",
+                ),
+            ),
+            WaveSpec(
                 "unstage-keep-the-edit",
                 "Unstage but keep the edit",
                 DEBUT,
@@ -371,23 +413,21 @@ WAVES: ModuleWaves = {
                 ),
             ),
             WaveSpec(
-                "throw-away-a-working-change",
-                "Throw away a working change",
-                DEBUT,
+                "unstage-and-discard-together",
+                "Unstage one, discard another",
+                COMPOSE,
                 (
-                    "restore-easy-discard",
-                    "restore-easy-discard-theme",
+                    "restore-med-unstage-discard",
+                    "restore-medium-app-debug",
                 ),
             ),
         ),
         "medium": (
             WaveSpec(
                 "unstage-one-discard-another",
-                "Unstage one, discard another",
+                "Sort out a mixed folder",
                 COMPOSE,
                 (
-                    "restore-med-unstage-discard",
-                    "restore-medium-app-debug",
                     "restore-medium-docs-scratch",
                     "restore-medium-css-build",
                 ),

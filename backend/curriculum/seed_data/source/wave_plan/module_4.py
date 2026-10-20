@@ -166,15 +166,6 @@ WAVES: ModuleWaves = {
                 ),
             ),
             WaveSpec(
-                "abandon-a-stopped-rebase",
-                "Abandon a stopped rebase",
-                DEBUT,
-                (
-                    "rebase-medium-abort",
-                    "rebase-easy-abort-stopped-docs",
-                ),
-            ),
-            WaveSpec(
                 "resolve-and-continue-a-rebase",
                 "Resolve and continue a rebase",
                 DEBUT,
@@ -183,8 +174,26 @@ WAVES: ModuleWaves = {
                     "rebase-easy-continue-config",
                 ),
             ),
+            WaveSpec(
+                "resolve-another-stopped-rebase",
+                "Resolve another stopped rebase",
+                PRACTICE,
+                (
+                    "rebase-easy-continue-styles",
+                    "rebase-easy-continue-routes",
+                ),
+            ),
         ),
         "medium": (
+            WaveSpec(
+                "abandon-a-stopped-rebase",
+                "Abandon a stopped rebase",
+                DEBUT,
+                (
+                    "rebase-medium-abort",
+                    "rebase-easy-abort-stopped-docs",
+                ),
+            ),
             WaveSpec(
                 "move-only-your-commits",
                 "Move only your commits",
@@ -206,21 +215,21 @@ WAVES: ModuleWaves = {
         ),
         "hard": (
             WaveSpec(
-                "continue-then-publish-safely",
-                "Continue the rebase, then publish safely",
-                SPIRAL,
-                (
-                    "rebase-hard-continue-then-lease-search",
-                    "rebase-hard-continue-then-lease-billing",
-                ),
-            ),
-            WaveSpec(
                 "abort-then-move-only-your-commits",
                 "Abort, then move only your commits",
                 TRANSFER,
                 (
                     "rebase-hard-abort-then-onto-reports",
                     "rebase-hard-abort-then-onto-ui",
+                ),
+            ),
+            WaveSpec(
+                "continue-then-publish-safely",
+                "Continue the rebase, then publish safely",
+                SPIRAL,
+                (
+                    "rebase-hard-continue-then-lease-search",
+                    "rebase-hard-continue-then-lease-billing",
                 ),
             ),
             WaveSpec(

@@ -683,6 +683,12 @@ RUNTIME_OVERRIDES = _runtime_overrides()
 # Scenarios the wave plan does not place, and why (docs/goals/curriculum-waves-and-repetition).
 UNPLACED_CASE_IDS = {
     "init-hard-safe-rerun": "re-running git init leaves no state to grade",
+    # A wave's variants are one problem; these differ from every wave of their level.
+    "clone-easy-oss-ssh": "an SSH clone without a folder; SSH debuts with a named folder",
+    "commit-easy-auth-dir": "stages a folder; the level's waves stage files",
+    "v21h-detach-save": "saves a detached commit without returning; the Hard wave also returns",
+    "cherry-medium-login-timeout": "two picks in order; no cherry-pick wave copies two commits",
+    "cherry-medium-invoice-rounding": "picks a branch tip by name; the waves pick commits",
 }
 
 _ROUTE_RULES = frozenset(

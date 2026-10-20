@@ -63,8 +63,12 @@ _VALUE_OPTIONS = frozenset(
         "--grep",
         "-b",
         "-B",
+        "--branch",
+        "--initial-branch",
         "-c",
         "-C",
+        "--create",
+        "--depth",
         "--since",
         "--until",
         "--date",
@@ -77,6 +81,16 @@ _DEFAULT_REMOTES = ("origin", "upstream")
 # Interactive modes walk one file at a time; never merge their steps.
 _INTERACTIVE_OPTIONS = frozenset({"-p", "--patch", "-i", "--interactive", "-e", "--edit"})
 _RELATIVE_REF = re.compile(r"[\w./@{}-]+(?:[~^]\d*)+")
+# git@host:team/repo.git or ssh://host/team/repo.git
+_SSH_URL = re.compile(r"^(?:ssh://|[\w.-]+@[\w.-]+:)")
+# Options that create a branch and name it, so a further operand is its start point.
+_CREATE_BRANCH_OPTIONS = {
+    "switch": frozenset({"-c", "-C", "--create", "--force-create"}),
+    "checkout": frozenset({"-b", "-B"}),
+}
+_BRANCH_LIST_OR_DELETE_OPTIONS = frozenset(
+    {"-d", "-D", "--delete", "-m", "-M", "--move", "-l", "--list", "-a", "-r", "--merged"}
+)
 
 
 @dataclass(frozen=True)
@@ -86,6 +100,8 @@ class ParsedCommand:
     paths_after_separator: tuple[str, ...]
     # Values of options that name a commit (--source=HEAD~1): refs, never paths.
     option_refs: tuple[str, ...] = ()
+    # Option names as typed (-c, --depth), without their values.
+    options: tuple[str, ...] = ()
 
     @property
     def refs(self) -> tuple[str, ...]:
@@ -129,6 +145,7 @@ def parse_command(command: str) -> ParsedCommand | None:
     operands: list[str] = []
     after: list[str] = []
     option_refs: list[str] = []
+    options: list[str] = []
     separator = False
     skip_next = False
     ref_next = False
@@ -144,6 +161,7 @@ def parse_command(command: str) -> ParsedCommand | None:
             separator = True
         elif token.startswith("-"):
             option, _, value = token.partition("=")
+            options.append(option)
             if option in _REF_VALUE_OPTIONS:
                 if value:
                     option_refs.append(value)
@@ -153,7 +171,7 @@ def parse_command(command: str) -> ParsedCommand | None:
                 skip_next = True
         else:
             operands.append(token)
-    return ParsedCommand(family, tuple(operands), tuple(after), tuple(option_refs))
+    return ParsedCommand(family, tuple(operands), tuple(after), tuple(option_refs), tuple(options))
 
 
 def _paths(parsed: ParsedCommand) -> tuple[str, ...]:
@@ -165,6 +183,25 @@ def _paths(parsed: ParsedCommand) -> tuple[str, ...]:
 def _remotes(state: dict | None) -> tuple[str, ...]:
     remotes = (state or {}).get("remotes")
     return tuple(remotes) if isinstance(remotes, dict) and remotes else _DEFAULT_REMOTES
+
+
+def _start_point(parsed: ParsedCommand) -> bool:
+    """A new branch named with a commit or branch to start from instead of HEAD."""
+    creating = _CREATE_BRANCH_OPTIONS.get(parsed.family)
+    if creating is not None:
+        # The new name is the option's value, so any operand is the start point.
+        return bool(creating & set(parsed.options)) and bool(parsed.operands)
+    if parsed.family == "branch":
+        return len(parsed.operands) >= 2 and not (
+            _BRANCH_LIST_OR_DELETE_OPTIONS & set(parsed.options)
+        )
+    return False
+
+
+def _start_point_syntax(family: str) -> str:
+    if family == "switch":
+        return "git switch -c <branch> <start-point>"
+    return f"git {family} <branch> <start-point>"
 
 
 TECHNIQUES: tuple[Technique, ...] = (
@@ -239,6 +276,31 @@ TECHNIQUES: tuple[Technique, ...] = (
         "@{upstream}, or @{u}, is the remote branch your current branch tracks.",
         lambda family: f"git {family} @{{upstream}}",
         lambda parsed, _state: any("@{u" in ref for ref in parsed.refs),
+    ),
+    Technique(
+        "start-point",
+        "Start a branch somewhere else",
+        "Name a commit or branch after the new branch, and it starts there instead of where you are.",
+        _start_point_syntax,
+        lambda parsed, _state: _start_point(parsed),
+    ),
+    Technique(
+        "target-folder",
+        "Name the folder to set up",
+        "Put a folder after git init and only that folder becomes a repository, created if needed.",
+        lambda family: f"git {family} <directory>",
+        lambda parsed, _state: (
+            parsed.family == "init" and any(operand != "." for operand in parsed.operands)
+        ),
+    ),
+    Technique(
+        "ssh-url",
+        "Clone over SSH",
+        "An address like git@host:team/repo.git signs in with your SSH key instead of a password.",
+        lambda family: f"git {family} git@<host>:<path>.git",
+        lambda parsed, _state: (
+            parsed.family == "clone" and any(_SSH_URL.match(operand) for operand in parsed.operands)
+        ),
     ),
 )
 _BY_KEY = {technique.key: technique for technique in TECHNIQUES}

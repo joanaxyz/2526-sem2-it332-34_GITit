@@ -314,8 +314,14 @@ def _abort_stopped_pick() -> dict[str, Any]:
 
 
 def _two_fixes_one_commit(
-    *, release: str, picks: tuple[str, str], message: str, paths: tuple[str, str]
+    *,
+    release: str,
+    picks: tuple[str, str],
+    message: str,
+    paths: tuple[str, str],
+    start: str | None = None,
 ) -> dict[str, Any]:
+    """Two fixes from ``main`` become one commit on ``release``; ``start`` is the first HEAD."""
     first, second = paths
     base = {
         "README.md": "readme-v1",
@@ -341,7 +347,7 @@ def _two_fixes_one_commit(
     )
     return {
         "initial_state": repo(
-            commits=commits, branches={"main": "c4", release: "c5"}, head=release
+            commits=commits, branches={"main": "c4", release: "c5"}, head=start or release
         ),
         "state_requirements": clean(
             release,
@@ -483,6 +489,20 @@ FIXTURES: dict[str, dict[str, Any]] = {
         paths=("src/tax.py", "src/invoice_tax.py"),
     ),
     "cherry-hard-two-releases-security": _two_releases(),
+    "cherry-hard-review-backports-auth": _two_fixes_one_commit(
+        release="release-2.2",
+        picks=("c2", "c4"),
+        message="Backport auth fixes",
+        paths=("src/auth.py", "src/token.py"),
+        start="main",
+    ),
+    "cherry-hard-review-backports-export": _two_fixes_one_commit(
+        release="release-3.0",
+        picks=("c1", "c3"),
+        message="Backport export fixes",
+        paths=("src/export.py", "src/csv_writer.py"),
+        start="main",
+    ),
     "cherry-hard-backport-capstone-export": _backport_capstone(
         release="release-1.4",
         path="src/export.py",

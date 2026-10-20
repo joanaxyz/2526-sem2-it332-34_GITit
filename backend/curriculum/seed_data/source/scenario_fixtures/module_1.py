@@ -326,8 +326,94 @@ def _capstone(
     }
 
 
+def _init_workspace(
+    *, root: str, branch: str, files: dict[str, str], inside: bool = False
+) -> dict[str, Any]:
+    """``root`` becomes a repository; ``files`` (inside it when ``inside``) stay untracked."""
+    rules: list[dict[str, Any]] = [{"type": "commit_count_equals", "count": 0}]
+    if inside:
+        rules += [
+            {"type": "working_tree_matches_exact_paths", "paths": sorted(files)},
+            {"type": "working_tree_contains_tokens", "tokens": sorted(files.values())},
+        ]
+    return {
+        "initial_state": repo(
+            initialized=False,
+            working_tree={path: untracked(content) for path, content in files.items()},
+        ),
+        "state_requirements": {
+            "repository_initialized": True,
+            "repository_root": root,
+            "head_branch": branch,
+            "staging_empty": True,
+            "working_tree_contains": sorted(files),
+            "rules": rules,
+        },
+    }
+
+
+def _clone(
+    *, url: str, project: str, messages: list[str], branch: str = "main", root: str | None = None
+) -> dict[str, Any]:
+    """A remote whose ``main`` holds ``messages``; a ``branch`` other than main adds one commit."""
+    commits: list[dict] = []
+    tree: dict[str, str] = {"README.md": f"# {project}\n"}
+    for index, message in enumerate(messages, start=1):
+        tree = {**tree, f"docs/part-{index}.md": f"{project}-part-{index}"}
+        commits.append(
+            commit(f"r{index}", message, [f"r{index - 1}"] if index > 1 else [], dict(tree))
+        )
+    branches = {"origin/main": commits[-1]["id"]}
+    if branch != "main":
+        branch_tip = f"r{len(commits) + 1}"
+        commits.append(
+            commit(
+                branch_tip,
+                f"Start the {branch} branch",
+                [commits[-1]["id"]],
+                {**tree, f"{branch}.md": f"{project}-{branch}"},
+            )
+        )
+        branches[f"origin/{branch}"] = branch_tip
+    tip_id = branches[f"origin/{branch}"]
+    fixtures = remote_fixture(url, commits, branches["origin/main"])
+    fixtures["branches"] = branches
+    requirements: dict[str, Any] = {
+        "repository_initialized": True,
+        "head_branch": branch,
+        "remote_exists": ["origin"],
+        "remote_branch_exists": [f"origin/{branch}"],
+        "remote_branch_points_to": {f"origin/{branch}": tip_id},
+        "branch_points_to": {branch: tip_id},
+        "staging_empty": True,
+        "working_tree_clean": True,
+        "rules": [],
+    }
+    if root:
+        requirements["repository_root"] = root
+    return {
+        "initial_state": repo(initialized=False, remote_fixtures=fixtures),
+        "state_requirements": requirements,
+    }
+
+
 FIXTURES: dict[str, dict[str, Any]] = {
     # 1.1 Initializing Repositories
+    "init-easy-plain-notes": _init_workspace(
+        root=".", branch="main", files={"notes.md": "Planning notes\n"}, inside=True
+    ),
+    "init-easy-plain-recipes": _init_workspace(
+        root=".", branch="main", files={"recipes.md": "Family recipes\n"}, inside=True
+    ),
+    "init-easy-new-folder-among-files": _init_workspace(
+        root="site-assets", branch="main", files={"design/logo.svg": "<svg>logo</svg>\n"}
+    ),
+    "init-medium-existing-sketches": _init_workspace(
+        root="sketches",
+        branch="main",
+        files={"sketches/ideas.md": "Sketch ideas\n", "sketches/palette.txt": "teal,amber\n"},
+        inside=True,
+    ),
     "init-hard-nested-service": _init_nested(
         root="services/billing-api", branch="trunk", siblings=["services/search-api", "docs"]
     ),
@@ -335,12 +421,24 @@ FIXTURES: dict[str, dict[str, Any]] = {
         root="courses/git-basics", branch="main", siblings=["courses/sql-basics", "templates"]
     ),
     # 1.2 Cloning Repositories
-    "clone-medium-shallow-metrics": _shallow_clone(
-        url="https://example.test/data/metrics-dash.git",
-        project="metrics",
-        destination="metrics-review",
+    "clone-easy-style-guide": _clone(
+        url="https://example.test/design/style-guide.git",
+        project="style-guide",
+        messages=["Create the style guide", "Add colour tokens"],
+    ),
+    "clone-easy-branch-folder-handbook": _clone(
+        url="https://example.test/docs/handbook.git",
+        project="handbook",
+        messages=["Create the team handbook", "Add onboarding chapter"],
+        branch="draft",
+        root="handbook-draft",
+    ),
+    "clone-medium-shallow-icons": _shallow_clone(
+        url="https://example.test/design/icon-set.git",
+        project="icons",
+        destination="icon-set",
         depth=1,
-        messages=["Create metrics dashboard", "Add weekly chart", "Add export button"],
+        messages=["Create the icon set", "Add navigation icons", "Add status icons"],
     ),
     "clone-hard-shallow-ssh-audit": _shallow_clone(
         url="git@example.test:security/audit-rules.git",
@@ -355,6 +453,49 @@ FIXTURES: dict[str, dict[str, Any]] = {
         ],
     ),
     # 1.3 Staging and Committing
+    "commit-medium-three-file-release": {
+        "initial_state": repo(
+            commits=[
+                commit(
+                    "c1",
+                    "Release 1.1",
+                    [],
+                    {
+                        "README.md": "readme-v1",
+                        "setup.py": "setup-1.1",
+                        "src/version.py": "version-1.1",
+                    },
+                )
+            ],
+            branches={"main": "c1"},
+            working_tree={
+                "CHANGELOG.md": untracked("changelog-1.2"),
+                "setup.py": modified("setup-1.2"),
+                "src/version.py": modified("version-1.2"),
+            },
+        ),
+        "state_requirements": {
+            "head_branch": "main",
+            "staging_empty": True,
+            "latest_commit": {
+                "branch": "main",
+                "message_contains": ["Prepare 1.2 release"],
+                "contains_paths": ["CHANGELOG.md", "setup.py", "src/version.py"],
+            },
+            "rules": [
+                {"type": "commit_count_equals", "count": 2},
+                tip(
+                    "main",
+                    message_equals="Prepare 1.2 release",
+                    tree_contains={
+                        "CHANGELOG.md": "changelog-1.2",
+                        "setup.py": "setup-1.2",
+                        "src/version.py": "version-1.2",
+                    },
+                ),
+            ],
+        },
+    },
     "commit-medium-new-project-portfolio": _first_snapshot(
         files={"index.html": "portfolio-home-v1", "styles.css": "portfolio-styles-v1"},
         private="notes.txt",
