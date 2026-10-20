@@ -1,0 +1,129 @@
+/*
+ * GIT it! pointer set — static 32×32 SVGs with precise hotspots.
+ * Uses the same white / neon blue / ink vocabulary as DESIGN.md.
+ * Scope to real mice; touch and coarse pointers retain native behavior.
+ * Browser keyword fallbacks remain functional when SVG cursors are unsupported.
+ */
+@media (hover: hover) and (pointer: fine) {
+  :root:not([data-custom-cursors='off']) {
+    --cursor-arrow: url('/cursors/arrow.svg') 4 3, auto;
+    --cursor-hand: url('/cursors/hand.svg') 14 4, pointer;
+    --cursor-text: url('/cursors/text.svg') 16 16, text;
+    --cursor-grab: url('/cursors/grab.svg') 16 15, grab;
+    --cursor-grabbing: url('/cursors/grabbing.svg') 16 16, grabbing;
+    --cursor-blocked: url('/cursors/blocked.svg') 16 16, not-allowed;
+    --cursor-progress: url('/cursors/progress.svg') 4 3, progress;
+    --cursor-crosshair: url('/cursors/crosshair.svg') 16 16, crosshair;
+    --cursor-help: url('/cursors/help.svg') 3 3, help;
+  }
+
+  :root:not([data-custom-cursors='off']),
+  :root:not([data-custom-cursors='off']) body {
+    cursor: var(--cursor-arrow, auto);
+  }
+
+  /* Actions: components, navigation, form controls, and semantic click targets. */
+  :root:not([data-custom-cursors='off']) :is(
+    a[href],
+    button:not(:disabled),
+    [role='button']:not([aria-disabled='true']),
+    [role='link'],
+    summary,
+    label[for],
+    select:not(:disabled),
+    input[type='checkbox']:not(:disabled),
+    input[type='radio']:not(:disabled),
+    input[type='range']:not(:disabled),
+    [data-cursor='hand']
+  ) {
+    cursor: var(--cursor-hand, pointer);
+  }
+
+  /* Reading, typing and selecting Git commands must never look clickable. */
+  :root:not([data-custom-cursors='off']) :is(
+    textarea:not(:read-only),
+    input:not([type]),
+    input[type='text'],
+    input[type='email'],
+    input[type='password'],
+    input[type='search'],
+    input[type='url'],
+    input[type='number'],
+    input[type='tel'],
+    [contenteditable='true'],
+    .terminal-output--docked,
+    .workspace-editor-textarea:not(:read-only),
+    [data-cursor='text']
+  ) {
+    cursor: var(--cursor-text, text);
+  }
+
+  /* The stage editor moves objects; directional resize grips stay native.
+     React Flow manages its own selection and dragging classes. */
+  :root:not([data-custom-cursors='off']) :is(
+    .stage-ed-land,
+    .react-flow__pane.draggable,
+    .react-flow__node.draggable,
+    [data-cursor='grab']
+  ) {
+    cursor: var(--cursor-grab, grab);
+  }
+
+  :root:not([data-custom-cursors='off']) :is(
+    .stage-ed-land:active,
+    .react-flow__pane.dragging,
+    .react-flow__node.dragging,
+    [data-cursor='grabbing']
+  ) {
+    cursor: var(--cursor-grabbing, grabbing);
+  }
+
+  :root:not([data-custom-cursors='off']) :is(
+    :disabled,
+    [aria-disabled='true'],
+    [data-cursor='blocked']
+  ) {
+    cursor: var(--cursor-blocked, not-allowed);
+  }
+
+  :root:not([data-custom-cursors='off']) :is(
+    [aria-busy='true'],
+    .story-path-node[data-state='loading'] .story-path-node-button,
+    .story-path-node--trial[data-state='loading'],
+    [data-cursor='progress']
+  ) {
+    cursor: var(--cursor-progress, progress);
+  }
+
+  :root:not([data-custom-cursors='off']) [data-cursor='crosshair'] {
+    cursor: var(--cursor-crosshair, crosshair);
+  }
+
+  :root:not([data-custom-cursors='off']) [data-cursor='help'] {
+    cursor: var(--cursor-help, help);
+  }
+
+  /* Preserve directional resize and cross-workspace drag affordances. */
+  :root:not([data-custom-cursors='off']) .stage-ed-land-handle.is-n,
+  :root:not([data-custom-cursors='off']) .stage-ed-land-handle.is-s {
+    cursor: ns-resize;
+  }
+  :root:not([data-custom-cursors='off']) .stage-ed-land-handle.is-e,
+  :root:not([data-custom-cursors='off']) .stage-ed-land-handle.is-w {
+    cursor: ew-resize;
+  }
+  :root:not([data-custom-cursors='off']) .stage-ed-land-handle.is-ne,
+  :root:not([data-custom-cursors='off']) .stage-ed-land-handle.is-sw {
+    cursor: nesw-resize;
+  }
+  :root:not([data-custom-cursors='off']) .stage-ed-land-handle.is-nw,
+  :root:not([data-custom-cursors='off']) .stage-ed-land-handle.is-se {
+    cursor: nwse-resize;
+  }
+  :root:not([data-custom-cursors='off']) .resize-handle--vertical {
+    cursor: col-resize;
+  }
+  :root:not([data-custom-cursors='off']) .resize-handle--horizontal {
+    cursor: row-resize;
+  }
+}
