@@ -6,7 +6,7 @@ from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.exceptions import TokenError
 
 from accounts.services import TokenService
-from adventures.models import AdventureLevel, AdventureRun
+from adventures.models import AdventureLevelTier, AdventureLevelTierRun
 from authoring.models import STATUS_PUBLISHED, ContentDefinition
 from authoring.services import ContentDefinitionService
 from challenges.models import ChallengeLevel, ChallengeRun
@@ -15,7 +15,7 @@ from common.api import api_exception_handler
 from common.constants import SESSION_STATUS_COMPLETED
 from common.serializers import CommandSubmitSerializer
 from players.services import get_or_create_player
-from progress.models import AdventureLevelCompletion, ChallengeTrialCompletion
+from progress.models import AdventureLevelTierCompletion, ChallengeTrialCompletion
 
 
 def _user(username: str):
@@ -95,17 +95,17 @@ def test_published_content_cannot_hide_definition_edit_behind_visibility():
 
 @pytest.mark.django_db
 def test_active_run_constraints_and_completion_history_survive_deletion():
-    call_command("seed_curriculum_fixture")
+    call_command("seed_curriculum", verbosity=0)
     player = get_or_create_player(_user("run-safety"))
-    level = AdventureLevel.objects.filter(is_published=True).order_by("id").first()
-    assert level is not None
-    wave = level.waves.filter(is_published=True).order_by("sort_order", "id").first()
+    tier = AdventureLevelTier.objects.filter(is_published=True).order_by("id").first()
+    assert tier is not None
+    wave = tier.waves.filter(is_published=True).order_by("sort_order", "id").first()
     assert wave is not None
     variant = wave.variants.filter(is_published=True).first()
     assert variant is not None
-    run = AdventureRun.objects.create(
+    run = AdventureLevelTierRun.objects.create(
         player=player,
-        level=level,
+        tier=tier,
         current_wave=wave,
         selected_variant=variant,
         repository_state=variant.initial_state,
@@ -113,9 +113,9 @@ def test_active_run_constraints_and_completion_history_survive_deletion():
 
     with pytest.raises(IntegrityError):
         with transaction.atomic():
-            AdventureRun.objects.create(
+            AdventureLevelTierRun.objects.create(
                 player=player,
-                level=level,
+                tier=tier,
                 current_wave=wave,
                 selected_variant=variant,
                 repository_state=variant.initial_state,
@@ -123,22 +123,22 @@ def test_active_run_constraints_and_completion_history_survive_deletion():
 
     run.status = SESSION_STATUS_COMPLETED
     run.save(update_fields=["status"])
-    completion = AdventureLevelCompletion.objects.create(
+    completion = AdventureLevelTierCompletion.objects.create(
         player=player,
-        adventure_level=level,
-        adventure_run=run,
+        tier=tier,
+        tier_run=run,
         stars=3,
     )
     run.delete()
 
     completion.refresh_from_db()
-    assert completion.adventure_run_id is None
+    assert completion.tier_run_id is None
     assert completion.stars == 3
 
 
 @pytest.mark.django_db
 def test_completed_challenge_launch_is_server_derived_replay_and_cannot_lower_best_score():
-    call_command("seed_curriculum_fixture")
+    call_command("seed_curriculum", verbosity=0)
     player = get_or_create_player(_user("replay-safety"))
     level = (
         ChallengeLevel.objects.filter(

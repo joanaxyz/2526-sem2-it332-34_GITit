@@ -43,10 +43,10 @@ describe('TierDagTabs panes', () => {
     render(<TierDagTabs snapshot={uninitialized} expectedState={target} countedCommands={0} animation={animation} />)
 
     const livePane = document.getElementById(
-      screen.getByRole('tab', { name: 'Live DAG' }).getAttribute('aria-controls')!,
+      screen.getByRole('tab', { name: 'Live' }).getAttribute('aria-controls')!,
     )!
     const expectedPane = document.getElementById(
-      screen.getByRole('tab', { name: 'Expected state' }).getAttribute('aria-controls')!,
+      screen.getByRole('tab', { name: 'Expected' }).getAttribute('aria-controls')!,
     )!
 
     expect(within(livePane).getByText('Git is not initialized')).toBeInTheDocument()

@@ -1,20 +1,20 @@
 import pytest
 from django.db import IntegrityError, transaction
 
-from adventures.models import AdventureRun, AdventureWave
+from adventures.models import AdventureLevelTierRun, AdventureLevelTierWave
 from authoring.compiler import ContentRuntimeCompiler
 from authoring.models import ContentDefinition, ContentKind, PublishedContentRuntime
 from challenges.models import ChallengeRun, ChallengeTrial
 from practice.models import CommandStep
 from progress.models import (
-    AdventureLevelCompletion,
+    AdventureLevelTierCompletion,
     ChallengeTrialCompletion,
     CoinTransaction,
     StreakRecord,
 )
 from testing.runtime_factories import (
-    create_stage_readme_adventure_run,
     create_stage_readme_challenge_run,
+    create_stage_readme_tier_run,
 )
 
 pytestmark = pytest.mark.django_db
@@ -26,16 +26,16 @@ def _assert_constraint_rejects(update) -> None:
 
 
 def test_adventure_budget_and_star_constraints(django_user_model):
-    fixture = create_stage_readme_adventure_run(django_user_model)
+    fixture = create_stage_readme_tier_run(django_user_model)
 
     _assert_constraint_rejects(
-        lambda: AdventureWave.objects.filter(pk=fixture.wave.pk).update(
+        lambda: AdventureLevelTierWave.objects.filter(pk=fixture.wave.pk).update(
             min_counted_commands=4,
             max_counted_commands=3,
         )
     )
     _assert_constraint_rejects(
-        lambda: AdventureRun.objects.filter(pk=fixture.run.pk).update(stars=4)
+        lambda: AdventureLevelTierRun.objects.filter(pk=fixture.run.pk).update(stars=4)
     )
 
 
@@ -59,14 +59,14 @@ def test_challenge_budget_and_star_constraints(django_user_model):
 
 
 def test_completion_stars_are_bounded(django_user_model):
-    adventure = create_stage_readme_adventure_run(django_user_model)
+    adventure = create_stage_readme_tier_run(django_user_model)
     challenge = create_stage_readme_challenge_run(django_user_model)
 
     _assert_constraint_rejects(
-        lambda: AdventureLevelCompletion.objects.create(
+        lambda: AdventureLevelTierCompletion.objects.create(
             player=adventure.player,
-            adventure_level=adventure.level,
-            adventure_run=adventure.run,
+            tier=adventure.tier,
+            tier_run=adventure.run,
             stars=4,
         )
     )

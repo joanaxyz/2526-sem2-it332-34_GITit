@@ -1,8 +1,14 @@
 # Authored curriculum source
 
-This directory is the canonical home for human-authored curriculum definitions.
-Content is grouped by chapter, adventure, or cohesive concept module; stable
-composer modules preserve the public seed-data imports used by the runtime.
+This directory is the canonical home for human-authored curriculum definitions:
+
+- `wave_scenarios.md` — extension scenarios (extra wave variants and Challenge
+  Gate trials), compiled to `../scenario_bank_waves.json` with
+  `python scripts/curriculum/import_revised_scenarios.py --extension`.
+- `scenario_fixtures/` — the repository fixture, evaluation rules, and answer
+  key for each extension scenario, keyed by scenario ID.
+- `challenge_gates.py` — each module's gate: title, narrative, and the
+  scenarios behind its Easy, Medium, and Hard trials.
 
 Ownership rules:
 
@@ -10,5 +16,4 @@ Ownership rules:
 2. Keep deterministic generated artifacts under `seed_data/generated/`.
 3. Regenerate generated output through the canonical management command; never
    edit generated files by hand.
-4. Preserve stable composer exports when splitting a large authored ledger, and
-   keep source-layout and seed-idempotency checks passing.
+4. Keep the seed-idempotency and generated-target checks passing.

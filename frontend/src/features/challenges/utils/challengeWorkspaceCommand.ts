@@ -5,6 +5,11 @@ import type { ChallengeDagAnimationController } from '@/features/challenges/hook
 import type { ChallengeRun } from '@/features/challenges/types'
 import { stringList } from '@/features/challenges/components/challengeWorkspaceLayout'
 import { queryKeys } from '@/shared/api/queryKeys'
+import {
+  confirmsPrediction,
+  predictLocalOutcome,
+  type CommandSubmissionOutcome,
+} from '@/shared/level-runtime/commandOutcome'
 import { isExitCommand } from '@/shared/level-runtime/commands'
 
 export function createChallengeWorkspaceCommandHandler({
@@ -41,9 +46,16 @@ export function createChallengeWorkspaceCommandHandler({
     clearToast()
     dagAnimation.onCommandStart()
 
-    mutation.mutate(command, {
+    const counts = queryClient.getQueryData<ChallengeRun>(queryKeys.challengeRun(runId))?.counts
+    let predicted: CommandSubmissionOutcome | null = null
+
+    const execution = mutation.mutate(command, {
       onSuccess: (response) => {
-        dagAnimation.onCommandResolved(response.command_outcome)
+        // A turn already shown from the local outcome only replays when the
+        // server judged it differently (it is the authority on progress).
+        if (!predicted || !confirmsPrediction(predicted, response.command_outcome)) {
+          dagAnimation.onCommandResolved(response.command_outcome)
+        }
         if (response.run.status === 'completed' || response.run.status === 'failed') {
           queueOutcomeAnimation(response.run.id)
         }
@@ -65,5 +77,13 @@ export function createChallengeWorkspaceCommandHandler({
       },
       onError: () => dagAnimation.onCommandError(),
     })
+    // Misses and read-only looks need no server verdict.
+    predicted = execution && counts
+      ? predictLocalOutcome(execution, {
+          counted: counts.counted_action_total,
+          max: counts.maximum_counted_commands,
+        })
+      : null
+    if (predicted) dagAnimation.onCommandResolved(predicted)
   }
 }

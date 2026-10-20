@@ -1,13 +1,16 @@
 # Curriculum seed data
 
-`seed_curriculum` seeds the current Arcane Spire Module 0-4 curriculum.
-`scenario_bank.json` owns its authored scenario contract, `scenario_bank.py`
-reads that contract, and `scenario_runtime.py` joins it to repository fixtures.
-The stable story/chapter/level scaffold is owned by the canonical command.
-
-The retired multi-story fixtures in `stories.py`, `chapters.py`, `lessons.py`,
-`adventure_levels.py`, and `challenges.py` are used by the explicitly named
-`seed_curriculum_fixture` command, which is disabled outside isolated tests.
+`seed_curriculum` seeds the current Arcane Spire Module 0-4 curriculum: each
+level's difficulty tiers, their ordered waves and variants, and each module's
+Challenge Gate. It writes only the tier and gate models.
+`scenario_bank.json` owns the main authored scenario contract and
+`scenario_bank_waves.json` the extension scenarios (extra wave variants and
+gate trials), both compiled from `source/*.md` by
+`scripts/curriculum/import_revised_scenarios.py`. `scenario_bank.py` reads both
+banks. `scenario_runtime.py` joins the main bank to the canonical command's
+cases, and `source/scenario_fixtures/` joins each extension scenario to its
+repository fixture. Gate composition lives in `source/challenge_gates.py`. The
+stable story/chapter/level scaffold is owned by the canonical command.
 
 Generated artifacts are isolated under `generated/`.
 

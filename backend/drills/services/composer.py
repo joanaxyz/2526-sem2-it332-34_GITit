@@ -119,24 +119,21 @@ def _prefix_keys(key: str) -> list[str]:
 
 
 def _level_waves(level: AdventureLevel) -> list:
-    """Published waves, tier order first, then the plain-wave flow.
+    """Published tier waves, in tier order then wave order.
 
-    Filtered in Python on purpose: both the solution scan and the finale
-    picker need this same tree, and querysets built with ``.filter()``
-    ignore any prefetch the caller set up. Reading ``.all()`` lets the
-    seeder prefetch the whole catalog's waves in a couple of queries
-    instead of a handful per level.
+    Uses whatever the caller prefetched (``tiers__waves__variants``), so the
+    seeder reads the whole catalog's waves in a couple of queries.
     """
     tiers = sorted(
         (tier for tier in level.tiers.all() if tier.is_published),
         key=lambda tier: _TIER_ORDER.get(tier.difficulty, 99),
     )
-    waves = [wave for tier in tiers for wave in tier.waves.all() if wave.is_published]
-    waves += sorted(
-        (wave for wave in level.waves.all() if wave.is_published),
-        key=lambda wave: (wave.sort_order, wave.id),
-    )
-    return waves
+    return [
+        wave
+        for tier in tiers
+        for wave in sorted(tier.waves.all(), key=lambda wave: (wave.sort_order, wave.id))
+        if wave.is_published
+    ]
 
 
 def _published_variants(wave) -> list:
@@ -208,16 +205,13 @@ def level_command_forms(
 ) -> list[CommandForm]:
     """Every published form the level teaches, whichever tree holds it.
 
-    A level attaches forms directly, and its waves (single-difficulty flow)
-    or tier waves (Easy/Medium/Hard flow) attach them again. Reading all
-    three keeps the drill correct for both content shapes without asking
-    the caller which one this level uses; when none of them is wired, the
-    authored solutions are the fallback source of truth.
+    A level attaches forms directly, and its tier waves attach them again.
+    When neither is wired, the authored solutions are the fallback source of
+    truth.
     """
     attached = list(
         CommandForm.objects.filter(
             Q(adventure_levels=level)
-            | Q(adventure_waves__level=level)
             | Q(adventure_level_tier_waves__tier__adventure_level=level),
             is_published=True,
         )

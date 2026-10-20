@@ -14,6 +14,8 @@ export type AdventureLevelTierAccess = {
   locked: boolean
   wave_progress: { completed: number; total: number }
   completion: LevelCompletionSummary | null
+  /** First-clear GitCoins for this tier; `claimed` once it has been paid. */
+  reward: { coins: number; claimed: boolean }
 }
 
 /** Squire's Drill state for one level, as the chapter overview reports it. */

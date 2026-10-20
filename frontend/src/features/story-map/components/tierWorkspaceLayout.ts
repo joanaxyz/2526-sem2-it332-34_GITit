@@ -13,3 +13,18 @@ export function mapUrlForRun(run: Pick<TierRun, 'chapter' | 'story'>) {
     ? storyPathWithQuery(storySlug, `chapter=${run.chapter.id}`)
     : storyPath(storySlug)
 }
+
+/** Every new tier attempt opens through TierStartPage, which holds the loading
+ * screen until the run exists and its artwork has decoded. */
+export function tierStartUrl(
+  tierId: number,
+  { replay = false, priorRunId }: { replay?: boolean; priorRunId?: number } = {},
+) {
+  if (replay) return `/adventure-level-tiers/${tierId}/replay`
+  const url = `/adventure-level-tiers/${tierId}/runs`
+  return priorRunId === undefined ? url : `${url}?prior_run_id=${priorRunId}`
+}
+
+export function tierRetryUrl(runId: number) {
+  return `/adventure-tier-runs/${runId}/retry`
+}

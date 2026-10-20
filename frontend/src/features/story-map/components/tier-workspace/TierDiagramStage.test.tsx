@@ -64,8 +64,8 @@ describe('TierDiagramStage', () => {
     render(<TierDiagramStage run={makeRun(true)} animation={animation} />)
 
     expect(screen.getByRole('tablist')).toBeInTheDocument()
-    expect(screen.getByRole('tab', { name: 'Live DAG' })).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByRole('tab', { name: 'Expected state' })).toHaveAttribute('aria-selected', 'false')
+    expect(screen.getByRole('tab', { name: 'Live' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Expected' })).toHaveAttribute('aria-selected', 'false')
     expect(screen.getByTestId('tier-dag-stage')).toBeInTheDocument()
     expect(screen.getByTestId('expected-dag-stage')).toBeInTheDocument()
   })

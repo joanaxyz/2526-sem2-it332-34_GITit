@@ -11,10 +11,6 @@
     padding-inline: 0.85rem;
   }
 
-  .app-brand small {
-    display: none;
-  }
-
   .app-nav {
     --nav-item-width: 7.2rem;
   }

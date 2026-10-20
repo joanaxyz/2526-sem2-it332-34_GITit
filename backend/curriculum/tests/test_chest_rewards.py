@@ -1,19 +1,19 @@
 import pytest
 from rest_framework.test import APIClient
 
-from adventures.models import AdventureLevel
+from adventures.models import AdventureLevel, AdventureLevelTier
 from common.exceptions import Locked
 from curriculum.models import Story
 from curriculum.services import CHEST_SCHEDULE, ChapterChestService
-from progress.models import AdventureLevelCompletion, CoinTransaction, Wallet
-from testing.runtime_factories import api_client_for, create_stage_readme_adventure_run, make_user
+from progress.models import AdventureLevelTierCompletion, CoinTransaction, Wallet
+from testing.runtime_factories import api_client_for, create_stage_readme_tier_run, make_user
 
 pytestmark = pytest.mark.django_db
 
 
 @pytest.fixture
 def chest_fixture(django_user_model):
-    fixture = create_stage_readme_adventure_run(django_user_model, username="chest-rewards")
+    fixture = create_stage_readme_tier_run(django_user_model, username="chest-rewards")
     for index in range(3):
         AdventureLevel.objects.create(
             chapter=fixture.chapter,
@@ -25,8 +25,10 @@ def chest_fixture(django_user_model):
 
 
 def complete_levels(fixture, count):
+    """A level counts toward chapter chests once its Easy tier is complete."""
     for level in AdventureLevel.objects.filter(chapter=fixture.chapter).order_by("id")[:count]:
-        AdventureLevelCompletion.objects.get_or_create(player=fixture.player, adventure_level=level)
+        tier, _ = AdventureLevelTier.objects.get_or_create(adventure_level=level, difficulty="easy")
+        AdventureLevelTierCompletion.objects.get_or_create(player=fixture.player, tier=tier)
 
 
 def test_read_checks_actual_progress_and_payment_without_awarding(chest_fixture):

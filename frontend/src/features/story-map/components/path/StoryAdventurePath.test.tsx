@@ -24,13 +24,18 @@ function renderPath(ui: ReactElement) {
 }
 
 const mocks = vi.hoisted(() => ({
-  openAdventureLevel: vi.fn(),
+  navigate: vi.fn(),
   openChallengeArtifact: vi.fn(),
   onCompanionRequired: vi.fn(),
 }))
 
 vi.mock('@/features/story-map/hooks/useStoryArtifactNavigation', () => ({
   useStoryArtifactNavigation: () => mocks,
+}))
+
+vi.mock('react-router-dom', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('react-router-dom')>()),
+  useNavigate: () => mocks.navigate,
 }))
 
 const chapter: LearningChapter = {
@@ -213,6 +218,7 @@ function tier(
     locked: false,
     wave_progress: { completed: 0, total: 2 },
     completion: null,
+    reward: { coins: 25, claimed: false },
     ...overrides,
   }
 }
@@ -331,52 +337,17 @@ describe('StoryAdventurePath level callout', () => {
     }))
 
     expect(mocks.onCompanionRequired).toHaveBeenCalledOnce()
-  })
-})
-
-describe('StoryAdventurePath companion gate', () => {
-  afterEach(() => {
-    cleanup()
-    vi.clearAllMocks()
+    expect(mocks.navigate).not.toHaveBeenCalled()
   })
 
-  it('keeps the learner on the map when a level is started without a companion', () => {
-    renderPath(
-      <StoryAdventurePath
-        chapter={chapter}
-        levels={[adventure]}
-        challenges={[challenge]}
-        challengesLocked={false}
-        loading={false}
-        hasCompanion={false}
-        onCompanionRequired={mocks.onCompanionRequired}
-      />,
-    )
+  it('starts the tier run once a companion is equipped', () => {
+    openCallout()
 
-    fireEvent.click(screen.getByRole('button', { name: /^Level 1: Initialize a Repository\./ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Play Initialize a Repository' }))
+    fireEvent.click(screen.getByRole('button', {
+      name: 'Stage and Commit, Medium tier: Continue',
+    }))
 
-    expect(mocks.onCompanionRequired).toHaveBeenCalledOnce()
-    expect(mocks.openAdventureLevel).not.toHaveBeenCalled()
-  })
-
-  it('opens the level normally once a companion is equipped', () => {
-    renderPath(
-      <StoryAdventurePath
-        chapter={chapter}
-        levels={[adventure]}
-        challenges={[challenge]}
-        challengesLocked={false}
-        loading={false}
-        hasCompanion
-        onCompanionRequired={mocks.onCompanionRequired}
-      />,
-    )
-
-    fireEvent.click(screen.getByRole('button', { name: /^Level 1: Initialize a Repository\./ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Play Initialize a Repository' }))
-
-    expect(mocks.openAdventureLevel).toHaveBeenCalledWith(adventure)
+    expect(mocks.navigate).toHaveBeenCalledWith('/adventure-level-tiers/32/runs')
     expect(mocks.onCompanionRequired).not.toHaveBeenCalled()
   })
 })

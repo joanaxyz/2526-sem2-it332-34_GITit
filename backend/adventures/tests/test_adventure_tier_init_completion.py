@@ -31,7 +31,6 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
         chapter=chapter,
         slug="initializing-a-local-repository",
         title="Initializing Repositories",
-        reward_coins=25,
     )
     easy = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
     medium = AdventureLevelTier.objects.create(adventure_level=level, difficulty="medium")
@@ -174,7 +173,12 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
     payload = response.json()
     assert payload["command_outcome"]["solved"] is True
     assert payload["run"]["status"] == "completed"
-    assert payload["run"]["progress"] == {"completed": 1, "total": 1, "cleared": True}
+    assert payload["run"]["progress"] == {
+        "completed": 1,
+        "total": 1,
+        "cleared": True,
+        "next_wave": None,
+    }
     assert payload["run"]["completion"] is not None
     assert payload["run"]["next_difficulty"] == {"id": medium.id, "difficulty": "medium"}
     assert payload["run"]["rewards"] == {

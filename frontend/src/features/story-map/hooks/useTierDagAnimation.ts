@@ -13,9 +13,9 @@ export type TierDagAnimationController = {
 
 /**
  * Adventure-tier repository choreography, mirroring useChallengeDagAnimation.
- * Optimistic Git updates render while the graph is in `processing`, then
- * their node/edge/ref deltas are released together when the server accepts
- * the command.
+ * Optimistic Git updates and their node/edge/ref deltas render at once while
+ * the graph is in `processing`; the server's verdict then plays as the result
+ * state.
  */
 export function useTierDagAnimation(): TierDagAnimationController {
   const sequenceRef = useRef(0)

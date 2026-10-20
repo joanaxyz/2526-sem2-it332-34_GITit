@@ -100,7 +100,6 @@
 }
 
 .story-path-node:not(:disabled) .story-path-node-badge,
-.story-path-node:not(:disabled) .story-path-node-play,
 .story-path-node-button:not(:disabled) .story-path-node-badge {
   pointer-events: auto;
 }
@@ -150,8 +149,7 @@
 }
 
 .story-path-node:focus-visible,
-.story-path-node-button:focus-visible,
-.story-path-node-play:focus-visible {
+.story-path-node-button:focus-visible {
   outline: none;
 }
 
@@ -169,12 +167,38 @@
   transform: translateY(-2px) scale(1.16);
 }
 
-.story-path-node[data-state='locked'] .story-path-node-ring,
-.story-path-node[data-state='loading'] .story-path-node-ring {
+.story-path-node[data-state='locked'] .story-path-node-ring {
   border-color: rgba(148, 163, 184, 0.3);
   color: rgba(219, 234, 254, 0.52);
   box-shadow: none;
   filter: grayscale(0.5);
+}
+
+/* Placeholder nodes are arriving, not locked: keep the theme colour and
+   breathe, so a first visit reads as the path loading in. */
+.story-path-node[data-state='loading'] .story-path-node-ring {
+  border-color: rgba(var(--theme-primary-rgb), 0.45);
+  color: rgba(219, 234, 254, 0.72);
+  box-shadow: 0 0 14px rgba(var(--theme-primary-rgb), 0.22);
+  animation: story-node-arriving 1.4s ease-in-out infinite;
+}
+
+.story-path-node[data-state='loading'] .story-path-node-button,
+.story-path-node--trial[data-state='loading'] {
+  cursor: progress;
+}
+
+@keyframes story-node-arriving {
+  50% {
+    border-color: rgba(var(--theme-primary-rgb), 0.75);
+    box-shadow: 0 0 22px rgba(var(--theme-primary-rgb), 0.42);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-path-node[data-state='loading'] .story-path-node-ring {
+    animation: none;
+  }
 }
 
 .story-path-node[data-state='cleared'] .story-path-node-ring,
@@ -185,8 +209,7 @@
     0 0 25px rgba(var(--theme-primary-rgb), 0.54);
 }
 
-.story-path-node-badge,
-.story-path-node-play {
+.story-path-node-badge {
   position: absolute;
   top: -0.45rem;
   right: 0.15rem;
@@ -205,29 +228,6 @@
   z-index: 2;
 }
 
-/* The play pill materializes from behind the active ring, extending right -
-   which is also why that node's stars move below (the pill takes their spot). */
-.story-path-node-play {
-  top: 50%;
-  right: auto;
-  bottom: auto;
-  left: 1.9rem;
-  z-index: 0;
-  justify-content: end;
-  width: 6.7rem;
-  height: 2.85rem;
-  padding: 0 0.72rem 0 0;
-  border: 1px solid rgba(243, 210, 122, 0.88);
-  border-radius: 999px;
-  background:
-    radial-gradient(circle at calc(100% - 1.2rem) 50%, rgba(243, 210, 122, 0.98) 0 0.82rem, transparent 0.84rem),
-    linear-gradient(90deg, rgba(22, 16, 8, 0.42), rgba(67, 44, 12, 0.86));
-  color: #06111d;
-  cursor: pointer;
-  box-shadow: 0 0 14px rgba(243, 210, 122, 0.52);
-  transform: translateY(-50%);
-}
-
 .story-path-node[data-selected] .story-path-node-ring {
   border-color: rgb(243, 210, 122);
   box-shadow:
@@ -236,47 +236,8 @@
     0 0 58px rgba(243, 210, 122, 0.2);
 }
 
-.story-path-node-play[data-pill-state='open'] {
-  animation: story-node-pill-open 180ms cubic-bezier(0.16, 1, 0.3, 1) both;
-}
-
-.story-path-node-play[data-pill-state='closing'] {
-  animation: story-node-pill-close 180ms ease both;
-}
-
-@keyframes story-node-pill-open {
-  from {
-    opacity: 0;
-    clip-path: inset(0 82% 0 0 round 999px);
-    transform: translate(-0.45rem, -50%) scaleX(0.84);
-  }
-  to {
-    opacity: 1;
-    clip-path: inset(0 0 0 0 round 999px);
-    transform: translate(0, -50%) scaleX(1);
-  }
-}
-
-@keyframes story-node-pill-close {
-  from {
-    opacity: 1;
-    clip-path: inset(0 0 0 0 round 999px);
-    transform: translate(0, -50%) scaleX(1);
-  }
-  to {
-    opacity: 0;
-    clip-path: inset(0 82% 0 0 round 999px);
-    transform: translate(-0.35rem, -50%) scaleX(0.88);
-  }
-}
-
 .story-path-node-ring {
   z-index: 1;
-}
-
-.story-path-node-play svg {
-  width: 1.05rem;
-  height: 1.05rem;
 }
 
 /* Stars sit centered directly beneath every node, so the row reads as part of

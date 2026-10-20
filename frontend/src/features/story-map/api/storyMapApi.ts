@@ -1,5 +1,13 @@
+import { queryOptions } from '@tanstack/react-query'
+
 import { apiOperationRequest } from '@/shared/api/httpClient'
-import type { ChapterContentOverview } from '@/features/story-map/types'
+import { queryKeys } from '@/shared/api/queryKeys'
+import type { ChapterContentOverview, LearningChapter } from '@/features/story-map/types'
+import {
+  readStoryMapSnapshot,
+  storyMapSnapshotKeys,
+  writeStoryMapSnapshot,
+} from '@/features/story-map/utils/storyMapSnapshot'
 import type { ChapterBook } from '@/features/story-map/components/book/bookTypes'
 import type {
   ChapterOrientationLessonDetail,
@@ -53,4 +61,36 @@ export const storyMapApi = {
       { body: { highest_step_seen: highestStepSeen } },
     )
   },
+}
+
+// Both map queries seed from the player's last-known snapshot and mark it
+// stale (updatedAt 0), so the path paints immediately and revalidates at once.
+export function storyChaptersQueryOptions(storySlug: string) {
+  const snapshotKey = storyMapSnapshotKeys.chapters(storySlug)
+  return queryOptions({
+    queryKey: queryKeys.storyChapters(storySlug),
+    queryFn: async () => {
+      const chapters = await storyMapApi.listChapters(storySlug)
+      writeStoryMapSnapshot(snapshotKey, chapters)
+      return chapters
+    },
+    initialData: () => readStoryMapSnapshot<LearningChapter[]>(snapshotKey),
+    initialDataUpdatedAt: 0,
+    staleTime: 5 * 60 * 1000,
+  })
+}
+
+export function chapterOverviewQueryOptions(chapterId: number) {
+  const snapshotKey = storyMapSnapshotKeys.chapterOverview(chapterId)
+  return queryOptions({
+    queryKey: queryKeys.chapterOverview(chapterId),
+    queryFn: async () => {
+      const overview = await storyMapApi.getChapterOverview(chapterId)
+      writeStoryMapSnapshot(snapshotKey, overview)
+      return overview
+    },
+    initialData: () => readStoryMapSnapshot<ChapterContentOverview>(snapshotKey),
+    initialDataUpdatedAt: 0,
+    staleTime: 2 * 60 * 1000,
+  })
 }

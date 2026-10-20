@@ -14,6 +14,7 @@ export type MutableRepositoryState = RepositorySnapshot & {
   cherry_pick_in_progress?: boolean
   cherry_pick_original_head?: string | null
   cherry_pick_source?: string | null
+  cherry_pick_message?: string | null
   cherry_pick_conflict_files?: string[]
   rebase_state?: RepositoryValue
   [key: string]: unknown

@@ -1,4 +1,5 @@
 import { useId, useState, type CSSProperties } from 'react'
+import { Link } from 'react-router-dom'
 import { ArrowDownRight, ArrowUpRight, Check, ChevronRight, GitBranch, RotateCcw, Swords, Target, Terminal } from 'lucide-react'
 
 import {
@@ -77,16 +78,6 @@ function Signal({
 }
 
 function ModuleComparison({ data, selected }: { data: PerformanceSummary; selected: EvidenceKey }) {
-  if (selected === 'car') {
-    return (
-      <div className="performance-overall-note">
-        <Terminal aria-hidden="true" />
-        <h4>One view across your commands</h4>
-        <p>Command acceptance is measured across Modules 1–4 together. A per-module breakdown is not available.</p>
-        <p>{kpiEvidence(selected, data.kpis.car)}</p>
-      </div>
-    )
-  }
   const modules = data.modules.filter((module) =>
     selected === 'rta' ? [3, 4].includes(module.number) : [1, 2, 3, 4].includes(module.number),
   )
@@ -170,18 +161,30 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
         {!measured(rate) ? <p className="performance-empty-hint">{definition.emptyHint}</p> : null}
         {selected !== 'retry_success_rate' ? (
           <p className="performance-direction"><Direction aria-hidden="true" />
-            {selected === 'arc' ? 'Fewer retries per finish is better' : 'A higher rate is better'}
+            {selected === 'arc' ? 'Fewer unsuccessful attempts before mastery is better' : 'A higher rate is better'}
           </p>
         ) : <p className="performance-direction">Supplementary measure · no goal to meet</p>}
+        {selected === 'car' && data.samples.car_missing > 0 ? <p>{data.samples.car_missing} mastered tiers lack validated command evidence and remain unscored.</p> : null}
+        {(selected === 'scr' || selected === 'hlcr') && data.samples.in_progress_tiers > 0 ? <p>{data.samples.in_progress_tiers} opened {data.samples.in_progress_tiers === 1 ? 'tier is' : 'tiers are'} in progress and not counted yet.</p> : null}
+        {selected === 'rta' ? <>
+          <p>{data.samples.transfer_pending} pending · {data.samples.transfer_missing} mastered tiers without eligible transfer evidence</p>
+          {data.transfers.length > 0 ? <ul aria-label="Available transfer checkpoints">
+            {data.transfers.map((point) => <li key={point.tier_id}>
+              <Link to={point.run_id ? `/adventure-tier-runs/${point.run_id}` : `/adventure-level-tiers/${point.tier_id}/runs?transfer=1`}>
+                {point.run_id ? 'Resume' : 'Start'} transfer checkpoint: {point.title}
+              </Link>
+            </li>)}
+          </ul> : null}
+        </> : null}
         <ModuleComparison data={data} selected={selected} />
         <details className="performance-calculation" key={selected}>
           <summary>How this is measured</summary>
           <p><strong>{definition.abbr}</strong> · {definition.name}</p>
           <p>{definition.formula}</p>
           <p>{selected === 'rta'
-            ? 'Only the first retry directly after a failure counts, and only when its starting repository or goal changes. Failed and abandoned eligible retries count; runs still in progress do not.'
+            ? 'Only the first reserved unseen checkpoint counts. Failed and abandoned first attempts remain failures; unfinished live checkpoints are pending. Formal studies count unattempted assignments as zero at cutoff.'
             : selected === 'retry_success_rate'
-              ? 'Includes any run with a prior run, including repeats after a success. Abandoned runs are excluded. This is separate from changed-retry transfer.'
+              ? 'Counts concluded recovery attempts after failed runs. Required successful repetitions are excluded.'
               : 'Practice runs in Modules 1–4, across all time. Replay runs are excluded. The activity range above does not change this record.'}</p>
         </details>
       </section>

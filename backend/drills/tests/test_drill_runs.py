@@ -59,7 +59,7 @@ def state_for(level, *, extra_keys=()):
 
 
 def seed(db_marker=None):
-    call_command("seed_curriculum_fixture")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
 
 

@@ -1,14 +1,14 @@
 from django.core.management import call_command
 from rest_framework.test import APIClient
 
-from curriculum.models import ChapterLesson
+from curriculum.models import Chapter, ChapterLesson
 from curriculum.selectors import chapter_book, published_chapters
 from players.services import get_or_create_player
 from shop.models import Entitlement
 
 
 def test_chapter_book_lists_every_registered_command(db):
-    call_command("seed_curriculum_fixture")
+    call_command("seed_curriculum", verbosity=0)
 
     chapter = next(s for s in published_chapters() if s.command_skill_count > 0)
     book = chapter_book(chapter_id=chapter.id)
@@ -28,9 +28,14 @@ def test_chapter_book_lists_every_registered_command(db):
 
 
 def test_chapter_book_includes_authored_lessons(db):
-    call_command("seed_curriculum_fixture")
-
-    lesson = ChapterLesson.objects.filter(is_published=True).select_related("chapter").first()
+    call_command("seed_curriculum", verbosity=0)
+    lesson = ChapterLesson.objects.create(
+        chapter=Chapter.objects.get(story__slug="arcane-spire", number=1),
+        slug="what-a-commit-records",
+        title="What a commit records",
+        pages=[{"id": "intro", "title": "Commits", "blocks": [{"type": "paragraph", "text": "x"}]}],
+        is_published=True,
+    )
     book = chapter_book(chapter_id=lesson.chapter_id)
 
     assert book is not None
@@ -41,7 +46,7 @@ def test_chapter_book_includes_authored_lessons(db):
 
 
 def test_chapter_book_prefers_seeded_library_entries(db):
-    call_command("seed_curriculum_fixture")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_command_library")
 
     from curriculum.library import library_key_for_command
@@ -74,7 +79,7 @@ def test_chapter_book_prefers_seeded_library_entries(db):
 
 
 def test_chapter_book_endpoint_ok_and_404(db, django_user_model):
-    call_command("seed_curriculum_fixture")
+    call_command("seed_curriculum", verbosity=0)
     user = django_user_model.objects.create_user(
         username="reader",
         email="reader@example.com",

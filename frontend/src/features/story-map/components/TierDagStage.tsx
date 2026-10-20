@@ -35,7 +35,6 @@ export function TierDagStage({
         zoomStorageKey={zoomStorageKey}
         fitViewPadding={0.16}
         animateChanges
-        pauseChangeAnimations={animation.activity === 'processing'}
         activity={animation.activity}
         layoutDirection="vertical"
         showHeader={showHeader}

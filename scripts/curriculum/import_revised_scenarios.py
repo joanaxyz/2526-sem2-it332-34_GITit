@@ -17,11 +17,12 @@ from pathlib import Path
 from typing import Any
 
 SCENARIO_RE = re.compile(
-    r"^### (?P<number>\d+\.\d+\.\d+) (?P<title>.+?) · "
+    r"^### (?P<number>\d+\.(?:\d+|G)\.\d+) (?P<title>.+?) · "
     r"(?P<difficulty>Easy|Medium|Hard)\s*$",
     re.MULTILINE,
 )
 VARIANT_RE = re.compile(r"^\*\*Variant ID:\*\* `([^`]+)`\s*$", re.MULTILINE)
+DOCUMENT_HEADING_RE = re.compile(r"^#{1,2} ", re.MULTILINE)
 HEADING_RE = re.compile(r"^\*\*(?P<heading>[^*\n]+)\*\*(?P<tail>[^\n]*)$", re.MULTILINE)
 ORDERED_STEP_RE = re.compile(r"(?ms)^\d+\.\s+(.*?)(?=^\d+\.\s+|\Z)")
 REQUIRED_FILE_RE = re.compile(
@@ -154,7 +155,12 @@ def _evaluation(value: str) -> tuple[list[str], int, int, list[str]]:
     return bullets, minimum, maximum, seed_notes
 
 
-def parse_document(text: str, *, enforce_bank_counts: bool = True) -> dict[str, dict[str, Any]]:
+def parse_document(
+    text: str,
+    *,
+    enforce_bank_counts: bool = True,
+    stop_at_document_headings: bool = False,
+) -> dict[str, dict[str, Any]]:
     matches = list(SCENARIO_RE.finditer(text))
     if enforce_bank_counts and len(matches) != 265:
         raise ImportError(f"Expected 265 scenarios, found {len(matches)}")
@@ -164,6 +170,12 @@ def parse_document(text: str, *, enforce_bank_counts: bool = True) -> dict[str, 
     for index, match in enumerate(matches):
         end = matches[index + 1].start() if index + 1 < len(matches) else len(text)
         section = text[match.end() : end]
+        if stop_at_document_headings:
+            # Extension documents group scenarios under `#`/`##` headings; a
+            # heading ends the scenario before it instead of joining its last block.
+            heading = DOCUMENT_HEADING_RE.search(section)
+            if heading:
+                section = section[: heading.start()]
         variant_match = VARIANT_RE.search(section)
         if not variant_match:
             raise ImportError(f"Scenario {match.group('number')} is missing Variant ID")
@@ -224,8 +236,29 @@ def parse_document(text: str, *, enforce_bank_counts: bool = True) -> dict[str, 
     return scenarios
 
 
-def render_document(path: Path) -> str:
-    scenarios = parse_document(path.read_text(encoding="utf-8-sig"))
+SEED_DATA = Path(__file__).resolve().parents[2] / "backend" / "curriculum" / "seed_data"
+BANK_PATH = SEED_DATA / "scenario_bank.json"
+EXTENSION_PATH = SEED_DATA / "scenario_bank_waves.json"
+
+
+def render_document(path: Path, *, extension: bool = False, bank_path: Path = BANK_PATH) -> str:
+    text = path.read_text(encoding="utf-8-sig")
+    if not extension:
+        scenarios = parse_document(text)
+    else:
+        scenarios = parse_document(
+            text, enforce_bank_counts=False, stop_at_document_headings=True
+        )
+        bank = json.loads(bank_path.read_text(encoding="utf-8"))
+        shared = sorted(scenarios.keys() & bank.keys())
+        if shared:
+            raise ImportError(f"Extension Variant IDs already exist in the bank: {shared}")
+        numbers = sorted(
+            {item["scenario_number"] for item in scenarios.values()}
+            & {item["scenario_number"] for item in bank.values()}
+        )
+        if numbers:
+            raise ImportError(f"Extension scenario numbers already used by the bank: {numbers}")
     return json.dumps(scenarios, indent=2, ensure_ascii=False) + "\n"
 
 
@@ -233,25 +266,25 @@ def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path, help="Revised Markdown scenario bank")
     parser.add_argument(
-        "--output",
-        type=Path,
-        default=(
-            Path(__file__).resolve().parents[2]
-            / "backend"
-            / "curriculum"
-            / "seed_data"
-            / "scenario_bank.json"
+        "--extension",
+        action="store_true",
+        help=(
+            "Compile the wave scenario document (any count, IDs disjoint from the bank) "
+            "into scenario_bank_waves.json"
         ),
     )
+    parser.add_argument("--output", type=Path, default=None)
     parser.add_argument(
         "--check",
         action="store_true",
         help="Fail if the output differs instead of rewriting it",
     )
     args = parser.parse_args(argv)
+    if args.output is None:
+        args.output = EXTENSION_PATH if args.extension else BANK_PATH
 
     try:
-        rendered = render_document(args.source)
+        rendered = render_document(args.source, extension=args.extension)
     except (OSError, ImportError) as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

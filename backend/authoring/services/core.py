@@ -14,6 +14,7 @@ from authoring.models import (
     ContentDefinition,
 )
 from authoring.validators import ContentDefinitionValidator
+from common.constants import DIFFICULTY_EASY
 
 
 class AuthoringChapterService:
@@ -352,10 +353,15 @@ def _content_fields(data: dict, *, partial: bool = False) -> dict:
 def _runtime_entry(runtime) -> dict:
     if runtime.adventure_id:
         level = runtime.adventure
+        tier = (
+            level.tiers.filter(is_published=True, difficulty=DIFFICULTY_EASY).first()
+            if level
+            else None
+        )
         return {
             "kind": "adventure",
             "runtime_id": runtime.adventure_id,
-            "start_path": f"/adventure-levels/{level.id}" if level else None,
+            "start_path": f"/adventure-level-tiers/{tier.id}/runs" if tier else None,
         }
     if runtime.challenge_id:
         level = runtime.challenge

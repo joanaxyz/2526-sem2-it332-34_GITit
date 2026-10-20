@@ -12,8 +12,6 @@ import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage'
 import { HomePage } from '@/features/home/pages/HomePage'
-import { AdventureStartPage } from '@/features/adventures/pages/AdventureStartPage'
-import { loadAdventureRunPage } from '@/features/adventures/pages/loadAdventureRunPage'
 import { ChallengeStartPage } from '@/features/challenges/pages/ChallengeStartPage'
 import { TierStartPage } from '@/features/story-map/pages/TierStartPage'
 import { loadTierRunPage } from '@/features/story-map/pages/loadTierRunPage'
@@ -212,14 +210,8 @@ const appRoutes: RouteObject[] = [
       </Protected>
     ),
     children: [
-      { path: '/adventure-levels/:levelId', element: <AdventureStartPage /> },
-      {
-        path: '/adventure-runs/:runId',
-        lazy: async () => ({
-          Component: (await loadAdventureRunPage()).AdventureRunPage,
-        }),
-      },
       { path: '/adventure-level-tiers/:tierId/runs', element: <TierStartPage mode="start" /> },
+      { path: '/adventure-level-tiers/:tierId/replay', element: <TierStartPage mode="replay" /> },
       { path: '/adventure-tier-runs/:runId/retry', element: <TierStartPage mode="retry" /> },
       {
         path: '/adventure-tier-runs/:runId',

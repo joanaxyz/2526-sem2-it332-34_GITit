@@ -41,7 +41,7 @@ class TierCommandHistoryCache(LRUCommandHistoryCache):
         previous_history: list[str],
         normalized_command: str,
     ) -> None:
-        self._remember(
-            self.key_for(run=run, attempt_count=run.total_attempts),
-            [*previous_history, normalized_command],
-        )
+        self.remember(run=run, history=[*previous_history, normalized_command])
+
+    def remember(self, *, run: AdventureLevelTierRun, history: list[str]) -> None:
+        self._remember(self.key_for(run=run, attempt_count=run.total_attempts), history)

@@ -64,6 +64,7 @@ describe('app entry routing', () => {
     '/level-editor',
     '/level-editor/new/adventure',
     '/adventure-level-tiers/1/runs',
+    '/adventure-level-tiers/1/replay',
     '/admin/analytics',
   ])('keeps the current URL %s registered', (pathname) => {
     expect(matchRoutes(router.routes, pathname)).not.toBeNull()

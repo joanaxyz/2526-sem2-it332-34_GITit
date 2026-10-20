@@ -81,12 +81,27 @@
   transform: rotate(45deg);
 }
 
+/* A compact top-right zoom row that recedes until the learner reaches for it. */
 .dag-controls.react-flow__controls {
+  display: flex;
+  margin: 0.5rem;
   overflow: hidden;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.28);
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.22);
   border-radius: var(--radius-sm);
   background: var(--surface-overlay);
-  box-shadow: var(--glow-interactive);
+  box-shadow: none;
+  opacity: 0.7;
+  transition: opacity var(--motion-fast) var(--ease-out);
+}
+
+.dag-controls.react-flow__controls:hover,
+.dag-controls.react-flow__controls:focus-within {
+  opacity: 1;
+}
+
+/* The commit tooltip shares the top-right corner; it sits below the zoom row. */
+.live-dag-panel .commit-details-overlay {
+  top: 2.5rem;
 }
 
 /* Lightweight SVG/CSS graph chrome. Dimensions are explicit because this app
@@ -231,9 +246,10 @@
 }
 
 .dag-controls .react-flow__controls-button {
-  width: 2rem;
-  height: 2rem;
-  border-bottom-color: rgba(var(--theme-primary-rgb), 0.16);
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border-bottom: 0;
   background: transparent;
   color: var(--text-secondary);
   transition:
@@ -242,7 +258,13 @@
     box-shadow var(--motion-fast) var(--ease-out);
 }
 
+.dag-controls .react-flow__controls-button + .react-flow__controls-button {
+  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.16);
+}
+
 .dag-controls .react-flow__controls-button svg {
+  max-width: 0.65rem;
+  max-height: 0.65rem;
   fill: currentColor;
 }
 

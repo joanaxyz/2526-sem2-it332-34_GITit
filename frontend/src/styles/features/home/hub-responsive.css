@@ -112,16 +112,14 @@
   .home-sprite-stage {
     --home-sprite-ground-bottom: 1.25rem;
     --home-sprite-scale: 1;
+    --home-pedestal-width: min(82%, 15rem);
+    --home-rune-radius: 8.5rem;
     height: clamp(20rem, calc(32vh + 4rem), 27rem);
     min-height: 12.75rem;
   }
 
   .home-sprite-rune {
-    inset: 0.8rem 2.2rem 1.25rem;
-  }
-
-  .home-sprite-pedestal {
-    width: min(82%, 15rem);
+    inset: 0.8rem 0 1.25rem;
   }
 
   .home-rank-list {
@@ -203,16 +201,15 @@
   .home-sprite-stage {
     --home-sprite-ground-bottom: 2rem;
     --home-sprite-scale: 1.05;
+    --home-pedestal-width: min(66%, 15rem);
+    --home-rune-radius: 7rem;
+    --home-target-x: 80%;
     min-height: 26rem;
     align-items: end;
     padding-top: 4.4rem;
   }
 
   .home-sprite-rune {
-    inset: 3.8rem 1.2rem 4rem;
-  }
-
-  .home-sprite-pedestal {
-    width: min(76%, 16rem);
+    inset: 3.8rem 0 4rem;
   }
 }

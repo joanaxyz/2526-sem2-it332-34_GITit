@@ -120,16 +120,15 @@ export function TierWorkspace() {
 
   const {
     exitMutation,
-    startLevelMutation,
-    continueMutation,
-    replayMutation,
-    retryMutation,
+    startNextLevel,
+    continueTier,
+    retry,
+    replay,
+    playAgain,
     createFileMutation,
     writeFileMutation,
     renameFileMutation,
     deleteFileMutation,
-    startFreshAttempt,
-    playAgain,
   } = useTierWorkspaceMutations({
     run,
     runId,
@@ -139,8 +138,6 @@ export function TierWorkspace() {
     bypassNavigationRunId,
     setExitNavigationRunId,
     setExitConfirmOpen,
-    setStartOverConfirmOpen,
-    setDismissedCompletionRunId,
   })
   if (query.isLoading || (!query.isError && !assetsReady)) {
     return (
@@ -190,7 +187,6 @@ export function TierWorkspace() {
     onSkillsLearned: learnedSkills.enqueue,
   })
 
-  const isReplaying = retryMutation.isPending || replayMutation.isPending
   const outcomeModalOpen =
     !learnedSkills.pending &&
     !storyOpen && !introductionOpen && !replayGuide &&
@@ -205,11 +201,10 @@ export function TierWorkspace() {
       <TierStatusHeader
         run={run}
         isExiting={exitMutation.isPending || exitNavigationPending}
-        isRetrying={isReplaying}
         onExit={() => run.status === 'started' ? setExitConfirmOpen(true) : exitMutation.mutate()}
-        onRetry={() => retryMutation.mutate()}
+        onRetry={retry}
         onStartOver={() => setStartOverConfirmOpen(true)}
-        onReplay={() => replayMutation.mutate(run.tier.id)}
+        onReplay={replay}
         commandGuides={run.status === 'started' && guideAllowed ? commandGuides : []}
         currentCommandGuideKey={run.tutor?.teaching_key}
         commandGuideOpen={introductionOpen || Boolean(replayGuide)}
@@ -288,13 +283,8 @@ export function TierWorkspace() {
         }}
         onBackToMap={() => navigate(mapUrlForRun(run))}
         onRetry={playAgain}
-        isRetrying={isReplaying}
-        onContinue={() => continueMutation.mutate()}
-        isContinuing={continueMutation.isPending}
-        onNextLevel={run.next_difficulty ? () => startLevelMutation.mutate(run.next_difficulty!.id) : undefined}
-        isStartingNextLevel={
-          startLevelMutation.isPending && startLevelMutation.variables === run.next_difficulty?.id
-        }
+        onContinue={continueTier}
+        onNextLevel={run.next_difficulty ? () => startNextLevel(run.next_difficulty!.id) : undefined}
         nextDifficultyLabel={
           run.next_difficulty
             ? run.next_difficulty.difficulty.charAt(0).toUpperCase() + run.next_difficulty.difficulty.slice(1)
@@ -322,16 +312,14 @@ export function TierWorkspace() {
       <TierExitConfirmModal
         open={exitConfirmOpen}
         isExiting={exitMutation.isPending || exitNavigationPending}
-        isRetrying={retryMutation.isPending}
         onClose={() => setExitConfirmOpen(false)}
-        onRetry={startFreshAttempt}
+        onRetry={retry}
         onExit={() => exitMutation.mutate()}
       />
       <TierStartOverConfirmModal
         open={startOverConfirmOpen}
-        isStarting={retryMutation.isPending}
         onClose={() => setStartOverConfirmOpen(false)}
-        onStartFresh={startFreshAttempt}
+        onStartFresh={retry}
       />
       <SkillLearnedOverlay skill={learnedSkills.skill} companionSlug={companionSlug} onClose={learnedSkills.dismiss} />
     </div>

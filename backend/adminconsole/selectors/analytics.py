@@ -7,10 +7,10 @@ from datetime import timedelta
 from django.db.models import Count
 from django.utils import timezone
 
-from adventures.models import AdventureRun
+from adventures.models import AdventureLevelTierRun
 from challenges.models import ChallengeRun
 from curriculum.models import Story
-from progress.selectors import total_adventure_level_completions, total_challenge_trial_completions
+from progress.selectors import total_adventure_tier_completions, total_challenge_trial_completions
 from progress.services import MetricsService
 from progress.services.kpi_range import ALL_TIME, KpiRange
 
@@ -21,9 +21,13 @@ def admin_analytics_payload(*, now=None, kpi_range: KpiRange = ALL_TIME) -> dict
     now = now or timezone.now()
     month_ago = now - timedelta(days=30)
 
+    # Adventure activity is played as difficulty-tier runs; a solved run is
+    # "passed" whether or not it completed its tier.
+    adventure_runs = AdventureLevelTierRun.objects.all()
+    adventure_passed_runs = adventure_runs.filter(status=AdventureLevelTierRun.Status.COMPLETED)
     adventure_by_status = {
         row["status"]: row["n"]
-        for row in AdventureRun.objects.values("status").annotate(n=Count("id"))
+        for row in adventure_runs.values("status").annotate(n=Count("id"))
     }
     challenge_by_status = {
         row["status"]: row["n"]
@@ -35,10 +39,10 @@ def admin_analytics_payload(*, now=None, kpi_range: KpiRange = ALL_TIME) -> dict
 
     adventure_total = sum(adventure_by_status.values())
     challenge_total = sum(challenge_by_status.values())
-    adventure_passed = AdventureRun.objects.filter(passed_at__isnull=False).count()
+    adventure_passed = adventure_passed_runs.count()
     challenge_passed = ChallengeRun.objects.filter(status=ChallengeRun.Status.COMPLETED).count()
     active_learners = (
-        AdventureRun.objects.filter(started_at__gte=month_ago)
+        adventure_runs.filter(started_at__gte=month_ago)
         .values_list("player_id", flat=True)
         .union(
             ChallengeRun.objects.filter(started_at__gte=month_ago).values_list(
@@ -49,15 +53,13 @@ def admin_analytics_payload(*, now=None, kpi_range: KpiRange = ALL_TIME) -> dict
         .count()
     )
 
+    story_key = "tier__adventure_level__chapter__story_id"
     story_runs = {
-        row["level__chapter__story_id"]: row["n"]
-        for row in AdventureRun.objects.values("level__chapter__story_id").annotate(n=Count("id"))
+        row[story_key]: row["n"] for row in adventure_runs.values(story_key).annotate(n=Count("id"))
     }
     story_passed = {
-        row["level__chapter__story_id"]: row["n"]
-        for row in AdventureRun.objects.filter(passed_at__isnull=False)
-        .values("level__chapter__story_id")
-        .annotate(n=Count("id"))
+        row[story_key]: row["n"]
+        for row in adventure_passed_runs.values(story_key).annotate(n=Count("id"))
     }
     challenge_story_runs = {
         row["challenge_trial__challenge_level__chapter__story_id"]: row["n"]
@@ -86,7 +88,7 @@ def admin_analytics_payload(*, now=None, kpi_range: KpiRange = ALL_TIME) -> dict
             }
         )
 
-    adventure_completions = total_adventure_level_completions()
+    adventure_completions = total_adventure_tier_completions()
     challenge_completions = total_challenge_trial_completions()
     return {
         "runs": {

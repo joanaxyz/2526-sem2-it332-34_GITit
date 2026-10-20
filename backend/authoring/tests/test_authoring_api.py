@@ -58,7 +58,7 @@ def test_user_can_create_validate_and_test_run_adventure_definition(django_user_
     test_run = client.post(f"/api/authoring/content-definitions/{definition_id}/test-run/")
     assert test_run.status_code == 200
     assert test_run.json()["kind"] == "adventure"
-    assert test_run.json()["start_path"].startswith("/adventure-levels/")
+    assert test_run.json()["start_path"].startswith("/adventure-level-tiers/")
 
     content = ContentDefinition.objects.get(id=definition_id)
     assert content.status == "testable"

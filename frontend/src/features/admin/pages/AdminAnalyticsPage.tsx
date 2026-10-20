@@ -3,6 +3,7 @@ import { Activity, Command, RotateCcw } from 'lucide-react'
 
 import { adminApi } from '@/features/admin/api/adminApi'
 import { PageHeading, StatTile } from '@/features/admin/components/adminUi'
+import { moduleTarget } from '@/features/admin/utils/kpiCatalogue'
 import { KPIS, type EvidenceKey, formatMetricValue, kpiEvidence, metricTargetStatus } from '@/features/performance/utils/performanceKpis'
 import type { PerformanceModule, RateMetric } from '@/features/performance/types'
 import { queryKeys } from '@/shared/api/queryKeys'
@@ -101,13 +102,13 @@ function KpiSummaryTable({ diagnostics }: {
                 <StatusCell rate={overall} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} evidenceKey={meta.key} />
                 {diagnostics.modules.map((mod) => {
                   const modRate = meta.key === 'scr' ? mod.scr
-                    : meta.key === 'car' ? undefined
+                    : meta.key === 'car' ? mod.car
                     : meta.key === 'hlcr' ? mod.hlcr
                     : meta.key === 'arc' ? mod.arc
                     : meta.key === 'rta' ? mod.rta
                     : undefined
                   return (
-                    <StatusCell key={mod.number} rate={modRate} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} evidenceKey={meta.key} />
+                    <StatusCell key={mod.number} rate={modRate} target={moduleTarget(meta.key, mod.number)} higherIsBetter={meta.higherIsBetter} format={meta.format} evidenceKey={meta.key} />
                   )
                 })}
               </tr>
@@ -116,9 +117,9 @@ function KpiSummaryTable({ diagnostics }: {
         </tbody>
       </table>
       <p className="mt-2 text-xs text-muted-foreground px-3 pb-2">
-        Green = target met · Red = target missed · (n) = each formula's denominator: started sessions (SCR),
-        submitted commands (CAR), hard sessions (HLCR), completed sessions (ARC), eligible retries (RTA); hover a
-        value for its full count · -- = no data
+        Green = target met · Red = target missed · (n) = contributing learners for cohort means.
+        Individual records count required tiers (SCR/HLCR), assessments (CAR), mastered tiers (ARC),
+        or transfer checkpoints (RTA). Hover a value for evidence · -- = no data
       </p>
     </div>
   )
@@ -212,11 +213,11 @@ export function AdminAnalyticsPage() {
           <article>
             <header className="admin-diagnostic-head">
               <Command aria-hidden="true" />
-              <span>Command processability</span>
+              <span>Command efficiency</span>
             </header>
             <strong className="admin-diagnostic-value">{formatPercent(diagnostics.kpis.car)}</strong>
-            <p>Submitted commands the simulator could process.</p>
-            <small>{kpiEvidence('car', diagnostics.kpis.car)} - aggregate only</small>
+            <p>Assessed command use relative to a validated solution.</p>
+            <small>{kpiEvidence('car', diagnostics.kpis.car)}</small>
           </article>
 
           <article>
@@ -225,7 +226,7 @@ export function AdminAnalyticsPage() {
               <span>Retry transfer accuracy</span>
             </header>
             <strong className="admin-diagnostic-value">{formatPercent(diagnostics.kpis.rta)}</strong>
-            <p>First retries after a failure, on a structurally changed variant, that complete (Modules 3-4).</p>
+            <p>First attempts on reserved unseen transfer checkpoints (Modules 3-4).</p>
             <small>{kpiEvidence('rta', diagnostics.kpis.rta)}</small>
             <ModuleRows modules={diagnostics.modules} metric="rta" />
           </article>
@@ -236,7 +237,7 @@ export function AdminAnalyticsPage() {
               <span>Average retries</span>
             </header>
             <strong className="admin-diagnostic-value">{formatScalar(diagnostics.kpis.arc)}</strong>
-            <p>Retries accumulated per completed session.</p>
+            <p>Unsuccessful attempts before mastery per mastered tier.</p>
             <small>{kpiEvidence('arc', diagnostics.kpis.arc)} - relative scale</small>
             <ModuleRows modules={diagnostics.modules} metric="arc" scalar />
           </article>

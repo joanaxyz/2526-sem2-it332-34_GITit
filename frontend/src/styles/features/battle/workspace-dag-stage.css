@@ -36,8 +36,8 @@
 }
 
 /* While the command is resolving, a restrained scan passes through the graph.
-   New topology is already present optimistically but its delta animation stays
-   paused until the result state is known. */
+   New topology renders optimistically and its delta animation plays at once;
+   the result flash below arrives with the verified state. */
 .challenge-dag-stage::before {
   top: 2.75rem;
   background: linear-gradient(

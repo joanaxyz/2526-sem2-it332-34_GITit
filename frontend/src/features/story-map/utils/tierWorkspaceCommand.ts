@@ -8,6 +8,11 @@ import { queryKeys } from '@/shared/api/queryKeys'
 import { isExitCommand } from '@/shared/level-runtime/commands'
 import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import { battleEventsForSubmittedCommand } from '@/shared/level-runtime/commandBattle'
+import {
+  confirmsPrediction,
+  predictLocalOutcome,
+  type CommandSubmissionOutcome,
+} from '@/shared/level-runtime/commandOutcome'
 import type { LearnedSkill } from '@/shared/skill-learning/useSkillLearnedQueue'
 
 export function createTierWorkspaceCommandHandler({
@@ -46,15 +51,25 @@ export function createTierWorkspaceCommandHandler({
     dagAnimation.onCommandStart()
     battleDirector.onAttackStart()
 
-    mutation.mutate(command, {
+    const resolveTurn = (outcome: CommandSubmissionOutcome) => {
+      dagAnimation.onCommandResolved(outcome)
+      battleDirector.onResolve(battleEventsForSubmittedCommand({
+        command,
+        outcome,
+        monsters: battleDirector.currentMonsters(),
+        storyWorldSlug: runStorySlug(queryClient, runId),
+      }))
+    }
+    const counts = queryClient.getQueryData<TierRun>(queryKeys.adventureTierRun(runId))?.counts
+    let predicted: CommandSubmissionOutcome | null = null
+
+    const execution = mutation.mutate(command, {
       onSuccess: (response) => {
-        dagAnimation.onCommandResolved(response.command_outcome)
-        battleDirector.onResolve(battleEventsForSubmittedCommand({
-          command,
-          outcome: response.command_outcome,
-          monsters: battleDirector.currentMonsters(),
-          storyWorldSlug: runStorySlug(queryClient, runId),
-        }))
+        // A turn already played from the local outcome only replays when the
+        // server judged it differently (it is the authority on progress).
+        if (!predicted || !confirmsPrediction(predicted, response.command_outcome)) {
+          resolveTurn(response.command_outcome)
+        }
         onSkillsLearned(response.learned_skills ?? [])
         if (response.run.status === 'completed' || response.run.status === 'failed') {
           queueOutcomeAnimation(response.run.id)
@@ -80,6 +95,15 @@ export function createTierWorkspaceCommandHandler({
         battleDirector.onError()
       },
     })
+    // Misses and read-only looks need no server verdict, so their turn plays
+    // now instead of after the round trip.
+    predicted = execution && counts
+      ? predictLocalOutcome(execution, {
+          counted: counts.counted_action_total,
+          max: counts.maximum_counted_commands,
+        })
+      : null
+    if (predicted) resolveTurn(predicted)
   }
 }
 

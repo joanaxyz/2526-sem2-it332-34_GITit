@@ -589,9 +589,10 @@ def test_staff_analytics_returns_shape(django_user_model):
 
     from adventures.models import (
         AdventureLevel,
-        AdventureRun,
-        AdventureWave,
-        AdventureWaveVariant,
+        AdventureLevelTier,
+        AdventureLevelTierRun,
+        AdventureLevelTierWave,
+        AdventureLevelTierWaveVariant,
     )
     from challenges.models import (
         ChallengeLevel,
@@ -620,19 +621,20 @@ def test_staff_analytics_returns_shape(django_user_model):
         slug="analytics-adventure",
         title="Analytics Adventure",
     )
-    wave = AdventureWave.objects.create(level=level, slug="wave", title="Wave")
-    adventure_variant = AdventureWaveVariant.objects.create(
+    tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
+    wave = AdventureLevelTierWave.objects.create(tier=tier, slug="wave", title="Wave")
+    adventure_variant = AdventureLevelTierWaveVariant.objects.create(
         wave=wave,
         slug="main",
         label="Main",
     )
-    AdventureRun.objects.create(
+    AdventureLevelTierRun.objects.create(
         player=player,
-        level=level,
+        tier=tier,
         current_wave=wave,
         selected_variant=adventure_variant,
-        status=AdventureRun.Status.COMPLETED,
-        passed_at=timezone.now(),
+        status=AdventureLevelTierRun.Status.COMPLETED,
+        completed_at=timezone.now(),
     )
     challenge_level = ChallengeLevel.objects.create(
         chapter=chapter,
@@ -667,15 +669,11 @@ def test_staff_analytics_returns_shape(django_user_model):
         "per_story",
         "runebound_performance",
     }
-    assert body["runebound_performance"]["kpis"] == {
-        "scr": {"value": None, "numerator": 0, "denominator": 0},
-        "car": {"value": None, "numerator": 0, "denominator": 0},
-        "hlcr": {"value": None, "numerator": 0, "denominator": 0},
-        "rta": {"value": None, "numerator": 0, "denominator": 0},
-        "retry_success_rate": {"value": None, "numerator": 0, "denominator": 0},
-        "rtr": {"value": None, "numerator": 0, "denominator": 0},
-        "arc": {"value": None, "numerator": 0, "denominator": 0},
-    }
+    # Cohort rates are means of learner scores, so each carries its unit.
+    empty_mean = {"value": None, "numerator": 0, "denominator": 0, "unit": "participants"}
+    assert body["runebound_performance"]["kpis"] == dict.fromkeys(
+        ("scr", "car", "hlcr", "rta", "retry_success_rate", "rtr", "arc"), empty_mean
+    )
     assert body["runs"]["total"] == 2
     assert body["runs"]["passed"] == 2
     assert body["runs"]["adventure"]["total"] == 1

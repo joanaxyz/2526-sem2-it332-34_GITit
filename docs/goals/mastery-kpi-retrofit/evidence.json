@@ -1,0 +1,107 @@
+{
+  "history": [
+    "failure",
+    "success",
+    "failure",
+    "success",
+    "success"
+  ],
+  "assessment_run": 5,
+  "reference": 3,
+  "actual": 4,
+  "transfer_run": 6,
+  "response": {
+    "kpis": {
+      "scr": {
+        "value": 100.0,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "car": {
+        "value": 75.0,
+        "numerator": 75.0,
+        "denominator": 1
+      },
+      "hlcr": {
+        "value": 100.0,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "arc": {
+        "value": 2.0,
+        "numerator": 2,
+        "denominator": 1
+      },
+      "rta": {
+        "value": 100.0,
+        "numerator": 1,
+        "denominator": 1
+      },
+      "retry_success_rate": {
+        "value": 100.0,
+        "numerator": 2,
+        "denominator": 2
+      },
+      "rtr": {
+        "value": 100.0,
+        "numerator": 2,
+        "denominator": 2
+      }
+    },
+    "completed_sessions": 3,
+    "modules": [
+      {
+        "number": 3,
+        "title": "Module 3",
+        "scr": {
+          "value": 100.0,
+          "numerator": 1,
+          "denominator": 1
+        },
+        "car": {
+          "value": 75.0,
+          "numerator": 75.0,
+          "denominator": 1
+        },
+        "hlcr": {
+          "value": 100.0,
+          "numerator": 1,
+          "denominator": 1
+        },
+        "arc": {
+          "value": 2.0,
+          "numerator": 2,
+          "denominator": 1
+        },
+        "rta": {
+          "value": 100.0,
+          "numerator": 1,
+          "denominator": 1
+        },
+        "retry_success_rate": {
+          "value": 100.0,
+          "numerator": 2,
+          "denominator": 2
+        },
+        "rtr": {
+          "value": 100.0,
+          "numerator": 2,
+          "denominator": 2
+        }
+      }
+    ],
+    "samples": {
+      "participants": 1,
+      "attempted_tiers": 1,
+      "in_progress_tiers": 0,
+      "mastered_tiers": 1,
+      "mastery_missing": 0,
+      "car_scored": 1,
+      "car_missing": 0,
+      "transfer_assigned": 1,
+      "transfer_pending": 0,
+      "transfer_missing": 0
+    },
+    "transfers": []
+  }
+}

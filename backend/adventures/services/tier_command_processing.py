@@ -1,7 +1,10 @@
 from django.db import transaction
+from django.db.models import Max, Q
 from django.utils import timezone
 
 from adventures.models import AdventureLevelTierProgress, AdventureLevelTierRun, SkillMastery
+from adventures.rewards import award_tier_reward
+from adventures.tier_waves import cleared_slugs, next_wave, published_waves, solved_wave_runs
 from common.constants import (
     COMMAND_COUNTED,
     DIFFICULTY_EASY,
@@ -24,7 +27,6 @@ from common.runtime import (
     update_fields_for_execution,
 )
 from common.services.performance import timing
-from curriculum.models import CommandForm
 from curriculum.services import ChapterChestService
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from practice.models import CommandStep
@@ -32,13 +34,17 @@ from practice.services.scaffolding import FeedbackGenerationService, Scaffolding
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import AdventureLevelTierCompletion
 from progress.services.scored_completions import update_best_score
-from progress.wallet import WalletService
 from simulator.services import (
     RepositorySnapshotService,
     RepositoryStateSimulator,
 )
-from tutoring.services.commands import current_feedback, record_command_feedback
-from tutoring.services.planner import plan_introduction
+from tutoring.services.commands import (
+    current_feedback,
+    record_command_feedback,
+    stored_feedback,
+)
+from tutoring.services.forms import forms_used_by
+from tutoring.services.planner import PlannerReads, plan_introduction
 
 from .selectors import form_solve_targets
 from .skill_learning import learn_from_command
@@ -85,8 +91,13 @@ class AdventureLevelTierCommandProcessingService:
             expected_client_revision=run.total_attempts,
         )
         previous_state = execution.previous_state
-        introduction = plan_introduction(run)
-        previous_introduction_feedback = current_feedback(run)
+        # Both tutor plans (before the command and for its response) share one
+        # read of the player's history and the form catalog.
+        tutor_reads = PlannerReads(run.player_id)
+        previous_history = tutor_reads.history(run)
+        introduction = None if run.is_transfer else plan_introduction(run, tutor_reads)
+        stored_introduction_feedback = stored_feedback(run)
+        previous_introduction_feedback = current_feedback(run, stored_introduction_feedback)
         next_state = execution.next_state
         command_result = execution.result
         classification, increment = execution.classification, execution.increment
@@ -102,7 +113,6 @@ class AdventureLevelTierCommandProcessingService:
             variant=run.selected_variant,
             state_tools=state_tools,
         )
-        previous_history = TierCommandHistoryCache().history_for(run=run)
         initial_state = run.selected_variant.initial_state
         initial_evaluation = evaluator.evaluate(
             CompletionEvaluationContext(
@@ -206,6 +216,17 @@ class AdventureLevelTierCommandProcessingService:
                 previous_history=executed_commands[:-1],
                 normalized_command=command_result.normalized_command,
             )
+            tutor_reads.remember_history(run, executed_commands)
+        else:
+            # Unprocessable input is not history, but it still advances the
+            # attempt count the history is keyed by.
+            TierCommandHistoryCache().remember(run=run, history=previous_history)
+            tutor_reads.remember_history(run, previous_history)
+        tutor_reads.record_step(
+            normalized_command=command_result.normalized_command,
+            processable=command_result.processed,
+            result_category=result_category,
+        )
 
         if execution.state_mutated:
             run.repository_state = next_state
@@ -215,10 +236,22 @@ class AdventureLevelTierCommandProcessingService:
                 state_mutated=execution.state_mutated,
             )
         )
+        # An editor may revise the variant while a learner has it open. Such a
+        # run cannot claim an old validated benchmark for the changed objective.
+        if run.ref_hash:
+            from progress.services.references import ref_hash
+
+            if run.current_wave_id == run.selected_variant.wave_id:
+                run.selected_variant.wave = run.current_wave
+            if run.ref_hash != ref_hash(run.selected_variant):
+                run.ref_count, run.ref_hash = None, ""
+                update_fields.update({"ref_count", "ref_hash"})
         rewards = None
         learned_skills = learn_from_command(player=run.player, result=command_result)
         if solved:
-            completed_fields, rewards = self._complete_run(run)
+            completed_fields, rewards = self._complete_run(
+                run, tutor_reads.wave_forms(run.current_wave)
+            )
             update_fields.update(completed_fields)
         elif failed:
             run.status = SESSION_STATUS_FAILED
@@ -230,7 +263,17 @@ class AdventureLevelTierCommandProcessingService:
 
         with span("run_save"):
             run.save(update_fields=sorted(update_fields))
-        record_command_feedback(run, introduction, execution, previous_introduction_feedback)
+        if run.is_transfer and (solved or failed):
+            from progress.services.checkpoints import finish_transfer
+
+            finish_transfer(run)
+        introduction_feedback = record_command_feedback(
+            run,
+            introduction,
+            execution,
+            previous_introduction_feedback,
+            stored=stored_introduction_feedback,
+        )
         with span("response_snapshot"):
             repository_snapshot = repository_response_snapshot(
                 self.snapshotter,
@@ -266,66 +309,89 @@ class AdventureLevelTierCommandProcessingService:
             ),
             "rewards": rewards,
             "learned_skills": learned_skills,
+            "tutor_context": {"reads": tutor_reads, "pending": introduction_feedback},
         }
 
-    def _complete_run(self, run: AdventureLevelTierRun) -> tuple[set[str], dict | None]:
-        """Mark the run completed and, if solving it pushed the tier's
-        successful-clears count to its required threshold, write
-        AdventureLevelTierCompletion. Returns the saved field names.
+    def _complete_run(self, run: AdventureLevelTierRun, wave_forms) -> tuple[set[str], dict | None]:
+        """Mark the run completed, clear its wave, and complete the tier once
+        every published wave is cleared. Returns the saved field names.
 
-        Unlike ChallengeRun (one success = done), a tier needs
-        required_successful_attempts successes across separate runs, so the
-        running count lives on AdventureLevelTierProgress (survives across
-        runs) rather than on this run row. Every solved run still ends as
-        COMPLETED regardless of whether the threshold was reached - mirrors
-        ChallengeRun's one-row-per-attempt shape; the player starts a fresh
-        run for the next clear attempt."""
+        A tier is an ordered set of waves (see ``tier_waves``). A graded solve
+        clears its wave once that wave has been solved
+        ``required_successful_attempts`` times, which credits the forms the
+        learner typed. The run that clears the last wave writes
+        AdventureLevelTierCompletion and pays the tier's reward. Progress
+        lives on AdventureLevelTierProgress because each run is one attempt;
+        every solved run ends as COMPLETED, mirroring ChallengeRun."""
         from adventures.scoring import stars as compute_stars
 
         run.status = SESSION_STATUS_COMPLETED
         run.completed_at = timezone.now()
         run.ended_at = run.completed_at
-        run.stars = compute_stars(
+        run.stars = 0 if run.is_transfer else compute_stars(
             solved=True,
             counted_commands=run.counted_action_total,
             budget=run.min_counted_commands,
             retry_count=run.retry_index,
         )
         rewards = None
-        if not run.is_replay:
-            progress, _ = AdventureLevelTierProgress.objects.get_or_create(
+        if run.is_transfer:
+            completion = None
+        elif not run.is_replay:
+            progress, _ = AdventureLevelTierProgress.objects.select_for_update().get_or_create(
                 player=run.player, tier=run.tier
             )
             progress.successful_clears += 1
-            progress.save(update_fields=["successful_clears", "updated_at"])
+            waves = published_waves(run.tier)
+            wave = run.current_wave
+            if not wave.is_published:
+                # A run started before a reseed superseded its wave still
+                # counts: it clears the learner's next uncleared wave.
+                wave = next_wave(waves, progress) or wave
+            cleared = cleared_slugs(progress)
+            mastery_advanced: list[dict] = []
+            wave_cleared = wave.slug not in cleared and (
+                # This run is not saved as completed yet.
+                solved_wave_runs(player=run.player, wave=wave) + 1
+                >= wave.required_successful_attempts
+            )
+            if wave_cleared:
+                cleared.append(wave.slug)
+                progress.cleared_wave_slugs = cleared
+                mastery_advanced = self._credit_mastery(run, wave_forms)
+            progress.save(update_fields=["successful_clears", "cleared_wave_slugs", "updated_at"])
+            run._prefetched_progress = progress
 
-            required = run.current_wave.required_successful_attempts
-            if progress.successful_clears >= required:
+            completion = None
+            tier_cleared = {w.slug for w in waves} <= set(cleared)
+            if wave_cleared and not tier_cleared:
+                rewards = {
+                    "first_level_clear": False,
+                    "coins_awarded": 0,
+                    "chapter_chests_awarded": [],
+                    "mastery_advanced": mastery_advanced,
+                }
+            elif tier_cleared:
                 completion, created = AdventureLevelTierCompletion.objects.get_or_create(
                     player=run.player,
                     tier=run.tier,
                     defaults={
                         "tier_run": run,
-                        "stars": run.stars,
+                        "stars": tier_stars(run=run, waves=waves, wave=wave),
                         "counted_action_total": run.counted_action_total,
                     },
                 )
                 if not created:
                     update_best_score(completion, run=run, run_field="tier_run")
                 if created:
-                    mastery_advanced = self._credit_mastery(run)
+                    from progress.services.checkpoints import record_mastery
+
+                    record_mastery(run)
                     level = run.tier.adventure_level
                     first_level_clear = run.tier.difficulty == DIFFICULTY_EASY
-                    coins_awarded = 0
+                    coins_awarded = award_tier_reward(player=run.player, tier=run.tier)
                     chapter_chests_awarded: list[dict] = []
                     if first_level_clear:
-                        if level.reward_coins and WalletService().award(
-                            player=run.player,
-                            amount=level.reward_coins,
-                            reason="adventure_level_reward",
-                            award_key=f"adventure-level-reward:{level.id}",
-                        ):
-                            coins_awarded = level.reward_coins
                         chapter_chests_awarded = ChapterChestService().award_chests(
                             player=run.player,
                             chapter=level.chapter,
@@ -342,18 +408,36 @@ class AdventureLevelTierCommandProcessingService:
                 .filter(player=run.player, tier=run.tier)
                 .first()
             )
-            update_best_score(completion, run=run, run_field="tier_run")
+            waves = published_waves(run.tier)
+            if len(waves) > 1 and completion is not None:
+                # Several waves: the tier is graded by its weakest wave, so a
+                # replay raises the tier only when it lifts that minimum.
+                best = tier_stars(run=run, waves=waves)
+                if best > completion.stars:
+                    completion.stars = best
+                    completion.save(update_fields=["stars"])
+            else:
+                update_best_score(completion, run=run, run_field="tier_run")
+        # The response reports this completion; do not read it back.
+        run._prefetched_completion = completion
+        run._payload_context_loaded = True
         return {"status", "completed_at", "ended_at", "stars"}, rewards
 
-    def _credit_mastery(self, run: AdventureLevelTierRun) -> list[dict]:
-        form_ids = set(
-            run.current_wave.command_forms.filter(is_published=True).values_list("id", flat=True)
-        )
-        if not form_ids:
+    def _credit_mastery(self, run: AdventureLevelTierRun, wave_forms) -> list[dict]:
+        """One solve for every published form the wave's clears actually used.
+
+        Called once per cleared wave. The commands come from every solved,
+        non-replay run of that wave, so a wave that needs several clears
+        credits each form a learner typed in any of them - and nothing they
+        did not type, which would otherwise suppress that form's guide later.
+        ``wave_forms`` (the wave's published forms) only break resolver ties.
+        """
+        forms = forms_used_by(_wave_clear_commands(run), preferred=wave_forms)
+        if not forms:
             return []
-        targets = form_solve_targets(form_ids)
+        targets = form_solve_targets({form.id for form in forms})
         advanced = []
-        for form in CommandForm.objects.filter(id__in=form_ids).select_related("command_skill"):
+        for form in forms:
             row, _ = SkillMastery.objects.get_or_create(player=run.player, command_form=form)
             row.solves += 1
             row.mastered = row.solves >= targets.get(form.id, 1)
@@ -370,11 +454,56 @@ class AdventureLevelTierCommandProcessingService:
         return advanced
 
 
+def tier_stars(*, run: AdventureLevelTierRun, waves, wave=None) -> int:
+    """A tier's grade: its weakest wave's best stars (decision D3).
+
+    A single-wave tier keeps today's grade - the stars of the run that
+    completed it. ``run`` is the solving run, not yet saved as completed;
+    ``wave`` is the wave it clears (its own unless that wave was superseded).
+    """
+    if len(waves) <= 1:
+        return run.stars
+    best = dict(
+        AdventureLevelTierRun.objects.filter(
+            player=run.player,
+            current_wave__in=waves,
+            status=SESSION_STATUS_COMPLETED,
+            is_transfer=False,
+        )
+        .values("current_wave_id")
+        .annotate(best=Max("stars"))
+        .values_list("current_wave_id", "best")
+    )
+    wave_id = wave.id if wave is not None else run.current_wave_id
+    best[wave_id] = max(best.get(wave_id, 0), run.stars)
+    return min(best.get(wave.id, 0) for wave in waves)
+
+
+def _wave_clear_commands(run: AdventureLevelTierRun) -> list[str]:
+    """Processed commands of this run and the player's earlier clears of its wave."""
+    earlier = AdventureLevelTierRun.objects.filter(
+        player=run.player,
+        current_wave=run.current_wave,
+        status=SESSION_STATUS_COMPLETED,
+        is_replay=False,
+        is_transfer=False,
+    ).exclude(id=run.id)
+    steps = (
+        CommandStep.objects.filter(
+            Q(adventure_tier_run=run) | Q(adventure_tier_run__in=earlier),
+            was_processable=True,
+        )
+        .order_by("id")
+        .values_list("normalized_command", "command_text")
+    )
+    return [normalized or text for normalized, text in steps]
+
+
 def _uses_contextual_feedback(run: AdventureLevelTierRun) -> bool:
-    return ScaffoldingService().supports_for_tier(run.tier.difficulty)["contextual_feedback"]
+    return not run.is_transfer and ScaffoldingService().supports_for_tier(run.tier.difficulty)["contextual_feedback"]
 
 
 def _visible_target_state(run: AdventureLevelTierRun) -> dict | None:
-    if ScaffoldingService().supports_for_tier(run.tier.difficulty)["expected_state"]:
+    if not run.is_transfer and ScaffoldingService().supports_for_tier(run.tier.difficulty)["expected_state"]:
         return run.selected_variant.target_state
     return None

@@ -23,6 +23,8 @@ const run = {
   stars: 2,
   policy: { min_counted_commands: 1, max_counted_commands: 8 },
   counts: { counted_action_total: 0 },
+  reward: { coins: 25, claimed: false },
+  wave: { index: 1, total: 1, title: '' },
   tier: { adventure_level_title: 'Branching paths' },
 } as TierRun
 

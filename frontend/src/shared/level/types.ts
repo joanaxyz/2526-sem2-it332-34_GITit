@@ -77,6 +77,7 @@ export type RepositorySnapshot = {
   cherry_pick_in_progress?: boolean
   cherry_pick_original_head?: string | null
   cherry_pick_source?: string | null
+  cherry_pick_message?: string | null
   cherry_pick_conflict_files?: string[]
   rebase_state?: RepositoryValue
   project_tree?: Record<string, RepositoryValue>
@@ -109,7 +110,11 @@ export type RepositoryVisualization = {
 // The minimal shape the shared terminal needs to render a command + its output.
 // Both ChallengeStepLog and the adventure step payload satisfy this, so terminal
 // line derivation (and the optimistic pending/error placeholders) are shared.
-export type TerminalStep = ApiSchemas['RuntimeStepResponse']
+// Every run step response (challenge and adventure tier) extends these fields.
+export type TerminalStep = Pick<
+  ApiSchemas['ChallengeRunStepResponse'],
+  'id' | 'command_text' | 'terminal_output' | 'result_category'
+>
 
 export type RepositoryCommandState = RepositorySnapshot & Record<string, RepositoryValue>
 

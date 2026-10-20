@@ -95,6 +95,8 @@ psycopg==3.3.4
     # via -r requirements.in
 psycopg-binary==3.3.4 ; implementation_name != 'pypy'
     # via psycopg
+psycopg-pool==3.3.3
+    # via psycopg
 py-serializable==2.1.0
     # via cyclonedx-python-lib
 pygments==2.20.0
@@ -144,6 +146,8 @@ sqlparse==0.6.0
     #   django
 toml==0.10.2
     # via pip-audit
+typing-extensions==4.16.0
+    # via psycopg-pool
 tzdata==2026.2 ; sys_platform == 'win32'
     # via
     #   django

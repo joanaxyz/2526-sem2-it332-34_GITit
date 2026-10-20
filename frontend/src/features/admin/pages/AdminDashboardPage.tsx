@@ -329,7 +329,7 @@ export function AdminDashboardPage() {
           </p>
           <h1 className="dk-title">KPI Overview</h1>
           <p className="dk-subtitle">
-            Live capstone objectives — all learner sessions aggregated.
+            Live practice objectives — equally weighted learner scores. Formal studies use frozen assignments.
           </p>
         </div>
 
@@ -341,9 +341,9 @@ export function AdminDashboardPage() {
             <span className="dk-stat-label">targets met</span>
           </div>
           <div className="dk-stat">
-            {/* Started sessions under the header's scope: SCR's denominator. */}
-            <span className="dk-stat-value">{diag.kpis.scr.denominator.toLocaleString()}</span>
-            <span className="dk-stat-label">sessions</span>
+            {/* Activity coverage stays separate from participant-mean KPI denominators. */}
+            <span className="dk-stat-value">{diag.samples.attempted_tiers.toLocaleString()}</span>
+            <span className="dk-stat-label">attempted tiers</span>
           </div>
           <div className="dk-stat">
             <span className="dk-stat-value">{data.active_learners_30d}</span>

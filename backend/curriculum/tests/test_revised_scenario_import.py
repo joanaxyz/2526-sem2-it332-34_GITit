@@ -147,3 +147,103 @@ EXPECTED = 1
 
     with pytest.raises(module.ImportError, match="different required-file"):
         module.parse_document(document, enforce_bank_counts=False)
+
+
+_EXTENSION_SCENARIO = """
+### {number} {title} · Easy
+
+**Variant ID:** `{variant}`
+
+**Story**
+A story.
+
+**Starting point:** A start.
+
+**Real-World Context**
+Context.
+
+**Your Task**
+Do it.
+
+**Objective Checklist**
+
+- [ ] Done.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git status` — Look.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- None.
+
+**Expected Result**
+Done.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 1 · Maximum counted commands: 12
+
+- First check.
+- Last check.
+"""
+
+
+def _write_bank(tmp_path, scenarios: dict) -> object:
+    import json
+
+    bank = tmp_path / "bank.json"
+    bank.write_text(json.dumps(scenarios), encoding="utf-8")
+    return bank
+
+
+def test_extension_mode_ends_scenarios_at_module_headings_and_accepts_gate_numbers(tmp_path):
+    module = _importer_module()
+    source = tmp_path / "waves.md"
+    source.write_text(
+        "# Waves\n\n## Module 1\n"
+        + _EXTENSION_SCENARIO.format(number="1.1.12", title="One", variant="wave-one")
+        + "\n## Module 2\n"
+        + _EXTENSION_SCENARIO.format(number="2.G.1", title="Gate", variant="gate-one"),
+        encoding="utf-8",
+    )
+
+    import json
+
+    rendered = json.loads(
+        module.render_document(source, extension=True, bank_path=_write_bank(tmp_path, {}))
+    )
+
+    assert list(rendered) == ["wave-one", "gate-one"]
+    assert rendered["wave-one"]["evaluation"] == ["First check.", "Last check."]
+    assert rendered["gate-one"]["scenario_number"] == "2.G.1"
+
+
+def test_extension_mode_rejects_ids_or_numbers_already_in_the_bank(tmp_path):
+    module = _importer_module()
+    source = tmp_path / "waves.md"
+    source.write_text(
+        _EXTENSION_SCENARIO.format(number="1.1.12", title="One", variant="taken"),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(module.ImportError, match="already exist in the bank"):
+        module.render_document(
+            source,
+            extension=True,
+            bank_path=_write_bank(tmp_path, {"taken": {"scenario_number": "9.9.9"}}),
+        )
+    with pytest.raises(module.ImportError, match="numbers already used"):
+        module.render_document(
+            source,
+            extension=True,
+            bank_path=_write_bank(tmp_path, {"other": {"scenario_number": "1.1.12"}}),
+        )
+
+
+def test_committed_wave_bank_is_current_with_its_markdown():
+    module = _importer_module()
+    source = REPO_ROOT / "backend/curriculum/seed_data/source/wave_scenarios.md"
+    compiled = REPO_ROOT / "backend/curriculum/seed_data/scenario_bank_waves.json"
+
+    assert module.render_document(source, extension=True) == compiled.read_text(encoding="utf-8")

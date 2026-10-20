@@ -4,14 +4,12 @@ import { Modal } from '@/shared/components/Modal'
 export function TierExitConfirmModal({
   open,
   isExiting,
-  isRetrying,
   onClose,
   onRetry,
   onExit,
 }: {
   open: boolean
   isExiting: boolean
-  isRetrying: boolean
   onClose: () => void
   onRetry: () => void
   onExit: () => void
@@ -23,10 +21,10 @@ export function TierExitConfirmModal({
           This run will be discarded. Start over with a fresh variant, or exit back to the map.
         </p>
         <div className="flex flex-wrap justify-end gap-2">
-          <Button type="button" variant="secondary" disabled={isRetrying || isExiting} onClick={onRetry}>
-            {isRetrying ? 'Starting retry' : 'Retry'}
+          <Button type="button" variant="secondary" disabled={isExiting} onClick={onRetry}>
+            Retry
           </Button>
-          <Button type="button" variant="destructive" disabled={isExiting || isRetrying} onClick={onExit}>
+          <Button type="button" variant="destructive" disabled={isExiting} onClick={onExit}>
             {isExiting ? 'Exiting' : 'Exit'}
           </Button>
         </div>

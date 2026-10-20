@@ -10,7 +10,6 @@ from common.constants import (
 from common.exceptions import Conflict, Locked
 from common.runtime import discard_started_run
 from progress.models import (
-    AdventureLevelCompletion,
     ChallengeLevelCompletion,
     ChallengeTrialCompletion,
 )
@@ -142,9 +141,15 @@ class ChallengeRunService:
         return queryset.first()
 
     def _ensure_unlocked(self, *, player, trial: ChallengeTrial) -> None:
+        from curriculum.selectors.adventure_access import cleared_tier_difficulties
+
         self._ensure_previous_challenge_level_complete(player=player, trial=trial)
+        cleared = cleared_tier_difficulties(player=player, chapter_id=trial.chapter.id)
+        if cleared is not None and trial.difficulty not in cleared:
+            raise Locked(
+                f"Clear every level's {trial.difficulty} tier in this chapter to open this trial."
+            )
         if trial.difficulty == DIFFICULTY_EASY:
-            self._ensure_adventure_complete(player=player, chapter=trial.chapter)
             return
         previous = DIFFICULTY_EASY if trial.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
         previous_trial = ChallengeTrial.objects.filter(
@@ -178,28 +183,6 @@ class ChallengeRunService:
             ).exists()
         ):
             raise Locked("Complete the previous challenge level first.")
-
-    def _ensure_adventure_complete(self, *, player, chapter) -> None:
-        from adventures.models import AdventureLevel
-
-        required_level_ids = set(
-            AdventureLevel.objects.filter(
-                chapter=chapter,
-                is_published=True,
-                is_required=True,
-            ).values_list("id", flat=True)
-        )
-        if not required_level_ids:
-            return
-        completed_level_ids = set(
-            AdventureLevelCompletion.objects.filter(
-                player=player,
-                adventure_level_id__in=required_level_ids,
-            ).values_list("adventure_level_id", flat=True)
-        )
-        if required_level_ids <= completed_level_ids:
-            return
-        raise Locked("Complete this chapter's required Adventure levels to unlock its challenges.")
 
     def _replay_variant(self, *, player, trial: ChallengeTrial):
         completion = (

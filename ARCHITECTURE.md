@@ -9,9 +9,11 @@ Use these terms in product copy, code names, tests, and seed data:
 - `Story` — a learning path.
 - `Chapter` — a section inside a story.
 - `Lesson` — short conceptual reading attached to a chapter.
-- `Adventure` — guided practice made of ordered levels and waves.
-- `Wave` — one scenario inside an adventure level.
+- `Adventure` — guided practice made of ordered levels.
+- `Tier` — the Easy, Medium, or Hard difficulty of an adventure level, made of ordered waves.
+- `Wave` — one stage of a tier; each run of it serves one of its variants (scenarios).
 - `Challenge` — independent assessment practice.
+- `Challenge Gate` — a module's closing challenge: a workflow testing what the module taught.
 - `Trial` — an easy, medium, or hard scenario inside a challenge.
 - `Drill` — optional recall practice attached to an adventure level (Squire's Drill).
 - `Level map` — the visual chapter navigation surface.
@@ -117,7 +119,7 @@ component-name/                focused child views and pure helpers
 shared/battle/effects/...      playback cores split by DOM helpers, layer playback, companion playback, monster playback
 ```
 
-Human-authored curriculum data lives under `backend/curriculum/seed_data/source/` while the public `backend/curriculum/seed_data/*.py` modules remain thin compatibility re-exports. Generated artifacts remain under `backend/curriculum/seed_data/generated/` and must not be hand-edited. The largest scenario modules (`adventure_levels`, `challenges`, and `blueprint_overlay`) have been moved under `source/`; the next improvement is splitting those source files by chapter/module instead of leaving them as large source modules.
+`seed_curriculum` owns the module levels and their tiers (`MODULE_LEVELS`). Scenario content comes from the committed banks `backend/curriculum/seed_data/scenario_bank.json` and `scenario_bank_waves.json`; the extension bank's Markdown, repository fixtures, and the Challenge Gate composition live under `backend/curriculum/seed_data/source/`. Generated artifacts remain under `backend/curriculum/seed_data/generated/` and must not be hand-edited.
 
 
 ## Command Execution Boundary
@@ -178,22 +180,45 @@ python scripts/check_api_type_adoption.py
 
 ### Performance metrics
 
-The authenticated `GET /api/progress/performance/` endpoint returns the current player's Arcane Spire Modules 1–4 performance. `MetricsService._performance_summary_for_runs()` owns all executable formulas. Learner, Admin aggregate, and Admin per-player reads share that implementation; staff-console reads additionally exclude staff accounts and may apply a Manila-time date range. Replay runs are excluded.
+`GET /api/progress/performance/` returns Arcane Spire Modules 1–4 mastery metrics.
+`MetricsService._performance_summary_for_runs()` is the response owner and delegates
+arithmetic to `progress/services/mastery_metrics.py`. Dashboard KPI fields use the
+same owner. Ordinary run/session totals and the Stats finish-rate diagnostic remain
+activity measures. Replay and transfer runs do not create practice mastery credit.
 
-| KPI | Learner label | Calculation | Overall goal |
-| --- | --- | --- | --- |
-| SCR | Runs finished | completed runs / started runs | ≥80% |
-| CAR | Commands accepted | processable commands / submitted commands | ≥70% |
-| HLCR | Hard runs cleared | completed hard runs / started hard runs | ≥70% |
-| ARC | Retries per finish | retry indices across completed runs / completed runs | ≤2 |
-| RTA | Changed retries cleared | successful eligible changed retries / eligible changed retries | ≥65% |
-| Retry success rate | Retry recovery | completed runs with a prior run / non-abandoned runs with a prior run | Supplementary; no target |
+The five official KPIs, targets, formulas, Let definitions, reference-validation
+commands and fixed-cohort evaluation workflow are documented in
+[KPI_METHODOLOGY.md](KPI_METHODOLOGY.md). SCR/HLCR count unique required tiers;
+CAR assesses successful command efficiency against a validated reference; ARC
+counts unsuccessful attempts before mastery; RTA preserves the first result on
+reserved unseen transfer checkpoints in Modules 3–4. The supplementary Retry
+Success Rate counts concluded recovery retries after actual unsuccessful attempts.
+Its deprecated `rtr` response alias has no current UI consumer.
 
-RTA covers Modules 3–4 only: the first retry directly after a failure is eligible only when the starting repository or target state changes structurally. Later retries in the same failure chain and runs still in progress are excluded; abandoned eligible retries count as unsuccessful. Retry recovery includes any run with a prior run, including repeats after success; it is separate from RTA. The deprecated `rtr` field remains a server compatibility alias of `retry_success_rate` and has no current UI consumer.
+`KpiCheckpoint` preserves assessment evidence separately from mutable best-star
+completion pointers. Runs snapshot validated reference counts and content hashes.
+`KpiExposure` records every presentation, including discarded empty launches;
+legacy incomplete exposure histories cannot establish transfer novelty. Explicit
+transfer starts use the existing access-checked tier-start route, bypass practice
+reward/mastery mutation, and hide answer scaffolding.
 
-No observations returns `value: null`, while a measured zero remains `0%` or `0.00`. CAR is overall-only; module data contains SCR/HLCR/ARC/retry success for Modules 1–4 and RTA for Modules 3–4. Learner module comparisons are descriptive and unscored; Admin owns the objective-specific Module 4 overrides.
+Learner, Admin aggregate and Admin per-player reads share formulas. Admin excludes
+staff and averages participant scores; date filters select Manila-time starts,
+with assessment outcomes after the range end excluded. Formal studies have fixed
+assignments, requirements, references, module weights and cutoff, and freeze their
+report through `kpi_study`. They include unattempted assignments at cutoff and
+report unavailable evidence separately.
 
-`features/performance/utils/performanceKpis.ts` owns display formulas, labels, evidence wording, targets, direction, and formatting for both learner and Admin presentation. It never recalculates a server KPI. There is no standalone Performance page or `/performance` route; learner performance lives in Home Progress. `HomeResultsPanel()` fetches on demand using `useModulePerformance`, owns loading/error/retry, and passes only ready `PerformanceSummary` data to `LearnerPerformanceInstrument`.
+`RateMetric.value` is authoritative. Mean CAR uses a fractional numerator of summed
+percentage points. Cohort rates carry `unit: participants`; sample metadata reports
+coverage. Null/no observations is distinct from measured zero. Module responses
+include CAR. Learner comparisons are descriptive; Admin retains approved objective
+overrides, including Module 4 HLCR ≥65% and ARC ≤3.
+
+`features/performance/utils/performanceKpis.ts` owns shared display-only labels,
+formulas, explanations, evidence units, targets and formatting. There is no
+standalone Performance route: Home Progress's `HomeResultsPanel()` fetches on
+demand and passes the ready response to `LearnerPerformanceInstrument`.
 
 ### Home Overview composition
 
@@ -277,6 +302,17 @@ A fresh install must run `seed_drills` (or `seed_all`) before any drill
 appears. That is deliberate: content lives in rows, so an unseeded
 database honestly has none rather than synthesising it per request.
 
+## Adventure Tiers and Challenge Gates
+
+- Each `AdventureLevel` has Easy, Medium, and Hard `AdventureLevelTier`s. A tier holds ordered `AdventureLevelTierWave`s, and each wave holds ordered variants.
+- An `AdventureLevelTierRun` is one attempt at one wave. A wave is cleared after `required_successful_attempts` solves; `AdventureLevelTierProgress.cleared_wave_slugs` records the cleared waves, and the tier completes (`AdventureLevelTierCompletion`) once every published wave is cleared. Starting a tier plays the next uncleared wave; replay cycles through the waves (`adventures/tier_waves.py`, `services/tier_runs.py`, `services/tier_variants.py`).
+- A tier's stars are the lowest of its waves' best stars. A run's star budget comes from its variant, falling back to the wave's (`services/tier_budget.py`).
+- Each wave clear credits mastery to the wave's command forms that the player's solved commands used (`tutoring.services.forms.forms_used_by`).
+- `adventures/rewards.py` owns the GitCoin ladder: Easy 25, Medium 35, Hard 50 once per tier, and 50/75/100 for Challenge Gate trials, all through idempotent wallet keys. `award_missing_tier_rewards` backfills tiers completed before the ladder existed.
+- A level counts as passed on the map and in chapter progress once its Easy tier is complete. Chapter completion counts each published level once plus each published gate trial.
+- `seed_curriculum` seeds one Challenge Gate per module from `source/challenge_gates.py`: Easy, Medium, and Hard trials with two variants each. A trial opens once every required level of the module has completed its tier of the same difficulty (`cleared_tier_difficulties`).
+- Authored adventures compile to one Easy tier with ordered waves (`authoring/compiler.py`).
+
 ## Generated Curriculum Targets
 
 `backend/curriculum/seed_data/generated/generated_targets.py` is committed generated output. It exists so normal curriculum seeding can compare repository states without replaying every authored solution at runtime.
@@ -285,11 +321,8 @@ database honestly has none rather than synthesising it per request.
 
 Rules:
 
-- Humans edit authored source modules under `backend/curriculum/seed_data/source/` when changing shared fixtures, routing, adventure levels, challenges, and blueprint overlays. Public modules such as `seed_data/adventure_levels.py`, `seed_data/challenges.py`, and `seed_data/blueprint_overlay.py` are compatibility wrappers only.
-- The large curriculum ledgers are partitioned by responsibility:
-  - `source/adventure_level_specs/` composes authored adventure waves by chapter plus blueprint-generated waves.
-  - `source/challenge_specs/` composes current blueprint challenges and legacy challenge batches.
-  - `source/blueprint/` stores blueprint adventure ledgers in smaller adventure-family modules.
+- Humans edit `MODULE_LEVELS` in `seed_curriculum`, the scenario Markdown compiled by `scripts/curriculum/import_revised_scenarios.py`, and the fixtures and gate composition under `backend/curriculum/seed_data/source/`.
+- `generate_targets` replays every module case and extension scenario, and fails unless the backend transition verifier accepts each replayed command (`solution_replay.verify_backend_transitions`), so a published answer key can always be submitted live.
 - Humans do not edit files under `backend/curriculum/seed_data/generated/` directly.
 - After changing a variant initial state, solution commands, or workspace-file edits, run `cd backend && python manage.py generate_targets`. It rewrites both generated targets and trajectories.
 - `scripts/check_seed_targets.py` is the cheap structural guard.

@@ -12,13 +12,13 @@ import { cn } from '@/shared/utils/cn'
 type DagTab = 'live' | 'expected'
 type DagViewMode = 'switch' | 'split'
 
-const MIN_SPLIT_PERCENT = 25
-const MAX_SPLIT_PERCENT = 75
+const MIN_SPLIT_PERCENT = 0
+const MAX_SPLIT_PERCENT = 100
 const DEFAULT_SPLIT_PERCENT = 50
 
 const TABS: { id: DagTab; label: string }[] = [
-  { id: 'live', label: 'Live DAG' },
-  { id: 'expected', label: 'Expected state' },
+  { id: 'live', label: 'Live' },
+  { id: 'expected', label: 'Expected' },
 ]
 
 /**
@@ -55,7 +55,6 @@ export function TierDagTabs({
   const panesRef = useRef<HTMLDivElement | null>(null)
   const [splitMetrics, setSplitMetrics] = useState({ height: 0, splitterHeight: 0 })
   const liveRowHeight = ((splitMetrics.height - splitMetrics.splitterHeight) * splitPercent) / 100
-  const expectedRowHeight = splitMetrics.height - splitMetrics.splitterHeight - liveRowHeight
   const tabId = (tab: DagTab) => `${baseId}-${tab}-tab`
   const panelId = (tab: DagTab) => `${baseId}-${tab}-panel`
 
@@ -226,8 +225,7 @@ export function TierDagTabs({
               ...(splitMetrics.height > 0
                 ? {
                     '--tier-dag-split-height': `${splitMetrics.height}px`,
-                    '--tier-dag-live-hidden': `${splitMetrics.height - liveRowHeight}px`,
-                    '--tier-dag-expected-hidden': `${splitMetrics.height - expectedRowHeight}px`,
+                    '--tier-dag-expected-hidden': `${liveRowHeight + splitMetrics.splitterHeight}px`,
                   } as CSSProperties
                 : {}),
             }

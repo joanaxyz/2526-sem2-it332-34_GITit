@@ -124,16 +124,12 @@ export function HomeViewSwitcher({
                 onClick={() => commit(index)}
               >
                 <option.Icon aria-hidden="true" />
-                <span>
-                  <strong>{option.label}</strong>
-                  <small>{option.blurb}</small>
-                </span>
+                <strong>{option.label}</strong>
               </div>
             ))}
           </div>
         ) : null}
       </div>
-      <p className="home-switcher-blurb">{selected.blurb}</p>
     </div>
   )
 }

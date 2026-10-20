@@ -1,13 +1,30 @@
 from importlib import import_module
+from types import SimpleNamespace
 
 import pytest
-from django.apps import apps
+from django.apps import apps as live_apps
 
 from curriculum.models import Chapter, Story
 
 cutover = import_module(
     "curriculum.migrations.0004_collapse_story_records_to_arcane_spire"
 ).collapse_to_arcane_spire
+
+# Later migrations drop the legacy adventure run table this historical
+# migration also cleared; with the live registry it has no rows to delete.
+_DROPPED_MODELS = {("adventures", "AdventureRun")}
+
+
+class _LiveAppsWithoutDroppedModels:
+    def get_model(self, app_label, model_name):
+        if (app_label, model_name) in _DROPPED_MODELS:
+            return SimpleNamespace(
+                objects=SimpleNamespace(filter=lambda **_: SimpleNamespace(delete=lambda: (0, {})))
+            )
+        return live_apps.get_model(app_label, model_name)
+
+
+apps = _LiveAppsWithoutDroppedModels()
 
 
 def _story(*, slug: str, title: str, prerequisite_story=None) -> Story:

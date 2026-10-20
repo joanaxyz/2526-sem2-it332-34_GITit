@@ -24,7 +24,7 @@ def seeded_level() -> AdventureLevel:
 
 
 def test_seeding_writes_a_drill_for_every_drillable_level(db):
-    call_command("seed_curriculum_fixture")
+    call_command("seed_curriculum", verbosity=0)
     summary = seed_all_level_drills()
 
     assert summary.drills_written > 0
@@ -41,7 +41,7 @@ def test_re_seeding_is_idempotent_and_keeps_card_ids(db):
     collapses most of the catalog into one entry and would assert almost
     nothing.
     """
-    call_command("seed_curriculum_fixture")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     before = {
         (drill_id, key): card_id
@@ -63,7 +63,7 @@ def test_re_seeding_is_idempotent_and_keeps_card_ids(db):
 
 
 def test_seeding_drops_cards_the_level_no_longer_teaches(db):
-    call_command("seed_curriculum_fixture")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     level = seeded_level()
     stray = LevelDrillCard.objects.create(
@@ -85,7 +85,7 @@ def test_seeding_drops_cards_the_level_no_longer_teaches(db):
 def test_an_unseeded_install_reports_no_drills(db):
     """Seeding is what creates drill content, so before it runs the level
     map honestly shows no drill rather than advertising an empty one."""
-    call_command("seed_curriculum_fixture")
+    call_command("seed_curriculum", verbosity=0)
     level_ids = list(AdventureLevel.objects.values_list("id", flat=True))
 
     assert drillable_level_ids(level_ids=level_ids) == set()
@@ -98,7 +98,7 @@ def test_an_unseeded_install_reports_no_drills(db):
 def test_availability_matches_the_rows_the_drill_page_reads(db):
     """The map and the page read the same rows, so they cannot disagree
     about whether a level has a drill."""
-    call_command("seed_curriculum_fixture")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     level_ids = list(AdventureLevel.objects.filter(is_published=True).values_list("id", flat=True))
 

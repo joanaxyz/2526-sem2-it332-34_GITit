@@ -11,76 +11,51 @@ export type Status = 'met' | 'miss' | 'none'
 // ─── KPI catalogue ────────────────────────────────────────────────────────────
 export const KPIS = [
   {
-    key: 'scr',
-    label: 'Runs finished',
-    explanation: 'How often you finish a practice run you start.',
-    scope: 'Modules 1–4 · replay runs excluded',
-    emptyHint: 'Start a practice run to begin your record.',
-    abbr: 'SCR',
-    name: 'Scenario Completion Rate',
-    target: 80,
-    up: true,
-    pct: true,
-    formula: 'Completed sessions ÷ Started sessions × 100',
-    why: 'Measures how many learners finish a scenario without dropping out. Below 80% means scenarios are too confusing, too long, or the feedback isn\'t helping recovery.',
+    key: 'scr', label: 'Tiers mastered',
+    explanation: 'Required tiers where you completed every successful repetition, however many attempts you needed.',
+    scope: 'Modules 1–4 · required tiers with an outcome',
+    emptyHint: 'Finish or fail a run on a required tier to begin your mastery record.',
+    abbr: 'SCR', name: 'Scenario Completion Rate', target: 80, up: true, pct: true,
+    formula: 'Required tiers mastered ÷ Unique required tiers attempted × 100',
+    why: 'Measures eventual mastery. A tier counts as attempted once a run on it ends, or its commands sit idle for 7 days; opening a tier is not an attempt. Formal studies use fixed assigned tiers, including unattempted tiers, as the denominator.',
   },
   {
-    key: 'car',
-    label: 'Commands accepted',
-    explanation: 'Commands Git could understand, even when they did not reach the goal yet.',
-    scope: 'Modules 1–4 · overall only',
-    emptyHint: 'Submit a command in practice to begin measuring this.',
-    abbr: 'CAR',
-    name: 'Command Accuracy Rate',
-    target: 70,
-    up: true,
-    pct: true,
-    formula: 'Processable commands ÷ Total submitted commands × 100',
-    why: 'Tracks how well learners type commands the simulator can understand. Low CAR means learners are guessing — field guide lessons need more worked examples.',
+    key: 'car', label: 'Command efficiency',
+    explanation: 'Command use on your first mastery run compared with a validated solution. Incorrect commands consume the same budget; optional diagnostics are free.',
+    scope: 'Modules 1–4 · first mastery assessment per tier',
+    emptyHint: 'Master a tier with a validated command reference. Older runs without reference evidence remain unscored.',
+    abbr: 'CAR', name: 'Command Accuracy Rate', target: 70, up: true, pct: true,
+    formula: 'Mean of 100 × S × min(1, T ÷ max(1, A))',
+    why: 'Let T = validated reference commands, A = assessed commands, S = 1 for success and 0 otherwise. This official KPI measures reference-relative efficiency. Scores are capped at 100%.',
   },
   {
-    key: 'hlcr',
-    label: 'Hard runs cleared',
-    explanation: 'How often you finish hard practice runs with less guidance.',
-    scope: 'Modules 1–4 · hard difficulty',
-    emptyHint: 'Try a hard run when you are ready.',
-    abbr: 'HLCR',
-    name: 'Hard-Level Completion Rate',
-    target: 70,
-    up: true,
-    pct: true,
-    formula: 'Hard-difficulty tiers completed ÷ Hard-difficulty tiers started × 100',
-    why: 'Hard tiers test whether learners can apply skills independently, not just in guided scenarios. Below 70% means the jump from normal to hard is too steep.',
+    key: 'hlcr', label: 'Hard tiers mastered',
+    explanation: 'Hard required tiers where you completed every required successful repetition.',
+    scope: 'Modules 1–4 · hard tiers with an outcome',
+    emptyHint: 'Try a hard required tier when you are ready.',
+    abbr: 'HLCR', name: 'Hard-Level Completion Rate', target: 70, up: true, pct: true,
+    formula: 'Required hard tiers mastered ÷ Unique required hard tiers attempted × 100',
+    why: 'Measures hard-task mastery, counting attempts as SCR does. Formal studies use assigned hard tiers. Module 4 retains its approved 65% objective target.',
   },
   {
-    key: 'arc',
-    label: 'Retries per finish',
-    explanation: 'The average retry count attached to your completed runs. Fewer means less trial and error.',
-    scope: 'Modules 1–4 · completed runs only',
-    emptyHint: 'Finish a practice run to see your retry average.',
-    abbr: 'ARC',
-    name: 'Avg Retry Count',
-    longName: 'Average Retry Count',
-    target: 2,
-    up: false,
-    pct: false,
-    formula: 'Total retry indices across completed sessions ÷ Completed sessions',
-    why: 'How many times on average a learner retries before succeeding. ≤2 is healthy. Above 3, learners are stuck in a loop — the failure feedback isn\'t actionable.',
+    key: 'arc', label: 'Retries before mastery',
+    explanation: 'Failed attempts and attempts you left after submitting commands, before each mastered tier. Successful required repetitions are not retries.',
+    scope: 'Modules 1–4 · mastered tiers only',
+    emptyHint: 'Master a required tier to see your retry average.',
+    abbr: 'ARC', name: 'Avg Retry Count', longName: 'Average Retry Count',
+    target: 2, up: false, pct: false,
+    formula: 'Unsuccessful attempts before mastery ÷ Tiers mastered',
+    why: 'Shows unsuccessful attempts needed for mastery. The contributing tier count matters; Module 4 retains its approved maximum of 3.',
   },
   {
-    key: 'rta',
-    label: 'Changed retries cleared',
-    explanation: 'After a failure, can you clear the first retry when its starting repository or goal changes?',
-    scope: 'Modules 3–4 · first changed retry after failure',
-    emptyHint: 'Measured on changed retries in Modules 3–4. No eligible retries yet.',
-    abbr: 'RTA',
-    name: 'Retry Transfer Accuracy',
-    target: 65,
-    up: true,
-    pct: true,
-    formula: 'Successful first-attempt completions on changed-variant retry sessions ÷ all changed-variant retry sessions × 100',
-    why: 'Measures skill transfer: after a failure, does the learner complete the first retry when the scenario is structurally changed (a different starting repository or target)? Modules 3–4 only.',
-    tooltip: 'RTA measures skill transfer to structurally changed scenarios in Modules 3–4: the first retry after a failure counts only when its starting repository or target state differs from the failed attempt.',
+    key: 'rta', label: 'Transfer checkpoints cleared',
+    explanation: 'Your first attempt on a reserved unfamiliar repository or goal, after practice. Its first result is preserved even if you practice again.',
+    scope: 'Modules 3–4 · reserved unseen transfer checkpoints',
+    emptyHint: 'Measured on unseen transfer checkpoints in Modules 3–4. Requires reserved content and complete exposure evidence.',
+    abbr: 'RTA', name: 'Retry Transfer Accuracy', target: 65, up: true, pct: true,
+    formula: 'Novel checkpoints cleared on first run ÷ Novel checkpoints assessed × 100',
+    why: 'Measures transfer after practice, including learners who never failed. Formal studies include all assigned valid checkpoints at cutoff; unavailable novelty evidence is missing.',
+    tooltip: 'A content-author review and durable exposure history establish novelty. A different variant ID alone is insufficient.',
   },
 ] as const satisfies readonly { key: Exclude<keyof ApiSchemas['PerformanceKpiSet'], 'retry_success_rate' | 'rtr'>; [field: string]: unknown }[]
 
@@ -89,18 +64,13 @@ export type KpiKey = (typeof KPIS)[number]['key']
 /** The old RTR measure, shown next to the evaluation KPIs for context. It has
  * no target, so it never counts toward "targets met". */
 export const SUPPLEMENTARY_KPI = {
-  key: 'retry_success_rate',
-  label: 'Retry recovery',
-  explanation: 'Completed runs that followed an earlier run, across any variant or attempt. Abandoned runs are excluded.',
+  key: 'retry_success_rate', label: 'Retry recovery',
+  explanation: 'Concluded retries following an actual failed run that succeed.',
   scope: 'Modules 1–4 · for context, no target',
-  emptyHint: 'This appears once you try another run after an earlier one.',
-  formula: 'Completed runs with a prior run ÷ non-abandoned runs with a prior run × 100',
-  abbr: 'RSR',
-  name: 'Retry Success Rate (supplementary)',
-  pct: true,
-  tooltip:
-    'Share of retry sessions that eventually ended in completion, any variant, any attempt. ' +
-    'Supplementary indicator only; RTA is the evaluation KPI for SO 3.5, SO 4.5 and RQ4.',
+  emptyHint: 'Measured once a retry following an unsuccessful attempt ends.',
+  formula: 'Successful recovery retries ÷ Concluded recovery retries × 100',
+  abbr: 'RSR', name: 'Retry Success Rate (supplementary)', pct: true,
+  tooltip: 'Successful required repetitions are not recovery retries. Transfer is measured separately.',
 } as const
 
 /** Any card on the Overall row: an evaluation KPI (with a target) or the
@@ -111,6 +81,7 @@ export const EMPTY_RATE: Rate = { value: null, numerator: 0, denominator: 0 }
 
 export function getModuleRate(mod: PerformanceModule, key: KpiKey): Rate {
   if (key === 'scr') return mod.scr
+  if (key === 'car') return mod.car
   if (key === 'hlcr') return mod.hlcr
   if (key === 'arc') return mod.arc
   if (key === 'rta') return mod.rta
@@ -127,40 +98,34 @@ function counted(value: number, singular: string, plural: string) {
 
 /** What each KPI's numerator and denominator count, in the words of its formula. */
 const EVIDENCE: Record<EvidenceKey, { some: (n: number, d: number) => string; none: string }> = {
-  // Completed sessions ÷ started sessions.
   scr: {
-    some: (n, d) => `${n.toLocaleString()} of ${counted(d, 'session', 'sessions')} completed`,
-    none: 'No sessions yet',
+    some: (n, d) => `${n.toLocaleString()} of ${counted(d, 'required tier', 'required tiers')} mastered`,
+    none: 'No attempted required tiers yet',
   },
-  // Processable commands ÷ submitted commands.
   car: {
-    some: (n, d) => `${n.toLocaleString()} processable / ${counted(d, 'submitted command', 'submitted commands')}`,
-    none: 'No commands yet',
+    some: (n, d) => `${n.toLocaleString()} score points across ${counted(d, 'assessed tier', 'assessed tiers')}`,
+    none: 'No validated command assessments yet',
   },
-  // Hard sessions completed ÷ hard sessions started.
   hlcr: {
-    some: (n, d) => `${n.toLocaleString()} of ${counted(d, 'hard session', 'hard sessions')} completed`,
-    none: 'No hard sessions yet',
+    some: (n, d) => `${n.toLocaleString()} of ${counted(d, 'hard tier', 'hard tiers')} mastered`,
+    none: 'No attempted hard tiers yet',
   },
-  // Total retries (retry_index) across completed sessions ÷ completed sessions.
   arc: {
-    some: (n, d) =>
-      `${counted(n, 'retry', 'retries')} across ${counted(d, 'completed session', 'completed sessions')}`,
-    none: 'No completed sessions yet',
+    some: (n, d) => `${counted(n, 'unsuccessful attempt', 'unsuccessful attempts')} across ${counted(d, 'mastered tier', 'mastered tiers')}`,
+    none: 'No mastered tiers yet',
   },
-  // Successful eligible retries ÷ eligible changed-variant retries.
   rta: {
-    some: (n, d) => `${n.toLocaleString()} of ${counted(d, 'eligible retry', 'eligible retries')} succeeded`,
-    none: 'No eligible retries yet',
+    some: (n, d) => `${n.toLocaleString()} of ${counted(d, 'transfer checkpoint', 'transfer checkpoints')} cleared first time`,
+    none: 'No assessed transfer checkpoints yet',
   },
-  // Retry sessions that completed ÷ retry sessions.
   retry_success_rate: {
-    some: (n, d) => `${n.toLocaleString()} of ${counted(d, 'retry session', 'retry sessions')} completed`,
-    none: 'No retry sessions yet',
+    some: (n, d) => `${n.toLocaleString()} of ${counted(d, 'recovery retry', 'recovery retries')} succeeded`,
+    none: 'No concluded recovery retries yet',
   },
 }
 
 export function kpiEvidence(key: EvidenceKey, rate: Rate) {
+  if (rate.unit === 'participants' && rate.denominator > 0) return `${counted(rate.denominator, 'contributing learner', 'contributing learners')} · equally weighted`
   const units = EVIDENCE[key]
   return rate.denominator > 0 ? units.some(rate.numerator, rate.denominator) : units.none
 }

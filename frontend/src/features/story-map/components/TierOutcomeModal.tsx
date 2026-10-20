@@ -29,9 +29,6 @@ export function TierOutcomeModal({
   onNextLevel,
   onRetry,
   onContinue,
-  isStartingNextLevel = false,
-  isRetrying = false,
-  isContinuing = false,
   nextDifficultyLabel,
 }: {
   open: boolean
@@ -44,16 +41,18 @@ export function TierOutcomeModal({
    * yet at required_successful_attempts) - passes prior_run_id so
    * TierVariantSelectionService rotates to a different variant. */
   onContinue?: () => void
-  isStartingNextLevel?: boolean
-  isRetrying?: boolean
-  isContinuing?: boolean
   nextDifficultyLabel?: string | null
 }) {
   const isFailed = run.status === 'failed'
   const isReplay = run.replay
-  const isNavigating = isStartingNextLevel || isRetrying || isContinuing
-  const canAdvance = !isReplay && run.status === 'completed' && Boolean(run.next_difficulty)
-  const isPartialClear = !isReplay && run.status === 'completed' && !canAdvance && !run.progress.cleared
+  const isTransfer = Boolean(run.transfer)
+  const canAdvance = !isTransfer && !isReplay && run.status === 'completed' && Boolean(run.next_difficulty)
+  const isPartialClear = !isTransfer && !isReplay && run.status === 'completed' && !canAdvance && !run.progress.cleared
+  // A tier with several authored waves names the wave just cleared and the next one;
+  // a single wave that needs several clears keeps the clear count.
+  const nextWave = run.wave.total > 1 ? run.progress.next_wave : null
+  const rewardHint =
+    run.reward.coins > 0 && !run.reward.claimed ? ` Clear it to earn ${run.reward.coins} GitCoins.` : ''
 
   useEffect(() => {
     if (!open) return
@@ -64,7 +63,9 @@ export function TierOutcomeModal({
     }
   }, [isFailed, open])
 
-  const headline = isReplay
+  const headline = isTransfer
+    ? isFailed ? 'Transfer checkpoint not cleared' : 'Transfer checkpoint cleared'
+    : isReplay
     ? isFailed
       ? 'Replay ended'
       : 'Replay complete'
@@ -73,11 +74,15 @@ export function TierOutcomeModal({
       : canAdvance
         ? 'Level ready'
         : isPartialClear
-          ? 'Scenario cleared'
+          ? nextWave
+            ? 'Wave cleared'
+            : 'Scenario cleared'
           : 'Level cleared'
 
   const hitActionLimit = isFailed && run.counts.max_reached
-  const message = isReplay
+  const message = isTransfer
+    ? 'Your first transfer result is recorded. You can continue free practice; later runs cannot change this checkpoint result.'
+    : isReplay
     ? isFailed
       ? "This free-play run ended before reaching the target state. It doesn't affect your saved progress. Play again whenever you like."
       : "Free play complete. This run is just a replay and doesn't change your saved progress."
@@ -89,11 +94,13 @@ export function TierOutcomeModal({
       : canAdvance
         ? 'Level cleared. The next difficulty is ready.'
         : isPartialClear
-          ? `Nice work. ${run.progress.completed} of ${run.progress.total} clears done for this difficulty - continue with a new scenario to finish it.`
+          ? nextWave
+            ? `Wave ${run.wave.index ?? nextWave.index - 1} of ${run.wave.total} cleared — next: ${nextWave.title}.${rewardHint}`
+            : `Nice work. ${run.progress.completed} of ${run.progress.total} clears done for this difficulty - continue with a new scenario to finish it.`
           : 'Level cleared.'
   const Icon = isFailed ? XCircle : Sparkles
   const targetActionsMet =
-    !isFailed &&
+    !isTransfer && !isFailed &&
     run.counts.counted_action_total > 0 &&
     run.counts.counted_action_total <= run.counts.minimum_counted_commands
 
@@ -104,7 +111,7 @@ export function TierOutcomeModal({
     {
       label: 'Actions',
       numerator: run.counts.counted_action_total,
-      denominator: run.counts.minimum_counted_commands,
+      denominator: isTransfer ? run.counts.maximum_counted_commands : run.counts.minimum_counted_commands,
       helper: `Max allowed: ${run.counts.maximum_counted_commands}`,
       iconSrc: terminalIconImage,
       accentColor: actionsAccent,
@@ -134,7 +141,7 @@ export function TierOutcomeModal({
         style={{ animationDelay: '60ms' } as CSSProperties}
       >
         {isFailed ? <img className="game-outcome-badge-icon" src={warnIconImage} alt="" aria-hidden="true" /> : null}
-        {difficultyLabel(run)} {isFailed ? 'failed' : 'complete'}
+        {isTransfer ? 'Transfer checkpoint' : `${difficultyLabel(run)} ${isFailed ? 'failed' : 'complete'}`}
       </Badge>
       {isReplay ? (
         <Badge
@@ -169,11 +176,10 @@ export function TierOutcomeModal({
 
   const headerActions = (
     <>
-      {onRetry ? (
+      {onRetry && !isTransfer ? (
         <button
           type="button"
           className="game-outcome-header-btn"
-          disabled={isNavigating}
           onClick={onRetry}
           aria-label={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
           title={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
@@ -184,7 +190,6 @@ export function TierOutcomeModal({
       <button
         type="button"
         className="game-outcome-header-btn"
-        disabled={isNavigating}
         onClick={onBackToMap}
         aria-label="Back to Map"
         title="Back to Map"
@@ -194,34 +199,36 @@ export function TierOutcomeModal({
     </>
   )
 
-  const actions = canAdvance ? (
+  const actions = isTransfer ? (
+    <Button type="button" onClick={onRetry ?? onBackToMap}>Continue free practice</Button>
+  ) : canAdvance ? (
     onNextLevel && nextDifficultyLabel ? (
-      <Button type="button" disabled={isNavigating} onClick={onNextLevel}>
-        {isStartingNextLevel ? 'Opening next level…' : 'Continue'}
+      <Button type="button" onClick={onNextLevel}>
+        Continue
       </Button>
     ) : (
-      <Button type="button" variant="secondary" disabled={isNavigating} onClick={onClose}>
+      <Button type="button" variant="secondary" onClick={onClose}>
         Stay in workspace
       </Button>
     )
   ) : isPartialClear ? (
     onContinue ? (
-      <Button type="button" disabled={isNavigating} onClick={onContinue}>
-        {isContinuing ? 'Starting next scenario…' : 'Continue'}
+      <Button type="button" onClick={onContinue}>
+        Continue
       </Button>
     ) : null
   ) : isFailed ? (
     onRetry ? (
-      <Button type="button" disabled={isNavigating} onClick={onRetry}>
+      <Button type="button" onClick={onRetry}>
         <RefreshCcw data-icon="inline-start" />
-        {isRetrying ? 'Starting fresh variant…' : 'Try again'}
+        Try again
       </Button>
     ) : null
   ) : isReplay ? (
     onRetry ? (
-      <Button type="button" disabled={isNavigating} onClick={onRetry}>
+      <Button type="button" onClick={onRetry}>
         <RefreshCcw data-icon="inline-start" />
-        {isRetrying ? 'Starting…' : 'Play again'}
+        Play again
       </Button>
     ) : null
   ) : run.status === 'completed' ? null : null
@@ -230,11 +237,12 @@ export function TierOutcomeModal({
     <GameOutcomeModal
       open={open}
       onClose={onClose}
-      title={isFailed ? 'Level failed' : 'Level complete'}
+      title={isTransfer ? 'Transfer result recorded' : isFailed ? 'Level failed' : 'Level complete'}
       tone={isFailed ? 'failure' : 'success'}
       icon={Icon}
       resultLabel={isFailed ? 'Game Over' : 'You Won'}
-      stars={run.stars}
+      stars={isTransfer ? undefined : run.stars}
+      showStars={!isTransfer}
       badges={badges}
       headline={headline}
       message={message}

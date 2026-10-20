@@ -31,13 +31,6 @@ class CommandStep(models.Model):
         related_name="steps",
         on_delete=models.CASCADE,
     )
-    attempt = models.ForeignKey(
-        "adventures.AdventureRun",
-        null=True,
-        blank=True,
-        related_name="steps",
-        on_delete=models.CASCADE,
-    )
     adventure_tier_run = models.ForeignKey(
         "adventures.AdventureLevelTierRun",
         null=True,
@@ -82,29 +75,14 @@ class CommandStep(models.Model):
     class Meta:
         indexes = [
             models.Index(fields=["challenge_run", "id"], name="cmdstep_run_id_idx"),
-            # Adventure history is queried by the run held in attempt.
-            models.Index(fields=["attempt", "id"], name="cmdstep_attempt_id_idx"),
             models.Index(fields=["adventure_tier_run", "id"], name="cmdstep_tier_run_id_idx"),
             models.Index(fields=["player", "created_at"], name="cmdstep_player_created_idx"),
         ]
         constraints = [
             models.CheckConstraint(
                 condition=(
-                    Q(
-                        challenge_run__isnull=False,
-                        attempt__isnull=True,
-                        adventure_tier_run__isnull=True,
-                    )
-                    | Q(
-                        challenge_run__isnull=True,
-                        attempt__isnull=False,
-                        adventure_tier_run__isnull=True,
-                    )
-                    | Q(
-                        challenge_run__isnull=True,
-                        attempt__isnull=True,
-                        adventure_tier_run__isnull=False,
-                    )
+                    Q(challenge_run__isnull=False, adventure_tier_run__isnull=True)
+                    | Q(challenge_run__isnull=True, adventure_tier_run__isnull=False)
                 ),
                 name="command_step_exactly_one_parent",
             ),
@@ -129,8 +107,6 @@ class CommandStep(models.Model):
 
         if self.challenge_run_id is not None:
             self.player_id = self.challenge_run.player_id
-        elif self.attempt_id is not None:
-            self.player_id = self.attempt.player_id
         elif self.adventure_tier_run_id is not None:
             self.player_id = self.adventure_tier_run.player_id
         super().save(*args, **kwargs)

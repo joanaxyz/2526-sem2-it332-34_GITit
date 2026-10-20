@@ -1,10 +1,12 @@
 from django.core.management import call_command
+from django.utils import timezone
 from rest_framework.test import APIClient
 
 from adventures.models import AdventureLevelTier, AdventureLevelTierRun
 from common.constants import DIFFICULTY_HARD, SESSION_STATUS_COMPLETED, SESSION_STATUS_FAILED
 from players.services import get_or_create_player
 from practice.models import CommandStep
+from progress.models import AdventureLevelTierCompletion, KpiCheckpoint
 from progress.serializers import PerformanceSummaryResponseSerializer
 from progress.services import MetricsService
 
@@ -66,6 +68,21 @@ def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
         attempt_number=2,
     )
 
+    AdventureLevelTierCompletion.objects.create(player=player, tier=tier, tier_run=retry)
+    KpiCheckpoint.objects.create(
+        player=player,
+        tier=tier,
+        kind="car",
+        run=retry,
+        ref_count=3,
+        actual=4,
+        passed=True,
+        retries=1,
+        ended_at=timezone.now(),
+    )
+    AdventureLevelTierRun.objects.filter(pk__in=[first.id, retry.id]).update(
+        ended_at=timezone.now()
+    )
     client = APIClient()
     client.force_authenticate(user=user)
     response = client.get("/api/progress/performance/")
@@ -74,9 +91,9 @@ def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
     payload = response.json()
     assert PerformanceSummaryResponseSerializer(data=payload).is_valid()
     assert payload["kpis"] == {
-        "scr": {"value": 50.0, "numerator": 1, "denominator": 2},
-        "car": {"value": 50.0, "numerator": 1, "denominator": 2},
-        "hlcr": {"value": 50.0, "numerator": 1, "denominator": 2},
+        "scr": {"value": 100.0, "numerator": 1, "denominator": 1},
+        "car": {"value": 75.0, "numerator": 75, "denominator": 1},
+        "hlcr": {"value": 100.0, "numerator": 1, "denominator": 1},
         # Module 1 same-variant retry: outside RTA scope, so RTA has no data,
         # while the learner retry success rate keeps its previous value.
         "rta": {"value": None, "numerator": 0, "denominator": 0},
@@ -92,7 +109,7 @@ def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
     assert module_one["rta"] == payload["kpis"]["rta"]
     assert module_one["retry_success_rate"] == payload["kpis"]["retry_success_rate"]
     assert module_one["arc"] == payload["kpis"]["arc"]
-    assert MetricsService().all_player_performance_summary() == payload
+    assert MetricsService().admin_player_performance_summary(player=player) == payload
 
 
 def test_admin_aggregate_spans_learners_while_player_endpoint_stays_scoped(db, django_user_model):
@@ -130,6 +147,8 @@ def test_admin_aggregate_spans_learners_while_player_endpoint_stays_scoped(db, d
             status=status,
             retry_index=0,
         )
+        if status == SESSION_STATUS_COMPLETED:
+            AdventureLevelTierCompletion.objects.create(player=player, tier=tier)
 
     first_user, _ = players[0]
     client = APIClient()
@@ -141,5 +160,10 @@ def test_admin_aggregate_spans_learners_while_player_endpoint_stays_scoped(db, d
 
     # Staff see both learners' attempts in one set.
     aggregate = MetricsService().all_player_performance_summary()
-    assert aggregate["kpis"]["scr"] == {"value": 50.0, "numerator": 1, "denominator": 2}
+    assert aggregate["kpis"]["scr"] == {
+        "value": 50.0,
+        "numerator": 100,
+        "denominator": 2,
+        "unit": "participants",
+    }
     assert aggregate != scoped

@@ -131,26 +131,6 @@
   letter-spacing: -0.015em;
 }
 
-/* The machine voice under the display voice: the lockup pairs two contrasting
-   families instead of two sizes of the same one. */
-.app-brand small {
-  display: block;
-  margin-top: 0.2rem;
-  color: hsl(var(--muted-foreground));
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  text-transform: uppercase;
-  transition: color var(--motion-normal) var(--ease-out);
-}
-
-.app-brand:hover small,
-.app-brand:focus-visible small {
-  color: rgb(var(--theme-primary-soft-rgb));
-}
-
 /* ---------- Nav blade ---------- */
 
 .app-nav {

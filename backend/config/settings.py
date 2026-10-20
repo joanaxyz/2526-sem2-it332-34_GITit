@@ -213,6 +213,22 @@ if "postgresql" in DATABASES["default"].get("ENGINE", ""):
         f"-c lock_timeout={env.int('DATABASE_LOCK_TIMEOUT_MS', default=10000)} "
         f"-c statement_timeout={env.int('DATABASE_STATEMENT_TIMEOUT_MS', default=30000)}"
     )
+    # Opt-in shared connection pool. `manage.py runserver` handles every request
+    # on a new thread, so persistent per-thread connections are never reused
+    # there, and against a remote pooler each request pays a full TLS + auth
+    # handshake (close to a second from a laptop). A pool keeps connections open
+    # across threads; Django requires persistent connections off when pooling.
+    _pool_max_size = env.int("DATABASE_POOL_MAX_SIZE", default=0)
+    if _pool_max_size > 0:
+        DATABASES["default"]["CONN_MAX_AGE"] = 0
+        # With a pool, Django validates a connection on checkout instead of per
+        # request, so a session the remote pooler dropped is replaced, not failed.
+        DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+        DATABASES["default"]["OPTIONS"]["pool"] = {
+            "min_size": 1,
+            "max_size": _pool_max_size,
+            "timeout": env.float("DATABASE_POOL_TIMEOUT_SECONDS", default=10.0),
+        }
 
 REDIS_URL = env("REDIS_URL", default="").strip()
 # Refresh-token revocation is stored in the configured Django cache. The

@@ -36,8 +36,14 @@
   }
 }
 
+/* A ref moving onto an existing commit slides at once; one on a new commit
+   waits for that commit's pop-in. */
 .dag-ref-enter {
-  animation: dag-ref-enter 200ms cubic-bezier(0.16, 1, 0.3, 1) 260ms both;
+  animation: dag-ref-enter 200ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.dag-node-enter .dag-ref-enter {
+  animation-delay: 260ms;
 }
 
 @keyframes dag-ref-enter {
@@ -51,12 +57,6 @@
     filter: brightness(1);
     transform: translateX(0);
   }
-}
-
-.live-dag-panel.is-change-paused .dag-node-enter,
-.live-dag-panel.is-change-paused .dag-edge-enter .react-flow__edge-path,
-.live-dag-panel.is-change-paused .dag-ref-enter {
-  animation-play-state: paused;
 }
 
 @media (prefers-reduced-motion: reduce) {

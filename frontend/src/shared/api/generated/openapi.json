@@ -883,340 +883,6 @@
                 }
             }
         },
-        "/api/adventure-levels/{level_id}/runs/": {
-            "post": {
-                "operationId": "adventure_levels_runs_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "level_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-levels"
-                ],
-                "responses": {
-                    "201": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/adventure-runs/{run_id}/": {
-            "get": {
-                "operationId": "adventure_runs_retrieve",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            },
-            "delete": {
-                "operationId": "adventure_runs_destroy",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No response body"
-                    }
-                }
-            }
-        },
-        "/api/adventure-runs/{run_id}/files/": {
-            "post": {
-                "operationId": "adventure_runs_files_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFile"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFile"
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFile"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            },
-            "put": {
-                "operationId": "adventure_runs_files_update",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFileRename"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFileRename"
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFileRename"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            },
-            "patch": {
-                "operationId": "adventure_runs_files_partial_update",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFile"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            },
-            "delete": {
-                "operationId": "adventure_runs_files_destroy",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "path",
-                        "schema": {
-                            "type": "string",
-                            "maxLength": 240
-                        },
-                        "required": true
-                    },
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/adventure-runs/{run_id}/level-library/": {
-            "post": {
-                "operationId": "adventure_runs_level_library_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureLevelLibraryResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/adventure-runs/{run_id}/submit-command/": {
-            "post": {
-                "operationId": "adventure_runs_submit_command_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CommandSubmit"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CommandSubmit"
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CommandSubmit"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureCommandResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
         "/api/adventure-tier-runs/{run_id}/": {
             "get": {
                 "operationId": "adventure_tier_runs_retrieve",
@@ -1563,36 +1229,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/AdventureLevelTierCommandResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/adventures/{adventure_slug}/runs/": {
-            "post": {
-                "operationId": "adventures_runs_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "adventure_slug",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventures"
-                ],
-                "responses": {
-                    "201": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
                                 }
                             }
                         },
@@ -4658,82 +4294,6 @@
                     "results"
                 ]
             },
-            "AdventureCommandResponse": {
-                "type": "object",
-                "properties": {
-                    "learned_skills": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/LearnedSkillResponse"
-                        }
-                    },
-                    "run": {
-                        "$ref": "#/components/schemas/AdventureCommandRunResponse"
-                    },
-                    "solved": {
-                        "type": "boolean"
-                    },
-                    "stdout": {
-                        "type": "string"
-                    },
-                    "stderr": {
-                        "type": "string"
-                    },
-                    "exit_code": {
-                        "type": "integer"
-                    },
-                    "terminal_output": {
-                        "type": "string"
-                    },
-                    "command_classification": {
-                        "type": "string"
-                    },
-                    "step": {
-                        "$ref": "#/components/schemas/RuntimeStepResponse"
-                    },
-                    "command_outcome": {
-                        "type": "object",
-                        "additionalProperties": {}
-                    }
-                },
-                "required": [
-                    "command_classification",
-                    "command_outcome",
-                    "exit_code",
-                    "run",
-                    "solved",
-                    "stderr",
-                    "stdout",
-                    "step",
-                    "terminal_output"
-                ]
-            },
-            "AdventureCommandRunResponse": {
-                "oneOf": [
-                    {
-                        "$ref": "#/components/schemas/AdventureRunResponse"
-                    },
-                    {
-                        "$ref": "#/components/schemas/AdventureRunPatchResponse"
-                    }
-                ]
-            },
-            "AdventureLevelLibraryResponse": {
-                "type": "object",
-                "properties": {
-                    "book": {
-                        "type": "object",
-                        "additionalProperties": {}
-                    },
-                    "run": {
-                        "$ref": "#/components/schemas/AdventureRunResponse"
-                    }
-                },
-                "required": [
-                    "book",
-                    "run"
-                ]
-            },
             "AdventureLevelTierCommandResponse": {
                 "type": "object",
                 "properties": {
@@ -4905,6 +4465,22 @@
                     "visualization_snapshot"
                 ]
             },
+            "AdventureLevelTierRewardResponse": {
+                "type": "object",
+                "description": "The tier's first-clear GitCoin reward, shown before play.",
+                "properties": {
+                    "coins": {
+                        "type": "integer"
+                    },
+                    "claimed": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "claimed",
+                    "coins"
+                ]
+            },
             "AdventureLevelTierRunResponse": {
                 "type": "object",
                 "properties": {
@@ -4920,6 +4496,9 @@
                         "type": "integer"
                     },
                     "replay": {
+                        "type": "boolean"
+                    },
+                    "transfer": {
                         "type": "boolean"
                     },
                     "stars": {
@@ -4962,6 +4541,9 @@
                     "variant": {
                         "type": "object",
                         "additionalProperties": {}
+                    },
+                    "wave": {
+                        "$ref": "#/components/schemas/AdventureLevelTierWavePositionResponse"
                     },
                     "progress": {
                         "type": "object",
@@ -5007,6 +4589,9 @@
                         "type": "object",
                         "additionalProperties": {},
                         "nullable": true
+                    },
+                    "reward": {
+                        "$ref": "#/components/schemas/AdventureLevelTierRewardResponse"
                     }
                 },
                 "required": [
@@ -5023,6 +4608,7 @@
                     "progress",
                     "replay",
                     "repository_state",
+                    "reward",
                     "scaffolding",
                     "scenario_context",
                     "stars",
@@ -5032,7 +4618,8 @@
                     "tier",
                     "tutor",
                     "variant",
-                    "visualization"
+                    "visualization",
+                    "wave"
                 ]
             },
             "AdventureLevelTierRunStart": {
@@ -5051,6 +4638,10 @@
                         "nullable": true
                     },
                     "replay": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "transfer": {
                         "type": "boolean",
                         "default": false
                     }
@@ -5097,138 +4688,25 @@
                     "visualization_snapshot"
                 ]
             },
-            "AdventureRunPatchResponse": {
+            "AdventureLevelTierWavePositionResponse": {
                 "type": "object",
+                "description": "Which of the tier's ordered waves the run plays.",
                 "properties": {
-                    "partial": {
-                        "$ref": "#/components/schemas/PartialEnum"
-                    },
-                    "id": {
-                        "type": "integer"
-                    },
-                    "status": {
-                        "$ref": "#/components/schemas/GameplayRunStatus"
-                    },
-                    "current_attempt": {
-                        "type": "object",
-                        "additionalProperties": {}
-                    }
-                },
-                "required": [
-                    "current_attempt",
-                    "id",
-                    "partial",
-                    "status"
-                ]
-            },
-            "AdventureRunResponse": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "status": {
-                        "$ref": "#/components/schemas/GameplayRunStatus"
-                    },
-                    "replay": {
-                        "type": "boolean"
-                    },
-                    "stars": {
-                        "type": "integer"
-                    },
-                    "library_opened": {
-                        "type": "boolean"
-                    },
-                    "is_passed": {
-                        "type": "boolean"
-                    },
-                    "selected_level": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "nullable": true
-                    },
-                    "next_level": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "nullable": true
-                    },
-                    "story": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "nullable": true
-                    },
-                    "chapter_id": {
+                    "index": {
                         "type": "integer",
                         "nullable": true
                     },
-                    "battle_stage": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "nullable": true
-                    },
-                    "current_level_index": {
+                    "total": {
                         "type": "integer"
                     },
-                    "total_levels": {
-                        "type": "integer"
-                    },
-                    "current_wave": {
-                        "type": "integer"
-                    },
-                    "total_waves": {
-                        "type": "integer"
-                    },
-                    "passed": {
-                        "type": "boolean"
-                    },
-                    "mastery": {
-                        "type": "object",
-                        "additionalProperties": {}
-                    },
-                    "completed_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "nullable": true
-                    },
-                    "current_attempt": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "nullable": true
-                    },
-                    "results": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "additionalProperties": {}
-                        }
-                    },
-                    "progress": {
-                        "type": "object",
-                        "additionalProperties": {}
+                    "title": {
+                        "type": "string"
                     }
                 },
                 "required": [
-                    "battle_stage",
-                    "chapter_id",
-                    "completed_at",
-                    "current_attempt",
-                    "current_level_index",
-                    "current_wave",
-                    "id",
-                    "is_passed",
-                    "library_opened",
-                    "mastery",
-                    "next_level",
-                    "passed",
-                    "progress",
-                    "replay",
-                    "results",
-                    "selected_level",
-                    "stars",
-                    "status",
-                    "story",
-                    "total_levels",
-                    "total_waves"
+                    "index",
+                    "title",
+                    "total"
                 ]
             },
             "ChallengeCommandResponse": {
@@ -7189,13 +6667,6 @@
                 "type": "string",
                 "description": "* `welcome` - Welcome\n* `orientation` - Orientation\n* `stories` - Stories\n* `shop` - Shop\n* `purchase` - Purchase\n* `home` - Home\n* `equip` - Equip\n* `done` - Done"
             },
-            "PartialEnum": {
-                "enum": [
-                    true
-                ],
-                "type": "boolean",
-                "description": "* `True` - True"
-            },
             "PasswordChange": {
                 "type": "object",
                 "properties": {
@@ -7404,7 +6875,7 @@
                                 "$ref": "#/components/schemas/RateMetric"
                             }
                         ],
-                        "description": "Retry Transfer Accuracy (Modules 3-4): first retries after a failure on a structurally changed variant that complete, over all such retries."
+                        "description": "Retry Transfer Accuracy (Modules 3-4): successful first attempts on reserved, unseen transfer checkpoints over concluded checkpoints. Formal studies include unattempted assignments."
                     },
                     "retry_success_rate": {
                         "allOf": [
@@ -7412,7 +6883,7 @@
                                 "$ref": "#/components/schemas/RateMetric"
                             }
                         ],
-                        "description": "Learner-facing share of runs with a prior run that complete."
+                        "description": "Concluded retries following actual unsuccessful attempts that succeed."
                     },
                     "rtr": {
                         "allOf": [
@@ -7447,6 +6918,9 @@
                     "scr": {
                         "$ref": "#/components/schemas/RateMetric"
                     },
+                    "car": {
+                        "$ref": "#/components/schemas/RateMetric"
+                    },
                     "hlcr": {
                         "$ref": "#/components/schemas/RateMetric"
                     },
@@ -7456,7 +6930,7 @@
                                 "$ref": "#/components/schemas/RateMetric"
                             }
                         ],
-                        "description": "Retry Transfer Accuracy (Modules 3-4): first retries after a failure on a structurally changed variant that complete, over all such retries."
+                        "description": "Retry Transfer Accuracy (Modules 3-4): successful first attempts on reserved, unseen transfer checkpoints over concluded checkpoints. Formal studies include unattempted assignments."
                     },
                     "retry_success_rate": {
                         "allOf": [
@@ -7464,7 +6938,7 @@
                                 "$ref": "#/components/schemas/RateMetric"
                             }
                         ],
-                        "description": "Learner-facing share of runs with a prior run that complete."
+                        "description": "Concluded retries following actual unsuccessful attempts that succeed."
                     },
                     "rtr": {
                         "allOf": [
@@ -7480,12 +6954,63 @@
                 },
                 "required": [
                     "arc",
+                    "car",
                     "hlcr",
                     "number",
                     "retry_success_rate",
                     "rta",
                     "scr",
                     "title"
+                ]
+            },
+            "PerformanceSamples": {
+                "type": "object",
+                "description": "Evidence coverage behind the KPI values; see KPI_METHODOLOGY.md.",
+                "properties": {
+                    "participants": {
+                        "type": "integer"
+                    },
+                    "attempted_tiers": {
+                        "type": "integer",
+                        "description": "Tiers with an outcome: mastered, a concluded run, or commands left idle 7+ days."
+                    },
+                    "in_progress_tiers": {
+                        "type": "integer",
+                        "description": "Opened tiers with no outcome yet; outside the SCR and HLCR denominators."
+                    },
+                    "mastered_tiers": {
+                        "type": "integer"
+                    },
+                    "mastery_missing": {
+                        "type": "integer"
+                    },
+                    "car_scored": {
+                        "type": "integer"
+                    },
+                    "car_missing": {
+                        "type": "integer"
+                    },
+                    "transfer_assigned": {
+                        "type": "integer"
+                    },
+                    "transfer_pending": {
+                        "type": "integer"
+                    },
+                    "transfer_missing": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "attempted_tiers",
+                    "car_missing",
+                    "car_scored",
+                    "in_progress_tiers",
+                    "mastered_tiers",
+                    "mastery_missing",
+                    "participants",
+                    "transfer_assigned",
+                    "transfer_missing",
+                    "transfer_pending"
                 ]
             },
             "PerformanceSummaryResponse": {
@@ -7502,12 +7027,23 @@
                         "items": {
                             "$ref": "#/components/schemas/PerformanceModule"
                         }
+                    },
+                    "samples": {
+                        "$ref": "#/components/schemas/PerformanceSamples"
+                    },
+                    "transfers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TransferCheckpoint"
+                        }
                     }
                 },
                 "required": [
                     "completed_sessions",
                     "kpis",
-                    "modules"
+                    "modules",
+                    "samples",
+                    "transfers"
                 ]
             },
             "PhaseEnum": {
@@ -7538,10 +7074,14 @@
                         "nullable": true
                     },
                     "numerator": {
-                        "type": "integer"
+                        "type": "number",
+                        "format": "double"
                     },
                     "denominator": {
                         "type": "integer"
+                    },
+                    "unit": {
+                        "$ref": "#/components/schemas/UnitEnum"
                     }
                 },
                 "required": [
@@ -7648,29 +7188,6 @@
                 ],
                 "type": "string",
                 "description": "* `repository` - repository\n* `commit` - commit\n* `branch` - branch\n* `head` - head\n* `staging` - staging\n* `working_tree` - working_tree\n* `conflict` - conflict\n* `tag` - tag\n* `remote` - remote\n* `config` - config\n* `stash` - stash\n* `operation` - operation"
-            },
-            "RuntimeStepResponse": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "command_text": {
-                        "type": "string"
-                    },
-                    "terminal_output": {
-                        "type": "string"
-                    },
-                    "result_category": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "command_text",
-                    "id",
-                    "result_category",
-                    "terminal_output"
-                ]
             },
             "SessionResponse": {
                 "type": "object",
@@ -8087,6 +7604,33 @@
                     "text",
                     "token"
                 ]
+            },
+            "TransferCheckpoint": {
+                "type": "object",
+                "properties": {
+                    "tier_id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "run_id": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "run_id",
+                    "tier_id",
+                    "title"
+                ]
+            },
+            "UnitEnum": {
+                "enum": [
+                    "participants"
+                ],
+                "type": "string",
+                "description": "* `participants` - participants"
             },
             "User": {
                 "type": "object",

@@ -13,6 +13,11 @@ from tutoring.services.forms import command_matches_form, resolve_form, teaching
         ("git log --author=Jo", "git log --author=<pattern>"),
         ("git sparse-checkout set src docs", "git sparse-checkout set <paths...>"),
         ("git show c1:README.md", "git show <commit>:<path>"),
+        ("git rebase --abort", "git rebase --abort"),
+        ("git reset --hard c4", "git reset --hard <commit>"),
+        ("git switch -c fix/x c1", "git switch -c <branch> [<start-point>]"),
+        ("git clone --depth=1 https://x.test/a.git", "git clone --depth=<depth> <url>"),
+        ("git checkout -- app.py", "git checkout -- <file>"),
     ],
 )
 def test_command_form_matcher_accepts_placeholders_optional_operands_and_aliases(command, usage):
@@ -25,6 +30,12 @@ def test_command_form_matcher_accepts_placeholders_optional_operands_and_aliases
         ("git add README.md", "git add -A"),
         ("git switch main", "git switch -c <branch>"),
         ("git status --short", "git status --porcelain"),
+        # An operand placeholder never swallows an option token.
+        ("git rebase --abort", "git rebase <upstream>"),
+        ("git rebase --continue", "git rebase [<upstream>]"),
+        ("git merge --abort", "git merge <branch>"),
+        ("git cherry-pick --continue", "git cherry-pick <commit>"),
+        ("git reset --hard c4", "git reset [<commit>]"),
     ],
 )
 def test_command_form_matcher_keeps_distinct_forms_separate(command, usage):

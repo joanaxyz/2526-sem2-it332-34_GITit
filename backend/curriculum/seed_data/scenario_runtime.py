@@ -527,6 +527,88 @@ def _rebase_continue() -> dict[str, Any]:
     }
 
 
+def _commit_message(commands: list[str]) -> str | None:
+    for command in reversed(commands):
+        parts = shlex.split(command)
+        if len(parts) < 3 or parts[:2] != ["git", "commit"] or "-m" not in parts:
+            continue
+        index = parts.index("-m")
+        if index + 1 < len(parts):
+            return parts[index + 1]
+    return None
+
+
+def _reconcile_with_fetch_and_merge(
+    *, branch: str, url: str, local_path: str, remote_path: str
+) -> dict[str, Any]:
+    """The fetch-then-merge reconcile on its own repository.
+
+    The archived fixture copied the pull-then-push scenario's repository and
+    target exactly, so a learner met the same exercise twice in a row.
+    """
+    base = {"README.md": "readme-v1"}
+    remote = f"origin/{branch}"
+    return {
+        "initial_state": _state(
+            [
+                _commit("c1", "Common base", [], base),
+                _commit(
+                    "c2", "Local work (non-overlapping)", ["c1"], {**base, local_path: "local-v1"}
+                ),
+                _commit(
+                    "c3",
+                    "Teammate pushed to remote (non-overlapping)",
+                    ["c1"],
+                    {**base, remote_path: "remote-v1"},
+                ),
+            ],
+            {branch: "c2"},
+            branch,
+            remotes={"origin": url},
+            remote_branches={remote: "c1"},
+            upstream_tracking={branch: remote},
+            remote_updates={remote: "c3"},
+        )
+    }
+
+
+def _squash_remote_feature(
+    *, target: str, feature: str, path: str, url: str, message: str
+) -> dict[str, Any]:
+    """A teammate's branch that only origin has: two drafts to land as one commit.
+
+    The archived fixture named the remote tip without authoring it, so the
+    squash carried nothing but deletions.
+    """
+    base = {"README.md": "readme-v1"}
+    remote = f"origin/{feature}"
+    return {
+        "initial_state": _state(
+            [
+                _commit("c1", "Bootstrap project", [], base),
+                _commit("c2", f"WIP: start {path}", ["c1"], {**base, path: f"{path}-draft"}),
+                _commit("c3", f"Finish {path}", ["c2"], {**base, path: f"{path}-v1"}),
+            ],
+            {target: "c1"},
+            target,
+            remotes={"origin": url},
+            remote_branches={remote: "c1"},
+            remote_updates={remote: "c3"},
+        ),
+        "state_requirements": _clean_requirements(
+            target,
+            {"type": "commit_count_on_branch_equals", "branch": target, "count": 2},
+            {
+                "type": "branch_tip_commit",
+                "branch": target,
+                "message_equals": message,
+                "is_not_merge": True,
+                "tree_contains": {**base, path: f"{path}-v1"},
+            },
+        ),
+    }
+
+
 def _runtime_overrides() -> dict[str, dict[str, Any]]:
     content = scenario_bank()
     mergetool_specs = {
@@ -559,6 +641,47 @@ def _runtime_overrides() -> dict[str, dict[str, Any]]:
         "rebase-medium-abort": _rebase_abort(),
         "rebase-hard-continue": _rebase_continue(),
     }
+    reconcile_specs = {
+        "v26m-auth": ("feature/auth", "ticketing-app", "src/auth_session.py", "docs/auth-flow.md"),
+        "v26m-payments": (
+            "feature/payments",
+            "e-commerce",
+            "src/payment_retry.py",
+            "docs/payments.md",
+        ),
+        "v26m-hotfix": (
+            "hotfix/critical",
+            "order-service",
+            "src/order_lock.py",
+            "tests/test_order_lock.py",
+        ),
+    }
+    for case_id, (branch, project, local_path, remote_path) in reconcile_specs.items():
+        overrides[case_id] = _reconcile_with_fetch_and_merge(
+            branch=branch,
+            url=f"https://github.com/team/{project}.git",
+            local_path=local_path,
+            remote_path=remote_path,
+        )
+    squash_specs = {
+        "v28m-auth": ("main", "feature/auth", "src/auth.py", "ticketing-app"),
+        "v28m-orders": ("develop", "feature/orders", "src/orders.py", "e-commerce"),
+        "v28m-parser": ("release/v2", "feature/parser", "src/parser.py", "data-pipeline"),
+        "squash-med-corp-gdpr": (
+            "staging",
+            "feature/gdpr-export",
+            "src/gdpr_export.py",
+            "corp-backend",
+        ),
+    }
+    for case_id, (target, feature, path, project) in squash_specs.items():
+        overrides[case_id] = _squash_remote_feature(
+            target=target,
+            feature=feature,
+            path=path,
+            url=f"https://github.com/team/{project}.git",
+            message=_commit_message(content[case_id]["solution_commands"]) or "",
+        )
     for suffix in range(1, 6):
         case_id = f"h{suffix}"
         overrides[case_id] = _reflog_recovery(f"recovery/{case_id}")
@@ -573,17 +696,6 @@ def _runtime_overrides() -> dict[str, dict[str, Any]]:
 
 
 RUNTIME_OVERRIDES = _runtime_overrides()
-
-
-def _commit_message(commands: list[str]) -> str | None:
-    for command in reversed(commands):
-        parts = shlex.split(command)
-        if len(parts) < 3 or parts[:2] != ["git", "commit"] or "-m" not in parts:
-            continue
-        index = parts.index("-m")
-        if index + 1 < len(parts):
-            return parts[index + 1]
-    return None
 
 
 def _canonicalize_requirements(case: dict[str, Any]) -> None:

@@ -45,6 +45,8 @@ psycopg==3.3.4
     # via -r requirements.in
 psycopg-binary==3.3.4 ; implementation_name != 'pypy'
     # via psycopg
+psycopg-pool==3.3.3
+    # via psycopg
 pyjwt==2.13.0
     # via djangorestframework-simplejwt
 pyyaml==6.0.3
@@ -65,6 +67,8 @@ sqlparse==0.6.0
     # via
     #   -r requirements.in
     #   django
+typing-extensions==4.16.0
+    # via psycopg-pool
 tzdata==2026.2 ; sys_platform == 'win32'
     # via
     #   django

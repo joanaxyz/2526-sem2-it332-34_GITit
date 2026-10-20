@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from django.db.models import Prefetch
 
-from adventures.models import AdventureLevel
+from adventures.models import AdventureLevel, AdventureLevelTier
 from curriculum.library import library_key_for_command
 from curriculum.models import ChapterLesson, CommandForm, LibraryEntry
 
@@ -12,6 +12,7 @@ from .access import (
     adventure_summary_payload,
     challenge_summary_payload,
 )
+from .adventure_access import _build_adventure_tier_access, cleared_difficulties
 from .book import chapter_adventure_knowledge, lesson_summary_payload
 from .challenge_queries import challenge_queryset
 
@@ -34,7 +35,12 @@ def chapter_content_overview(*, player, chapter_id: int) -> dict:
                     "sort_order", "id"
                 ),
                 to_attr="overview_forms",
-            )
+            ),
+            Prefetch(
+                "tiers",
+                queryset=AdventureLevelTier.objects.filter(is_published=True),
+                to_attr="overview_tiers",
+            ),
         )
         .order_by("sort_order", "id")
     )
@@ -42,7 +48,13 @@ def chapter_content_overview(*, player, chapter_id: int) -> dict:
         "sort_order", "id"
     )
     challenges = list(challenge_queryset(chapter_id=chapter_id))
-    adventure_access = _build_adventure_access(player=player, adventures=adventures)
+    # One tier access context for the whole chapter: a fixed handful of queries
+    # however many nodes the map has.
+    chapter_tiers = [tier for adventure in adventures for tier in adventure.overview_tiers]
+    tier_access = _build_adventure_tier_access(player=player, tiers=chapter_tiers)
+    adventure_access = _build_adventure_access(
+        player=player, adventures=adventures, tiers=chapter_tiers, tier_access=tier_access
+    )
     eligible_forms_by_adventure_id = {
         adventure.id: [
             form
@@ -72,11 +84,24 @@ def chapter_content_overview(*, player, chapter_id: int) -> dict:
     }
     required_adventure_ids = {adventure.id for adventure in adventures if adventure.is_required}
     adventure_passed = required_adventure_ids <= adventure_access.passed_adventure_ids
+    required_tiers = [
+        (tier.id, adventure.id, tier.difficulty)
+        for adventure in adventures
+        if adventure.is_required
+        for tier in adventure.overview_tiers
+    ]
     access = _build_challenge_access(
         player=player,
         chapter_id=chapter_id,
         challenges=challenges,
         adventure_passed=adventure_passed,
+        # The gate opens per difficulty from the tiers and completions the map
+        # already loaded (None for chapters without tiers).
+        cleared_difficulties=(
+            (cleared_difficulties(required_tiers, set(tier_access.completions)) if player else set())
+            if required_tiers
+            else None
+        ),
     )
     # The frontend map lays out its floating relics in code now (frontend), so the
     # overview is just the chapter's content lists.
@@ -86,6 +111,8 @@ def chapter_content_overview(*, player, chapter_id: int) -> dict:
             adventure=adventure,
             access=adventure_access,
             knowledge=knowledge_by_adventure_id[adventure.id],
+            tiers=adventure.overview_tiers,
+            tier_access=tier_access,
         )
         for adventure in adventures
     ]

@@ -181,9 +181,9 @@ def test_authenticated_dashboard_exposes_typed_runebound_chapter_and_retry_rows(
         "abandoned": 0,
     }
     assert payload["kpis"]["scr"] == {
-        "value": 50.0,
+        "value": 100.0,
         "numerator": 1,
-        "denominator": 2,
+        "denominator": 1,
     }
     chapter_kpis = payload["chapter_kpis"][str(chapter.number)]
     assert chapter_kpis["scr"] == payload["kpis"]["scr"]

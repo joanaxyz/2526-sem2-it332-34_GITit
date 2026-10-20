@@ -48,6 +48,7 @@ export function GameOutcomeModal({
   icon: Icon,
   resultLabel,
   stars,
+  showStars = true,
   badges,
   headline,
   message,
@@ -67,6 +68,8 @@ export function GameOutcomeModal({
   resultLabel?: string
   /** Stars earned, shown as the hero crest when provided. */
   stars?: number
+  /** Assessments record a first outcome without awarding a star grade. */
+  showStars?: boolean
   badges?: ReactNode
   headline: string
   message: ReactNode
@@ -83,9 +86,8 @@ export function GameOutcomeModal({
   const isFailed = tone === 'failure'
   const earnedStars = Number.isFinite(stars) ? normalizeStarScore(stars) : null
   const displayLabel = resultLabel ?? (isFailed ? 'Game Over' : 'You Won')
-  // Failure always shows the unlit stars; wins need a positive star score.
-  // Starless wins keep the icon crest.
-  const starArtKey = isFailed ? 'lose' : earnedStars && earnedStars > 0 ? `win-${earnedStars}` : null
+  // Graded failures show unlit stars; assessments keep the icon crest.
+  const starArtKey = !showStars ? null : isFailed ? 'lose' : earnedStars && earnedStars > 0 ? `win-${earnedStars}` : null
   const starArt = useLazyImage(starArtKey, STAR_ART_LOADERS)
   const defaultAccent = isFailed ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'
 

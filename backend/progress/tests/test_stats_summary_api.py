@@ -4,7 +4,7 @@ from django.db import connection
 from django.test.utils import CaptureQueriesContext
 from rest_framework.test import APIClient
 
-from adventures.models import AdventureLevel, AdventureWave
+from adventures.models import AdventureLevel, AdventureLevelTier, AdventureLevelTierWave
 from curriculum.models import Chapter, CommandForm, CommandSkill, Story
 from players.services import get_or_create_player
 from progress.serializers import StatsActivityResponseSerializer, StatsSummaryResponseSerializer
@@ -60,8 +60,9 @@ def test_authenticated_stats_summary_matches_documented_contract(db, django_user
         is_published=True,
     )
     level.command_forms.add(form)
-    wave = AdventureWave.objects.create(
-        level=level,
+    tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
+    wave = AdventureLevelTierWave.objects.create(
+        tier=tier,
         slug="stats-wave",
         title="Stats Wave",
         is_published=True,
@@ -211,8 +212,9 @@ def test_stats_skill_profile_excludes_unearnable_and_non_runebound_commands(db, 
         is_published=True,
     )
     other_level.command_forms.add(other_form)
-    other_wave = AdventureWave.objects.create(
-        level=other_level,
+    other_tier = AdventureLevelTier.objects.create(adventure_level=other_level, difficulty="easy")
+    other_wave = AdventureLevelTierWave.objects.create(
+        tier=other_tier,
         slug="arcane-wave",
         title="Arcane Wave",
         is_published=True,
