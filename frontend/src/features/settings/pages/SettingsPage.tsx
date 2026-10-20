@@ -174,7 +174,7 @@ export function SettingsPage() {
               />
               <span>Show floating mascot</span>
             </label>
-            <p className="settings-note">Turn this off to remove the floating mascot from the map and guide launcher. Guide messages use your companion’s portrait when equipped; drills still use Git-It. Saved on this device.</p>
+            <p className="settings-note">Turn this off to remove the floating mascot from the map and guide launcher. While it is shown, guide messages use Git-It’s portrait; when it is hidden, they use your companion’s portrait if one is equipped. Drills always use Git-It. Saved on this device.</p>
           </div>
         </section>
 

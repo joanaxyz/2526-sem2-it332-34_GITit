@@ -31,6 +31,8 @@ export function DrillVerdictBar({
   onContinue,
   flightChoices = false,
   outOfLives = false,
+  checkpoint = false,
+  fell = false,
 }: {
   verdict: DrillVerdict | null
   canCheck: boolean
@@ -43,6 +45,8 @@ export function DrillVerdictBar({
   onContinue: () => void
   flightChoices?: boolean
   outOfLives?: boolean
+  checkpoint?: boolean
+  fell?: boolean
 }) {
   const continueRef = useRef<HTMLButtonElement>(null)
   useEffect(() => {
@@ -91,7 +95,7 @@ export function DrillVerdictBar({
               <code data-voice={answerVoice}>{answerText}</code>
               {answerGloss ? <em data-voice={glossVoice}>{answerGloss}</em> : null}
             </p>
-            <p className="drill-teach-note">{outOfLives ? 'Take another flight to practice this command.' : 'One life lost. This command returns for another pass.'}</p>
+            <p className="drill-teach-note">{fell ? 'A hole ended this run. Review the order and try again.' : outOfLives ? 'Take another flight to practice this command.' : 'One life lost. This command returns for another pass.'}</p>
           </div>
         ) : null}
       </div>
@@ -111,7 +115,7 @@ export function DrillVerdictBar({
               <span className="drill-verdict-badge" aria-hidden="true">
                 <X />
               </span>
-              <span>{outOfLives ? 'Out of lives' : 'Life lost'}</span>
+              <span>{fell ? 'Game over' : outOfLives ? 'Out of lives' : 'Life lost'}</span>
             </>
           ) : null}
           {tone === 'idle' ? (
@@ -124,7 +128,7 @@ export function DrillVerdictBar({
                   <span aria-hidden="true"> · </span>
                 </>
               ) : null}
-              {flightChoices ? 'Fly into an answer' : <><kbd>Enter</kbd> to check</>}
+              {flightChoices ? 'Fly into an answer' : checkpoint ? 'Build the path before Blue reaches a gap' : <><kbd>Enter</kbd> to check</>}
             </span>
           ) : null}
         </p>
@@ -138,7 +142,7 @@ export function DrillVerdictBar({
           >
             {outOfLives ? 'View results' : 'Continue'}
           </button>
-        ) : flightChoices ? <span className="drill-flight-footer-note">Collisions submit your answer</span> : (
+        ) : flightChoices ? <span className="drill-flight-footer-note">Collisions submit your answer</span> : checkpoint ? <span className="drill-flight-footer-note">Reach the checkpoint</span> : (
           <button
             type="button"
             className="ui-button ui-button--default"

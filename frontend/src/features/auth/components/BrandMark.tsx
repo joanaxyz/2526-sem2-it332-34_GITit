@@ -16,7 +16,7 @@ export function BrandMark({ size = 'lg', className }: BrandMarkProps) {
       className={cn('auth-brand', size === 'sm' && 'auth-brand--sm', className)}
     >
       <img src={gitLogoImage} alt="" />
-      <span>GIT it!</span>
+      <span>IT it!</span>
     </Link>
   )
 }

@@ -15,7 +15,7 @@ import { seededShuffle } from '@/features/drills/utils/drillShuffle'
 
 const CHOICE_KEYS = ['1', '2', '3', '4']
 
-/** Flight collisions answer pick-one rounds; production rounds keep their assembly checkpoint. */
+/** Flight collisions answer pick-one rounds; assembled answers become a walking path. */
 export function DrillSession({ plan }: { plan: DrillPlan }) {
   const navigate = useNavigate()
   const session = useDrillSession(plan)
@@ -25,6 +25,7 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
   const rung = ask?.kind === 'card' ? ask.rung : null
   const options = useMemo(() => seededShuffle(choicePoolFor(card, rung), `${card?.key}:${rung}:${session.round}`), [card, rung, session.round])
   const optionCount = options.length
+  const checkpoint = optionCount === 0
   useEffect(() => {
     function onKey(event: KeyboardEvent) {
       if (event.metaKey || event.ctrlKey || event.altKey) return
@@ -43,8 +44,8 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
       if (event.key === 'Enter' && !(target instanceof HTMLButtonElement) && !(target instanceof HTMLAnchorElement)) {
         event.preventDefault()
         if (verdict) advance()
+        else if (checkpoint) return
         else if (!started) document.querySelector<HTMLButtonElement>('.drill-flight-intro button')?.click()
-        else if (!optionCount) check()
         return
       }
       if (typing) return
@@ -56,7 +57,7 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
     }
     window.addEventListener('keydown', onKey)
     return () => window.removeEventListener('keydown', onKey)
-  }, [advance, check, exitPath, navigate, optionCount, session.finished, started, verdict])
+  }, [advance, checkpoint, exitPath, navigate, session.finished, started, verdict])
 
   return (
     <div className="drill-screen drill-screen--flight">
@@ -107,14 +108,15 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
             shaky={session.shaky}
             saveFailed={session.saveFailed}
             gameOver={session.gameOver}
+            fell={session.fell}
             onRestart={() => { setStarted(false); session.restart() }}
           />
         ) : (
-          <div className="drill-flight-round">
-          <DrillFlightArena round={session.round}
+          <div className="drill-flight-round" data-checkpoint={checkpoint || undefined}>
+          {checkpoint ? null : <DrillFlightArena round={session.round}
             options={options} verdict={verdict} lives={session.lives} started={started}
             onStart={() => setStarted(true)} onCollide={session.collide}
-            voice={rung === 'read' ? 'prose' : 'machine'} />
+            voice={rung === 'read' ? 'prose' : 'machine'} />}
           <DrillQuestion
             key={`question-${session.round}`}
             card={card}
@@ -125,6 +127,7 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
             onAnswer={session.setAnswer}
             flightChoices={optionCount > 0}
             flightSelection={answer?.kind === 'choice' ? answer.value : null}
+            checkpoint={checkpoint ? { onResolve: session.resolveCheckpoint } : undefined}
           />
           </div>
         )}
@@ -133,7 +136,7 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
       {session.finished ? null : (
         <DrillVerdictBar
           verdict={verdict}
-          canCheck={answer !== null}
+          canCheck={!checkpoint && answer !== null}
           card={card}
           rung={rung}
           sequence={session.sequence}
@@ -142,6 +145,8 @@ export function DrillSession({ plan }: { plan: DrillPlan }) {
           onContinue={advance}
           flightChoices={optionCount > 0}
           outOfLives={session.lives === 0}
+          checkpoint={checkpoint}
+          fell={session.fell}
         />
       )}
     </div>

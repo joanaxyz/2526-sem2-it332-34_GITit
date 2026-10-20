@@ -1,5 +1,5 @@
 import { ArrowLeft, ArrowRight, Check, GripHorizontal, MoveDiagonal2, RotateCcw, X } from 'lucide-react'
-import type { CSSProperties, Dispatch, ReactNode, SetStateAction } from 'react'
+import type { CSSProperties, Dispatch, PointerEvent as ReactPointerEvent, ReactNode, SetStateAction } from 'react'
 import { createPortal } from 'react-dom'
 
 import { Button } from '@/shared/components/Button'
@@ -85,10 +85,14 @@ export function GameplayWorkspaceTourOverlay({
     frontPane,
     setFrontPane,
     transformMode,
+    transformCursor,
     transformed,
     resetTransform,
     beginMove,
     beginResize,
+    pointerDownOnPane,
+    hoverPane,
+    leavePane,
     moveWithKeyboard,
     resizeWithKeyboard,
   } = transform
@@ -172,6 +176,12 @@ export function GameplayWorkspaceTourOverlay({
       <MoveDiagonal2 aria-hidden="true" />
     </button>
   ) : null
+  // A mouse moves a card by dragging it and resizes it from its edges.
+  const paneGestures = (pane: Pane) => transformable ? {
+    onPointerDown: (event: ReactPointerEvent<HTMLElement>) => pointerDownOnPane(pane, event),
+    onPointerMove: (event: ReactPointerEvent<HTMLElement>) => hoverPane(pane, event),
+    onPointerLeave: leavePane,
+  } : {}
 
   const content = (
     <MascotMessage className="workspace-tour__conversation">
@@ -267,6 +277,7 @@ export function GameplayWorkspaceTourOverlay({
       data-closing={collapseVector ? 'true' : undefined}
       data-transforming={transformMode ?? undefined}
       data-testid="workspace-tour"
+      style={transformCursor ? { '--workspace-tour-cursor': transformCursor } as CSSProperties : undefined}
     >
       {/* One dimming layer with cut-outs: the spotlit target plus any revealed
           regions stay readable, since tours explain them rather than hide them. */}
@@ -340,6 +351,7 @@ export function GameplayWorkspaceTourOverlay({
         aria-labelledby={titleId}
         aria-describedby={bodyId}
         tabIndex={-1}
+        {...(separate ? {} : paneGestures('main'))}
       >
         {separate ? (
           // No frame around the cards: each one floats, moves, and sizes on its own.
@@ -348,7 +360,8 @@ export function GameplayWorkspaceTourOverlay({
               className={`workspace-tour__pane workspace-tour__main${frontPane === 'main' ? ' is-front' : ''}`}
               data-tour-pane="main"
               style={paneStyle('main', DESKTOP_CARD_WIDTH)}
-              onPointerDown={() => setFrontPane('main')}
+              {...paneGestures('main')}
+              onPointerDownCapture={() => setFrontPane('main')}
             >
               {content}
               {resizeHandle('main')}
@@ -357,7 +370,8 @@ export function GameplayWorkspaceTourOverlay({
               className={`workspace-tour__pane workspace-tour__aside${frontPane === 'aside' ? ' is-front' : ''}`}
               data-tour-pane="aside"
               style={paneStyle('aside', asideWidth)}
-              onPointerDown={() => setFrontPane('aside')}
+              {...paneGestures('aside')}
+              onPointerDownCapture={() => setFrontPane('aside')}
             >
               {moveHandle('aside', ' workspace-tour__pane-move')}
               <div className="workspace-tour__pane-scroll">{aside}</div>

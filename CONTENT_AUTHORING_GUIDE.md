@@ -167,6 +167,29 @@ The learner must never have to guess an arbitrary literal that evaluation requir
 
 The curriculum invariant suite audits this contract across every adventure and challenge variant.
 
+### Brief formatting
+
+Formatting belongs to the authored prose. The briefing renders the section fields above;
+it does not guess which words to emphasize or where sentences should become paragraphs.
+
+- Separate story paragraphs with a blank line (`\n\n` in seed JSON).
+- Wrap literal paths, folder names, branch names, and refs in backticks: `` `ci-configs` ``.
+- Use `**emphasis**` sparingly for an important constraint or a handover quote.
+- These conventions apply to `story`, `starting_point`, `real_world_context`, `task`,
+  and `expected_result`. Labels, titles, objective checks, and exact copy details stay plain text.
+- Only emphasis and inline code are rendered. HTML, links, and other Markdown remain text.
+
+For example, a task can read:
+
+```text
+Create a repository in a new `ci-configs` folder, with `main` as its first branch.
+**Leave every other file in the workspace where it is.**
+```
+
+The normalizer preserves these markers without a schema change. Apply edits to the
+authored scenario bank (or its Markdown source when available), then run
+`seed_curriculum` to update variant content. Reload the workspace to fetch the updated brief.
+
 ## Generated Targets
 
 Generated targets live in:

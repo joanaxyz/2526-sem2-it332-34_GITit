@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { LearnedSkill } from '@/features/skills/types'
+import { COMMAND_ANATOMY_TIP } from '@/shared/mascot/mascotKnowledge'
 import { knowledgeForMascot } from './mascotKnowledge'
 
 const skills: LearnedSkill[] = [
@@ -11,18 +12,19 @@ const skills: LearnedSkill[] = [
 describe('knowledge matched to the learner', () => {
   it('uses earned skills and their authored descriptions, with the latest chapter first at home', () => {
     const tips = knowledgeForMascot(skills)
-    expect(tips.map((tip) => tip.command)).toEqual(['git merge', 'git branch', 'git init'])
+    expect(tips.map((tip) => tip.command)).toEqual(['git merge', 'git branch', 'git init', undefined])
+    expect(tips.at(-1)).toBe(COMMAND_ANATOMY_TIP)
     expect(tips[0]).toEqual({ id: 'skill:3', command: 'git merge', text: skills[2].summary, source: 'Merging' })
     expect(skills.map((skill) => skill.id)).toEqual([1, 2, 3])
   })
 
   it('prioritizes the viewed chapter, reinforces earlier knowledge, and excludes later chapters', () => {
     const tips = knowledgeForMascot(skills, { id: 20, number: 2 })
-    expect(tips.map((tip) => tip.command)).toEqual(['git branch', 'git init'])
+    expect(tips.map((tip) => tip.command)).toEqual(['git branch', 'git init', undefined])
   })
 
   it('never introduces a command just because its chapter is open', () => {
-    expect(knowledgeForMascot(skills.slice(0, 1), { id: 30, number: 3 }).map((tip) => tip.command)).toEqual(['git init'])
+    expect(knowledgeForMascot(skills.slice(0, 1), { id: 30, number: 3 }).map((tip) => tip.command)).toEqual(['git init', undefined])
     expect(knowledgeForMascot([], { id: 30, number: 3 })).toEqual([])
   })
 

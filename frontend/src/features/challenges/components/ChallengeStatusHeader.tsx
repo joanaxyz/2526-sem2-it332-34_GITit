@@ -48,7 +48,7 @@ export function ChallengeStatusHeader({
 
       <a className="gameplay-header-brand" href="/home" aria-label="GIT it! home">
         <img src={gitLogoImage} alt="" />
-        <span>GIT it!</span>
+        <span>IT it!</span>
       </a>
 
       <div className="gameplay-header-mission" aria-label="Current challenge">
