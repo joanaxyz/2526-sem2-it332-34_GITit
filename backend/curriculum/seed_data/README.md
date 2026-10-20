@@ -9,8 +9,10 @@ gate trials), both compiled from `source/*.md` by
 `scripts/curriculum/import_revised_scenarios.py`. `scenario_bank.py` reads both
 banks. `scenario_runtime.py` joins the main bank to the canonical command's
 cases, and `source/scenario_fixtures/` joins each extension scenario to its
-repository fixture. Gate composition lives in `source/challenge_gates.py`. The
-stable story/chapter/level scaffold is owned by the canonical command.
+repository fixture. `source/wave_plan/` places every scenario in its level,
+tier and wave, in play order; gate composition lives in
+`source/challenge_gates.py`. The stable story/chapter/level scaffold is owned
+by the canonical command.
 
 Generated artifacts are isolated under `generated/`.
 

@@ -31,7 +31,7 @@ class AdventureLevelTierWaveVariantInline(admin.TabularInline):
 
 @admin.register(AdventureLevelTierWave)
 class AdventureLevelTierWaveAdmin(admin.ModelAdmin):
-    list_display = ("slug", "title", "tier", "sort_order", "required_successful_attempts", "is_published")
+    list_display = ("slug", "title", "tier", "sort_order", "is_published")
     list_filter = ("is_published", "tier__difficulty")
     search_fields = ("title", "slug")
     inlines = [AdventureLevelTierWaveVariantInline]

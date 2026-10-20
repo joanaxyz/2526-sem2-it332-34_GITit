@@ -85,10 +85,9 @@ export function useTierWorkspaceMutations({
 
   const startNextLevel = (tierId: number) => openStartRoute(tierStartUrl(tierId))
 
-  // Continues the SAME tier after a partial clear (progress not yet at
-  // required_successful_attempts) - passes prior_run_id so
-  // TierVariantSelectionService rotates away from the just-played variant
-  // instead of defaulting to variants[0] every time.
+  // Continues the SAME tier after a wave clear that left waves to play: the
+  // server starts the learner's next uncleared wave. prior_run_id links the
+  // runs so a replay chain stays a replay.
   const continueTier = () => {
     if (run) openStartRoute(tierStartUrl(run.tier.id, { priorRunId: run.id }))
   }

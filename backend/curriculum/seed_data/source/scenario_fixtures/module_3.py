@@ -184,7 +184,6 @@ def _tool_merge(
     theirs: str,
     resolved: str,
     config: dict[str, str],
-    tool: str,
     configured: dict[str, str] | None = None,
 ) -> dict[str, Any]:
     commits = [
@@ -203,9 +202,8 @@ def _tool_merge(
             {"type": "commit_is_merge", "branch": "main"},
             {"type": "commit_has_parent", "branch": "main", "parent": "c2"},
             {"type": "commit_tree_contains", "branch": "main", "tree": {path: resolved}},
-            {"type": "operation_metadata_equals", "key": "last_mergetool_tool", "value": tool},
-            {"type": "operation_metadata_contains", "key": "config", "value": config},
             conflict_free=True,
+            config=config,
         ),
     }
 
@@ -458,7 +456,6 @@ FIXTURES: dict[str, dict[str, Any]] = {
         theirs="Your monthly invoice is attached.",
         resolved="Your monthly invoice is ready.",
         config={"merge.tool": "meld"},
-        tool="meld",
     ),
     "mergetool-hard-no-backup-api": _tool_merge(
         branch="feature/api-v3",
@@ -467,7 +464,6 @@ FIXTURES: dict[str, dict[str, Any]] = {
         theirs="API_VERSION = '3.0'",
         resolved="API_VERSION = '3.0'\nLEGACY_VERSION = '2.4'",
         config={"merge.tool": "meld", "mergetool.keepBackup": "false"},
-        tool="meld",
         configured={"merge.tool": "meld"},
     ),
     # 3.3

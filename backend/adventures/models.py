@@ -142,11 +142,6 @@ class AdventureLevelTierWave(models.Model):
     min_counted_commands = models.PositiveIntegerField(default=1)
     max_counted_commands = models.PositiveIntegerField(default=4)
     objective_checks = models.JSONField(default=list, blank=True)
-    # How many successful clears of this wave (drawing a fresh variant each
-    # attempt) are required to master the tier. Mirrors the old
-    # DifficultyInstance.required_successful_attempts semantics: a tier is a
-    # single repeatable exercise, not a sequence of distinct waves.
-    required_successful_attempts = models.PositiveIntegerField(default=1)
     is_published = models.BooleanField(default=True)
 
     class Meta:
@@ -208,9 +203,9 @@ class AdventureLevelTierRun(models.Model):
 
     Mirrors ChallengeRun's lifecycle shape (one row per attempt; a fresh row
     is created for each retry rather than one long-lived row looping
-    internally). A tier's progress toward required_successful_attempts is
-    NOT tracked here - a run field would reset every attempt - see
-    AdventureLevelTierProgress for the per-(player, tier) rollup counter.
+    internally). A tier's progress through its waves is NOT tracked here - a
+    run field would reset every attempt - see AdventureLevelTierProgress for
+    the per-(player, tier) rollup.
     """
 
     class Status(models.TextChoices):
@@ -304,14 +299,12 @@ class AdventureLevelTierRun(models.Model):
 
 
 class AdventureLevelTierProgress(models.Model):
-    """Per-(player, tier) rollup of successful clears toward
-    AdventureLevelTierWave.required_successful_attempts.
+    """Per-(player, tier) rollup of the tier's cleared waves.
 
     Each AdventureLevelTierRun is one attempt and ends (completed/failed) on
-    its own - a run field can't hold this count since it would reset to zero
-    on every new attempt. This row persists across attempts and is the
-    source AdventureLevelTierCompletion is written from once
-    successful_clears reaches the wave's threshold.
+    its own - a run field can't hold this since it would reset on every new
+    attempt. This row persists across attempts; AdventureLevelTierCompletion
+    is written once every published wave of the tier is cleared.
     """
 
     player = models.ForeignKey(

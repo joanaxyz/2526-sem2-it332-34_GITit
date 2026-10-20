@@ -37,9 +37,8 @@ export function TierOutcomeModal({
   onBackToMap: () => void
   onNextLevel?: () => void
   onRetry?: () => void
-  /** Starts a fresh run on the same tier after a partial clear (progress not
-   * yet at required_successful_attempts) - passes prior_run_id so
-   * TierVariantSelectionService rotates to a different variant. */
+  /** Starts the next run on the same tier after a wave clear that left waves
+   * to play; the server picks the learner's next uncleared wave. */
   onContinue?: () => void
   nextDifficultyLabel?: string | null
 }) {
@@ -48,9 +47,8 @@ export function TierOutcomeModal({
   const isTransfer = Boolean(run.transfer)
   const canAdvance = !isTransfer && !isReplay && run.status === 'completed' && Boolean(run.next_difficulty)
   const isPartialClear = !isTransfer && !isReplay && run.status === 'completed' && !canAdvance && !run.progress.cleared
-  // A tier with several authored waves names the wave just cleared and the next one;
-  // a single wave that needs several clears keeps the clear count.
-  const nextWave = run.wave.total > 1 ? run.progress.next_wave : null
+  // A cleared wave that is not the tier's last names itself and the next wave.
+  const nextWave = run.progress.next_wave
   const rewardHint =
     run.reward.coins > 0 && !run.reward.claimed ? ` Clear it to earn ${run.reward.coins} GitCoins.` : ''
 
@@ -74,9 +72,7 @@ export function TierOutcomeModal({
       : canAdvance
         ? 'Level ready'
         : isPartialClear
-          ? nextWave
-            ? 'Wave cleared'
-            : 'Scenario cleared'
+          ? 'Wave cleared'
           : 'Level cleared'
 
   const hitActionLimit = isFailed && run.counts.max_reached
@@ -93,10 +89,8 @@ export function TierOutcomeModal({
         : 'This attempt ended before the repository reached the target state. Start a fresh variant and try again.'
       : canAdvance
         ? 'Level cleared. The next difficulty is ready.'
-        : isPartialClear
-          ? nextWave
-            ? `Wave ${run.wave.index ?? nextWave.index - 1} of ${run.wave.total} cleared — next: ${nextWave.title}.${rewardHint}`
-            : `Nice work. ${run.progress.completed} of ${run.progress.total} clears done for this difficulty - continue with a new scenario to finish it.`
+        : isPartialClear && nextWave
+          ? `Wave ${run.wave.index ?? nextWave.index - 1} of ${run.wave.total} cleared — next: ${nextWave.title}.${rewardHint}`
           : 'Level cleared.'
   const Icon = isFailed ? XCircle : Sparkles
   const targetActionsMet =
@@ -141,7 +135,11 @@ export function TierOutcomeModal({
         style={{ animationDelay: '60ms' } as CSSProperties}
       >
         {isFailed ? <img className="game-outcome-badge-icon" src={warnIconImage} alt="" aria-hidden="true" /> : null}
-        {isTransfer ? 'Transfer checkpoint' : `${difficultyLabel(run)} ${isFailed ? 'failed' : 'complete'}`}
+        {isTransfer
+          ? 'Transfer checkpoint'
+          : isPartialClear && nextWave
+            ? `${difficultyLabel(run)} wave ${run.wave.index ?? nextWave.index - 1} of ${run.wave.total}`
+            : `${difficultyLabel(run)} ${isFailed ? 'failed' : 'complete'}`}
       </Badge>
       {isReplay ? (
         <Badge
@@ -237,7 +235,7 @@ export function TierOutcomeModal({
     <GameOutcomeModal
       open={open}
       onClose={onClose}
-      title={isTransfer ? 'Transfer result recorded' : isFailed ? 'Level failed' : 'Level complete'}
+      title={isTransfer ? 'Transfer result recorded' : isFailed ? 'Level failed' : isPartialClear ? 'Wave complete' : 'Level complete'}
       tone={isFailed ? 'failure' : 'success'}
       icon={Icon}
       resultLabel={isFailed ? 'Game Over' : 'You Won'}

@@ -7,6 +7,7 @@ SUPPORTED_RULE_TYPES = frozenset(
         "branch_points_to",
         "branch_tip_commit",
         "branches_equal",
+        "config_equals",
         "head_branch_changed",
         "head_branch_equals",
         "head_detached",
@@ -18,6 +19,7 @@ SUPPORTED_RULE_TYPES = frozenset(
         "remote_branch_exists",
         "remote_branch_matches_local",
         "remote_branch_points_to",
+        "repository_root_equals",
         "upstream_tracking_equals",
         "upstream_tracking_set",
     }
@@ -117,6 +119,15 @@ def check_ref_state_rule(
         right = self._ref_target(state, rule.get("right"))
         passed = left == right
         return passed, f"Refs compare as {left!r} and {right!r}."
+    if rule_type == "repository_root_equals":
+        actual = state.get("repository_root")
+        expected = rule.get("path")
+        return actual == expected, f"The repository is at {actual!r}, expected {expected!r}."
+    if rule_type == "config_equals":
+        config = state.get("config") or {}
+        values = rule.get("values") or {}
+        wrong = {key: config.get(key) for key, value in values.items() if config.get(key) != value}
+        return not wrong, "Config matches." if not wrong else f"Config differs: {wrong}."
     if rule_type == "branch_tip_commit":
         branch = rule.get("branch") or self._head_branch(state)
         commit = self.normalizer.commit_by_id(state, self._ref_target(state, branch))

@@ -1,10 +1,8 @@
 """The wave grammar (docs/goals/curriculum-waves-and-repetition/PLAN.md §3).
 
 The wave plan owns placement, so these rules are checked on the plan itself,
-with the guides' real resolver and technique detectors. The curriculum is
-walked in level order: a planned level plays its designed waves; a level not
-yet cut over still plays one pool wave per tier, which only carries knowledge
-and reuse forward (the rules are checked on planned waves).
+with the guides' real resolver and technique detectors, walking every
+level's designed waves in play order.
 """
 
 from __future__ import annotations
@@ -22,9 +20,7 @@ from django.core.management import call_command
 from adventures.models import AdventureLevelTier
 from curriculum.management.commands.seed_curriculum import (
     MODULE_1_LEVELS,
-    MODULE_1_SESSION_COUNTS_DEFAULT,
     MODULE_2_LEVELS,
-    MODULE_2_SESSION_COUNTS_DEFAULT,
     MODULE_3_LEVELS,
     MODULE_4_LEVELS,
     MODULE_COMMAND_FORMS,
@@ -32,6 +28,7 @@ from curriculum.management.commands.seed_curriculum import (
 )
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
 from curriculum.seed_data.scenario_bank import scenario_bank, wave_scenario_bank
+from curriculum.seed_data.scenario_runtime import UNPLACED_CASE_IDS
 from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES
 from curriculum.seed_data.source.scenario_fixtures import WAVE_FIXTURES, extension_case
 from curriculum.seed_data.source.wave_plan import MODULE_WAVE_PLAN
@@ -55,12 +52,6 @@ CORE = {
 # Time model (minutes), PLAN.md §4: brief and outcome, typed command, file edit, first guide.
 PER_RUN, PER_COMMAND, PER_EDIT, PER_GUIDE = 1.0, 0.4, 1.0, 0.5
 NO_FAIL_BUDGET_MINUTES = 300  # the team accepted ~4.9 h (2026-10-20); re-measure before raising
-TODAY_REQUIRED = {
-    1: MODULE_1_SESSION_COUNTS_DEFAULT,
-    2: MODULE_2_SESSION_COUNTS_DEFAULT,
-    3: {"easy": 1, "medium": 1, "hard": 1},
-    4: {"easy": 1, "medium": 1, "hard": 1},
-}
 
 MODULE_OF = {
     level["slug"]: module
@@ -87,12 +78,8 @@ class Wave:
     level: str
     tier: str
     slug: str
-    role: str | None  # None: a level's pool, not yet cut over
+    role: str
     variants: tuple[str, ...]
-
-    @property
-    def planned(self) -> bool:
-        return self.role is not None
 
 
 def _level_number(level_slug: str) -> str:
@@ -112,22 +99,8 @@ def _walk() -> list[Wave]:
     waves: list[Wave] = []
     for level in MODULE_LEVELS:
         slug = level["slug"]
-        planned = MODULE_WAVE_PLAN.get(slug)
         for tier in TIERS:
-            if planned is None:
-                cases = sorted(level["tiers"][tier]["cases"], key=lambda case: case["case_id"])
-                waves.append(
-                    Wave(
-                        len(waves),
-                        slug,
-                        tier,
-                        f"{slug}-{tier}",
-                        None,
-                        tuple(c["case_id"] for c in cases),
-                    )
-                )
-                continue
-            for spec in planned.get(tier, ()):
+            for spec in MODULE_WAVE_PLAN.get(slug, {}).get(tier, ()):
                 waves.append(Wave(len(waves), slug, tier, spec.slug, spec.role, spec.variants))
     return waves
 
@@ -228,8 +201,8 @@ def _walk_knowledge(waves: list[Wave]):
         known_forms |= all_forms
 
 
-def _planned_waves() -> list[Wave]:
-    return [wave for wave in _walk() if wave.planned]
+def test_every_curriculum_level_has_a_wave_plan():
+    assert sorted(set(POOLS) - set(MODULE_WAVE_PLAN)) == []
 
 
 def test_plan_shape_is_two_or_three_waves_of_two_or_more_variants():
@@ -254,10 +227,10 @@ def test_plan_shape_is_two_or_three_waves_of_two_or_more_variants():
     assert problems == [], "\n".join(problems)
 
 
-def test_every_scenario_of_a_planned_level_is_placed_exactly_once():
+def test_every_scenario_is_placed_exactly_once():
     placed: dict[str, str] = {}
     problems = []
-    for wave in _planned_waves():
+    for wave in _walk():
         for case_id in wave.variants:
             if case_id in placed:
                 problems.append(f"{case_id}: placed in {placed[case_id]} and {_wave_name(wave)}")
@@ -277,7 +250,7 @@ def test_every_scenario_of_a_planned_level_is_placed_exactly_once():
         problems += [
             f"{case_id}: {level} scenario not placed"
             for case_id in POOLS[level]
-            if case_id not in placed
+            if case_id not in placed and case_id not in UNPLACED_CASE_IDS
         ]
         problems += [
             f"{case_id}: new {number} scenario not placed"
@@ -290,8 +263,6 @@ def test_every_scenario_of_a_planned_level_is_placed_exactly_once():
 def test_debuts_happen_before_hard_and_in_every_variant_of_the_wave():
     problems = []
     for wave, per_variant, novel, forms, new_forms in _walk_knowledge(_walk()):
-        if not wave.planned:
-            continue
         for part in sorted(novel):
             missing = [case_id for case_id, parts in per_variant.items() if part not in parts]
             if missing:
@@ -308,8 +279,6 @@ def test_debuts_happen_before_hard_and_in_every_variant_of_the_wave():
 def test_roles_match_what_each_wave_introduces():
     problems = []
     for wave, _, novel, _, new_forms in _walk_knowledge(_walk()):
-        if not wave.planned:
-            continue
         if wave.role == DEBUT and not (novel or new_forms):
             problems.append(f"{_wave_name(wave)}: a debut that introduces nothing")
         if wave.role != DEBUT and novel:
@@ -323,17 +292,13 @@ def test_what_a_wave_debuts_comes_back_later():
     waves = _walk()
     level_of = {wave.order: wave.level for wave in waves}
     tier_of = {wave.order: wave.tier for wave in waves}
-    # A pool tier credits reuse by any of its variants: today's draws are not designed.
+    # Reuse counts only where every variant of the later wave uses it.
     every = {
-        wave.order: (
-            frozenset.intersection(*(_parts(case_id) for case_id in wave.variants))
-            if wave.planned
-            else frozenset().union(*(_parts(case_id) for case_id in wave.variants))
-        )
+        wave.order: frozenset.intersection(*(_parts(case_id) for case_id in wave.variants))
         for wave in waves
     }
     every_form = {
-        wave.order: (frozenset.intersection if wave.planned else frozenset().union)(
+        wave.order: frozenset.intersection(
             *(_guide_forms(case_id, MODULE_OF[wave.level]) for case_id in wave.variants)
         )
         for wave in waves
@@ -344,19 +309,8 @@ def test_what_a_wave_debuts_comes_back_later():
             tier_of[start]
         )
 
-    level_order = [level["slug"] for level in MODULE_LEVELS]
-
-    def pending(level: str) -> bool:
-        # Much reuse lives in later modules' spirals, which a pool tier cannot show:
-        # a shortfall is judged once every later level is planned.
-        return any(
-            slug not in MODULE_WAVE_PLAN for slug in level_order[level_order.index(level) + 1 :]
-        )
-
     problems = []
     for wave, _, novel, _, new_forms in _walk_knowledge(waves):
-        if not wave.planned or pending(wave.level):
-            continue
         for part in sorted(novel):
             if part[0] != "tech" and part[1] in SETUP:
                 continue
@@ -395,7 +349,7 @@ def test_no_two_variants_repeat_a_scenario():
                 [_case(case_id)["initial_state"], TARGET_STATES.get(case_id)], sort_keys=True
             )
             earlier, first = seen.setdefault(key, (wave, case_id))
-            if first != case_id and (wave.planned or earlier.planned):
+            if first != case_id:
                 problems.append(
                     f"{case_id} ({_wave_name(wave)}) repeats {first} ({_wave_name(earlier)})"
                 )
@@ -403,29 +357,19 @@ def test_no_two_variants_repeat_a_scenario():
 
 
 def _no_fail_minutes(waves: list[Wave]) -> float:
-    """A learner who never fails: the first variant of each wave, each pool's required draws."""
+    """A learner who never fails plays the first variant of every wave."""
     minutes = 0.0
     known: set[str] = set()
     for wave in waves:
-        module = MODULE_OF[wave.level]
-        if wave.planned:
-            played = wave.variants[:1]
-        else:
-            tier = next(level for level in MODULE_LEVELS if level["slug"] == wave.level)["tiers"][
-                wave.tier
-            ]
-            played = wave.variants[
-                : tier.get("required_successful_attempts", TODAY_REQUIRED[module][wave.tier])
-            ]
-        for case_id in played:
-            forms = _guide_forms(case_id, module)
-            minutes += (
-                PER_RUN
-                + PER_COMMAND * len(_git_commands(case_id))
-                + PER_EDIT * len(_case(case_id).get("solution_workspace_files") or [])
-                + PER_GUIDE * len(forms - known)
-            )
-            known |= forms
+        case_id = wave.variants[0]
+        forms = _guide_forms(case_id, MODULE_OF[wave.level])
+        minutes += (
+            PER_RUN
+            + PER_COMMAND * len(_git_commands(case_id))
+            + PER_EDIT * len(_case(case_id).get("solution_workspace_files") or [])
+            + PER_GUIDE * len(forms - known)
+        )
+        known |= forms
     return minutes
 
 
@@ -438,7 +382,7 @@ def test_no_fail_path_stays_within_the_agreed_time():
 def test_seed_publishes_exactly_the_planned_waves_and_is_idempotent():
     call_command("seed_curriculum", verbosity=0)
 
-    def published() -> dict[tuple[str, str], list[tuple[str, int, list[str]]]]:
+    def published() -> dict[tuple[str, str], list[tuple[str, list[str]]]]:
         result = defaultdict(list)
         for tier in AdventureLevelTier.objects.filter(
             adventure_level__slug__in=list(POOLS)
@@ -451,19 +395,16 @@ def test_seed_publishes_exactly_the_planned_waves_and_is_idempotent():
                     key=lambda row: (row.sort_order, row.semantic_key, row.id),
                 )
                 result[(tier.adventure_level.slug, tier.difficulty)].append(
-                    (wave.slug, wave.required_successful_attempts, [v.slug for v in variants])
+                    (wave.slug, [v.slug for v in variants])
                 )
         return dict(result)
 
     first = published()
-    for level in POOLS:
-        for tier in TIERS:
-            seeded = first[(level, tier)]
-            planned = MODULE_WAVE_PLAN.get(level, {}).get(tier)
-            if planned is None:
-                assert [slug for slug, _, _ in seeded] == [f"{level}-{tier}"]
-                continue
-            assert seeded == [(wave.slug, 1, list(wave.variants)) for wave in planned]
+    assert first == {
+        (level, tier): [(wave.slug, list(wave.variants)) for wave in waves]
+        for level, tiers in MODULE_WAVE_PLAN.items()
+        for tier, waves in tiers.items()
+    }
 
     call_command("seed_curriculum", verbosity=0)
     assert published() == first

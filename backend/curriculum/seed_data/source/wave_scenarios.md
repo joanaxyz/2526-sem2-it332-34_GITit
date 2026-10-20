@@ -10,50 +10,93 @@ Numbering continues each level's scenario list. Gate scenarios use `N.G.k`.
 
 ## Module 1 — Local Repository Foundations
 
-### 1.1.12 Re-run setup in the team handbook · Hard
+### 1.1.12 Set up the billing service inside the services folder · Hard
 
-**Variant ID:** `init-hard-safe-rerun-handbook`
+**Variant ID:** `init-hard-nested-service`
 
 **Story**
-Raven's onboarding script for new group members ends by setting up the repository again, "just in case". This time it runs inside team-handbook, which is already a repository with two commits on main. You are halfway through rewriting the welcome text in drafts/intro.md and have not committed it. Raven wants to know whether the script is safe to leave as it is, so the setup step has to run here, now, without costing anyone their history or your draft.
+The workspace Raven shared holds several projects: services/billing-api, services/search-api and the docs folder. Only the billing service is ready for version control. The other two belong to other groups, who set up their own repositories. Raven's team names the first branch trunk on every new repository, and the brief takes that for granted.
 
-**Starting point:** You are in team-handbook. It is already a repository with two commits, you are on main, and drafts/intro.md has uncommitted edits.
+**Starting point:** You are at the top of the workspace. services/billing-api, services/search-api and docs all hold files, and none of them is a repository.
 
 **Real-World Context**
-Setup scripts often repeat repository initialization. In an existing repository it only refreshes Git's metadata: the commits, the current branch and any uncommitted edits stay exactly as they were.
+`git init` takes the folder to turn into a repository, nested paths included. Initializing the wrong level puts other projects' files inside your repository.
 
 **Your Task**
-Run repository initialization again in the current repository. Keep both commits, the main branch and your uncommitted edits to drafts/intro.md.
+Make services/billing-api, and only that folder, a Git repository whose first branch follows the team's convention. Do not stage or commit anything.
 
 **Objective Checklist**
 
-- [ ] The repository is still on main, pointing at the same latest commit.
-- [ ] Both existing commits are still there.
-- [ ] Your edits in drafts/intro.md are still there, uncommitted.
+- [ ] services/billing-api is a repository; the workspace and its other folders are not.
+- [ ] The current branch is trunk.
+- [ ] Nothing is staged or committed.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
-1. `git init` — Reinitializes the existing repository in place.
+1. `git init -b trunk services/billing-api` — Initialize the nested folder with the team's first branch.
 
 **Accepted Alternatives (STAFF ONLY)**
 
-- `git init .`, `git -C . init`, `git init -b main` (Git ignores the branch option on an existing repository).
-- `-q` / `--quiet` is accepted, never required.
+- `cd services/billing-api` then `git init -b trunk`; `--initial-branch=trunk`.
 - Common patterns that apply: P19.
 
 **Not accepted**
 
-- `git init --bare`, deleting the repository first, or committing the draft.
+- Initializing the workspace or the services folder, or a first branch other than trunk.
 
 **Expected Result**
-Git reinitialized the repository. The two commits, the main branch and the draft edits are exactly as before.
+services/billing-api is a repository on trunk with no commits, and nothing else in the workspace changed.
 
 **Evaluation (STAFF ONLY)**
 
 Minimum counted commands: 1 · Maximum counted commands: 8
 
-- Repository at `.`; HEAD on `main` at the same commit; commit count 2.
-- `drafts/intro.md` still modified with the draft text; nothing staged; the last init reinitialized the current directory.
+- Repository at `services/billing-api`; HEAD on unborn `trunk`; no commits; nothing staged.
+- Every workspace file still present and untracked.
+
+### 1.1.13 Set up the Git basics course inside the courses folder · Hard
+
+**Variant ID:** `init-hard-nested-course`
+
+**Story**
+Sage keeps the study group's material in one workspace: courses/git-basics, courses/sql-basics and a templates folder. The Git basics course is the one moving under version control today. The SQL course is still a draft, and the templates are shared by everyone. The group starts every repository on main.
+
+**Starting point:** You are at the top of the workspace. courses/git-basics, courses/sql-basics and templates all hold files, and none of them is a repository.
+
+**Real-World Context**
+A repository covers its folder and everything inside it, so choosing the folder is the decision that matters.
+
+**Your Task**
+Make courses/git-basics, and only that folder, a Git repository with main as its first branch. Do not stage or commit anything.
+
+**Objective Checklist**
+
+- [ ] courses/git-basics is a repository; the workspace and its other folders are not.
+- [ ] The current branch is main.
+- [ ] Nothing is staged or committed.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git init -b main courses/git-basics` — Initialize the nested course folder.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `cd courses/git-basics` then `git init -b main`; `--initial-branch=main`; `git init courses/git-basics` (main is the default first branch).
+- Common patterns that apply: P19.
+
+**Not accepted**
+
+- Initializing the workspace or the courses folder.
+
+**Expected Result**
+courses/git-basics is a repository on main with no commits, and nothing else in the workspace changed.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 1 · Maximum counted commands: 8
+
+- Repository at `courses/git-basics`; HEAD on unborn `main`; no commits; nothing staged.
+- Every workspace file still present and untracked.
 
 ### 1.2.14 Shallow copy of the metrics dashboard · Medium
 
@@ -1457,7 +1500,6 @@ Change the last commit's message to Add retry to API client, then update origin'
 
 - [ ] The last commit is now Add retry to API client, with the same changes.
 - [ ] origin/feature/api-retry matches your local branch.
-- [ ] The push used a lease, not a bare force.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -1467,11 +1509,11 @@ Change the last commit's message to Add retry to API client, then update origin'
 **Accepted Alternatives (STAFF ONLY)**
 
 - `--force-with-lease=feature/api-retry`; `git push --force-with-lease` with the upstream set.
-- Not accepted: `-f`, `--force` or `+feature/api-retry` (an unconditional overwrite).
+- `--force` also completes it (same end state), with the hint that `--force-with-lease` is the safe choice.
 
 **Not accepted**
 
-- A plain push, a bare force push, or a new commit on top instead of the amend.
+- A plain push (Git rejects it: origin still has the old commit), or a new commit on top instead of the amend.
 
 **Expected Result**
 origin/feature/api-retry now holds the reworded commit, published with a lease.
@@ -1481,7 +1523,7 @@ origin/feature/api-retry now holds the reworded commit, published with a lease.
 Minimum counted commands: 2 · Maximum counted commands: 8
 
 - HEAD on `feature/api-retry`; tip `Add retry to API client` (parent `c1`), replacing `c2`, same tree.
-- `origin/feature/api-retry` = local branch; the push used `--force-with-lease`; clean tree.
+- `origin/feature/api-retry` = local branch; clean tree.
 
 ### 2.4.17 Reword the SSO docs commit and republish · Hard
 
@@ -1502,7 +1544,6 @@ Change the last commit's message to Document SSO setup, then update origin's doc
 
 - [ ] The last commit is now Document SSO setup, with the same changes.
 - [ ] origin/docs/sso matches your local branch.
-- [ ] The push used a lease, not a bare force.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -1512,11 +1553,11 @@ Change the last commit's message to Document SSO setup, then update origin's doc
 **Accepted Alternatives (STAFF ONLY)**
 
 - `--force-with-lease=docs/sso`.
-- Not accepted: `-f`, `--force` or `+docs/sso`.
+- `--force` also completes it (same end state), with the hint that `--force-with-lease` is the safe choice.
 
 **Not accepted**
 
-- A plain push, a bare force push, or an extra commit instead of the amend.
+- A plain push (Git rejects it), or an extra commit instead of the amend.
 
 **Expected Result**
 origin/docs/sso holds the reworded commit, and the push was protected by a lease.
@@ -1526,7 +1567,7 @@ origin/docs/sso holds the reworded commit, and the push was protected by a lease
 Minimum counted commands: 2 · Maximum counted commands: 8
 
 - HEAD on `docs/sso`; tip `Document SSO setup` (parent `c1`), replacing `c2`, same tree.
-- `origin/docs/sso` = local branch; the push used `--force-with-lease`; clean tree.
+- `origin/docs/sso` = local branch; clean tree.
 
 ### 2.5.14 Update main, then start dark mode · Medium
 
@@ -2666,7 +2707,7 @@ Your monthly invoice is ready.
 
 **Objective Checklist**
 
-- [ ] The repository's merge tool is meld, and the conflict was opened with it.
+- [ ] The repository's merge tool is meld.
 - [ ] main has a merge commit with feature/billing-copy as a parent.
 - [ ] src/billing_copy.txt contains exactly the required content.
 
@@ -2689,7 +2730,7 @@ Your monthly invoice is ready.
 
 **Not accepted**
 
-- Resolving the file without the merge tool, or leaving the tool unconfigured.
+- Leaving the tool unconfigured. (Resolving the file in the editor instead of the tool completes it: same end state.)
 
 **Expected Result**
 meld is the repository's merge tool, and main has a merge commit with the agreed email text.
@@ -2698,7 +2739,7 @@ meld is the repository's merge tool, and main has a merge commit with the agreed
 
 Minimum counted commands: 4 · Maximum counted commands: 10
 
-- `merge.tool` = `meld`; the merge tool opened with meld.
+- `merge.tool` = `meld`.
 - HEAD on `main`; tip is a merge with parent `c2`; tree `src/billing_copy.txt` = the required content; clean tree.
 
 ### 3.2.15 Merge the API version without backup files · Hard
@@ -2751,7 +2792,7 @@ LEGACY_VERSION = '2.4'
 
 **Not accepted**
 
-- Resolving without the merge tool, or leaving backups switched on.
+- Leaving backups switched on.
 
 **Expected Result**
 Backups are off, and main has a merge commit with the agreed version lines.
@@ -2760,7 +2801,7 @@ Backups are off, and main has a merge commit with the agreed version lines.
 
 Minimum counted commands: 4 · Maximum counted commands: 8
 
-- `mergetool.keepBackup` = `false`, `merge.tool` = `meld`; the merge tool opened with meld.
+- `mergetool.keepBackup` = `false`, `merge.tool` = `meld`.
 - HEAD on `main`; tip is a merge with parent `c2`; tree `src/api_version.py` = the required content; clean tree.
 
 ### 3.3.14 Backport the retry fix and note its source · Easy
@@ -3168,6 +3209,878 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 
 - HEAD on `release-3.0`, 3 commits; tip (parent `c3`) message contains the fix and `cherry picked from commit c4`; tree `src/login.py` = the required content.
 - No cherry-pick in progress; no conflicts; clean tree.
+
+## Module 4 — Advanced Recovery and History
+
+### 4.1.16 Recover the search ranking fix and publish it · Medium
+
+**Variant ID:** `reflog-medium-recover-and-publish-search`
+
+**Story**
+A hard reset this morning moved main back to the project baseline and took four commits with it, including your borrower search ranking fix. Nothing was pushed, so origin cannot help, but Git's reflog still remembers where main was. Finn wants the recovered work on its own branch, recovery/search-fix, and on origin so he can review it today.
+
+**Starting point:** You are on main after a hard reset to the baseline; the reflog still lists the lost tip; origin is available.
+
+**Real-World Context**
+The reflog records every place a branch has pointed. A commit that no branch reaches is still there for a while, and a new branch can bring it back.
+
+**Your Task**
+Find the lost tip in the reflog, recover it on a new branch named recovery/search-fix, switch to it, and publish it to origin with its upstream set. Leave main where it is.
+
+**Objective Checklist**
+
+- [ ] recovery/search-fix points at the lost ranking fix and is checked out.
+- [ ] origin/recovery/search-fix matches it, and the local branch tracks it.
+- [ ] main has not moved.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git reflog` — Find the commit main pointed to before the reset.
+2. `git switch -c recovery/search-fix c4` — Recover it on a new branch.
+3. `git push -u origin recovery/search-fix` — Publish it for review.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git reflog show main`; `git branch recovery/search-fix c4` then `git switch recovery/search-fix`; `git push --set-upstream origin recovery/search-fix`.
+- Common patterns that apply: P26, P27, P31.
+
+**Not accepted**
+
+- Resetting main back to the lost commit, or publishing without an upstream.
+
+**Expected Result**
+The ranking fix is safe on recovery/search-fix, published and tracked, and main is unchanged.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 10
+
+- HEAD on `recovery/search-fix` at `c4`; `origin/recovery/search-fix` = local; upstream set.
+- `main` at `c0`; clean tree.
+
+### 4.1.17 Recover the billing summary and publish it · Medium
+
+**Variant ID:** `reflog-medium-recover-and-publish-billing`
+
+**Story**
+You reset main to an older commit to test something and forgot that the billing work on top was not pushed yet. Three commits, ending with Finish billing summary, are no longer on any branch. Sage needs them back on recovery/billing and on origin before the finance demo.
+
+**Starting point:** You are on main after a hard reset; the reflog still lists the lost tip; origin is available.
+
+**Real-World Context**
+Recovering is cheap when you act before Git cleans up unreachable commits. Publishing the recovered branch makes the work safe on the server too.
+
+**Your Task**
+Find the lost tip in the reflog, recover it on a new branch named recovery/billing, switch to it, and publish it to origin with its upstream set. Leave main where it is.
+
+**Objective Checklist**
+
+- [ ] recovery/billing points at the lost billing summary and is checked out.
+- [ ] origin/recovery/billing matches it, and the local branch tracks it.
+- [ ] main has not moved.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git reflog` — Find where main was before the reset.
+2. `git switch -c recovery/billing c5` — Recover it on a new branch.
+3. `git push -u origin recovery/billing` — Publish and track it.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git reflog show main`; `git branch recovery/billing c5` then `git switch recovery/billing`; `git push --set-upstream origin recovery/billing`.
+- Common patterns that apply: P26, P27, P31.
+
+**Not accepted**
+
+- Moving main to the lost commit, or publishing without an upstream.
+
+**Expected Result**
+The billing work is on recovery/billing, published and tracked, and main is unchanged.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 10
+
+- HEAD on `recovery/billing` at `c5`; `origin/recovery/billing` = local; upstream set.
+- `main` at `c2`; clean tree.
+
+### 4.1.18 Bookmark the lost work, then bring only the auth fix to main · Hard
+
+**Variant ID:** `reflog-hard-recover-then-pick-auth`
+
+**Story**
+After a reset moved main back three commits, the reflog shows what you lost: some session groundwork, an abandoned magic-link experiment, and on top of it the auth token expiry fix Raven needs today. You want the whole lost line kept on recovery/auth for later, without leaving main. Only the fix itself belongs on main now. Check the commit before you copy it.
+
+**Starting point:** You are on main after a hard reset; the reflog lists the lost tip, which holds the auth fix on top of the experiment.
+
+**Real-World Context**
+`git branch <name> <commit>` keeps a commit reachable without switching to it. Cherry-picking then copies just the change you need, leaving the rest of the lost line behind.
+
+**Your Task**
+Find the lost tip in the reflog and inspect it. Keep it on a new branch named recovery/auth without switching, then copy only the auth fix onto main as a new commit.
+
+**Objective Checklist**
+
+- [ ] recovery/auth points at the lost tip, and main is still checked out.
+- [ ] main has one new commit with the auth fix and nothing from the experiment or the groundwork.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git reflog` — Find the lost tip.
+2. `git show c4` — Confirm it is the auth fix.
+3. `git branch recovery/auth c4` — Keep the lost line without switching.
+4. `git cherry-pick c4` — Copy only the fix onto main.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git log recovery/auth` after creating the branch; `-x` on the pick.
+- Common patterns that apply: P25, P26, P27.
+
+**Not accepted**
+
+- Resetting main to the lost tip (it brings the experiment), or switching to the recovery branch and staying there.
+
+**Expected Result**
+recovery/auth keeps the lost line, and main has only the auth fix on top of where it was.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 8
+
+- `recovery/auth` at `c4`; HEAD on `main`; tip (parent `c1`) message contains the fix; tree has the fix and no experiment or groundwork files.
+- Clean tree.
+
+### 4.1.19 Bookmark the lost work, then bring only the export fix to main · Hard
+
+**Variant ID:** `reflog-hard-recover-then-pick-export`
+
+**Story**
+A reset dropped three commits from main: export groundwork, a debug commit that dumps every row to the console, and the export date format fix on top. The fix has to ship; the debug commit must never reach main. Sage wants the lost line kept on recovery/export so nobody loses the groundwork, but you should stay on main the whole time. Inspect the commit before you copy it.
+
+**Starting point:** You are on main after a hard reset; the reflog lists the lost tip, which holds the export fix on top of the debug commit.
+
+**Real-World Context**
+Recovering a line of work and shipping part of it are separate steps. A bookmark branch keeps everything; a cherry-pick ships only what was asked for.
+
+**Your Task**
+Find the lost tip in the reflog and inspect it. Keep it on a new branch named recovery/export without switching, then copy only the export fix onto main as a new commit.
+
+**Objective Checklist**
+
+- [ ] recovery/export points at the lost tip, and main is still checked out.
+- [ ] main has one new commit with the export fix and nothing from the debug commit or the groundwork.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git reflog` — Find the lost tip.
+2. `git show c4` — Confirm it is the export fix.
+3. `git branch recovery/export c4` — Keep the lost line without switching.
+4. `git cherry-pick c4` — Copy only the fix onto main.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `-x` on the pick; `git log` along the way.
+- Common patterns that apply: P25, P26, P27.
+
+**Not accepted**
+
+- Resetting main to the lost tip, or merging the recovery branch.
+
+**Expected Result**
+recovery/export keeps the lost line, and main has only the export fix.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 8
+
+- `recovery/export` at `c4`; HEAD on `main`; tip (parent `c1`) message contains the fix; tree has the fix and no debug or groundwork files.
+- Clean tree.
+
+### 4.2.10 Sync first, then undo the docs theme · Easy
+
+**Variant ID:** `revert-easy-pull-then-revert-docs`
+
+**Story**
+The docs build has been failing since c3, Switch docs theme, which is already on origin. Raven also pushed an FAQ page after it, and your main has not seen that yet. Raven wants the theme change undone without rewriting anything that is published, and the fix on origin before the handbook goes out.
+
+**Starting point:** You are on main, one commit behind origin/main; c3 is published and broke the docs build.
+
+**Real-World Context**
+`git revert` adds a new commit that undoes an old one. Published history stays intact, so teammates can pull the fix like any other commit. Updating first means your revert goes on top of the newest work.
+
+**Your Task**
+Bring main up to date with origin, undo c3 with a new commit, and push main to origin.
+
+**Objective Checklist**
+
+- [ ] main includes Raven's FAQ commit.
+- [ ] A new commit undoes Switch docs theme, and c3 is still in the history.
+- [ ] origin/main matches your main.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git pull origin main` — Bring in Raven's commit.
+2. `git revert c3` — Undo the theme change with a new commit.
+3. `git push` — Publish main.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git pull`; `git revert --no-edit c3`; `git push origin main`.
+- Common patterns that apply: P21, P22, P41.
+
+**Not accepted**
+
+- `git reset` to before c3 followed by a force push, or reverting before pulling and then failing to publish.
+
+**Expected Result**
+origin/main has the FAQ page and a new commit that reverts the theme change, with the old history intact.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 12
+
+- Tip is `Revert "Switch docs theme"` with parent `c4`; tree has the old docs config and the FAQ; `c3` still in history.
+- `origin/main` = `main`; clean tree.
+
+### 4.2.11 Sync first, then undo the endpoint rename · Easy
+
+**Variant ID:** `revert-easy-pull-then-revert-api`
+
+**Story**
+c4, Rename the orders endpoint, broke every client of the billing API, and it is already on origin. Finn has since pushed a health endpoint you do not have locally. He wants the rename undone safely, on top of his work, and published right away.
+
+**Starting point:** You are on main, behind origin/main; c4 is published and broke the API.
+
+**Real-World Context**
+Reverting is the safe undo for shared history: nothing anyone already pulled is rewritten.
+
+**Your Task**
+Bring main up to date with origin, undo c4 with a new commit, and push main to origin.
+
+**Objective Checklist**
+
+- [ ] main includes Finn's health endpoint commit.
+- [ ] A new commit undoes Rename the orders endpoint, and c4 is still in the history.
+- [ ] origin/main matches your main.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git pull origin main` — Bring in Finn's commit.
+2. `git revert c4` — Undo the rename with a new commit.
+3. `git push` — Publish main.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git pull`; `git revert --no-edit c4`; `git push origin main`.
+- Common patterns that apply: P21, P22, P41.
+
+**Not accepted**
+
+- Rewriting published history with `git reset` and a force push.
+
+**Expected Result**
+origin/main has the health endpoint and a new commit that reverts the rename.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 12
+
+- Tip is `Revert "Rename the orders endpoint"` with parent `c5`; tree has the old routes and the health endpoint; `c4` still in history.
+- `origin/main` = `main`; clean tree.
+
+### 4.2.12 Undo the pricing change on release 2.1 · Medium
+
+**Variant ID:** `revert-medium-release-branch-pricing`
+
+**Story**
+Customers on release 2.1 are seeing prices rounded to whole pesos since c4, Round prices to whole pesos. The release branch is published and tracks origin/release/2.1, and the release notes were updated after the bad commit. Finn wants the rounding undone on the release branch only, without rewriting it, and pushed for the patch build. You are on main.
+
+**Starting point:** You are on main; release/2.1 tracks origin/release/2.1; c4 on release/2.1 broke pricing.
+
+**Real-World Context**
+Release branches are shared and published, so fixes go on as new commits. Reverting on the release branch leaves main and everyone's copies of the release untouched.
+
+**Your Task**
+Switch to release/2.1, undo c4 with a new commit, and push release/2.1 to origin. Leave main unchanged.
+
+**Objective Checklist**
+
+- [ ] release/2.1 has a new commit that undoes Round prices to whole pesos, and c4 is still in its history.
+- [ ] The release notes update is kept.
+- [ ] origin/release/2.1 matches your release/2.1, and main is unchanged.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git switch release/2.1` — Go to the release branch.
+2. `git revert c4` — Undo the rounding with a new commit.
+3. `git push` — Publish the release branch.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git checkout release/2.1`; `git revert --no-edit c4`; `git push origin release/2.1`.
+- Common patterns that apply: P21, P22, P23.
+
+**Not accepted**
+
+- Reverting on main, or resetting the release branch and force pushing.
+
+**Expected Result**
+origin/release/2.1 has a new commit reverting the rounding, with the release notes intact.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 10
+
+- HEAD on `release/2.1`; tip is `Revert "Round prices to whole pesos"` with parent `c5`; tree has the old pricing and the new release notes; `c4` still in history.
+- `origin/release/2.1` = `release/2.1`; `main` at `c1`; clean tree.
+
+### 4.2.13 Undo the SSO requirement on release 1.8 · Medium
+
+**Variant ID:** `revert-medium-release-branch-auth`
+
+**Story**
+Since c3, Require SSO for every account, customers on release 1.8 without a company login cannot sign in at all. The release branch is published and tracks origin, and the release notes changed after it. Sage asks you to undo the requirement on release/1.8 only, as a new commit, and push it. You are on main.
+
+**Starting point:** You are on main; release/1.8 tracks origin/release/1.8; c3 on release/1.8 broke sign-in.
+
+**Real-World Context**
+A revert on the branch that needs it is the smallest safe fix: no other branch changes, and no published commit is rewritten.
+
+**Your Task**
+Switch to release/1.8, undo c3 with a new commit, and push release/1.8 to origin. Leave main unchanged.
+
+**Objective Checklist**
+
+- [ ] release/1.8 has a new commit that undoes Require SSO for every account, and c3 is still in its history.
+- [ ] The release notes update is kept.
+- [ ] origin/release/1.8 matches your release/1.8, and main is unchanged.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git switch release/1.8` — Go to the release branch.
+2. `git revert c3` — Undo the requirement with a new commit.
+3. `git push` — Publish the release branch.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git checkout release/1.8`; `git revert --no-edit c3`; `git push origin release/1.8`.
+- Common patterns that apply: P21, P22, P23.
+
+**Not accepted**
+
+- Reverting on main, or rewriting the release branch.
+
+**Expected Result**
+origin/release/1.8 has a new commit reverting the SSO requirement.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 10
+
+- HEAD on `release/1.8`; tip is `Revert "Require SSO for every account"` with parent `c4`; tree has the old sign-in and the new release notes; `c3` still in history.
+- `origin/release/1.8` = `release/1.8`; `main` at `c1`; clean tree.
+
+### 4.2.14 Reword the local commit, revert the published one · Hard
+
+**Variant ID:** `revert-hard-amend-local-revert-pushed-shop`
+
+**Story**
+Your local main has one commit nobody has seen yet, c4, with the message "wip"; it adds the order export. Origin already has c0 to c3, and Maeve just found that c2, Break checkout, really did break checkout. She wants one push that does both fixes the right way: the unpublished message can be rewritten, but the published commit must be undone without touching history anyone has pulled.
+
+**Starting point:** You are on main; c0 to c3 are published; c4 is local with the message "wip"; published c2 broke checkout.
+
+**Real-World Context**
+The rule of thumb is: rewrite only what is not published. Amending a local commit is fine; a published mistake gets a revert.
+
+**Your Task**
+Change c4's message to Add order export, undo c2 with a new commit, and push main to origin once.
+
+**Objective Checklist**
+
+- [ ] The order export commit is now named Add order export and still sits on c3.
+- [ ] A new commit undoes Break checkout, and c2 and c3 are still in the history.
+- [ ] origin/main matches your main.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git commit --amend -m "Add order export"` — Reword the unpublished commit.
+2. `git revert c2` — Undo the published mistake with a new commit.
+3. `git push` — Publish both fixes.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git revert --no-edit c2`; `git push origin main`.
+- Common patterns that apply: P21, P22, P48.
+
+**Not accepted**
+
+- Reverting first and then amending (it rewrites the revert), resetting published commits, or a force push.
+
+**Expected Result**
+origin/main ends with the reworded export commit and a revert of the checkout change, and no published commit was rewritten.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 8
+
+- Tip is `Revert "Break checkout"`; `main~1` is `Add order export` with parent `c3`, replacing `c4`; tree has the old checkout and the export.
+- `c2` and `c3` still in history; `origin/main` = `main`; clean tree.
+
+### 4.2.15 Reword the local commit, revert the published feed change · Hard
+
+**Variant ID:** `revert-hard-amend-local-revert-pushed-blog`
+
+**Story**
+The field notes blog has a new RSS feed in your local commit c4, but you committed it as "stuff". Origin already has c3, Shorten feed item IDs, which made every feed reader show old posts as new. Raven wants a single push: your local commit with a proper name, and the published change undone safely.
+
+**Starting point:** You are on main; c0 to c3 are published; c4 is local with the message "stuff"; published c3 broke the RSS feed.
+
+**Real-World Context**
+Knowing what is published decides which tool you use: amend before you push, revert after.
+
+**Your Task**
+Change c4's message to Add RSS feed, undo c3 with a new commit, and push main to origin once.
+
+**Objective Checklist**
+
+- [ ] The feed commit is now named Add RSS feed and still sits on c3.
+- [ ] A new commit undoes Shorten feed item IDs, and c3 is still in the history.
+- [ ] origin/main matches your main.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git commit --amend -m "Add RSS feed"` — Reword the unpublished commit.
+2. `git revert c3` — Undo the published change with a new commit.
+3. `git push` — Publish both fixes.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git revert --no-edit c3`; `git push origin main`.
+- Common patterns that apply: P21, P22, P48.
+
+**Not accepted**
+
+- Reverting first and then amending, resetting published commits, or a force push.
+
+**Expected Result**
+origin/main ends with the reworded feed commit and a revert of the ID change.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 8
+
+- Tip is `Revert "Shorten feed item IDs"`; `main~1` is `Add RSS feed` with parent `c3`, replacing `c4`; tree has the old feed IDs and the new feed.
+- `c3` still in history; `origin/main` = `main`; clean tree.
+
+### 4.3.10 Abandon the stopped docs rebase · Easy
+
+**Variant ID:** `rebase-easy-abort-stopped-docs`
+
+**Story**
+You started rebasing feature/docs-search onto main, and it stopped on a conflict in docs/index.md: main renamed the handbook heading while your branch added a search hint under it. Raven says the heading rename is not final yet, so the rebase can wait. Your branch should be exactly as it was before you started.
+
+**Starting point:** You are in the middle of rebasing feature/docs-search onto main, stopped on a conflict in docs/index.md.
+
+**Real-World Context**
+`git rebase --abort` cancels a rebase completely and puts the branch back where it was before the rebase began.
+
+**Your Task**
+Cancel the rebase so feature/docs-search is exactly as it was before.
+
+**Objective Checklist**
+
+- [ ] No rebase is in progress and no conflicts remain.
+- [ ] feature/docs-search points at its original tip again.
+- [ ] main is unchanged.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git rebase --abort` — Cancel the rebase.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git status` first to see the rebase in progress.
+- Common patterns that apply: P49.
+
+**Not accepted**
+
+- Resolving and continuing the rebase, or `git rebase --skip`.
+
+**Expected Result**
+feature/docs-search is back at its original tip with no rebase in progress.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 1 · Maximum counted commands: 12
+
+- HEAD on `feature/docs-search` at `c3`; no rebase in progress; `main` at `c1`.
+- No conflicts; clean tree.
+
+### 4.3.11 Resolve and continue the config loader rebase · Easy
+
+**Variant ID:** `rebase-easy-continue-config`
+
+**Story**
+Your rebase of feature/config-loader onto main stopped on a conflict in config/app.yml: main switched the loader to toml, and your branch added a watch setting. Finn agrees with both, so the resolved file keeps main's loader and your watch setting. After that, the rebase should finish replaying the rest of your branch.
+
+**Starting point:** You are in the middle of rebasing feature/config-loader onto main, stopped on a conflict in config/app.yml.
+
+**Real-World Context**
+During a rebase, Git replays your commits one at a time. When one stops on a conflict, you resolve it, stage the file, and continue; Git then replays the rest.
+
+**Your Task**
+Resolve config/app.yml to the content below, stage it, and continue the rebase until it finishes.
+
+**Required resolved file content**
+
+`config/app.yml`
+
+```
+loader: toml
+watch: true
+```
+
+**Objective Checklist**
+
+- [ ] No rebase is in progress and no conflicts remain.
+- [ ] feature/config-loader now sits on top of main's latest commit.
+- [ ] config/app.yml contains exactly the required content, and the branch's later commit was replayed too.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. In the simulator's file editor, set `config/app.yml` to exactly:
+
+   ```
+   loader: toml
+   watch: true
+   ```
+2. `git add config/app.yml` — Mark the file resolved.
+3. `git rebase --continue` — Replay the rest of the branch.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git status` along the way.
+- Common patterns that apply: P49.
+
+**Not accepted**
+
+- Aborting the rebase, `git rebase --skip`, or committing the resolution as a separate commit.
+
+**Expected Result**
+feature/config-loader is rebased onto main with the agreed config, and no rebase is in progress.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 12
+
+- HEAD on `feature/config-loader`, 4 commits including `c1`, no merge commits; tree `config/app.yml` = the required content plus the follow-up file.
+- No rebase in progress; no conflicts; clean tree.
+
+### 4.3.12 Finish the search rebase and republish safely · Hard
+
+**Variant ID:** `rebase-hard-continue-then-lease-search`
+
+**Story**
+You pushed feature/search yesterday. Today you are rebasing it onto main, and it stopped on a conflict in src/search.py: main doubled the results per page, and your branch turned on fuzzy matching. Keep both. When the rebase is done, origin's copy still has the old history, so it has to be replaced, but only if nobody else pushed to the branch in the meantime.
+
+**Starting point:** feature/search was pushed earlier; you are in the middle of rebasing it onto main, stopped on a conflict in src/search.py.
+
+**Real-World Context**
+A rebase rewrites commits that may already be on the remote. `--force-with-lease` replaces the remote branch only if it is still where you last saw it.
+
+**Your Task**
+Resolve src/search.py to the content below, finish the rebase, and update origin's feature/search without overwriting work you have not seen.
+
+**Required resolved file content**
+
+`src/search.py`
+
+```
+RESULTS = 20
+FUZZY = True
+```
+
+**Objective Checklist**
+
+- [ ] The rebase is finished and feature/search sits on main's latest commit.
+- [ ] src/search.py contains exactly the required content.
+- [ ] origin/feature/search matches your branch.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. In the simulator's file editor, set `src/search.py` to exactly:
+
+   ```
+   RESULTS = 20
+   FUZZY = True
+   ```
+2. `git add src/search.py` — Mark the file resolved.
+3. `git rebase --continue` — Finish the rebase.
+4. `git push --force-with-lease origin feature/search` — Republish safely.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `--force-with-lease=feature/search`; `git push --force-with-lease` with the upstream set.
+- Common patterns that apply: P49.
+
+**Not accepted**
+
+- A plain push (Git rejects it: origin still has the old commits), or aborting the rebase.
+
+**Expected Result**
+origin/feature/search holds the rebased branch with the agreed search settings.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 8
+
+- HEAD on `feature/search`, 4 commits including `c1`, no merges; tree `src/search.py` = the required content plus the test file.
+- `origin/feature/search` = local; no rebase in progress; clean tree.
+
+### 4.3.13 Finish the billing rebase and republish safely · Hard
+
+**Variant ID:** `rebase-hard-continue-then-lease-billing`
+
+**Story**
+feature/billing is on origin already. Your rebase onto main stopped on a conflict in src/billing.py: main added a rounding rule, and your branch switched the currency to USD for the new market. The final file keeps both. Sage reminds you that a teammate sometimes pushes small fixes to this branch, so the republish must refuse if that happened.
+
+**Starting point:** feature/billing was pushed earlier; you are in the middle of rebasing it onto main, stopped on a conflict in src/billing.py.
+
+**Real-World Context**
+Finishing a rebase is half the job when the branch is shared. Republishing with a lease protects any teammate commit you have not fetched.
+
+**Your Task**
+Resolve src/billing.py to the content below, finish the rebase, and update origin's feature/billing safely.
+
+**Required resolved file content**
+
+`src/billing.py`
+
+```
+CURRENCY = 'USD'
+ROUNDING = 'half-up'
+```
+
+**Objective Checklist**
+
+- [ ] The rebase is finished and feature/billing sits on main's latest commit.
+- [ ] src/billing.py contains exactly the required content.
+- [ ] origin/feature/billing matches your branch.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. In the simulator's file editor, set `src/billing.py` to exactly:
+
+   ```
+   CURRENCY = 'USD'
+   ROUNDING = 'half-up'
+   ```
+2. `git add src/billing.py` — Mark the file resolved.
+3. `git rebase --continue` — Finish the rebase.
+4. `git push --force-with-lease origin feature/billing` — Republish safely.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `--force-with-lease=feature/billing`.
+- Common patterns that apply: P49.
+
+**Not accepted**
+
+- A plain push (Git rejects it: origin still has the old commits), or aborting the rebase.
+
+**Expected Result**
+origin/feature/billing holds the rebased branch with the agreed billing settings.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 8
+
+- HEAD on `feature/billing`, 4 commits including `c1`, no merges; tree `src/billing.py` = the required content plus the docs file.
+- `origin/feature/billing` = local; no rebase in progress; clean tree.
+
+### 4.3.14 Abort, then move only the reports commits · Hard
+
+**Variant ID:** `rebase-hard-abort-then-onto-reports`
+
+**Story**
+You are rebasing feature/reports onto main, and it stopped on a conflict in src/charts.js. That file is not even yours: you started feature/reports from spike/charts, an experiment, so the rebase is dragging the spike's commits along. Maeve wants only your two reports commits on top of main, and the spike left out entirely.
+
+**Starting point:** You are in the middle of rebasing feature/reports onto main, stopped on a conflict from a spike/charts commit; feature/reports was started from spike/charts.
+
+**Real-World Context**
+`git rebase --onto <newbase> <upstream> <branch>` replays only the commits after `<upstream>`, so a branch can leave behind the base it was started from.
+
+**Your Task**
+Cancel the current rebase. Then move only feature/reports' own commits onto main, leaving the spike's commits behind.
+
+**Objective Checklist**
+
+- [ ] No rebase is in progress and no conflicts remain.
+- [ ] feature/reports sits on main's latest commit with only its two commits.
+- [ ] Nothing from spike/charts is on feature/reports, and spike/charts is unchanged.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git rebase --abort` — Cancel the rebase that drags the spike along.
+2. `git rebase --onto main spike/charts feature/reports` — Replay only the reports commits onto main.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git log --oneline --graph --all` along the way; `git rebase --onto main spike/charts` while on feature/reports.
+- Common patterns that apply: P49.
+
+**Not accepted**
+
+- Resolving the spike conflict and continuing, or a plain `git rebase main`.
+
+**Expected Result**
+feature/reports is two commits on top of main, with no spike commits.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 8
+
+- HEAD on `feature/reports`, 4 commits including `c1`, excluding `c2` and `c3`; tree has the reports work and main's charts, no spike stylesheet.
+- `spike/charts` at `c3`; no rebase in progress; clean tree.
+
+### 4.3.15 Abort, then move only the table commits · Hard
+
+**Variant ID:** `rebase-hard-abort-then-onto-ui`
+
+**Story**
+feature/table-ui was started from spike/new-grid by mistake, and your rebase onto main just stopped on a conflict in src/charts.js from one of the spike's commits. Finn says the grid spike is not going anywhere, so it must not travel with your table work. Only your own two commits should end up on main's latest commit.
+
+**Starting point:** You are in the middle of rebasing feature/table-ui onto main, stopped on a conflict from a spike/new-grid commit; feature/table-ui was started from spike/new-grid.
+
+**Real-World Context**
+When a branch was started from the wrong base, `--onto` lets you cut it loose and replant only your own commits.
+
+**Your Task**
+Cancel the current rebase. Then move only feature/table-ui's own commits onto main, leaving the spike's commits behind.
+
+**Objective Checklist**
+
+- [ ] No rebase is in progress and no conflicts remain.
+- [ ] feature/table-ui sits on main's latest commit with only its two commits.
+- [ ] Nothing from spike/new-grid is on feature/table-ui, and spike/new-grid is unchanged.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git rebase --abort` — Cancel the rebase.
+2. `git rebase --onto main spike/new-grid feature/table-ui` — Replay only the table commits onto main.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git rebase --onto main spike/new-grid` while on feature/table-ui.
+- Common patterns that apply: P49.
+
+**Not accepted**
+
+- Continuing the spike's rebase, or a plain `git rebase main`.
+
+**Expected Result**
+feature/table-ui is two commits on top of main, with no spike commits.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 8
+
+- HEAD on `feature/table-ui`, 4 commits including `c1`, excluding `c2` and `c3`; tree has the table work and main's charts, no spike stylesheet.
+- `spike/new-grid` at `c3`; no rebase in progress; clean tree.
+
+### 4.3.16 Undo a bad rebase of the CLI flags and republish · Hard
+
+**Variant ID:** `rebase-hard-reset-rebase-lease-cli`
+
+**Story**
+You pushed feature/cli-flags, then rebased it onto main to pick up a docs fix. Something went wrong: the rebased branch is missing Parse --quiet flag. The reflog still shows the tip you pushed, c6, before the rebase. Finn wants the complete branch back, replayed on main properly, and origin updated, safely, because he sometimes pushes to this branch too.
+
+**Starting point:** You are on feature/cli-flags after a rebase that dropped a commit; the reflog lists the original tip, c6, which origin also still has.
+
+**Real-World Context**
+The reflog is your undo history for rebases. Resetting to the pre-rebase tip and rebasing again restores everything; a lease protects the republish.
+
+**Your Task**
+Find the pre-rebase tip in the reflog, reset the branch to it, rebase it onto main again, and update origin's feature/cli-flags without overwriting work you have not seen.
+
+**Objective Checklist**
+
+- [ ] feature/cli-flags sits on main's latest commit with all three of its commits, including Parse --quiet flag.
+- [ ] No rebase is in progress, and the history has no merge commits.
+- [ ] origin/feature/cli-flags matches your branch.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git reflog` — Find the tip before the rebase.
+2. `git reset --hard c6` — Put the branch back where it was.
+3. `git rebase main` — Replay all three commits onto main.
+4. `git push --force-with-lease origin feature/cli-flags` — Republish safely.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git reset --hard feature/cli-flags@{1}` or `git reset --hard origin/feature/cli-flags`; `--force-with-lease=feature/cli-flags`.
+- Common patterns that apply: P26, P49.
+
+**Not accepted**
+
+- Re-creating the dropped commit by hand, a plain push (Git rejects it), or a merge.
+
+**Expected Result**
+origin/feature/cli-flags holds all three CLI commits on top of main's docs fix.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 8
+
+- HEAD on `feature/cli-flags`, 5 commits including `c1`, no merges; tree has all three changes and the fixed usage docs.
+- `origin/feature/cli-flags` = local; no rebase in progress; clean tree.
+
+### 4.3.17 Undo a bad rebase of the rate limiter and republish · Hard
+
+**Variant ID:** `rebase-hard-reset-rebase-lease-api`
+
+**Story**
+feature/rate-limits was pushed with three commits. After you rebased it onto main, Add rate limiter is gone and the API wiring points at nothing. The reflog still has the pushed tip, c5. Sage needs the branch whole again, on top of main, and origin updated without stomping on anything a teammate may have pushed.
+
+**Starting point:** You are on feature/rate-limits after a rebase that dropped a commit; the reflog lists the original tip, c5, which origin also still has.
+
+**Real-World Context**
+A bad rebase is recoverable as long as you know where the branch was. The reflog tells you, and `git reset --hard` takes you back.
+
+**Your Task**
+Find the pre-rebase tip in the reflog, reset the branch to it, rebase it onto main again, and update origin's feature/rate-limits safely.
+
+**Objective Checklist**
+
+- [ ] feature/rate-limits sits on main's latest commit with all three of its commits, including Add rate limiter.
+- [ ] No rebase is in progress, and the history has no merge commits.
+- [ ] origin/feature/rate-limits matches your branch.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git reflog` — Find the tip before the rebase.
+2. `git reset --hard c5` — Put the branch back where it was.
+3. `git rebase main` — Replay all three commits onto main.
+4. `git push --force-with-lease origin feature/rate-limits` — Republish safely.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git reset --hard origin/feature/rate-limits`; `--force-with-lease=feature/rate-limits`.
+- Common patterns that apply: P26, P49.
+
+**Not accepted**
+
+- Re-creating the dropped commit by hand, a plain push (Git rejects it), or a merge.
+
+**Expected Result**
+origin/feature/rate-limits holds all three commits on top of main.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 8
+
+- HEAD on `feature/rate-limits`, 5 commits including `c1`, no merges; tree has all three changes and the fixed usage docs.
+- `origin/feature/rate-limits` = local; no rebase in progress; clean tree.
 
 ## Module 1 Challenge Gate — Foundations Gate
 
@@ -4014,7 +4927,7 @@ PRICE_TIERS = ['basic', 'pro']
 
 - [ ] main has a merge commit with feature/pricing-v2 as a parent.
 - [ ] feature/old-pricing is not part of main's history.
-- [ ] src/prices.py contains exactly the required content, resolved with meld.
+- [ ] src/prices.py contains exactly the required content, and meld is the repository's merge tool.
 - [ ] No conflicts remain and the working folder is clean.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -4037,7 +4950,7 @@ PRICE_TIERS = ['basic', 'pro']
 
 **Not accepted**
 
-- Resolving and committing the old-pricing merge, or resolving the file without the merge tool.
+- Resolving and committing the old-pricing merge.
 
 **Expected Result**
 main has a merge commit joining feature/pricing-v2 with the agreed prices, and feature/old-pricing never reached main.
@@ -4047,7 +4960,7 @@ main has a merge commit joining feature/pricing-v2 with the agreed prices, and f
 Minimum counted commands: 5 · Maximum counted commands: 8
 
 - HEAD on `main`; tip is a merge with parent `c3`; history excludes `c2`; tree `src/prices.py` = the required content.
-- The merge tool opened with meld; no conflicts; clean tree.
+- `merge.tool` = `meld`; no conflicts; clean tree.
 
 ### 3.G.6 Back out the wrong merge and use the team's tool · Hard
 
@@ -4076,7 +4989,7 @@ const label = 'Place order'
 
 - [ ] main has a merge commit with feature/checkout-copy as a parent.
 - [ ] feature/draft-copy is not part of main's history.
-- [ ] src/checkout.js contains exactly the required content, resolved with meld.
+- [ ] src/checkout.js contains exactly the required content, and meld is the repository's merge tool.
 - [ ] No conflicts remain and the working folder is clean.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -4099,7 +5012,7 @@ const label = 'Place order'
 
 **Not accepted**
 
-- Resolving and committing the draft-copy merge, or resolving the file without the merge tool.
+- Resolving and committing the draft-copy merge.
 
 **Expected Result**
 main has a merge commit joining feature/checkout-copy with the approved label, and feature/draft-copy never reached main.
@@ -4109,7 +5022,7 @@ main has a merge commit joining feature/checkout-copy with the approved label, a
 Minimum counted commands: 5 · Maximum counted commands: 8
 
 - HEAD on `main`; tip is a merge with parent `c3`; history excludes `c2`; tree `src/checkout.js` = the required content.
-- The merge tool opened with meld; no conflicts; clean tree.
+- `merge.tool` = `meld`; no conflicts; clean tree.
 
 ## Module 4 Challenge Gate — Recovery Gate
 
@@ -4130,7 +5043,6 @@ Find the lost “Fix borrower search” commit in the reflog, inspect it to be s
 
 **Objective Checklist**
 
-- [ ] You looked through the reflog and inspected the commit before recovering it.
 - [ ] recovery/search points at the “Fix borrower search” commit and is checked out.
 - [ ] main still points where the reset left it.
 
@@ -4157,7 +5069,7 @@ recovery/search holds the search fix, and main is untouched.
 Minimum counted commands: 1 · Maximum counted commands: 12
 
 - HEAD on `recovery/search` at `c3`; `main` still at `c0`.
-- The reflog and the commit were inspected in that order; clean tree.
+- Clean tree.
 
 ### 4.G.2 Rescue the lost receipt fix · Easy
 
@@ -4176,7 +5088,6 @@ Find the lost “Fix receipt totals” commit in the reflog, inspect it to be su
 
 **Objective Checklist**
 
-- [ ] You looked through the reflog and inspected the commit before recovering it.
 - [ ] recovery/receipts points at the “Fix receipt totals” commit and is checked out.
 - [ ] main still points where the reset left it.
 
@@ -4203,7 +5114,7 @@ recovery/receipts holds the receipt fix, and main is untouched.
 Minimum counted commands: 1 · Maximum counted commands: 12
 
 - HEAD on `recovery/receipts` at `c3`; `main` still at `c0`.
-- The reflog and the commit were inspected in that order; clean tree.
+- Clean tree.
 
 ### 4.G.3 Drop the experiment, reverse the published banner · Medium
 
@@ -4316,7 +5227,7 @@ Abandon the stopped rebase, move only the commits made on feature/receipts after
 
 - [ ] No rebase is in progress.
 - [ ] feature/receipts holds main plus your two receipt commits, and none of release/1.0's fixes.
-- [ ] origin/feature/receipts matches the moved branch, updated with a lease.
+- [ ] origin/feature/receipts matches the moved branch.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -4341,7 +5252,7 @@ feature/receipts is main plus the two receipt commits, and origin has the same b
 Minimum counted commands: 3 · Maximum counted commands: 8
 
 - HEAD on `feature/receipts` with 4 commits; history contains `c2`, excludes `c1`; tree has the receipts file and main's `src/app.py`.
-- No rebase in progress; `origin/feature/receipts` = the branch, pushed with `--force-with-lease`; clean tree.
+- No rebase in progress; `origin/feature/receipts` = the branch; clean tree.
 
 ### 4.G.6 Move the coupons branch off the release line · Hard
 
@@ -4362,7 +5273,7 @@ Abandon the stopped rebase, move only the commits made on feature/coupons after 
 
 - [ ] No rebase is in progress.
 - [ ] feature/coupons holds main plus your two coupon commits, and none of release/1.0's fixes.
-- [ ] origin/feature/coupons matches the moved branch, updated with a lease.
+- [ ] origin/feature/coupons matches the moved branch.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -4387,4 +5298,4 @@ feature/coupons is main plus the two coupon commits, and origin has the same bra
 Minimum counted commands: 3 · Maximum counted commands: 8
 
 - HEAD on `feature/coupons` with 4 commits; history contains `c2`, excludes `c1`; tree has the coupons file and main's `src/app.py`.
-- No rebase in progress; `origin/feature/coupons` = the branch, pushed with `--force-with-lease`; clean tree.
+- No rebase in progress; `origin/feature/coupons` = the branch; clean tree.

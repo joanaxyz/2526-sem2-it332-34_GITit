@@ -5,12 +5,14 @@ from math import isfinite
 
 from django.core.exceptions import ValidationError
 from django.db import transaction
+from django.db.models import Count
 from django.utils import timezone
 
 from adventures.models import (
     AdventureLevelTier,
     AdventureLevelTierProgress,
     AdventureLevelTierRun,
+    AdventureLevelTierWave,
     AdventureLevelTierWaveVariant,
 )
 from players.models import Player
@@ -92,14 +94,28 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
         )
     specs = []
     for tier in tiers:
-        wave = tier.waves.filter(is_published=True).order_by("sort_order", "id").first()
-        if wave is None:
+        waves = list(tier.waves.filter(is_published=True).order_by("sort_order", "id"))
+        if not waves:
             raise ValidationError(f"Tier {tier.id} has no published exercise.")
-        variants = list(wave.variants.filter(is_published=True).order_by("id"))
+        # Each wave is cleared once, so mastery is the clear of the tier's last
+        # wave and any wave's variant is evidence. Transfer stays reserved on
+        # the first wave.
+        variants = list(
+            AdventureLevelTierWaveVariant.objects.filter(
+                wave__in=waves, is_published=True
+            ).order_by("wave__sort_order", "id")
+        )
         ordinary = [v for v in variants if not v.is_transfer]
         if not ordinary:
             raise ValidationError(f"Tier {tier.id} has no ordinary practice variants.")
-        transfer = next((v for v in variants if v.is_transfer and v.transfer_note.strip()), None)
+        transfer = next(
+            (
+                v
+                for v in variants
+                if v.is_transfer and v.transfer_note.strip() and v.wave_id == waves[0].id
+            ),
+            None,
+        )
         if transfer and any(state_key(v) == state_key(transfer) for v in ordinary):
             raise ValidationError(
                 "A transfer checkpoint must differ from ordinary practice content."
@@ -121,7 +137,7 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
                 "module": tier.adventure_level.chapter.number,
                 "slug": tier.adventure_level.slug,
                 "difficulty": tier.difficulty,
-                "required": max(1, wave.required_successful_attempts),
+                "required": len(waves),
                 "variants": [_reference(v) for v in ordinary],
                 "transfer": _reference(transfer) if transfer else None,
                 "transfer_missing": missing,
@@ -157,6 +173,12 @@ def _records(study):
             wave__tier_id__in=specs,
         ).select_related("wave__tier__adventure_level__chapter")
     }
+    wave_counts = dict(
+        AdventureLevelTierWave.objects.filter(tier_id__in=specs, is_published=True)
+        .values("tier_id")
+        .annotate(count=Count("id"))
+        .values_list("tier_id", "count")
+    )
     grouped = defaultdict(list)
     for run in (
         AdventureLevelTierRun.objects.filter(
@@ -185,10 +207,9 @@ def _records(study):
             attempts = grouped[player_id, tier_id]
             refs = {r["id"]: r for r in spec["variants"]}
             available = all(_available(content.get(ref_id), ref) for ref_id, ref in refs.items())
-            requirements_match = all(
-                ref_id in content
-                and content[ref_id].wave.required_successful_attempts == spec["required"]
-                for ref_id in refs
+            # A reseed that changed the tier's waves changes what mastery means.
+            requirements_match = wave_counts.get(tier_id) == spec["required"] and all(
+                ref_id in content for ref_id in refs
             )
             ended = [r for r in attempts if r.ended_at and r.ended_at <= study.cutoff]
             valid = [

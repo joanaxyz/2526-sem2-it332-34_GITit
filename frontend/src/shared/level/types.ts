@@ -67,6 +67,7 @@ export type RepositorySnapshot = {
   config?: Record<string, RepositoryValue>
   remote_fixtures?: RepositoryValue
   remote_updates?: Record<string, string | null>
+  repository_root?: string | null
   merge_abort_state?: RepositorySnapshot
   merge_parent?: string | null
   merge_conflicts?: RepositoryValue

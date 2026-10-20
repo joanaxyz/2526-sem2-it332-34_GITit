@@ -204,21 +204,7 @@ def _mergetool_case(
         {"type": "commit_is_merge", "branch": "main"},
         {"type": "commit_has_parent", "branch": "main", "parent": "c2"},
         {"type": "commit_tree_contains", "branch": "main", "tree": required_tree},
-        {
-            "type": "operation_metadata_equals",
-            "key": "last_mergetool_opened",
-            "value": True,
-        },
     ]
-    if branch == "feature/i18n-refresh":
-        rules = [
-            rule
-            for rule in rules
-            if not (
-                rule.get("type") == "operation_metadata_equals"
-                and rule.get("key") == "last_mergetool_opened"
-            )
-        ]
     return {
         "initial_state": _state(
             commits,
@@ -311,10 +297,6 @@ def _reflog_recovery(branch: str) -> dict[str, Any]:
             branch,
             {"type": "branch_points_to", "branch": branch, "commit": "c3"},
             {"type": "branch_points_to", "branch": "main", "commit": "c0"},
-            {
-                "type": "required_command_sequence",
-                "commands": ["git show c4", "git show c3"],
-            },
         ),
     }
 
@@ -698,26 +680,130 @@ def _runtime_overrides() -> dict[str, dict[str, Any]]:
 RUNTIME_OVERRIDES = _runtime_overrides()
 
 
+# Scenarios the wave plan does not place, and why (docs/goals/curriculum-waves-and-repetition).
+UNPLACED_CASE_IDS = {
+    "init-hard-safe-rerun": "re-running git init leaves no state to grade",
+}
+
+_ROUTE_RULES = frozenset(
+    {
+        "required_command",
+        "forbidden_command",
+        "required_command_sequence",
+        "commit_replaced_by_amend",
+        "commit_not_followed_by_extra_commit",
+    }
+)
+
+
+# Checklist lines in the team's bank that describe the route, not the result.
+_ROUTE_CHECK_MARKERS = ("(process check)", "(command-history check)")
+_ROUTE_CHECK_TEXTS = frozenset(
+    {"The update used a guarded (checked) force, not an unconditional one."}
+)
+
+
+def graded_checks(checks: list[str]) -> list[str]:
+    """The checklist lines grading can confirm: repository state, never the route."""
+    return [
+        check
+        for check in checks
+        if check not in _ROUTE_CHECK_TEXTS
+        and not any(marker in check for marker in _ROUTE_CHECK_MARKERS)
+    ]
+
+
+def _state_only(requirements: dict[str, Any]) -> dict[str, Any]:
+    """Grade the archived fixtures by repository state, never by the route.
+
+    Typed-command checks go. Operation records become the state they stood
+    for: where init or clone put the repository, the initial branch, and the
+    shallow history; an amend stays graded by the tip replacing the old commit.
+    """
+    for key in ("required_commands", "forbidden_commands", "skip_required_commands"):
+        requirements.pop(key, None)
+    rules = []
+    for rule in requirements.get("rules") or []:
+        kind, key, value = rule.get("type"), rule.get("key"), rule.get("value")
+        if kind in _ROUTE_RULES:
+            continue
+        if kind not in {"operation_metadata_equals", "operation_metadata_path_matches"}:
+            rules.append(rule)
+            continue
+        if key == "last_init_directory" and value is not None:
+            requirements["repository_root"] = value
+        elif key == "last_init_current_directory" and value is True:
+            requirements.setdefault("repository_root", ".")
+        elif key == "last_clone_destination":
+            requirements["repository_root"] = value
+        elif key == "last_init_initial_branch":
+            requirements.setdefault("head_branch", value)
+        elif key == "last_clone_depth" and value:
+            if not any(
+                r.get("type") == "commit_count_equals" for r in requirements.get("rules") or []
+            ):
+                rules.append({"type": "commit_count_equals", "count": value})
+    requirements["rules"] = rules
+    return requirements
+
+
+def visited_branch(start: str, commands: list[str]) -> str | None:
+    """The branch an answer key visits and leaves again, if it does."""
+    for command in commands:
+        parts = shlex.split(command)
+        if parts[:2] in (["git", "switch"], ["git", "checkout"]) and len(parts) == 3:
+            if parts[2] != start:
+                return parts[2]
+    return None
+
+
+def visit_rule(start: str, visited: str) -> dict[str, Any]:
+    """The HEAD reflog shows the visit: Git records every switch there."""
+    return {
+        "type": "reflog_contains",
+        "expected": {"message": f"checkout: moving from {start} to {visited}"},
+    }
+
+
+def _require_state_evidence(case: dict[str, Any], requirements: dict[str, Any]) -> None:
+    """Fixtures whose goal the archived rules never pinned down in state.
+
+    A pull is graded by the server's new commit being in the local branch; a
+    stash round trip, which ends where it began, by the visit in the reflog.
+    """
+    initial = case["initial_state"]
+    updates = initial.get("remote_updates") or {}
+    rules = requirements.setdefault("rules", [])
+    for remote_branch, branch in (requirements.get("remote_branch_matches_local") or {}).items():
+        if updates.get(remote_branch):
+            rules.append(
+                {
+                    "type": "branch_history_contains",
+                    "branch": branch,
+                    "commits": [updates[remote_branch]],
+                }
+            )
+    start = (initial.get("head") or {}).get("name")
+    if (
+        start
+        and requirements.get("head_branch") == start
+        and (
+            initial.get("working_tree")
+            or requirements.get("stash_stack_empty")
+            or any(rule.get("type") == "stash_stack_empty" for rule in rules)
+        )
+    ):
+        visited = visited_branch(start, case["solution_commands"])
+        if visited:
+            rules.append(visit_rule(start, visited))
+
+
 def _canonicalize_requirements(case: dict[str, Any]) -> None:
     """Remove assertions tied to the archived answer instead of the revised one."""
 
     case_id = case["case_id"]
     requirements = copy.deepcopy(case.get("state_requirements") or {})
     rules = list(requirements.get("rules") or [])
-
-    if case_id.startswith("init-") and not any(
-        token in command.split()
-        for command in case["solution_commands"]
-        for token in ("-q", "--quiet")
-    ):
-        rules = [
-            rule
-            for rule in rules
-            if not (
-                rule.get("type") == "operation_metadata_equals"
-                and rule.get("key") == "last_init_quiet"
-            )
-        ]
 
     if case_id.startswith("partial-"):
         message = _commit_message(case["solution_commands"])
@@ -771,12 +857,10 @@ def _canonicalize_requirements(case: dict[str, Any]) -> None:
             branch,
             {"type": "branch_points_to", "branch": branch, "commit": "c3"},
             {"type": "branch_points_to", "branch": "main", "commit": main_tip},
-            {
-                "type": "required_command_sequence",
-                "commands": ["git reflog", "git show c3"],
-            },
         )
 
+    requirements = _state_only(requirements)
+    _require_state_evidence(case, requirements)
     case["state_requirements"] = requirements
 
 

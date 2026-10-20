@@ -13,9 +13,10 @@ from curriculum.seed_data.source.scenario_fixtures.gates import FIXTURES as GATE
 from curriculum.seed_data.source.scenario_fixtures.module_1 import FIXTURES as MODULE_1
 from curriculum.seed_data.source.scenario_fixtures.module_2 import FIXTURES as MODULE_2
 from curriculum.seed_data.source.scenario_fixtures.module_3 import FIXTURES as MODULE_3
+from curriculum.seed_data.source.scenario_fixtures.module_4 import FIXTURES as MODULE_4
 
 WAVE_FIXTURES: dict[str, dict[str, Any]] = {}
-for _module in (MODULE_1, MODULE_2, MODULE_3, GATES):
+for _module in (MODULE_1, MODULE_2, MODULE_3, MODULE_4, GATES):
     _overlap = WAVE_FIXTURES.keys() & _module.keys()
     if _overlap:
         raise RuntimeError(f"Duplicate wave fixture IDs: {sorted(_overlap)}")
@@ -34,7 +35,6 @@ def extension_case(case_id: str) -> dict[str, Any]:
         "context": authored["story"],
         "initial_state": fixture["initial_state"],
         "state_requirements": fixture["state_requirements"],
-        "required_commands": fixture.get("required_commands", []),
         "solution_commands": list(authored["solution_commands"]),
         "solution_workspace_files": list(authored["solution_workspace_files"]),
         "max_counted_commands": authored["maximum_counted_commands"],

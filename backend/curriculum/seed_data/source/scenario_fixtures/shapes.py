@@ -49,11 +49,8 @@ def tip(branch: str, **conditions: Any) -> dict[str, Any]:
 
 
 def amended(old: str) -> list[dict[str, Any]]:
-    return [
-        {"type": "operation_metadata_equals", "key": "last_amend_replaced_commit", "value": old},
-        {"type": "branch_tip_replaces_commit", "old": old},
-        {"type": "commit_replaced_by_amend", "old": old},
-    ]
+    """The branch tip replaced ``old``: a different commit with the same parents."""
+    return [{"type": "branch_tip_replaces_commit", "old": old}]
 
 
 def remote_fixture(url: str, commits: list[dict], tip_id: str) -> dict[str, Any]:

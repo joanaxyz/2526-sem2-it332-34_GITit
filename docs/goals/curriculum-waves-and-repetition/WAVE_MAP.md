@@ -54,7 +54,7 @@ Time estimate: 1 min per wave (brief and outcome), 0.4 min per typed command, 1 
 | Medium | 1. Folder and branch from the brief | practice | — | 1.1.5 `init-medium-docs-site`<br>1.1.6 `init-medium-trunk-api-playground` |
 | Medium | 2. Existing files stay untracked | practice | — | 1.1.7 `init-medium-existing-files`<br>1.1.8 `init-hard-ci` ↤H |
 | Hard | 1. Only the right subfolder | transfer | — | 1.1.9 `init-hard-research-log`<br>1.1.10 `init-hard-ui-kit` |
-| Hard | 2. Re-run init safely | transfer | `git init` | 1.1.11 `init-hard-safe-rerun`<br>**new** `init-hard-safe-rerun-handbook` |
+| Hard | 2. A nested project folder | transfer | — | **new** `init-hard-nested-service`<br>**new** `init-hard-nested-course` |
 
 ### 1.2 Cloning Remote Repositories — teaches git clone
 
@@ -340,7 +340,8 @@ Each needs the full bank contract (story, starting point, real-world context, ta
 
 | ID | Wave | Starting point | Task | Answer key | Note |
 |---|---|---|---|---|---|
-| `init-hard-safe-rerun-handbook` | 1.1 Hard 2 | Inside team-handbook: already a repository on main with two commits; drafts/intro.md has uncommitted edits. | Run initialization again; keep the commits, the branch and the edits. | `git init` |  |
+| `init-hard-nested-service` | 1.1 Hard 2 | Workspace with services/billing-api, services/search-api and docs; none is a repository. | Initialize only services/billing-api, first branch trunk. | `git init -b trunk services/billing-api` | Replaces the re-run wave (state-only grading, 2026-10-20). |
+| `init-hard-nested-course` | 1.1 Hard 2 | Workspace with courses/git-basics, courses/sql-basics and templates. | Initialize only courses/git-basics on main. | `git init -b main courses/git-basics` | Replaces the re-run wave. |
 | `clone-medium-shallow-metrics` | 1.2 Medium 2 | Workspace outside any repository; no metrics-review folder. | Clone the metrics-dash URL into metrics-review with only the latest commit. | `git clone --depth 1 https://example.test/data/metrics-dash.git metrics-review` |  |
 | `clone-hard-shallow-ssh-audit` | 1.2 Hard 2 | Workspace with other project folders; no rules-review folder. | Clone audit-rules over SSH into rules-review, keeping only the last two commits. | `git clone --depth 2 git@example.test:security/audit-rules.git rules-review` |  |
 | `commit-medium-new-project-portfolio` | 1.3 Medium 2 | Folder portfolio is not a repository; index.html and styles.css are new; notes.txt is private. | Make it a repository on main and commit only the two site files as the first snapshot. | `git init -b main` → `git add index.html styles.css` → `git commit -m "Initial portfolio"` | Spiral: `git init` from 1.1. |

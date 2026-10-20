@@ -2134,7 +2134,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "feature/database-models"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to feature/database-models",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -2196,7 +2202,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "hotfix/session-timeout"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to hotfix/session-timeout",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -2280,7 +2292,18 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "main"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from c1 to review/v1-snapshot",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "checkout: moving from review/v1-snapshot to main",
+        "ref": "HEAD@{1}",
+        "target": "c2"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -2359,7 +2382,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "feature/docs-update"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from develop to feature/docs-update",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -4793,7 +4822,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "feature/jm/database-models"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to feature/jm/database-models",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -4855,7 +4890,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "PROJ-418/password-reset"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to PROJ-418/password-reset",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -5062,7 +5103,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "client/55-contact-form-redesign"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to client/55-contact-form-redesign",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -5124,7 +5171,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "jdelacruz/fix-parser-edge-case"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to jdelacruz/fix-parser-edge-case",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -5186,7 +5239,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "feature/shopping-cart"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to feature/shopping-cart",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -5250,7 +5309,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "PROJ-301/auth-module-update"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to PROJ-301/auth-module-update",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -5346,8 +5411,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from main to PROJ-733/invoice-rounding",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -5446,8 +5516,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from main to fix/parser-unicode",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -5514,7 +5589,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "fix/renderer-memory-leak"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to fix/renderer-memory-leak",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -5578,7 +5659,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "test/login-flow"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to test/login-flow",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -5642,7 +5729,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "bugfix/cart-total"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to bugfix/cart-total",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -5704,7 +5797,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "PROJ-512/email-notification"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to PROJ-512/email-notification",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -5766,7 +5865,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "infra/api-gateway/log-rotation"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to infra/api-gateway/log-rotation",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -5828,7 +5933,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "fix/tokenizer-crash"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to fix/tokenizer-crash",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {
       "origin/feat/dark-mode": "c1",
       "origin/feat/keyboard-shortcuts": "c1",
@@ -5895,7 +6006,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "bugfix/login-redirect"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to bugfix/login-redirect",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -7816,13 +7933,23 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from main to release-1.2",
         "ref": "HEAD@{0}",
-        "target": "c5"
+        "target": "c3"
       },
       {
         "message": "move HEAD",
         "ref": "HEAD@{1}",
+        "target": "c5"
+      },
+      {
+        "message": "checkout: moving from release-1.2 to release-1.1",
+        "ref": "HEAD@{2}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{3}",
         "target": "c6"
       }
     ],
@@ -8057,13 +8184,23 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from main to release-2.1",
         "ref": "HEAD@{0}",
-        "target": "c6"
+        "target": "c5"
       },
       {
         "message": "move HEAD",
         "ref": "HEAD@{1}",
+        "target": "c6"
+      },
+      {
+        "message": "checkout: moving from release-2.1 to release-2.0",
+        "ref": "HEAD@{2}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{3}",
         "target": "c7"
       }
     ],
@@ -9533,6 +9670,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "api-workshop",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -9684,6 +9822,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "audit-logs-local",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -9801,6 +9940,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "docs-portal",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -9918,6 +10058,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "oss-toolkit",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -10053,6 +10194,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "profile-site",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -10163,6 +10305,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "notebook-review",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -10275,6 +10418,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "mobile-ui-lab",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -10402,6 +10546,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "research-log-lab",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -10548,6 +10693,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "rules-review",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -10660,6 +10806,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "oss-review",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -10789,6 +10936,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "backend-api",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -10942,6 +11090,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "analytics-worktree",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -11071,6 +11220,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "cli-starter-lab",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -11177,6 +11327,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "css-kit",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -11285,6 +11436,7 @@ TARGET_STATES = json.loads(r"""
     },
     "replaced_commits": {},
     "repository_initialized": true,
+    "repository_root": "metrics-review",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -12457,6 +12609,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": ".",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -12538,6 +12691,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": ".",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -12868,6 +13022,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~1",
         "commit": "c2",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/e1",
+        "ref": "HEAD@{2}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -13000,6 +13159,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~1",
         "commit": "c2",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/e2",
+        "ref": "HEAD@{2}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -13132,6 +13296,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~1",
         "commit": "c2",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/e3",
+        "ref": "HEAD@{2}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -13264,6 +13433,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~1",
         "commit": "c2",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/e4",
+        "ref": "HEAD@{2}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -13396,6 +13570,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~1",
         "commit": "c2",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/e5",
+        "ref": "HEAD@{2}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -13751,6 +13930,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": ".",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -13832,6 +14012,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": ".",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -14624,8 +14805,18 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/reports to main",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c3"
+      },
+      {
+        "message": "checkout: moving from main to feature/invoice-pdf",
+        "ref": "HEAD@{2}",
         "target": "c3"
       }
     ],
@@ -14765,8 +14956,18 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/cart to main",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c3"
+      },
+      {
+        "message": "checkout: moving from main to feature/search-filters",
+        "ref": "HEAD@{2}",
         "target": "c3"
       }
     ],
@@ -14969,13 +15170,18 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/export to main",
         "ref": "HEAD@{0}",
-        "target": "c4"
+        "target": "c1"
       },
       {
         "message": "move HEAD",
         "ref": "HEAD@{1}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
         "target": "c0"
       }
     ],
@@ -15178,13 +15384,18 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/filters to main",
         "ref": "HEAD@{0}",
-        "target": "c4"
+        "target": "c1"
       },
       {
         "message": "move HEAD",
         "ref": "HEAD@{1}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
         "target": "c0"
       }
     ],
@@ -15334,9 +15545,19 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/profile to main",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c3"
+      },
+      {
+        "message": "checkout: moving from main to feature/profile",
+        "ref": "HEAD@{2}",
+        "target": "c2"
       }
     ],
     "remote_branches": {
@@ -15489,9 +15710,19 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/reports to main",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c3"
+      },
+      {
+        "message": "checkout: moving from main to feature/reports",
+        "ref": "HEAD@{2}",
+        "target": "c2"
       }
     ],
     "remote_branches": {
@@ -16340,8 +16571,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from main to release/3.0",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c4"
       }
     ],
@@ -16515,8 +16751,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from main to release/2.1",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c4"
       }
     ],
@@ -16677,6 +16918,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~3",
         "commit": "c0",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/receipts",
+        "ref": "HEAD@{3}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -16836,6 +17082,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~3",
         "commit": "c0",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/search",
+        "ref": "HEAD@{3}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -18061,6 +18312,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~3",
         "commit": "c0",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/h1",
+        "ref": "HEAD@{3}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -18220,6 +18476,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~3",
         "commit": "c0",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/h2",
+        "ref": "HEAD@{3}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -18379,6 +18640,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~3",
         "commit": "c0",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/h3",
+        "ref": "HEAD@{3}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -18538,6 +18804,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~3",
         "commit": "c0",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/h4",
+        "ref": "HEAD@{3}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -18697,6 +18968,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~3",
         "commit": "c0",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/h5",
+        "ref": "HEAD@{3}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -18745,6 +19021,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": ".",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -18786,6 +19063,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": "invoice-tracker",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -18827,6 +19105,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": ".",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -18868,12 +19147,131 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": "ci-configs",
     "staging": {},
     "stash_stack": [],
     "tags": {},
     "upstream_tracking": {},
     "working_tree": {
       "pipelines/build.yml": "untracked"
+    }
+  },
+  "init-hard-nested-course": {
+    "branches": {
+      "main": null
+    },
+    "commits": [],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": null,
+      "type": "branch"
+    },
+    "last_init_branch": "main",
+    "last_init_current_directory": false,
+    "last_init_directory": "courses/git-basics",
+    "last_init_initial_branch": "main",
+    "last_init_quiet": false,
+    "last_init_reinitialized": false,
+    "operation_metadata": {
+      "last_init_branch": "main",
+      "last_init_current_directory": false,
+      "last_init_directory": "courses/git-basics",
+      "last_init_initial_branch": "main",
+      "last_init_quiet": false,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": false,
+    "repository_root": "courses/git-basics",
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "courses/git-basics/README.md": {
+        "content": "courses/git-basics-readme",
+        "status": "untracked"
+      },
+      "courses/git-basics/app.py": {
+        "content": "courses/git-basics-app",
+        "status": "untracked"
+      },
+      "courses/sql-basics/README.md": {
+        "content": "courses/sql-basics-readme",
+        "status": "untracked"
+      },
+      "templates/README.md": {
+        "content": "templates-readme",
+        "status": "untracked"
+      }
+    }
+  },
+  "init-hard-nested-service": {
+    "branches": {
+      "trunk": null
+    },
+    "commits": [],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "trunk",
+      "target": null,
+      "type": "branch"
+    },
+    "last_init_branch": "trunk",
+    "last_init_current_directory": false,
+    "last_init_directory": "services/billing-api",
+    "last_init_initial_branch": "trunk",
+    "last_init_quiet": false,
+    "last_init_reinitialized": false,
+    "operation_metadata": {
+      "last_init_branch": "trunk",
+      "last_init_current_directory": false,
+      "last_init_directory": "services/billing-api",
+      "last_init_initial_branch": "trunk",
+      "last_init_quiet": false,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "repository_reinitialized": false,
+    "repository_root": "services/billing-api",
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "docs/README.md": {
+        "content": "docs-readme",
+        "status": "untracked"
+      },
+      "services/billing-api/README.md": {
+        "content": "services/billing-api-readme",
+        "status": "untracked"
+      },
+      "services/billing-api/app.py": {
+        "content": "services/billing-api-app",
+        "status": "untracked"
+      },
+      "services/search-api/README.md": {
+        "content": "services/search-api-readme",
+        "status": "untracked"
+      }
     }
   },
   "init-hard-research-log": {
@@ -18911,6 +19309,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": "research-log",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -18985,104 +19384,6 @@ TARGET_STATES = json.loads(r"""
       "notes/today.md": "untracked"
     }
   },
-  "init-hard-safe-rerun-handbook": {
-    "branches": {
-      "main": "c2"
-    },
-    "commits": [
-      {
-        "changes": {
-          "README.md": {
-            "after": "handbook-readme-v1",
-            "before": null,
-            "change_type": "added"
-          },
-          "drafts/intro.md": {
-            "after": "intro-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "README.md": "added",
-          "drafts/intro.md": "added"
-        },
-        "id": "c1",
-        "is_merge": false,
-        "message": "Create handbook outline",
-        "order": 0,
-        "parents": [],
-        "tree": {
-          "README.md": "handbook-readme-v1",
-          "drafts/intro.md": "intro-v1"
-        }
-      },
-      {
-        "changes": {
-          "checklists/onboarding.md": {
-            "after": "onboarding-v1",
-            "before": null,
-            "change_type": "added"
-          }
-        },
-        "files": {
-          "checklists/onboarding.md": "added"
-        },
-        "id": "c2",
-        "is_merge": false,
-        "message": "Add onboarding checklist",
-        "order": 1,
-        "parents": [
-          "c1"
-        ],
-        "tree": {
-          "README.md": "handbook-readme-v1",
-          "checklists/onboarding.md": "onboarding-v1",
-          "drafts/intro.md": "intro-v1"
-        }
-      }
-    ],
-    "conflict_details": {},
-    "conflicts": [],
-    "head": {
-      "name": "main",
-      "target": "c2",
-      "type": "branch"
-    },
-    "last_init_branch": "main",
-    "last_init_current_directory": true,
-    "last_init_directory": null,
-    "last_init_initial_branch": "main",
-    "last_init_quiet": false,
-    "last_init_reinitialized": true,
-    "operation_metadata": {
-      "last_init_branch": "main",
-      "last_init_current_directory": true,
-      "last_init_directory": null,
-      "last_init_initial_branch": "main",
-      "last_init_quiet": false,
-      "last_init_reinitialized": true,
-      "repository_reinitialized": true
-    },
-    "partial_hunks": {},
-    "reflog": [],
-    "remote_branches": {},
-    "remote_tags": {},
-    "remotes": {},
-    "replaced_commits": {},
-    "repository_initialized": true,
-    "repository_reinitialized": true,
-    "staging": {},
-    "stash_stack": [],
-    "tags": {},
-    "upstream_tracking": {},
-    "working_tree": {
-      "drafts/intro.md": {
-        "content": "intro-welcome-rewrite",
-        "status": "modified"
-      }
-    }
-  },
   "init-hard-ui-kit": {
     "branches": {
       "trunk": null
@@ -19118,6 +19419,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": "ui-kit",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -19163,6 +19465,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": "oss-contrib",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -19204,6 +19507,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": "docs-site",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -19245,6 +19549,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": "field-notes",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -19295,6 +19600,7 @@ TARGET_STATES = json.loads(r"""
     "replaced_commits": {},
     "repository_initialized": true,
     "repository_reinitialized": false,
+    "repository_root": "api-playground",
     "staging": {},
     "stash_stack": [],
     "tags": {},
@@ -19420,6 +19726,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~2",
         "commit": "c1",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/m1",
+        "ref": "HEAD@{2}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -19552,6 +19863,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~2",
         "commit": "c1",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/m2",
+        "ref": "HEAD@{2}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -19684,6 +20000,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~2",
         "commit": "c1",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/m3",
+        "ref": "HEAD@{2}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -19816,6 +20137,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~2",
         "commit": "c1",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/m4",
+        "ref": "HEAD@{2}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -19948,6 +20274,11 @@ TARGET_STATES = json.loads(r"""
         "action": "reset: moving to HEAD~2",
         "commit": "c1",
         "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/m5",
+        "ref": "HEAD@{2}",
+        "target": "c3"
       }
     ],
     "remote_branches": {},
@@ -22711,8 +23042,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/current-work to release/stable",
         "ref": "HEAD@{0}",
+        "target": "c3"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -22845,8 +23181,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from hotfix/billing-rounding to release/v2",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -22985,8 +23326,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/search to main",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -23258,8 +23604,13 @@ TARGET_STATES = json.loads(r"""
         "target": "c0"
       },
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/mfa to develop",
         "ref": "HEAD@{1}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
         "target": "c3"
       }
     ],
@@ -23408,8 +23759,13 @@ TARGET_STATES = json.loads(r"""
         "target": "c0"
       },
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/reports to main",
         "ref": "HEAD@{1}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
         "target": "c3"
       }
     ],
@@ -28393,6 +28749,11 @@ TARGET_STATES = json.loads(r"""
         "message": "move HEAD",
         "ref": "HEAD@{0}",
         "target": "c2"
+      },
+      {
+        "message": "checkout: moving from main to feature/webhooks",
+        "ref": "HEAD@{1}",
+        "target": "c2"
       }
     ],
     "remote_branches": {
@@ -28506,6 +28867,11 @@ TARGET_STATES = json.loads(r"""
       {
         "message": "move HEAD",
         "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "checkout: moving from main to feature/dark-mode",
+        "ref": "HEAD@{1}",
         "target": "c2"
       }
     ],
@@ -29254,8 +29620,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from main to feature/invoice-pdf",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -29359,8 +29730,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from main to feature/search-filters",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -30964,6 +31340,838 @@ TARGET_STATES = json.loads(r"""
     },
     "working_tree": {}
   },
+  "rebase-easy-abort-stopped-docs": {
+    "branches": {
+      "feature/docs-search": "c3",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "docs/index.md": {
+            "after": "# Handbook",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "docs/index.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/index.md": "# Handbook"
+        }
+      },
+      {
+        "changes": {
+          "docs/index.md": {
+            "after": "# Team Handbook",
+            "before": "# Handbook",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "docs/index.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/index.md": "# Team Handbook"
+        }
+      },
+      {
+        "changes": {
+          "docs/index.md": {
+            "after": "# Handbook\nSearch: press /",
+            "before": "# Handbook",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "docs/index.md": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Start feature/docs-search",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/index.md": "# Handbook\nSearch: press /"
+        }
+      },
+      {
+        "changes": {
+          "docs/search.md": {
+            "after": "docs/search.md-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/search.md": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Finish feature/docs-search",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/index.md": "# Handbook\nSearch: press /",
+          "docs/search.md": "docs/search.md-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/docs-search",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_rebase_aborted": true,
+    "operation_metadata": {
+      "last_rebase_aborted": true
+    },
+    "partial_hunks": {},
+    "reflog": [],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "rebase-easy-continue-config": {
+    "branches": {
+      "feature/config-loader": "c5",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "config/app.yml": {
+            "after": "loader: yaml",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "config/app.yml": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "config/app.yml": "loader: yaml"
+        }
+      },
+      {
+        "changes": {
+          "config/app.yml": {
+            "after": "loader: toml",
+            "before": "loader: yaml",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/app.yml": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "config/app.yml": "loader: toml"
+        }
+      },
+      {
+        "changes": {
+          "config/app.yml": {
+            "after": "loader: yaml\nwatch: true",
+            "before": "loader: yaml",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/app.yml": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Start feature/config-loader",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "config/app.yml": "loader: yaml\nwatch: true"
+        }
+      },
+      {
+        "changes": {
+          "docs/config.md": {
+            "after": "docs/config.md-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/config.md": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Finish feature/config-loader",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "config/app.yml": "loader: yaml\nwatch: true",
+          "docs/config.md": "docs/config.md-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "config/app.yml": {
+            "after": "loader: toml\nwatch: true",
+            "before": "loader: toml",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/app.yml": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Start feature/config-loader",
+        "order": 4,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "config/app.yml": "loader: toml\nwatch: true"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "docs/config.md": {
+            "after": "docs/config.md-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/config.md": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Finish feature/config-loader",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "config/app.yml": "loader: toml\nwatch: true",
+          "docs/config.md": "docs/config.md-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/config-loader",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_rebase_new_head": "c5",
+    "last_rebase_replayed_commits": [
+      "c4",
+      "c5"
+    ],
+    "last_workspace_file_written": "config/app.yml",
+    "operation_metadata": {
+      "last_rebase_new_head": "c5",
+      "last_rebase_replayed_commits": [
+        "c4",
+        "c5"
+      ],
+      "last_workspace_file_written": "config/app.yml"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "rebase-hard-abort-then-onto-reports": {
+    "branches": {
+      "feature/reports": "c7",
+      "main": "c1",
+      "spike/charts": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/charts.js": {
+            "after": "charts-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/charts.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/charts.js": {
+            "after": "charts-main",
+            "before": "charts-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/charts.js": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Upgrade chart defaults",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-main"
+        }
+      },
+      {
+        "changes": {
+          "src/charts.js": {
+            "after": "charts-spike",
+            "before": "charts-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/charts.js": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Spike: charts",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike"
+        }
+      },
+      {
+        "changes": {
+          "src/spike.css": {
+            "after": "spike-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/spike.css": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Spike: tune charts",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike",
+          "src/spike.css": "spike-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/reports.js": {
+            "after": "src/reports.js-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/reports.js": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Start feature/reports",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike",
+          "src/reports.js": "src/reports.js-v1",
+          "src/spike.css": "spike-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/reports.js": {
+            "after": "src/reports.js-v2",
+            "before": "src/reports.js-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/reports.js": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Finish feature/reports",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike",
+          "src/reports.js": "src/reports.js-v2",
+          "src/spike.css": "spike-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/reports.js": {
+            "after": "src/reports.js-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/reports.js": "added"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Start feature/reports",
+        "order": 6,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-main",
+          "src/reports.js": "src/reports.js-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/reports.js": {
+            "after": "src/reports.js-v2",
+            "before": "src/reports.js-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/reports.js": "modified"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Finish feature/reports",
+        "order": 7,
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-main",
+          "src/reports.js": "src/reports.js-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/reports",
+      "target": "c7",
+      "type": "branch"
+    },
+    "last_rebase_aborted": true,
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c7",
+    "last_rebase_onto": "c1",
+    "last_rebase_replayed_commits": [
+      "c6",
+      "c7"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c3",
+    "operation_metadata": {
+      "last_rebase_aborted": true,
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c7",
+      "last_rebase_onto": "c1",
+      "last_rebase_replayed_commits": [
+        "c6",
+        "c7"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c3"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c7"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "rebase-hard-abort-then-onto-ui": {
+    "branches": {
+      "feature/table-ui": "c7",
+      "main": "c1",
+      "spike/new-grid": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/charts.js": {
+            "after": "charts-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/charts.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/charts.js": {
+            "after": "charts-main",
+            "before": "charts-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/charts.js": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Upgrade chart defaults",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-main"
+        }
+      },
+      {
+        "changes": {
+          "src/charts.js": {
+            "after": "charts-spike",
+            "before": "charts-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/charts.js": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Spike: new-grid",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike"
+        }
+      },
+      {
+        "changes": {
+          "src/spike.css": {
+            "after": "spike-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/spike.css": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Spike: tune new-grid",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike",
+          "src/spike.css": "spike-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/table.js": {
+            "after": "src/table.js-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/table.js": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Start feature/table-ui",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike",
+          "src/spike.css": "spike-v1",
+          "src/table.js": "src/table.js-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/table.js": {
+            "after": "src/table.js-v2",
+            "before": "src/table.js-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/table.js": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Finish feature/table-ui",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike",
+          "src/spike.css": "spike-v1",
+          "src/table.js": "src/table.js-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/table.js": {
+            "after": "src/table.js-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/table.js": "added"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Start feature/table-ui",
+        "order": 6,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-main",
+          "src/table.js": "src/table.js-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/table.js": {
+            "after": "src/table.js-v2",
+            "before": "src/table.js-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/table.js": "modified"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Finish feature/table-ui",
+        "order": 7,
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-main",
+          "src/table.js": "src/table.js-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "feature/table-ui",
+      "target": "c7",
+      "type": "branch"
+    },
+    "last_rebase_aborted": true,
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c7",
+    "last_rebase_onto": "c1",
+    "last_rebase_replayed_commits": [
+      "c6",
+      "c7"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c3",
+    "operation_metadata": {
+      "last_rebase_aborted": true,
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c7",
+      "last_rebase_onto": "c1",
+      "last_rebase_replayed_commits": [
+        "c6",
+        "c7"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c3"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c7"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
   "rebase-hard-continue": {
     "branches": {
       "feature/rate-limits": "c5",
@@ -31148,6 +32356,1594 @@ TARGET_STATES = json.loads(r"""
     "stash_stack": [],
     "tags": {},
     "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "rebase-hard-continue-then-lease-billing": {
+    "branches": {
+      "feature/billing": "c5",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/billing.py": {
+            "after": "CURRENCY = 'PHP'",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/billing.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/billing.py": "CURRENCY = 'PHP'"
+        }
+      },
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "CURRENCY = 'PHP'\nROUNDING = 'half-up'",
+            "before": "CURRENCY = 'PHP'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/billing.py": "CURRENCY = 'PHP'\nROUNDING = 'half-up'"
+        }
+      },
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "CURRENCY = 'USD'",
+            "before": "CURRENCY = 'PHP'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Start feature/billing",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/billing.py": "CURRENCY = 'USD'"
+        }
+      },
+      {
+        "changes": {
+          "docs/billing.md": {
+            "after": "docs/billing.md-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/billing.md": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Finish feature/billing",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/billing.md": "docs/billing.md-v1",
+          "src/billing.py": "CURRENCY = 'USD'"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/billing.py": {
+            "after": "CURRENCY = 'USD'\nROUNDING = 'half-up'",
+            "before": "CURRENCY = 'PHP'\nROUNDING = 'half-up'",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Start feature/billing",
+        "order": 4,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/billing.py": "CURRENCY = 'USD'\nROUNDING = 'half-up'"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "docs/billing.md": {
+            "after": "docs/billing.md-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/billing.md": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Finish feature/billing",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/billing.md": "docs/billing.md-v1",
+          "src/billing.py": "CURRENCY = 'USD'\nROUNDING = 'half-up'"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": true,
+    "force_with_lease": true,
+    "head": {
+      "name": "feature/billing",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/billing",
+    "last_push_commit": "c5",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/billing",
+    "last_rebase_new_head": "c5",
+    "last_rebase_replayed_commits": [
+      "c4",
+      "c5"
+    ],
+    "last_workspace_file_written": "src/billing.py",
+    "operation_metadata": {
+      "force_push_with_lease": true,
+      "force_with_lease": true,
+      "last_push_branch": "feature/billing",
+      "last_push_commit": "c5",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/billing",
+      "last_rebase_new_head": "c5",
+      "last_rebase_replayed_commits": [
+        "c4",
+        "c5"
+      ],
+      "last_workspace_file_written": "src/billing.py"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/billing": "c5",
+      "origin/main": "c1"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/team/billing-api.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/billing": "origin/feature/billing",
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "rebase-hard-continue-then-lease-search": {
+    "branches": {
+      "feature/search": "c5",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/search.py": {
+            "after": "RESULTS = 10",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/search.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": "RESULTS = 10"
+        }
+      },
+      {
+        "changes": {
+          "src/search.py": {
+            "after": "RESULTS = 20",
+            "before": "RESULTS = 10",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Main update",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": "RESULTS = 20"
+        }
+      },
+      {
+        "changes": {
+          "src/search.py": {
+            "after": "RESULTS = 10\nFUZZY = True",
+            "before": "RESULTS = 10",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Start feature/search",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": "RESULTS = 10\nFUZZY = True"
+        }
+      },
+      {
+        "changes": {
+          "tests/test_search.py": {
+            "after": "tests/test_search.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "tests/test_search.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Finish feature/search",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": "RESULTS = 10\nFUZZY = True",
+          "tests/test_search.py": "tests/test_search.py-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/search.py": {
+            "after": "RESULTS = 20\nFUZZY = True",
+            "before": "RESULTS = 20",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Start feature/search",
+        "order": 4,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": "RESULTS = 20\nFUZZY = True"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "tests/test_search.py": {
+            "after": "tests/test_search.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "tests/test_search.py": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Finish feature/search",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": "RESULTS = 20\nFUZZY = True",
+          "tests/test_search.py": "tests/test_search.py-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": true,
+    "force_with_lease": true,
+    "head": {
+      "name": "feature/search",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/search",
+    "last_push_commit": "c5",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/search",
+    "last_rebase_new_head": "c5",
+    "last_rebase_replayed_commits": [
+      "c4",
+      "c5"
+    ],
+    "last_workspace_file_written": "src/search.py",
+    "operation_metadata": {
+      "force_push_with_lease": true,
+      "force_with_lease": true,
+      "last_push_branch": "feature/search",
+      "last_push_commit": "c5",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/search",
+      "last_rebase_new_head": "c5",
+      "last_rebase_replayed_commits": [
+        "c4",
+        "c5"
+      ],
+      "last_workspace_file_written": "src/search.py"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/search": "c5",
+      "origin/main": "c1"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/team/library-search.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/search": "origin/feature/search",
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "rebase-hard-reset-rebase-lease-api": {
+    "branches": {
+      "feature/rate-limits": "c9",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "docs/usage.md": {
+            "after": "usage-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "docs/usage.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v1"
+        }
+      },
+      {
+        "changes": {
+          "docs/usage.md": {
+            "after": "usage-v2",
+            "before": "usage-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "docs/usage.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix typo in usage docs",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v2"
+        }
+      },
+      {
+        "changes": {
+          "src/kept.py": {
+            "after": "kept-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/kept.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add retry budget",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v1",
+          "src/kept.py": "kept-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/dropped.py": {
+            "after": "dropped-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/dropped.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add rate limiter",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v1",
+          "src/dropped.py": "dropped-v1",
+          "src/kept.py": "kept-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/main.py": {
+            "after": "main-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/main.py": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Wire limiter into API",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v1",
+          "src/dropped.py": "dropped-v1",
+          "src/kept.py": "kept-v1",
+          "src/main.py": "main-v2"
+        }
+      },
+      {
+        "changes": {
+          "src/kept.py": {
+            "after": "kept-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/kept.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Add retry budget",
+        "order": 5,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v2",
+          "src/kept.py": "kept-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/main.py": {
+            "after": "main-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/main.py": "added"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Wire limiter into API",
+        "order": 6,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v2",
+          "src/kept.py": "kept-v1",
+          "src/main.py": "main-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/kept.py": {
+            "after": "kept-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/kept.py": "added"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Add retry budget",
+        "order": 7,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v2",
+          "src/kept.py": "kept-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/dropped.py": {
+            "after": "dropped-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/dropped.py": "added"
+        },
+        "id": "c8",
+        "is_merge": false,
+        "message": "Add rate limiter",
+        "order": 8,
+        "parents": [
+          "c7"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v2",
+          "src/dropped.py": "dropped-v1",
+          "src/kept.py": "kept-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/main.py": {
+            "after": "main-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/main.py": "added"
+        },
+        "id": "c9",
+        "is_merge": false,
+        "message": "Wire limiter into API",
+        "order": 9,
+        "parents": [
+          "c8"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v2",
+          "src/dropped.py": "dropped-v1",
+          "src/kept.py": "kept-v1",
+          "src/main.py": "main-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": true,
+    "force_with_lease": true,
+    "head": {
+      "name": "feature/rate-limits",
+      "target": "c9",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/rate-limits",
+    "last_push_commit": "c9",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/rate-limits",
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c9",
+    "last_rebase_onto": null,
+    "last_rebase_replayed_commits": [
+      "c7",
+      "c8",
+      "c9"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c1",
+    "last_reset_mode": "hard",
+    "last_reset_previous_head": "c6",
+    "last_reset_target": "c5",
+    "last_reset_target_expr": "c5",
+    "merge_abort_state": {
+      "branches": {
+        "feature/rate-limits": "c6",
+        "main": "c1"
+      },
+      "commits": [
+        {
+          "changes": {
+            "README.md": {
+              "after": "readme-v1",
+              "before": null,
+              "change_type": "added"
+            },
+            "docs/usage.md": {
+              "after": "usage-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "README.md": "added",
+            "docs/usage.md": "added"
+          },
+          "id": "c0",
+          "is_merge": false,
+          "message": "Project baseline",
+          "order": 0,
+          "parents": [],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v1"
+          }
+        },
+        {
+          "changes": {
+            "docs/usage.md": {
+              "after": "usage-v2",
+              "before": "usage-v1",
+              "change_type": "modified"
+            }
+          },
+          "files": {
+            "docs/usage.md": "modified"
+          },
+          "id": "c1",
+          "is_merge": false,
+          "message": "Fix typo in usage docs",
+          "order": 1,
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v2"
+          }
+        },
+        {
+          "changes": {
+            "src/kept.py": {
+              "after": "kept-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/kept.py": "added"
+          },
+          "id": "c2",
+          "is_merge": false,
+          "message": "Add retry budget",
+          "order": 2,
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v1",
+            "src/kept.py": "kept-v1"
+          }
+        },
+        {
+          "changes": {
+            "src/dropped.py": {
+              "after": "dropped-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/dropped.py": "added"
+          },
+          "id": "c3",
+          "is_merge": false,
+          "message": "Add rate limiter",
+          "order": 3,
+          "parents": [
+            "c2"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v1",
+            "src/dropped.py": "dropped-v1",
+            "src/kept.py": "kept-v1"
+          }
+        },
+        {
+          "changes": {
+            "src/main.py": {
+              "after": "main-v2",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/main.py": "added"
+          },
+          "id": "c5",
+          "is_merge": false,
+          "message": "Wire limiter into API",
+          "order": 4,
+          "parents": [
+            "c3"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v1",
+            "src/dropped.py": "dropped-v1",
+            "src/kept.py": "kept-v1",
+            "src/main.py": "main-v2"
+          }
+        },
+        {
+          "changes": {
+            "src/kept.py": {
+              "after": "kept-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/kept.py": "added"
+          },
+          "id": "c4",
+          "is_merge": false,
+          "message": "Add retry budget",
+          "order": 5,
+          "parents": [
+            "c1"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v2",
+            "src/kept.py": "kept-v1"
+          }
+        },
+        {
+          "changes": {
+            "src/main.py": {
+              "after": "main-v2",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/main.py": "added"
+          },
+          "id": "c6",
+          "is_merge": false,
+          "message": "Wire limiter into API",
+          "order": 6,
+          "parents": [
+            "c4"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v2",
+            "src/kept.py": "kept-v1",
+            "src/main.py": "main-v2"
+          }
+        }
+      ],
+      "conflict_details": {},
+      "conflicts": [],
+      "head": {
+        "name": "feature/rate-limits",
+        "target": "c6",
+        "type": "branch"
+      },
+      "operation_metadata": {},
+      "partial_hunks": {},
+      "reflog": [
+        {
+          "action": "commit: Wire limiter into API",
+          "commit": "c5",
+          "ref": "feature/rate-limits"
+        },
+        {
+          "action": "rebase (finish): refs/heads/feature/rate-limits onto c1",
+          "commit": "c6",
+          "ref": "feature/rate-limits"
+        }
+      ],
+      "remote_branches": {
+        "origin/feature/rate-limits": "c5",
+        "origin/main": "c1"
+      },
+      "remote_tags": {},
+      "remotes": {
+        "origin": "https://example.test/team/billing-api.git"
+      },
+      "replaced_commits": {},
+      "repository_initialized": true,
+      "staging": {},
+      "stash_stack": [],
+      "tags": {},
+      "upstream_tracking": {
+        "feature/rate-limits": "origin/feature/rate-limits",
+        "main": "origin/main"
+      },
+      "working_tree": {}
+    },
+    "operation_metadata": {
+      "force_push_with_lease": true,
+      "force_with_lease": true,
+      "last_push_branch": "feature/rate-limits",
+      "last_push_commit": "c9",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/rate-limits",
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c9",
+      "last_rebase_onto": null,
+      "last_rebase_replayed_commits": [
+        "c7",
+        "c8",
+        "c9"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c1",
+      "last_reset_mode": "hard",
+      "last_reset_previous_head": "c6",
+      "last_reset_target": "c5",
+      "last_reset_target_expr": "c5"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit: Wire limiter into API",
+        "commit": "c5",
+        "ref": "feature/rate-limits"
+      },
+      {
+        "action": "rebase (finish): refs/heads/feature/rate-limits onto c1",
+        "commit": "c6",
+        "ref": "feature/rate-limits"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c5"
+      },
+      {
+        "message": "reset: moving to c5",
+        "ref": "HEAD@{3}",
+        "target": "c5"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{4}",
+        "target": "c9"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/rate-limits": "c9",
+      "origin/main": "c1"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/team/billing-api.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/rate-limits": "origin/feature/rate-limits",
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "rebase-hard-reset-rebase-lease-cli": {
+    "branches": {
+      "feature/cli-flags": "c9",
+      "main": "c1"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "docs/usage.md": {
+            "after": "usage-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "docs/usage.md": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v1"
+        }
+      },
+      {
+        "changes": {
+          "docs/usage.md": {
+            "after": "usage-v2",
+            "before": "usage-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "docs/usage.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Fix typo in usage docs",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v2"
+        }
+      },
+      {
+        "changes": {
+          "src/kept.py": {
+            "after": "kept-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/kept.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Parse --verbose flag",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v1",
+          "src/kept.py": "kept-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/dropped.py": {
+            "after": "dropped-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/dropped.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Parse --quiet flag",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v1",
+          "src/dropped.py": "dropped-v1",
+          "src/kept.py": "kept-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/main.py": {
+            "after": "main-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/main.py": "added"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Use flags in main",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v1",
+          "src/dropped.py": "dropped-v1",
+          "src/kept.py": "kept-v1",
+          "src/main.py": "main-v2"
+        }
+      },
+      {
+        "changes": {
+          "src/kept.py": {
+            "after": "kept-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/kept.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Parse --verbose flag",
+        "order": 5,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v2",
+          "src/kept.py": "kept-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/main.py": {
+            "after": "main-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/main.py": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Use flags in main",
+        "order": 6,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v2",
+          "src/kept.py": "kept-v1",
+          "src/main.py": "main-v2"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/kept.py": {
+            "after": "kept-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/kept.py": "added"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Parse --verbose flag",
+        "order": 7,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v2",
+          "src/kept.py": "kept-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/dropped.py": {
+            "after": "dropped-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/dropped.py": "added"
+        },
+        "id": "c8",
+        "is_merge": false,
+        "message": "Parse --quiet flag",
+        "order": 8,
+        "parents": [
+          "c7"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v2",
+          "src/dropped.py": "dropped-v1",
+          "src/kept.py": "kept-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/main.py": {
+            "after": "main-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/main.py": "added"
+        },
+        "id": "c9",
+        "is_merge": false,
+        "message": "Use flags in main",
+        "order": 9,
+        "parents": [
+          "c8"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/usage.md": "usage-v2",
+          "src/dropped.py": "dropped-v1",
+          "src/kept.py": "kept-v1",
+          "src/main.py": "main-v2"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": true,
+    "force_with_lease": true,
+    "head": {
+      "name": "feature/cli-flags",
+      "target": "c9",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/cli-flags",
+    "last_push_commit": "c9",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/cli-flags",
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c9",
+    "last_rebase_onto": null,
+    "last_rebase_replayed_commits": [
+      "c7",
+      "c8",
+      "c9"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c1",
+    "last_reset_mode": "hard",
+    "last_reset_previous_head": "c5",
+    "last_reset_target": "c6",
+    "last_reset_target_expr": "c6",
+    "merge_abort_state": {
+      "branches": {
+        "feature/cli-flags": "c5",
+        "main": "c1"
+      },
+      "commits": [
+        {
+          "changes": {
+            "README.md": {
+              "after": "readme-v1",
+              "before": null,
+              "change_type": "added"
+            },
+            "docs/usage.md": {
+              "after": "usage-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "README.md": "added",
+            "docs/usage.md": "added"
+          },
+          "id": "c0",
+          "is_merge": false,
+          "message": "Project baseline",
+          "order": 0,
+          "parents": [],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v1"
+          }
+        },
+        {
+          "changes": {
+            "docs/usage.md": {
+              "after": "usage-v2",
+              "before": "usage-v1",
+              "change_type": "modified"
+            }
+          },
+          "files": {
+            "docs/usage.md": "modified"
+          },
+          "id": "c1",
+          "is_merge": false,
+          "message": "Fix typo in usage docs",
+          "order": 1,
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v2"
+          }
+        },
+        {
+          "changes": {
+            "src/kept.py": {
+              "after": "kept-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/kept.py": "added"
+          },
+          "id": "c2",
+          "is_merge": false,
+          "message": "Parse --verbose flag",
+          "order": 2,
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v1",
+            "src/kept.py": "kept-v1"
+          }
+        },
+        {
+          "changes": {
+            "src/dropped.py": {
+              "after": "dropped-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/dropped.py": "added"
+          },
+          "id": "c3",
+          "is_merge": false,
+          "message": "Parse --quiet flag",
+          "order": 3,
+          "parents": [
+            "c2"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v1",
+            "src/dropped.py": "dropped-v1",
+            "src/kept.py": "kept-v1"
+          }
+        },
+        {
+          "changes": {
+            "src/main.py": {
+              "after": "main-v2",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/main.py": "added"
+          },
+          "id": "c6",
+          "is_merge": false,
+          "message": "Use flags in main",
+          "order": 4,
+          "parents": [
+            "c3"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v1",
+            "src/dropped.py": "dropped-v1",
+            "src/kept.py": "kept-v1",
+            "src/main.py": "main-v2"
+          }
+        },
+        {
+          "changes": {
+            "src/kept.py": {
+              "after": "kept-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/kept.py": "added"
+          },
+          "id": "c4",
+          "is_merge": false,
+          "message": "Parse --verbose flag",
+          "order": 5,
+          "parents": [
+            "c1"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v2",
+            "src/kept.py": "kept-v1"
+          }
+        },
+        {
+          "changes": {
+            "src/main.py": {
+              "after": "main-v2",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/main.py": "added"
+          },
+          "id": "c5",
+          "is_merge": false,
+          "message": "Use flags in main",
+          "order": 6,
+          "parents": [
+            "c4"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "docs/usage.md": "usage-v2",
+            "src/kept.py": "kept-v1",
+            "src/main.py": "main-v2"
+          }
+        }
+      ],
+      "conflict_details": {},
+      "conflicts": [],
+      "head": {
+        "name": "feature/cli-flags",
+        "target": "c5",
+        "type": "branch"
+      },
+      "operation_metadata": {},
+      "partial_hunks": {},
+      "reflog": [
+        {
+          "action": "commit: Use flags in main",
+          "commit": "c6",
+          "ref": "feature/cli-flags"
+        },
+        {
+          "action": "rebase (finish): refs/heads/feature/cli-flags onto c1",
+          "commit": "c5",
+          "ref": "feature/cli-flags"
+        }
+      ],
+      "remote_branches": {
+        "origin/feature/cli-flags": "c6",
+        "origin/main": "c1"
+      },
+      "remote_tags": {},
+      "remotes": {
+        "origin": "https://example.test/team/cli-tool.git"
+      },
+      "replaced_commits": {},
+      "repository_initialized": true,
+      "staging": {},
+      "stash_stack": [],
+      "tags": {},
+      "upstream_tracking": {
+        "feature/cli-flags": "origin/feature/cli-flags",
+        "main": "origin/main"
+      },
+      "working_tree": {}
+    },
+    "operation_metadata": {
+      "force_push_with_lease": true,
+      "force_with_lease": true,
+      "last_push_branch": "feature/cli-flags",
+      "last_push_commit": "c9",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/cli-flags",
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c9",
+      "last_rebase_onto": null,
+      "last_rebase_replayed_commits": [
+        "c7",
+        "c8",
+        "c9"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c1",
+      "last_reset_mode": "hard",
+      "last_reset_previous_head": "c5",
+      "last_reset_target": "c6",
+      "last_reset_target_expr": "c6"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit: Use flags in main",
+        "commit": "c6",
+        "ref": "feature/cli-flags"
+      },
+      {
+        "action": "rebase (finish): refs/heads/feature/cli-flags onto c1",
+        "commit": "c5",
+        "ref": "feature/cli-flags"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c6"
+      },
+      {
+        "message": "reset: moving to c6",
+        "ref": "HEAD@{3}",
+        "target": "c6"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{4}",
+        "target": "c9"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/cli-flags": "c9",
+      "origin/main": "c1"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/team/cli-tool.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/cli-flags": "origin/feature/cli-flags",
+      "main": "origin/main"
+    },
     "working_tree": {}
   },
   "rebase-medium-abort": {
@@ -31754,8 +34550,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from develop to feature/compliance-audit",
         "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -32322,6 +35123,811 @@ TARGET_STATES = json.loads(r"""
     "working_tree": {
       "notes/draft.md": "notes/draft.md-draft-2"
     }
+  },
+  "reflog-hard-recover-then-pick-auth": {
+    "branches": {
+      "main": "c5",
+      "recovery/auth": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/auth.py": {
+            "after": "src/auth.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/auth.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/auth.py": "src/auth.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Prepare the sprint",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "src/auth.py": "src/auth.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/groundwork.py": {
+            "after": "groundwork-draft",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/groundwork.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Session groundwork",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "src/auth.py": "src/auth.py-v1",
+          "src/groundwork.py": "groundwork-draft"
+        }
+      },
+      {
+        "changes": {
+          "lab/experiment.py": {
+            "after": "experiment-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "lab/experiment.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Experiment: magic links",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "lab/experiment.py": "experiment-v1",
+          "src/auth.py": "src/auth.py-v1",
+          "src/groundwork.py": "groundwork-draft"
+        }
+      },
+      {
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-expiry-fixed",
+            "before": "src/auth.py-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix auth token expiry",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "lab/experiment.py": "experiment-v1",
+          "src/auth.py": "auth-expiry-fixed",
+          "src/groundwork.py": "groundwork-draft"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/auth.py": {
+            "after": "auth-expiry-fixed",
+            "before": "src/auth.py-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/auth.py": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Fix auth token expiry",
+        "order": 5,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "src/auth.py": "auth-expiry-fixed"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery/auth",
+    "last_cherry_pick_created_commit": "c5",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c4",
+    "operation_metadata": {
+      "last_branch_created": "recovery/auth",
+      "last_cherry_pick_created_commit": "c5",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c4"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit: Fix auth token expiry",
+        "commit": "c4",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~3",
+        "commit": "c1",
+        "ref": "main"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "reflog-hard-recover-then-pick-export": {
+    "branches": {
+      "main": "c5",
+      "recovery/export": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/export.py": {
+            "after": "src/export.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/export.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/export.py": "src/export.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Prepare the sprint",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "src/export.py": "src/export.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/groundwork.py": {
+            "after": "groundwork-draft",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/groundwork.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Export groundwork",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "src/export.py": "src/export.py-v1",
+          "src/groundwork.py": "groundwork-draft"
+        }
+      },
+      {
+        "changes": {
+          "lab/experiment.py": {
+            "after": "experiment-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "lab/experiment.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Debug: dump every row",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "lab/experiment.py": "experiment-v1",
+          "src/export.py": "src/export.py-v1",
+          "src/groundwork.py": "groundwork-draft"
+        }
+      },
+      {
+        "changes": {
+          "src/export.py": {
+            "after": "export-dates-fixed",
+            "before": "src/export.py-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/export.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix export date format",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "lab/experiment.py": "experiment-v1",
+          "src/export.py": "export-dates-fixed",
+          "src/groundwork.py": "groundwork-draft"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/export.py": {
+            "after": "export-dates-fixed",
+            "before": "src/export.py-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/export.py": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Fix export date format",
+        "order": 5,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "src/export.py": "export-dates-fixed"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery/export",
+    "last_cherry_pick_created_commit": "c5",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c4",
+    "operation_metadata": {
+      "last_branch_created": "recovery/export",
+      "last_cherry_pick_created_commit": "c5",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c4"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit: Fix export date format",
+        "commit": "c4",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~3",
+        "commit": "c1",
+        "ref": "main"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "reflog-medium-recover-and-publish-billing": {
+    "branches": {
+      "main": "c2",
+      "recovery/billing": "c5"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/billing.py": {
+            "after": "src/billing.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/billing.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/billing.py": "src/billing.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "billing-groundwork",
+            "before": "src/billing.py-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Billing groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/billing.py": "billing-groundwork"
+        }
+      },
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "billing-invoices",
+            "before": "billing-groundwork",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add invoice model",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/billing.py": "billing-invoices"
+        }
+      },
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "billing-terms",
+            "before": "billing-invoices",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add payment terms",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/billing.py": "billing-terms"
+        }
+      },
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "billing-late-fees",
+            "before": "billing-terms",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Add late fees",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/billing.py": "billing-late-fees"
+        }
+      },
+      {
+        "changes": {
+          "src/billing.py": {
+            "after": "billing-summary",
+            "before": "billing-late-fees",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/billing.py": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Finish billing summary",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/billing.py": "billing-summary"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "recovery/billing",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery/billing",
+    "last_push_branch": "recovery/billing",
+    "last_push_commit": "c5",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/recovery/billing",
+    "last_switch_branch": "recovery/billing",
+    "last_switched_to": "recovery/billing",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_branch_created": "recovery/billing",
+      "last_push_branch": "recovery/billing",
+      "last_push_commit": "c5",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/recovery/billing",
+      "last_switch_branch": "recovery/billing",
+      "last_switched_to": "recovery/billing"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit: Finish billing summary",
+        "commit": "c5",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to c2",
+        "commit": "c2",
+        "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/billing",
+        "ref": "HEAD@{2}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c2",
+      "origin/recovery/billing": "c5"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/team/billing-api.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main",
+      "recovery/billing": "origin/recovery/billing"
+    },
+    "working_tree": {}
+  },
+  "reflog-medium-recover-and-publish-search": {
+    "branches": {
+      "main": "c0",
+      "recovery/search-fix": "c4"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/search.py": {
+            "after": "src/search.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/search.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": "src/search.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/search.py": {
+            "after": "search-groundwork",
+            "before": "src/search.py-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Search groundwork",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": "search-groundwork"
+        }
+      },
+      {
+        "changes": {
+          "src/search.py": {
+            "after": "search-continued",
+            "before": "search-groundwork",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Continue search work",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": "search-continued"
+        }
+      },
+      {
+        "changes": {
+          "src/search.py": {
+            "after": "search-tested",
+            "before": "search-continued",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add ranking tests",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": "search-tested"
+        }
+      },
+      {
+        "changes": {
+          "src/search.py": {
+            "after": "search-ranking-fixed",
+            "before": "search-tested",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/search.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Fix borrower search ranking",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/search.py": "search-ranking-fixed"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "recovery/search-fix",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery/search-fix",
+    "last_push_branch": "recovery/search-fix",
+    "last_push_commit": "c4",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/recovery/search-fix",
+    "last_switch_branch": "recovery/search-fix",
+    "last_switched_to": "recovery/search-fix",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_branch_created": "recovery/search-fix",
+      "last_push_branch": "recovery/search-fix",
+      "last_push_commit": "c4",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/recovery/search-fix",
+      "last_switch_branch": "recovery/search-fix",
+      "last_switched_to": "recovery/search-fix"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit: Fix borrower search ranking",
+        "commit": "c4",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to c0",
+        "commit": "c0",
+        "ref": "main"
+      },
+      {
+        "message": "checkout: moving from main to recovery/search-fix",
+        "ref": "HEAD@{2}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c0",
+      "origin/recovery/search-fix": "c4"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/team/library-search.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main",
+      "recovery/search-fix": "origin/recovery/search-fix"
+    },
+    "working_tree": {}
   },
   "restore-easy-discard": {
     "branches": {
@@ -33626,6 +37232,1506 @@ TARGET_STATES = json.loads(r"""
     "working_tree": {
       "notes/todo.md": "notes/todo.md-draft-v2"
     }
+  },
+  "revert-easy-pull-then-revert-api": {
+    "branches": {
+      "main": "c6"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/routes.py": {
+            "after": "src/routes.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/routes.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/routes.py": "src/routes.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "CONTRIBUTING.md": {
+            "after": "contributing-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "CONTRIBUTING.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add contributor notes",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "CONTRIBUTING.md": "contributing-v1",
+          "README.md": "readme-v1",
+          "src/routes.py": "src/routes.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "Makefile": {
+            "after": "make-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "Makefile": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Tidy project layout",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "CONTRIBUTING.md": "contributing-v1",
+          "Makefile": "make-v1",
+          "README.md": "readme-v1",
+          "src/routes.py": "src/routes.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "docs/release.md": {
+            "after": "release-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/release.md": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add release checklist",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "CONTRIBUTING.md": "contributing-v1",
+          "Makefile": "make-v1",
+          "README.md": "readme-v1",
+          "docs/release.md": "release-v1",
+          "src/routes.py": "src/routes.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/routes.py": {
+            "after": "src/routes.py-broken",
+            "before": "src/routes.py-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Rename the orders endpoint",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "CONTRIBUTING.md": "contributing-v1",
+          "Makefile": "make-v1",
+          "README.md": "readme-v1",
+          "docs/release.md": "release-v1",
+          "src/routes.py": "src/routes.py-broken"
+        }
+      },
+      {
+        "changes": {
+          "src/health.py": {
+            "after": "src/health.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/health.py": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Add health endpoint",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "CONTRIBUTING.md": "contributing-v1",
+          "Makefile": "make-v1",
+          "README.md": "readme-v1",
+          "docs/release.md": "release-v1",
+          "src/health.py": "src/health.py-v1",
+          "src/routes.py": "src/routes.py-broken"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/routes.py": {
+            "after": "src/routes.py-v1",
+            "before": "src/routes.py-broken",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/routes.py": "modified"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Revert \"Rename the orders endpoint\"",
+        "order": 6,
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "CONTRIBUTING.md": "contributing-v1",
+          "Makefile": "make-v1",
+          "README.md": "readme-v1",
+          "docs/release.md": "release-v1",
+          "src/health.py": "src/health.py-v1",
+          "src/routes.py": "src/routes.py-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c6",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/main",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c5",
+    "last_push_branch": "main",
+    "last_push_commit": "c6",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c6",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c4",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/main",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c5",
+      "last_push_branch": "main",
+      "last_push_commit": "c6",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c6",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c4",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c5"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c6"
+      },
+      {
+        "message": "revert: c4",
+        "ref": "HEAD@{2}",
+        "target": "c6"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c6"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/main": "c6"
+    },
+    "remotes": {
+      "origin": "https://example.test/team/billing-api.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "revert-easy-pull-then-revert-docs": {
+    "branches": {
+      "main": "c5"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "docs/conf.py": {
+            "after": "docs/conf.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "docs/conf.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "docs/conf.py": "docs/conf.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "CONTRIBUTING.md": {
+            "after": "contributing-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "CONTRIBUTING.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add contributor notes",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "CONTRIBUTING.md": "contributing-v1",
+          "README.md": "readme-v1",
+          "docs/conf.py": "docs/conf.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "Makefile": {
+            "after": "make-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "Makefile": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Tidy project layout",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "CONTRIBUTING.md": "contributing-v1",
+          "Makefile": "make-v1",
+          "README.md": "readme-v1",
+          "docs/conf.py": "docs/conf.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "docs/conf.py": {
+            "after": "docs/conf.py-broken",
+            "before": "docs/conf.py-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "docs/conf.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Switch docs theme",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "CONTRIBUTING.md": "contributing-v1",
+          "Makefile": "make-v1",
+          "README.md": "readme-v1",
+          "docs/conf.py": "docs/conf.py-broken"
+        }
+      },
+      {
+        "changes": {
+          "docs/faq.md": {
+            "after": "docs/faq.md-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/faq.md": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Add FAQ page",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "CONTRIBUTING.md": "contributing-v1",
+          "Makefile": "make-v1",
+          "README.md": "readme-v1",
+          "docs/conf.py": "docs/conf.py-broken",
+          "docs/faq.md": "docs/faq.md-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "docs/conf.py": {
+            "after": "docs/conf.py-v1",
+            "before": "docs/conf.py-broken",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "docs/conf.py": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Revert \"Switch docs theme\"",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "CONTRIBUTING.md": "contributing-v1",
+          "Makefile": "make-v1",
+          "README.md": "readme-v1",
+          "docs/conf.py": "docs/conf.py-v1",
+          "docs/faq.md": "docs/faq.md-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "fetch_pruned_refs": null,
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_fetch_all": false,
+    "last_fetch_remote": "origin",
+    "last_merge_branch": "origin/main",
+    "last_merge_fast_forward": true,
+    "last_merge_target": "c4",
+    "last_push_branch": "main",
+    "last_push_commit": "c5",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c5",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c3",
+    "operation_metadata": {
+      "fetch_pruned_refs": null,
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_fetch_all": false,
+      "last_fetch_remote": "origin",
+      "last_merge_branch": "origin/main",
+      "last_merge_fast_forward": true,
+      "last_merge_target": "c4",
+      "last_push_branch": "main",
+      "last_push_commit": "c5",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c5",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c3",
+      "remote_tracking_updated": true
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c5"
+      },
+      {
+        "message": "revert: c3",
+        "ref": "HEAD@{2}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c5"
+    },
+    "remote_tags": {},
+    "remote_tracking_updated": true,
+    "remote_updates": {
+      "origin/main": "c5"
+    },
+    "remotes": {
+      "origin": "https://example.test/team/handbook.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "revert-hard-amend-local-revert-pushed-blog": {
+    "branches": {
+      "main": "c6"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/rss.py": {
+            "after": "src/rss.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/rss.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/rss.py": "src/rss.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/products.py": {
+            "after": "products-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/products.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add product pages",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/products.py": "products-v1",
+          "src/rss.py": "src/rss.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/tags.py": {
+            "after": "tags-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/tags.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add tags",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/products.py": "products-v1",
+          "src/rss.py": "src/rss.py-v1",
+          "src/tags.py": "tags-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/rss.py": {
+            "after": "src/rss.py-broken",
+            "before": "src/rss.py-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/rss.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Shorten feed item IDs",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/products.py": "products-v1",
+          "src/rss.py": "src/rss.py-broken",
+          "src/tags.py": "tags-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/feed_rss.py": {
+            "after": "src/feed_rss.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/feed_rss.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "stuff",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/feed_rss.py": "src/feed_rss.py-v1",
+          "src/products.py": "products-v1",
+          "src/rss.py": "src/rss.py-broken",
+          "src/tags.py": "tags-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/feed_rss.py": {
+            "after": "src/feed_rss.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/feed_rss.py": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Add RSS feed",
+        "order": 5,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/feed_rss.py": "src/feed_rss.py-v1",
+          "src/products.py": "products-v1",
+          "src/rss.py": "src/rss.py-broken",
+          "src/tags.py": "tags-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/rss.py": {
+            "after": "src/rss.py-v1",
+            "before": "src/rss.py-broken",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/rss.py": "modified"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Revert \"Shorten feed item IDs\"",
+        "order": 6,
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/feed_rss.py": "src/feed_rss.py-v1",
+          "src/products.py": "products-v1",
+          "src/rss.py": "src/rss.py-v1",
+          "src/tags.py": "tags-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c6",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c5",
+    "last_amend_replaced_commit": "c4",
+    "last_push_branch": "main",
+    "last_push_commit": "c6",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c6",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c3",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_amend_created_commit": "c5",
+      "last_amend_replaced_commit": "c4",
+      "last_push_branch": "main",
+      "last_push_commit": "c6",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c6",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c3"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c5"
+      },
+      {
+        "message": "commit --amend: replaced c4",
+        "ref": "HEAD@{1}",
+        "target": "c5"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c6"
+      },
+      {
+        "message": "revert: c3",
+        "ref": "HEAD@{3}",
+        "target": "c6"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c6"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/team/field-notes.git"
+    },
+    "replaced_commits": {
+      "c4": "c5"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "revert-hard-amend-local-revert-pushed-shop": {
+    "branches": {
+      "main": "c6"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/checkout.py": {
+            "after": "src/checkout.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/checkout.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Initial commit",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/checkout.py": "src/checkout.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/products.py": {
+            "after": "products-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/products.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add product pages",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/checkout.py": "src/checkout.py-v1",
+          "src/products.py": "products-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/checkout.py": {
+            "after": "src/checkout.py-broken",
+            "before": "src/checkout.py-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/checkout.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Break checkout",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/checkout.py": "src/checkout.py-broken",
+          "src/products.py": "products-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/search.py": {
+            "after": "search-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/search.py": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Add search",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/checkout.py": "src/checkout.py-broken",
+          "src/products.py": "products-v1",
+          "src/search.py": "search-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/order_export.py": {
+            "after": "src/order_export.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/order_export.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "wip",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/checkout.py": "src/checkout.py-broken",
+          "src/order_export.py": "src/order_export.py-v1",
+          "src/products.py": "products-v1",
+          "src/search.py": "search-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/order_export.py": {
+            "after": "src/order_export.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/order_export.py": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Add order export",
+        "order": 5,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/checkout.py": "src/checkout.py-broken",
+          "src/order_export.py": "src/order_export.py-v1",
+          "src/products.py": "products-v1",
+          "src/search.py": "search-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/checkout.py": {
+            "after": "src/checkout.py-v1",
+            "before": "src/checkout.py-broken",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/checkout.py": "modified"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Revert \"Break checkout\"",
+        "order": 6,
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/checkout.py": "src/checkout.py-v1",
+          "src/order_export.py": "src/order_export.py-v1",
+          "src/products.py": "products-v1",
+          "src/search.py": "search-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c6",
+      "type": "branch"
+    },
+    "last_amend_created_commit": "c5",
+    "last_amend_replaced_commit": "c4",
+    "last_push_branch": "main",
+    "last_push_commit": "c6",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c6",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c2",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_amend_created_commit": "c5",
+      "last_amend_replaced_commit": "c4",
+      "last_push_branch": "main",
+      "last_push_commit": "c6",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c6",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c5"
+      },
+      {
+        "message": "commit --amend: replaced c4",
+        "ref": "HEAD@{1}",
+        "target": "c5"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c6"
+      },
+      {
+        "message": "revert: c2",
+        "ref": "HEAD@{3}",
+        "target": "c6"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c6"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/team/shop-web.git"
+    },
+    "replaced_commits": {
+      "c4": "c5"
+    },
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
+  "revert-medium-release-branch-auth": {
+    "branches": {
+      "main": "c1",
+      "release/1.8": "c5"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/signin.py": {
+            "after": "src/signin.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/signin.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/signin.py": "src/signin.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/next.py": {
+            "after": "next-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/next.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Start the next version",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/next.py": "next-v1",
+          "src/signin.py": "src/signin.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "CHANGELOG.md": {
+            "after": "changelog-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "CHANGELOG.md": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Cut release/1.8",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v1",
+          "README.md": "readme-v1",
+          "src/signin.py": "src/signin.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/signin.py": {
+            "after": "src/signin.py-broken",
+            "before": "src/signin.py-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/signin.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Require SSO for every account",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v1",
+          "README.md": "readme-v1",
+          "src/signin.py": "src/signin.py-broken"
+        }
+      },
+      {
+        "changes": {
+          "CHANGELOG.md": {
+            "after": "changelog-v2",
+            "before": "changelog-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "CHANGELOG.md": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Update release notes",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v2",
+          "README.md": "readme-v1",
+          "src/signin.py": "src/signin.py-broken"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/signin.py": {
+            "after": "src/signin.py-v1",
+            "before": "src/signin.py-broken",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/signin.py": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Revert \"Require SSO for every account\"",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v2",
+          "README.md": "readme-v1",
+          "src/signin.py": "src/signin.py-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "release/1.8",
+      "target": "c5",
+      "type": "branch"
+    },
+    "last_push_branch": "release/1.8",
+    "last_push_commit": "c5",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/release/1.8",
+    "last_revert_created_commit": "c5",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c3",
+    "last_switch_branch": "release/1.8",
+    "last_switched_to": "release/1.8",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "release/1.8",
+      "last_push_commit": "c5",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/release/1.8",
+      "last_revert_created_commit": "c5",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c3",
+      "last_switch_branch": "release/1.8",
+      "last_switched_to": "release/1.8"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "checkout: moving from main to release/1.8",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c5"
+      },
+      {
+        "message": "revert: c3",
+        "ref": "HEAD@{2}",
+        "target": "c5"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c1",
+      "origin/release/1.8": "c5"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/team/ticketing-app.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main",
+      "release/1.8": "origin/release/1.8"
+    },
+    "working_tree": {}
+  },
+  "revert-medium-release-branch-pricing": {
+    "branches": {
+      "main": "c1",
+      "release/2.1": "c6"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/pricing.py": {
+            "after": "src/pricing.py-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/pricing.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/pricing.py": "src/pricing.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/next.py": {
+            "after": "next-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/next.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Start the next version",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/next.py": "next-v1",
+          "src/pricing.py": "src/pricing.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "CHANGELOG.md": {
+            "after": "changelog-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "CHANGELOG.md": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Cut release/2.1",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v1",
+          "README.md": "readme-v1",
+          "src/pricing.py": "src/pricing.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "build.sh": {
+            "after": "build-v2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "build.sh": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Fix release build script",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v1",
+          "README.md": "readme-v1",
+          "build.sh": "build-v2",
+          "src/pricing.py": "src/pricing.py-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/pricing.py": {
+            "after": "src/pricing.py-broken",
+            "before": "src/pricing.py-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/pricing.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Round prices to whole pesos",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v1",
+          "README.md": "readme-v1",
+          "build.sh": "build-v2",
+          "src/pricing.py": "src/pricing.py-broken"
+        }
+      },
+      {
+        "changes": {
+          "CHANGELOG.md": {
+            "after": "changelog-v2",
+            "before": "changelog-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "CHANGELOG.md": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Update release notes",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v2",
+          "README.md": "readme-v1",
+          "build.sh": "build-v2",
+          "src/pricing.py": "src/pricing.py-broken"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/pricing.py": {
+            "after": "src/pricing.py-v1",
+            "before": "src/pricing.py-broken",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/pricing.py": "modified"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Revert \"Round prices to whole pesos\"",
+        "order": 6,
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "CHANGELOG.md": "changelog-v2",
+          "README.md": "readme-v1",
+          "build.sh": "build-v2",
+          "src/pricing.py": "src/pricing.py-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "release/2.1",
+      "target": "c6",
+      "type": "branch"
+    },
+    "last_push_branch": "release/2.1",
+    "last_push_commit": "c6",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/release/2.1",
+    "last_revert_created_commit": "c6",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c4",
+    "last_switch_branch": "release/2.1",
+    "last_switched_to": "release/2.1",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "release/2.1",
+      "last_push_commit": "c6",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/release/2.1",
+      "last_revert_created_commit": "c6",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c4",
+      "last_switch_branch": "release/2.1",
+      "last_switched_to": "release/2.1"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "checkout: moving from main to release/2.1",
+        "ref": "HEAD@{0}",
+        "target": "c5"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c6"
+      },
+      {
+        "message": "revert: c4",
+        "ref": "HEAD@{2}",
+        "target": "c6"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c1",
+      "origin/release/2.1": "c6"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/team/shop-web.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main",
+      "release/2.1": "origin/release/2.1"
+    },
+    "working_tree": {}
   },
   "rh6": {
     "branches": {
@@ -35677,8 +40783,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/cli-colors to main",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -35836,8 +40947,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/toast-ui to develop",
         "ref": "HEAD@{0}",
+        "target": "c1"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -36411,7 +41527,13 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 1
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/models to review/groupmate-branch",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -36479,7 +41601,13 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 1
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/api-docs to release/stable",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -36782,7 +41910,18 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 0
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/experiment to release/v3",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "checkout: moving from release/v3 to feature/experiment",
+        "ref": "HEAD@{1}",
+        "target": "c3"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -37018,7 +42157,18 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 0
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/billing to hotfix/tax-fix",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "checkout: moving from hotfix/tax-fix to feature/billing",
+        "ref": "HEAD@{1}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -37097,7 +42247,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "main"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/api-keys to main",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -37173,7 +42329,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "main"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/docs-refresh to main",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -37283,7 +42445,18 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "develop"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from c3 to archive/spike-results",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      },
+      {
+        "message": "checkout: moving from archive/spike-results to develop",
+        "ref": "HEAD@{1}",
+        "target": "c2"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -37345,7 +42518,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "feature/auth"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to feature/auth",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -37407,7 +42586,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "bugfix/login"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to bugfix/login",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -37469,7 +42654,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "experiment/ui"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to experiment/ui",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -37576,7 +42767,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "saved-work"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from c2 to saved-work",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -37679,7 +42876,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "feature/workspace"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from develop to feature/workspace",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -37771,7 +42974,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "hotfix/critical"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to hotfix/critical",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -37899,7 +43108,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "feature/export"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to feature/export",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -38002,7 +43217,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "feature/notifications"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to feature/notifications",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -38081,7 +43302,13 @@ TARGET_STATES = json.loads(r"""
       "last_switched_to": "feature/payments"
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from main to feature/payments",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -38139,7 +43366,13 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 1
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/auth to main",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -38207,7 +43440,13 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 1
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/cache to release/v2",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -38275,7 +43514,13 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 1
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/notify to develop",
+        "ref": "HEAD@{0}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -38366,7 +43611,18 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 0
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/api-v2 to hotfix/urgent",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "checkout: moving from hotfix/urgent to feature/api-v2",
+        "ref": "HEAD@{1}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -38448,7 +43704,18 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 0
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/auth-rework to main",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "checkout: moving from main to feature/auth-rework",
+        "ref": "HEAD@{1}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -38530,7 +43797,18 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 0
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/refactor to release/v1",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "checkout: moving from release/v1 to feature/refactor",
+        "ref": "HEAD@{1}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -38612,7 +43890,18 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 0
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/orders to hotfix/fix-tax",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "checkout: moving from hotfix/fix-tax to feature/orders",
+        "ref": "HEAD@{1}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -38696,7 +43985,18 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 0
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/payments to main",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "checkout: moving from main to feature/payments",
+        "ref": "HEAD@{1}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -38780,7 +44080,18 @@ TARGET_STATES = json.loads(r"""
       "stash_count": 0
     },
     "partial_hunks": {},
-    "reflog": [],
+    "reflog": [
+      {
+        "message": "checkout: moving from feature/analytics to release/v2",
+        "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "checkout: moving from release/v2 to feature/analytics",
+        "ref": "HEAD@{1}",
+        "target": "c1"
+      }
+    ],
     "remote_branches": {},
     "remote_tags": {},
     "remotes": {},
@@ -41175,8 +46486,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/current to feature/auth",
         "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -41349,8 +46665,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/current to hotfix/critical",
         "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -41523,8 +46844,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/current to feature/payments",
         "ref": "HEAD@{0}",
+        "target": "c2"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -42438,8 +47764,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/current to main",
         "ref": "HEAD@{0}",
+        "target": "c3"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -42584,8 +47915,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/current to release/v1",
         "ref": "HEAD@{0}",
+        "target": "c3"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],
@@ -42730,8 +48066,13 @@ TARGET_STATES = json.loads(r"""
     "partial_hunks": {},
     "reflog": [
       {
-        "message": "move HEAD",
+        "message": "checkout: moving from feature/current to develop",
         "ref": "HEAD@{0}",
+        "target": "c3"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
         "target": "c0"
       }
     ],

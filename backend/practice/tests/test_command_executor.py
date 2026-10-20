@@ -55,6 +55,10 @@ class TestClientCommandExecutionService:
         next_state = {
             **previous,
             "repository_initialized": True,
+            # A fresh init records where the repository is; a re-run keeps it.
+            "repository_root": previous.get("repository_root")
+            if previous.get("repository_initialized")
+            else ".",
             "branches": {
                 **previous.get("branches", {}),
                 "main": previous.get("branches", {}).get("main"),
@@ -1056,6 +1060,7 @@ class TestClientCommandExecutionService:
         verifier = ClientCommandExecutionService().transition_verifier
         next_state = {**state}
         next_state["repository_initialized"] = True
+        next_state["repository_root"] = "repo"
         next_state["remotes"] = {"origin": "https://example.test/repo.git"}
         next_state["remote_branches"] = {"origin/main": "r1"}
         next_state["commits"] = [

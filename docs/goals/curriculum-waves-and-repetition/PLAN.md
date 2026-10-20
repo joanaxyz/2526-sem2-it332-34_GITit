@@ -483,7 +483,22 @@ Decided 2026-10-20 (second round, during execution):
   - Module 1's 18 wave scenarios are written and validated, waiting for Task 4's wave plan.
   - Task L: done in code, L1–L7. The legacy models, runtime, fixture seed and frontend feature are deleted. The drop migrations (`adventures 0014/0015`, `progress 0004`, `practice 0004`) pass on the test database and were applied to the shared database on 2026-10-20, with the user's OK (every legacy table was empty). `verify_frontend_level_sequences.py` targeted only the deleted run flow and was removed, so browser evidence uses a scripted walk (see §13). Checks on 2026-10-20: backend 896 passed / 1 failed (`test_symbol_manifest_equivalence`, catalog and KPI-session hashes, both outside this task); frontend 57 failed in 14 files against 60 in 16 files at HEAD `ba41c32`, the drop being the two deleted legacy adventure suites; `npm run build` passes.
   - Porting the star-target test to tiers showed the budget lives on the variant (`tier_budget.command_budget`). All 265 published variants can reach three stars.
-  - Browser evidence for Tasks 1–3, G and L is still to be captured.
+  - Tasks 4–9 (2026-10-20): done in code.
+    - All 21 levels seed from the wave plan: 132 waves, 349 variants, about 4.9 h no-fail (70/113/64/49 min).
+    - All 85 new scenarios are written. The transitional single-wave seed branch is deleted, and `required_successful_attempts` is retired (`adventures 0016`, not applied to the shared database).
+    - Added `map_partial_tier_progress`, `deploy/CURRICULUM_WAVES_RESEED.md` and a regenerated `LEVEL_CHEAT_SHEET.md`.
+    - KPI studies now count a tier's published waves as its required clears.
+  - **State-only grading** (user decision, 2026-10-20): published scenarios are graded on repository state only.
+    - Typed-command rules and operation-record rules are gone. The team's are converted at seed time (`scenario_runtime._state_only`); mine are fixed at the source.
+    - Both engines now record `repository_root`, reject unsafe pushes as Git does, and write switch entries to the HEAD reflog.
+    - The 1.1 Hard "Re-run init safely" wave became "A nested project folder". `init-hard-safe-rerun` is unplaced, because re-running init leaves no state to grade (`UNPLACED_CASE_IDS`).
+    - Twelve team scenarios passed in their starting state and now require state evidence: pulls land the server's commit, and stash round trips show the visit in the reflog.
+  - Engine fixes found while authoring, in both engines:
+    - A push now updates the pending server tip.
+    - A squash merges three ways.
+    - `--no-commit` picks stack on the index.
+    - Four 2.8 fixtures squashed an empty commit and now author the teammate's commits.
+  - Browser evidence for Tasks 1–10 is still to be captured.
   - Wave forms are the level forms *every* variant of the wave uses. Mastery targets count those waves, so a target is always reachable under used-form credit. Today's mixed pools therefore attach no forms to some waves; the cutovers fix that, because every variant of a designed wave shares its debut.
 - **KPI invariants Task 3 must keep** (from the KPI session, 2026-10-20). Check them after every task with `progress/tests/test_mastery_kpis.py`, `test_kpi_scope.py`, `test_kpi_studies.py` and `test_kpi_references.py`:
   1. `mastery_metrics.live_records` dates legacy mastery by the last *non-replay* clear. It assumes every launch after an `AdventureLevelTierCompletion` exists is `is_replay=True`. Ordered waves must not create non-replay runs after completion.
