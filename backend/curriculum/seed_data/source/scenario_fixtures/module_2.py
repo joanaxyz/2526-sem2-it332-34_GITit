@@ -67,6 +67,35 @@ def _detached_save_and_return() -> dict[str, Any]:
     }
 
 
+def _branch_then_return(*, branch: str, path: str) -> dict[str, Any]:
+    return {
+        "initial_state": repo(
+            commits=[commit("c1", "Project baseline", [], {**BASE, path: f"{path}-v1"})],
+            branches={"main": "c1"},
+        ),
+        "state_requirements": clean(
+            "main", points_to("main", "c1"), points_to(branch, "c1"), branch_exists=[branch]
+        ),
+    }
+
+
+def _mark_point(*, branch: str, messages: list[str], marked: str) -> dict[str, Any]:
+    """``main`` holds ``messages``; ``branch`` must mark the commit named ``marked``."""
+    commits, tree = [], dict(BASE)
+    for index, message in enumerate(messages, start=1):
+        tree = {**tree, f"src/part_{index}.py": f"part-{index}-v1"}
+        commits.append(
+            commit(f"c{index}", message, [f"c{index - 1}"] if index > 1 else [], dict(tree))
+        )
+    target = next(item["id"] for item in commits if item["message"] == marked)
+    return {
+        "initial_state": repo(commits=commits, branches={"main": commits[-1]["id"]}),
+        "state_requirements": clean(
+            "main", points_to("main", commits[-1]["id"]), points_to(branch, target)
+        ),
+    }
+
+
 # ---------------------------------------------------------------------------
 # 2.2 Branch Naming Conventions
 # ---------------------------------------------------------------------------
@@ -100,6 +129,33 @@ def _named_branch_commit(
             points_to("main", "c1"),
             {"type": "commit_count_on_branch_equals", "branch": branch, "count": 2},
             tip(branch, message_equals=message, tree_contains={path: fix, stray: f"{stray}-v1"}),
+        ),
+    }
+
+
+def _clear_merged(*, merged: tuple[str, str], unmerged: str) -> dict[str, Any]:
+    """Two branches already in ``main`` go; the unmerged one stays."""
+    first, second = merged
+    commits = [
+        commit("c1", "Project baseline", [], BASE),
+        commit("c2", f"Merge {first}", ["c1"], {**BASE, "src/first.py": "first-v1"}),
+        commit(
+            "c3",
+            f"Merge {second}",
+            ["c2"],
+            {**BASE, "src/first.py": "first-v1", "src/second.py": "second-v1"},
+        ),
+        commit("c4", f"Start {unmerged}", ["c1"], {**BASE, "src/draft.py": "draft-v1"}),
+    ]
+    return {
+        "initial_state": repo(
+            commits=commits, branches={"main": "c3", first: "c2", second: "c3", unmerged: "c4"}
+        ),
+        "state_requirements": clean(
+            "main",
+            points_to("main", "c3"),
+            points_to(unmerged, "c4"),
+            branch_absent=[first, second],
         ),
     }
 
@@ -185,6 +241,31 @@ def _cancelled_experiment() -> dict[str, Any]:
             points_to("feature/experiment", "c3"),
             points_to("release/v3", "c2"),
             visit_rule("feature/experiment", "release/v3"),
+        ),
+    }
+
+
+def _park_draft(*, branch: str, visit: str, path: str, wip: str) -> dict[str, Any]:
+    """Shelve the draft, check ``visit``, come back, and leave the draft in the stash."""
+    base = {**BASE, path: f"{path}-v1"}
+    return {
+        "initial_state": repo(
+            commits=[
+                commit("c1", "Project baseline", [], base),
+                commit("c2", f"Cut {visit}", ["c1"], {**base, "CHANGELOG.md": f"{visit}-notes"}),
+                commit("c3", f"Start {branch}", ["c1"], {**base, path: f"{path}-v2"}),
+            ],
+            branches={"main": "c1", visit: "c2", branch: "c3"},
+            head=branch,
+            working_tree={path: modified(wip)},
+        ),
+        "state_requirements": clean(
+            branch,
+            points_to(branch, "c3"),
+            points_to(visit, "c2"),
+            visit_rule(branch, visit),
+            {"type": "stash_stack_length_equals", "count": 1},
+            {"type": "stash_top_contains", "paths": [path]},
         ),
     }
 
@@ -439,9 +520,66 @@ def _switch_squash_cleanup(*, branch: str, target: str, path: str, message: str)
     }
 
 
+def _squash_remote_publish_tidy(
+    *, name: str, branch: str, path: str, message: str
+) -> dict[str, Any]:
+    """Squash the teammate's fetched branch into main, publish main, drop the stale local copy."""
+    commits = _wip_branch(path, 3)
+    return {
+        "initial_state": repo(
+            commits=commits,
+            branches={"main": "c1", branch: "c2"},
+            **origin(
+                name,
+                branches={"origin/main": "c1", f"origin/{branch}": "c2"},
+                updates={f"origin/{branch}": "c4"},
+                tracking={"main": "origin/main"},
+            ),
+        ),
+        "state_requirements": clean(
+            "main",
+            tip(
+                "main",
+                message_equals=message,
+                parent_equals="c1",
+                is_not_merge=True,
+                tree_contains={path: f"{path}-v1"},
+            ),
+            {"type": "commit_count_on_branch_equals", "branch": "main", "count": 2},
+            matches_origin("main"),
+            branch_absent=[branch],
+        ),
+    }
+
+
 # ---------------------------------------------------------------------------
 # 2.9 Deleting and Recovering Remote Branches
 # ---------------------------------------------------------------------------
+
+
+def _delete_then_prune(*, name: str, branch: str, stale: str) -> dict[str, Any]:
+    """Delete ``branch`` on origin, then prune the ``stale`` ref a teammate already removed."""
+    return {
+        "initial_state": repo(
+            commits=[
+                commit("c1", "Project baseline", [], BASE),
+                commit("c2", f"Finish {branch}", ["c1"], {**BASE, "src/done.py": "done-v1"}),
+                commit("c3", f"Finish {stale}", ["c1"], {**BASE, "src/old.py": "old-v1"}),
+            ],
+            branches={"main": "c1"},
+            **origin(
+                name,
+                branches={"origin/main": "c1", f"origin/{branch}": "c2", f"origin/{stale}": "c3"},
+                tracking={"main": "origin/main"},
+                stale=[f"origin/{stale}"],
+            ),
+        ),
+        "state_requirements": clean(
+            "main",
+            points_to("main", "c1"),
+            remote_branch_absent=[f"origin/{branch}", f"origin/{stale}"],
+        ),
+    }
 
 
 def _land_and_retire_remote(*, name: str, branch: str, path: str, message: str) -> dict[str, Any]:
@@ -504,6 +642,27 @@ FIXTURES: dict[str, dict[str, Any]] = {
         branch="feature/api-keys", path="src/api_keys.py", message="Add API key model"
     ),
     "switch-hard-detached-save-and-return": _detached_save_and_return(),
+    "switch-easy-branch-then-return-docs": _branch_then_return(
+        branch="docs/faq", path="docs/index.md"
+    ),
+    "switch-easy-branch-then-return-api": _branch_then_return(
+        branch="feature/rate-limit", path="src/api.py"
+    ),
+    "branch-hard-mark-release-point": _mark_point(
+        branch="release/1.0",
+        messages=["Project baseline", "Release 1.0 snapshot", "Add bulk order support"],
+        marked="Release 1.0 snapshot",
+    ),
+    "branch-hard-mark-audit-point": _mark_point(
+        branch="audit/q3",
+        messages=[
+            "Project baseline",
+            "Add payment export",
+            "Q3 audit sign-off",
+            "Start Q4 reports",
+        ],
+        marked="Q3 audit sign-off",
+    ),
     # 2.2
     "bn-easy-delete-merged-typo": _delete_merged(
         branch="fix/readme-typo", path="README.md", message="Fix typo in README"
@@ -525,6 +684,12 @@ FIXTURES: dict[str, dict[str, Any]] = {
         branch="PROJ-733/invoice-rounding",
         message="Round invoice totals",
     ),
+    "bn-hard-clear-merged-sprint": _clear_merged(
+        merged=("feature/login-copy", "fix/footer-link"), unmerged="spike/dark-mode"
+    ),
+    "bn-hard-clear-merged-release": _clear_merged(
+        merged=("release/1.4", "hotfix/1.4.1"), unmerged="experiment/new-nav"
+    ),
     # 2.3
     "stash-easy-pop-search": _pop_one(
         branch="feature/search", path="src/search.py", wip="search-ranking-wip", message="Start search page"
@@ -534,6 +699,15 @@ FIXTURES: dict[str, dict[str, Any]] = {
     ),
     "stash-hard-two-stashes-reports": _two_stashes(),
     "stash-hard-cancelled-experiment": _cancelled_experiment(),
+    "stash-hard-park-draft-search": _park_draft(
+        branch="feature/search", visit="release/v4", path="src/search.py", wip="search-facets-wip"
+    ),
+    "stash-hard-park-draft-billing": _park_draft(
+        branch="feature/billing",
+        visit="hotfix/tax",
+        path="src/billing.py",
+        wip="billing-credits-wip",
+    ),
     # 2.4
     "push-medium-branch-commit-publish-search": _branch_commit_publish(
         name="shop-web", path="src/filters.js", branch="feature/search-filters", message="Add search filters"
@@ -596,6 +770,22 @@ FIXTURES: dict[str, dict[str, Any]] = {
         teammate_path="docs/contributing.md",
         message="Add health check",
     ),
+    "rec-hard-commit-fetch-merge-search": _commit_then_reconcile(
+        name="search-service",
+        branch="feature/search",
+        keep="src/ranking.py",
+        scratch="notes/plan.md",
+        teammate_path="docs/search.md",
+        message="Tune search ranking",
+    ),
+    "rec-hard-commit-fetch-merge-billing": _commit_then_reconcile(
+        name="billing-service",
+        branch="feature/billing",
+        keep="src/rounding.py",
+        scratch="tmp/invoice-dump.json",
+        teammate_path="docs/billing.md",
+        message="Round invoice totals",
+    ),
     # 2.7
     "merge-medium-commit-switch-noff-reports": _commit_then_land(
         branch="feature/reports", target="main", path="src/reports.py", message="Add monthly report"
@@ -640,6 +830,12 @@ FIXTURES: dict[str, dict[str, Any]] = {
     "squash-hard-switch-squash-cleanup-ui": _switch_squash_cleanup(
         branch="feature/toast-ui", target="develop", path="src/toast.js", message="Add toast notifications"
     ),
+    "squash-hard-remote-publish-tidy-search": _squash_remote_publish_tidy(
+        name="shop-web", branch="feature/search", path="src/search.js", message="Add search"
+    ),
+    "squash-hard-remote-publish-tidy-docs": _squash_remote_publish_tidy(
+        name="api-docs", branch="docs/api", path="docs/api.md", message="Document the API"
+    ),
     # 2.9
     "rb-medium-land-and-retire-search": _land_and_retire_remote(
         name="shop-web", branch="feature/search", path="src/search.js", message="Add search page"
@@ -658,5 +854,11 @@ FIXTURES: dict[str, dict[str, Any]] = {
         branch="feature/payments-v2",
         path="src/payments.js",
         stale="feature/legacy-checkout",
+    ),
+    "rb-easy-delete-then-prune-docs": _delete_then_prune(
+        name="docs-site", branch="docs/old-faq", stale="feature/old-banner"
+    ),
+    "rb-easy-delete-then-prune-api": _delete_then_prune(
+        name="api-service", branch="feature/v1-api", stale="spike/graphql"
     ),
 }

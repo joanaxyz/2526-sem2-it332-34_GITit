@@ -39,15 +39,6 @@ WAVES: ModuleWaves = {
                     "manual-easy-navbar-copy",
                 ),
             ),
-            WaveSpec(
-                "back-out-of-a-merge",
-                "Back out of a merge",
-                DEBUT,
-                (
-                    "manual-easy-abort-wrong-branch",
-                    "manual-easy-abort-too-early",
-                ),
-            ),
         ),
         "medium": (
             WaveSpec(
@@ -58,6 +49,15 @@ WAVES: ModuleWaves = {
                     "manual-medium-router",
                     "manual-medium-policy",
                     "manual-medium-gateway",
+                ),
+            ),
+            WaveSpec(
+                "back-out-of-a-merge",
+                "Back out of a merge",
+                DEBUT,
+                (
+                    "manual-easy-abort-wrong-branch",
+                    "manual-easy-abort-too-early",
                 ),
             ),
             WaveSpec(
@@ -171,17 +171,6 @@ WAVES: ModuleWaves = {
                     "cherry-easy-export-null",
                     "cherry-easy-rate-limit",
                     "cherry-easy-null-check",
-                    "cherry-medium-login-timeout",
-                    "cherry-medium-invoice-rounding",
-                ),
-            ),
-            WaveSpec(
-                "record-where-it-came-from",
-                "Record where it came from",
-                DEBUT,
-                (
-                    "cherry-hard-trace-source",
-                    "cherry-easy-trace-source-hotfix",
                 ),
             ),
             WaveSpec(
@@ -193,8 +182,26 @@ WAVES: ModuleWaves = {
                     "cherry-medium-staged-review",
                 ),
             ),
+            WaveSpec(
+                "two-fixes-one-reviewed-commit",
+                "Two fixes, one reviewed commit",
+                COMPOSE,
+                (
+                    "cherry-medium-two-fixes-one-commit-login",
+                    "cherry-medium-two-fixes-one-commit-tax",
+                ),
+            ),
         ),
         "medium": (
+            WaveSpec(
+                "record-where-it-came-from",
+                "Record where it came from",
+                DEBUT,
+                (
+                    "cherry-hard-trace-source",
+                    "cherry-easy-trace-source-hotfix",
+                ),
+            ),
             WaveSpec(
                 "resolve-and-continue",
                 "Resolve and continue",
@@ -213,17 +220,17 @@ WAVES: ModuleWaves = {
                     "cherry-medium-abort-stopped-pick",
                 ),
             ),
-            WaveSpec(
-                "two-fixes-one-reviewed-commit",
-                "Two fixes, one reviewed commit",
-                COMPOSE,
-                (
-                    "cherry-medium-two-fixes-one-commit-login",
-                    "cherry-medium-two-fixes-one-commit-tax",
-                ),
-            ),
         ),
         "hard": (
+            WaveSpec(
+                "review-two-backports-before-committing",
+                "Review two backports before committing",
+                TRANSFER,
+                (
+                    "cherry-hard-review-backports-auth",
+                    "cherry-hard-review-backports-export",
+                ),
+            ),
             WaveSpec(
                 "backport-to-two-releases",
                 "Backport to two releases",

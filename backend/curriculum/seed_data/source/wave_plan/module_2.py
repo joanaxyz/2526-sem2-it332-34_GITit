@@ -30,6 +30,7 @@ WAVES: ModuleWaves = {
                     "v21e-ui",
                     "bc-easy-capstone-db",
                     "bc-easy-corp-hotfix",
+                    "bc-med-oss-develop",
                 ),
             ),
             WaveSpec(
@@ -39,6 +40,15 @@ WAVES: ModuleWaves = {
                 (
                     "switch-easy-back-to-main-docs",
                     "switch-easy-back-to-main-api",
+                ),
+            ),
+            WaveSpec(
+                "branch-off-then-return",
+                "Branch off, then come back",
+                COMPOSE,
+                (
+                    "switch-easy-branch-then-return-docs",
+                    "switch-easy-branch-then-return-api",
                 ),
             ),
         ),
@@ -55,24 +65,15 @@ WAVES: ModuleWaves = {
             ),
             WaveSpec(
                 "start-from-another-tip",
-                "Start from another branch's tip",
-                PRACTICE,
+                "Start from a chosen commit",
+                DEBUT,
                 (
-                    "bc-med-oss-develop",
                     "v21h-from-develop",
+                    "v21h-hotfix-c1",
                 ),
             ),
         ),
         "hard": (
-            WaveSpec(
-                "start-from-an-older-commit",
-                "Start from an older commit",
-                TRANSFER,
-                (
-                    "v21h-hotfix-c1",
-                    "v21h-detach-save",
-                ),
-            ),
             WaveSpec(
                 "save-detached-work-then-return",
                 "Save detached work, then go back",
@@ -80,6 +81,15 @@ WAVES: ModuleWaves = {
                 (
                     "bc-hard-review-snap",
                     "switch-hard-detached-save-and-return",
+                ),
+            ),
+            WaveSpec(
+                "mark-a-release-point",
+                "Mark a release point without leaving main",
+                TRANSFER,
+                (
+                    "branch-hard-mark-release-point",
+                    "branch-hard-mark-audit-point",
                 ),
             ),
         ),
@@ -108,6 +118,15 @@ WAVES: ModuleWaves = {
                     "bn-easy-delete-merged-spike",
                 ),
             ),
+            WaveSpec(
+                "replace-a-badly-named-branch",
+                "Replace a badly named branch",
+                COMPOSE,
+                (
+                    "bn-hard-oss-rename",
+                    "bn-hard-corp-rename",
+                ),
+            ),
         ),
         "medium": (
             WaveSpec(
@@ -122,25 +141,16 @@ WAVES: ModuleWaves = {
                 ),
             ),
             WaveSpec(
-                "replace-a-badly-named-branch",
-                "Replace a badly named branch",
-                COMPOSE,
-                (
-                    "bn-hard-oss-rename",
-                    "bn-hard-corp-rename",
-                ),
-            ),
-        ),
-        "hard": (
-            WaveSpec(
                 "fix-the-name-keep-the-convention",
                 "Fix the name, keep the convention",
-                TRANSFER,
+                COMPOSE,
                 (
                     "bn-hard-startup-prefix",
                     "bn-hard-qa-camel",
                 ),
             ),
+        ),
+        "hard": (
             WaveSpec(
                 "start-the-fix-on-a-well-named-branch",
                 "Start the fix on a well-named branch",
@@ -148,6 +158,15 @@ WAVES: ModuleWaves = {
                 (
                     "bn-hard-named-branch-commit-parser",
                     "bn-hard-named-branch-commit-billing",
+                ),
+            ),
+            WaveSpec(
+                "clear-out-merged-branches",
+                "Clear out the merged branches",
+                TRANSFER,
+                (
+                    "bn-hard-clear-merged-sprint",
+                    "bn-hard-clear-merged-release",
                 ),
             ),
         ),
@@ -176,8 +195,6 @@ WAVES: ModuleWaves = {
                     "stash-easy-pop-profile",
                 ),
             ),
-        ),
-        "medium": (
             WaveSpec(
                 "stash-visit-return-restore",
                 "Stash, visit, return, restore",
@@ -189,6 +206,8 @@ WAVES: ModuleWaves = {
                     "stash-med-corp-named",
                 ),
             ),
+        ),
+        "medium": (
             WaveSpec(
                 "discard-a-cancelled-draft",
                 "Discard a cancelled draft",
@@ -198,17 +217,17 @@ WAVES: ModuleWaves = {
                     "v23h-dropped-api",
                 ),
             ),
-        ),
-        "hard": (
             WaveSpec(
                 "two-stashes-keep-the-right-one",
                 "Two stashes, keep the right one",
-                TRANSFER,
+                COMPOSE,
                 (
                     "stash-hard-oss-multi",
                     "stash-hard-two-stashes-reports",
                 ),
             ),
+        ),
+        "hard": (
             WaveSpec(
                 "cancelled-work-clean-exit",
                 "Cancelled work, clean exit",
@@ -216,6 +235,15 @@ WAVES: ModuleWaves = {
                 (
                     "v23h-dropped-refactor",
                     "stash-hard-cancelled-experiment",
+                ),
+            ),
+            WaveSpec(
+                "park-the-draft-for-later",
+                "Park the draft for later",
+                TRANSFER,
+                (
+                    "stash-hard-park-draft-search",
+                    "stash-hard-park-draft-billing",
                 ),
             ),
         ),
@@ -242,6 +270,13 @@ WAVES: ModuleWaves = {
                 (
                     "v24m-auth",
                     "v24m-orders",
+                ),
+            ),
+            WaveSpec(
+                "track-another-branch",
+                "Publish and track another branch",
+                PRACTICE,
+                (
                     "v24m-parser",
                     "push-med-docs-track",
                 ),
@@ -299,8 +334,6 @@ WAVES: ModuleWaves = {
                     "v25e-main",
                     "v25e-feature",
                     "v25e-develop",
-                    "fetch-easy-cap-check",
-                    "fetch-easy-corp-list",
                 ),
             ),
             WaveSpec(
@@ -310,6 +343,22 @@ WAVES: ModuleWaves = {
                 (
                     "v25m-main",
                     "v25m-feature",
+                ),
+            ),
+            WaveSpec(
+                "check-origin-again",
+                "Check origin again",
+                PRACTICE,
+                (
+                    "fetch-easy-cap-check",
+                    "fetch-easy-corp-list",
+                ),
+            ),
+            WaveSpec(
+                "bring-more-commits-in",
+                "Bring more commits in",
+                PRACTICE,
+                (
                     "v25m-develop",
                     "pull-med-free-client",
                 ),
@@ -380,8 +429,6 @@ WAVES: ModuleWaves = {
                     "v26m-payments",
                 ),
             ),
-        ),
-        "medium": (
             WaveSpec(
                 "fetch-merge-push-practice",
                 "Reconcile a teammate's branch",
@@ -391,6 +438,8 @@ WAVES: ModuleWaves = {
                     "rec-med-qa-testrunner",
                 ),
             ),
+        ),
+        "medium": (
             WaveSpec(
                 "commit-reconcile-publish",
                 "Commit, reconcile, publish",
@@ -400,8 +449,6 @@ WAVES: ModuleWaves = {
                     "rec-medium-commit-then-reconcile-api",
                 ),
             ),
-        ),
-        "hard": (
             WaveSpec(
                 "reconcile-from-the-wrong-branch",
                 "Reconcile from the wrong branch",
@@ -411,6 +458,8 @@ WAVES: ModuleWaves = {
                     "v26h-payments",
                 ),
             ),
+        ),
+        "hard": (
             WaveSpec(
                 "reconcile-and-publish-under-pressure",
                 "Reconcile and publish under pressure",
@@ -418,6 +467,15 @@ WAVES: ModuleWaves = {
                 (
                     "v26h-hotfix",
                     "rec-hard-corp-audit",
+                ),
+            ),
+            WaveSpec(
+                "commit-fetch-merge-publish",
+                "Commit, fetch, merge, publish",
+                SPIRAL,
+                (
+                    "rec-hard-commit-fetch-merge-search",
+                    "rec-hard-commit-fetch-merge-billing",
                 ),
             ),
         ),
@@ -446,8 +504,6 @@ WAVES: ModuleWaves = {
                     "v27m-payments",
                 ),
             ),
-        ),
-        "medium": (
             WaveSpec(
                 "no-ff-practice",
                 "Merge with a merge commit",
@@ -457,6 +513,8 @@ WAVES: ModuleWaves = {
                     "merge-med-corp-sso",
                 ),
             ),
+        ),
+        "medium": (
             WaveSpec(
                 "finish-then-land",
                 "Finish the feature, then land it",
@@ -466,8 +524,6 @@ WAVES: ModuleWaves = {
                     "merge-medium-commit-switch-noff-auth",
                 ),
             ),
-        ),
-        "hard": (
             WaveSpec(
                 "land-from-the-wrong-branch",
                 "Land from the wrong branch",
@@ -475,6 +531,15 @@ WAVES: ModuleWaves = {
                 (
                     "v27h-auth",
                     "v27h-payments",
+                ),
+            ),
+        ),
+        "hard": (
+            WaveSpec(
+                "land-a-release-fix-from-the-wrong-branch",
+                "Land a release fix from the wrong branch",
+                TRANSFER,
+                (
                     "v27h-hotfix",
                     "merge-hard-devops-cert",
                 ),
@@ -514,6 +579,15 @@ WAVES: ModuleWaves = {
                     "v28h-orders",
                 ),
             ),
+            WaveSpec(
+                "one-commit-no-leftovers",
+                "One commit, no leftovers",
+                PRACTICE,
+                (
+                    "v28h-parser",
+                    "squash-hard-devops-log",
+                ),
+            ),
         ),
         "medium": (
             WaveSpec(
@@ -539,21 +613,21 @@ WAVES: ModuleWaves = {
         ),
         "hard": (
             WaveSpec(
-                "one-commit-no-leftovers",
-                "One commit, no leftovers",
-                TRANSFER,
-                (
-                    "v28h-parser",
-                    "squash-hard-devops-log",
-                ),
-            ),
-            WaveSpec(
                 "squash-land-from-another-branch",
                 "Squash-land from another branch",
                 SPIRAL,
                 (
                     "squash-hard-switch-squash-cleanup-cli",
                     "squash-hard-switch-squash-cleanup-ui",
+                ),
+            ),
+            WaveSpec(
+                "squash-a-remote-branch-publish-tidy",
+                "Squash a remote branch, publish, tidy up",
+                TRANSFER,
+                (
+                    "squash-hard-remote-publish-tidy-search",
+                    "squash-hard-remote-publish-tidy-docs",
                 ),
             ),
         ),
@@ -582,6 +656,15 @@ WAVES: ModuleWaves = {
                     "v29m-orders",
                     "v29m-parser",
                     "rb-med-free-prune",
+                ),
+            ),
+            WaveSpec(
+                "delete-then-prune",
+                "Delete one, prune the rest",
+                COMPOSE,
+                (
+                    "rb-easy-delete-then-prune-docs",
+                    "rb-easy-delete-then-prune-api",
                 ),
             ),
         ),
