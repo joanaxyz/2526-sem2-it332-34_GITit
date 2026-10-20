@@ -43,6 +43,16 @@
   font-weight: 700;
 }
 
+.scenario-inline-em {
+  font-style: italic;
+}
+
+.scenario-inline-underline {
+  text-decoration-line: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 0.18em;
+}
+
 .text-primary-foreground { color: hsl(var(--primary-foreground)); }
 .text-accent { color: hsl(var(--accent)); }
 .text-destructive { color: hsl(var(--destructive)); }

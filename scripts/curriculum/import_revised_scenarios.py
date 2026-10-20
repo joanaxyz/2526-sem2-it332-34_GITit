@@ -23,7 +23,28 @@ SCENARIO_RE = re.compile(
 )
 VARIANT_RE = re.compile(r"^\*\*Variant ID:\*\* `([^`]+)`\s*$", re.MULTILINE)
 DOCUMENT_HEADING_RE = re.compile(r"^#{1,2} ", re.MULTILINE)
-HEADING_RE = re.compile(r"^\*\*(?P<heading>[^*\n]+)\*\*(?P<tail>[^\n]*)$", re.MULTILINE)
+SECTION_NAMES = (
+    "Variant ID:",
+    "Story",
+    "Starting point:",
+    "Real-World Context",
+    "Your Task",
+    "Required resolved file content",
+    "Objective Checklist",
+    "Answer Key",
+    "Accepted Alternatives",
+    "Not accepted",
+    "Expected Result",
+    "Evaluation",
+)
+# Only known section names open a block, so authored prose may start a line
+# with **emphasis** without being mistaken for a heading.
+HEADING_RE = re.compile(
+    r"^\*\*(?P<heading>(?:"
+    + "|".join(re.escape(name) for name in SECTION_NAMES)
+    + r")(?: \(STAFF ONLY[^)\n]*\))?)\*\*(?P<tail>[^\n]*)$",
+    re.MULTILINE,
+)
 ORDERED_STEP_RE = re.compile(r"(?ms)^\d+\.\s+(.*?)(?=^\d+\.\s+|\Z)")
 REQUIRED_FILE_RE = re.compile(
     r"(?ms)^`(?P<path>[^`\n]+)`\s*\n+\s*```[^\n]*\n(?P<content>.*?)\n\s*```"
