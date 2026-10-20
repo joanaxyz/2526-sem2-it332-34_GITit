@@ -10,8 +10,9 @@ from rest_framework.exceptions import ValidationError
 
 from adventures.models import (
     AdventureLevel,
-    AdventureWave,
-    AdventureWaveVariant,
+    AdventureLevelTier,
+    AdventureLevelTierWave,
+    AdventureLevelTierWaveVariant,
 )
 from authoring.models import ContentDefinition, ContentKind, PublishedContentRuntime
 from authoring.schemas import (
@@ -21,6 +22,7 @@ from authoring.schemas import (
     level_waves,
 )
 from challenges.models import ChallengeLevel, ChallengeTrial, ChallengeTrialVariant
+from common.constants import DIFFICULTY_EASY
 from curriculum.models import (
     MANAGEMENT_SOURCE_RUNTIME,
     Chapter,
@@ -31,6 +33,8 @@ from curriculum.models import (
 from simulator.services import RepositoryStateSimulator
 from simulator.trajectory import build_solution_trajectory
 
+# Adventures compile to difficulty tiers with ordered waves.
+RUNTIME_SHAPE = "tier-waves-v1"
 HIDDEN_CHAPTER_NUMBER_BASE = 900_000
 GROUPED_CHAPTER_NUMBER_BASE = 800_000
 
@@ -153,45 +157,62 @@ class ContentRuntimeCompiler:
         )[0]
 
     def _compile_adventure(self, content: ContentDefinition, chapter: Chapter) -> AdventureLevel:
+        """Compile authored levels onto the difficulty-tier runtime.
+
+        Each authored level becomes an AdventureLevel with one Easy tier whose
+        ordered waves are the level's authored problems, one clear each. Rows
+        are upserted by slug and removed ones unpublished, never deleted:
+        playtest runs reference tiers, waves and variants.
+        """
         fallback_form = self._command_form_for_content(content=content, chapter=chapter)
-        AdventureLevel.objects.filter(source_content_definition=content).delete()
+        kept_level_ids: list[int] = []
         first_level = None
         for index, authored in enumerate(content_levels(content.definition)):
-            level = AdventureLevel.objects.create(
+            level = self._upsert_adventure_level(
+                content=content,
                 chapter=chapter,
                 slug=authored["slug"],
                 title=authored["title"],
-                is_published=True,
                 sort_order=index,
-                source_content_definition=content,
             )
+            kept_level_ids.append(level.id)
             if first_level is None:
                 first_level = level
             level_forms = self._resolve_level_forms(authored, fallback=fallback_form)
             level.command_forms.set(level_forms)
+            tier, _ = AdventureLevelTier.objects.update_or_create(
+                adventure_level=level,
+                difficulty=DIFFICULTY_EASY,
+                defaults={"is_published": True},
+            )
+            kept_wave_slugs: list[str] = []
             for wave_index, authored_wave in enumerate(level_waves(authored)):
                 ctx = authored_wave.get("scenario_context") or {}
                 budget = authored_wave.get("command_budget") or {}
-                wave = AdventureWave.objects.create(
-                    level=level,
+                wave, _ = AdventureLevelTierWave.objects.update_or_create(
+                    tier=tier,
                     slug=authored_wave.get("slug") or f"{level.slug}-wave-{wave_index + 1}",
-                    title=authored_wave.get("title", "") or "",
-                    sort_order=wave_index,
-                    story=ctx.get("story", "") or "",
-                    task=ctx.get("task", "") or "",
-                    min_counted_commands=int(
-                        budget.get("min_counted_commands")
-                        or authored_wave.get("min_counted_commands")
-                        or 1
-                    ),
-                    max_counted_commands=int(
-                        budget.get("max_counted_commands")
-                        or authored_wave.get("max_counted_commands")
-                        or 8
-                    ),
-                    objective_checks=authored_wave.get("objective_checks") or [],
-                    is_published=True,
+                    defaults={
+                        "title": authored_wave.get("title", "") or "",
+                        "sort_order": wave_index,
+                        "story": ctx.get("story", "") or "",
+                        "task": ctx.get("task", "") or "",
+                        "min_counted_commands": int(
+                            budget.get("min_counted_commands")
+                            or authored_wave.get("min_counted_commands")
+                            or 1
+                        ),
+                        "max_counted_commands": int(
+                            budget.get("max_counted_commands")
+                            or authored_wave.get("max_counted_commands")
+                            or 8
+                        ),
+                        "objective_checks": authored_wave.get("objective_checks") or [],
+                        "required_successful_attempts": 1,
+                        "is_published": True,
+                    },
                 )
+                kept_wave_slugs.append(wave.slug)
                 wave_forms = self._resolve_level_forms(
                     authored_wave,
                     fallback=None,
@@ -200,20 +221,40 @@ class ContentRuntimeCompiler:
                 wave.command_forms.set(wave_forms or level_forms)
                 self._replace_variants(
                     parent=wave,
-                    variant_model=AdventureWaveVariant,
+                    variant_model=AdventureLevelTierWaveVariant,
                     parent_field="wave",
                     authored=authored_wave,
                     index=wave_index,
                 )
+            tier.waves.exclude(slug__in=kept_wave_slugs).update(is_published=False)
         if first_level is None:
-            first_level = AdventureLevel.objects.create(
+            first_level = self._upsert_adventure_level(
+                content=content,
                 chapter=chapter,
                 slug=f"ugc-adventure-{content.id}",
                 title=content.title,
-                is_published=True,
-                source_content_definition=content,
+                sort_order=0,
             )
+            kept_level_ids.append(first_level.id)
+        AdventureLevel.objects.filter(source_content_definition=content).exclude(
+            id__in=kept_level_ids
+        ).update(is_published=False)
         return first_level
+
+    @staticmethod
+    def _upsert_adventure_level(
+        *, content: ContentDefinition, chapter: Chapter, slug: str, title: str, sort_order: int
+    ) -> AdventureLevel:
+        return AdventureLevel.objects.update_or_create(
+            chapter=chapter,
+            slug=slug,
+            defaults={
+                "title": title,
+                "is_published": True,
+                "sort_order": sort_order,
+                "source_content_definition": content,
+            },
+        )[0]
 
     def _compile_challenge(self, content: ContentDefinition, chapter: Chapter) -> ChallengeLevel:
         # Grouped authored chapters share one runtime Chapter, so challenge
@@ -529,6 +570,9 @@ class ContentRuntimeCompiler:
         return hashlib.sha256(
             json.dumps(
                 {
+                    # Bumped when the compiled runtime shape changes, so content
+                    # compiled for an older shape recompiles on its next compile.
+                    "runtime": RUNTIME_SHAPE,
                     "kind": content.kind,
                     "title": content.title,
                     "summary": content.summary,

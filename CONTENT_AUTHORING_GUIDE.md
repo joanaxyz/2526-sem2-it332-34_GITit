@@ -7,7 +7,7 @@ This guide explains how to author curriculum content that teaches Git through sc
 | Type | Purpose | Shape | Completion |
 |---|---|---|---|
 | Lesson | Explain a concept briefly before practice | Chapter book pages | Read/progress state |
-| Adventure | Teach command mastery through guided scenarios | Levels → waves → variants | Wave objectives + verified state |
+| Adventure | Teach command mastery through guided scenarios | Levels → easy/medium/hard tiers → ordered waves → variants | Every wave of the tier cleared, verified by state |
 | Challenge | Assess transfer on new scenarios | Easy/medium/hard trials → variants | Whole-state evaluation |
 
 ## Authoring Principles
@@ -21,35 +21,52 @@ This guide explains how to author curriculum content that teaches Git through sc
 
 ## Adventure Authoring
 
-Adventure scenario specs live under
-`backend/curriculum/seed_data/source/adventure_level_specs/`. Foundational
-level and wave groupings live in the blueprint ledgers under
-`backend/curriculum/seed_data/source/blueprint/`; advanced drill groupings live
-in the private owner map in `backend/curriculum/seed_data/adventures.py`.
+`MODULE_LEVELS` in `backend/curriculum/management/commands/seed_curriculum.py`
+defines each module level: the command forms it teaches and, for each of its
+Easy, Medium, and Hard tiers, the story, task, counted-command budget, and
+scenario cases. The levels and the commands each one teaches are fixed by the
+team; waves, variants, and the difficulty a command form appears at may change.
 
-A wave should define:
+A tier holds ordered waves; a run plays the learner's next uncleared wave and
+serves one of its variants, and the tier completes when every wave is cleared.
+A wave's command forms are the level forms every one of its variants' answer
+keys uses. A clear credits them toward mastery, so keep a wave's variants on
+the same forms.
 
-- stable usage key
-- stable slug
-- learner-facing title/story/task
-- two variants
+Scenarios come from two banks:
+
+- `seed_data/scenario_bank.json`, the main bank, compiled from the revised
+  Markdown scenario document with
+  `python scripts/curriculum/import_revised_scenarios.py <document.md>`.
+- `seed_data/scenario_bank_waves.json`, the extension bank, compiled from
+  `seed_data/source/wave_scenarios.md` with the same script and `--extension`.
+  Each extension scenario's repository fixture, evaluation rules, and answer
+  key live in `seed_data/source/scenario_fixtures/` under the same ID. The
+  importer rejects an ID or number that collides with the main bank.
+
+Each scenario should define:
+
+- a stable case ID
+- a learner-facing title, story, and task
+- an initial repository state
 - solution commands (git, plus terminal shell commands such as `mkdir`, `cd`, `touch`, or `echo "x" > file` when the task is about files; replay keeps the working directory between them)
-- objective checks, when the wave is guided
-- prerequisites, when order matters
-
-A level groups waves through exactly one of those owners. The public
-`ADVENTURE_WAVE_PLANS` mapping is their validated composition output, not a
-second authoring surface.
+- state requirements the evaluator verifies
+- a counted-command budget when the tier default does not fit
 
 ## Challenge Authoring
 
-Challenge data lives in `backend/curriculum/seed_data/challenges.py`.
+Each module ends in a Challenge Gate: a workflow that tests what the module
+taught. `seed_data/source/challenge_gates.py` composes each gate's title,
+narrative, and the two scenarios behind each of its Easy, Medium, and Hard
+trials. Gate scenarios are extension scenarios numbered `N.G.k` in
+`seed_data/source/wave_scenarios.md`. A trial of a given difficulty opens once
+every required level of the module has cleared its tier of that difficulty.
 
-Each challenge should have:
+Each trial should have:
 
-- easy, medium, and hard trials
-- two variants per trial
+- two variants
 - a new scenario not copied from adventures
+- a workflow that combines the module's commands
 - a repository-state transition that changes the DAG or refs
 - evaluation specs that verify final state instead of command text alone
 
@@ -77,16 +94,13 @@ diagram fades first, then feedback.
 | medium | yes | no | yes |
 | hard | yes | no | no |
 
-Guided adventure runs walk waves instead of difficulty tiers, so they sit
-outside both ladders: live DAG plus the objective checklist, nothing that fades.
-
 The Expected State panel needs both the ladder flag and a populated
 `target_state`, so a variant with an empty target silently loses its diagram.
 Targets come from `python manage.py generate_targets` - never by hand.
 
 ## Objective Checks
 
-Guided adventure objectives should be:
+Where a wave defines objective checks, they should be:
 
 - **Modular** — one visible checklist row per meaningful step.
 - **Variant-safe** — do not hard-code a file/branch/commit that differs between variants.
@@ -151,5 +165,5 @@ Before merging content changes:
 ```bash
 python scripts/check_seed_targets.py
 python scripts/check_generated_targets_current.py
-cd backend && python -m pytest curriculum/tests/test_objective_soundness.py curriculum/tests/test_curriculum_chapter_books.py curriculum/tests/test_curriculum_fixture_idempotency.py -q
+cd backend && python -m pytest curriculum/tests/test_curriculum_chapter_books.py curriculum/tests/test_curriculum_seed_idempotency.py curriculum/tests/test_star_target_reachability.py curriculum/tests/test_solution_replay_guard.py challenges/tests/test_module_challenge_gates.py -q
 ```

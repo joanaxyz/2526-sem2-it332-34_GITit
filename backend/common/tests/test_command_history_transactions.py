@@ -9,11 +9,7 @@ from adventures.models import (
     AdventureLevelTierRun,
     AdventureLevelTierWave,
     AdventureLevelTierWaveVariant,
-    AdventureRun,
-    AdventureWave,
-    AdventureWaveVariant,
 )
-from adventures.services.history import AdventureCommandHistoryCache
 from adventures.services.tier_history import TierCommandHistoryCache
 from challenges.models import ChallengeLevel, ChallengeRun, ChallengeTrial, ChallengeTrialVariant
 from challenges.services.history import CommandHistoryCache
@@ -24,31 +20,24 @@ from practice.models import CommandStep
 
 @dataclass
 class HistorySession:
-    run: AdventureRun | AdventureLevelTierRun | ChallengeRun
-    cache: AdventureCommandHistoryCache | TierCommandHistoryCache | CommandHistoryCache
+    run: AdventureLevelTierRun | ChallengeRun
+    cache: TierCommandHistoryCache | CommandHistoryCache
     parent_field: str
 
     def key(self, count):
-        if self.parent_field == "attempt":
-            return self.cache.key_for(attempt=self.run, log_count=count)
         return self.cache.key_for(run=self.run, attempt_count=count)
 
     def read(self, count):
-        if self.parent_field == "attempt":
-            return self.cache.history_for(attempt=self.run, log_count=count)
         self.run.total_attempts = count
         return self.cache.history_for(run=self.run)
 
     def remember(self, count, history):
-        if self.parent_field == "attempt":
-            self.cache.remember(attempt=self.run, log_count=count, history=history)
-        else:
-            self.run.total_attempts = count
-            self.cache.remember_after_append(
-                run=self.run,
-                previous_history=history[:-1],
-                normalized_command=history[-1],
-            )
+        self.run.total_attempts = count
+        self.cache.remember_after_append(
+            run=self.run,
+            previous_history=history[:-1],
+            normalized_command=history[-1],
+        )
 
     def step(self, count, command="git status", *, processed=True):
         return CommandStep.objects.create(
@@ -66,7 +55,7 @@ class HistorySession:
         )
 
 
-@pytest.fixture(params=["challenge", "adventure", "tier"])
+@pytest.fixture(params=["challenge", "tier"])
 def history_session(request, transactional_db, django_user_model):
     player = get_or_create_player(django_user_model.objects.create_user(username="history-player"))
     story = Story.objects.create(slug="history", title="History")
@@ -81,21 +70,13 @@ def history_session(request, transactional_db, django_user_model):
         session = HistorySession(run, CommandHistoryCache(), "challenge_run")
     else:
         level = AdventureLevel.objects.create(chapter=chapter, slug="history", title="History")
-        if request.param == "adventure":
-            wave = AdventureWave.objects.create(level=level, slug="history")
-            variant = AdventureWaveVariant.objects.create(wave=wave, slug="history")
-            run = AdventureRun.objects.create(
-                player=player, level=level, current_wave=wave, selected_variant=variant
-            )
-            session = HistorySession(run, AdventureCommandHistoryCache(), "attempt")
-        else:
-            tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-            wave = AdventureLevelTierWave.objects.create(tier=tier, slug="history")
-            variant = AdventureLevelTierWaveVariant.objects.create(wave=wave, slug="history")
-            run = AdventureLevelTierRun.objects.create(
-                player=player, tier=tier, current_wave=wave, selected_variant=variant
-            )
-            session = HistorySession(run, TierCommandHistoryCache(), "adventure_tier_run")
+        tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
+        wave = AdventureLevelTierWave.objects.create(tier=tier, slug="history")
+        variant = AdventureLevelTierWaveVariant.objects.create(wave=wave, slug="history")
+        run = AdventureLevelTierRun.objects.create(
+            player=player, tier=tier, current_wave=wave, selected_variant=variant
+        )
+        session = HistorySession(run, TierCommandHistoryCache(), "adventure_tier_run")
     session.cache._cache.clear()
     yield session
     session.cache._cache.clear()

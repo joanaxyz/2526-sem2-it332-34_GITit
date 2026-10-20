@@ -1,7 +1,6 @@
 from types import SimpleNamespace
 
 import pytest
-from django.utils import timezone
 from rest_framework.test import APIClient
 
 from adventures.models import (
@@ -9,11 +8,12 @@ from adventures.models import (
     AdventureLevelTier,
     AdventureLevelTierWave,
     AdventureLevelTierWaveVariant,
-    AdventureWave,
-    AdventureWaveVariant,
     SkillMastery,
 )
-from adventures.services import AdventureLevelTierRunService, AdventureRunService
+from adventures.services import (
+    AdventureLevelTierCommandProcessingService,
+    AdventureLevelTierRunService,
+)
 from adventures.services.skill_learning import learn_from_command
 from curriculum.models import Chapter, CommandForm, CommandSkill, Story
 from curriculum.selectors.command_skills import learned_command_skills
@@ -91,8 +91,7 @@ def test_unpublished_or_unplayable_forms_do_not_teach(learner):
     assert learned_command_skills(player=learner) == []
 
 
-@pytest.mark.parametrize("lane", ["adventure", "tier"])
-def test_verified_command_teaches_before_completion_and_survives_discard(learner, lane):
+def test_verified_command_teaches_before_completion_and_survives_discard(learner):
     story = Story.objects.create(slug="learning-story", title="Learning")
     chapter = Chapter.objects.create(story=story, slug="learning", number=1, title="Learning")
     status_form = form("git status", chapter=chapter)
@@ -116,19 +115,12 @@ def test_verified_command_teaches_before_completion_and_survives_discard(learner
         },
         "solution_commands": ['git commit -m "First"'],
     }
-    if lane == "adventure":
-        wave = AdventureWave.objects.create(level=level, slug="learning")
-        AdventureWaveVariant.objects.create(wave=wave, **variant_fields)
-        run_service = AdventureRunService()
-        run = run_service.start_run(player=learner, level=level)
-        endpoint = f"/api/adventure-runs/{run.id}/submit-command/"
-    else:
-        tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-        wave = AdventureLevelTierWave.objects.create(tier=tier, slug="learning")
-        AdventureLevelTierWaveVariant.objects.create(wave=wave, **variant_fields)
-        run_service = AdventureLevelTierRunService()
-        run = run_service.start_run(player=learner, tier=tier, source_entry_point="level_page")
-        endpoint = f"/api/adventure-tier-runs/{run.id}/submit-command/"
+    tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
+    wave = AdventureLevelTierWave.objects.create(tier=tier, slug="learning")
+    AdventureLevelTierWaveVariant.objects.create(wave=wave, **variant_fields)
+    run_service = AdventureLevelTierRunService()
+    run = run_service.start_run(player=learner, tier=tier, source_entry_point="level_page")
+    endpoint = f"/api/adventure-tier-runs/{run.id}/submit-command/"
     wave.command_forms.add(status_form, commit_form)
     client = APIClient()
     client.force_authenticate(user=learner.user)
@@ -198,20 +190,23 @@ def test_verified_command_teaches_before_completion_and_survives_discard(learner
     ]
 
 
-def test_completion_without_command_use_cannot_populate_spellbook(learner):
+def test_completion_without_command_use_credits_nothing(learner):
+    """Clearing a wave credits only the forms its runs typed (PLAN.md §7.2)."""
     story = Story.objects.create(slug="completion-story", title="Completion")
     chapter = Chapter.objects.create(story=story, slug="completion", number=1, title="Completion")
     unused = form("git status", chapter=chapter)
     level = AdventureLevel.objects.create(chapter=chapter, slug="completion", title="Completion")
     level.command_forms.add(unused)
-    wave = AdventureWave.objects.create(level=level, slug="completion")
+    tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
+    wave = AdventureLevelTierWave.objects.create(tier=tier, slug="completion")
     wave.command_forms.add(unused)
-    AdventureWaveVariant.objects.create(wave=wave, slug="completion")
-    service = AdventureRunService()
-    run = service.start_run(player=learner, level=level)
-    run.passed_at = timezone.now()
-    run.save(update_fields=["passed_at"])
-    service._credit_mastery(player=learner, level=level)
+    AdventureLevelTierWaveVariant.objects.create(wave=wave, slug="completion")
+    run = AdventureLevelTierRunService().start_run(
+        player=learner, tier=tier, source_entry_point="level_page"
+    )
 
+    credited = AdventureLevelTierCommandProcessingService()._credit_mastery(run, [unused])
+
+    assert credited == []
     assert learned_command_skills(player=learner) == []
-    assert SkillMastery.objects.get(player=learner, command_form=unused).solves == 1
+    assert not SkillMastery.objects.filter(player=learner, command_form=unused).exists()

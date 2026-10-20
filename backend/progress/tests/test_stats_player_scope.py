@@ -12,9 +12,6 @@ from adventures.models import (
     AdventureLevelTierRun,
     AdventureLevelTierWave,
     AdventureLevelTierWaveVariant,
-    AdventureRun,
-    AdventureWave,
-    AdventureWaveVariant,
 )
 from challenges.models import ChallengeLevel, ChallengeRun, ChallengeTrial, ChallengeTrialVariant
 from curriculum.models import Chapter, Story
@@ -29,8 +26,6 @@ def stats_players(db, django_user_model):
     story = Story.objects.create(slug="arcane-spire", title="The Arcane Spire")
     chapter = Chapter.objects.create(story=story, slug="stats", number=1, title="Stats")
     level = AdventureLevel.objects.create(chapter=chapter, slug="stats", title="Stats")
-    wave = AdventureWave.objects.create(level=level, slug="stats")
-    variant = AdventureWaveVariant.objects.create(wave=wave, slug="stats")
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
     tier_wave = AdventureLevelTierWave.objects.create(tier=tier, slug="stats")
     tier_variant = AdventureLevelTierWaveVariant.objects.create(wave=tier_wave, slug="stats")
@@ -42,13 +37,6 @@ def stats_players(db, django_user_model):
         user = django_user_model.objects.create_user(username=username)
         player = get_or_create_player(user)
         runs = {
-            "attempt": AdventureRun.objects.create(
-                player=player,
-                level=level,
-                current_wave=wave,
-                selected_variant=variant,
-                status="completed",
-            ),
             "challenge_run": ChallengeRun.objects.create(
                 player=player,
                 challenge_trial=trial,
@@ -119,7 +107,7 @@ def _completed_tier_run(player, *, story_slug: str, suffix: str, chapter_number:
 def test_player_steps_use_the_direct_owner_without_parent_joins(stats_players):
     (_, player, runs), (_, other_player, other_runs) = stats_players
     own_steps = [_step(runs, parent, number=1) for parent in runs]
-    _step(other_runs, "attempt", number=1)
+    _step(other_runs, "adventure_tier_run", number=1)
 
     queryset = MetricsService()._player_steps(player=player)
     sql = str(queryset.query)
@@ -137,7 +125,6 @@ def test_stats_include_only_runebound_tier_commands_without_leaking_other_player
 ):
     (user, player, runs), (_, _, other_runs) = stats_players
     _step(runs, "challenge_run", number=1, days_ago=2)
-    _step(runs, "attempt", number=1, days_ago=1, valid=False)
     _step(runs, "adventure_tier_run", number=1)
     _step(runs, "adventure_tier_run", number=2, valid=False)
     # Headline accuracy and volume stay all-time even outside every trend window.
@@ -165,7 +152,7 @@ def test_stats_include_only_runebound_tier_commands_without_leaking_other_player
 
 def test_stats_count_runebound_tier_completions_in_one_query(stats_players):
     (_, player, runs), (_, other_player, _) = stats_players
-    level = runs["attempt"].level
+    level = runs["adventure_tier_run"].tier.adventure_level
     other_level = AdventureLevel.objects.create(
         chapter=level.chapter, slug="another", title="Another"
     )

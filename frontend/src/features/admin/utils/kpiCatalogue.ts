@@ -78,3 +78,10 @@ export const MODULES: readonly ModuleObjectives[] = [
     ],
   },
 ]
+
+/** Reuse the approved SO targets when a module table grades a KPI. */
+export function moduleTarget(key: KpiKey, number: number): number {
+  const metric = MODULES.find((module) => module.num === number)?.sos
+    .flatMap((objective) => objective.metrics).find((item) => item.kpi === key)
+  return metric?.target ?? KPIS.find((kpi) => kpi.key === key)!.target
+}

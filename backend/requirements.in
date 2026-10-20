@@ -7,7 +7,7 @@ django-redis==6.0.0
 whitenoise==6.11.0
 redis==7.4.0
 drf-spectacular==0.29.0
-psycopg[binary]==3.3.4
+psycopg[binary,pool]==3.3.4
 sqlparse==0.6.0
 # Production WSGI server (POSIX-only; Windows dev uses manage.py runserver)
 gunicorn==23.0.0; sys_platform != "win32"

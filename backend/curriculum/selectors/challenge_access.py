@@ -11,7 +11,10 @@ from common.constants import (
 from curriculum.models import CommandForm
 
 from .access_helpers import _completion_payload, _latest_attempt_payload, _ordered_trials
-from .adventure_access import _adventure_passed
+from .adventure_access import _adventure_passed, cleared_tier_difficulties
+
+# Distinguishes "not computed by the caller" from None ("no tiers in chapter").
+_UNSET = object()
 
 
 @dataclass(frozen=True)
@@ -24,6 +27,9 @@ class ChallengeAccessContext:
     level_completions: set[int] = field(default_factory=set)
     latest_runs: dict[int, ChallengeRun] = field(default_factory=dict)
     adventure_passed: bool = False
+    # Tier chapters only: difficulties whose tier every level has cleared,
+    # which open the matching gate trials. None for wave-based chapters.
+    cleared_tier_difficulties: set[str] | None = None
 
 
 def _build_challenge_access(
@@ -32,6 +38,7 @@ def _build_challenge_access(
     chapter_id: int,
     challenges: list[ChallengeLevel],
     adventure_passed: bool | None = None,
+    cleared_difficulties: set[str] | None | object = _UNSET,
 ) -> ChallengeAccessContext:
     from progress.models import ChallengeLevelCompletion, ChallengeTrialCompletion
 
@@ -39,11 +46,17 @@ def _build_challenge_access(
         return ChallengeAccessContext()
     if adventure_passed is None:
         adventure_passed = _adventure_passed(player=player, chapter_id=chapter_id)
+    if cleared_difficulties is _UNSET:
+        # Callers that already hold the chapter's tiers pass the result in.
+        cleared_difficulties = cleared_tier_difficulties(player=player, chapter_id=chapter_id)
     challenge_levels = list(challenges)
     challenge_level_ids = [level.id for level in challenge_levels]
     trial_ids = [trial.id for level in challenge_levels for trial in level.trials.all()]
     if not trial_ids:
-        return ChallengeAccessContext(adventure_passed=adventure_passed)
+        return ChallengeAccessContext(
+            adventure_passed=adventure_passed,
+            cleared_tier_difficulties=cleared_difficulties,
+        )
 
     completions = {
         completion.challenge_trial_id: completion
@@ -88,6 +101,7 @@ def _build_challenge_access(
         level_completions=level_completions,
         latest_runs=latest_runs,
         adventure_passed=adventure_passed,
+        cleared_tier_difficulties=cleared_difficulties,
     )
 
 
@@ -249,6 +263,11 @@ def _challenge_unlocked(
         level=trial.challenge_level,
         access=access,
         sibling_levels=sibling_levels,
+    ):
+        return False
+    if (
+        access.cleared_tier_difficulties is not None
+        and trial.difficulty not in access.cleared_tier_difficulties
     ):
         return False
     if trial.difficulty == DIFFICULTY_EASY:

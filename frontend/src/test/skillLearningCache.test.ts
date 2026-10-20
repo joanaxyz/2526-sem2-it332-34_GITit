@@ -2,8 +2,6 @@ import { QueryClient } from '@tanstack/react-query'
 import { cleanup, renderHook } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { useAdventureCommandSubmission } from '@/features/adventures/hooks/useAdventureCommandSubmission'
-import type { AdventureCommandResponse, AdventureRun, AdventureStepLog } from '@/features/adventures/types'
 import { useTierCommandSubmission } from '@/features/story-map/hooks/useTierCommandSubmission'
 import type { TierCommandResponse, TierRun, TierStepLog } from '@/features/story-map/components/tierWorkspaceTypes'
 import { queryKeys } from '@/shared/api/queryKeys'
@@ -17,17 +15,6 @@ const skill = { id: 7, slug: 'git-init', title: 'Create a repository', base_comm
 afterEach(() => { cleanup(); vi.clearAllMocks() })
 
 describe('learned skill cache updates on command responses', () => {
-  it.each([true, false])('refreshes the spellbook only for an adventure learning event while the run is still started (event=%s)', (learned) => {
-    renderHook(() => useAdventureCommandSubmission(1))
-    const config = mocks.optimistic.mock.calls[0][0] as OptimisticGitCommandConfig<AdventureRun, AdventureStepLog, AdventureCommandResponse>
-    const queryClient = new QueryClient()
-    const invalidate = vi.spyOn(queryClient, 'invalidateQueries')
-    const response = { run: { partial: true, status: 'started' }, learned_skills: learned ? [skill] : [] } as unknown as AdventureCommandResponse
-    config.onSuccess(response, undefined, queryClient)
-    const spellbookCalls = invalidate.mock.calls.filter(([filters]) => filters?.queryKey === queryKeys.learnedSkills)
-    expect(spellbookCalls).toHaveLength(learned ? 1 : 0)
-  })
-
   it.each([true, false])('refreshes the spellbook only for a tier learning event while the run is still started (event=%s)', (learned) => {
     renderHook(() => useTierCommandSubmission(1))
     const config = mocks.optimistic.mock.calls[0][0] as OptimisticGitCommandConfig<TierRun, TierStepLog, TierCommandResponse>

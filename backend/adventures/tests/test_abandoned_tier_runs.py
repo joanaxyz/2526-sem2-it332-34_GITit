@@ -188,7 +188,7 @@ def test_abandoned_runs_do_not_count_as_tried_variants(tier, learner):
     AdventureLevelTierRunService().discard(run=run)
     selector = TierVariantSelectionService()
 
-    assert selector._tried_variant_keys(player=player, tier=tier) == set()
+    assert selector._tried_variant_keys(player=player, wave=run.current_wave) == set()
 
     AdventureLevelTierRun.objects.create(
         player=player,
@@ -197,6 +197,6 @@ def test_abandoned_runs_do_not_count_as_tried_variants(tier, learner):
         selected_variant=run.selected_variant,
         status=SESSION_STATUS_FAILED,
     )
-    assert selector._tried_variant_keys(player=player, tier=tier) == {
+    assert selector._tried_variant_keys(player=player, wave=run.current_wave) == {
         run.selected_variant.semantic_key
     }

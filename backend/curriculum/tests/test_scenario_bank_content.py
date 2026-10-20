@@ -8,6 +8,8 @@ from curriculum.management.commands.seed_curriculum import MODULE_LEVELS
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
 from curriculum.seed_data.scenario_bank import scenario_bank
 from curriculum.seed_data.scenario_runtime import DISPLACED_REVISED_CASE_IDS
+from curriculum.seed_data.source.scenario_fixtures import extension_cases
+from curriculum.seed_data.source.wave_plan import MODULE_WAVE_PLAN
 from evaluation.services.state_based import StateBasedEvaluator
 
 
@@ -99,6 +101,31 @@ def test_every_revised_answer_key_satisfies_its_runtime_evaluation():
     assert failures == []
 
 
+def test_every_wave_and_gate_answer_key_satisfies_its_evaluation_and_the_start_does_not():
+    """The scenarios written for the wave plan and the gates (``wave_scenarios.md``)."""
+    evaluator = StateBasedEvaluator()
+    failures = []
+
+    for case_id, case in extension_cases().items():
+        solved = evaluator.evaluate(
+            TARGET_STATES[case_id],
+            case["state_requirements"],
+            initial_state=case["initial_state"],
+            executed_commands=case["solution_commands"],
+        )
+        if not solved.target_matched:
+            failures.append((case_id, [rule["reason"] for rule in solved.failed_rules]))
+        untouched = evaluator.evaluate(
+            case["initial_state"],
+            case["state_requirements"],
+            initial_state=case["initial_state"],
+            executed_commands=[],
+        )
+        if untouched.target_matched:
+            failures.append((case_id, "the starting state already passes"))
+
+    assert failures == []
+
 @pytest.mark.django_db
 def test_curriculum_seed_persists_the_complete_scenario_contract():
     call_command("seed_curriculum", verbosity=0)
@@ -131,7 +158,23 @@ def test_curriculum_seed_persists_the_complete_scenario_contract():
         "label": "Required file: src/auth.js",
         "value": "timeout=5000\nretry=enabled",
     }
-    assert AdventureLevelTierWaveVariant.objects.filter(is_published=True).count() == 265
+    # Planned levels publish their waves' variants; the rest still publish their pools.
+    planned = sum(
+        len(wave.variants)
+        for tiers in MODULE_WAVE_PLAN.values()
+        for waves in tiers.values()
+        for wave in waves
+    )
+    pooled = sum(
+        len(tier["cases"])
+        for level in MODULE_LEVELS
+        if level["slug"] not in MODULE_WAVE_PLAN
+        for tier in level["tiers"].values()
+    )
+    assert (
+        AdventureLevelTierWaveVariant.objects.filter(is_published=True).count()
+        == planned + pooled
+    )
 
 
 @pytest.mark.django_db

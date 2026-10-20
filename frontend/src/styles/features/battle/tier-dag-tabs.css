@@ -69,6 +69,37 @@
   transform: translateX(100%);
 }
 
+/* Switch/Split is a layout setting, not a view: a flat, squared segmented
+   control that reads as secondary beside the Live/Expected pill. */
+.tier-dag-layout-toggle {
+  padding: 0;
+  border-color: rgba(var(--theme-primary-rgb), 0.18);
+  border-radius: var(--radius-sm);
+  background: transparent;
+  box-shadow: none;
+}
+
+.tier-dag-layout-toggle::before {
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 50%;
+  border: 0;
+  border-radius: 0;
+  background: rgba(var(--theme-primary-rgb), 0.12);
+  box-shadow: inset 0 -2px 0 rgb(var(--theme-primary-rgb));
+}
+
+.tier-dag-layout-toggle .tier-dag-tab {
+  border-radius: 0;
+  padding: 0.2rem 0.6rem;
+  letter-spacing: 0.06em;
+}
+
+.tier-dag-layout-toggle .tier-dag-tab + .tier-dag-tab {
+  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.18);
+}
+
 .tier-dag-tab {
   position: relative;
   border: 0;
@@ -164,17 +195,14 @@
   bottom: 0;
 }
 
-/* Overlay chrome stays inside the visible slice of each canvas. */
-.tier-dag-panes.is-split [data-dag-pane='live'] .react-flow__panel.bottom {
-  bottom: var(--tier-dag-live-hidden, 0px);
+/* The Expected canvas extends above its pane; its top-anchored chrome drops
+   to the visible slice. Repository details anchor to the pane itself. */
+.tier-dag-panes.is-split [data-dag-pane='expected'] .react-flow__panel.top {
+  top: var(--tier-dag-expected-hidden, 0px);
 }
 
 .tier-dag-panes.is-split [data-dag-pane='expected'] .commit-details-overlay {
-  top: calc(var(--tier-dag-expected-hidden, 0px) + 0.75rem);
-}
-
-.tier-dag-panes.is-split .repository-diagram-details {
-  visibility: hidden;
+  top: calc(var(--tier-dag-expected-hidden, 0px) + 2.5rem);
 }
 
 .tier-dag-splitter {

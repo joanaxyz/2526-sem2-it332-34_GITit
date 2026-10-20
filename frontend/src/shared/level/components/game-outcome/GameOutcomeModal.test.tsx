@@ -28,6 +28,11 @@ function renderOutcome(stars?: number, tone: 'success' | 'failure' = 'success') 
 }
 
 describe('GameOutcomeModal star artwork', () => {
+  it('keeps assessments free of star grades, including failed checkpoints', () => {
+    render(<GameOutcomeModal open onClose={() => {}} title="Transfer result" icon={Star}
+      headline="Result recorded" message="First attempt preserved" tone="failure" stars={0} showStars={false} />)
+    expect(screen.queryByRole('img', { name: 'No stars earned' })).not.toBeInTheDocument()
+  })
   it.each([1, 2, 3])('selects the %s-star victory variant', (stars) => {
     renderOutcome(stars)
 

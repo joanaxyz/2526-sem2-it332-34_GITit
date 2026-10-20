@@ -12,9 +12,9 @@ export type ChallengeDagAnimationController = {
 }
 
 /**
- * Challenge-only repository choreography. Optimistic Git updates render while
- * the graph is in `processing`, then their node/edge/ref deltas are released
- * together when the server accepts the command.
+ * Challenge-only repository choreography. Optimistic Git updates and their
+ * node/edge/ref deltas render at once while the graph is in `processing`; the
+ * server's verdict then plays as the result state.
  */
 export function useChallengeDagAnimation(): ChallengeDagAnimationController {
   const sequenceRef = useRef(0)

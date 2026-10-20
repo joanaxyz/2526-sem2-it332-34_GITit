@@ -24,6 +24,8 @@ from adventures.models import (
     AdventureLevelTierWave,
     AdventureLevelTierWaveVariant,
 )
+from adventures.rewards import CHALLENGE_GATE_REWARD_COINS
+from challenges.models import ChallengeLevel, ChallengeTrial, ChallengeTrialVariant
 from curriculum.models import (
     Chapter,
     ChapterOrientationLesson,
@@ -36,7 +38,12 @@ from curriculum.seed_data.generated.generated_targets import TARGET_STATES
 from curriculum.seed_data.generated.generated_trajectories import SOLUTION_TRAJECTORIES
 from curriculum.seed_data.scenario_bank import scenario_for_case
 from curriculum.seed_data.scenario_runtime import apply_scenario_bank
+from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES, GATE_MAX_COUNTED_COMMANDS
+from curriculum.seed_data.source.scenario_fixtures import extension_case
+from curriculum.seed_data.source.wave_plan import MODULE_WAVE_PLAN, WaveSpec
+from curriculum.seed_data.source.wave_plan.types import SPIRAL
 from curriculum.seed_data.spec_helpers import required_commit_message_details
+from tutoring.services.forms import catalog_forms, forms_used_by
 
 STORY_SLUG = "arcane-spire"
 
@@ -44,8 +51,7 @@ DIFFICULTY_MAX_COUNTED_COMMANDS = {"easy": 12, "medium": 10, "hard": 8}
 
 
 def ev(state_requirements: dict | None = None, *, required: list[str] | None = None) -> dict:
-    """Mirror curriculum/seed_data/spec_helpers.py:ev() - the shape the current,
-    working rule-based (non-snapshot) content already uses for evaluation_spec."""
+    """The rule-based (non-snapshot) evaluation_spec shape every seeded variant uses."""
     return {
         "state_requirements": state_requirements or {},
         "process_requirements": {"required_commands": required or [], "forbidden_commands": []},
@@ -91,13 +97,13 @@ STORY_SPEC = {
     "difficulty": Story.DIFFICULTY_BEGINNER,
 }
 
-# (number, slug, title, description, is_orientation) - titles/descriptions are
-# the archived branch's LearningUnit.title/description verbatim.
+# (number, slug, title, description, is_orientation) - descriptions are the
+# archived branch's LearningUnit.description verbatim.
 CHAPTER_SPECS: list[dict[str, Any]] = [
     {
         "number": 0,
         "slug": "module-0-orientation",
-        "title": "Module 0",
+        "title": "Orientation",
         "description": (
             "Build your Git mental model and platform familiarity before scenario "
             "practice. Eight guided lessons — recommended before Modules 1–4."
@@ -107,7 +113,7 @@ CHAPTER_SPECS: list[dict[str, Any]] = [
     {
         "number": 1,
         "slug": "module-1-local-repository-foundations",
-        "title": "Module 1",
+        "title": "Repository Foundations",
         "description": (
             "Initialize, clone, stage, commit, ignore, partially stage, amend, "
             "clean up, and inspect local Git repositories through scenario practice."
@@ -117,7 +123,7 @@ CHAPTER_SPECS: list[dict[str, Any]] = [
     {
         "number": 2,
         "slug": "module-2-branching-and-collaboration",
-        "title": "Module 2",
+        "title": "Branching & Collaboration",
         "description": (
             "Create, switch, and delete branches; stash work in progress; push "
             "and pull with remotes; merge, squash-merge, and reconcile diverged "
@@ -128,7 +134,7 @@ CHAPTER_SPECS: list[dict[str, Any]] = [
     {
         "number": 3,
         "slug": "module-3-conflict-resolution",
-        "title": "Module 3",
+        "title": "Conflict Resolution",
         "description": (
             "Practice conflict diagnostics, manual resolution, mergetool "
             "workflows, prevention checks, cherry-picking, and integrated recovery."
@@ -138,7 +144,7 @@ CHAPTER_SPECS: list[dict[str, Any]] = [
     {
         "number": 4,
         "slug": "module-4-advanced-recovery-and-history",
-        "title": "Module 4",
+        "title": "Recovery & History",
         "description": (
             "Practice hard reset recovery, safe pushed commit reversal, and "
             "rebase recovery sequences."
@@ -191,6 +197,11 @@ MODULE_COMMAND_FORMS: dict[int, dict[str, list[tuple[str, str, str]]]] = {
     },
     2: {
         "git-branch": [
+            (
+                "create",
+                "git branch <branch> [<start-point>]",
+                "Create a branch without switching to it",
+            ),
             ("delete", "git branch -d <branch>", "Delete a merged local branch"),
             ("force-delete", "git branch -D <branch>", "Force-delete a local branch"),
         ],
@@ -239,14 +250,37 @@ MODULE_COMMAND_FORMS: dict[int, dict[str, list[tuple[str, str, str]]]] = {
         ],
         "git-cherry-pick": [
             ("commit", "git cherry-pick <commit>", "Apply one commit"),
+            (
+                "record-origin",
+                "git cherry-pick -x <commit>",
+                "Apply a commit and record where it came from",
+            ),
             ("no-commit", "git cherry-pick --no-commit <commit>", "Apply without committing"),
+            (
+                "continue",
+                "git cherry-pick --continue",
+                "Finish a cherry-pick after resolving its conflict",
+            ),
             ("abort", "git cherry-pick --abort", "Abort a cherry-pick"),
         ],
         "git-commit": [
-            ("complete-merge", "git commit [-m <message>]", "Complete the resolved merge"),
+            # Replaces `git commit [-m <message>]` ("complete-merge"), which no
+            # authored merge completion ever typed.
+            (
+                "no-edit",
+                "git commit --no-edit",
+                "Complete the merge with its prepared message",
+            ),
+        ],
+        "git-config": [
+            ("set", "git config <key> <value>", "Set a configuration value"),
         ],
         "git-merge": [
             ("branch", "git merge <branch>", "Merge a branch and expose conflicts"),
+            ("abort", "git merge --abort", "Abandon a stopped merge"),
+        ],
+        "git-mergetool": [
+            ("open", "git mergetool", "Resolve conflicts in a merge tool"),
         ],
     },
     4: {
@@ -258,9 +292,23 @@ MODULE_COMMAND_FORMS: dict[int, dict[str, list[tuple[str, str, str]]]] = {
         ],
         "git-rebase": [
             ("upstream", "git rebase <upstream>", "Replay work onto an upstream branch"),
+            (
+                "onto",
+                "git rebase --onto <newbase> <upstream> [<branch>]",
+                "Move a range of commits onto a new base",
+            ),
+            ("continue", "git rebase --continue", "Resume a rebase after resolving a conflict"),
+            ("abort", "git rebase --abort", "Abandon a stopped rebase"),
         ],
         "git-reflog": [
             ("head", "git reflog", "Find recent HEAD positions"),
+        ],
+        "git-reset": [
+            (
+                "hard",
+                "git reset --hard <commit>",
+                "Move the branch to a commit and discard later changes",
+            ),
         ],
         "git-revert": [
             ("commit", "git revert <commit>", "Reverse a commit additively"),
@@ -13022,9 +13070,11 @@ class Command(BaseCommand):
         self._seed_adventure_levels(
             chapters[4], MODULE_4_LEVELS, {"easy": 0, "medium": 0, "hard": 0}
         )
+        self._seed_challenge_gates(chapters)
         self.stdout.write(
             self.style.SUCCESS(
-                "Seeded Story, Chapters, Module 0 orientation lessons, and Module 1-4 levels."
+                "Seeded Story, Chapters, Module 0 orientation lessons, Module 1-4 levels "
+                "and their Challenge Gates."
             )
         )
 
@@ -13168,32 +13218,235 @@ class Command(BaseCommand):
                     "is_required": True,
                     "is_published": True,
                     "sort_order": level_spec["sort_order"],
-                    "reward_coins": 25,
                 },
             )
-            skill_slugs = self._level_skill_slugs(level_spec)
-            forms = list(
-                CommandForm.objects.filter(
-                    chapter=chapter,
-                    command_skill__slug__in=skill_slugs,
-                    is_published=True,
+            chapter_forms = list(
+                CommandForm.objects.filter(chapter=chapter, is_published=True).select_related(
+                    "command_skill"
                 )
             )
+            planned = MODULE_WAVE_PLAN.get(level_spec["slug"])
+            if planned is None:
+                # Transitional: a level not yet in the wave plan keeps one wave
+                # per tier that repeats its pool, until its module cuts over.
+                forms = self._level_forms(level_spec, chapter_forms, catalog=self._form_catalog)
+                level.command_forms.set(forms)
+                for difficulty, tier_spec in level_spec["tiers"].items():
+                    self._seed_tier(level, difficulty, tier_spec, session_counts_default, forms)
+                continue
+            cases = self._planned_cases(level_spec, planned)
+            # A spiral wave reviews earlier levels' forms; they are not this level's.
+            taught = {
+                difficulty: {
+                    "cases": [
+                        cases[case_id]
+                        for wave in waves
+                        if wave.role != SPIRAL
+                        for case_id in wave.variants
+                    ]
+                }
+                for difficulty, waves in planned.items()
+            }
+            forms = self._level_forms({"tiers": taught}, chapter_forms, catalog=self._form_catalog)
             level.command_forms.set(forms)
-            for difficulty, tier_spec in level_spec["tiers"].items():
-                self._seed_tier(level, difficulty, tier_spec, session_counts_default, forms)
+            for difficulty, waves in planned.items():
+                self._seed_planned_tier(
+                    level, difficulty, waves, cases, level_spec["tiers"][difficulty], forms
+                )
+
+    def _form_catalog(self, family: str) -> list[CommandForm]:
+        """Published forms of a family, read once per seed (forms are seeded first)."""
+        cache = self.__dict__.setdefault("_form_catalog_cache", {})
+        if family not in cache:
+            cache[family] = catalog_forms(family)
+        return cache[family]
 
     @staticmethod
-    def _level_skill_slugs(level_spec: dict[str, Any]) -> set[str]:
-        """Derive the explicitly taught command families from authored solutions."""
-        slugs: set[str] = set()
-        for tier_spec in level_spec.get("tiers", {}).values():
-            for case in tier_spec.get("cases", []):
-                for command in case.get("solution_commands", []):
-                    parts = str(command).strip().lower().split()
-                    if len(parts) >= 2 and parts[0] == "git":
-                        slugs.add(f"git-{parts[1]}")
-        return slugs
+    def _planned_cases(
+        level_spec: dict[str, Any], planned: dict[str, tuple[WaveSpec, ...]]
+    ) -> dict[str, dict[str, Any]]:
+        """Every case the level's planned waves name: its own bank cases or new ones."""
+        pool = {
+            case["case_id"]: case
+            for tier_spec in level_spec["tiers"].values()
+            for case in tier_spec["cases"]
+        }
+        cases: dict[str, dict[str, Any]] = {}
+        for waves in planned.values():
+            for wave in waves:
+                for case_id in wave.variants:
+                    if case_id in cases:
+                        raise CommandError(f"{case_id!r} is planned twice in {level_spec['slug']}.")
+                    try:
+                        cases[case_id] = pool.get(case_id) or extension_case(case_id)
+                    except KeyError as missing:
+                        raise CommandError(
+                            f"{level_spec['slug']} plans {case_id!r}, which has no scenario or fixture."
+                        ) from missing
+        return cases
+
+    @staticmethod
+    def _variant_defaults(
+        case: dict[str, Any], *, placed_difficulty: str | None = None
+    ) -> dict[str, Any]:
+        """The persisted fields of one authored case, for a tier wave or a gate trial.
+
+        A case the wave plan moved to another tier takes that tier's command limit.
+        """
+        revised = scenario_for_case(case["case_id"])
+        difficulty = placed_difficulty or revised["difficulty"]
+        maximum = (
+            revised["maximum_counted_commands"]
+            if difficulty == revised["difficulty"]
+            else DIFFICULTY_MAX_COUNTED_COMMANDS[difficulty]
+        )
+        required_values = [
+            *(
+                {
+                    "label": f"Required file: {item['path']}",
+                    "value": item["content"],
+                }
+                for item in revised.get("required_files", [])
+            ),
+            *required_case_details(case),
+        ]
+        return {
+            "label": revised["label"],
+            "initial_state": case["initial_state"],
+            "evaluation_spec": ev(
+                case["state_requirements"],
+                required=case.get("required_commands", []),
+            ),
+            "target_state": TARGET_STATES.get(case["case_id"], {}),
+            "solution_commands": case["solution_commands"],
+            "solution_workspace_files": case.get("solution_workspace_files", []),
+            "solution_trajectory": SOLUTION_TRAJECTORIES.get(case["case_id"], {}),
+            "case_id": case["case_id"],
+            "semantic_key": case["case_id"],
+            "parameter_context": {
+                "scenario_number": revised["scenario_number"],
+                "difficulty": difficulty,
+                "minimum_counted_commands": revised["minimum_counted_commands"],
+                "maximum_counted_commands": maximum,
+            },
+            "scenario_context": {
+                "schema_version": 3,
+                "story": revised["story"],
+                "starting_point": revised["starting_point"],
+                "real_world_context": revised["real_world_context"],
+                "task": revised["task"],
+                "objective_checks": revised["objective_checks"],
+                "expected_result": revised["expected_result"],
+                "details": required_values,
+            },
+            "is_published": True,
+        }
+
+    def _seed_challenge_gates(self, chapters: list[Chapter]) -> None:
+        """One Challenge Gate per module: Easy/Medium/Hard workflow trials.
+
+        Rows are upserted by slug; a variant displaced by a later edit is
+        unpublished, never deleted, because runs reference it.
+        """
+        for module_number, gate in CHALLENGE_GATES.items():
+            chapter = chapters[module_number]
+            level, _ = ChallengeLevel.objects.update_or_create(
+                chapter=chapter,
+                slug=gate["slug"],
+                defaults={
+                    "title": gate["title"],
+                    "summary": gate["summary"],
+                    "narrative": gate["narrative"],
+                    "sort_order": 0,
+                    "is_published": True,
+                },
+            )
+            cases_by_difficulty = {
+                difficulty: [extension_case(case_id) for case_id in case_ids]
+                for difficulty, case_ids in gate["trials"].items()
+            }
+            chapter_forms = list(
+                CommandForm.objects.filter(chapter=chapter, is_published=True).select_related(
+                    "command_skill"
+                )
+            )
+            level.command_forms.set(
+                self._level_forms(
+                    {"tiers": {difficulty: {"cases": cases} for difficulty, cases in cases_by_difficulty.items()}},
+                    chapter_forms,
+                    catalog=self._form_catalog,
+                )
+            )
+            for difficulty, cases in cases_by_difficulty.items():
+                first = scenario_for_case(cases[0]["case_id"])
+                trial, _ = ChallengeTrial.objects.update_or_create(
+                    challenge_level=level,
+                    difficulty=difficulty,
+                    defaults={
+                        "story": first["story"],
+                        "task": first["task"],
+                        "min_counted_commands": min(
+                            scenario_for_case(case["case_id"])["minimum_counted_commands"]
+                            for case in cases
+                        ),
+                        "max_counted_commands": GATE_MAX_COUNTED_COMMANDS[difficulty],
+                        "reward_coins": CHALLENGE_GATE_REWARD_COINS[difficulty],
+                        "objective_checks": [],
+                        "is_published": True,
+                    },
+                )
+                for case in cases:
+                    ChallengeTrialVariant.objects.update_or_create(
+                        trial=trial,
+                        slug=case["case_id"],
+                        defaults=self._variant_defaults(case),
+                    )
+                trial.variants.exclude(slug__in=[case["case_id"] for case in cases]).update(
+                    is_published=False
+                )
+
+    @staticmethod
+    def _level_forms(
+        level_spec: dict[str, Any], chapter_forms: list[CommandForm], *, catalog
+    ) -> list[CommandForm]:
+        """The level's own-chapter forms its authored solutions actually type.
+
+        Resolved with the guides' resolver, so a level attaches the forms it
+        teaches and not every form of the command families it touches.
+        """
+        commands = [
+            command
+            for tier_spec in level_spec.get("tiers", {}).values()
+            for case in tier_spec.get("cases", [])
+            for command in case.get("solution_commands", [])
+        ]
+        chapter_ids = {form.id for form in chapter_forms}
+        return [
+            form
+            for form in forms_used_by(commands, preferred=chapter_forms, catalog=catalog)
+            if form.id in chapter_ids
+        ]
+
+    @staticmethod
+    def _wave_forms(
+        level_forms: list[CommandForm], cases: list[dict[str, Any]], *, catalog
+    ) -> list[CommandForm]:
+        """Level forms every variant of the wave uses.
+
+        A wave's forms are the mastery targets' denominator
+        (``form_solve_targets``), so only forms a learner is sure to type on
+        any variant of the wave count.
+        """
+        shared: set[int] | None = None
+        for case in cases:
+            used = {
+                form.id
+                for form in forms_used_by(
+                    case.get("solution_commands", []), preferred=level_forms, catalog=catalog
+                )
+            }
+            shared = used if shared is None else shared & used
+        return [form for form in level_forms if form.id in (shared or set())]
 
     def _seed_tier(
         self,
@@ -13229,56 +13482,74 @@ class Command(BaseCommand):
                 "is_published": True,
             },
         )
-        wave.command_forms.set(forms)
+        wave.command_forms.set(
+            self._wave_forms(forms, tier_spec["cases"], catalog=self._form_catalog)
+        )
         for case in tier_spec["cases"]:
-            revised = scenario_for_case(case["case_id"])
-            required_values = [
-                *(
-                    {
-                        "label": f"Required file: {item['path']}",
-                        "value": item["content"],
-                    }
-                    for item in revised.get("required_files", [])
-                ),
-                *required_case_details(case),
-            ]
             AdventureLevelTierWaveVariant.objects.update_or_create(
                 wave=wave,
                 slug=case["case_id"],
-                defaults={
-                    "label": revised["label"],
-                    "initial_state": case["initial_state"],
-                    "evaluation_spec": ev(
-                        case["state_requirements"],
-                        required=case.get("required_commands", []),
-                    ),
-                    "target_state": TARGET_STATES.get(case["case_id"], {}),
-                    "solution_commands": case["solution_commands"],
-                    "solution_workspace_files": case.get("solution_workspace_files", []),
-                    "solution_trajectory": SOLUTION_TRAJECTORIES.get(case["case_id"], {}),
-                    "case_id": case["case_id"],
-                    "semantic_key": case["case_id"],
-                    "parameter_context": {
-                        "scenario_number": revised["scenario_number"],
-                        "difficulty": revised["difficulty"],
-                        "minimum_counted_commands": revised["minimum_counted_commands"],
-                        "maximum_counted_commands": revised["maximum_counted_commands"],
-                    },
-                    "scenario_context": {
-                        "schema_version": 3,
-                        "story": revised["story"],
-                        "starting_point": revised["starting_point"],
-                        "real_world_context": revised["real_world_context"],
-                        "task": revised["task"],
-                        "objective_checks": revised["objective_checks"],
-                        "expected_result": revised["expected_result"],
-                        "details": required_values,
-                    },
-                    "is_published": True,
-                },
+                defaults=self._variant_defaults(case),
             )
         # Any variant displaced by the canonical revised bank stays available
         # to historical runs (PROTECT) but can no longer be selected.
         wave.variants.exclude(slug__in=[case["case_id"] for case in tier_spec["cases"]]).update(
             is_published=False
         )
+
+    def _seed_planned_tier(
+        self,
+        level: AdventureLevel,
+        difficulty: str,
+        waves: tuple[WaveSpec, ...],
+        cases: dict[str, dict[str, Any]],
+        tier_spec: dict[str, Any],
+        level_forms: list[CommandForm],
+    ) -> None:
+        """The tier's designed waves, in play order, each cleared once.
+
+        Waves and variants are upserted by slug and keep the plan's order, so
+        the first listed variant is a first-time learner's pick. Waves the plan
+        no longer names - the tier's single pool wave before cutover - stay
+        for the runs that reference them (PROTECT) but are no longer played.
+        """
+        tier, _ = AdventureLevelTier.objects.update_or_create(
+            adventure_level=level,
+            difficulty=difficulty,
+            defaults={"is_published": True},
+        )
+        for order, spec in enumerate(waves):
+            wave_cases = [cases[case_id] for case_id in spec.variants]
+            wave, _ = AdventureLevelTierWave.objects.update_or_create(
+                tier=tier,
+                slug=spec.slug,
+                defaults={
+                    "title": spec.title,
+                    "sort_order": order,
+                    "story": tier_spec["story"],
+                    # Drills pair the wave's task with any of its variants.
+                    "task": spec.title,
+                    "min_counted_commands": min(
+                        scenario_for_case(case_id)["minimum_counted_commands"]
+                        for case_id in spec.variants
+                    ),
+                    "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS[difficulty],
+                    "objective_checks": [],
+                    "required_successful_attempts": 1,
+                    "is_published": True,
+                },
+            )
+            wave.command_forms.set(
+                self._wave_forms(level_forms, wave_cases, catalog=self._form_catalog)
+            )
+            for index, case in enumerate(wave_cases):
+                AdventureLevelTierWaveVariant.objects.update_or_create(
+                    wave=wave,
+                    slug=case["case_id"],
+                    defaults={
+                        **self._variant_defaults(case, placed_difficulty=difficulty),
+                        "sort_order": index,
+                    },
+                )
+            wave.variants.exclude(slug__in=spec.variants).update(is_published=False)
+        tier.waves.exclude(slug__in=[spec.slug for spec in waves]).update(is_published=False)

@@ -5,9 +5,19 @@ from tutoring.models import PendingCommandIntroduction
 from tutoring.services.anatomy import anatomy
 from tutoring.services.introductions import context_hash
 
+# Marks a feedback row that has not been read yet (``None`` means there is none).
+UNREAD = object()
 
-def current_feedback(run):
-    pending = PendingCommandIntroduction.objects.filter(run=run).first()
+
+def stored_feedback(run):
+    # The command submission joins the row onto its locked run read.
+    if type(run).pendingcommandintroduction.is_cached(run):
+        return getattr(run, "pendingcommandintroduction", None)
+    return PendingCommandIntroduction.objects.filter(run=run).first()
+
+
+def current_feedback(run, stored=UNREAD):
+    pending = stored_feedback(run) if stored is UNREAD else stored
     if (
         pending
         and pending.revision == run.total_attempts
@@ -27,10 +37,12 @@ def used_introduced_form(candidate, execution) -> bool:
     )
 
 
-def record_command_feedback(run, candidate, execution, previous_feedback=None):
+def record_command_feedback(run, candidate, execution, previous_feedback=None, stored=UNREAD):
     """Record feedback for the command that ran while ``candidate`` was introduced.
 
-    ``candidate`` is the introduction planned *before* the command ran.
+    ``candidate`` is the introduction planned *before* the command ran, and
+    ``stored`` the run's feedback row read before it ran. Returns the run's
+    feedback row afterwards, or ``None``.
     """
 
     used_form = used_introduced_form(candidate, execution)
@@ -47,10 +59,11 @@ def record_command_feedback(run, candidate, execution, previous_feedback=None):
             previous_feedback.revision = run.total_attempts
             previous_feedback.context_hash = context_hash(run)
             previous_feedback.save(update_fields=["revision", "context_hash", "payload"])
-            return
-    PendingCommandIntroduction.objects.filter(run=run).delete()
+            return previous_feedback
+    if stored is not None:
+        PendingCommandIntroduction.objects.filter(run=run).delete()
     if candidate is None:
-        return
+        return None
     result = execution.result
     if used_form:
         changes = describe_transition(execution.previous_state, execution.next_state)
@@ -66,16 +79,16 @@ def record_command_feedback(run, candidate, execution, previous_feedback=None):
     elif execution.state_mutated:
         # A different route changed what is useful next. The planner decides
         # afresh from the new repository; never reveal an obsolete example.
-        return
+        return None
     elif result.processed and not result.exit_code and result.diagnostic:
         # Looking around (status, log, diff) is always fine.
-        return
+        return None
     else:
         verdict = "incorrect"
         explanation = "That wasn't the command this step needs."
         changes = []
         example = candidate.example
-    PendingCommandIntroduction.objects.create(
+    return PendingCommandIntroduction.objects.create(
         run=run,
         teaching_key=candidate.teaching_key,
         revision=run.total_attempts,

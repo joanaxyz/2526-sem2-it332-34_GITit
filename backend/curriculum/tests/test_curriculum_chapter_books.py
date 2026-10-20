@@ -1,9 +1,7 @@
-import pytest
 from django.core.management import call_command, get_commands
-from django.core.management.base import CommandError
-from django.test import override_settings
 
 from adventures.models import AdventureLevel, AdventureLevelTier
+from adventures.rewards import tier_reward_coins
 from curriculum.models import Chapter, CommandForm, Story
 from curriculum.selectors import chapter_book, published_chapters
 
@@ -19,12 +17,13 @@ EXPECTED_COMMANDS = {
         "git stash",
         "git switch",
     },
-    3: {"git add", "git cherry-pick", "git commit", "git merge"},
+    3: {"git add", "git cherry-pick", "git commit", "git config", "git merge", "git mergetool"},
     4: {
         "git log",
         "git push",
         "git rebase",
         "git reflog",
+        "git reset",
         "git revert",
         "git show",
         "git switch",
@@ -39,7 +38,6 @@ def _curriculum_chapters():
     }
 
 
-@override_settings(ALLOW_RETIRED_CURRICULUM_FIXTURE_SEED=False)
 def test_canonical_curriculum_uses_arcane_spire_identity_and_visual_assets(db):
     call_command("seed_curriculum", verbosity=0)
 
@@ -49,10 +47,10 @@ def test_canonical_curriculum_uses_arcane_spire_identity_and_visual_assets(db):
     assert story.world_slug == "arcane-spire"
 
 
-def test_only_current_and_explicit_fixture_seed_commands_are_registered():
+def test_only_the_live_curriculum_seed_command_is_registered():
     commands = get_commands()
     assert commands["seed_curriculum"] == "curriculum"
-    assert commands["seed_curriculum_fixture"] == "curriculum"
+    assert "seed_curriculum_fixture" not in commands
     assert "seed_legacy_modules" not in commands
 
 
@@ -125,29 +123,18 @@ def test_curriculum_levels_seed_gamification_rewards_and_skill_forms(db):
     )
 
     assert levels
-    assert all(level.reward_coins == 25 for level in levels)
-    assert all(level.command_forms.exists() for level in levels)
+    # Every level pays the difficulty ladder once per tier (adventures/rewards.py).
     assert all(
-        wave.command_forms.exists()
+        {tier.difficulty: tier_reward_coins(tier) for tier in level.tiers.all()}
+        == {"easy": 25, "medium": 35, "hard": 50}
         for level in levels
-        for tier in level.tiers.all()
-        for wave in tier.waves.all()
     )
-
-
-def test_retired_curriculum_seed_cannot_overwrite_canonical_field_guides(db):
-    call_command("seed_curriculum", verbosity=0)
-    with pytest.raises(CommandError, match="retired three-story fixture"):
-        call_command("seed_curriculum_fixture", verbosity=0)
-
-    chapters = _curriculum_chapters()
-    assert all(chapter.is_published for chapter in chapters.values())
-    for module_number, expected_commands in EXPECTED_COMMANDS.items():
-        book = chapter_book(chapter_id=chapters[module_number].id)
-        assert {command["base_command"] for command in book["commands"]} == expected_commands
-
-
-@override_settings(ALLOW_RETIRED_CURRICULUM_FIXTURE_SEED=False)
-def test_retired_curriculum_seed_is_disabled_outside_tests(db):
-    with pytest.raises(CommandError, match="disabled outside the test suite"):
-        call_command("seed_curriculum_fixture", verbosity=0)
+    assert all(level.command_forms.exists() for level in levels)
+    # A wave attaches the level forms every one of its variants types: they
+    # are the mastery targets' denominator, so a learner can always reach
+    # them. A pool whose variants each teach a different form attaches none.
+    for level in levels:
+        level_forms = {form.id for form in level.command_forms.all()}
+        for tier in level.tiers.all():
+            for wave in tier.waves.all():
+                assert {form.id for form in wave.command_forms.all()} <= level_forms

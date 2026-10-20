@@ -2,15 +2,15 @@ from __future__ import annotations
 
 from django.db.models import Sum
 
-from adventures.services import AdventureRunService
+from adventures.services import AdventureLevelTierRunService
 from challenges.models import ChallengeRun
 from common.constants import SESSION_STATUS_COMPLETED
 from progress.models import CoinTransaction, Wallet
 from testing.frontend_execution import frontend_execution_payload
 from testing.runtime_factories import (
     api_client_for,
-    create_stage_readme_adventure_run,
     create_stage_readme_challenge_run,
+    create_stage_readme_tier_run,
 )
 
 
@@ -29,9 +29,9 @@ def _submit_challenge_add_readme(*, user, run, target):
     )
 
 
-def _submit_adventure_add_readme(*, user, run, target):
+def _submit_tier_add_readme(*, user, run, target):
     return api_client_for(user).post(
-        f"/api/adventure-runs/{run.id}/submit-command/",
+        f"/api/adventure-tier-runs/{run.id}/submit-command/",
         {
             "command": "git add README.md",
             "execution": frontend_execution_payload(
@@ -87,16 +87,12 @@ def test_challenge_trial_reward_is_paid_once_per_player_and_trial(db, django_use
     assert Wallet.objects.get(player=fixture.player).balance >= starting_balance + 40
 
 
-def test_adventure_level_reward_is_paid_once_even_after_replay(db, django_user_model):
-    fixture = create_stage_readme_adventure_run(
-        django_user_model,
-        username="adventure-reward",
-        reward_coins=55,
-    )
+def test_adventure_tier_reward_is_paid_once_even_after_replay(db, django_user_model):
+    fixture = create_stage_readme_tier_run(django_user_model, username="adventure-reward")
 
     starting_balance = Wallet.objects.get_or_create(player=fixture.player)[0].balance
 
-    response = _submit_adventure_add_readme(
+    response = _submit_tier_add_readme(
         user=fixture.user,
         run=fixture.run,
         target=fixture.states.target,
@@ -105,9 +101,11 @@ def test_adventure_level_reward_is_paid_once_even_after_replay(db, django_user_m
     fixture.run.refresh_from_db()
     assert fixture.run.status == SESSION_STATUS_COMPLETED
 
-    replay = AdventureRunService().start_run(player=fixture.player, level=fixture.level)
+    replay = AdventureLevelTierRunService().start_run(
+        player=fixture.player, tier=fixture.tier, source_entry_point="level_page"
+    )
     assert replay.is_replay is True
-    response = _submit_adventure_add_readme(
+    response = _submit_tier_add_readme(
         user=fixture.user,
         run=replay,
         target=fixture.states.target,
@@ -116,8 +114,9 @@ def test_adventure_level_reward_is_paid_once_even_after_replay(db, django_user_m
     replay.refresh_from_db()
     assert replay.status == SESSION_STATUS_COMPLETED
 
+    # Easy keeps the per-level award key it has always paid under.
     award_key = f"adventure-level-reward:{fixture.level.id}"
     award_transactions = CoinTransaction.objects.filter(player=fixture.player, award_key=award_key)
     assert award_transactions.count() == 1
-    assert award_transactions.aggregate(total=Sum("amount"))["total"] == 55
-    assert Wallet.objects.get(player=fixture.player).balance >= starting_balance + 55
+    assert award_transactions.aggregate(total=Sum("amount"))["total"] == 25
+    assert Wallet.objects.get(player=fixture.player).balance >= starting_balance + 25

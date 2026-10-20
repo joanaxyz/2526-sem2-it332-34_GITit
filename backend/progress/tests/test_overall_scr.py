@@ -1,7 +1,7 @@
 """Overall SCR shares its source and filters with the per-module SCR.
 
 The admin dashboard's overall SCR card reads runebound_performance.kpis.scr,
-so it must equal the sum of the per-module rows: Runebound tier runs in story
+so its individual tier counts equal the sum of the per-module rows: Runebound tier runs in story
 arcane-spire, Modules 1-4, replays excluded.
 """
 
@@ -21,6 +21,7 @@ from common.constants import (
 )
 from curriculum.models import Chapter, Story
 from players.services import get_or_create_player
+from progress.models import AdventureLevelTierCompletion
 from progress.services import MetricsService
 
 
@@ -59,19 +60,23 @@ def test_overall_scr_matches_per_module_scr_source(db, django_user_model):
 
     user = django_user_model.objects.create_user(username="scr-learner", password="pass12345")
     player = get_or_create_player(user)
-    # Counted: 4 started, 2 completed.
+    # Counted: 3 tiers with an outcome, 2 mastered.
     _run(player, tiers[1], SESSION_STATUS_COMPLETED)
     _run(player, tiers[1], SESSION_STATUS_FAILED)
     _run(player, tiers[2], SESSION_STATUS_COMPLETED)
-    _run(player, tiers[3], SESSION_STATUS_STARTED)
-    # Not counted: a replay, a module outside 1-4, and another story.
+    _run(player, tiers[3], SESSION_STATUS_FAILED)
+    # Not counted: an opened tier with no commands, a replay, a module
+    # outside 1-4, and another story.
+    _run(player, tiers[4], SESSION_STATUS_STARTED)
     _run(player, tiers[4], SESSION_STATUS_COMPLETED, is_replay=True)
     _run(player, tiers[5], SESSION_STATUS_COMPLETED)
     _run(player, other_tier, SESSION_STATUS_COMPLETED)
 
-    summary = MetricsService().all_player_performance_summary()
+    for number in (1, 2):
+        AdventureLevelTierCompletion.objects.create(player=player, tier=tiers[number][0])
+    summary = MetricsService().performance_summary(player=player)
 
-    assert summary["kpis"]["scr"] == {"value": 50.0, "numerator": 2, "denominator": 4}
+    assert summary["kpis"]["scr"] == {"value": 66.7, "numerator": 2, "denominator": 3}
     modules = summary["modules"]
     assert [m["number"] for m in modules] == [1, 2, 3, 4]
     assert sum(m["scr"]["numerator"] for m in modules) == summary["kpis"]["scr"]["numerator"]
@@ -83,10 +88,11 @@ def test_overall_scr_matches_per_module_scr_source(db, django_user_model):
     client = APIClient()
     client.force_authenticate(user=staff)
     body = client.get("/api/admin/analytics/").json()
-    assert body["runebound_performance"]["kpis"]["scr"] == summary["kpis"]["scr"]
-    # data.runs (the old card source) counts AdventureRun/ChallengeRun rows
-    # across every story, so it does not see these tier runs at all.
-    assert body["runs"]["total"] == 0
+    assert body["runebound_performance"]["kpis"]["scr"]["value"] == summary["kpis"]["scr"]["value"]
+    # data.runs counts every tier and challenge run across every story,
+    # including the replay, the open run, and the other story's run.
+    assert body["runs"]["adventure"]["total"] == AdventureLevelTierRun.objects.count()
+    assert body["runs"]["total"] == AdventureLevelTierRun.objects.count()
 
 
 def test_overall_scr_without_runs_is_null(db):
@@ -94,4 +100,9 @@ def test_overall_scr_without_runs_is_null(db):
 
     summary = MetricsService().all_player_performance_summary()
 
-    assert summary["kpis"]["scr"] == {"value": None, "numerator": 0, "denominator": 0}
+    assert summary["kpis"]["scr"] == {
+        "value": None,
+        "numerator": 0,
+        "denominator": 0,
+        "unit": "participants",
+    }

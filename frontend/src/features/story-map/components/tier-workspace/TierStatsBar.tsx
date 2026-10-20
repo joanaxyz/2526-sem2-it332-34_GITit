@@ -1,10 +1,11 @@
-import { GitBranch, Smile, Target, TerminalSquare } from 'lucide-react'
+import { GitBranch, Layers, Smile, Target, TerminalSquare } from 'lucide-react'
 import type { ComponentType, ReactNode, RefObject } from 'react'
 
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { DifficultyChip, StarTriplet } from '@/shared/level/components/LevelContextPanel'
 import { RookIcon, StarSolidIcon } from '@/shared/level/components/workspaceIcons'
 import { cn } from '@/shared/utils/cn'
+import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 
 type TierStat = {
   label: string
@@ -29,10 +30,24 @@ export type RepoGraphTrigger = {
  */
 export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: RepoGraphTrigger }) {
   const starTarget = run.policy.min_counted_commands
+  const rewardClaimed = run.reward.claimed || Boolean(run.rewards?.coins_awarded)
   const stats: TierStat[] = [
-    { label: 'Mode', icon: RookIcon, value: `Adventure${run.replay ? ' · Replay' : ''}` },
+    { label: 'Mode', icon: RookIcon, value: run.transfer ? 'Transfer checkpoint' : `Adventure${run.replay ? ' · Replay' : ''}` },
     ...(run.difficulty
       ? [{ label: 'Difficulty', icon: Smile, value: <DifficultyChip difficulty={run.difficulty} /> }]
+      : []),
+    ...(run.wave.total > 1 && run.wave.index
+      ? [
+          {
+            label: 'Wave',
+            icon: Layers,
+            value: (
+              <span className="lvlctx-num" title={run.wave.title || undefined}>
+                {run.wave.index} / {run.wave.total}
+              </span>
+            ),
+          },
+        ]
       : []),
     {
       label: 'Stars',
@@ -58,12 +73,22 @@ export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: Rep
         </span>
       ),
     },
+    {
+      label: 'Reward',
+      icon: GitCoinIcon,
+      value: rewardClaimed ? (
+        'Claimed'
+      ) : (
+        <span className="lvlctx-num">+{run.reward.coins} GitCoins</span>
+      ),
+    },
   ]
+  const hiddenForTransfer = new Set(['Stars', 'Star target', 'Reward'])
 
   return (
     <div className="tier-stats-bar" role="group" aria-label="Level status">
       <dl className="tier-stats">
-        {stats.map((stat) => (
+        {stats.filter((stat) => !run.transfer || !hiddenForTransfer.has(stat.label)).map((stat) => (
           <div className="tier-stat" key={stat.label}>
             <dt>
               <stat.icon aria-hidden="true" className={cn('tier-stat-icon', stat.iconClass)} />

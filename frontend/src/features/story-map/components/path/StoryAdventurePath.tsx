@@ -13,7 +13,6 @@ import { nextPlayableLevelId } from '@/features/story-map/utils/storyMapChapter'
 import { StoryLevelTierPanel, StoryTrialsPanel } from './StoryAdventurePanels'
 import { StoryChallengeNode, StoryPathLevelNode, type StoryTrialState } from './StoryPathNodes'
 
-const PILL_CLOSE_MS = 180
 
 // Callout geometry. The route's amplitude leaves the right side of the canvas
 // permanently empty, which is where the level callout docks: beside-the-node
@@ -45,14 +44,9 @@ export function StoryAdventurePath({
   onCompanionRequired: () => void
   defaultTrialsOpen?: boolean
 }) {
-  const { openAdventureLevel, openChallengeArtifact } = useStoryArtifactNavigation()
+  const { openChallengeArtifact } = useStoryArtifactNavigation()
   const navigate = useNavigate()
-  const { openAdventure, startTier, startTierRunMutation } = useStoryAdventureStarts({
-    hasCompanion,
-    onCompanionRequired,
-    onOpenAdventure: openAdventureLevel,
-    onTierRunStarted: (runId) => navigate(`/adventure-tier-runs/${runId}`),
-  })
+  const { startTier } = useStoryAdventureStarts({ hasCompanion, onCompanionRequired })
   const currentLevelId = nextPlayableLevelId(levels, chapter.locked)
   const placeholderCount = Math.max(3, chapter.adventure_level_count || 6)
   const nodes: Array<AdventureLevelSummary | undefined> = levels.length
@@ -62,8 +56,6 @@ export function StoryAdventurePath({
   const [trialsOpen, setTrialsOpen] = useState(defaultTrialsOpen)
   const trialsPanelRef = useRef<HTMLElement | null>(null)
   const [selectedLevelId, setSelectedLevelId] = useState<number | null>(null)
-  const [closingLevelId, setClosingLevelId] = useState<number | null>(null)
-  const closeTimerRef = useRef<number | null>(null)
 
   const pathRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLDivElement | null>(null)
@@ -91,30 +83,13 @@ export function StoryAdventurePath({
     return () => observer.disconnect()
   }, [measureNodeRadius])
 
-  function queueClosingPill(levelId: number) {
-    if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current)
-    setClosingLevelId(levelId)
-    closeTimerRef.current = window.setTimeout(() => {
-      setClosingLevelId((current) => (current === levelId ? null : current))
-      closeTimerRef.current = null
-    }, PILL_CLOSE_MS)
-  }
-
   function toggleLevelPill(levelId: number) {
-    if (selectedLevelId === levelId) {
-      queueClosingPill(levelId)
-      setSelectedLevelId(null)
-      return
-    }
-    if (selectedLevelId !== null) queueClosingPill(selectedLevelId)
-    setClosingLevelId((closing) => (closing === levelId ? null : closing))
-    setSelectedLevelId(levelId)
+    setSelectedLevelId((selected) => (selected === levelId ? null : levelId))
   }
 
   useEffect(() => {
     setTrialsOpen(defaultTrialsOpen)
     setSelectedLevelId(null)
-    setClosingLevelId(null)
   }, [chapter.id, defaultTrialsOpen])
 
   useEffect(() => {
@@ -122,12 +97,6 @@ export function StoryAdventurePath({
       setSelectedLevelId(null)
     }
   }, [levels, selectedLevelId])
-
-  useEffect(() => {
-    return () => {
-      if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current)
-    }
-  }, [])
 
   useEffect(() => {
     if (!trialsOpen) return
@@ -314,9 +283,7 @@ export function StoryAdventurePath({
             currentLevelId={currentLevelId}
             loading={loading}
             selectedLevelId={selectedLevelId}
-            closingLevelId={closingLevelId}
             onToggle={toggleLevelPill}
-            onOpenLevel={openAdventure}
           />
         ))}
 
@@ -356,8 +323,6 @@ export function StoryAdventurePath({
             panelRef={levelTierPanelRef}
             placement="docked"
             style={levelTierPanelStyle}
-            pendingTierId={startTierRunMutation.variables?.tierId}
-            isStarting={startTierRunMutation.isPending}
             onClose={() => setSelectedLevelId(null)}
             onStartTier={startTier}
             onOpenDrill={() => navigate(`/adventure-levels/${selectedTierLevel.id}/drill`)}
@@ -371,8 +336,6 @@ export function StoryAdventurePath({
           levelNumber={selectedTierNodeIndex + 1}
           panelRef={levelTierPanelRef}
           placement="inline"
-          pendingTierId={startTierRunMutation.variables?.tierId}
-          isStarting={startTierRunMutation.isPending}
           onClose={() => setSelectedLevelId(null)}
           onStartTier={startTier}
           onOpenDrill={() => navigate(`/adventure-levels/${selectedTierLevel.id}/drill`)}

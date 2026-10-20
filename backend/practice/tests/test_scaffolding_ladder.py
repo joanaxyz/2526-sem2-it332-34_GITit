@@ -54,15 +54,6 @@ def test_unknown_tier_difficulty_falls_back_to_the_least_support():
     assert ScaffoldingService().supports_for_tier("") == EXPECTED_TIER_LADDER[DIFFICULTY_HARD]
 
 
-def test_guided_adventure_runs_sit_outside_the_ladder():
-    supports = ScaffoldingService().guided_supports()
-    assert supports == {
-        "live_dag": True,
-        "expected_state": False,
-        "contextual_feedback": False,
-    }
-
-
 @pytest.mark.parametrize("difficulty", sorted(EXPECTED_LADDER))
 def test_command_processing_reads_the_same_ladder(db, django_user_model, difficulty):
     fixture = create_stage_readme_challenge_run(
@@ -200,12 +191,3 @@ def test_tier_command_writes_feedback_and_target_only_where_the_tier_ladder_allo
     payload = tier_run_payload(run, include_steps=False)
     assert payload["scaffolding"] == expected
     assert (payload["expected_state"] is not None) is expected["expected_state"]
-
-
-def test_guided_adventure_payload_is_not_difficulty_tiered(db, django_user_model):
-    from adventures.payloads import attempt_payload
-    from testing.runtime_factories import create_stage_readme_adventure_run
-
-    fixture = create_stage_readme_adventure_run(django_user_model, username="ladder-guided")
-    payload = attempt_payload(fixture.run, include_steps=False)
-    assert payload["scaffolding"] == ScaffoldingService().guided_supports()

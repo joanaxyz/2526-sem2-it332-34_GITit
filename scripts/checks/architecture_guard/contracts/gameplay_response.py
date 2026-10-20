@@ -50,11 +50,8 @@ def gameplay_response_backend_violations(sources: dict[str, str]) -> list[str]:
             "RuntimeStepResponseSerializer",
         },
         GAMEPLAY_ADVENTURE_OPENAPI: {
-            "AdventureRunResponseSerializer",
-            "AdventureRunPatchResponseSerializer",
-            "AdventureCommandRunResponseField",
-            "AdventureLevelLibraryResponseSerializer",
-            "AdventureCommandResponseSerializer",
+            "AdventureLevelTierRewardResponseSerializer",
+            "AdventureLevelTierWavePositionResponseSerializer",
             "AdventureLevelTierRunStepResponseSerializer",
             "AdventureLevelTierCommandStepResponseSerializer",
             "AdventureLevelTierCommandRunResponseSerializer",
@@ -129,9 +126,6 @@ def gameplay_response_backend_violations(sources: dict[str, str]) -> list[str]:
         "backend/adventures/views.py": (
             "adventures.openapi",
             {
-                "AdventureCommandResponseSerializer",
-                "AdventureLevelLibraryResponseSerializer",
-                "AdventureRunResponseSerializer",
                 "AdventureLevelTierCommandResponseSerializer",
                 "AdventureLevelTierRunResponseSerializer",
             },
@@ -187,49 +181,8 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
     violations: list[str] = []
     schemas = schema.get("components", {}).get("schemas", {})
     exact_fields = {
-        "RuntimeStepResponse": {
-            "id",
-            "command_text",
-            "terminal_output",
-            "result_category",
-        },
-        "AdventureRunResponse": {
-            "id",
-            "status",
-            "replay",
-            "stars",
-            "library_opened",
-            "is_passed",
-            "selected_level",
-            "next_level",
-            "story",
-            "chapter_id",
-            "battle_stage",
-            "current_level_index",
-            "total_levels",
-            "current_wave",
-            "total_waves",
-            "passed",
-            "mastery",
-            "completed_at",
-            "current_attempt",
-            "results",
-            "progress",
-        },
-        "AdventureRunPatchResponse": {"partial", "id", "status", "current_attempt"},
-        "AdventureCommandResponse": {
-            "run",
-            "learned_skills",
-            "solved",
-            "stdout",
-            "stderr",
-            "exit_code",
-            "terminal_output",
-            "command_classification",
-            "step",
-            "command_outcome",
-        },
-        "AdventureLevelLibraryResponse": {"book", "run"},
+        "AdventureLevelTierRewardResponse": {"coins", "claimed"},
+        "AdventureLevelTierWavePositionResponse": {"index", "total", "title"},
         "ChallengeRunStepResponse": {
             "id",
             "command_text",
@@ -304,7 +257,6 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
         },
     }
     optional_fields = {
-        "AdventureCommandResponse": {"learned_skills"},
         "ChallengeCommandRunResponse": {
             "mastery_progress",
             "completion",
@@ -327,15 +279,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
             )
 
     expected_nullable = {
-        "AdventureRunResponse": {
-            "selected_level",
-            "next_level",
-            "story",
-            "chapter_id",
-            "battle_stage",
-            "completed_at",
-            "current_attempt",
-        },
+        "AdventureLevelTierWavePositionResponse": {"index"},
         "ChallengeRunResponse": {
             "failure_reason",
             "completed_at",
@@ -371,26 +315,24 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
         violations.append(
             f"{GAMEPLAY_RESPONSE_GENERATED_OPENAPI}: GameplayRunStatus must be one exact shared enum"
         )
-    if schemas.get("PartialEnum", {}).get("type") != "boolean" or schemas.get(
-        "PartialEnum", {}
-    ).get("enum") != [True]:
-        violations.append(
-            f"{GAMEPLAY_RESPONSE_GENERATED_OPENAPI}: PartialEnum must be the literal true branch"
-        )
-    expected_union = {
-        "oneOf": [
-            {"$ref": "#/components/schemas/AdventureRunResponse"},
-            {"$ref": "#/components/schemas/AdventureRunPatchResponse"},
-        ]
-    }
-    if schemas.get("AdventureCommandRunResponse") != expected_union:
-        violations.append(
-            f"{GAMEPLAY_RESPONSE_GENERATED_OPENAPI}: AdventureCommandRunResponse must be the exact full/patch union"
-        )
+    for displaced in (
+        "AdventureRunResponse",
+        "AdventureRunPatchResponse",
+        "AdventureCommandRunResponse",
+        "AdventureCommandResponse",
+        "AdventureLevelLibraryResponse",
+        "PartialEnum",
+    ):
+        if displaced in schemas:
+            violations.append(
+                f"{GAMEPLAY_RESPONSE_GENERATED_OPENAPI}: retired {displaced} must stay absent"
+            )
     expected_component_refs = {
-        ("AdventureCommandResponse", "run"): "AdventureCommandRunResponse",
-        ("AdventureCommandResponse", "step"): "RuntimeStepResponse",
-        ("AdventureLevelLibraryResponse", "run"): "AdventureRunResponse",
+        ("AdventureLevelTierRunResponse", "reward"): "AdventureLevelTierRewardResponse",
+        ("AdventureLevelTierRunResponse", "wave"): "AdventureLevelTierWavePositionResponse",
+        ("AdventureLevelTierRunResponse", "steps"): "AdventureLevelTierRunStepResponse",
+        ("AdventureLevelTierCommandResponse", "run"): "AdventureLevelTierCommandRunResponse",
+        ("AdventureLevelTierCommandResponse", "step"): "AdventureLevelTierCommandStepResponse",
         ("ChallengeRunResponse", "steps"): "ChallengeRunStepResponse",
         ("ChallengeCommandResponse", "run"): "ChallengeCommandRunResponse",
         ("ChallengeCommandResponse", "step"): "ChallengeCommandStepResponse",
@@ -404,8 +346,8 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
                 f"{GAMEPLAY_RESPONSE_GENERATED_OPENAPI}: {schema_name}.{field_name} must reference {expected_ref}"
             )
     for schema_name in (
-        "AdventureRunResponse",
-        "AdventureRunPatchResponse",
+        "AdventureLevelTierRunResponse",
+        "AdventureLevelTierCommandRunResponse",
         "ChallengeRunResponse",
         "ChallengeCommandRunResponse",
     ):
@@ -417,26 +359,16 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
 
     response_refs = {
         (
-            "/api/adventure-levels/{level_id}/runs/",
+            "/api/adventure-level-tiers/{tier_id}/runs/",
             "post",
             "201",
-        ): "AdventureRunResponse",
+        ): "AdventureLevelTierRunResponse",
+        ("/api/adventure-tier-runs/{run_id}/", "get", "200"): "AdventureLevelTierRunResponse",
         (
-            "/api/adventures/{adventure_slug}/runs/",
-            "post",
-            "201",
-        ): "AdventureRunResponse",
-        ("/api/adventure-runs/{run_id}/", "get", "200"): "AdventureRunResponse",
-        (
-            "/api/adventure-runs/{run_id}/level-library/",
+            "/api/adventure-tier-runs/{run_id}/submit-command/",
             "post",
             "200",
-        ): "AdventureLevelLibraryResponse",
-        (
-            "/api/adventure-runs/{run_id}/submit-command/",
-            "post",
-            "200",
-        ): "AdventureCommandResponse",
+        ): "AdventureLevelTierCommandResponse",
         (
             "/api/challenge-trials/{trial_id}/runs/",
             "post",
@@ -451,7 +383,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
         ): "ChallengeCommandResponse",
     }
     for prefix, component in (
-        ("adventure-runs", "AdventureRunResponse"),
+        ("adventure-tier-runs", "AdventureLevelTierRunResponse"),
         ("challenge-runs", "ChallengeRunResponse"),
     ):
         for method in ("post", "patch", "put", "delete"):

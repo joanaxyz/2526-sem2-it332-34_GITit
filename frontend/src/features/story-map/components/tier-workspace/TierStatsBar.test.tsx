@@ -13,6 +13,8 @@ function makeRun(overrides: Partial<TierRun> = {}): TierRun {
     stars: 2,
     policy: { min_counted_commands: 1, max_counted_commands: 12 },
     counts: { counted_action_total: 3 },
+    reward: { coins: 35, claimed: false },
+    wave: { index: 1, total: 1, title: '' },
     ...overrides,
   } as unknown as TierRun
 }
@@ -33,6 +35,40 @@ describe('TierStatsBar', () => {
     expect(within(statValue('Stars')).getByLabelText('2 of 3 stars')).toBeInTheDocument()
     expect(statValue('Commands')).toHaveTextContent('3 / 12')
     expect(statValue('Star target')).toHaveTextContent('≤ 1 command')
+  })
+
+  it('shows the tier reward before play and marks it claimed once paid', () => {
+    const { unmount } = render(<TierStatsBar run={makeRun()} />)
+    expect(statValue('Reward')).toHaveTextContent('+35 GitCoins')
+    unmount()
+
+    render(<TierStatsBar run={makeRun({ reward: { coins: 35, claimed: true } })} />)
+    expect(statValue('Reward')).toHaveTextContent('Claimed')
+  })
+
+  it('shows the wave position only for a tier with several waves', () => {
+    const { unmount } = render(<TierStatsBar run={makeRun()} />)
+    expect(screen.queryByText('Wave', { selector: 'dt' })).not.toBeInTheDocument()
+    unmount()
+
+    render(<TierStatsBar run={makeRun({ wave: { index: 2, total: 3, title: 'Publish and track' } })} />)
+    expect(statValue('Wave')).toHaveTextContent('2 / 3')
+  })
+
+  it('counts a reward paid by this run as claimed', () => {
+    render(
+      <TierStatsBar
+        run={makeRun({
+          rewards: {
+            first_level_clear: false,
+            coins_awarded: 35,
+            chapter_chests_awarded: [],
+            mastery_advanced: [],
+          },
+        })}
+      />,
+    )
+    expect(statValue('Reward')).toHaveTextContent('Claimed')
   })
 
   it('carries the tour anchors for the command budget and star target', () => {

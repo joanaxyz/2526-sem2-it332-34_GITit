@@ -38,8 +38,8 @@ function renderTabs() {
   const view = render(tabs(0))
   return {
     rerender: view.rerender,
-    liveTab: screen.getByRole('tab', { name: 'Live DAG' }),
-    expectedTab: screen.getByRole('tab', { name: 'Expected state' }),
+    liveTab: screen.getByRole('tab', { name: 'Live' }),
+    expectedTab: screen.getByRole('tab', { name: 'Expected' }),
     livePane: screen.getByTestId('live-view').parentElement as HTMLElement,
     expectedPane: screen.getByTestId('expected-view').parentElement as HTMLElement,
   }
@@ -81,7 +81,7 @@ describe('TierDagTabs', () => {
     expect(screen.getByTestId('expected-view')).toHaveAttribute('data-refit', '1:0')
     expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '0:0')
 
-    fireEvent.click(screen.getByRole('tab', { name: 'Live DAG' }))
+    fireEvent.click(screen.getByRole('tab', { name: 'Live' }))
     expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '1:0')
   })
 
@@ -117,7 +117,7 @@ describe('TierDagTabs', () => {
 
     rerender(tabs(1))
 
-    expect(screen.getByRole('tab', { name: 'Live DAG' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Live' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '1:0')
     // The switch does not steal focus from wherever the learner is.
     expect(expectedTab).toHaveFocus()
@@ -128,7 +128,7 @@ describe('TierDagTabs', () => {
 
     rerender(tabs(1))
 
-    expect(screen.getByRole('tab', { name: 'Live DAG' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('tab', { name: 'Live' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByTestId('live-view')).toHaveAttribute('data-refit', '0:0')
   })
 

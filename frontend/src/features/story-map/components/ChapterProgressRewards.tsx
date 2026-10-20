@@ -47,7 +47,6 @@ export function ChapterProgressRewards({ chapter, preview = false }: {
 
   return (
     <GamePanel as="section" eyebrow="Progress Rewards" className="story-skill-reward-panel">
-      <p className="story-reward-help">GitCoins are added at each milestone. Open an earned chest for details.</p>
       <div className="story-skill-reward-grid" aria-label={`${chapter.title} progress rewards`} aria-busy={checking}>
         {chests.map((chest) => {
           const earned = chest.claimed || chest.unlocked

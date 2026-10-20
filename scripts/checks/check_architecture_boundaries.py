@@ -1869,36 +1869,32 @@ def check_backend_service_packages() -> list[str]:
     return violations
 
 
-def check_curriculum_seed_public_modules_are_thin() -> list[str]:
-    violations: list[str] = []
-    seed_data = BACKEND / "curriculum" / "seed_data"
-    expected_partitions = {
-        "adventure_levels": seed_data / "source" / "adventure_level_specs",
-        "challenges": seed_data / "source" / "challenge_specs",
-        "blueprint_overlay": seed_data / "source" / "blueprint",
-    }
-    for module_name, partition_dir in expected_partitions.items():
-        public_module = seed_data / f"{module_name}.py"
-        source_module = seed_data / "source" / f"{module_name}.py"
-        if not public_module.exists() or not source_module.exists():
-            violations.append(
-                f"backend/curriculum/seed_data/{module_name}.py: expected thin public wrapper plus source/{module_name}.py compatibility module"
-            )
-            continue
-        for module_path, label in (
-            (public_module, "public"),
-            (source_module, "source compatibility"),
-        ):
-            line_count = len(module_path.read_text(encoding="utf-8", errors="ignore").splitlines())
-            if line_count > 50:
-                violations.append(
-                    f"{rel(module_path)}: {label} seed-data module has {line_count} lines; keep authored data in partitioned source packages"
-                )
-        if not partition_dir.exists() or not (partition_dir / "__init__.py").exists():
-            violations.append(
-                f"{rel(partition_dir)}: expected partitioned authored seed-data package for {module_name}"
-            )
-    return violations
+# The retired multi-story curriculum and its wave-based adventure runtime were
+# removed (docs/goals/curriculum-waves-and-repetition/PLAN.md, Task L). The live
+# curriculum is seeded by `seed_curriculum` onto difficulty tiers only.
+RETIRED_CURRICULUM_PATHS = (
+    "curriculum/management/commands/seed_curriculum_fixture.py",
+    "curriculum/management/commands/seed_curriculum_writer.py",
+    "curriculum/management/commands/seed_curriculum_structure.py",
+    "curriculum/seed_data/adventure_levels.py",
+    "curriculum/seed_data/challenges.py",
+    "curriculum/seed_data/chapters.py",
+    "curriculum/seed_data/lessons.py",
+    "curriculum/seed_data/stories.py",
+    "curriculum/seed_data/source/adventure_level_specs",
+    "curriculum/seed_data/source/challenge_specs",
+    "curriculum/seed_data/source/blueprint",
+    "adventures/services/runs.py",
+    "adventures/payloads.py",
+)
+
+
+def check_retired_curriculum_stays_removed() -> list[str]:
+    return [
+        f"backend/{path}: the retired curriculum seed and wave runtime must not return"
+        for path in RETIRED_CURRICULUM_PATHS
+        if (BACKEND / path).exists()
+    ]
 
 
 def main() -> int:
@@ -1922,7 +1918,7 @@ def main() -> int:
         *check_backend_layer_package_inits_are_thin(),
         *check_backend_common_shape(),
         *check_backend_service_packages(),
-        *check_curriculum_seed_public_modules_are_thin(),
+        *check_retired_curriculum_stays_removed(),
         *check_adminconsole_http_read_ownership(),
         *check_adminconsole_selectors_are_http_free(),
         *check_backend_runtime_import_cycles(),

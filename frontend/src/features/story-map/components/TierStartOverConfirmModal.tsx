@@ -3,12 +3,10 @@ import { Modal } from '@/shared/components/Modal'
 
 export function TierStartOverConfirmModal({
   open,
-  isStarting,
   onClose,
   onStartFresh,
 }: {
   open: boolean
-  isStarting: boolean
   onClose: () => void
   onStartFresh: () => void
 }) {
@@ -23,11 +21,11 @@ export function TierStartOverConfirmModal({
           <li>This action cannot be undone.</li>
         </ul>
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" disabled={isStarting} onClick={onClose}>
+          <Button type="button" variant="ghost" onClick={onClose}>
             Cancel
           </Button>
-          <Button type="button" disabled={isStarting} onClick={onStartFresh}>
-            {isStarting ? 'Starting' : 'Start fresh attempt'}
+          <Button type="button" onClick={onStartFresh}>
+            Start fresh attempt
           </Button>
         </div>
       </div>

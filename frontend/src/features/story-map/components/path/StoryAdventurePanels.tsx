@@ -16,6 +16,7 @@ import {
   difficultyLabel,
 } from '@/features/story-map/utils/challengeUi'
 import { StarRating } from '@/shared/level/components/StarRating'
+import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 
 const DIFFICULTY_ORDER = ['easy', 'medium', 'hard'] as const
 
@@ -55,8 +56,6 @@ export function StoryLevelTierPanel({
   panelRef,
   placement,
   style,
-  pendingTierId,
-  isStarting,
   onClose,
   onStartTier,
   onOpenDrill,
@@ -66,8 +65,6 @@ export function StoryLevelTierPanel({
   panelRef: RefObject<HTMLElement | null>
   placement: 'docked' | 'inline'
   style?: CSSProperties
-  pendingTierId?: number
-  isStarting: boolean
   onClose: () => void
   onStartTier: (tierId: number, replay: boolean) => void
   onOpenDrill: () => void
@@ -159,12 +156,7 @@ export function StoryLevelTierPanel({
           const tierLabel = DIFFICULTY_TIER_LABELS[difficulty]
           const progress = tier?.wave_progress ?? { completed: 0, total: 0 }
           const isLocked = status === 'locked'
-          const isStartingThisTier = isStarting && pendingTierId === tier?.id
-          const actionLabel = isLocked
-            ? 'Locked'
-            : isStartingThisTier
-              ? 'Starting…'
-              : TIER_ACTION_LABELS[status]
+          const actionLabel = isLocked ? 'Locked' : TIER_ACTION_LABELS[status]
 
           return (
             <li key={`${level.id}-${difficulty}`}>
@@ -174,7 +166,7 @@ export function StoryLevelTierPanel({
                 data-status={status}
                 data-next={(!drillIsNextMove && difficulty === nextDifficulty) || undefined}
                 style={{ '--row-index': index } as CSSProperties}
-                disabled={isLocked || !tier || isStarting}
+                disabled={isLocked || !tier}
                 aria-label={`${level.title}, ${tierLabel} tier: ${actionLabel}`}
                 title={isLocked ? 'Clear the previous difficulty to unlock this tier.' : undefined}
                 onClick={() => {
@@ -200,6 +192,14 @@ export function StoryLevelTierPanel({
                         ? `${progress.total} ${progress.total === 1 ? 'wave' : 'waves'}`
                         : `${progress.completed}/${progress.total}`
                       : null}
+                    {tier && !tier.reward.claimed && tier.reward.coins > 0 ? (
+                      <span
+                        className="story-level-tier-row-reward"
+                        aria-label={`${tier.reward.coins} GitCoins on first clear`}
+                      >
+                        <GitCoinIcon className="size-3" />+{tier.reward.coins}
+                      </span>
+                    ) : null}
                   </span>
                 </span>
                 {isLocked ? (

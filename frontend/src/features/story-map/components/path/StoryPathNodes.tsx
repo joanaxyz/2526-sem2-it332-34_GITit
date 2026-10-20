@@ -1,4 +1,4 @@
-import { Check, Lock, Play, Swords } from 'lucide-react'
+import { Check, Lock, Swords } from 'lucide-react'
 import type { CSSProperties } from 'react'
 
 import type { AdventureLevelSummary } from '@/features/story-map/types'
@@ -15,9 +15,7 @@ export function StoryPathLevelNode({
   currentLevelId,
   loading,
   selectedLevelId,
-  closingLevelId,
   onToggle,
-  onOpenLevel,
 }: {
   level?: AdventureLevelSummary
   index: number
@@ -26,9 +24,7 @@ export function StoryPathLevelNode({
   currentLevelId: number | null
   loading: boolean
   selectedLevelId: number | null
-  closingLevelId: number | null
   onToggle: (levelId: number) => void
-  onOpenLevel: (level: AdventureLevelSummary) => void
 }) {
   const state = level
     ? level.locked || chapterLocked
@@ -48,8 +44,6 @@ export function StoryPathLevelNode({
     : level?.completion?.stars ?? 0
   const disabled = !level || state === 'locked' || state === 'loading'
   const selected = Boolean(level && selectedLevelId === level.id)
-  const closing = Boolean(level && closingLevelId === level.id && !selected)
-  const showPlayPill = Boolean(level && !hasTiers && (selected || closing))
 
   return (
     <div
@@ -84,19 +78,6 @@ export function StoryPathLevelNode({
           </span>
         ) : null}
       </button>
-
-      {showPlayPill ? (
-        <button
-          type="button"
-          className="story-path-node-play"
-          data-pill-state={closing ? 'closing' : 'open'}
-          aria-label={`Play ${level!.title}`}
-          onClick={() => onOpenLevel(level!)}
-        >
-          <Play className="size-4" fill="currentColor" aria-hidden="true" />
-          <span className="sr-only">Play</span>
-        </button>
-      ) : null}
 
       {state === 'locked' || state === 'loading' ? null : (
         <StarRating

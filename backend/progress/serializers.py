@@ -5,8 +5,9 @@ from progress.services.metrics import ACTIVITY_WINDOWS
 
 class RateMetricSerializer(serializers.Serializer):
     value = serializers.FloatField(allow_null=True)
-    numerator = serializers.IntegerField()
+    numerator = serializers.FloatField()
     denominator = serializers.IntegerField()
+    unit = serializers.ChoiceField(choices=["participants"], required=False)
 
 
 class DashboardKpiSetSerializer(serializers.Serializer):
@@ -16,10 +17,12 @@ class DashboardKpiSetSerializer(serializers.Serializer):
 
 
 RTA_HELP_TEXT = (
-    "Retry Transfer Accuracy (Modules 3-4): first retries after a failure on a "
-    "structurally changed variant that complete, over all such retries."
+    "Retry Transfer Accuracy (Modules 3-4): successful first attempts on reserved, "
+    "unseen transfer checkpoints over concluded checkpoints. Formal studies include unattempted assignments."
 )
-RETRY_SUCCESS_RATE_HELP_TEXT = "Learner-facing share of runs with a prior run that complete."
+RETRY_SUCCESS_RATE_HELP_TEXT = (
+    "Concluded retries following actual unsuccessful attempts that succeed."
+)
 # TODO(next release): drop the deprecated "rtr" alias once no deployed frontend
 # reads it; it mirrors retry_success_rate so older bundles keep rendering.
 RTR_DEPRECATED_HELP_TEXT = "Deprecated alias of retry_success_rate. Will be removed."
@@ -39,6 +42,7 @@ class PerformanceModuleSerializer(serializers.Serializer):
     number = serializers.IntegerField()
     title = serializers.CharField()
     scr = RateMetricSerializer()
+    car = RateMetricSerializer()
     hlcr = RateMetricSerializer()
     rta = RateMetricSerializer(help_text=RTA_HELP_TEXT)
     retry_success_rate = RateMetricSerializer(help_text=RETRY_SUCCESS_RATE_HELP_TEXT)
@@ -46,10 +50,37 @@ class PerformanceModuleSerializer(serializers.Serializer):
     arc = RateMetricSerializer()
 
 
+class TransferCheckpointSerializer(serializers.Serializer):
+    tier_id = serializers.IntegerField()
+    title = serializers.CharField()
+    run_id = serializers.IntegerField(allow_null=True)
+
+
+class PerformanceSamplesSerializer(serializers.Serializer):
+    """Evidence coverage behind the KPI values; see KPI_METHODOLOGY.md."""
+
+    participants = serializers.IntegerField()
+    attempted_tiers = serializers.IntegerField(
+        help_text="Tiers with an outcome: mastered, a concluded run, or commands left idle 7+ days."
+    )
+    in_progress_tiers = serializers.IntegerField(
+        help_text="Opened tiers with no outcome yet; outside the SCR and HLCR denominators."
+    )
+    mastered_tiers = serializers.IntegerField()
+    mastery_missing = serializers.IntegerField()
+    car_scored = serializers.IntegerField()
+    car_missing = serializers.IntegerField()
+    transfer_assigned = serializers.IntegerField()
+    transfer_pending = serializers.IntegerField()
+    transfer_missing = serializers.IntegerField()
+
+
 class PerformanceSummaryResponseSerializer(serializers.Serializer):
     kpis = PerformanceKpiSetSerializer()
     completed_sessions = serializers.IntegerField()
     modules = PerformanceModuleSerializer(many=True)
+    samples = PerformanceSamplesSerializer()
+    transfers = TransferCheckpointSerializer(many=True)
 
 
 class DashboardCountsSerializer(serializers.Serializer):

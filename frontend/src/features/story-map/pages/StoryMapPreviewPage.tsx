@@ -118,6 +118,7 @@ function previewTiers(levelIndex: number): AdventureLevelTierAccess[] {
       completion: cleared
         ? { stars: 3 - tierIndex, counted_action_total: 1, completed_at: '2026-08-25T00:00:00Z' }
         : null,
+      reward: { coins: [25, 35, 50][tierIndex], claimed: cleared },
     }
   })
 }

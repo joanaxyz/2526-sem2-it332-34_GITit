@@ -614,7 +614,7 @@
     },
     "gameplay_mutation_backend_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "fdfdfa132185a9f67ead14e653cad9cc4858a84c7509a9bbbba95f36ae27a77d",
+      "normalized_ast_sha256": "9aaf31c439e1270ed2f9d836b7def80f332adeb5964d66eadb9585ec6d9eb751",
       "owner": "scripts.checks.architecture_guard.contracts.gameplay",
       "pre_cutover_lines": [
         4982,
@@ -632,7 +632,7 @@
     },
     "gameplay_mutation_openapi_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "a1e3dd26cad20bea15174d5e7119e0d08b9d1d9dba9c63ec7517b2f377b1d819",
+      "normalized_ast_sha256": "c633c7a63201a6fc23190a1a18729c94b4c30de9fe93fd99c70e4496c8ba85a4",
       "owner": "scripts.checks.architecture_guard.contracts.gameplay",
       "pre_cutover_lines": [
         4889,

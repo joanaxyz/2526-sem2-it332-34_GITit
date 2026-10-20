@@ -2,15 +2,16 @@ from django.contrib import admin
 
 from adventures.models import (
     AdventureLevel,
-    AdventureRun,
-    AdventureWave,
-    AdventureWaveVariant,
+    AdventureLevelTier,
+    AdventureLevelTierRun,
+    AdventureLevelTierWave,
+    AdventureLevelTierWaveVariant,
     SkillMastery,
 )
 
 
-class AdventureWaveInline(admin.TabularInline):
-    model = AdventureWave
+class AdventureLevelTierInline(admin.TabularInline):
+    model = AdventureLevelTier
     extra = 0
 
 
@@ -19,35 +20,37 @@ class AdventureLevelAdmin(admin.ModelAdmin):
     list_display = ("slug", "title", "chapter", "is_required", "is_published", "sort_order")
     list_filter = ("is_required", "is_published", "chapter")
     search_fields = ("title", "slug")
-    inlines = [AdventureWaveInline]
+    inlines = [AdventureLevelTierInline]
 
 
-class AdventureWaveVariantInline(admin.TabularInline):
-    model = AdventureWaveVariant
+class AdventureLevelTierWaveVariantInline(admin.TabularInline):
+    model = AdventureLevelTierWaveVariant
     extra = 0
+    fields = ("slug", "label", "sort_order", "is_transfer", "is_published")
 
 
-@admin.register(AdventureWave)
-class AdventureWaveAdmin(admin.ModelAdmin):
-    list_display = ("slug", "title", "level", "sort_order", "is_published")
-    list_filter = ("is_published",)
+@admin.register(AdventureLevelTierWave)
+class AdventureLevelTierWaveAdmin(admin.ModelAdmin):
+    list_display = ("slug", "title", "tier", "sort_order", "required_successful_attempts", "is_published")
+    list_filter = ("is_published", "tier__difficulty")
     search_fields = ("title", "slug")
-    inlines = [AdventureWaveVariantInline]
+    inlines = [AdventureLevelTierWaveVariantInline]
 
 
-@admin.register(AdventureRun)
-class AdventureRunAdmin(admin.ModelAdmin):
+@admin.register(AdventureLevelTierRun)
+class AdventureLevelTierRunAdmin(admin.ModelAdmin):
     list_display = (
         "id",
         "player",
-        "level",
+        "tier",
         "current_wave",
         "is_replay",
+        "is_transfer",
         "stars",
         "status",
         "started_at",
     )
-    list_filter = ("is_replay", "status")
+    list_filter = ("is_replay", "is_transfer", "status")
 
 
 @admin.register(SkillMastery)

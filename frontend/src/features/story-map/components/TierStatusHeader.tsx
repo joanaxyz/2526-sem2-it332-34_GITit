@@ -12,7 +12,6 @@ import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes
 export function TierStatusHeader({
   run,
   isExiting = false,
-  isRetrying = false,
   onExit,
   onRetry,
   onStartOver,
@@ -25,7 +24,6 @@ export function TierStatusHeader({
 }: {
   run: TierRun
   isExiting?: boolean
-  isRetrying?: boolean
   onExit?: () => void
   onRetry?: () => void
   onStartOver?: () => void
@@ -37,13 +35,11 @@ export function TierStatusHeader({
   repoGraph?: RepoGraphTrigger
 }) {
   const exitLabel = run.status === 'started' ? 'Exit' : 'Back'
-  const canRetry = !run.replay && run.status === 'failed' && !!onRetry
-  const canStartOver = !run.replay && run.status === 'started' && !!onStartOver
+  const canRetry = !run.transfer && !run.replay && run.status === 'failed' && !!onRetry
+  const canStartOver = !run.transfer && !run.replay && run.status === 'started' && !!onStartOver
   const canReplay = run.replay && !!onReplay
   const replayLabel = run.status === 'started' ? 'Start over' : 'Play again'
   const replayIsStartOver = replayLabel === 'Start over'
-  const replayActionLabel = isRetrying ? 'Starting' : replayLabel
-  const startOverLabel = isRetrying ? 'Starting over' : 'Start over'
 
   return (
     <header className="gameplay-workspace-header" aria-label="Adventure command bar">
@@ -65,6 +61,7 @@ export function TierStatusHeader({
 
       <div className="gameplay-header-mission" aria-label="Current adventure">
         <strong>{run.tier.adventure_level_title}</strong>
+        {run.transfer ? <span>Transfer checkpoint · first attempt recorded</span> : null}
       </div>
 
       <span className="gameplay-header-spacer" aria-hidden="true" />
@@ -76,26 +73,25 @@ export function TierStatusHeader({
         buttonClassName="gameplay-header-button gameplay-header-icon-button gameplay-header-audio"
       />
 
-      <CommandGuideLauncher
+      {!run.transfer ? <CommandGuideLauncher
         guides={commandGuides}
         currentGuideKey={currentCommandGuideKey}
         guideOpen={commandGuideOpen}
         onSelectGuide={onSelectCommandGuide ?? (() => undefined)}
-      />
+      /> : null}
 
       {canRetry ? (
-        <button type="button" className="gameplay-header-button" disabled={isRetrying} onClick={onRetry}>
+        <button type="button" className="gameplay-header-button" onClick={onRetry}>
           <RefreshCcw aria-hidden="true" />
-          {isRetrying ? 'Starting retry' : 'Retry'}
+          Retry
         </button>
       ) : null}
       {canStartOver ? (
         <button
           type="button"
           className="gameplay-header-button gameplay-header-icon-button"
-          disabled={isRetrying}
-          title={startOverLabel}
-          aria-label={startOverLabel}
+          title="Start over"
+          aria-label="Start over"
           onClick={onStartOver}
         >
           <RefreshCcw aria-hidden="true" />
@@ -105,13 +101,12 @@ export function TierStatusHeader({
         <button
           type="button"
           className={`gameplay-header-button${replayIsStartOver ? ' gameplay-header-icon-button' : ''}`}
-          disabled={isRetrying}
-          title={replayActionLabel}
-          aria-label={replayActionLabel}
+          title={replayLabel}
+          aria-label={replayLabel}
           onClick={onReplay}
         >
           <RefreshCcw aria-hidden="true" />
-          {replayIsStartOver ? null : replayActionLabel}
+          {replayIsStartOver ? null : replayLabel}
         </button>
       ) : null}
     </header>

@@ -133,6 +133,7 @@ export function gitCherryPick(state: MutableRepositoryState, parsed: ParsedGitCo
     delete state.cherry_pick_in_progress
     delete state.cherry_pick_original_head
     delete state.cherry_pick_source
+    delete state.cherry_pick_message
     setOperationMetadata(state, { last_cherry_pick_aborted: true })
     return { command: 'cherry-pick', stdout: '' }
   }
@@ -190,6 +191,9 @@ export function gitCherryPick(state: MutableRepositoryState, parsed: ParsedGitCo
     state.cherry_pick_in_progress = true
     state.cherry_pick_original_head = headId
     state.cherry_pick_source = sourceId
+    // Git prepares the commit message (with any -x note) when it stops, and
+    // --continue commits with it.
+    state.cherry_pick_message = cherryPickMessage(source.message ?? `cherry-pick ${sourceId}`, sourceId, parsed)
     setOperationMetadata(state, {
       last_cherry_pick_source: sourceId,
       last_cherry_pick_conflicted: true,
@@ -204,8 +208,12 @@ export function gitCherryPick(state: MutableRepositoryState, parsed: ParsedGitCo
   const nextTree = applyChanges(head, source.changes ?? {})
   const changes = diffTrees(head, nextTree)
   if (hasOption(parsed, '--no-commit') || hasOption(parsed, '-n')) {
+    // Like Git, a --no-commit pick lands on top of whatever is already staged,
+    // so several picks can be committed together.
+    const index = applyChanges(head, changesFromEntries(head, clone(state.staging ?? {})))
+    const staged = diffTrees(head, applyChanges(index, source.changes ?? {}))
     state.staging = Object.fromEntries(
-      Object.entries(changes).map(([path, change]) => [path, change.after === null ? 'deleted' : { status: change.change_type, content: clone(change.after) }]),
+      Object.entries(staged).map(([path, change]) => [path, change.after === null ? 'deleted' : { status: change.change_type, content: clone(change.after) }]),
     )
     setOperationMetadata(state, { cherry_pick_in_progress: true, cherry_pick_original_head: headId, last_cherry_pick_source: sourceId, last_cherry_pick_no_commit: true })
     state.cherry_pick_in_progress = true
@@ -239,7 +247,7 @@ function continueCherryPick(state: MutableRepositoryState): CommandOutcome {
   }
   const tree = applyChanges(head, stagedChanges)
   const commitId = nextCommitId(state)
-  const message = source.message ?? `cherry-pick ${sourceId}`
+  const message = String(state.cherry_pick_message ?? source.message ?? `cherry-pick ${sourceId}`)
   state.commits ??= []
   state.commits.push(
     commitPayload({
@@ -257,6 +265,7 @@ function continueCherryPick(state: MutableRepositoryState): CommandOutcome {
   delete state.cherry_pick_in_progress
   delete state.cherry_pick_original_head
   delete state.cherry_pick_source
+  delete state.cherry_pick_message
   setOperationMetadata(state, {
     last_cherry_pick_source: sourceId,
     last_cherry_pick_created_commit: commitId,

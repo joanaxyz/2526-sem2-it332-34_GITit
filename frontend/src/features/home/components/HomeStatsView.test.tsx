@@ -20,6 +20,8 @@ vi.mock('@/features/performance/api/performanceApi', () => ({
 
 const performanceFixture: PerformanceSummary = {
   completed_sessions: 14,
+  samples: { participants: 1, attempted_tiers: 35, in_progress_tiers: 0, mastered_tiers: 14, mastery_missing: 0, car_scored: 0, car_missing: 0, transfer_assigned: 0, transfer_pending: 0, transfer_missing: 0 },
+  transfers: [],
   kpis: {
     scr: { value: 40, numerator: 14, denominator: 35 },
     car: { value: 95, numerator: 40, denominator: 42 },
@@ -30,7 +32,8 @@ const performanceFixture: PerformanceSummary = {
   },
   modules: [
     {
-      number: 0,
+      car: { value: null, numerator: 0, denominator: 0 },
+    number: 0,
       title: 'Module 0',
       scr: { value: 100, numerator: 2, denominator: 2 },
       hlcr: { value: null, numerator: 0, denominator: 0 },
@@ -39,7 +42,8 @@ const performanceFixture: PerformanceSummary = {
       arc: { value: null, numerator: 0, denominator: 0 },
     },
     {
-      number: 1,
+      car: { value: null, numerator: 0, denominator: 0 },
+    number: 1,
       title: 'Repository Foundations',
       scr: { value: 50, numerator: 1, denominator: 2 },
       hlcr: { value: null, numerator: 0, denominator: 0 },
@@ -48,7 +52,8 @@ const performanceFixture: PerformanceSummary = {
       arc: { value: 1.5, numerator: 3, denominator: 2 },
     },
     {
-      number: 2,
+      car: { value: null, numerator: 0, denominator: 0 },
+    number: 2,
       title: 'Module 2',
       scr: { value: null, numerator: 0, denominator: 0 },
       hlcr: { value: null, numerator: 0, denominator: 0 },
@@ -112,8 +117,8 @@ describe('HomeStatsView contract', () => {
     expect(within(story as HTMLElement).getByText('43 of 57 runs you started')).toBeInTheDocument()
     expect(within(story as HTMLElement).getByText('Overall finish rate')).toBeInTheDocument()
     const signals = await screen.findByRole('group', { name: 'Practice measures' })
-    expect(within(signals).getByRole('button', { name: /Runs finished/ })).toHaveTextContent('40%')
-    expect(within(signals).getByRole('button', { name: /Commands accepted/ })).toHaveTextContent('95%')
+    expect(within(signals).getByRole('button', { name: /Tiers mastered/ })).toHaveTextContent('40%')
+    expect(within(signals).getByRole('button', { name: /Command efficiency/ })).toHaveTextContent('95%')
   })
 
   it('renders nothing of its own for the Profile category', () => {
@@ -228,12 +233,12 @@ describe('HomeStatsView contract', () => {
     renderView('progress')
     const signals = await screen.findByRole('group', { name: 'Practice measures' })
     expect(within(signals).getAllByRole('button')).toHaveLength(6)
-    expect(within(signals).getByRole('button', { name: /Hard runs cleared/ })).toHaveTextContent('0%')
-    expect(within(signals).getByRole('button', { name: /Retries per finish/ })).toHaveTextContent('1.43')
+    expect(within(signals).getByRole('button', { name: /Hard tiers mastered/ })).toHaveTextContent('0%')
+    expect(within(signals).getByRole('button', { name: /Retries before mastery/ })).toHaveTextContent('1.43')
     const modules = screen.getByRole('region', { name: 'Module comparison' })
     expect(modules).not.toHaveTextContent('Module 0')
     expect(modules).toHaveTextContent('50%')
-    fireEvent.click(within(signals).getByRole('button', { name: /Retries per finish/ }))
+    fireEvent.click(within(signals).getByRole('button', { name: /Retries before mastery/ }))
     expect(modules).toHaveTextContent('1.50')
     expect(mocks.summary).toHaveBeenCalledTimes(1)
   })
@@ -286,7 +291,7 @@ describe('HomeStatsView contract', () => {
     const story = document.querySelector('.home-overview-story-block')
     expect(Array.from(story!.querySelectorAll('dd')).map((value) => value.textContent)).toEqual(['0', '30'])
     const signals = await screen.findByRole('group', { name: 'Practice measures' })
-    expect(within(signals).getByRole('button', { name: /Commands accepted/ })).toHaveTextContent('95%')
+    expect(within(signals).getByRole('button', { name: /Command efficiency/ })).toHaveTextContent('95%')
   })
 
   it('does not mutate frozen input summaries', () => {

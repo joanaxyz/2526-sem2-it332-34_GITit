@@ -75,6 +75,10 @@ export function usePlayerAttackChoreography({
           const groundImpact = monsterFeetAnchor(event.target)
           const to = playback === 'projectile' ? bodyImpact : feetPlanted ? groundImpact : anchor(targetEl)
           const impactTo = playback === 'projectile' && groundAnchor === 'feet' ? groundImpact : undefined
+          let markImpact = () => {}
+          const impact = new Promise<void>((resolve) => {
+            markImpact = resolve
+          })
           const effect = effectForSkill(event.skill, companionSlugRef.current)({
             layer,
             backLayer,
@@ -82,17 +86,25 @@ export function usePlayerAttackChoreography({
             to,
             impactTo,
             sizeScale: monsterSizeScale(event.target),
+            onImpact: () => markImpact(),
           })
           void playCastEnd()
-          // A missed attack still casts and impacts, but the target took no damage,
-          // so it never flinches. A finishing blow skips the hurt flinch entirely:
-          // the death strip starts at impact (the monster_death beat that follows
-          // sees the corpse and holds it).
+          // The target reacts on contact, never after the spell has faded: a bolt
+          // when it lands, a ground run when it arrives, a burst when it blooms.
+          // A missed attack still casts and impacts, but the target took no
+          // damage, so it never flinches. A finishing blow skips the hurt flinch
+          // entirely: the death strip starts at impact (the monster_death beat
+          // that follows sees the corpse and holds it).
           const lethal = !event.missed && event.target_hp_after <= 0
-          if (targetHandle && playback !== 'projectile' && !event.missed) {
+          if (targetHandle && !event.missed) {
+            await Promise.race([impact, effect])
             if (lethal) {
               await Promise.all([effect, targetHandle.die()])
+            } else if (playback === 'projectile') {
+              await Promise.all([effect, boundedAnimation(targetHandle.hurt(), 420)])
             } else {
+              // Target and ground effects keep washing over the body, so the
+              // flinch repeats until they fade.
               let effectDone = false
               const hurtLoop = (async () => {
                 while (!effectDone) {
@@ -107,10 +119,6 @@ export function usePlayerAttackChoreography({
             }
           } else {
             await effect
-            if (targetHandle && !event.missed) {
-              if (lethal) await targetHandle.die()
-              else await boundedAnimation(targetHandle.hurt(), 420)
-            }
           }
         } else {
           void playCastEnd()

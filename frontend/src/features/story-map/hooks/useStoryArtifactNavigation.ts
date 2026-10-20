@@ -4,7 +4,6 @@ import type {
   ChallengeActionIntent,
   ChallengeTrialAccess,
 } from '@/features/challenges/types'
-import type { AdventureLevelSummary } from '@/features/story-map/types'
 
 /**
  * The story map routes from the selected interactable artifact into the owning
@@ -26,9 +25,5 @@ export function useStoryArtifactNavigation() {
     navigate(`/challenge-trials/${item.id}`)
   }
 
-  function openAdventureLevel(level: AdventureLevelSummary) {
-    navigate(`/adventure-levels/${level.id}`)
-  }
-
-  return { openChallengeArtifact, openAdventureLevel }
+  return { openChallengeArtifact }
 }

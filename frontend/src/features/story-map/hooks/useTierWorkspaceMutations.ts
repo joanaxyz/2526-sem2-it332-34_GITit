@@ -9,7 +9,11 @@ import {
   syncTierRunInCache,
   updateTierRunCache,
 } from '@/features/story-map/utils/tierRunCache'
-import { mapUrlForRun } from '@/features/story-map/components/tierWorkspaceLayout'
+import {
+  mapUrlForRun,
+  tierRetryUrl,
+  tierStartUrl,
+} from '@/features/story-map/components/tierWorkspaceLayout'
 import { queryKeys } from '@/shared/api/queryKeys'
 import type {
   WorkspaceFileInput,
@@ -25,8 +29,6 @@ export function useTierWorkspaceMutations({
   bypassNavigationRunId,
   setExitNavigationRunId,
   setExitConfirmOpen,
-  setStartOverConfirmOpen,
-  setDismissedCompletionRunId,
 }: {
   run: TierRun | null
   runId: number
@@ -36,8 +38,6 @@ export function useTierWorkspaceMutations({
   bypassNavigationRunId: MutableRefObject<number | null>
   setExitNavigationRunId: Dispatch<SetStateAction<number | null>>
   setExitConfirmOpen: Dispatch<SetStateAction<boolean>>
-  setStartOverConfirmOpen: Dispatch<SetStateAction<boolean>>
-  setDismissedCompletionRunId: Dispatch<SetStateAction<number | null>>
 }) {
   const exitMutation = useMutation({
     onMutate: () => {
@@ -68,69 +68,38 @@ export function useTierWorkspaceMutations({
     },
   })
 
-  const replayMutation = useMutation({
-    mutationFn: (tierId: number) => tierRunsApi.startRun(tierId, { replay: true }),
-    onSuccess: (next) => {
-      moveToReplacementRun({
-        previousRun: run,
-        nextRun: next,
-        navigate,
-        queryClient,
-        bypassNavigationRunId,
-        setExitNavigationRunId,
-        setExitConfirmOpen,
-        setStartOverConfirmOpen,
-        setDismissedCompletionRunId,
-      })
-    },
-  })
+  // Every new attempt opens through a start route, which holds the loading
+  // screen until the run exists and its artwork has decoded. Leaving a run in
+  // progress that way must not trip the discard-on-leave blocker: the start
+  // request discards the old run itself.
+  function openStartRoute(url: string, { replacesRun = false } = {}) {
+    const leavingRun = latestRunRef.current ?? run
+    if (leavingRun?.status === 'started') bypassNavigationRunId.current = leavingRun.id
+    navigate(url)
+    if (replacesRun && leavingRun) {
+      window.setTimeout(() => {
+        queryClient.removeQueries({ queryKey: queryKeys.adventureTierRun(leavingRun.id) })
+      }, 0)
+    }
+  }
 
-  const startLevelMutation = useMutation({
-    mutationFn: (tierId: number) => tierRunsApi.startRun(tierId),
-    onSuccess: (next) => {
-      syncTierRunInCache(queryClient, next)
-      invalidateTierProgressQueries(queryClient)
-      if (run?.status === 'completed') setDismissedCompletionRunId(run.id)
-      navigate(`/adventure-tier-runs/${next.id}`)
-    },
-  })
+  const startNextLevel = (tierId: number) => openStartRoute(tierStartUrl(tierId))
 
   // Continues the SAME tier after a partial clear (progress not yet at
   // required_successful_attempts) - passes prior_run_id so
   // TierVariantSelectionService rotates away from the just-played variant
   // instead of defaulting to variants[0] every time.
-  const continueMutation = useMutation({
-    mutationFn: () => {
-      if (!run) throw new Error('No adventure tier run is available to continue.')
-      return tierRunsApi.startRun(run.tier.id, { prior_run_id: run.id })
-    },
-    onSuccess: (next) => {
-      syncTierRunInCache(queryClient, next)
-      invalidateTierProgressQueries(queryClient)
-      if (run?.status === 'completed') setDismissedCompletionRunId(run.id)
-      navigate(`/adventure-tier-runs/${next.id}`)
-    },
-  })
+  const continueTier = () => {
+    if (run) openStartRoute(tierStartUrl(run.tier.id, { priorRunId: run.id }))
+  }
 
-  const retryMutation = useMutation({
-    mutationFn: () => {
-      if (!run) throw new Error('No adventure tier run is available to retry.')
-      return tierRunsApi.retryRun(run.id)
-    },
-    onSuccess: (next) => {
-      moveToReplacementRun({
-        previousRun: run,
-        nextRun: next,
-        navigate,
-        queryClient,
-        bypassNavigationRunId,
-        setExitNavigationRunId,
-        setExitConfirmOpen,
-        setStartOverConfirmOpen,
-        setDismissedCompletionRunId,
-      })
-    },
-  })
+  const retry = () => {
+    if (run) openStartRoute(tierRetryUrl(run.id), { replacesRun: true })
+  }
+
+  const replay = () => {
+    if (run) openStartRoute(tierStartUrl(run.tier.id, { replay: true }), { replacesRun: true })
+  }
 
   const createFileMutation = useMutation({
     mutationFn: (input: WorkspaceFileInput) => {
@@ -172,67 +141,18 @@ export function useTierWorkspaceMutations({
     },
   })
 
-  const startFreshAttempt = () => retryMutation.mutate()
-  const playAgain = () => {
-    if (run?.replay) {
-      replayMutation.mutate(run.tier.id)
-    } else {
-      retryMutation.mutate()
-    }
-  }
+  const playAgain = () => (run?.replay ? replay() : retry())
 
   return {
     exitMutation,
-    startLevelMutation,
-    continueMutation,
-    replayMutation,
-    retryMutation,
+    startNextLevel,
+    continueTier,
+    retry,
+    replay,
+    playAgain,
     createFileMutation,
     writeFileMutation,
     renameFileMutation,
     deleteFileMutation,
-    startFreshAttempt,
-    playAgain,
-  }
-}
-
-function moveToReplacementRun({
-  previousRun,
-  nextRun,
-  navigate,
-  queryClient,
-  bypassNavigationRunId,
-  setExitNavigationRunId,
-  setExitConfirmOpen,
-  setStartOverConfirmOpen,
-  setDismissedCompletionRunId,
-}: {
-  previousRun: TierRun | null
-  nextRun: TierRun
-  navigate: NavigateFunction
-  queryClient: QueryClient
-  bypassNavigationRunId: MutableRefObject<number | null>
-  setExitNavigationRunId: Dispatch<SetStateAction<number | null>>
-  setExitConfirmOpen: Dispatch<SetStateAction<boolean>>
-  setStartOverConfirmOpen: Dispatch<SetStateAction<boolean>>
-  setDismissedCompletionRunId: Dispatch<SetStateAction<number | null>>
-}) {
-  syncTierRunInCache(queryClient, nextRun)
-  invalidateTierProgressQueries(queryClient)
-  setDismissedCompletionRunId(null)
-  setExitConfirmOpen(false)
-  setStartOverConfirmOpen(false)
-  if (previousRun?.status === 'started') {
-    bypassNavigationRunId.current = previousRun.id
-    setExitNavigationRunId(previousRun.id)
-  } else {
-    bypassNavigationRunId.current = null
-    setExitNavigationRunId(null)
-  }
-  navigate(`/adventure-tier-runs/${nextRun.id}`)
-  if (previousRun?.id && previousRun.id !== nextRun.id) {
-    window.setTimeout(() => {
-      queryClient.removeQueries({ queryKey: queryKeys.adventureTierRun(previousRun.id) })
-    }, 0)
   }
 }

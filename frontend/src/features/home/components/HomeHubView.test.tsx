@@ -173,6 +173,7 @@ describe('HomeHubView contract', () => {
       error: null,
     })
     mocks.catalog.mockResolvedValue(catalog())
+    mocks.playEffect.mockResolvedValue(undefined)
     mocks.effectForSkill.mockReturnValue(mocks.playEffect)
     mocks.effectPlacementForSkill.mockReturnValue({ playback: 'projectile', anchor: 'feet' })
   })

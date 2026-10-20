@@ -102,13 +102,6 @@
   .story-trials-grid {
     grid-template-columns: minmax(0, 1fr);
   }
-
-  .story-path-node-play {
-    left: 1.4rem;
-    width: 5rem;
-    height: 2.25rem;
-    padding-right: 0.48rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -130,8 +123,7 @@
     transform: none;
   }
 
-  .story-trials-panel,
-  .story-path-node-play {
+  .story-trials-panel {
     animation: none;
   }
 }

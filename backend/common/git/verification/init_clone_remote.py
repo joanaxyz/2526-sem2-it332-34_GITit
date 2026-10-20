@@ -254,6 +254,8 @@ class InitCloneRemoteVerificationMixin:
         expected_remote_branches = copy.deepcopy(previous_state.get("remote_branches") or {})
         expected_upstream = copy.deepcopy(previous_state.get("upstream_tracking") or {})
         expected_remote_tags = copy.deepcopy(previous_state.get("remote_tags") or {})
+        # Pending server moves: a push replaces or removes the server's tip.
+        expected_remote_updates = copy.deepcopy(previous_state.get("remote_updates") or {})
 
         if "--tags" in parts:
             expected_remote_tags = copy.deepcopy(previous_state.get("tags") or {})
@@ -265,6 +267,7 @@ class InitCloneRemoteVerificationMixin:
                     "execution.next_state does not match the submitted git push command."
                 )
             expected_remote_branches.pop(remote_key, None)
+            expected_remote_updates.pop(remote_key, None)
             expected_upstream = {
                 key: value for key, value in expected_upstream.items() if value != remote_key
             }
@@ -277,6 +280,8 @@ class InitCloneRemoteVerificationMixin:
             commit_id = (previous_state.get("branches") or {}).get(branch)
             remote_key = f"{remote}/{branch}"
             expected_remote_branches[remote_key] = commit_id
+            if remote_key in expected_remote_updates:
+                expected_remote_updates[remote_key] = commit_id
             expected_remotes.setdefault(remote, f"https://example.test/{remote}.git")
             if "-u" in parts or "--set-upstream" in parts:
                 expected_upstream[branch] = remote_key
@@ -288,6 +293,8 @@ class InitCloneRemoteVerificationMixin:
         if next_state.get("upstream_tracking") != expected_upstream:
             raise BadRequest("execution.next_state does not match the submitted git push command.")
         if next_state.get("remote_tags") != expected_remote_tags:
+            raise BadRequest("execution.next_state does not match the submitted git push command.")
+        if (next_state.get("remote_updates") or {}) != expected_remote_updates:
             raise BadRequest("execution.next_state does not match the submitted git push command.")
 
     def _expected_fetch_state(self, *, command: str, previous_state: dict) -> dict:

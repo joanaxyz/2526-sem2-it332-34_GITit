@@ -307,7 +307,6 @@ export function AppTopbar({ className }: { className?: string }) {
         </span>
         <span className="app-brand-copy">
           <strong>GIT it!</strong>
-          <small>Level up your Git</small>
         </span>
       </NavLink>
 

@@ -12,9 +12,6 @@ Two ladders, one per gameplay surface:
 - ``SCAFFOLDING_LADDER`` (challenge trials): the Expected State diagram goes
   first, then the contextual feedback. Easy shows both, Medium keeps only the
   feedback, Hard neither.
-
-Guided adventure runs walk waves instead of difficulty tiers and sit outside
-both ladders (``GUIDED_SUPPORTS``).
 """
 
 from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
@@ -57,14 +54,6 @@ TIER_SCAFFOLDING_LADDER = {
     },
 }
 
-# Guided adventure runs walk waves instead of difficulty tiers, so they sit
-# outside the ladder: a live DAG plus the objective checklist, nothing that
-# fades.
-GUIDED_SUPPORTS = {
-    "live_dag": True,
-    "expected_state": False,
-    "contextual_feedback": False,
-}
 
 
 class ScaffoldingService:
@@ -77,9 +66,6 @@ class ScaffoldingService:
         return dict(
             TIER_SCAFFOLDING_LADDER.get(difficulty, TIER_SCAFFOLDING_LADDER[DIFFICULTY_HARD])
         )
-
-    def guided_supports(self) -> dict:
-        return dict(GUIDED_SUPPORTS)
 
     def shows_expected_state(self, difficulty: str) -> bool:
         return self.supports_for(difficulty)["expected_state"]

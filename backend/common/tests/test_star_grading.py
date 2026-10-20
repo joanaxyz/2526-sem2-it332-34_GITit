@@ -2,17 +2,11 @@ from types import SimpleNamespace
 
 import pytest
 
-from adventures.models import (
-    AdventureLevelTier,
-    AdventureLevelTierProgress,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
-)
+from adventures.models import AdventureLevelTierProgress
 from adventures.scoring import stars
-from adventures.services import AdventureLevelTierRunService, AdventureRunService
+from adventures.services import AdventureLevelTierRunService
 from challenges.services import ChallengeRunService
 from progress.models import (
-    AdventureLevelCompletion,
     AdventureLevelTierCompletion,
     ChallengeTrialCompletion,
     CoinTransaction,
@@ -20,8 +14,8 @@ from progress.models import (
 from testing.frontend_execution import frontend_execution_payload
 from testing.runtime_factories import (
     api_client_for,
-    create_stage_readme_adventure_run,
     create_stage_readme_challenge_run,
+    create_stage_readme_tier_run,
 )
 
 
@@ -45,16 +39,11 @@ def test_star_grades_follow_the_command_target(solved, counted, budget, retry_co
     )
 
 
-@pytest.fixture(params=["adventure", "tier", "challenge"])
+@pytest.fixture(params=["tier", "challenge"])
 def grading_lane(request, db, django_user_model):
     lane = request.param
-    factory = (
-        create_stage_readme_challenge_run
-        if lane == "challenge"
-        else create_stage_readme_adventure_run
-    )
-    fixture = factory(django_user_model, reward_coins=25)
     if lane == "challenge":
+        fixture = create_stage_readme_challenge_run(django_user_model, reward_coins=25)
         owner = fixture.trial
         run = fixture.run
         completion_model = ChallengeTrialCompletion
@@ -65,20 +54,10 @@ def grading_lane(request, db, django_user_model):
                 player=fixture.player, trial=owner, source_entry_point="level_page", prior_run=prior
             )
 
-    elif lane == "tier":
-        fixture.run.delete()
-        owner = AdventureLevelTier.objects.create(adventure_level=fixture.level, difficulty="easy")
-        wave = AdventureLevelTierWave.objects.create(
-            tier=owner, slug="grading", min_counted_commands=1, max_counted_commands=3
-        )
-        AdventureLevelTierWaveVariant.objects.create(
-            wave=wave,
-            slug="grading",
-            initial_state=fixture.states.initial,
-            target_state=fixture.states.target,
-            evaluation_spec={"completion_policy": {"mode": "state_hash"}},
-            solution_commands=["git add README.md"],
-        )
+    else:
+        fixture = create_stage_readme_tier_run(django_user_model)
+        owner = fixture.tier
+        run = fixture.run
         completion_model = AdventureLevelTierCompletion
         endpoint = "adventure-tier-runs"
 
@@ -86,16 +65,6 @@ def grading_lane(request, db, django_user_model):
             return AdventureLevelTierRunService().start_run(
                 player=fixture.player, tier=owner, source_entry_point="level_page", prior_run=prior
             )
-
-        run = start()
-    else:
-        owner = fixture.level
-        run = fixture.run
-        completion_model = AdventureLevelCompletion
-        endpoint = "adventure-runs"
-
-        def start(prior=None):
-            return AdventureRunService().start_run(player=fixture.player, level=owner)
 
     return SimpleNamespace(
         lane=lane,
@@ -122,9 +91,7 @@ def _submit(context, run, command):
                 processed=solving or diagnostic,
                 diagnostic=diagnostic,
                 exit_code=0 if solving or diagnostic else 129,
-                client_run_revision=(
-                    run.command_count if context.lane == "adventure" else run.total_attempts
-                ),
+                client_run_revision=run.total_attempts,
             ),
         },
         format="json",

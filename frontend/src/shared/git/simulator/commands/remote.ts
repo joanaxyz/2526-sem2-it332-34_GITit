@@ -126,6 +126,8 @@ export function gitPush(state: MutableRepositoryState, parsed: ParsedGitCommand)
     const remoteKey = `${remote}/${branch}`
     if (!(remoteKey in (state.remote_branches ?? {}))) throw new SimulatorCommandError(`error: unable to delete '${branch}': remote ref does not exist`, 1)
     delete state.remote_branches?.[remoteKey]
+    // The server no longer has the branch: a later fetch must not bring it back.
+    if (state.remote_updates) delete state.remote_updates[remoteKey]
     for (const [local, upstream] of Object.entries(state.upstream_tracking ?? {})) {
       if (upstream === remoteKey) delete state.upstream_tracking?.[local]
     }
@@ -138,6 +140,8 @@ export function gitPush(state: MutableRepositoryState, parsed: ParsedGitCommand)
   const remoteKey = `${remote}/${branch}`
   state.remote_branches ??= {}
   state.remote_branches[remoteKey] = commitId ?? null
+  // The server now holds the pushed tip: a later fetch must not roll it back.
+  if (state.remote_updates && remoteKey in state.remote_updates) state.remote_updates[remoteKey] = commitId ?? null
   state.remotes ??= {}
   state.remotes[remote] ??= `https://example.test/${remote}.git`
   if (hasOption(parsed, '-u') || hasOption(parsed, '--set-upstream')) {

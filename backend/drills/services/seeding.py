@@ -21,7 +21,6 @@ from django.db.models import Prefetch
 from adventures.models import (
     AdventureLevel,
     AdventureLevelTierWaveVariant,
-    AdventureWaveVariant,
 )
 from curriculum.models import CommandForm
 from drills.models import LevelDrill, LevelDrillCard
@@ -173,11 +172,6 @@ def seed_all_level_drills(*, level_ids: list[int] | None = None) -> DrillSeedSum
             Prefetch(
                 "tiers__waves__variants",
                 queryset=AdventureLevelTierWaveVariant.objects.only(*variant_fields),
-            ),
-            "waves",
-            Prefetch(
-                "waves__variants",
-                queryset=AdventureWaveVariant.objects.only(*variant_fields),
             ),
         )
     )

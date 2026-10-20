@@ -1,84 +1,13 @@
-"""Shared builders for authoring seed_data repository-state specs.
+"""Learner-brief details derived from a scenario's authored evaluation.
 
-Both the adventure level specs (``adventure_levels.py``) and the challenge
-specs (``challenges.py``) author initial repository states and evaluation
-specs with these helpers.
+``seed_curriculum`` adds these to every seeded variant's brief so a required
+commit message the learner cannot infer from repository state is shown.
 """
 
 from __future__ import annotations
 
-import copy
 import shlex
 from typing import Any
-
-
-def commit(
-    commit_id: str, message: str, parents: list[str] | None = None, tree: dict | None = None
-) -> dict:
-    return {"id": commit_id, "message": message, "parents": parents or [], "tree": tree or {}}
-
-
-def repo(
-    *,
-    commits: list[dict] | None = None,
-    branches: dict | None = None,
-    head: str = "main",
-    working_tree: dict | None = None,
-    staging: dict | None = None,
-    conflicts: list[str] | None = None,
-    **extra,
-) -> dict:
-    commits = copy.deepcopy(
-        commits or [commit("c0", "Initial project", [], {"README.md": "Project notes"})]
-    )
-    branches = copy.deepcopy(branches or {head: commits[-1]["id"] if commits else None})
-    state = {
-        "repository_initialized": True,
-        "commits": commits,
-        "branches": branches,
-        "head": {"type": "branch", "name": head},
-        "working_tree": copy.deepcopy(working_tree or {}),
-        "staging": copy.deepcopy(staging or {}),
-        "conflicts": list(conflicts or []),
-    }
-    state.update(copy.deepcopy(extra))
-    return state
-
-
-def uninitialized(working_tree: dict | None = None, **extra) -> dict:
-    state = {
-        "repository_initialized": False,
-        "commits": [],
-        "branches": {},
-        "head": {"type": "none"},
-        "working_tree": copy.deepcopy(
-            {"README.md": "Project notes"} if working_tree is None else working_tree
-        ),
-        "staging": {},
-        "conflicts": [],
-    }
-    state.update(copy.deepcopy(extra))
-    return state
-
-
-def ev(
-    state_requirements: dict | None = None,
-    *,
-    required: list[str] | None = None,
-    forbidden: list[str] | None = None,
-) -> dict:
-    return {
-        "state_requirements": state_requirements or {},
-        "process_requirements": {
-            "required_commands": required or [],
-            "forbidden_commands": forbidden or [],
-        },
-        "completion_policy": {"mode": "rules"},
-    }
-
-
-def meta_equals(key: str, value) -> dict:
-    return {"type": "operation_metadata_equals", "key": key, "value": value}
 
 
 def required_commit_message_details(
@@ -121,50 +50,6 @@ def required_commit_message_details(
         {"label": f"Commit message {index}", "value": message}
         for index, message in enumerate(messages, start=1)
     ]
-
-
-def enrich_context_with_required_details(
-    context: dict[str, Any],
-    *,
-    solution_commands: list[str] | None,
-    evaluation_spec: dict[str, Any] | None,
-) -> dict[str, Any]:
-    """Expose otherwise-uninferable required literals in the learner brief.
-
-    Copy rows intentionally render only their value. The prose therefore names
-    the value's role, while the row remains a compact copy target.
-    """
-
-    enriched = copy.deepcopy(context)
-    required_details = required_commit_message_details(solution_commands, evaluation_spec)
-    if not required_details:
-        return enriched
-
-    details = list(enriched.get("details") or [])
-    seen = {
-        str(detail.get("value", "")).strip().casefold()
-        for detail in details
-        if isinstance(detail, dict) and str(detail.get("value", "")).strip()
-    }
-    for detail in required_details:
-        key = detail["value"].casefold()
-        if key not in seen:
-            details.append(detail)
-            seen.add(key)
-    enriched["details"] = details
-
-    prose = f"{enriched.get('story', '')} {enriched.get('task', '')}".casefold()
-    if "commit message" not in prose:
-        note = (
-            "Use the required commit message shown below."
-            if len(required_details) == 1
-            else "Use the required commit messages shown below in workflow order."
-        )
-        destination = "task" if str(enriched.get("task", "")).strip() else "story"
-        existing = str(enriched.get(destination, "")).strip()
-        enriched[destination] = f"{existing} {note}".strip()
-
-    return enriched
 
 
 def _evaluation_message_fragments(value: Any) -> list[str]:

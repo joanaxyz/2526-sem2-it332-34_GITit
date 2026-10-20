@@ -35,10 +35,11 @@ from django.test.utils import CaptureQueriesContext
 
 from adventures.models import (
     AdventureLevel,
-    AdventureRun,
-    AdventureRunWave,
-    AdventureWave,
-    AdventureWaveVariant,
+    AdventureLevelTier,
+    AdventureLevelTierProgress,
+    AdventureLevelTierRun,
+    AdventureLevelTierWave,
+    AdventureLevelTierWaveVariant,
 )
 from challenges.models import ChallengeLevel, ChallengeRun, ChallengeTrial, ChallengeTrialVariant
 from common.constants import DIFFICULTY_EASY, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
@@ -58,11 +59,11 @@ STRESS_VARIANT_BYTES = 16 * 1024
 
 @dataclass(frozen=True)
 class BenchmarkCatalog:
-    adventure_level: AdventureLevel
-    first_wave: AdventureWave
-    final_wave: AdventureWave
-    first_variant: AdventureWaveVariant
-    final_variant: AdventureWaveVariant
+    adventure_tier: AdventureLevelTier
+    first_wave: AdventureLevelTierWave
+    final_wave: AdventureLevelTierWave
+    first_variant: AdventureLevelTierWaveVariant
+    final_variant: AdventureLevelTierWaveVariant
     challenge_trial: ChallengeTrial
     challenge_variant: ChallengeTrialVariant
 
@@ -209,16 +210,21 @@ def _build_catalog() -> BenchmarkCatalog:
         is_required=True,
         is_published=True,
     )
-    first_wave = AdventureWave.objects.create(
-        level=adventure_level,
+    adventure_tier = AdventureLevelTier.objects.create(
+        adventure_level=adventure_level,
+        difficulty=DIFFICULTY_EASY,
+        is_published=True,
+    )
+    first_wave = AdventureLevelTierWave.objects.create(
+        tier=adventure_tier,
         slug="measured-first",
         title="Measured first wave",
         sort_order=0,
         min_counted_commands=1,
         max_counted_commands=3,
     )
-    final_wave = AdventureWave.objects.create(
-        level=adventure_level,
+    final_wave = AdventureLevelTierWave.objects.create(
+        tier=adventure_tier,
         slug="measured-final",
         title="Measured final wave",
         sort_order=1,
@@ -273,7 +279,7 @@ def _build_catalog() -> BenchmarkCatalog:
         is_published=True,
     )
     return BenchmarkCatalog(
-        adventure_level=adventure_level,
+        adventure_tier=adventure_tier,
         first_wave=first_wave,
         final_wave=final_wave,
         first_variant=first_variant,
@@ -285,13 +291,13 @@ def _build_catalog() -> BenchmarkCatalog:
 
 def _create_adventure_variant(
     *,
-    wave: AdventureWave,
+    wave: AdventureLevelTierWave,
     slug: str,
     semantic_key: str,
     initial_state: dict,
     target_state: dict,
-) -> AdventureWaveVariant:
-    return AdventureWaveVariant.objects.create(
+) -> AdventureLevelTierWaveVariant:
+    return AdventureLevelTierWaveVariant.objects.create(
         wave=wave,
         slug=slug,
         label=slug.replace("-", " ").title(),
@@ -326,10 +332,16 @@ def _create_adventure_payload_stress(
             for index in range(STRESS_LEVELS)
         ]
     )
-    waves = AdventureWave.objects.bulk_create(
+    tiers = AdventureLevelTier.objects.bulk_create(
         [
-            AdventureWave(
-                level=level,
+            AdventureLevelTier(adventure_level=level, difficulty=DIFFICULTY_EASY)
+            for level in levels
+        ]
+    )
+    waves = AdventureLevelTierWave.objects.bulk_create(
+        [
+            AdventureLevelTierWave(
+                tier=tier,
                 slug=f"stress-wave-{wave_index}",
                 title=f"Stress wave {wave_index}",
                 sort_order=wave_index,
@@ -337,14 +349,14 @@ def _create_adventure_payload_stress(
                 max_counted_commands=3,
                 is_published=True,
             )
-            for level in levels
+            for tier in tiers
             for wave_index in range(STRESS_WAVES_PER_LEVEL)
         ]
     )
     padding = "x" * STRESS_VARIANT_BYTES
-    AdventureWaveVariant.objects.bulk_create(
+    AdventureLevelTierWaveVariant.objects.bulk_create(
         [
-            AdventureWaveVariant(
+            AdventureLevelTierWaveVariant(
                 wave=wave,
                 slug=f"stress-variant-{variant_index}",
                 label=f"Stress variant {variant_index}",
@@ -375,16 +387,26 @@ def _prepare_adventure(
     player = get_or_create_player(user)
     wave = catalog.final_wave if final_wave else catalog.first_wave
     variant = catalog.final_variant if final_wave else catalog.first_variant
-    run = AdventureRun.objects.create(
+    if final_wave:
+        # The final wave completes the tier only once the first is cleared.
+        AdventureLevelTierProgress.objects.create(
+            player=player,
+            tier=catalog.adventure_tier,
+            successful_clears=1,
+            cleared_wave_slugs=[catalog.first_wave.slug],
+        )
+    run = AdventureLevelTierRun.objects.create(
         player=player,
-        level=catalog.adventure_level,
+        tier=catalog.adventure_tier,
         current_wave=wave,
         selected_variant=variant,
+        source_entry_point="latency_profiler",
+        min_counted_commands=wave.min_counted_commands,
+        max_counted_commands=wave.max_counted_commands,
         repository_state=variant.initial_state,
     )
-    AdventureRunWave.objects.create(run=run, wave=wave, selected_variant=variant)
-    assert run.command_count == 0
-    assert run.counted_command_count == 0
+    assert run.total_attempts == 0
+    assert run.counted_action_total == 0
 
     command = DIAGNOSTIC_COMMAND if diagnostic else COMMAND
     next_state = variant.initial_state if diagnostic else variant.target_state
@@ -403,25 +425,25 @@ def _prepare_adventure(
         run.refresh_from_db()
         if diagnostic:
             assert run.status == SESSION_STATUS_STARTED
-            assert payload["run"]["partial"] is True
+            assert payload["run"]["status"] == SESSION_STATUS_STARTED
         elif final_wave:
             assert run.status == SESSION_STATUS_COMPLETED
             assert payload["run"]["status"] == SESSION_STATUS_COMPLETED
-            assert payload["run"]["current_attempt"] is None
+            assert payload["run"]["completion"] is not None
         else:
-            assert run.status == SESSION_STATUS_STARTED
-            assert run.current_wave_id == catalog.final_wave.id
-            assert payload["run"]["status"] == SESSION_STATUS_STARTED
-            assert payload["run"]["current_attempt"] is not None
+            # Clearing the first wave ends this run; the tier stays open.
+            assert run.status == SESSION_STATUS_COMPLETED
+            assert payload["run"]["completion"] is None
+            assert payload["run"]["progress"]["completed"] == 1
 
     return PreparedRequest(
         client=api_client_for(user),
-        url=f"/api/adventure-runs/{run.id}/submit-command/",
+        url=f"/api/adventure-tier-runs/{run.id}/submit-command/",
         body={"command": command, "execution": execution},
         precondition_fingerprint=_fingerprint(
             lane=lane,
             state=run.repository_state,
-            revision=run.command_count,
+            revision=run.total_attempts,
             variant_key=variant.semantic_key,
         ),
         validate=validate,
@@ -545,11 +567,11 @@ def test_profile_steady_state(django_user_model):
             ),
         ),
         (
-            "adventure_wave_advance",
+            "adventure_wave_clear",
             lambda: _prepare_adventure(
                 django_user_model,
                 catalog,
-                lane="adventure_wave_advance",
+                lane="adventure_wave_clear",
                 final_wave=False,
                 diagnostic=False,
             ),

@@ -2,13 +2,13 @@
 
 Only the SOs measured by CAR (Command Accuracy Rate) are mapped; the HLCR,
 ARC and RTA objectives are measured per module instead. The mapping is at
-level granularity: an SO's CAR is computed from every command submitted in
-the listed levels' tier runs (story arcane-spire, replays excluded), so a
-level that exercised several commands counts all of them toward its SO.
+level granularity: an SO's CAR averages validated first-mastery assessments
+in the listed levels, then averages learner scores equally (Arcane Spire,
+replays excluded). It measures command efficiency relative to a reference.
 
 Every level currently maps to exactly one SO. If a level ever needs to count
 toward several SOs, list it under each and note the limitation here, because
-level-level CAR cannot separate the commands that belong to each SO.
+level-level CAR cannot separate the skills that belong to each SO.
 """
 
 SO_CAR_LEVELS: dict[str, tuple[str, ...]] = {

@@ -1,5 +1,5 @@
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { PanelLeftOpen, PanelRightOpen, X } from 'lucide-react'
 
@@ -11,7 +11,11 @@ import { OrientationLessonWorkspace } from '@/features/story-map/components/orie
 import { StoryChapterList } from '@/features/story-map/components/StoryChapterList'
 import { StoryOnboarding } from '@/features/story-map/components/StoryOnboarding'
 import { StoryCompanionPanel, StorySkillFocusPanel } from '@/features/story-map/components/StorySidePanels'
-import { storyMapApi } from '@/features/story-map/api/storyMapApi'
+import {
+  chapterOverviewQueryOptions,
+  storyChaptersQueryOptions,
+  storyMapApi,
+} from '@/features/story-map/api/storyMapApi'
 import { useStories } from '@/features/story-map/hooks/useStories'
 import { chapterTitle, firstOpenChapter, mascotKnowledgeFocusLevelId } from '@/features/story-map/utils/storyMapChapter'
 import { queryKeys } from '@/shared/api/queryKeys'
@@ -57,11 +61,8 @@ export function StoryMapPage() {
   const companionRequiredFromRoute = searchParams.get('companion-required') === '1'
   const [companionPromptOpen, setCompanionPromptOpen] = useState(companionRequiredFromRoute)
 
-  const chaptersQuery = useQuery({
-    queryKey: queryKeys.storyChapters(storySlug),
-    queryFn: () => storyMapApi.listChapters(storySlug),
-    staleTime: 5 * 60 * 1000,
-  })
+  const queryClient = useQueryClient()
+  const chaptersQuery = useQuery(storyChaptersQueryOptions(storySlug))
   const storiesQuery = useStories()
 
   const chapters = useMemo(() => chaptersQuery.data ?? [], [chaptersQuery.data])
@@ -169,14 +170,22 @@ export function StoryMapPage() {
     [activeChapterId, chapters, orientationRequested],
   )
   const overviewQuery = useQuery({
-    queryKey: queryKeys.chapterOverview(activeChapter?.id ?? 0),
-    queryFn: () => storyMapApi.getChapterOverview(activeChapter!.id),
+    ...chapterOverviewQueryOptions(activeChapter?.id ?? 0),
     // Orientation chapters carry no AdventureLevel/ChallengeLevel content, so
     // their overview would always resolve to empty arrays - skip the request
     // and route them to OrientationLessonWorkspace instead (see render below).
     enabled: Boolean(activeChapter) && !activeChapter?.is_orientation,
-    staleTime: 2 * 60 * 1000,
   })
+  const activeOverviewReady = overviewQuery.isSuccess
+  // Once the visible chapter has landed, warm every other open chapter so
+  // switching chapters paints its path at once rather than placeholder nodes.
+  useEffect(() => {
+    if (!activeOverviewReady) return
+    for (const chapter of chapters) {
+      if (chapter.locked || chapter.is_orientation || chapter.id === activeChapter?.id) continue
+      void queryClient.prefetchQuery(chapterOverviewQueryOptions(chapter.id))
+    }
+  }, [activeChapter?.id, activeOverviewReady, chapters, queryClient])
   const mapLevels = overviewQuery.data?.adventures
   const currentLevelId = mascotKnowledgeFocusLevelId(mapLevels ?? [], activeChapter?.locked ?? true)
   const mascotKnowledge = useMascotKnowledge(activeChapter ?? undefined, mapLevels

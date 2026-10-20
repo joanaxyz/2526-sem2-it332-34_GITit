@@ -17,29 +17,13 @@ export type HomeView = 'profile' | 'progress' | 'skills'
 export type HomeViewOption = {
   id: HomeView
   label: string
-  blurb: string
   Icon: LucideIcon
 }
 
 export const HOME_VIEWS: readonly HomeViewOption[] = [
-  {
-    id: 'profile',
-    label: 'Profile',
-    blurb: 'Your rank, your companion, and the spells you have learned',
-    Icon: UserRound,
-  },
-  {
-    id: 'progress',
-    label: 'Progress',
-    blurb: 'Your recent activity and practice goals across Arcane Spire',
-    Icon: Map,
-  },
-  {
-    id: 'skills',
-    label: 'Skills & achievements',
-    blurb: 'How confidently you handle each Git command, and what you have earned',
-    Icon: Sparkles,
-  },
+  { id: 'profile', label: 'Profile', Icon: UserRound },
+  { id: 'progress', label: 'Progress', Icon: Map },
+  { id: 'skills', label: 'Skills & achievements', Icon: Sparkles },
 ] as const
 
 export const DEFAULT_HOME_VIEW: HomeView = 'profile'

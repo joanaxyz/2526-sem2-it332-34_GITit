@@ -1,81 +1,16 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-import { AdventureOutcomeModal } from '@/features/adventures/components/AdventureOutcomeModal'
-import type { AdventureRun } from '@/features/adventures/types'
 import { ChallengeOutcomeModal } from '@/features/challenges/components/ChallengeOutcomeModal'
 import type { ChallengeRun } from '@/features/challenges/types'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
 
-type PreviewMode = 'adventure-win' | 'adventure-loss' | 'challenge-win' | 'challenge-loss'
+type PreviewMode = 'challenge-win' | 'challenge-loss'
 
 function previewMode(value: string | null): PreviewMode {
-  if (value === 'adventure-loss' || value === 'challenge-win' || value === 'challenge-loss') return value
-  return 'adventure-win'
+  return value === 'challenge-loss' ? 'challenge-loss' : 'challenge-win'
 }
-
-const adventureRun = {
-  id: 1,
-  status: 'completed',
-  replay: false,
-  stars: 3,
-  library_opened: false,
-  is_passed: true,
-  selected_level: { id: 1, slug: 'create-repository', title: 'Create a repository', is_required: true },
-  next_level: { id: 2, slug: 'first-commit', title: 'First commit', is_required: true },
-  chapter_id: 1,
-  current_level_index: 2,
-  total_levels: 3,
-  current_wave: 3,
-  total_waves: 3,
-  mastery: {
-    commands: [
-      {
-        slug: 'git-init/current-directory',
-        form_id: 1,
-        form_slug: 'current-directory',
-        skill_slug: 'git-init',
-        title: 'Initialize the current folder',
-        strength: 1,
-        mastered_bar: 1,
-        introduced: true,
-        mastered: true,
-      },
-      {
-        slug: 'git-init/named-folder',
-        form_id: 2,
-        form_slug: 'named-folder',
-        skill_slug: 'git-init',
-        title: 'Initialize a named folder',
-        strength: 1,
-        mastered_bar: 1,
-        introduced: true,
-        mastered: true,
-      },
-      {
-        slug: 'git-branch/first-name',
-        form_id: 3,
-        form_slug: 'first-name',
-        skill_slug: 'git-branch',
-        title: 'Choose the first branch name',
-        strength: 1,
-        mastered_bar: 1,
-        introduced: true,
-        mastered: true,
-      },
-    ],
-    commands_mastered: 3,
-    total_commands: 3,
-    total_achievable: 3,
-    passed: true,
-  },
-  story: { id: 1, slug: 'arcane-spire', title: 'The Arcane Spire', world_slug: 'arcane-spire' },
-  completed_at: '2026-06-30T00:00:00Z',
-  current_attempt: null,
-  results: [],
-  progress: { completed: 2, total: 7 },
-} as unknown as AdventureRun
 
 const challengeRun = {
   id: 7,
@@ -132,24 +67,7 @@ const challengeRun = {
 function OutcomePreviewPage() {
   const [searchParams] = useSearchParams()
   const [mode, setMode] = useState<PreviewMode>(() => previewMode(searchParams.get('mode')))
-  const isAdventure = mode.startsWith('adventure')
   const isLoss = mode.endsWith('loss')
-
-  const activeAdventureRun = {
-    ...adventureRun,
-    status: isLoss ? 'failed' : 'completed',
-    stars: isLoss ? 0 : 3,
-    mastery: {
-      ...adventureRun.mastery,
-      passed: !isLoss,
-      commands: adventureRun.mastery.commands.map((command) => ({
-        ...command,
-        strength: isLoss ? 0 : command.strength,
-        mastered: isLoss ? false : command.mastered,
-      })),
-      commands_mastered: isLoss ? 0 : adventureRun.mastery.commands_mastered,
-    },
-  } as AdventureRun
 
   const activeChallengeRun = {
     ...challengeRun,
@@ -169,14 +87,14 @@ function OutcomePreviewPage() {
     <div className="workspace-bg min-h-screen overflow-hidden p-4 text-foreground">
       <header className="flex items-center gap-2 border-b border-primary/15 pb-3">
         <span className="grid size-8 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary">
-          {isAdventure ? 'A' : 'C'}
+          C
         </span>
         <div>
           <h1 className="text-sm font-semibold">Outcome preview</h1>
           <p className="text-xs text-muted-foreground">Dev fixture for the game result overlay.</p>
         </div>
         <div className="ml-auto flex flex-wrap gap-2">
-          {(['adventure-win', 'adventure-loss', 'challenge-win', 'challenge-loss'] as const).map((item) => (
+          {(['challenge-win', 'challenge-loss'] as const).map((item) => (
             <Button
               key={item}
               type="button"
@@ -215,27 +133,16 @@ function OutcomePreviewPage() {
         </section>
       </main>
 
-      {isAdventure ? (
-        <AdventureOutcomeModal
-          open
-          run={activeAdventureRun}
-          onRestart={() => setMode('adventure-win')}
-          onNextLevel={() => setMode('challenge-win')}
-          onBackToMap={() => setMode('adventure-win')}
-          onClose={() => undefined}
-        />
-      ) : (
-        <ChallengeOutcomeModal
-          open
-          run={activeChallengeRun}
-          onClose={() => undefined}
-          onBackToMap={() => setMode('challenge-win')}
-          onRetry={() => setMode('challenge-win')}
-          onNextLevel={() => setMode('challenge-win')}
-          onSelectLevel={() => undefined}
-          nextDifficultyLabel="Medium"
-        />
-      )}
+      <ChallengeOutcomeModal
+        open
+        run={activeChallengeRun}
+        onClose={() => undefined}
+        onBackToMap={() => setMode('challenge-win')}
+        onRetry={() => setMode('challenge-win')}
+        onNextLevel={() => setMode('challenge-win')}
+        onSelectLevel={() => undefined}
+        nextDifficultyLabel="Medium"
+      />
     </div>
   )
 }

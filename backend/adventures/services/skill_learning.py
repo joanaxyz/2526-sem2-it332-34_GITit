@@ -1,5 +1,6 @@
 """Persist skill discovery from verified command use, independently of clears."""
 
+from django.db.models import Exists, OuterRef
 from django.utils import timezone
 
 from adventures.models import SkillMastery
@@ -26,19 +27,19 @@ def learn_from_command(*, player, result) -> list[dict]:
             is_playable=True,
             command_skill__is_published=True,
             command_skill__base_command=f"git {family}",
+        ).annotate(
+            # Repeat use is the common case; one read answers it.
+            already_learned=Exists(
+                SkillMastery.objects.filter(
+                    player=player, command_form=OuterRef("pk"), learned_at__isnull=False
+                )
+            )
         )
         # A catalog's one-or-more operand form also covers one path. The tutor's
         # stricter multi-operand lesson detector is not the skill unlock rule.
         if command_matches_form(result.normalized_command, form.usage_form)
     ]
-    if not forms:
-        return []
-    form_ids = {form.id for form in forms}
-    if not form_ids.difference(
-        SkillMastery.objects.filter(
-            player=player, command_form_id__in=form_ids, learned_at__isnull=False
-        ).values_list("command_form_id", flat=True)
-    ):
+    if all(form.already_learned for form in forms):
         return []
 
     skill_ids = {form.command_skill_id for form in forms}
