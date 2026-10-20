@@ -21,10 +21,8 @@ import type {
   WorkspaceTourPosition as Position,
   WorkspaceTourStep,
 } from './gameplayWorkspaceTourTypes'
-import {
-  workspaceTourFrame,
-  type WorkspaceTourTransform,
-} from './useWorkspaceTourTransform'
+import type { WorkspaceTourTransform } from './useWorkspaceTourTransform'
+import { workspaceTourFrame } from './workspaceTourGeometry'
 
 const ASIDE_GAP = 12
 

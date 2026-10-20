@@ -10,20 +10,29 @@ import { VIEWPORT_GAP, type RectSnapshot } from './gameplayWorkspaceTourLayout'
 import type {
   WorkspaceTourPane as Pane,
   WorkspaceTourPosition as Position,
-  WorkspaceTourSize as Size,
 } from './gameplayWorkspaceTourTypes'
+import {
+  PANE_MINIMUMS,
+  SOUTH_EAST,
+  TRANSFORM_BREAKPOINT,
+  arrowDelta,
+  clampPosition,
+  clampSize,
+  edgesAt,
+  fitTransformToViewport,
+  onScrollbar,
+  resizeCursor,
+  resizeFrame,
+  workspaceTourFrame,
+  type Edges,
+  type PaneBounds,
+  type TransformMode,
+} from './workspaceTourGeometry'
 import {
   EMPTY_TRANSFORM,
   sanitizeTransformPreference,
   type TransformPreference,
 } from './workspaceTourTransformPreference'
-
-type PaneBounds = { size: Size; minimum: Size; maximum: Size }
-
-type TransformMode = 'move' | 'resize'
-
-/** The card edges a resize drags; a corner drags two. */
-type Edges = { left: boolean; right: boolean; top: boolean; bottom: boolean }
 
 type TransformSession = {
   mode: TransformMode
@@ -40,108 +49,11 @@ type TransformSession = {
   started: boolean
 }
 
-const TRANSFORM_BREAKPOINT = 600
-const PANE_MINIMUMS: Record<Pane, Size> = {
-  main: { width: 304, height: 220 },
-  aside: { width: 240, height: 160 },
-}
-const KEYBOARD_TRANSFORM_STEP = 16
 const DRAG_THRESHOLD = 3
-// How close to a card's edge a mouse grabs that edge instead of moving the card.
-const EDGE_ZONE = 8
-const SOUTH_EAST: Edges = { left: false, right: true, top: false, bottom: true }
 // The visible card inside a pane: the guide's speech bubble when there is one.
 const PANE_SURFACE = '.mascot-message__bubble'
 // Pressing these does their own thing (click, select a command) instead of moving the card.
 const NO_DRAG = 'button, a, input, textarea, select, label, [role="tab"], [contenteditable="true"], code, pre, kbd'
-
-export function workspaceTourFrame(position: Position, size: Size): RectSnapshot {
-  return {
-    left: position.left,
-    top: position.top,
-    right: position.left + size.width,
-    bottom: position.top + size.height,
-    width: size.width,
-    height: size.height,
-  }
-}
-
-function clampPosition(position: Position, size: Size): Position {
-  return {
-    left: Math.min(
-      Math.max(position.left, VIEWPORT_GAP),
-      Math.max(VIEWPORT_GAP, window.innerWidth - size.width - VIEWPORT_GAP),
-    ),
-    top: Math.min(
-      Math.max(position.top, VIEWPORT_GAP),
-      Math.max(VIEWPORT_GAP, window.innerHeight - size.height - VIEWPORT_GAP),
-    ),
-  }
-}
-
-function clamp(value: number, low: number, high: number) {
-  return Math.min(Math.max(value, Math.min(low, high)), high)
-}
-
-function clampSize(size: Size, { minimum, maximum }: PaneBounds): Size {
-  return {
-    width: clamp(size.width, minimum.width, maximum.width),
-    height: clamp(size.height, minimum.height, maximum.height),
-  }
-}
-
-/** The dragged edges follow the pointer; the opposite edges stay put. */
-function resizeFrame(frame: RectSnapshot, edges: Edges, dx: number, dy: number, minimum: Size) {
-  let { left, top, width, height } = frame
-  if (edges.right) width = clamp(frame.width + dx, minimum.width, window.innerWidth - VIEWPORT_GAP - frame.left)
-  if (edges.bottom) height = clamp(frame.height + dy, minimum.height, window.innerHeight - VIEWPORT_GAP - frame.top)
-  if (edges.left) {
-    left = Math.max(VIEWPORT_GAP, Math.min(frame.left + dx, frame.right - minimum.width))
-    width = frame.right - left
-  }
-  if (edges.top) {
-    top = Math.max(VIEWPORT_GAP, Math.min(frame.top + dy, frame.bottom - minimum.height))
-    height = frame.bottom - top
-  }
-  return { position: { left, top }, size: { width, height } }
-}
-
-/** The edges of `rect` the pointer is on; null away from the edges or outside. */
-function edgesAt(rect: DOMRect, x: number, y: number): Edges | null {
-  if (x < rect.left || x > rect.right || y < rect.top || y > rect.bottom) return null
-  const edges = {
-    left: x - rect.left < EDGE_ZONE,
-    right: rect.right - x < EDGE_ZONE,
-    top: y - rect.top < EDGE_ZONE,
-    bottom: rect.bottom - y < EDGE_ZONE,
-  }
-  return edges.left || edges.right || edges.top || edges.bottom ? edges : null
-}
-
-function resizeCursor({ left, right, top, bottom }: Edges) {
-  if ((left && top) || (right && bottom)) return 'nwse-resize'
-  if ((right && top) || (left && bottom)) return 'nesw-resize'
-  return left || right ? 'ew-resize' : 'ns-resize'
-}
-
-/** A press on a scroll area's own scrollbar, which scrolls rather than moves the card. */
-function onScrollbar(event: ReactPointerEvent<HTMLElement>) {
-  const target = event.target as HTMLElement
-  const { offsetX, offsetY } = event.nativeEvent
-  return target.clientWidth > 0 && (offsetX > target.clientWidth || offsetY > target.clientHeight)
-}
-
-/** Arrow keys as a step, farther with Shift; null for any other key. */
-function arrowDelta(event: ReactKeyboardEvent) {
-  const step = event.shiftKey ? KEYBOARD_TRANSFORM_STEP * 3 : KEYBOARD_TRANSFORM_STEP
-  switch (event.key) {
-    case 'ArrowLeft': return { dx: -step, dy: 0 }
-    case 'ArrowRight': return { dx: step, dy: 0 }
-    case 'ArrowUp': return { dx: 0, dy: -step }
-    case 'ArrowDown': return { dx: 0, dy: step }
-    default: return null
-  }
-}
 
 export function useWorkspaceTourTransform({
   cardElement,
@@ -410,44 +322,8 @@ export function useWorkspaceTourTransform({
       if (window.innerWidth <= TRANSFORM_BREAKPOINT) {
         return
       }
-      const available = {
-        width: Math.max(1, window.innerWidth - VIEWPORT_GAP * 2),
-        height: Math.max(1, window.innerHeight - VIEWPORT_GAP * 2),
-      }
       const frames = { main: paneFrame('main'), aside: separate ? paneFrame('aside') : null }
-      const fit = (size: Size) => ({
-        width: Math.min(size.width, available.width),
-        height: Math.min(size.height, available.height),
-      })
-      setPreference((current) => {
-        const paneSizesNext = { ...current.paneSizes }
-        const panePositionsNext = { ...current.panePositions }
-        let changed = false
-        for (const pane of ['main', 'aside'] as const) {
-          const size = paneSizesNext[pane]
-          if (size) {
-            const nextSize = fit(size)
-            if (nextSize.width !== size.width || nextSize.height !== size.height) {
-              paneSizesNext[pane] = nextSize
-              changed = true
-            }
-          }
-        }
-        for (const pane of ['main', 'aside'] as const) {
-          const position = panePositionsNext[pane]
-          const frame = frames[pane]
-          if (position && frame) {
-            const nextPosition = clampPosition(position, fit(frame))
-            if (nextPosition.left !== position.left || nextPosition.top !== position.top) {
-              panePositionsNext[pane] = nextPosition
-              changed = true
-            }
-          }
-        }
-        return changed
-          ? { panePositions: panePositionsNext, paneSizes: paneSizesNext }
-          : current
-      })
+      setPreference((current) => fitTransformToViewport(current, frames))
     }
     keepCardsVisible()
     window.addEventListener('resize', keepCardsVisible)
