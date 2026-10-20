@@ -172,12 +172,23 @@ The curriculum invariant suite audits this contract across every adventure and c
 Formatting belongs to the authored prose. The briefing renders the section fields above;
 it does not guess which words to emphasize or where sentences should become paragraphs.
 
-- Separate story paragraphs with a blank line (`\n\n` in seed JSON).
-- Wrap literal paths, folder names, branch names, and refs in backticks: `` `ci-configs` ``.
-- Use `**emphasis**` sparingly for an important constraint or a handover quote.
+- Separate story paragraphs with a blank line (`\n\n` in seed JSON, an empty line in
+  Markdown). Break a long story where the scene turns: before the dialogue, or before
+  "You are on …" hands over to the task.
+- Wrap anything the learner types or reads back from Git in backticks: paths, folder names,
+  branch, remote and tag names, commit labels (`` `c3` ``), `` `HEAD` ``, stash refs, URLs,
+  `git` commands, and the exact message a task asks for (`` with the message `Fix login` ``).
+  Keep ordinary words plain where they are not refs ("the main reason", "partial staging").
+- Use `**strong**` sparingly for the one constraint a learner must not miss, usually a
+  task's "Do not …" or "Leave … uncommitted" sentence.
+- Use `__underline__` for a single contrast word or clause that flips the instruction:
+  "Stage `__only__` the fix", "rather than at the current `main` tip".
+- Use `*emphasis*` for tone in the story: a stressed word, a client's list of requests,
+  a document title.
 - These conventions apply to `story`, `starting_point`, `real_world_context`, `task`,
   and `expected_result`. Labels, titles, objective checks, and exact copy details stay plain text.
-- Only emphasis and inline code are rendered. HTML, links, and other Markdown remain text.
+- Only these four marks are rendered. Marks nest inside strong, underline and emphasis;
+  code spans stay literal. HTML, links, and other Markdown remain text.
 
 For example, a task can read:
 
@@ -187,7 +198,7 @@ Create a repository in a new `ci-configs` folder, with `main` as its first branc
 ```
 
 The normalizer preserves these markers without a schema change. Apply edits to the
-authored scenario bank (or its Markdown source when available), then run
+authored scenario bank or `source/wave_scenarios.md` (then recompile it), then run
 `seed_curriculum` to update variant content. Reload the workspace to fetch the updated brief.
 
 ## Generated Targets

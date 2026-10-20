@@ -122,6 +122,8 @@
   color: hsl(var(--foreground));
   font-size: var(--text-xs);
   line-height: 1.55;
+  /* Authored blank lines separate story paragraphs. */
+  white-space: pre-line;
 }
 
 .lvlctx-task {

@@ -247,3 +247,56 @@ def test_committed_wave_bank_is_current_with_its_markdown():
     compiled = REPO_ROOT / "backend/curriculum/seed_data/scenario_bank_waves.json"
 
     assert module.render_document(source, extension=True) == compiled.read_text(encoding="utf-8")
+
+
+def test_importer_keeps_formatted_prose_paragraphs():
+    module = _importer_module()
+    document = """
+### 1.1.1 Format the story · Easy
+
+**Variant ID:** `formatted-one`
+
+**Story**
+Raven left `ci-configs` for you.
+
+**“Ship it before the meeting.”**
+
+You *almost* believe her.
+
+**Starting point:** You are in `ci-configs`.
+
+**Real-World Context**
+Boundaries __matter__.
+
+**Your Task**
+Initialize `ci-configs`. **Leave everything else alone.**
+
+**Objective Checklist**
+
+- [ ] ci-configs is a repository.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git init ci-configs` — Initialize it.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- None.
+
+**Expected Result**
+Only `ci-configs` is a repository.
+
+**Evaluation (STAFF ONLY)**
+
+- Minimum counted commands: 1 · Maximum counted commands: 4
+"""
+
+    parsed = module.parse_document(document, enforce_bank_counts=False)["formatted-one"]
+
+    assert parsed["story"] == (
+        "Raven left `ci-configs` for you.\n\n"
+        "**“Ship it before the meeting.”**\n\n"
+        "You *almost* believe her."
+    )
+    assert parsed["real_world_context"] == "Boundaries __matter__."
+    assert parsed["task"] == "Initialize `ci-configs`. **Leave everything else alone.**"
