@@ -67,7 +67,7 @@ describe('WorkspaceTerminalStage', () => {
     expect(screen.queryByRole('separator')).not.toBeInTheDocument()
   })
 
-  it('docks the input row at the foot of the terminal', () => {
+  it('renders the prompt inside the terminal scrollback', () => {
     render(
       <WorkspaceTerminalStage
         run={makeRun()}
@@ -80,7 +80,7 @@ describe('WorkspaceTerminalStage', () => {
         onCommand={vi.fn()}
       />,
     )
-    expect(document.querySelector('.terminal-panel')).toHaveClass('terminal-panel--docked')
-    expect(screen.getByLabelText('Git command').closest('.terminal-input-dock')).not.toBeNull()
+    expect(screen.getByRole('log')).toContainElement(screen.getByLabelText('Git command'))
+    expect(document.querySelector('.terminal-input-dock')).toBeNull()
   })
 })

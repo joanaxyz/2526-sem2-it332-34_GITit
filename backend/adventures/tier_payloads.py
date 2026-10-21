@@ -33,7 +33,9 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
     visualizer = RepositoryVisualizationService()
     context = _scenario_context(run)
     repository_state = snapshotter.snapshot(run.repository_state, already_normalized=True)
-    supports = ScaffoldingService().supports_for_tier("hard" if run.is_transfer else run.tier.difficulty)
+    supports = ScaffoldingService().supports_for_tier(
+        "hard" if run.is_transfer else run.tier.difficulty
+    )
     expected_target = run.selected_variant.target_state
     target_state = run.selected_variant.target_state if supports["expected_state"] else None
     visualization = visualizer.snapshot(
@@ -160,8 +162,12 @@ def progress_payload(run: AdventureLevelTierRun) -> dict:
     from adventures.models import AdventureLevelTierProgress
 
     if run.is_transfer:
-        return {"completed": int(run.status == SESSION_STATUS_COMPLETED), "total": 1,
-                "cleared": run.status == SESSION_STATUS_COMPLETED, "next_wave": None}
+        return {
+            "completed": int(run.status == SESSION_STATUS_COMPLETED),
+            "total": 1,
+            "cleared": run.status == SESSION_STATUS_COMPLETED,
+            "next_wave": None,
+        }
     # A solve already holds the row it just counted.
     progress = getattr(run, "_prefetched_progress", None)
     if progress is None:
@@ -227,7 +233,12 @@ def run_counts_payload(run: AdventureLevelTierRun) -> dict:
 
 
 def next_difficulty_payload(run: AdventureLevelTierRun) -> dict | None:
-    if run.is_transfer or run.is_replay or run.status != SESSION_STATUS_COMPLETED or not run.tier_id:
+    if (
+        run.is_transfer
+        or run.is_replay
+        or run.status != SESSION_STATUS_COMPLETED
+        or not run.tier_id
+    ):
         return None
     if not progress_payload(run)["cleared"]:
         return None

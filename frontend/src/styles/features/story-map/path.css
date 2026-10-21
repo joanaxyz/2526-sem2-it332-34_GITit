@@ -1,24 +1,3 @@
-.story-switcher--map {
-  position: relative;
-  inset: auto;
-  z-index: var(--z-dropdown);
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 0.5rem 0.85rem;
-  width: fit-content;
-  max-width: none;
-  margin: 0 auto;
-  padding: 0.4rem 0.6rem;
-  border-radius: var(--radius-lg);
-  background: var(--panel-bg);
-}
-
-.story-switcher--map > span {
-  color: var(--text-primary);
-  font-size: var(--text-sm);
-}
-
 .story-map-title {
   display: none;
 }

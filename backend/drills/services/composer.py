@@ -211,8 +211,7 @@ def level_command_forms(
     """
     attached = list(
         CommandForm.objects.filter(
-            Q(adventure_levels=level)
-            | Q(adventure_level_tier_waves__tier__adventure_level=level),
+            Q(adventure_levels=level) | Q(adventure_level_tier_waves__tier__adventure_level=level),
             is_published=True,
         )
         .select_related("command_skill")

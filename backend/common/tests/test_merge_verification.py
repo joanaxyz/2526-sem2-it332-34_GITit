@@ -21,7 +21,12 @@ def _state(**overrides):
 def _diverged(**overrides):
     return _state(
         commits=[
-            {"id": "c1", "message": "base", "parents": [], "tree": {"app.py": "base", "docs.md": "d1"}},
+            {
+                "id": "c1",
+                "message": "base",
+                "parents": [],
+                "tree": {"app.py": "base", "docs.md": "d1"},
+            },
             {
                 "id": "c2",
                 "message": "ours",
@@ -42,7 +47,9 @@ def _diverged(**overrides):
 
 def test_divergent_merge_keeps_files_only_this_branch_changed():
     verifier = ClientTransitionVerifier()
-    expected = verifier._expected_merge_state(command="git merge feature", previous_state=_diverged())
+    expected = verifier._expected_merge_state(
+        command="git merge feature", previous_state=_diverged()
+    )
 
     merge_commit = expected["commits"][-1]
     assert merge_commit["parents"] == ["c2", "c3"]

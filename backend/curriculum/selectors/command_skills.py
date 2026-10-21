@@ -1,9 +1,10 @@
 from __future__ import annotations
 
-from django.db.models import Max
-
 from adventures.models import SkillMastery
-from curriculum.models import Chapter, CommandForm, CommandSkill
+from curriculum.library import library_key_for_command
+from curriculum.models import Chapter, CommandForm, LibraryEntry
+
+from .book import chapter_adventure_knowledge
 
 
 def learned_command_skills(*, player) -> list[dict]:
@@ -17,17 +18,21 @@ def learned_command_skills(*, player) -> list[dict]:
     """
     if player is None:
         return []
-    learned_at_by_skill_id = dict(
+    learned_forms_by_skill_id: dict[int, list[CommandForm]] = {}
+    learned_at_by_skill_id = {}
+    for mastery in (
         SkillMastery.objects.filter(
             player=player,
             learned_at__isnull=False,
             command_form__is_published=True,
             command_form__command_skill__is_published=True,
         )
-        .values("command_form__command_skill_id")
-        .annotate(learned_at=Max("learned_at"))
-        .values_list("command_form__command_skill_id", "learned_at")
-    )
+        .select_related("command_form__command_skill")
+        .order_by("-learned_at", "command_form__sort_order", "command_form_id")
+    ):
+        form = mastery.command_form
+        learned_forms_by_skill_id.setdefault(form.command_skill_id, []).append(form)
+        learned_at_by_skill_id.setdefault(form.command_skill_id, mastery.learned_at)
     skill_ids = set(learned_at_by_skill_id)
 
     if not skill_ids:
@@ -44,9 +49,19 @@ def learned_command_skills(*, player) -> list[dict]:
     ):
         intro_chapter_by_skill.setdefault(form.command_skill_id, form.chapter)
 
-    skills = CommandSkill.objects.filter(id__in=skill_ids, is_published=True)
+    # Reuse the map's compact Chapter Book projection, restricted to forms this
+    # player has learned. Resolve the library in one batch for the spellbook.
+    library_keys = {
+        library_key_for_command(forms[0].command_skill.base_command)
+        for forms in learned_forms_by_skill_id.values()
+    }
+    entries_by_key = {
+        entry.command_key: entry
+        for entry in LibraryEntry.objects.filter(command_key__in=library_keys, is_published=True)
+    }
     rows = []
-    for skill in skills:
+    for forms in learned_forms_by_skill_id.values():
+        skill = forms[0].command_skill
         chapter = intro_chapter_by_skill.get(skill.id)
         rows.append(
             {
@@ -59,6 +74,9 @@ def learned_command_skills(*, player) -> list[dict]:
                 "chapter_number": chapter.number if chapter else 0,
                 "chapter_title": chapter.title if chapter else "",
                 "learned_at": learned_at_by_skill_id[skill.id],
+                "knowledge": chapter_adventure_knowledge(
+                    forms=forms, entries_by_key=entries_by_key
+                ),
                 "_sort": (chapter.sort_order if chapter else 0, skill.sort_order, skill.id),
             }
         )

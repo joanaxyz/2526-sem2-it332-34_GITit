@@ -1,4 +1,4 @@
-"""The shape of a planned wave (docs/goals/curriculum-waves-and-repetition/WAVE_MAP.md)."""
+"""The shape of a planned wave; see CONTENT_AUTHORING_GUIDE.md."""
 
 from __future__ import annotations
 

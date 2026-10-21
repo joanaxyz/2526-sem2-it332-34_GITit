@@ -267,9 +267,7 @@ def render_document(path: Path, *, extension: bool = False, bank_path: Path = BA
     if not extension:
         scenarios = parse_document(text)
     else:
-        scenarios = parse_document(
-            text, enforce_bank_counts=False, stop_at_document_headings=True
-        )
+        scenarios = parse_document(text, enforce_bank_counts=False, stop_at_document_headings=True)
         bank = json.loads(bank_path.read_text(encoding="utf-8"))
         shared = sorted(scenarios.keys() & bank.keys())
         if shared:

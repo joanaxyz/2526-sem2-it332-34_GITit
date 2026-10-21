@@ -7,8 +7,10 @@ import {
   DESKTOP_CARD_WIDTH,
   HEADER_CLEARANCE,
   layoutFor,
+  layoutForPanes,
   prefersReducedMotion,
   VIEWPORT_GAP,
+  type WorkspaceTourPaneLayout,
 } from './gameplayWorkspaceTourLayout'
 import type {
   CollapseVector,
@@ -69,6 +71,7 @@ export function GameplayWorkspaceTour({
   reveal,
   aside,
   asideWidth = 336,
+  paneLayout,
   paneLabels = { main: 'main card', aside: 'side card' },
   steps,
   refreshKey,
@@ -97,6 +100,8 @@ export function GameplayWorkspaceTour({
   /** A second card shown beside the main one on wide screens. */
   aside?: ReactNode
   asideWidth?: number
+  /** Initial sizes and top alignment for a pair of cards; manual transforms take priority. */
+  paneLayout?: WorkspaceTourPaneLayout
   /** Names of the two cards for their resize controls, e.g. "command card". */
   paneLabels?: Record<WorkspaceTourPane, string>
   steps: readonly WorkspaceTourStep[]
@@ -264,7 +269,9 @@ export function GameplayWorkspaceTour({
           top: box.top, right: box.right, bottom: box.bottom, left: box.left, width: box.width, height: box.height,
         }))
       setLayout({
-        ...layoutFor(rect, activeStep.placement ?? 'bottom', cardHeight, width),
+        ...(aside && paneLayout
+          ? layoutForPanes(rect, paneLayout)
+          : layoutFor(rect, activeStep.placement ?? 'bottom', cardHeight, width)),
         reveals,
         ...(mainPane ? { mainSize: { width: mainPane.width, height: mainPane.height } } : {}),
       })
@@ -300,7 +307,7 @@ export function GameplayWorkspaceTour({
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
     }
-  }, [activeStep, activeTarget, aside, asideWidth, cardElement, reveal])
+  }, [activeStep, activeTarget, aside, asideWidth, cardElement, paneLayout, reveal])
 
   useEffect(() => {
     if (!focusCard || !activeStep || !layoutReady) return

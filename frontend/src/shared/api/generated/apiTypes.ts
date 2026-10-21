@@ -78,6 +78,8 @@ export type ApiSchemas = {
   "CommandFormPreviewSkillResponse": { "base_command": string; "id": number; "slug": string; "title": string }
   "CommandIntroductionForm": { "label": string; "summary": string; "teaching_key": string; "usage_form": string }
   "CommandIntroductionResponse": { "anatomy": Array<ApiSchemas["SyntaxPart"]>; "changes": Array<ApiSchemas["RepositoryChange"]>; "command_form": ApiSchemas["CommandIntroductionForm"]; "completion_token": string | null; "concepts": Array<ApiSchemas["Concept"]>; "context_id": string; "explanation": string | null; "help_token": string; "needs": Array<ApiSchemas["RepositoryChange"]>; "phase": ApiSchemas["PhaseEnum"]; "run_revision": number; "teaching_key": string; "title": string; "verdict": ApiSchemas["VerdictEnum"] | ApiSchemas["NullEnum"] | null }
+  "CommandKnowledgeResponse": { "command": string; "id": string; "kind": ApiSchemas["CommandKnowledgeResponseKindEnum"]; "syntax": string; "text": string; "title": string; "token": string; "when_to_use": string }
+  "CommandKnowledgeResponseKindEnum": "command" | "option" | "argument"
   "CommandSubmit": { "command": string; "execution": ApiSchemas["ClientCommandExecution"] }
   "Concept": { "key": string; "text": string; "title": string }
   "ContentDefinition": { "chapter_id": number | null; "command_family": string; "created_at": string; "definition": { [key: string]: JsonValue }; "difficulty": string; "id": number; "kind": ApiSchemas["KindA5eEnum"]; "official_chapter_id": number | null; "owner_id": number | null; "published_at": string | null; "slug": string; "source_definition_id": number | null; "status": ApiSchemas["StatusEnum"]; "summary": string; "tags": Array<string>; "title": string; "updated_at": string; "validation_errors": Array<ApiSchemas["ValidationErrorRow"]>; "visibility": ApiSchemas["VisibilityEnum"] }
@@ -109,7 +111,7 @@ export type ApiSchemas = {
   "IntroductionCompleteResponse": { "tutor": ApiSchemas["CommandIntroductionResponse"] | null }
   "KeyEnum": "shop-purchases"
   "KindA5eEnum": "adventure" | "challenge" | "lesson"
-  "LearnedSkillResponse": { "base_command": string; "chapter_id"?: number | null; "chapter_number": number; "chapter_title": string; "id": number; "learned_at": string; "slug": string; "summary": string; "title": string }
+  "LearnedSkillResponse": { "base_command": string; "chapter_id"?: number | null; "chapter_number": number; "chapter_title": string; "id": number; "knowledge"?: Array<ApiSchemas["CommandKnowledgeResponse"]>; "learned_at": string; "slug": string; "summary": string; "title": string }
   "LearnedSkillsResponse": { "results": Array<ApiSchemas["LearnedSkillResponse"]> }
   "LevelDrillPlanResponse": { "available": boolean; "cards": Array<ApiSchemas["DrillCard"]>; "level": ApiSchemas["DrillLevel"]; "progress": ApiSchemas["DrillProgress"]; "resume": ApiSchemas["DrillResume"] | null; "sequence": ApiSchemas["DrillSequence"] | null }
   "Login": { "identifier": string; "password": string }

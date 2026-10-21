@@ -2,6 +2,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { CommandInput } from '@/shared/level/components/CommandInput'
+import { TerminalPanel } from '@/shared/level/components/TerminalPanel'
 
 const prompt = 'blue'
 const originalClipboard = navigator.clipboard
@@ -72,7 +73,7 @@ describe('CommandInput clipboard paste', () => {
       return 1
     })
 
-    render(<CommandInput prompt={prompt} onSubmit={onSubmit} />)
+    render(<TerminalPanel lines={[]} prompt={prompt} onCommand={onSubmit} />)
     const input = screen.getByRole('textbox', { name: 'Git command' }) as HTMLInputElement
     fireEvent.change(input, { target: { value: 'git replace' } })
     input.setSelectionRange(4, 11)
@@ -90,7 +91,7 @@ describe('CommandInput clipboard paste', () => {
     const onSubmit = vi.fn()
     mockClipboard(vi.fn().mockRejectedValue(new Error('denied')))
 
-    render(<CommandInput prompt={prompt} onSubmit={onSubmit} />)
+    render(<TerminalPanel lines={[]} prompt={prompt} onCommand={onSubmit} />)
     const input = screen.getByRole('textbox', { name: 'Git command' }) as HTMLInputElement
     fireEvent.change(input, { target: { value: 'git status' } })
 

@@ -560,9 +560,11 @@ class CommitHistoryVerificationMixin:
         expected = copy.deepcopy(previous_state)
         rebase_state = expected.get("rebase_state") or {}
         branch = rebase_state.get("branch") if isinstance(rebase_state.get("branch"), str) else None
-        if branch and branch in (expected.get("branches") or {}) and self._head_branch(
-            expected
-        ) != branch:
+        if (
+            branch
+            and branch in (expected.get("branches") or {})
+            and self._head_branch(expected) != branch
+        ):
             expected["head"] = {
                 "type": "branch",
                 "name": branch,
@@ -573,14 +575,18 @@ class CommitHistoryVerificationMixin:
         if isinstance(current_source, str) and current_source:
             source = self.normalizer.commit_by_id(expected, current_source)
             if not source:
-                raise BadRequest(f"execution.next_state does not match the submitted {label} command.")
+                raise BadRequest(
+                    f"execution.next_state does not match the submitted {label} command."
+                )
             parent = self.normalizer.head_commit_id(expected)
             base = self._tree_for_commit(expected, parent)
             staged = self.normalizer.changes_from_entries(
                 base, copy.deepcopy(expected.get("staging") or {})
             )
             if not staged:
-                raise BadRequest(f"execution.next_state does not match the submitted {label} command.")
+                raise BadRequest(
+                    f"execution.next_state does not match the submitted {label} command."
+                )
             tree = self.normalizer.apply_changes(base, staged)
             commit_id = self._next_commit_id(expected)
             expected.setdefault("commits", []).append(
@@ -599,7 +605,9 @@ class CommitHistoryVerificationMixin:
         for source_id in [str(item) for item in (rebase_state.get("remaining") or [])]:
             source = self.normalizer.commit_by_id(expected, source_id)
             if not source:
-                raise BadRequest(f"execution.next_state does not match the submitted {label} command.")
+                raise BadRequest(
+                    f"execution.next_state does not match the submitted {label} command."
+                )
             parent = self.normalizer.head_commit_id(expected)
             base = self._tree_for_commit(expected, parent)
             tree = self.normalizer.apply_changes(base, source.get("changes") or {})

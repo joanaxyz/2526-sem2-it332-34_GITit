@@ -1,4 +1,4 @@
-"""Ordered waves inside a tier (docs/goals/curriculum-waves-and-repetition/PLAN.md §6).
+"""Ordered waves inside a tier, as documented in CONTENT_AUTHORING_GUIDE.md.
 
 A run plays the learner's next uncleared wave and rotates variants within it;
 the tier completes on its last wave; free play cycles the waves. A tier with

@@ -36,6 +36,8 @@ describe('app entry routing', () => {
   })
 
   it.each([
+    '/stories',
+    '/stories/',
     '/tower',
     '/towers',
     '/towers/arcane-spire',

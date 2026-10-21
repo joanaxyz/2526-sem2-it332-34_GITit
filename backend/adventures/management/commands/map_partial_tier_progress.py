@@ -5,7 +5,7 @@ tier holds only a clear count. This marks the first ``min(clears, waves - 1)``
 of its new waves cleared, so learners keep their place without a tier ever
 being completed for them. Rows that already name a published wave are left
 alone, which makes a second run a no-op. Delete this command after the deploy
-that runs it (docs/goals/curriculum-waves-and-repetition/PLAN.md §10).
+that runs it; see deploy/CURRICULUM_WAVES_RESEED.md.
 """
 
 from django.core.management.base import BaseCommand

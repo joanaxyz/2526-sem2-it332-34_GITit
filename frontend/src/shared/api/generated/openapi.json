@@ -5663,6 +5663,54 @@
                     "verdict"
                 ]
             },
+            "CommandKnowledgeResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/CommandKnowledgeResponseKindEnum"
+                    },
+                    "command": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "token": {
+                        "type": "string"
+                    },
+                    "syntax": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "when_to_use": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "command",
+                    "id",
+                    "kind",
+                    "syntax",
+                    "text",
+                    "title",
+                    "token",
+                    "when_to_use"
+                ]
+            },
+            "CommandKnowledgeResponseKindEnum": {
+                "enum": [
+                    "command",
+                    "option",
+                    "argument"
+                ],
+                "type": "string",
+                "description": "* `command` - command\n* `option` - option\n* `argument` - argument"
+            },
             "CommandSubmit": {
                 "type": "object",
                 "description": "Shared command request contract for every browser-simulated run.",
@@ -6590,6 +6638,12 @@
                     "learned_at": {
                         "type": "string",
                         "format": "date-time"
+                    },
+                    "knowledge": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CommandKnowledgeResponse"
+                        }
                     }
                 },
                 "required": [

@@ -20,7 +20,6 @@ import {
   ADMIN_ROUTES,
   HOME_ROUTE,
   SHOP_ROUTE,
-  STORIES_ROUTE,
   STORY_DETAIL_ROUTE,
   storyPath,
 } from '@/shared/navigation/routes'
@@ -100,14 +99,8 @@ const appRoutes: RouteObject[] = [
     children: [
       { path: '/', element: <Navigate replace to={storyPath()} /> },
       { path: HOME_ROUTE, element: <HomePage /> },
-      // Browsing Home, Stories, and repository-only challenges does not require
+      // Browsing Home, the story map, and repository-only challenges does not require
       // a companion. Adventure play remains protected below.
-      {
-        path: STORIES_ROUTE,
-        lazy: async () => ({
-          Component: (await import('@/features/story-map/pages/StorySelectPage')).StorySelectPage,
-        }),
-      },
       {
         path: STORY_DETAIL_ROUTE,
         lazy: async () => ({

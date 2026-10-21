@@ -71,9 +71,7 @@ def chapter_content_overview(*, player, chapter_id: int) -> dict:
     }
     entries_by_key = {
         entry.command_key: entry
-        for entry in LibraryEntry.objects.filter(
-            command_key__in=library_keys, is_published=True
-        )
+        for entry in LibraryEntry.objects.filter(command_key__in=library_keys, is_published=True)
     }
     knowledge_by_adventure_id = {
         adventure.id: chapter_adventure_knowledge(
@@ -85,7 +83,10 @@ def chapter_content_overview(*, player, chapter_id: int) -> dict:
     required_adventure_ids = {adventure.id for adventure in adventures if adventure.is_required}
     adventure_passed = required_adventure_ids <= adventure_access.passed_adventure_ids
     required_tier_ids = {
-        tier.id for adventure in adventures if adventure.is_required for tier in adventure.overview_tiers
+        tier.id
+        for adventure in adventures
+        if adventure.is_required
+        for tier in adventure.overview_tiers
     }
     access = _build_challenge_access(
         player=player,

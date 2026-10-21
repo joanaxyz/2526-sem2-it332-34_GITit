@@ -3,7 +3,7 @@
 Before the ladder only a level's first Easy clear paid GitCoins. This credits
 every existing tier completion through the same award keys the runtime uses,
 so it is idempotent and never pays a tier twice. Delete this command after the
-deploy that runs it (docs/goals/curriculum-waves-and-repetition/PLAN.md §8).
+deploy that runs it; see deploy/CURRICULUM_WAVES_RESEED.md.
 """
 
 from django.core.management.base import BaseCommand

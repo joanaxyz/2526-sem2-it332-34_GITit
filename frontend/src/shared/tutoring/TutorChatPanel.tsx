@@ -1,8 +1,7 @@
-import { ArrowUp, RotateCcw } from 'lucide-react'
+import { ArrowUp, BookOpen, ChevronDown, SquarePen } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
 
 import { useAuthStore } from '@/shared/auth/useAuth'
-import { MascotPortrait } from '@/shared/mascot/GuideCharacterPortrait'
 import type { TutorContext } from './tutorApi'
 import { useTutorChat, type TutorMessage } from './useTutorChat'
 import './tutor.css'
@@ -24,10 +23,18 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
   const [draft, setDraft] = useState('')
   const composerId = useId()
   const transcript = useRef<HTMLDivElement>(null)
+  const composer = useRef<HTMLTextAreaElement>(null)
   useEffect(() => {
     const element = transcript.current
     if (element) element.scrollTop = element.scrollHeight
   }, [chat.messages, chat.pending])
+
+  useEffect(() => {
+    const element = composer.current
+    if (!element) return
+    element.style.height = 'auto'
+    element.style.height = `${Math.min(element.scrollHeight, 160)}px`
+  }, [draft])
 
   function submit() {
     if (!draft.trim() || chat.pending) return
@@ -40,15 +47,14 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
 
   return (
     <div className="tutor-chat">
-      <div className="tutor-chat__intro">
-        <p>Understand Git, one question at a time.</p>
-        <span>I explain concepts and placeholders. You choose the solution.</span>
-        {chat.messages.length ? (
-          <button type="button" className="tutor-chat__reset" aria-label="Start a new conversation" onClick={chat.clear}>
-            <RotateCcw size={15} />
+      {chat.messages.length ? (
+        <div className="tutor-chat__actions">
+          <button type="button" className="tutor-chat__reset" aria-label="Start a new conversation" onClick={() => { chat.clear(); composer.current?.focus() }}>
+            <SquarePen size={15} aria-hidden="true" />
+            New chat
           </button>
-        ) : null}
-      </div>
+        </div>
+      ) : null}
 
       <div
         ref={transcript}
@@ -60,8 +66,13 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
       >
         {chat.messages.length
           ? chat.messages.map((entry, index) => <Message key={index} entry={entry} />)
-          : <p className="tutor-chat__empty">Ask what a command means, why it works, or which idea feels unclear.</p>}
-        {chat.pending ? <p className="tutor-chat__pending" role="status">Finding an explanation…</p> : null}
+          : (
+            <div className="tutor-chat__empty" data-tutor-selectable>
+              <h3>What would you like to understand?</h3>
+              <p>Ask what a command means, why it works, or which idea feels unclear.</p>
+            </div>
+          )}
+        {chat.pending ? <p className="tutor-chat__pending" role="status" data-tutor-selectable><span aria-hidden="true" />Finding an explanation…</p> : null}
       </div>
 
       <div className="tutor-chat__topics" aria-label="Topics to explore">
@@ -72,16 +83,22 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
         ))}
       </div>
 
-      {chat.error ? <p className="tutor-chat__error" role="alert">{chat.error}</p> : null}
+      {chat.error ? <p className="tutor-chat__error" role="alert" data-tutor-selectable>{chat.error}</p> : null}
 
-      <form className="tutor-chat__composer" onSubmit={(event) => { event.preventDefault(); submit() }}>
+      <form
+        className="tutor-chat__composer"
+        data-tutor-selectable
+        onClick={(event) => { if (event.target === event.currentTarget) composer.current?.focus() }}
+        onSubmit={(event) => { event.preventDefault(); submit() }}
+      >
         <label className="sr-only" htmlFor={composerId}>Ask Git-It a question</label>
         <textarea
+          ref={composer}
           id={composerId}
           value={draft}
           maxLength={4000}
-          rows={2}
-          placeholder="What would you like to understand?"
+          rows={1}
+          placeholder="Ask anything about Git…"
           disabled={chat.pending}
           onChange={(event) => setDraft(event.target.value)}
           onKeyDown={(event) => {
@@ -92,10 +109,9 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
           }}
         />
         <button type="submit" aria-label="Send question" disabled={chat.pending || !draft.trim()}>
-          <ArrowUp size={19} />
+          <ArrowUp size={19} aria-hidden="true" />
         </button>
       </form>
-      <p className="tutor-chat__footnote">Enter to send · Shift + Enter for a new line</p>
     </div>
   )
 }
@@ -103,18 +119,16 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
 function Message({ entry }: { entry: TutorMessage }) {
   const fromGitIt = entry.role === 'assistant'
   return (
-    <div className={`tutor-chat__message tutor-chat__message--${entry.role}`}>
-      {fromGitIt ? <MascotPortrait className="tutor-chat__avatar" alt="" width={30} height={38} /> : null}
-      <div className="tutor-chat__bubble">
-        <strong>{fromGitIt ? 'Git-It' : 'You'}</strong>
-        <p>{entry.text}</p>
+    <article className={`tutor-chat__message tutor-chat__message--${entry.role}`} aria-label={fromGitIt ? 'Git-It' : 'You'}>
+      <div className="tutor-chat__content" data-tutor-selectable>
+        {entry.text.split(/\n{2,}/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
         {fromGitIt && entry.reply.sources.length ? (
           <details className="tutor-chat__sources">
-            <summary>Teaching sources</summary>
+            <summary><BookOpen size={13} aria-hidden="true" />Sources <span>{entry.reply.sources.length}</span><ChevronDown size={13} aria-hidden="true" /></summary>
             <ul>{entry.reply.sources.map((source) => <li key={source.id}>{source.title}</li>)}</ul>
           </details>
         ) : null}
       </div>
-    </div>
+    </article>
   )
 }

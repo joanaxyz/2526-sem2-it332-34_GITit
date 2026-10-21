@@ -333,10 +333,7 @@ def _create_adventure_payload_stress(
         ]
     )
     tiers = AdventureLevelTier.objects.bulk_create(
-        [
-            AdventureLevelTier(adventure_level=level, difficulty=DIFFICULTY_EASY)
-            for level in levels
-        ]
+        [AdventureLevelTier(adventure_level=level, difficulty=DIFFICULTY_EASY) for level in levels]
     )
     waves = AdventureLevelTierWave.objects.bulk_create(
         [

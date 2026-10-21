@@ -1,4 +1,4 @@
-"""Each module ends in a seeded Challenge Gate (docs/goals/curriculum-waves-and-repetition/PLAN.md §14)."""
+"""Each module ends in a seeded Challenge Gate; see CONTENT_AUTHORING_GUIDE.md."""
 
 import shlex
 
@@ -153,7 +153,7 @@ def test_every_gate_trial_is_a_module_workflow_not_an_adventure_wave():
         for case_id in wave.variants
     }
     for gate in CHALLENGE_GATES.values():
-        for difficulty, case_ids in gate["trials"].items():
+        for case_ids in gate["trials"].values():
             for case_id in case_ids:
                 steps = _counted_skeleton(scenario_for_case(case_id)["solution_commands"])
                 assert len(steps) >= 3, f"{case_id}: a gate trial is a workflow"

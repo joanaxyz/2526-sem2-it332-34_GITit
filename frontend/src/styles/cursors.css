@@ -39,7 +39,7 @@
     cursor: var(--cursor-hand, pointer);
   }
 
-  /* Reading, typing and selecting Git commands must never look clickable. */
+  /* Text entry uses the I-beam; blank terminal space keeps the normal pointer. */
   :root:not([data-custom-cursors='off']) :is(
     textarea:not(:read-only),
     input:not([type]),
@@ -51,7 +51,6 @@
     input[type='number'],
     input[type='tel'],
     [contenteditable='true'],
-    .terminal-output--docked,
     .workspace-editor-textarea:not(:read-only),
     [data-cursor='text']
   ) {

@@ -5,17 +5,27 @@
   background: rgba(var(--theme-primary-rgb), 0.035);
 }
 
+.terminal-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
 .terminal-output {
   min-height: 0;
   flex: 1 1 auto;
-  overflow: auto;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overflow-wrap: anywhere;
   padding: 0.85rem 0.95rem;
   font-family: var(--font-mono);
   font-size: 0.78rem;
   line-height: 1.55;
+  cursor: inherit;
 }
 
 .terminal-line {
+  min-height: 1.55em;
   color: rgba(232, 246, 250, 0.82);
   white-space: pre-wrap;
 }
@@ -55,6 +65,8 @@
   display: flex;
   align-items: baseline;
   gap: 0.5ch;
+  margin: 0;
+  border: 0;
   padding: 0;
   background: transparent;
 }
@@ -82,13 +94,18 @@
   line-height: 1.55;
   outline: none;
   caret-color: hsl(var(--primary));
+  cursor: text;
+}
+
+.command-input:focus-within .command-input-prompt small {
+  color: hsl(var(--foreground));
 }
 
 .command-input-field::placeholder {
   color: hsl(var(--muted-foreground));
 }
 
-.command-input-paste {
+.terminal-paste {
   display: inline-flex;
   min-height: 1.8rem;
   flex: 0 0 auto;
@@ -110,158 +127,46 @@
     color 180ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-.command-input-paste svg {
+.terminal-paste svg {
   width: 0.85rem;
   height: 0.85rem;
 }
 
-.command-input-paste:hover:not(:disabled) {
+.terminal-paste:hover:not(:disabled) {
   border-color: rgba(var(--theme-primary-rgb), 0.48);
   background: rgba(var(--theme-primary-rgb), 0.13);
   color: hsl(var(--foreground));
 }
 
-.command-input-paste:focus-visible {
+.terminal-paste:focus-visible {
   outline: 2px solid rgb(var(--theme-primary-rgb));
   outline-offset: 2px;
 }
 
-.command-input-paste:disabled {
+.terminal-paste:disabled {
   cursor: not-allowed;
   opacity: 0.45;
-}
-
-.command-input-submit {
-  display: inline-flex;
-  min-height: 2rem;
-  flex: 0 0 auto;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.48);
-  border-radius: var(--radius-sm);
-  padding: 0.3rem 0.58rem;
-  background: rgba(var(--theme-primary-rgb), 0.14);
-  color: hsl(var(--foreground));
-  cursor: pointer;
-  font-family: var(--font-sans);
-  font-size: var(--text-2xs);
-  font-weight: 700;
-  line-height: 1;
-  white-space: nowrap;
-  transition:
-    border-color 180ms cubic-bezier(0.16, 1, 0.3, 1),
-    background-color 180ms cubic-bezier(0.16, 1, 0.3, 1);
-}
-
-.command-input-submit:hover:not(:disabled) {
-  border-color: rgba(var(--theme-primary-rgb), 0.72);
-  background: rgba(var(--theme-primary-rgb), 0.24);
-}
-
-.command-input-submit:focus-visible {
-  outline: 2px solid rgb(var(--theme-primary-rgb));
-  outline-offset: 2px;
-}
-
-.command-input-submit:disabled {
-  cursor: not-allowed;
-  opacity: 0.45;
-}
-
-
-.terminal-line + .terminal-line {
-  margin-top: 0.16rem;
 }
 
 .terminal-line--input {
-  margin-block: 0.35rem 0.15rem;
-  border-left: 2px solid rgba(var(--theme-primary-rgb), 0.54);
-  padding-left: 0.55rem;
   color: var(--text-primary);
-  font-weight: 600;
-}
-
-.terminal-line--warning,
-.terminal-line--system {
-  border-left: 2px solid hsl(var(--warning) / 0.58);
-  padding-left: 0.55rem;
-}
-
-.terminal-line--success {
-  border-left: 2px solid hsl(var(--success) / 0.62);
-  padding-left: 0.55rem;
-}
-
-.command-input {
-  position: sticky;
-  bottom: -0.85rem;
-  margin: 0.55rem -0.35rem -0.85rem;
-  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.14);
-  padding: 0.72rem 0.35rem 0.85rem;
-  background: linear-gradient(180deg, rgba(1, 8, 19, 0.88), rgba(1, 8, 19, 0.98));
-}
-
-/* Docked input (TerminalPanel dockInput, opt-in): the history fills the panel
-   and scrolls on its own, anchored to the bottom so the newest line sits right
-   above an input row pinned to the panel's foot. Only these opt-in classes are
-   styled here; the default stream layout above is unchanged. */
-.terminal-output--docked {
-  display: flex;
-  flex-direction: column;
-  overflow-x: hidden;
-  overflow-y: auto;
-  cursor: text;
-}
-
-/* margin-top:auto (not justify-content:flex-end) keeps the history anchored to
-   the bottom while it is short and still scrollable once it overflows. */
-.terminal-history {
-  margin-top: auto;
-}
-
-.terminal-output--docked .terminal-line {
-  overflow-wrap: anywhere;
-}
-
-.terminal-input-dock {
-  flex: 0 0 auto;
-  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.14);
-  padding: var(--space-3) var(--space-4) var(--space-4);
-  background: linear-gradient(180deg, rgba(1, 8, 19, 0.88), rgba(1, 8, 19, 0.98));
-}
-
-.terminal-input-dock .command-input {
-  position: static;
-  align-items: center;
-  margin: 0;
-  border-top: 0;
-  padding: 0;
-  background: transparent;
 }
 
 @media (max-width: 600px) {
-  .terminal-input-dock {
-    padding: var(--space-2) var(--space-3) var(--space-3);
-  }
-
-  .command-input-paste span {
+  .terminal-paste span {
     display: none;
   }
 
-  .command-input-paste {
+  .terminal-paste {
     width: 1.9rem;
     justify-content: center;
     padding-inline: 0;
   }
 
-  .command-input-submit {
-    padding-inline: 0.45rem;
-  }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .command-input-paste,
-  .command-input-submit {
+  .terminal-paste {
     transition: none;
   }
 }

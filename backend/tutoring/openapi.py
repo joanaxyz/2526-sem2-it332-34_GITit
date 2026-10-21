@@ -76,5 +76,7 @@ class TutorChatResponseSerializer(serializers.Serializer):
     reply = serializers.CharField()
     sources = TutorTeachingSourceSerializer(many=True)
     suggested_topics = TutorTeachingSourceSerializer(many=True)
-    response_kind = serializers.ChoiceField(choices=["explanation", "concept_redirect", "clarification", "unavailable"])
+    response_kind = serializers.ChoiceField(
+        choices=["explanation", "concept_redirect", "clarification", "unavailable"]
+    )
     scenario_related = serializers.BooleanField()

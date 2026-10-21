@@ -176,9 +176,6 @@
     min-height: 17rem;
   }
 
-  .command-input-prompt {
-    display: none;
-  }
 }
 
 @media (max-width: 600px) {

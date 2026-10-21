@@ -269,7 +269,7 @@
   border-radius: 999px;
   background: hsl(var(--warning));
   color: rgb(var(--theme-surface-rgb));
-  font-size: 0.56rem;
+  font-size: 0.6875rem;
   font-weight: 700;
   line-height: 1;
   letter-spacing: 0.08em;
