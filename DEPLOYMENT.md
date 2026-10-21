@@ -8,9 +8,9 @@ sets Gemini `thinkingLevel` or Groq `reasoning_effort`; use only levels the mode
 supports, because a rejected request is a configuration failure. Limited models enter
 a shared-cache cooldown; authentication/configuration failures do not trigger
 rate-limit rotation. Each attempt is capped by `TUTOR_PROVIDER_ATTEMPT_SECONDS`
-(default 4) within `TUTOR_PROVIDER_DEADLINE_SECONDS` (default 12);
-`THROTTLE_TUTOR_CHAT` defaults to `12/min` per authenticated user. Static teaching
-remains available if providers fail.
+(default 10) within `TUTOR_PROVIDER_DEADLINE_SECONDS` (default 20);
+`THROTTLE_TUTOR_CHAT` defaults to `12/min` per authenticated user. If every provider
+fails, the tutor says it is unavailable; scenario protection never relaxes.
 
 The packaged tutor scenario index must match the seed banks. Run
 `python manage.py build_tutor_index --check` from `backend/` before release.

@@ -72,6 +72,7 @@ function setup(lesson = tutor, replay = false) {
 }
 
 beforeEach(() => {
+  localStorage.clear()
   useAuthStore.getState().setSession('learner-token', {
     id: 1, username: 'learner', email: 'learner@example.com', is_staff: false,
   })
@@ -95,8 +96,10 @@ describe('terminal-led command introduction', () => {
     expect(screen.getByRole('dialog', { name: 'Create and switch' }).querySelector('img')).toBeNull()
     expect(screen.getByRole('button', { name: 'Move command guide' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Resize command guide' })).toBeInTheDocument()
-    expect(screen.getAllByRole('textbox')).toHaveLength(2)
-    expect(screen.getByRole('dialog', { name: 'Ask Git-It' })).toBeInTheDocument()
+    expect(screen.getAllByRole('textbox')).toHaveLength(1)
+    // Its chat starts as a launcher, so nothing covers the card.
+    expect(screen.queryByRole('dialog', { name: 'Ask Git-It' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ask Git-It' })).toBeInTheDocument()
     expect(screen.getByText(tutor.command_form.summary)).toBeInTheDocument()
     // Absolute beginners: what a command is, and what each part means.
     expect(screen.getByText(/You type a command in the terminal/)).toBeInTheDocument()
@@ -105,7 +108,7 @@ describe('terminal-led command introduction', () => {
     // A miss never reveals the concrete solution command either.
     expect(screen.queryByText('git switch -c feature')).not.toBeInTheDocument()
     // Nothing to click through: the guide stays while the learner types, with a
-    // single close button (the chat window has none). On a narrow screen the
+    // single close button (the chat starts collapsed). On a narrow screen the
     // change sits in its own tab of the same card.
     expect(screen.getAllByRole('button', { name: /close/i })).toEqual([
       screen.getByRole('button', { name: 'Close command guide' }),
@@ -152,9 +155,12 @@ describe('terminal-led command introduction', () => {
     expect(client.getQueryData(queryKeys.adventureTierRun(1))).toEqual({ ...run, tutor: null })
   })
 
-  it('stays open for clicks in its chat window and terminal, and collapses on a click elsewhere', async () => {
+  it('stays open for clicks in its chat launcher, chat window and terminal, and collapses on a click elsewhere', async () => {
     const { onDismiss } = setup()
     await screen.findByText('Syntax: git switch -c <branch>')
+    const chatLauncher = screen.getByRole('button', { name: 'Ask Git-It' })
+    fireEvent.pointerDown(chatLauncher)
+    fireEvent.click(chatLauncher)
     fireEvent.pointerDown(screen.getByRole('textbox', { name: 'Ask Git-It a question' }))
     fireEvent.pointerDown(document.querySelector('[data-command-input]')!)
     fireEvent.pointerDown(screen.getByRole('dialog', { name: 'Create and switch' }))
@@ -175,7 +181,7 @@ describe('terminal-led command introduction', () => {
   it('collapses on Escape and hands focus back to the terminal', async () => {
     const { onDismiss } = setup()
     await screen.findByText('Syntax: git switch -c <branch>')
-    fireEvent.keyDown(screen.getByRole('textbox', { name: 'Ask Git-It a question' }), { key: 'Escape' })
+    fireEvent.keyDown(document.querySelector('[data-command-input]')!, { key: 'Escape' })
     expect(onDismiss).toHaveBeenCalledOnce()
     await waitFor(() => expect(document.activeElement).toHaveAttribute('data-command-input'))
   })

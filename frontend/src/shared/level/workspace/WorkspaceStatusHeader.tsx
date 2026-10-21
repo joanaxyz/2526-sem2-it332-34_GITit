@@ -66,7 +66,8 @@ export function WorkspaceStatusHeader({
       </a>
 
       <div className="gameplay-header-mission" aria-label={missionLabel}>
-        <strong>{title}</strong>
+        {/* The title gives way to the stats strip, so its full text stays on hover. */}
+        <strong title={title}>{title}</strong>
         {note ? <span>{note}</span> : null}
       </div>
 

@@ -131,7 +131,9 @@ def _level_scenarios(level: AdventureLevel) -> list:
     return [
         scenario
         for tier in tiers
-        for scenario in sorted(tier.scenarios.all(), key=lambda scenario: (scenario.sort_order, scenario.id))
+        for scenario in sorted(
+            tier.scenarios.all(), key=lambda scenario: (scenario.sort_order, scenario.id)
+        )
         if scenario.is_published
     ]
 
@@ -211,7 +213,8 @@ def level_command_forms(
     """
     attached = list(
         CommandForm.objects.filter(
-            Q(adventure_levels=level) | Q(adventure_level_tier_scenarios__tier__adventure_level=level),
+            Q(adventure_levels=level)
+            | Q(adventure_level_tier_scenarios__tier__adventure_level=level),
             is_published=True,
         )
         .select_related("command_skill")

@@ -18,7 +18,9 @@ def cleared_slugs(progress) -> list[str]:
     return list(progress.cleared_scenario_slugs or []) if progress is not None else []
 
 
-def next_scenario(scenarios: list[AdventureLevelTierScenario], progress) -> AdventureLevelTierScenario | None:
+def next_scenario(
+    scenarios: list[AdventureLevelTierScenario], progress
+) -> AdventureLevelTierScenario | None:
     """The first published scenario the learner has not cleared, or None."""
     cleared = set(cleared_slugs(progress))
     return next((scenario for scenario in scenarios if scenario.slug not in cleared), None)
@@ -53,7 +55,9 @@ def scenario_progress(
     }
 
 
-def replay_scenario(*, player, tier, scenarios: list[AdventureLevelTierScenario]) -> AdventureLevelTierScenario:
+def replay_scenario(
+    *, player, tier, scenarios: list[AdventureLevelTierScenario]
+) -> AdventureLevelTierScenario:
     """Free play cycles the tier's scenarios, starting after the last replayed one."""
     latest = (
         AdventureLevelTierRun.objects.filter(player=player, tier=tier, is_replay=True)

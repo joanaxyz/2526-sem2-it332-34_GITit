@@ -12,6 +12,8 @@ checkpoints and respects rate-limit delays. Check freshness without network call
 
 Model, dimensions, preprocessing version and public-corpus digest must match before
 runtime semantic matching is enabled. Changed files are picked up by modification
-time. Missing/stale indexes or limited query embeddings fall back to text matching
-and conservative scenario handling. Text generation still follows Gemini → Groq;
-embedding vectors are never mixed between models/providers.
+time. Retrieval returns the matched case IDs; the answer guard looks up those cases'
+answer fields separately and never sends them to a provider. Missing/stale indexes or
+limited query embeddings fall back to text matching and keep scenario protection on.
+Reply generation follows Gemini → Groq; embedding vectors are never mixed between
+models/providers.

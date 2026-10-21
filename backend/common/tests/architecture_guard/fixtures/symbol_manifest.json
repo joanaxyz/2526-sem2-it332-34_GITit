@@ -442,7 +442,7 @@
     },
     "auth_contract_source_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "d273de9cc3a1d5786c562225d3b2d7c4c9edf4824bcc136df49e1ef01437098f",
+      "normalized_ast_sha256": "cbd4f3cdfbdecc86c594e6e432d8c167d30e7fb0a48dc70df5de233f9eb7f4bf",
       "owner": "scripts.checks.architecture_guard.contracts.auth",
       "pre_cutover_lines": [
         3223,

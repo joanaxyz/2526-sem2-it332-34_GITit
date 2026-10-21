@@ -16,7 +16,9 @@
 
 .tier-stats-bar {
   display: flex;
-  flex: 0 1 auto;
+  /* Its stats never wrap on wide screens, so it keeps its width and the
+     mission title shrinks instead of sitting under the strip. */
+  flex: 0 0 auto;
   align-items: center;
   justify-content: flex-end;
   min-width: 0;

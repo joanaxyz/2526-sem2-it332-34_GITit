@@ -35,6 +35,14 @@ describe('app entry routing', () => {
     expect(router.state.location.pathname).toBe(expectedPath)
   })
 
+  it('shows a not-found page for an address with no route', async () => {
+    await router.navigate('/this-route-does-not-exist')
+    render(<QueryClientProvider client={client}><RouterProvider router={router} /></QueryClientProvider>)
+    expect(await screen.findByRole('heading', { name: 'Page not found' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Back to GIT it!' })).toBeInTheDocument()
+    expect(screen.queryByText(/Hey developer/)).not.toBeInTheDocument()
+  })
+
   it.each([
     '/stories',
     '/stories/',

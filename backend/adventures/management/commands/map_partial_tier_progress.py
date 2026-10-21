@@ -17,9 +17,7 @@ from progress.models import AdventureLevelTierCompletion
 
 
 class Command(BaseCommand):
-    help = (
-        "Mark the first scenarios cleared for tiers left partly done before the scenario plan (idempotent)."
-    )
+    help = "Mark the first scenarios cleared for tiers left partly done before the scenario plan (idempotent)."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -40,7 +38,9 @@ class Command(BaseCommand):
             if (progress.player_id, progress.tier_id) in completed:
                 continue
             if progress.tier_id not in scenarios_by_tier:
-                scenarios_by_tier[progress.tier_id] = [w.slug for w in published_scenarios(progress.tier)]
+                scenarios_by_tier[progress.tier_id] = [
+                    w.slug for w in published_scenarios(progress.tier)
+                ]
             slugs = scenarios_by_tier[progress.tier_id]
             cleared = cleared_slugs(progress)
             if not slugs or set(cleared) & set(slugs):

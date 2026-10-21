@@ -27,7 +27,7 @@ from curriculum.management.commands.seed_curriculum import (
     MODULE_LEVELS,
 )
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
-from curriculum.seed_data.scenario_bank import scenario_bank, extension_scenario_bank
+from curriculum.seed_data.scenario_bank import extension_scenario_bank, scenario_bank
 from curriculum.seed_data.scenario_runtime import UNPLACED_CASE_IDS
 from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES
 from curriculum.seed_data.source.scenario_fixtures import SCENARIO_FIXTURES, extension_case
@@ -103,7 +103,9 @@ def _walk() -> list[Scenario]:
         slug = level["slug"]
         for tier in TIERS:
             for spec in MODULE_SCENARIO_PLAN.get(slug, {}).get(tier, ()):
-                scenarios.append(Scenario(len(scenarios), slug, tier, spec.slug, spec.role, spec.variants))
+                scenarios.append(
+                    Scenario(len(scenarios), slug, tier, spec.slug, spec.role, spec.variants)
+                )
     return scenarios
 
 
@@ -236,7 +238,9 @@ def test_every_scenario_is_placed_exactly_once():
     for scenario in _walk():
         for case_id in scenario.variants:
             if case_id in placed:
-                problems.append(f"{case_id}: placed in {placed[case_id]} and {_scenario_name(scenario)}")
+                problems.append(
+                    f"{case_id}: placed in {placed[case_id]} and {_scenario_name(scenario)}"
+                )
             placed[case_id] = _scenario_name(scenario)
             in_level = case_id in POOLS[scenario.level]
             authored = extension_scenario_bank().get(case_id)
@@ -269,7 +273,9 @@ def test_debuts_happen_before_hard_and_in_every_variant_of_the_scenario():
         for part in sorted(novel):
             missing = [case_id for case_id, parts in per_variant.items() if part not in parts]
             if missing:
-                problems.append(f"{_scenario_name(scenario)}: debut {_label(part)} missing in {missing}")
+                problems.append(
+                    f"{_scenario_name(scenario)}: debut {_label(part)} missing in {missing}"
+                )
             if scenario.tier == "hard":
                 problems.append(f"{_scenario_name(scenario)}: {_label(part)} debuts at hard")
         for form in sorted(new_forms):

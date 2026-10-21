@@ -622,7 +622,9 @@ def test_staff_analytics_returns_shape(django_user_model):
         title="Analytics Adventure",
     )
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug="scenario", title="Scenario")
+    scenario = AdventureLevelTierScenario.objects.create(
+        tier=tier, slug="scenario", title="Scenario"
+    )
     adventure_variant = AdventureLevelTierScenarioVariant.objects.create(
         scenario=scenario,
         slug="main",

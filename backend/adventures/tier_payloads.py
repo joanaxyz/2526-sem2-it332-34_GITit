@@ -184,7 +184,11 @@ def scenario_payload(run: AdventureLevelTierRun) -> dict:
     """Which of the tier's scenarios this run plays, for the workspace header."""
     scenarios = _run_scenarios(run)
     index = next(
-        (number for number, scenario in enumerate(scenarios, start=1) if scenario.id == run.current_scenario_id),
+        (
+            number
+            for number, scenario in enumerate(scenarios, start=1)
+            if scenario.id == run.current_scenario_id
+        ),
         None,
     )
     return {

@@ -28,8 +28,10 @@ const DEFAULT_PANE_LAYOUT = {
 // The scenario and project files stay readable while a guide is open.
 const CONTEXT_REGIONS = ['[data-tour-target="level-story"]', '[data-tour-target="project-files"]']
 const FEEDBACK_REGIONS = [...CONTEXT_REGIONS, '[data-tour-target="terminal"]']
-// The guide's chat window and the terminal belong with the guide: clicks there keep it open.
-const CLOSE_ON_OUTSIDE_CLICK = { except: ['.tutor-window', '[data-tour-target="terminal"]'] }
+// The guide's chat window, its launcher and the terminal belong with the guide: clicks there keep it open.
+const CLOSE_ON_OUTSIDE_CLICK = {
+  except: ['.tutor-window', '[data-mascot-launcher="guide-tutor"]', '[data-tour-target="terminal"]'],
+}
 
 /**
  * "Command guide": introduces the one new command form, or technique, the
@@ -45,7 +47,8 @@ const CLOSE_ON_OUTSIDE_CLICK = { except: ['.tutor-window', '[data-tour-target="t
  * Escape, or a click outside collapses it into the mascot launcher, which
  * brings it back. After a command, "Got it" records the guide (and its new
  * words) as done.
- * Its "Ask Git-It" chat window opens and closes with it.
+ * Its "Ask Git-It" chat starts as a launcher beside it, so it never covers the
+ * card, and closes with it.
  */
 export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss }: {
   run: TierRun

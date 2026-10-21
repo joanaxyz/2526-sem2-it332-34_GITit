@@ -28,7 +28,9 @@ def stats_players(db, django_user_model):
     level = AdventureLevel.objects.create(chapter=chapter, slug="stats", title="Stats")
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
     tier_scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug="stats")
-    tier_variant = AdventureLevelTierScenarioVariant.objects.create(scenario=tier_scenario, slug="stats")
+    tier_variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=tier_scenario, slug="stats"
+    )
     challenge = ChallengeLevel.objects.create(chapter=chapter, slug="stats", title="Stats")
     trial = ChallengeTrial.objects.create(challenge_level=challenge, difficulty="easy")
     trial_variant = ChallengeTrialVariant.objects.create(trial=trial, slug="stats")

@@ -24,7 +24,9 @@ class TierVariantSelectionService:
         tried_variant_keys: set[str] | None = None,
     ) -> AdventureLevelTierScenarioVariant | None:
         variants = (
-            published_variants if published_variants is not None else self._published_variants(scenario)
+            published_variants
+            if published_variants is not None
+            else self._published_variants(scenario)
         )
         variants = [variant for variant in variants if not variant.is_transfer]
         if not variants:

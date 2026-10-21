@@ -28,7 +28,10 @@ def _setup(django_user_model):
     def player(name: str, clears: int, cleared: list[str] | None = None):
         learner = get_or_create_player(django_user_model.objects.create_user(username=name))
         AdventureLevelTierProgress.objects.create(
-            player=learner, tier=tier, successful_clears=clears, cleared_scenario_slugs=cleared or []
+            player=learner,
+            tier=tier,
+            successful_clears=clears,
+            cleared_scenario_slugs=cleared or [],
         )
         return learner
 
@@ -39,7 +42,9 @@ def _cleared(player, tier) -> list[str]:
     return AdventureLevelTierProgress.objects.get(player=player, tier=tier).cleared_scenario_slugs
 
 
-def test_partial_clears_map_onto_the_first_scenarios_without_completing_the_tier(db, django_user_model):
+def test_partial_clears_map_onto_the_first_scenarios_without_completing_the_tier(
+    db, django_user_model
+):
     tier, player = _setup(django_user_model)
     one = player("one", 1)
     many = player("many", 5)

@@ -85,9 +85,3 @@ def post_json(url, headers, body, timeout):
         raise ProviderError(503) from None
     except (ValueError, UnicodeError):
         raise ProviderError(502) from None
-
-
-def in_background(fn, *args):
-    """Run blocking provider work beside the request thread; returns a Future."""
-    loop, _ = _io()
-    return asyncio.run_coroutine_threadsafe(asyncio.to_thread(fn, *args), loop)

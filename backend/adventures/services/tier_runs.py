@@ -166,7 +166,9 @@ class AdventureLevelTierRunService:
         selector = TierVariantSelectionService()
         published_variants = selector._published_variants(scenario)
         tried_keys = (
-            selector._tried_variant_keys(player=player, scenario=scenario) if selection_reference else set()
+            selector._tried_variant_keys(player=player, scenario=scenario)
+            if selection_reference
+            else set()
         )
         variant = selector.select_variant(
             player=player,

@@ -24,14 +24,19 @@ class TutorChatContextSerializer(serializers.Serializer):
         return attrs
 
 
+class TutorChatTurnSerializer(serializers.Serializer):
+    role = serializers.ChoiceField(choices=["user", "assistant"])
+    text = serializers.CharField(max_length=6000, trim_whitespace=True)
+
+
 class TutorChatRequestSerializer(serializers.Serializer):
     message = serializers.CharField(max_length=4000, trim_whitespace=True)
     context = TutorChatContextSerializer()
-    history = serializers.ListField(
-        child=serializers.CharField(max_length=4000), max_length=8, required=False, default=list
-    )
+    history = TutorChatTurnSerializer(many=True, required=False, default=list)
 
     def validate_history(self, value):
-        if sum(map(len, value)) > 12000:
+        if len(value) > 20:
+            raise serializers.ValidationError("Conversation context is too long.")
+        if sum(len(turn["text"]) for turn in value) > 32000:
             raise serializers.ValidationError("Conversation context is too long.")
         return value

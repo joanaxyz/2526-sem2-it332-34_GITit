@@ -41,8 +41,9 @@ export function useTutorChat(context: TutorContext, scope: string) {
     controller.current = request
     const generation = useAuthStore.getState().sessionGeneration
     const before = messagesRef.current
-    const history = before.filter((entry) => entry.role === 'user').map((entry) => entry.text).slice(-8)
-    while (history.join('').length > 12000) history.shift()
+    // Both sides travel, so "what do you mean?" can refer to Git-It's last answer.
+    const history = before.slice(-20).map((entry) => ({ role: entry.role, text: entry.text.slice(0, 6000) }))
+    while (history.reduce((total, turn) => total + turn.text.length, 0) > 32000) history.shift()
     remember([...before, { role: 'user', text: message }])
     setPending(true)
     setError('')

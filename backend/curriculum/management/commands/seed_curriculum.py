@@ -13462,4 +13462,6 @@ class Command(BaseCommand):
                     },
                 )
             scenario.variants.exclude(slug__in=spec.variants).update(is_published=False)
-        tier.scenarios.exclude(slug__in=[spec.slug for spec in scenarios]).update(is_published=False)
+        tier.scenarios.exclude(slug__in=[spec.slug for spec in scenarios]).update(
+            is_published=False
+        )

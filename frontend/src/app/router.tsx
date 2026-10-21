@@ -6,6 +6,7 @@ import { AuthLayout } from '@/app/layouts/AuthLayout'
 import { HomeLayout } from '@/app/layouts/HomeLayout'
 import { LevelLayout } from '@/app/layouts/LevelLayout'
 import { Protected } from '@/app/Protected'
+import { RouteErrorPage } from '@/app/RouteErrorPage'
 import { RequireCompanion } from '@/app/RequireCompanion'
 import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
@@ -219,6 +220,7 @@ const appRoutes: RouteObject[] = [
 export const router = createBrowserRouter([
   {
     element: <Outlet />,
+    errorElement: <RouteErrorPage />,
     hydrateFallbackElement: <LoadingScreen label="Loading application" />,
     children: appRoutes,
   },

@@ -7,8 +7,8 @@ from authoring.models import ContentDefinition, ContentKind
 from authoring.schemas import (
     BOOK_BLOCK_TYPES,
     content_levels,
-    level_trials,
     level_scenarios,
+    level_trials,
 )
 from evaluation.compiler import compile_evaluation_spec
 from evaluation.engine import EvaluationEngine
