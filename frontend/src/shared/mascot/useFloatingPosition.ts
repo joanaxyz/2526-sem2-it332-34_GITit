@@ -4,9 +4,13 @@ import type { KeyboardEvent, PointerEvent } from 'react'
 import { readPreference, writePreference } from '@/shared/utils/persistentState'
 
 type Position = { x: number; y: number }
+export type FloatingSize = { width: number; height: number }
 
-// Matches .mascot-launcher in mascot-launcher.css.
-const FLOATING_LAUNCHER_SIZE = { width: 76, height: 104 }
+// Matches .mascot-launcher (and its [data-size="large"] variant) in mascot-launcher.css.
+export const FLOATING_LAUNCHER_SIZES = {
+  default: { width: 76, height: 104 },
+  large: { width: 128, height: 180 },
+} satisfies Record<string, FloatingSize>
 const GAP = 12
 // Below the app's top bar.
 const TOP = 64
@@ -21,23 +25,47 @@ const ARROWS: Record<string, Position> = {
   ArrowDown: { x: 0, y: 1 },
 }
 
-function keepInView({ x, y }: Position): Position {
+function keepInView({ x, y }: Position, size: FloatingSize): Position {
   return {
-    x: Math.max(GAP, Math.min(window.innerWidth - FLOATING_LAUNCHER_SIZE.width - GAP, x)),
-    y: Math.max(TOP, Math.min(window.innerHeight - FLOATING_LAUNCHER_SIZE.height - GAP, y)),
+    x: Math.max(GAP, Math.min(window.innerWidth - size.width - GAP, x)),
+    y: Math.max(TOP, Math.min(window.innerHeight - size.height - GAP, y)),
   }
 }
 
-function homePosition(): Position {
-  return keepInView({ x: window.innerWidth - FLOATING_LAUNCHER_SIZE.width - 24, y: window.innerHeight * 0.42 })
+function homePosition(size: FloatingSize): Position {
+  return keepInView({ x: window.innerWidth - size.width - 24, y: window.innerHeight * 0.42 }, size)
 }
 
 // Saved as fractions of the viewport, so a launcher keeps its spot in a resized window.
-function savedPosition(key: string): Position {
+function savedPosition(key: string, size: FloatingSize): Position {
   const saved = readPreference<Partial<Position> | null>(key, null)
   return saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)
-    ? keepInView({ x: saved.x! * window.innerWidth, y: saved.y! * window.innerHeight })
-    : homePosition()
+    ? keepInView({ x: saved.x! * window.innerWidth, y: saved.y! * window.innerHeight }, size)
+    : homePosition(size)
+}
+
+// Where each launcher last stood while visible, so another can take its place:
+// the workspace's guide mascot becomes a finished run's next-step mascot.
+type ShownLauncher = { position: Position; size: FloatingSize; order: number }
+const lastShown = new Map<string, ShownLauncher>()
+let shownOrder = 0
+
+export function rememberShownPosition(key: string, position: Position, size: FloatingSize) {
+  lastShown.set(key, { position, size, order: ++shownOrder })
+}
+
+/** Stands a launcher of `size` where the most recently visible of `keys` stood, feet aligned. */
+function handoffPosition(keys: readonly string[], size: FloatingSize): Position | null {
+  let latest: ShownLauncher | undefined
+  for (const key of keys) {
+    const shown = lastShown.get(key)
+    if (shown && (!latest || shown.order > latest.order)) latest = shown
+  }
+  if (!latest) return null
+  return keepInView({
+    x: latest.position.x + latest.size.width / 2 - size.width / 2,
+    y: latest.position.y + latest.size.height - size.height,
+  }, size)
 }
 
 function savePosition(key: string, { x, y }: Position) {
@@ -48,8 +76,14 @@ function savePosition(key: string, { x, y }: Position) {
  * A control the learner can drag anywhere in the viewport, or move with the
  * arrow keys (Home puts it back). Its position is remembered under `key`.
  */
-export function useFloatingPosition(key: string, onDragStart?: () => void) {
-  const [position, setPosition] = useState(() => savedPosition(key))
+export function useFloatingPosition(
+  key: string,
+  onDragStart?: () => void,
+  size: FloatingSize = FLOATING_LAUNCHER_SIZES.default,
+  /** Keys of launchers this one replaces; it starts where the latest of them was last seen. */
+  takeOverFrom: readonly string[] = [],
+) {
+  const [position, setPosition] = useState(() => handoffPosition(takeOverFrom, size) ?? savedPosition(key, size))
   const [dragging, setDragging] = useState(false)
   const latest = useRef(position)
   const press = useRef<{ id: number; start: Position; origin: Position; moved: boolean } | null>(null)
@@ -57,18 +91,18 @@ export function useFloatingPosition(key: string, onDragStart?: () => void) {
   const dragged = useRef(false)
 
   function place(next: Position) {
-    latest.current = keepInView(next)
+    latest.current = keepInView(next, size)
     setPosition(latest.current)
   }
 
   useEffect(() => {
     const fit = () => {
-      latest.current = keepInView(latest.current)
+      latest.current = keepInView(latest.current, size)
       setPosition(latest.current)
     }
     window.addEventListener('resize', fit)
     return () => window.removeEventListener('resize', fit)
-  }, [])
+  }, [size])
 
   const handlers = {
     onPointerDown(event: PointerEvent<HTMLElement>) {
@@ -115,7 +149,7 @@ export function useFloatingPosition(key: string, onDragStart?: () => void) {
       const step = event.shiftKey ? KEY_STEP_LARGE : KEY_STEP
       place(arrow
         ? { x: latest.current.x + arrow.x * step, y: latest.current.y + arrow.y * step }
-        : homePosition())
+        : homePosition(size))
       savePosition(key, latest.current)
     },
   }

@@ -2,6 +2,7 @@
 
 One background event loop per process owns a pooled client, so provider calls
 reuse warm TLS connections instead of handshaking on every learner question.
+Requests can be started and collected separately, so callers can race them.
 """
 
 import asyncio
@@ -74,9 +75,13 @@ async def _post_json(client, url, headers, body, timeout):
     return None
 
 
-def post_json(url, headers, body, timeout):
+def start_json(url, headers, body, timeout):
+    """Begin a POST on the shared loop: a future to `collect`, or to cancel."""
     loop, client = _io()
-    future = asyncio.run_coroutine_threadsafe(_post_json(client, url, headers, body, timeout), loop)
+    return asyncio.run_coroutine_threadsafe(_post_json(client, url, headers, body, timeout), loop)
+
+
+def collect(future, timeout):
     try:
         # The coroutine enforces the budget; this only guards a stalled loop.
         return future.result(max(0.1, timeout) + 1)
@@ -85,3 +90,7 @@ def post_json(url, headers, body, timeout):
         raise ProviderError(503) from None
     except (ValueError, UnicodeError):
         raise ProviderError(502) from None
+
+
+def post_json(url, headers, body, timeout):
+    return collect(start_json(url, headers, body, timeout), timeout)

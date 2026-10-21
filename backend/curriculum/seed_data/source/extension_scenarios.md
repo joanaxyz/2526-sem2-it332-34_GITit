@@ -15,7 +15,9 @@ Numbering continues each level's scenario list. Gate scenarios use `N.G.k`.
 **Variant ID:** `init-hard-nested-service`
 
 **Story**
-The workspace Raven shared holds several projects: `services/billing-api`, `services/search-api` and the docs folder. Only the billing service is ready for version control. The other two belong to other groups, who set up their own repositories. Raven's team names the first branch `trunk` on every new repository, and the brief takes that for granted.
+The workspace Raven shared holds several projects: `services/billing-api`, `services/search-api` and the docs folder.
+
+**Only the billing service is ready for version control.** The other two belong to other groups, who set up their own repositories. Raven's team names the first branch `trunk` on every new repository, and the brief takes that for granted.
 
 **Starting point:** You are at the top of the workspace. `services/billing-api`, `services/search-api` and docs all hold files, and none of them is a repository.
 
@@ -23,7 +25,9 @@ The workspace Raven shared holds several projects: `services/billing-api`, `serv
 `git init` takes the folder to turn into a repository, nested paths included. Initializing the wrong level puts other projects' files inside your repository.
 
 **Your Task**
-Make `services/billing-api`, and __only__ that folder, a Git repository whose first branch follows the team's convention. **Do not stage or commit anything.**
+Make `services/billing-api`, and __only__ that folder, a Git repository whose first branch follows the team's convention.
+
+**Do not stage or commit anything.**
 
 **Objective Checklist**
 
@@ -59,7 +63,9 @@ Minimum counted commands: 1 · Maximum counted commands: 8
 **Variant ID:** `init-hard-nested-course`
 
 **Story**
-Sage keeps the study group's material in one workspace: `courses/git-basics`, `courses/sql-basics` and a templates folder. The Git basics course is the one moving under version control today. The SQL course is still a draft, and the templates are shared by everyone. The group starts every repository on `main`.
+Sage keeps the study group's material in one workspace: `courses/git-basics`, `courses/sql-basics` and a templates folder. **The Git basics course is the one moving under version control today.**
+
+The SQL course is still a draft, and the templates are shared by everyone. The group starts every repository on `main`.
 
 **Starting point:** You are at the top of the workspace. `courses/git-basics`, `courses/sql-basics` and templates all hold files, and none of them is a repository.
 
@@ -67,7 +73,9 @@ Sage keeps the study group's material in one workspace: `courses/git-basics`, `c
 A repository covers its folder and everything inside it, so choosing the folder is the decision that matters.
 
 **Your Task**
-Make `courses/git-basics`, and __only__ that folder, a Git repository with `main` as its first branch. **Do not stage or commit anything.**
+Make `courses/git-basics`, and __only__ that folder, a Git repository with `main` as its first branch.
+
+**Do not stage or commit anything.**
 
 **Objective Checklist**
 
@@ -103,7 +111,9 @@ Minimum counted commands: 1 · Maximum counted commands: 8
 **Variant ID:** `init-easy-plain-notes`
 
 **Story**
-Raven has been keeping the group's planning notes in one folder, and the notes already changed twice this week without anyone noticing. Before the next meeting, Raven wants Git watching the folder so later changes can be recorded. The notes themselves stay as they are for now.
+Raven has been keeping the group's planning notes in one folder, and the notes already changed twice this week without anyone noticing.
+
+Before the next meeting, Raven wants Git watching the folder so later changes can be recorded. The notes themselves stay as they are for now.
 
 **Starting point:** You are in the planning folder. It holds `notes.md` and is not a repository yet.
 
@@ -111,7 +121,9 @@ Raven has been keeping the group's planning notes in one folder, and the notes a
 `git init` turns the folder you are in into a repository. It creates Git's records and touches none of your files.
 
 **Your Task**
-Turn the current folder into a Git repository. **Do not stage or commit `notes.md`.**
+Turn the current folder into a Git repository.
+
+**Do not stage or commit `notes.md`.**
 
 **Objective Checklist**
 
@@ -154,7 +166,9 @@ Sage is collecting the family's recipes in one folder before a reunion, and two 
 Starting a repository is the first step of version control: Git can only record changes in a folder it tracks.
 
 **Your Task**
-Turn the current folder into a Git repository. **Do not stage or commit `recipes.md`.**
+Turn the current folder into a Git repository.
+
+**Do not stage or commit `recipes.md`.**
 
 **Objective Checklist**
 
@@ -189,7 +203,9 @@ Minimum counted commands: 1 · Maximum counted commands: 12
 **Variant ID:** `init-easy-new-folder-among-files`
 
 **Story**
-The design team's workspace already holds a loose `design/logo.svg` that belongs to another project. Raven wants a separate repository for the website's assets, in a new `site-assets` folder, starting on `main`. The logo should stay where it is, outside the new repository.
+The design team's workspace already holds a loose `design/logo.svg` that belongs to another project.
+
+Raven wants a separate repository for the website's assets, in a new `site-assets` folder, starting on `main`. The logo should stay where it is, outside the new repository.
 
 **Starting point:** You are at the top of the workspace. It holds `design/logo.svg` and no repository.
 
@@ -197,7 +213,9 @@ The design team's workspace already holds a loose `design/logo.svg` that belongs
 `git init <folder>` creates the folder if needed and makes only that folder a repository, so nearby files stay out of it.
 
 **Your Task**
-Create a repository in a new `site-assets` folder with `main` as its first branch. **Leave `design/logo.svg` where it is.**
+Create a repository in a new `site-assets` folder with `main` as its first branch.
+
+**Leave `design/logo.svg` where it is.**
 
 **Objective Checklist**
 
@@ -232,7 +250,9 @@ Minimum counted commands: 1 · Maximum counted commands: 12
 **Variant ID:** `init-medium-existing-sketches`
 
 **Story**
-Sage has a `sketches` folder with an ideas list and a colour palette that the whole art club edits. Last week someone overwrote the palette and nobody could get it back. The folder should become a repository on `main` before the next session, without changing either file.
+Sage has a `sketches` folder with an ideas list and a colour palette that the whole art club edits.
+
+Last week someone overwrote the palette and nobody could get it back. The folder should become a repository on `main` before the next session, without changing either file.
 
 **Starting point:** You are at the top of the workspace. The folder `sketches` holds `ideas.md` and `palette.txt`. It is not a repository yet.
 
@@ -240,7 +260,9 @@ Sage has a `sketches` folder with an ideas list and a colour palette that the wh
 Initializing an existing folder leaves its files untracked. Nothing is recorded until someone stages and commits them on purpose.
 
 **Your Task**
-Make the existing `sketches` folder a Git repository with `main` as its first branch. **Do not stage or commit its files.**
+Make the existing `sketches` folder a Git repository with `main` as its first branch.
+
+**Do not stage or commit its files.**
 
 **Objective Checklist**
 
@@ -275,7 +297,9 @@ Minimum counted commands: 1 · Maximum counted commands: 10
 **Variant ID:** `clone-hard-shallow-ssh-audit`
 
 **Story**
-The security group wants a second opinion on its newest audit rule, and Sage wants you to compare it with the rule that came just before it. Your SSH key is already registered with the server. Your laptop holds other projects, so the review copy goes into its own folder, `rules-review`. Anything older than those two commits is noise for this review.
+The security group wants a second opinion on its newest audit rule, and Sage wants you to compare it with the rule that came just before it. Your SSH key is already registered with the server.
+
+Your laptop holds other projects, so the review copy goes into its own folder, `rules-review`. Anything older than those two commits is noise for this review.
 
 **Starting point:** You are in your workspace, which holds other project folders. No folder named `rules-review` exists yet. The remote repository is reachable at the address in the task.
 
@@ -446,7 +470,9 @@ Minimum counted commands: 1 · Maximum counted commands: 10
 **Variant ID:** `commit-medium-new-project-portfolio`
 
 **Story**
-Your portfolio site has lived in a plain folder for weeks: `index.html`, `styles.css` and a `notes.txt` full of private reminders about which projects to leave out. Raven wants every group member's portfolio under version control before the career fair. The two site files belong in the history. *Your notes do not.*
+Your portfolio site has lived in a plain folder for weeks: `index.html`, `styles.css` and a `notes.txt` full of private reminders about which projects to leave out.
+
+Raven wants every group member's portfolio under version control before the career fair. The two site files belong in the history. *Your notes do not.*
 
 **Starting point:** You are in portfolio. It is not a repository yet. `index.html`, `styles.css` and `notes.txt` are all new files.
 
@@ -454,7 +480,9 @@ Your portfolio site has lived in a plain folder for weeks: `index.html`, `styles
 Starting version control on an existing folder takes two steps: create the repository, then choose which files go into the first snapshot. Private notes can stay in the folder without ever being committed.
 
 **Your Task**
-Make `portfolio` a Git repository on `main`, then commit `index.html` and `styles.css` with the message `Initial portfolio`. **Leave `notes.txt` untracked.**
+Make `portfolio` a Git repository on `main`, then commit `index.html` and `styles.css` with the message `Initial portfolio`.
+
+**Leave `notes.txt` untracked.**
 
 **Objective Checklist**
 
@@ -479,7 +507,7 @@ Make `portfolio` a Git repository on `main`, then commit `index.html` and `style
 - `git add .` or `git add -A`: they would commit notes.txt.
 
 **Expected Result**
-portfolio is a repository on `main` with one commit, “Initial portfolio”, holding the two site files. `notes.txt` stays untracked.
+portfolio is a repository on `main` with one commit, “`Initial portfolio`”, holding the two site files. `notes.txt` stays untracked.
 
 **Evaluation (STAFF ONLY)**
 
@@ -501,7 +529,9 @@ Sage keeps the group's shared shopping list and recipes in a folder on the lab c
 A first commit decides what the project's history starts with. Staging by name keeps unfinished drafts out of it.
 
 **Your Task**
-Make `recipes` a Git repository on `main`, then commit `recipes.md` and `shopping.md` with the message `Start recipe notes`. **Leave `draft.txt` untracked.**
+Make `recipes` a Git repository on `main`, then commit `recipes.md` and `shopping.md` with the message `Start recipe notes`.
+
+**Leave `draft.txt` untracked.**
 
 **Objective Checklist**
 
@@ -526,7 +556,7 @@ Make `recipes` a Git repository on `main`, then commit `recipes.md` and `shoppin
 - `git add .` or `git add -A`: they would commit draft.txt.
 
 **Expected Result**
-recipes is a repository on `main` with one commit, “Start recipe notes”, holding the two notes files. `draft.txt` stays untracked.
+recipes is a repository on `main` with one commit, “`Start recipe notes`”, holding the two notes files. `draft.txt` stays untracked.
 
 **Evaluation (STAFF ONLY)**
 
@@ -570,7 +600,7 @@ Stage `CHANGELOG.md`, `setup.py` and `src/version.py`, then create a commit with
 - Splitting the release across several commits.
 
 **Expected Result**
-`main` has one new commit, "Prepare 1.2 release", with all three files.
+`main` has one new commit, "`Prepare 1.2 release`", with all three files.
 
 **Evaluation (STAFF ONLY)**
 
@@ -583,7 +613,9 @@ Minimum counted commands: 2 · Maximum counted commands: 10
 **Variant ID:** `partial-medium-hunk-plus-test`
 
 **Story**
-You fixed the rounding bug in the cart total and wrote `tests/test_cart.py` to prove it. While hunting the bug you also added a debug print to `src/cart.py`, and it is still there. Maeve will review the commit tonight. She wants the fix and its test together, and no stray print in the history.
+You fixed the rounding bug in the cart total and wrote `tests/test_cart.py` to prove it. While hunting the bug you also added a debug print to `src/cart.py`, and it is still there.
+
+Maeve will review the commit tonight. She wants the fix and its test together, and no stray print in the history.
 
 **Starting point:** You are on `main`. `src/cart.py` holds the rounding fix and a debug print. `tests/test_cart.py` is a new file.
 
@@ -591,7 +623,9 @@ You fixed the rounding bug in the cart total and wrote `tests/test_cart.py` to p
 A fix is easiest to trust when its test arrives in the same commit. Partial staging takes the fix from a file that also holds throwaway debugging, while the new test file is staged whole.
 
 **Your Task**
-Commit the rounding fix from `src/cart.py` together with the whole of `tests/test_cart.py`, using the message `Fix cart total rounding`. **Leave the debug print uncommitted** and finish on `main`.
+Commit the rounding fix from `src/cart.py` together with the whole of `tests/test_cart.py`, using the message `Fix cart total rounding`.
+
+**Leave the debug print uncommitted** and finish on `main`.
 
 **Objective Checklist**
 
@@ -616,7 +650,7 @@ Commit the rounding fix from `src/cart.py` together with the whole of `tests/tes
 - `git add src/cart.py` (whole file): it would stage the debug print.
 
 **Expected Result**
-“Fix cart total rounding” holds the rounding fix and its test. The debug print is still in `src/cart.py`, uncommitted.
+“`Fix cart total rounding`” holds the rounding fix and its test. The debug print is still in `src/cart.py`, uncommitted.
 
 **Evaluation (STAFF ONLY)**
 
@@ -630,7 +664,9 @@ Minimum counted commands: 3 · Maximum counted commands: 10
 **Variant ID:** `partial-medium-hunk-plus-doc`
 
 **Story**
-Exported CSV files have been breaking whenever a name contains a comma. Your fix in `src/export.py` wraps such values in quotes, and you updated `docs/export.md` to explain the new behavior. The same file also holds an experimental flag you are still trying out. Sage asks for one commit with the fix and the docs, and nothing half-finished.
+Exported CSV files have been breaking whenever a name contains a comma. Your fix in `src/export.py` wraps such values in quotes, and you updated `docs/export.md` to explain the new behavior.
+
+The same file also holds an experimental flag you are still trying out. Sage asks for one commit with the fix and the docs, and nothing half-finished.
 
 **Starting point:** You are on `main`. `src/export.py` holds the quoting fix and an experimental flag. `docs/export.md` has finished edits.
 
@@ -638,7 +674,9 @@ Exported CSV files have been breaking whenever a name contains a comma. Your fix
 Documentation that ships with the change it describes stays accurate. Partial staging keeps the experiment out while the doc file goes in whole.
 
 **Your Task**
-Commit the quoting fix from `src/export.py` together with the whole of `docs/export.md`, using the message `Fix CSV quoting`. **Leave the experimental flag uncommitted** and finish on `main`.
+Commit the quoting fix from `src/export.py` together with the whole of `docs/export.md`, using the message `Fix CSV quoting`.
+
+**Leave the experimental flag uncommitted** and finish on `main`.
 
 **Objective Checklist**
 
@@ -663,7 +701,7 @@ Commit the quoting fix from `src/export.py` together with the whole of `docs/exp
 - `git add src/export.py` (whole file): it would stage the experimental flag.
 
 **Expected Result**
-“Fix CSV quoting” holds the quoting fix and its documentation. The experimental flag stays in `src/export.py`, uncommitted.
+“`Fix CSV quoting`” holds the quoting fix and its documentation. The experimental flag stays in `src/export.py`, uncommitted.
 
 **Evaluation (STAFF ONLY)**
 
@@ -677,7 +715,9 @@ Minimum counted commands: 3 · Maximum counted commands: 10
 **Variant ID:** `partial-hard-split-two-commits-api`
 
 **Story**
-`src/api.py` holds two finished changes: a fix for the token expiry check and an unrelated tidy-up of the logging calls. Raven wants them as two separate commits, fix first, so the fix can be picked onto the release branch on its own later. Both changes are in the same file.
+`src/api.py` holds two finished changes: a fix for the token expiry check and an unrelated tidy-up of the logging calls. Raven wants them as two separate commits, fix first, so the fix can be picked onto the release branch on its own later.
+
+**Both changes are in the same file.**
 
 **Starting point:** You are on `main`. `src/api.py` holds an expiry fix and a logging tidy-up. Nothing is staged.
 
@@ -711,7 +751,7 @@ Make two commits on `main`. First commit __only__ the expiry fix with the messag
 - One commit with both changes, or the tidy-up committed first.
 
 **Expected Result**
-`main` has two new commits in order: “Fix token expiry check” with the fix, then “Tidy API logging” with the tidy-up.
+`main` has two new commits in order: “`Fix token expiry check`” with the fix, then “`Tidy API logging`” with the tidy-up.
 
 **Evaluation (STAFF ONLY)**
 
@@ -725,7 +765,9 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 **Variant ID:** `partial-hard-split-two-commits-ui`
 
 **Story**
-While fixing a focus trap in the dropdown menu, you also renamed three of its helper functions so they read better. Both changes sit in `src/menu.js`. Maeve asks for the fix on its own commit first: if the renames cause trouble, she wants to be able to undo them without losing the fix.
+While fixing a focus trap in the dropdown menu, you also renamed three of its helper functions so they read better.
+
+Both changes sit in `src/menu.js`. Maeve asks for the fix on its own commit first: if the renames cause trouble, she wants to be able to undo them without losing the fix.
 
 **Starting point:** You are on `main`. `src/menu.js` holds a focus-trap fix and helper renames. Nothing is staged.
 
@@ -759,7 +801,7 @@ Make two commits on `main`. First commit __only__ the focus-trap fix with the me
 - One commit with both changes, or the renames committed first.
 
 **Expected Result**
-`main` has two new commits in order: “Fix menu focus trap” with the fix, then “Rename menu helpers” with the renames.
+`main` has two new commits in order: “`Fix menu focus trap`” with the fix, then “`Rename menu helpers`” with the renames.
 
 **Evaluation (STAFF ONLY)**
 
@@ -773,15 +815,19 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 **Variant ID:** `amend-medium-hunk-into-last-checkout`
 
 **Story**
-Your last commit, “Validate checkout totals”, was supposed to include a guard against negative totals, but that hunk is still sitting in `src/checkout.py`. Next to it is a debug hunk you added while testing. You have not pushed. Sage would rather see one complete commit than a "forgot one line" commit right after it.
+Your last commit, “`Validate checkout totals`”, was supposed to include a guard against negative totals, but that hunk is still sitting in `src/checkout.py`. Next to it is a debug hunk you added while testing.
 
-**Starting point:** You are on `main`. The latest commit is “Validate checkout totals”. `src/checkout.py` holds the missing guard hunk and a debug hunk.
+**You have not pushed.** Sage would rather see one complete commit than a "forgot one line" commit right after it.
+
+**Starting point:** You are on `main`. The latest commit is “`Validate checkout totals`”. `src/checkout.py` holds the missing guard hunk and a debug hunk.
 
 **Real-World Context**
 Amending an unpublished commit can add the piece it was missing. Partial staging makes sure only that piece goes in, not the debugging around it.
 
 **Your Task**
-Add __only__ the missing guard hunk from `src/checkout.py` to the latest commit, keeping its message `Validate checkout totals`. **Leave the debug hunk uncommitted** and finish on `main`.
+Add __only__ the missing guard hunk from `src/checkout.py` to the latest commit, keeping its message `Validate checkout totals`.
+
+**Leave the debug hunk uncommitted** and finish on `main`.
 
 **Objective Checklist**
 
@@ -804,7 +850,7 @@ Add __only__ the missing guard hunk from `src/checkout.py` to the latest commit,
 - A new commit for the guard, or `git add src/checkout.py` (whole file), which would include the debug hunk.
 
 **Expected Result**
-“Validate checkout totals” now includes the guard and replaced the old commit. The debug hunk stays in `src/checkout.py`.
+“`Validate checkout totals`” now includes the guard and replaced the old commit. The debug hunk stays in `src/checkout.py`.
 
 **Evaluation (STAFF ONLY)**
 
@@ -818,15 +864,19 @@ Minimum counted commands: 2 · Maximum counted commands: 10
 **Variant ID:** `amend-medium-hunk-into-last-search`
 
 **Story**
-Your commit “Rank exact matches first” went in without the hunk that actually moves exact matches to the top. That hunk is still in `src/search.py`, next to some extra logging you only needed for testing. Nothing has been pushed yet, and Maeve is about to pull your branch for a demo.
+Your commit “`Rank exact matches first`” went in without the hunk that actually moves exact matches to the top. That hunk is still in `src/search.py`, next to some extra logging you only needed for testing.
 
-**Starting point:** You are on `main`. The latest commit is “Rank exact matches first”. `src/search.py` holds the missing ranking hunk and a logging hunk.
+**Nothing has been pushed yet**, and Maeve is about to pull your branch for a demo.
+
+**Starting point:** You are on `main`. The latest commit is “`Rank exact matches first`”. `src/search.py` holds the missing ranking hunk and a logging hunk.
 
 **Real-World Context**
 An unpublished commit that misses part of its own change can be completed by amending it. Staging just that hunk keeps the testing noise out.
 
 **Your Task**
-Add __only__ the missing ranking hunk from `src/search.py` to the latest commit, keeping its message `Rank exact matches first`. **Leave the logging hunk uncommitted** and finish on `main`.
+Add __only__ the missing ranking hunk from `src/search.py` to the latest commit, keeping its message `Rank exact matches first`.
+
+**Leave the logging hunk uncommitted** and finish on `main`.
 
 **Objective Checklist**
 
@@ -849,7 +899,7 @@ Add __only__ the missing ranking hunk from `src/search.py` to the latest commit,
 - A new commit for the ranking change, or `git add src/search.py` (whole file), which would include the logging.
 
 **Expected Result**
-“Rank exact matches first” now includes the ranking change and replaced the old commit. The logging hunk stays in `src/search.py`.
+“`Rank exact matches first`” now includes the ranking change and replaced the old commit. The logging hunk stays in `src/search.py`.
 
 **Evaluation (STAFF ONLY)**
 
@@ -863,11 +913,11 @@ Minimum counted commands: 2 · Maximum counted commands: 10
 **Variant ID:** `amend-hard-fix-message-then-commit-api`
 
 **Story**
-You committed the new rate limiter late last night with the message “stuff”. This morning you also wrote `docs/limits.md` to explain it.
+You committed the new rate limiter late last night with the message “`stuff`”. This morning you also wrote `docs/limits.md` to explain it.
 
-Raven reads history before every release, and wants two clear commits: the limiter under a real name, then the docs in their own commit. Nothing has been pushed.
+Raven reads history before every release, and wants two clear commits: the limiter under a real name, then the docs in their own commit. **Nothing has been pushed.**
 
-**Starting point:** You are on `main`. The latest commit, “stuff”, adds `src/limiter.py`. `docs/limits.md` is a new, uncommitted file.
+**Starting point:** You are on `main`. The latest commit, “`stuff`”, adds `src/limiter.py`. `docs/limits.md` is a new, uncommitted file.
 
 **Real-World Context**
 Amend rewrites the most recent commit, so order matters. Rename the commit before adding another one, or the amend would rewrite the wrong commit.
@@ -897,7 +947,7 @@ Rename the latest commit to `Add rate limiter`, then commit `docs/limits.md` sep
 - Committing the docs first and amending afterwards (that renames the docs commit), or amending the docs into the limiter commit.
 
 **Expected Result**
-`main` reads “Add rate limiter” followed by “Document rate limits”, each with its own files.
+`main` reads “`Add rate limiter`” followed by “`Document rate limits`”, each with its own files.
 
 **Evaluation (STAFF ONLY)**
 
@@ -911,9 +961,11 @@ Minimum counted commands: 3 · Maximum counted commands: 8
 **Variant ID:** `amend-hard-fix-message-then-commit-docs`
 
 **Story**
-Your commit with the new install guide is called “wip”, which tells nobody anything. Since then you have also written `docs/faq.md` with the questions people keep asking Sage. Sage wants the guide under a proper name and the FAQ as its own commit, so either can be reviewed alone. You have not pushed.
+Your commit with the new install guide is called “`wip`”, which tells nobody anything. Since then you have also written `docs/faq.md` with the questions people keep asking Sage.
 
-**Starting point:** You are on `main`. The latest commit, “wip”, adds `docs/install.md`. `docs/faq.md` is a new, uncommitted file.
+Sage wants the guide under a proper name and the FAQ as its own commit, so either can be reviewed alone. **You have not pushed.**
+
+**Starting point:** You are on `main`. The latest commit, “`wip`”, adds `docs/install.md`. `docs/faq.md` is a new, uncommitted file.
 
 **Real-World Context**
 Amend only ever rewrites the latest commit. Fix its message while it is still the latest, then build the next commit on top.
@@ -943,7 +995,7 @@ Rename the latest commit to `Document install steps`, then commit `docs/faq.md` 
 - Committing the FAQ first and amending afterwards, or amending the FAQ into the guide commit.
 
 **Expected Result**
-`main` reads “Document install steps” followed by “Add install FAQ”, each with its own file.
+`main` reads “`Document install steps`” followed by “`Add install FAQ`”, each with its own file.
 
 **Evaluation (STAFF ONLY)**
 
@@ -957,7 +1009,9 @@ Minimum counted commands: 3 · Maximum counted commands: 8
 **Variant ID:** `restore-easy-discard-theme`
 
 **Story**
-You spent the afternoon trying a neon color scheme in `styles/theme.css`. Raven took one look at the preview and *laughed*. You agree it was a mistake, and none of the edits are worth keeping. You want the file back exactly as it was in the last commit.
+You spent the afternoon trying a neon color scheme in `styles/theme.css`. Raven took one look at the preview and *laughed*.
+
+You agree it was a mistake, and none of the edits are worth keeping. You want the file back exactly as it was in the last commit.
 
 **Starting point:** You are on `main`. `styles/theme.css` has uncommitted edits. Nothing is staged.
 
@@ -1000,7 +1054,9 @@ Minimum counted commands: 1 · Maximum counted commands: 12
 **Variant ID:** `restore-medium-unstage-then-commit-login`
 
 **Story**
-You staged everything a little too quickly. `src/login.py` holds the redirect fix that is ready to go, but `notes/todo.md` is staged too, and it holds your personal list for the week. Maeve is waiting for the fix. Your to-do edits should stay in the folder, just not in this commit.
+You staged everything a little too quickly. `src/login.py` holds the redirect fix that is ready to go, but `notes/todo.md` is staged too, and it holds your personal list for the week.
+
+Maeve is waiting for the fix. Your to-do edits should stay in the folder, just not in this commit.
 
 **Starting point:** You are on `main`. `src/login.py` and `notes/todo.md` are both staged.
 
@@ -1032,7 +1088,7 @@ Unstage `notes/todo.md` while keeping its edits, then commit the login fix with 
 - Discarding the to-do edits, or committing both files.
 
 **Expected Result**
-“Fix login redirect” holds only the login fix. Your to-do edits are still in `notes/todo.md`, uncommitted.
+“`Fix login redirect`” holds only the login fix. Your to-do edits are still in `notes/todo.md`, uncommitted.
 
 **Evaluation (STAFF ONLY)**
 
@@ -1046,7 +1102,9 @@ Minimum counted commands: 2 · Maximum counted commands: 10
 **Variant ID:** `restore-medium-unstage-then-commit-cart`
 
 **Story**
-The cart badge has been showing the wrong count, and your fix in `src/cart_badge.js` is ready. When you staged it you also staged `scratch/ideas.txt`, where you have been jotting feature ideas for Sage. The ideas should stay in your folder, but they have no place in a bug-fix commit.
+The cart badge has been showing the wrong count, and your fix in `src/cart_badge.js` is ready.
+
+When you staged it you also staged `scratch/ideas.txt`, where you have been jotting feature ideas for Sage. The ideas should stay in your folder, but they have no place in a bug-fix commit.
 
 **Starting point:** You are on `main`. `src/cart_badge.js` and `scratch/ideas.txt` are both staged.
 
@@ -1078,7 +1136,7 @@ Unstage `scratch/ideas.txt` while keeping its edits, then commit the badge fix w
 - Discarding the ideas, or committing both files.
 
 **Expected Result**
-“Fix cart badge count” holds only the badge fix. Your ideas stay in `scratch/ideas.txt`, uncommitted.
+“`Fix cart badge count`” holds only the badge fix. Your ideas stay in `scratch/ideas.txt`, uncommitted.
 
 **Evaluation (STAFF ONLY)**
 
@@ -1102,7 +1160,9 @@ Your folder is a mess. `debug.log` got staged by accident, and you want to keep 
 Real commits often need several kinds of tidying first. Unstage what should wait, discard what is worthless, and stage only the finished part of a mixed file.
 
 **Your Task**
-Unstage `debug.log` (keep it in the folder), discard the edits to `tmp/output.txt`, and commit only the totals fix from `src/report.py` with the message `Fix report totals`. **Leave the experiment uncommitted** and finish on `main`.
+Unstage `debug.log` (keep it in the folder), discard the edits to `tmp/output.txt`, and commit only the totals fix from `src/report.py` with the message `Fix report totals`.
+
+**Leave the experiment uncommitted** and finish on `main`.
 
 **Objective Checklist**
 
@@ -1129,7 +1189,7 @@ Unstage `debug.log` (keep it in the folder), discard the edits to `tmp/output.tx
 - Committing with debug.log still staged, leaving the stray output edits, or `git add src/report.py` (whole file).
 
 **Expected Result**
-“Fix report totals” holds only the totals fix. `debug.log` is untracked in the folder, `tmp/output.txt` matches the last commit, and the experiment stays in `src/report.py`.
+“`Fix report totals`” holds only the totals fix. `debug.log` is untracked in the folder, `tmp/output.txt` matches the last commit, and the experiment stays in `src/report.py`.
 
 **Evaluation (STAFF ONLY)**
 
@@ -1153,7 +1213,9 @@ A customer was charged late fees because invoices showed the wrong due date. You
 An urgent fix should go out on its own. Clearing the index and the working folder first keeps unrelated work out of a commit that might need to be reverted or copied later.
 
 **Your Task**
-Unstage `notes/invoice-ideas.md` (keep it in the folder), discard the edits to `build/invoice.html`, and commit only the due-date fix from `src/invoice.py` with the message `Fix invoice due date`. **Leave the refactor uncommitted** and finish on `main`.
+Unstage `notes/invoice-ideas.md` (keep it in the folder), discard the edits to `build/invoice.html`, and commit only the due-date fix from `src/invoice.py` with the message `Fix invoice due date`.
+
+**Leave the refactor uncommitted** and finish on `main`.
 
 **Objective Checklist**
 
@@ -1180,7 +1242,7 @@ Unstage `notes/invoice-ideas.md` (keep it in the folder), discard the edits to `
 - Committing with the notes still staged, leaving the build edits, or `git add src/invoice.py` (whole file).
 
 **Expected Result**
-“Fix invoice due date” holds only the due-date fix. The notes are untracked in the folder, `build/invoice.html` matches the last commit, and the refactor stays in `src/invoice.py`.
+“`Fix invoice due date`” holds only the due-date fix. The notes are untracked in the folder, `build/invoice.html` matches the last commit, and the refactor stays in `src/invoice.py`.
 
 **Evaluation (STAFF ONLY)**
 
@@ -1206,7 +1268,9 @@ Nothing on your branch is left uncommitted, so there is nothing to carry over. Y
 Switching branches swaps the files in your working folder for the snapshot of the branch you move to. With everything committed, the move is safe and your feature branch keeps its work.
 
 **Your Task**
-Switch back to `main`. **Leave `feature/docs-refresh` exactly as it is.**
+Switch back to `main`.
+
+**Leave `feature/docs-refresh` exactly as it is.**
 
 **Objective Checklist**
 
@@ -1242,7 +1306,9 @@ Minimum counted commands: 1 · Maximum counted commands: 12
 **Variant ID:** `switch-easy-back-to-main-api`
 
 **Story**
-Finn asked for an API key model for the ticketing app, and you committed it on `feature/api-keys` a few minutes ago. Now he wants a quick look at a bug report that only reproduces on `main`. Your branch is fully committed, so the switch will not take any half-finished work with it.
+Finn asked for an API key model for the ticketing app, and you committed it on `feature/api-keys` a few minutes ago.
+
+Now he wants a quick look at a bug report that only reproduces on `main`. Your branch is fully committed, so the switch will not take any half-finished work with it.
 
 **Starting point:** You are on `feature/api-keys` with a clean working folder; available local branches: `feature/api-keys`, `main`.
 
@@ -1296,7 +1362,9 @@ Today's task is on `develop`. If you simply switch away, the spike commit is lef
 A commit made on a detached `HEAD` belongs to no branch. Giving it a name before you leave is what keeps it from being lost.
 
 **Your Task**
-Keep the spike commit on a new branch named `archive/spike-results`, then finish on `develop`. **Do not move `main` or `develop`.**
+Keep the spike commit on a new branch named `archive/spike-results`, then finish on `develop`.
+
+**Do not move `main` or `develop`.**
 
 **Objective Checklist**
 
@@ -1419,7 +1487,9 @@ Minimum counted commands: 2 · Maximum counted commands: 12
 **Variant ID:** `branch-hard-mark-release-point`
 
 **Story**
-Support needs a permanent pointer to the code that shipped as 1.0, and `main` has already moved past it. Raven asks for a `release/1.0` branch on the commit named "Release 1.0 snapshot". You are mid-review on `main` and should stay there.
+Support needs a permanent pointer to the code that shipped as 1.0, and `main` has already moved past it. Raven asks for a `release/1.0` branch on the commit named "Release 1.0 snapshot".
+
+You are mid-review on `main` and should stay there.
 
 **Starting point:** You are on `main`. Its history holds the "Release 1.0 snapshot" commit and later work.
 
@@ -1461,7 +1531,9 @@ Minimum counted commands: 1 · Maximum counted commands: 10
 **Variant ID:** `branch-hard-mark-audit-point`
 
 **Story**
-The auditors signed off on the code at the commit "Q3 audit sign-off", and the compliance team needs a branch there called `audit/q3`. Work on `main` has continued since. You are in the middle of checking `main` and should not leave it.
+The auditors signed off on the code at the commit "Q3 audit sign-off", and the compliance team needs a branch there called `audit/q3`. Work on `main` has continued since.
+
+You are in the middle of checking `main` and should not leave it.
 
 **Starting point:** You are on `main`. Its history holds the "Q3 audit sign-off" commit and later work.
 
@@ -1503,7 +1575,9 @@ Minimum counted commands: 1 · Maximum counted commands: 10
 **Variant ID:** `bn-easy-delete-merged-typo`
 
 **Story**
-Your README typo fix went through review and is already part of `main`. The branch `fix/readme-typo` is still sitting in your local list, and Sage likes the branch list to show only work that is still open. Git can tell that every commit on that branch is already on `main`.
+Your README typo fix went through review and is already part of `main`.
+
+The branch `fix/readme-typo` is still sitting in your local list, and Sage likes the branch list to show only work that is still open. Git can tell that every commit on that branch is already on `main`.
 
 **Starting point:** You are on `main`; available local branches: `main`, `fix/readme-typo`. `fix/readme-typo` is already merged into `main`.
 
@@ -1547,7 +1621,9 @@ Minimum counted commands: 1 · Maximum counted commands: 12
 **Variant ID:** `bn-easy-delete-merged-spike`
 
 **Story**
-Finn decided to keep the old search ranking after all, and your `spike/old-search` branch was merged into `main` this morning. The branch has done its job. Finn asks you to remove it locally so nobody starts new work from it by mistake.
+Finn decided to keep the old search ranking after all, and your `spike/old-search` branch was merged into `main` this morning.
+
+The branch has done its job. Finn asks you to remove it locally so nobody starts new work from it by mistake.
 
 **Starting point:** You are on `main`; available local branches: `main`, `spike/old-search`. `spike/old-search` is already merged into `main`.
 
@@ -1699,7 +1775,9 @@ The sprint is over, and the branch list is getting long. `feature/login-copy` an
 `git branch -d` only deletes branches whose work is already merged, so housekeeping cannot lose unmerged work by accident.
 
 **Your Task**
-Delete the local branches that are already merged into `main`. **Keep `spike/dark-mode`.**
+Delete the local branches that are already merged into `main`.
+
+**Keep `spike/dark-mode`.**
 
 **Objective Checklist**
 
@@ -1742,7 +1820,9 @@ Release 1.4 and its hotfix are both in `main` now, but their branches are still 
 Deleting merged branches keeps the branch list readable without losing any history, because their commits stay reachable from main.
 
 **Your Task**
-Delete the local branches that are already merged into `main`. **Keep `experiment/new-nav`.**
+Delete the local branches that are already merged into `main`.
+
+**Keep `experiment/new-nav`.**
 
 **Objective Checklist**
 
@@ -1787,7 +1867,9 @@ Finn wants a demo of the ranking this afternoon, so it is time to pick it up aga
 `git stash pop` puts shelved changes back into your working folder and removes them from the stash, so the shelf does not fill up with copies you already restored.
 
 **Your Task**
-Bring the stashed search work back into your working folder and remove it from the stash. **Do not commit it.**
+Bring the stashed search work back into your working folder and remove it from the stash.
+
+**Do not commit it.**
 
 **Objective Checklist**
 
@@ -1823,7 +1905,9 @@ Minimum counted commands: 1 · Maximum counted commands: 12
 **Variant ID:** `stash-easy-pop-profile`
 
 **Story**
-Sage interrupted your avatar upload work for a quick review, and you stashed the unfinished edits to `src/profile.py`. The review is done and you are back on `feature/profile` with a clean folder. Your draft is the only thing in the stash, and you want it back exactly where it was.
+Sage interrupted your avatar upload work for a quick review, and you stashed the unfinished edits to `src/profile.py`.
+
+The review is done and you are back on `feature/profile` with a clean folder. Your draft is the only thing in the stash, and you want it back exactly where it was.
 
 **Starting point:** You are on `feature/profile` with a clean working folder; the stash holds one entry with your avatar edits.
 
@@ -1831,7 +1915,9 @@ Sage interrupted your avatar upload work for a quick review, and you stashed the
 A stash is a shelf for unfinished work, not a place to keep it. Popping it puts the work back and clears the shelf in one step.
 
 **Your Task**
-Restore the stashed avatar work into your working folder and remove it from the stash. **Leave it uncommitted**.
+Restore the stashed avatar work into your working folder and remove it from the stash.
+
+**Leave it uncommitted**.
 
 **Objective Checklist**
 
@@ -1964,7 +2050,9 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 **Variant ID:** `stash-hard-park-draft-search`
 
 **Story**
-You are halfway through search facets on `feature/search` when Raven asks you to look over `release/v4`. The facets are not ready to commit, and you won't touch them again until tomorrow. Leave the branch clean, but keep the draft saved for later.
+You are halfway through search facets on `feature/search` when Raven asks you to look over `release/v4`.
+
+The facets are not ready to commit, and you won't touch them again until tomorrow. Leave the branch clean, but keep the draft saved for later.
 
 **Starting point:** You are on `feature/search` with uncommitted edits to `src/search.py`.
 
@@ -2099,7 +2187,9 @@ Minimum counted commands: 4 · Maximum counted commands: 10
 **Variant ID:** `push-medium-branch-commit-publish-invoices`
 
 **Story**
-The billing service can finally export invoices as PDFs, and your code sits in a new file, `src/invoice_pdf.py`. You wrote it on `main` by habit. Sage wants it on `feature/invoice-pdf`, pushed to `origin` so the accountants' reviewer can try it, with the branch tracking `origin` for the follow-up fixes.
+The billing service can finally export invoices as PDFs, and your code sits in a new file, `src/invoice_pdf.py`.
+
+You wrote it on `main` by habit. Sage wants it on `feature/invoice-pdf`, pushed to `origin` so the accountants' reviewer can try it, with the branch tracking `origin` for the follow-up fixes.
 
 **Starting point:** You are on `main`; `src/invoice_pdf.py` is a new, uncommitted file; `origin` is available.
 
@@ -2238,7 +2328,9 @@ Minimum counted commands: 2 · Maximum counted commands: 8
 **Variant ID:** `pull-medium-update-then-branch-ui`
 
 **Story**
-Finn merged a tidy-up of the theme colours into `main` on the server this morning, and your local `main` has not seen it yet. Your next task is dark mode, which builds directly on those colours. Starting from yesterday's `main` would mean redoing his work in a merge later, so the new branch has to start from an up-to-date `main`.
+Finn merged a tidy-up of the theme colours into `main` on the server this morning, and your local `main` has not seen it yet.
+
+Your next task is dark mode, which builds directly on those colours. Starting from yesterday's `main` would mean redoing his work in a merge later, so the new branch has to start from an up-to-date `main`.
 
 **Starting point:** You are on `main` with a clean working folder; `origin/main` has a new commit that your local `main` does not have.
 
@@ -2282,7 +2374,9 @@ Minimum counted commands: 2 · Maximum counted commands: 10
 **Variant ID:** `pull-medium-update-then-branch-api`
 
 **Story**
-Sage pushed an event registry to the billing service's `main` branch overnight. Your webhooks feature will register its events there, so it has to start from a `main` that includes her commit. Your local `main` is one commit behind `origin`.
+Sage pushed an event registry to the billing service's `main` branch overnight.
+
+Your webhooks feature will register its events there, so it has to start from a `main` that includes her commit. Your local `main` is one commit behind `origin`.
 
 **Starting point:** You are on `main` with a clean working folder; `origin/main` has a new commit that your local `main` does not have.
 
@@ -2336,7 +2430,9 @@ You want `main` updated and your draft back, still uncommitted, with nothing lef
 Git will not let a pull overwrite uncommitted changes to a file the pull touches. Stashing clears the way, and popping afterwards puts your draft back on top of the new version.
 
 **Your Task**
-Update `main` from `origin` without losing your edits to `docs/guide.md`. **Keep the edits uncommitted and leave nothing in the stash.**
+Update `main` from `origin` without losing your edits to `docs/guide.md`.
+
+**Keep the edits uncommitted and leave nothing in the stash.**
 
 **Objective Checklist**
 
@@ -2384,7 +2480,9 @@ Your setting is half done and not worth a commit yet. A pull would overwrite you
 The stash is the quick way to step out of the way of a pull and step back in afterwards, without making a throwaway commit.
 
 **Your Task**
-Update `develop` from `origin` without losing your edits to `src/app.py`. **Keep them uncommitted and leave nothing in the stash.**
+Update `develop` from `origin` without losing your edits to `src/app.py`.
+
+**Keep them uncommitted and leave nothing in the stash.**
 
 **Objective Checklist**
 
@@ -2522,7 +2620,9 @@ Minimum counted commands: 4 · Maximum counted commands: 10
 **Variant ID:** `rec-hard-commit-fetch-merge-search`
 
 **Story**
-Your ranking tweak is staged on `feature/search`, but so is `notes/plan.md`, which is only your to-do list. Meanwhile Mika pushed search docs to the same branch on `origin`. The branch on `origin` should end up with your fix and Mika's docs, and without your notes.
+Your ranking tweak is staged on `feature/search`, but so is `notes/plan.md`, which is only your to-do list.
+
+Meanwhile Mika pushed search docs to the same branch on `origin`. The branch on `origin` should end up with your fix and Mika's docs, and without your notes.
 
 **Starting point:** You are on `feature/search` with `src/ranking.py` and `notes/plan.md` staged. `origin/feature/search` has a newer commit from Mika.
 
@@ -2568,7 +2668,9 @@ Minimum counted commands: 5 · Maximum counted commands: 12
 **Variant ID:** `rec-hard-commit-fetch-merge-billing`
 
 **Story**
-You staged the invoice rounding fix on `feature/billing`, along with `tmp/invoice-dump.json` from a debugging session. Ana has since pushed billing docs to the branch on `origin`. The published branch needs your fix and Ana's docs, and the debug dump must stay out.
+You staged the invoice rounding fix on `feature/billing`, along with `tmp/invoice-dump.json` from a debugging session.
+
+Ana has since pushed billing docs to the branch on `origin`. The published branch needs your fix and Ana's docs, and the debug dump must stay out.
 
 **Starting point:** You are on `feature/billing` with `src/rounding.py` and `tmp/invoice-dump.json` staged. `origin/feature/billing` has a newer commit from Ana.
 
@@ -2802,7 +2904,7 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 **Variant ID:** `squash-medium-squash-publish-onboarding`
 
 **Story**
-The onboarding flow is done, but `feature/onboarding` tells the story of how it got there: four commits named WIP 1 to WIP 4. Finn wants `main` to show one commit, Add onboarding flow, and he wants it on `origin` before the marketing team starts testing tomorrow.
+The onboarding flow is done, but `feature/onboarding` tells the story of how it got there: four commits named WIP 1 to WIP 4. Finn wants `main` to show one commit, `Add onboarding flow`, and he wants it on `origin` before the marketing team starts testing tomorrow.
 
 **Starting point:** You are on `main`; `feature/onboarding` has four draft commits; `origin` is available.
 
@@ -2834,7 +2936,7 @@ Bring `feature/onboarding` into `main` as one new commit with the message `Add o
 - Any merge that brings the draft commits into main, or leaving main unpublished.
 
 **Expected Result**
-`main` and `origin/main` have one new commit, Add onboarding flow, containing the finished flow.
+`main` and `origin/main` have one new commit, `Add onboarding flow`, containing the finished flow.
 
 **Evaluation (STAFF ONLY)**
 
@@ -2848,7 +2950,9 @@ Minimum counted commands: 3 · Maximum counted commands: 10
 **Variant ID:** `squash-medium-squash-publish-export`
 
 **Story**
-Sage's CSV export is ready on `feature/export-csv`, after three commits called WIP 1 to WIP 3. The billing team's rule is one commit per feature on `develop`. She asks you to land it as Add CSV export and push `develop` so the nightly build picks it up.
+Sage's CSV export is ready on `feature/export-csv`, after three commits called WIP 1 to WIP 3.
+
+The billing team's rule is one commit per feature on `develop`. She asks you to land it as `Add CSV export` and push `develop` so the nightly build picks it up.
 
 **Starting point:** You are on `develop`; `feature/export-csv` has three draft commits; `origin` is available.
 
@@ -2880,7 +2984,7 @@ Bring `feature/export-csv` into `develop` as one new commit with the message `Ad
 - Any merge that brings the draft commits, or leaving develop unpublished.
 
 **Expected Result**
-`develop` and `origin/develop` have one new commit, Add CSV export.
+`develop` and `origin/develop` have one new commit, `Add CSV export`.
 
 **Evaluation (STAFF ONLY)**
 
@@ -2894,7 +2998,7 @@ Minimum counted commands: 3 · Maximum counted commands: 10
 **Variant ID:** `squash-hard-switch-squash-cleanup-cli`
 
 **Story**
-You are still on `feature/cli-colors`, where three draft commits add coloured output to the command-line tool. Finn approved it with one condition: `main` gets a single commit, Add CLI colors, and the feature branch disappears afterwards.
+You are still on `feature/cli-colors`, where three draft commits add coloured output to the command-line tool. Finn approved it with one condition: `main` gets a single commit, `Add CLI colors`, and the feature branch disappears afterwards.
 
 Because a squash does not record the branch as merged, Git will treat removing it as throwing away unmerged work, so you will have to *insist*.
 
@@ -2930,7 +3034,7 @@ Switch to `main`, bring `feature/cli-colors` in as one commit with the message `
 - A normal merge or fast-forward, or keeping the branch.
 
 **Expected Result**
-`main` has one new commit, Add CLI colors, and `feature/cli-colors` is gone.
+`main` has one new commit, `Add CLI colors`, and `feature/cli-colors` is gone.
 
 **Evaluation (STAFF ONLY)**
 
@@ -2944,7 +3048,7 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 **Variant ID:** `squash-hard-switch-squash-cleanup-ui`
 
 **Story**
-Three draft commits on `feature/toast-ui` add toast notifications to the web app. Sage wants them on `develop` as one commit, Add toast notifications, and no local feature branch left behind. You are still on the feature branch.
+Three draft commits on `feature/toast-ui` add toast notifications to the web app. Sage wants them on `develop` as one commit, `Add toast notifications`, and no local feature branch left behind. You are still on the feature branch.
 
 **Starting point:** You are on `feature/toast-ui`; it has three draft commits that are not on `develop`.
 
@@ -2977,7 +3081,7 @@ Switch to `develop`, bring `feature/toast-ui` in as one commit with the message 
 - Squashing in the wrong direction (develop into the feature branch), a normal merge, or keeping the branch.
 
 **Expected Result**
-`develop` has one new commit, Add toast notifications, and `feature/toast-ui` is gone.
+`develop` has one new commit, `Add toast notifications`, and `feature/toast-ui` is gone.
 
 **Evaluation (STAFF ONLY)**
 
@@ -2991,7 +3095,9 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 **Variant ID:** `squash-hard-remote-publish-tidy-search`
 
 **Story**
-Mika finished the search feature on `origin/feature/search` in a string of WIP commits. The team wants it on `main` as one commit, "Add search", published to `origin`. Your own local `feature/search` is an old copy that nobody needs any more.
+Mika finished the search feature on `origin/feature/search` in a string of WIP commits.
+
+The team wants it on `main` as one commit, "`Add search`", published to `origin`. Your own local `feature/search` is an old copy that nobody needs any more.
 
 **Starting point:** You are on `main`. Your local `feature/search` is behind `origin/feature/search`, and you haven't fetched Mika's latest commits.
 
@@ -3024,7 +3130,7 @@ Bring the latest `origin/feature/search` into `main` as one new commit with the 
 - A regular merge, or squashing the stale local branch instead of the fetched one.
 
 **Expected Result**
-`main` has one "Add search" commit on `origin` too, and the stale branch is gone.
+`main` has one "`Add search`" commit on `origin` too, and the stale branch is gone.
 
 **Evaluation (STAFF ONLY)**
 
@@ -3037,7 +3143,7 @@ Minimum counted commands: 5 · Maximum counted commands: 12
 **Variant ID:** `squash-hard-remote-publish-tidy-docs`
 
 **Story**
-Ana wrote the API docs on `origin/docs/api` in many small commits. They should land on `main` as a single commit, "Document the API", and be published. Your local `docs/api` is an outdated copy from last week.
+Ana wrote the API docs on `origin/docs/api` in many small commits. They should land on `main` as a single commit, "`Document the API`", and be published. Your local `docs/api` is an outdated copy from last week.
 
 **Starting point:** You are on `main`. Your local `docs/api` is behind `origin/docs/api`, and you haven't fetched Ana's latest commits.
 
@@ -3070,7 +3176,7 @@ Bring the latest `origin/docs/api` into `main` as one new commit with the messag
 - A regular merge, or squashing the stale local branch instead of the fetched one.
 
 **Expected Result**
-`main` has one "Document the API" commit on `origin` too, and the stale branch is gone.
+`main` has one "`Document the API`" commit on `origin` too, and the stale branch is gone.
 
 **Evaluation (STAFF ONLY)**
 
@@ -3083,7 +3189,9 @@ Minimum counted commands: 5 · Maximum counted commands: 12
 **Variant ID:** `rb-medium-land-and-retire-search`
 
 **Story**
-`feature/search` is finished and approved, and both you and `origin` have a copy of it. Finn wants it landed on `main` with a merge commit and `main` published. The remote branch has done its job and should go, but keep your local copy for now: you still want to compare it with the next iteration.
+`feature/search` is finished and approved, and both you and `origin` have a copy of it.
+
+Finn wants it landed on `main` with a merge commit and `main` published. The remote branch has done its job and should go, but keep your local copy for now: you still want to compare it with the next iteration.
 
 **Starting point:** You are on `main`; `feature/search` is finished locally and on `origin`; `origin/main` matches `main`.
 
@@ -3091,7 +3199,9 @@ Minimum counted commands: 5 · Maximum counted commands: 12
 Deleting a branch on the remote does not touch your local branch. Teams usually retire the remote copy once its work is merged and published.
 
 **Your Task**
-Merge `feature/search` into `main` with a merge commit, push `main` to `origin`, then delete `feature/search` on `origin`. **Keep the local branch.**
+Merge `feature/search` into `main` with a merge commit, push `main` to `origin`, then delete `feature/search` on `origin`.
+
+**Keep the local branch.**
 
 **Objective Checklist**
 
@@ -3129,7 +3239,9 @@ Minimum counted commands: 3 · Maximum counted commands: 10
 **Variant ID:** `rb-medium-land-and-retire-billing`
 
 **Story**
-Sage approved the billing summary on `feature/billing`. The release checklist says: merge with a merge commit, publish `main`, and delete the feature branch on `origin` so the branch list on the server only shows open work. You still need your local copy to write the release notes.
+Sage approved the billing summary on `feature/billing`.
+
+The release checklist says: merge with a merge commit, publish `main`, and delete the feature branch on `origin` so the branch list on the server only shows open work. You still need your local copy to write the release notes.
 
 **Starting point:** You are on `main`; `feature/billing` is finished locally and on `origin`; `origin/main` matches `main`.
 
@@ -3137,7 +3249,9 @@ Sage approved the billing summary on `feature/billing`. The release checklist sa
 Cleaning up remote branches after a merge keeps the shared branch list short. Local branches are yours to keep or remove separately.
 
 **Your Task**
-Merge `feature/billing` into `main` with a merge commit, push `main` to `origin`, then delete `feature/billing` on `origin`. **Keep the local branch.**
+Merge `feature/billing` into `main` with a merge commit, push `main` to `origin`, then delete `feature/billing` on `origin`.
+
+**Keep the local branch.**
 
 **Objective Checklist**
 
@@ -3365,7 +3479,7 @@ Minimum counted commands: 2 · Maximum counted commands: 12
 **Variant ID:** `manual-easy-abort-wrong-branch`
 
 **Story**
-You meant to merge the new colour theme into `main`, but you typed `feature/legacy-theme`, the branch the group retired last month. Git stopped on a conflict in `src/theme.css`, and nothing has been committed yet.
+You meant to merge the new colour theme into `main`, but you typed `feature/legacy-theme`, the branch the group retired last month. Git stopped on a conflict in `src/theme.css`, and **nothing has been committed yet**.
 
 Sage says not to fix anything in this merge at all: just get `main` back exactly as it was before you started.
 
@@ -3413,7 +3527,7 @@ Minimum counted commands: 1 · Maximum counted commands: 12
 **Story**
 You started merging `feature/payments` into `main`, and Git stopped on a conflict in `src/payments.py`.
 
-Then Finn messaged: the payments review is not finished, and the currency change on that branch might still be rejected. The merge should not exist yet. You want `main` back to how it was, with no half-merged files lying around.
+Then Finn messaged: the payments review is not finished, and the currency change on that branch might still be rejected. **The merge should not exist yet.** You want `main` back to how it was, with no half-merged files lying around.
 
 **Starting point:** You are on `main`, in the middle of a merge of `feature/payments` that stopped on a conflict in `src/payments.py`.
 
@@ -3521,7 +3635,7 @@ Minimum counted commands: 4 · Maximum counted commands: 10
 **Story**
 On `develop` you raised the ticketing app's request timeout in `config/app.yml` and committed it. Finn, at the same time, pushed a change to the same file on `origin/develop` that raises the retry count.
 
-Both changes are wanted. Pulling will stop on the conflict, and the final file must contain your timeout and his retries.
+**Both changes are wanted.** Pulling will stop on the conflict, and the final file must contain your timeout and his retries.
 
 **Starting point:** You are on `develop` with one local commit to `config/app.yml`; `origin/develop` has a new commit that changed the same lines.
 
@@ -3783,7 +3897,9 @@ The release team audits every backport, so the copied commit's message has to sa
 `git cherry-pick -x` appends "(cherry picked from commit …)" to the new commit's message, so anyone reading the release history can find the original change.
 
 **Your Task**
-Apply `c2` to `release-2.4` as a new commit whose message records the commit it came from. **Do not bring over any other `main` commits.**
+Apply `c2` to `release-2.4` as a new commit whose message records the commit it came from.
+
+**Do not bring over any other `main` commits.**
 
 **Objective Checklist**
 
@@ -3884,7 +4000,7 @@ Minimum counted commands: 3 · Maximum counted commands: 10
 **Story**
 You were backporting the cart tax fix to `release-review-2`, and the pick stopped on a conflict in `src/cart.py`. Part of the fix, the totals change, is already staged.
 
-Then Maeve tells you the review build must keep its own tax rate: the backport is off. Release-review-2 has to look exactly as it did before you started.
+Then Maeve tells you the review build must keep its own tax rate: **the backport is off**. Release-review-2 has to look exactly as it did before you started.
 
 **Starting point:** You are on `release-review-2` in the middle of a cherry-pick of `c1` that stopped on a conflict in `src/cart.py`; `src/totals.py` is already staged from the pick.
 
@@ -3928,9 +4044,9 @@ Minimum counted commands: 1 · Maximum counted commands: 10
 **Variant ID:** `cherry-medium-two-fixes-one-commit-login`
 
 **Story**
-Release 1.2 needs two fixes from `main`: `c2` fixes the login form and `c3` fixes session handling. Finn reviews backports as a unit, so he wants them on `release-1.2` as one commit, Backport login fixes, *not two*.
+Release 1.2 needs two fixes from `main`: `c2` fixes the login form and `c3` fixes session handling. Finn reviews backports as a unit, so he wants them on `release-1.2` as one commit, `Backport login fixes`, *not two*.
 
-The other commits on `main` are a new feature that must stay out of the release.
+**The other commits on `main` are a new feature that must stay out of the release.**
 
 **Starting point:** You are on `release-1.2`; `c2` and `c3` on `main` are the two login fixes.
 
@@ -3975,7 +4091,9 @@ Minimum counted commands: 3 · Maximum counted commands: 10
 **Variant ID:** `cherry-medium-two-fixes-one-commit-tax`
 
 **Story**
-Two tax fixes landed on `main` weeks apart: `c1` corrects the tax rate and `c4` fixes how invoices show it. Release 3.1 needs both, in a single commit, Backport tax fixes, so the finance reviewer can approve one change. The commits between them are an unfinished feature that must not ship.
+Two tax fixes landed on `main` weeks apart: `c1` corrects the tax rate and `c4` fixes how invoices show it.
+
+Release 3.1 needs both, in a single commit, `Backport tax fixes`, so the finance reviewer can approve one change. **The commits between them are an unfinished feature that must not ship.**
 
 **Starting point:** You are on `release-3.1`; `c1` and `c4` on `main` are the two tax fixes.
 
@@ -4195,7 +4313,9 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 **Variant ID:** `cherry-hard-review-backports-auth`
 
 **Story**
-Two fixes on `main`, one in `src/auth.py` and one in `src/token.py`, need to reach `release-2.2`. The release manager wants to review them as a single commit called "Backport auth fixes". The feature commits around them must not come along.
+Two fixes on `main`, one in `src/auth.py` and one in `src/token.py`, need to reach `release-2.2`.
+
+The release manager wants to review them as a single commit called "`Backport auth fixes`". **The feature commits around them must not come along.**
 
 **Starting point:** You are on `main`. `release-2.2` was cut from the baseline before any of main's later commits.
 
@@ -4241,7 +4361,7 @@ Minimum counted commands: 4 · Maximum counted commands: 12
 **Variant ID:** `cherry-hard-review-backports-export`
 
 **Story**
-`release-3.0` needs two fixes from `main`: one in `src/export.py` and one in `src/csv_writer.py`. QA will only sign off on a single commit, "Backport export fixes". New feature work on `main` stays out of the release.
+`release-3.0` needs two fixes from `main`: one in `src/export.py` and one in `src/csv_writer.py`. QA will only sign off on a single commit, "`Backport export fixes`". New feature work on `main` stays out of the release.
 
 **Starting point:** You are on `main`. `release-3.0` was cut from the baseline before any of main's later commits.
 
@@ -4289,7 +4409,7 @@ Minimum counted commands: 4 · Maximum counted commands: 12
 **Variant ID:** `reflog-medium-recover-and-publish-search`
 
 **Story**
-A hard reset this morning moved `main` back to the project baseline and took four commits with it, including your borrower search ranking fix. Nothing was pushed, so `origin` cannot help, but Git's reflog still remembers where `main` was.
+A hard reset this morning moved `main` back to the project baseline and took four commits with it, including your borrower search ranking fix. **Nothing was pushed**, so `origin` cannot help, but Git's reflog still remembers where `main` was.
 
 Finn wants the recovered work on its own branch, `recovery/search-fix`, and on `origin` so he can review it today.
 
@@ -4337,7 +4457,9 @@ Minimum counted commands: 2 · Maximum counted commands: 10
 **Variant ID:** `reflog-medium-recover-and-publish-billing`
 
 **Story**
-You reset `main` to an older commit to test something and forgot that the billing work on top was not pushed yet. Three commits, ending with Finish billing summary, are no longer on any branch. Sage needs them back on `recovery/billing` and on `origin` before the finance demo.
+You reset `main` to an older commit to test something and forgot that the billing work on top was not pushed yet.
+
+Three commits, ending with Finish billing summary, are no longer on any branch. Sage needs them back on `recovery/billing` and on `origin` before the finance demo.
 
 **Starting point:** You are on `main` after a hard reset; the reflog still lists the lost tip; `origin` is available.
 
@@ -4385,7 +4507,7 @@ Minimum counted commands: 2 · Maximum counted commands: 10
 **Story**
 After a reset moved `main` back three commits, the reflog shows what you lost: some session groundwork, an abandoned magic-link experiment, and on top of it the auth token expiry fix Raven needs today.
 
-You want the whole lost line kept on `recovery/auth` for later, without leaving `main`. Only the fix itself belongs on `main` now. Check the commit before you copy it.
+You want the whole lost line kept on `recovery/auth` for later, without leaving `main`. **Only the fix itself belongs on `main` now.** Check the commit before you copy it.
 
 **Starting point:** You are on `main` after a hard reset; the reflog lists the lost tip, which holds the auth fix on top of the experiment.
 
@@ -4527,7 +4649,9 @@ Minimum counted commands: 3 · Maximum counted commands: 12
 **Variant ID:** `revert-easy-pull-then-revert-api`
 
 **Story**
-`c4`, Rename the orders endpoint, broke every client of the billing API, and it is already on `origin`. Finn has since pushed a health endpoint you do not have locally. He wants the rename undone safely, on top of his work, and published right away.
+`c4`, Rename the orders endpoint, broke every client of the billing API, and it is already on `origin`.
+
+Finn has since pushed a health endpoint you do not have locally. He wants the rename undone safely, on top of his work, and published right away.
 
 **Starting point:** You are on `main`, behind `origin/main`; `c4` is published and broke the API.
 
@@ -4583,7 +4707,9 @@ Finn wants the rounding undone __on the release branch only__, without rewriting
 Release branches are shared and published, so fixes go on as new commits. Reverting on the release branch leaves `main` and everyone's copies of the release untouched.
 
 **Your Task**
-Switch to `release/2.1`, undo `c4` with a new commit, and push `release/2.1` to `origin`. **Leave `main` unchanged.**
+Switch to `release/2.1`, undo `c4` with a new commit, and push `release/2.1` to `origin`.
+
+**Leave `main` unchanged.**
 
 **Objective Checklist**
 
@@ -4631,7 +4757,9 @@ Sage asks you to undo the requirement on `release/1.8` only, as a new commit, an
 A revert on the branch that needs it is the smallest safe fix: no other branch changes, and no published commit is rewritten.
 
 **Your Task**
-Switch to `release/1.8`, undo `c3` with a new commit, and push `release/1.8` to `origin`. **Leave `main` unchanged.**
+Switch to `release/1.8`, undo `c3` with a new commit, and push `release/1.8` to `origin`.
+
+**Leave `main` unchanged.**
 
 **Objective Checklist**
 
@@ -4875,7 +5003,7 @@ Minimum counted commands: 2 · Maximum counted commands: 12
 **Story**
 You pushed `feature/search` yesterday. Today you are rebasing it onto `main`, and it stopped on a conflict in `src/search.py`: `main` doubled the results per page, and your branch turned on fuzzy matching. Keep both.
 
-When the rebase is done, `origin`'s copy still has the old history, so it has to be replaced, but only if nobody else pushed to the branch in the meantime.
+When the rebase is done, `origin`'s copy still has the old history, so it has to be replaced, but **only if nobody else pushed to the branch in the meantime**.
 
 **Starting point:** `feature/search` was pushed earlier; you are in the middle of rebasing it onto `main`, stopped on a conflict in `src/search.py`.
 
@@ -4938,7 +5066,7 @@ Minimum counted commands: 3 · Maximum counted commands: 8
 **Story**
 `feature/billing` is on `origin` already. Your rebase onto `main` stopped on a conflict in `src/billing.py`: `main` added a rounding rule, and your branch switched the currency to USD for the new market. The final file keeps both.
 
-Sage reminds you that a teammate sometimes pushes small fixes to this branch, so the republish must refuse if that happened.
+Sage reminds you that a teammate sometimes pushes small fixes to this branch, so **the republish must refuse if that happened**.
 
 **Starting point:** `feature/billing` was pushed earlier; you are in the middle of rebasing it onto `main`, stopped on a conflict in `src/billing.py`.
 
@@ -5046,7 +5174,9 @@ Minimum counted commands: 2 · Maximum counted commands: 8
 **Variant ID:** `rebase-hard-abort-then-onto-ui`
 
 **Story**
-`feature/table-ui` was started from `spike/new-grid` by mistake, and your rebase onto `main` just stopped on a conflict in `src/charts.js` from one of the spike's commits. Finn says the grid spike is not going anywhere, so **it must not travel with your table work**. Only your own two commits should end up on `main`'s latest commit.
+`feature/table-ui` was started from `spike/new-grid` by mistake, and your rebase onto `main` just stopped on a conflict in `src/charts.js` from one of the spike's commits. Finn says the grid spike is not going anywhere, so **it must not travel with your table work**.
+
+Only your own two commits should end up on `main`'s latest commit.
 
 **Starting point:** You are in the middle of rebasing `feature/table-ui` onto `main`, stopped on a conflict from a `spike/new-grid` commit; `feature/table-ui` was started from `spike/new-grid`.
 
@@ -5142,7 +5272,7 @@ Minimum counted commands: 3 · Maximum counted commands: 8
 **Story**
 `feature/rate-limits` was pushed with three commits. After you rebased it onto `main`, Add rate limiter is gone and the API wiring points at nothing. The reflog still has the pushed tip, `c5`.
 
-Sage needs the branch whole again, on top of `main`, and `origin` updated without stomping on anything a teammate may have pushed.
+Sage needs the branch whole again, on top of `main`, and `origin` updated **without stomping on anything a teammate may have pushed**.
 
 **Starting point:** You are on `feature/rate-limits` after a rebase that dropped a commit; the reflog lists the original tip, `c5`, which `origin` also still has.
 
@@ -5309,7 +5439,7 @@ Minimum counted commands: 2 · Maximum counted commands: 12
 **Story**
 Maeve has been logging bird counts in a plain folder all semester: `notes.md` and `readings.csv` hold the data, `README.md` explains how to read it, and `scratch.txt` is full of half-finished guesses.
 
-She wants the data in history first, so the log shows when the readings arrived, and the guide as a commit of its own that can change later without touching the data. Your guesses in `scratch.txt` stay private.
+She wants the data in history first, so the log shows when the readings arrived, and the guide as a commit of its own that can change later without touching the data. **Your guesses in `scratch.txt` stay private.**
 
 **Starting point:** You are in `field-log`. It is not a repository yet. `notes.md`, `readings.csv`, `README.md` and `scratch.txt` are new files.
 
@@ -5317,7 +5447,9 @@ She wants the data in history first, so the log shows when the readings arrived,
 A clear history starts with its first commits. Recording a project in purposeful snapshots, data first and documentation second, makes each one easy to review, revert or reword later.
 
 **Your Task**
-Make `field-log` a Git repository on `main`. Commit `notes.md` and `readings.csv` with the message `Start field log`, then commit `README.md` on top of it with the message `Add field log guide`. **Leave `scratch.txt` untracked.**
+Make `field-log` a Git repository on `main`. Commit `notes.md` and `readings.csv` with the message `Start field log`, then commit `README.md` on top of it with the message `Add field log guide`.
+
+**Leave `scratch.txt` untracked.**
 
 **Objective Checklist**
 
@@ -5344,7 +5476,7 @@ Make `field-log` a Git repository on `main`. Commit `notes.md` and `readings.csv
 - `git add .` or `git add -A`: they would commit scratch.txt, or put the guide in the first commit.
 
 **Expected Result**
-`field-log` is a repository on `main` with two commits: “Start field log” with `notes.md` and `readings.csv`, then “Add field log guide” with `README.md`. `scratch.txt` stays untracked.
+`field-log` is a repository on `main` with two commits: “`Start field log`” with `notes.md` and `readings.csv`, then “`Add field log guide`” with `README.md`. `scratch.txt` stays untracked.
 
 **Evaluation (STAFF ONLY)**
 
@@ -5368,7 +5500,9 @@ Raven asks you to put the project under version control tonight: the app as the 
 A first commit is a promise about what the project is. Keeping the app and its setup notes in separate commits, and personal planning notes out of history, gives the team a history they can follow.
 
 **Your Task**
-Make `quiz-app` a Git repository on `main`. Commit `index.html` and `quiz.js` with the message `Start quiz app`, then commit `README.md` on top of it with the message `Add quiz setup notes`. **Leave `todo.txt` untracked.**
+Make `quiz-app` a Git repository on `main`. Commit `index.html` and `quiz.js` with the message `Start quiz app`, then commit `README.md` on top of it with the message `Add quiz setup notes`.
+
+**Leave `todo.txt` untracked.**
 
 **Objective Checklist**
 
@@ -5395,7 +5529,7 @@ Make `quiz-app` a Git repository on `main`. Commit `index.html` and `quiz.js` wi
 - `git add .` or `git add -A`: they would commit todo.txt, or put the setup notes in the first commit.
 
 **Expected Result**
-`quiz-app` is a repository on `main` with two commits: “Start quiz app” with `index.html` and `quiz.js`, then “Add quiz setup notes” with `README.md`. `todo.txt` stays untracked.
+`quiz-app` is a repository on `main` with two commits: “`Start quiz app`” with `index.html` and `quiz.js`, then “`Add quiz setup notes`” with `README.md`. `todo.txt` stays untracked.
 
 **Evaluation (STAFF ONLY)**
 
@@ -5409,17 +5543,19 @@ Minimum counted commands: 5 · Maximum counted commands: 12
 **Variant ID:** `gate1-medium-complete-last-commit-search`
 
 **Story**
-You committed “Add search page” in a hurry before lunch.
+You committed “`Add search page`” in a hurry before lunch.
 
 Back at your desk you see what went wrong: `templates/search.html` never made it in, the ranking change is still sitting in `src/search.py` next to a debug hunk, and `notes.txt` got staged by accident. Sage reviews the branch in an hour, and nothing has been pushed.
 
-**Starting point:** You are on `main`. The latest commit is “Add search page”. `notes.txt` is staged, `templates/search.html` is a new file, and `src/search.py` holds the ranking hunk and a debug hunk.
+**Starting point:** You are on `main`. The latest commit is “`Add search page`”. `notes.txt` is staged, `templates/search.html` is a new file, and `src/search.py` holds the ranking hunk and a debug hunk.
 
 **Real-World Context**
 An unpublished commit that left part of its change behind can be completed instead of followed by a "forgot this" commit. That takes three skills from this module at once: unstaging, partial staging and amending.
 
 **Your Task**
-Unstage `notes.txt` (keep it), then complete the latest commit with `templates/search.html` and the ranking hunk from `src/search.py`, keeping its message `Add search page`. **Leave the debug hunk uncommitted** and finish on `main`.
+Unstage `notes.txt` (keep it), then complete the latest commit with `templates/search.html` and the ranking hunk from `src/search.py`, keeping its message `Add search page`.
+
+**Leave the debug hunk uncommitted** and finish on `main`.
 
 **Objective Checklist**
 
@@ -5444,7 +5580,7 @@ Unstage `notes.txt` (keep it), then complete the latest commit with `templates/s
 - A new commit for the missing pieces, amending with notes.txt still staged, or staging the whole of src/search.py.
 
 **Expected Result**
-“Add search page” now holds the template and the ranking change and replaced the old commit. `notes.txt` and the debug hunk stay in the working folder.
+“`Add search page`” now holds the template and the ranking change and replaced the old commit. `notes.txt` and the debug hunk stay in the working folder.
 
 **Evaluation (STAFF ONLY)**
 
@@ -5458,17 +5594,19 @@ Minimum counted commands: 4 · Maximum counted commands: 10
 **Variant ID:** `gate1-medium-complete-last-commit-upload`
 
 **Story**
-“Add file upload” went in without `docs/upload.md`, and the size-limit check you wrote is still unstaged in `src/upload.py`, beside a debug hunk.
+“`Add file upload`” went in without `docs/upload.md`, and the size-limit check you wrote is still unstaged in `src/upload.py`, beside a debug hunk.
 
 On top of that, `scratch.md` is staged even though it is only your notes to yourself. Maeve wants the upload work as one complete commit before she pulls your branch.
 
-**Starting point:** You are on `main`. The latest commit is “Add file upload”. `scratch.md` is staged, `docs/upload.md` is a new file, and `src/upload.py` holds the size-limit hunk and a debug hunk.
+**Starting point:** You are on `main`. The latest commit is “`Add file upload`”. `scratch.md` is staged, `docs/upload.md` is a new file, and `src/upload.py` holds the size-limit hunk and a debug hunk.
 
 **Real-World Context**
 Completing a local commit keeps a feature reviewable as one change. Unstage what does not belong, stage exactly what does, then amend.
 
 **Your Task**
-Unstage `scratch.md` (keep it), then complete the latest commit with `docs/upload.md` and the size-limit hunk from `src/upload.py`, keeping its message `Add file upload`. **Leave the debug hunk uncommitted** and finish on `main`.
+Unstage `scratch.md` (keep it), then complete the latest commit with `docs/upload.md` and the size-limit hunk from `src/upload.py`, keeping its message `Add file upload`.
+
+**Leave the debug hunk uncommitted** and finish on `main`.
 
 **Objective Checklist**
 
@@ -5493,7 +5631,7 @@ Unstage `scratch.md` (keep it), then complete the latest commit with `docs/uploa
 - A new commit for the missing pieces, amending with scratch.md still staged, or staging the whole of src/upload.py.
 
 **Expected Result**
-“Add file upload” now holds the documentation and the size-limit change and replaced the old commit. `scratch.md` and the debug hunk stay in the working folder.
+“`Add file upload`” now holds the documentation and the size-limit change and replaced the old commit. `scratch.md` and the debug hunk stay in the working folder.
 
 **Evaluation (STAFF ONLY)**
 
@@ -5547,7 +5685,7 @@ Rename the latest commit to `Add export` __without adding anything to it__, disc
 - Amending while tmp/run.log is staged, amending after the new commit, or staging the whole of src/export.py.
 
 **Expected Result**
-`main` reads “Add export” followed by “Fix export headers”. The log and the debug hunk stay in the working folder, and the cache file matches the last commit.
+`main` reads “`Add export`” followed by “`Fix export headers`”. The log and the debug hunk stay in the working folder, and the cache file matches the last commit.
 
 **Evaluation (STAFF ONLY)**
 
@@ -5601,7 +5739,7 @@ Rename the latest commit to `Add billing` __without adding anything to it__, dis
 - Amending while logs/billing.log is staged, amending after the new commit, or staging the whole of src/billing.py.
 
 **Expected Result**
-`main` reads “Add billing” followed by “Fix billing tax”. The log and the debug hunk stay in the working folder, and the cache file matches the last commit.
+`main` reads “`Add billing`” followed by “`Fix billing tax`”. The log and the debug hunk stay in the working folder, and the cache file matches the last commit.
 
 **Evaluation (STAFF ONLY)**
 
@@ -5711,7 +5849,7 @@ Minimum counted commands: 3 · Maximum counted commands: 12
 **Variant ID:** `gate2-medium-stash-and-sync-reports`
 
 **Story**
-You are halfway through a new chart in `src/reports.py` when Sage messages: a login timeout patch just landed on `origin`, and everyone should have it on their local `main` before the demo. Your chart is not ready to commit, and you do not want to lose a line of it.
+You are halfway through a new chart in `src/reports.py` when Sage messages: a login timeout patch just landed on `origin`, and everyone should have it on their local `main` before the demo. **Your chart is not ready to commit, and you do not want to lose a line of it.**
 
 **Starting point:** You are on `feature/reports`. `src/reports.py` has uncommitted edits. `origin/main` has a new commit that your local `main` does not have yet.
 
@@ -5719,7 +5857,9 @@ You are halfway through a new chart in `src/reports.py` when Sage messages: a lo
 Stashing parks unfinished work so you can switch branches with a clean folder, then bring the work back exactly as it was.
 
 **Your Task**
-Set your `src/reports.py` edits aside, update your local `main` from `origin`, then return to `feature/reports` and bring the edits back. **Leave no stash entry behind.**
+Set your `src/reports.py` edits aside, update your local `main` from `origin`, then return to `feature/reports` and bring the edits back.
+
+**Leave no stash entry behind.**
 
 **Objective Checklist**
 
@@ -5759,7 +5899,7 @@ Minimum counted commands: 5 · Maximum counted commands: 10
 **Variant ID:** `gate2-medium-stash-and-sync-profile`
 
 **Story**
-Your avatar upload in `src/profile.py` is half written when Raven asks the whole group to pull the login timeout patch onto `main` before tonight's test session. The avatar code does not even run yet, so committing it is out of the question.
+Your avatar upload in `src/profile.py` is half written when Raven asks the whole group to pull the login timeout patch onto `main` before tonight's test session. **The avatar code does not even run yet, so committing it is out of the question.**
 
 **Starting point:** You are on `feature/profile`. `src/profile.py` has uncommitted edits. `origin/main` has a new commit that your local `main` does not have yet.
 
@@ -5767,7 +5907,9 @@ Your avatar upload in `src/profile.py` is half written when Raven asks the whole
 A stash is the quickest safe place for unfinished edits while you deal with another branch.
 
 **Your Task**
-Set your `src/profile.py` edits aside, update your local `main` from `origin`, then return to `feature/profile` and bring the edits back. **Leave no stash entry behind.**
+Set your `src/profile.py` edits aside, update your local `main` from `origin`, then return to `feature/profile` and bring the edits back.
+
+**Leave no stash entry behind.**
 
 **Objective Checklist**
 
@@ -5845,7 +5987,7 @@ Update `main` from `origin`, land `feature/filters` on it as one commit with the
 - A regular or `--no-ff` merge (main must get a single non-merge commit), or leaving either copy of the branch.
 
 **Expected Result**
-`main` and `origin/main` end with “Add search filters”, and `feature/filters` is gone everywhere.
+`main` and `origin/main` end with “`Add search filters`”, and `feature/filters` is gone everywhere.
 
 **Evaluation (STAFF ONLY)**
 
@@ -5859,7 +6001,7 @@ Minimum counted commands: 7 · Maximum counted commands: 8
 **Variant ID:** `gate2-hard-land-and-retire-export`
 
 **Story**
-The CSV export on `feature/export` passed review. Maeve wants it on `main` as one commit, Add CSV export, then published, and the branch removed from your machine and from `origin`.
+The CSV export on `feature/export` passed review. Maeve wants it on `main` as one commit, `Add CSV export`, then published, and the branch removed from your machine and from `origin`.
 
 The changelog moved on `origin` since you last updated, so `main` needs updating first.
 
@@ -5897,7 +6039,7 @@ Update `main` from `origin`, land `feature/export` on it as one commit with the 
 - A regular or `--no-ff` merge (main must get a single non-merge commit), or leaving either copy of the branch.
 
 **Expected Result**
-`main` and `origin/main` end with “Add CSV export”, and `feature/export` is gone everywhere.
+`main` and `origin/main` end with “`Add CSV export`”, and `feature/export` is gone everywhere.
 
 **Evaluation (STAFF ONLY)**
 
@@ -6307,7 +6449,9 @@ Sage still needs the search fix for tomorrow's demo, reviewed on its own branch 
 Lost commits are not gone while the reflog remembers them. Once they are safe on a branch, replaying them onto the current `main` lets reviewers read them against the code that will actually ship.
 
 **Your Task**
-Create `recovery/search` at your lost “Fix borrower search” commit, replay the branch onto `main`, and publish it to `origin` for review. **Leave `main` where it is.**
+Create `recovery/search` at your lost “Fix borrower search” commit, replay the branch onto `main`, and publish it to `origin` for review.
+
+**Leave `main` where it is.**
 
 **Objective Checklist**
 
@@ -6356,7 +6500,9 @@ The shop needs the receipt fix reviewed before Friday's release, on its own bran
 Lost commits are not gone while the reflog remembers them. Once they are safe on a branch, replaying them onto the current `main` lets reviewers read them against the code that will actually ship.
 
 **Your Task**
-Create `recovery/receipts` at your lost “Fix receipt totals” commit, replay the branch onto `main`, and publish it to `origin` for review. **Leave `main` where it is.**
+Create `recovery/receipts` at your lost “Fix receipt totals” commit, replay the branch onto `main`, and publish it to `origin` for review.
+
+**Leave `main` where it is.**
 
 **Objective Checklist**
 
@@ -6397,7 +6543,7 @@ Minimum counted commands: 3 · Maximum counted commands: 12
 **Story**
 “Add discount banner” went out to `origin` yesterday and broke the storefront layout. On top of it you have a local, unpushed commit, “Try banner animation”, that nobody wants.
 
-Raven's instructions: throw the local experiment away completely, but undo the published banner without rewriting what the team already pulled.
+Raven's instructions: **throw the local experiment away completely, but undo the published banner without rewriting what the team already pulled**.
 
 **Starting point:** You are on `main`. “Add discount banner” (`c2`) is on `origin`; “Try banner animation” (`c3`) is local only.
 
@@ -6445,7 +6591,7 @@ Minimum counted commands: 3 · Maximum counted commands: 10
 **Story**
 “Page on every warning” is live on `origin` and has woken the on-call engineer four times tonight. You also have a local commit, “Experiment with alert sounds”, that should never see the light of day.
 
-Sage wants the experiment gone and the paging change reversed in a way that leaves the shared history intact.
+Sage wants the experiment gone and the paging change reversed in a way that **leaves the shared history intact**.
 
 **Starting point:** You are on `main`. “Page on every warning” (`c2`) is on `origin`; “Experiment with alert sounds” (`c3`) is local only.
 
@@ -6493,7 +6639,7 @@ Minimum counted commands: 3 · Maximum counted commands: 10
 **Story**
 `feature/receipts` was started from `release/1.0` by mistake, and it is already pushed. You tried to rebase it onto `main`, and Git stopped on a release-only fix that does not belong in your branch at all.
 
-Raven wants only your two receipt commits on top of `main`, and the pushed branch updated without clobbering anything a teammate might have added.
+Raven wants only your two receipt commits on top of `main`, and the pushed branch updated **without clobbering anything a teammate might have added**.
 
 **Starting point:** You are on `feature/receipts` in the middle of a stopped rebase onto `main`. Your branch was started from `release/1.0` and is already pushed to `origin`.
 

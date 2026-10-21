@@ -5,6 +5,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import { challengesApi } from '@/features/challenges/api/challengesApi'
 import { ChallengeStatusHeader } from '@/features/challenges/components/ChallengeStatusHeader'
 import { ChallengeOutcomeModal } from '@/features/challenges/components/ChallengeOutcomeModal'
+import { challengeOutcomeNextStep } from '@/features/challenges/components/challengeOutcome'
 import { challengeScene, mapUrlForRun } from '@/features/challenges/components/challengeWorkspaceLayout'
 import { useChallengeCommandSubmission } from '@/features/challenges/hooks/useChallengeCommandSubmission'
 import { useChallengeRun } from '@/features/challenges/hooks/useChallengeRun'
@@ -20,6 +21,7 @@ import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { useOutcomeAnimationGate } from '@/shared/level-runtime/outcomeAnimation'
+import { OutcomeNextStepMascot } from '@/shared/level/components/game-outcome/OutcomeNextStepMascot'
 import { terminalPrompt } from '@/shared/level/terminalPrompt'
 import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
 import { ExitConfirmModal } from '@/shared/level/workspace/ExitConfirmModal'
@@ -158,6 +160,17 @@ export function ChallengeWorkspace() {
     !mutation.isPending &&
     dismissedCompletionRunId !== run.id &&
     completionAnimationReady(run.id)
+  // Once the result is dismissed, the mascot carries the trial's next step.
+  const nextStep = dismissedCompletionRunId === run.id && !exitNavigationPending
+    ? challengeOutcomeNextStep({
+      run,
+      onBackToMap: () => navigate(mapUrlForRun(run)),
+      onRetry: playAgain,
+      isRetrying: isReplaying,
+      onNextLevel: run.next_difficulty ? () => startLevelMutation.mutate(run.next_difficulty!.id) : undefined,
+      isStartingNextLevel: startLevelMutation.isPending && startLevelMutation.variables === run.next_difficulty?.id,
+    })
+    : null
 
   return (
     <div className="workspace-bg gameplay-workspace-screen tier-workspace-screen">
@@ -228,16 +241,8 @@ export function ChallengeWorkspace() {
         onBackToMap={() => navigate(mapUrlForRun(run))}
         onRetry={playAgain}
         isRetrying={isReplaying}
-        onNextLevel={run.next_difficulty ? () => startLevelMutation.mutate(run.next_difficulty!.id) : undefined}
-        isStartingNextLevel={
-          startLevelMutation.isPending && startLevelMutation.variables === run.next_difficulty?.id
-        }
-        nextDifficultyLabel={
-          run.next_difficulty
-            ? run.next_difficulty.difficulty.charAt(0).toUpperCase() + run.next_difficulty.difficulty.slice(1)
-            : null
-        }
       />
+      {nextStep ? <OutcomeNextStepMascot key={run.id} step={nextStep} /> : null}
       <WorkspaceStoryModal
         open={storyOpen}
         title={story.title}

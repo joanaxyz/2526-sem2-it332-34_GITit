@@ -144,7 +144,9 @@ task value, writes it into a command, or covers the solution's command sequence 
 regenerated once with a stricter instruction, then replaced by a fixed teaching
 message. Validated replies are cached by prompt digest. Provider attempts use
 bounded time and cached rate-limit cooldowns over one pooled keep-alive client per
-process. The committed semantic index is cached locally; see
+process. An attempt still silent after a short hedge delay keeps running while the
+next model starts; the first usable reply wins and passes the same guard, and the
+outrun model sits out briefly. The committed semantic index is cached locally; see
 [index regeneration](backend/tutoring/data/README.md).
 
 Workspace chat requires an owned run and a server-signed safe guide context.

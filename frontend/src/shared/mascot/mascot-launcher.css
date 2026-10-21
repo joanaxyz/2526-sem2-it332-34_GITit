@@ -10,6 +10,10 @@
 .mascot-launcher__button:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; }
 .mascot-launcher__portrait { display: block; width: 72px; height: 90px; object-fit: contain; pointer-events: none; animation: mascot-launcher-float 3.2s ease-in-out infinite; }
 .mascot-launcher[data-dragging] .mascot-launcher__portrait { animation-play-state: paused; }
+/* Git-It as the main call to action; sizes match FLOATING_LAUNCHER_SIZES in useFloatingPosition.ts. */
+.mascot-launcher[data-size="large"] { width: 128px; height: 180px; }
+.mascot-launcher[data-size="large"] .mascot-launcher__portrait { width: 124px; height: 155px; }
+.mascot-launcher[data-size="large"] .mascot-launcher__caption { padding: 3px 10px; font-size: var(--text-xs); }
 .mascot-launcher__caption { border-radius: 5px; padding: 2px 7px; background: #102133; color: #e8f6fa; font-size: var(--text-2xs); font-weight: 700; line-height: 1.2; white-space: nowrap; }
 .mascot-launcher__button:hover .mascot-launcher__caption { background: #173b58; }
 .mascot-launcher__button.is-tour-destination .mascot-launcher__caption { animation: mascot-launcher-arrive 350ms ease-out; }

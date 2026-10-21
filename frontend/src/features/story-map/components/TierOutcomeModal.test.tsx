@@ -1,17 +1,18 @@
-import { cleanup, fireEvent, render, screen } from '@testing-library/react'
+import { cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ComponentProps } from 'react'
 
 import type { GameOutcomeModal } from '@/shared/level/components/game-outcome/GameOutcomeModal'
 import type { TierRun } from './tierWorkspaceTypes'
 import { TierOutcomeModal } from './TierOutcomeModal'
+import { tierOutcomeNextStep } from './tierOutcome'
 
 const shown = vi.hoisted(() => vi.fn())
 vi.mock('@/shared/audio/battleAudio', () => ({ playGameOverSound: vi.fn(), playVictorySound: vi.fn() }))
 vi.mock('@/shared/level/components/game-outcome/GameOutcomeModal', () => ({
   GameOutcomeModal: (props: ComponentProps<typeof GameOutcomeModal>) => {
     shown(props)
-    return <div><h1>{props.headline}</h1><p>{props.message}</p>{props.actions}</div>
+    return <div><h1>{props.headline}</h1><p>{props.message}</p></div>
   },
 }))
 
@@ -31,8 +32,9 @@ describe('transfer checkpoint outcomes', () => {
     const practice = vi.fn()
     render(<TierOutcomeModal open run={run} onClose={() => {}} onBackToMap={() => {}} onRetry={practice} />)
     expect(screen.getByText(/later runs cannot change this checkpoint result/)).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Try again' })).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Continue free practice' }))
+    const step = tierOutcomeNextStep({ run, onBackToMap: () => {}, onRetry: practice })
+    expect(step).toMatchObject({ caption: 'Practice', prompt: 'Click me to keep practicing!' })
+    step?.onSelect()
     expect(practice).toHaveBeenCalledOnce()
     expect(shown.mock.calls.at(-1)?.[0]).toMatchObject({ showStars: false, stars: undefined, title: 'Transfer result recorded' })
   })
@@ -79,12 +81,51 @@ describe('ordered scenario outcomes', () => {
     expect(screen.queryByText('Easy complete')).not.toBeInTheDocument()
   })
 
-  it('keeps Continue after the final difficulty and returns to the map', () => {
+  it('offers the next scenario through the mascot after a partial clear', () => {
+    const continueTier = vi.fn()
+    const step = tierOutcomeNextStep({ run: clearedScenario(), onBackToMap: vi.fn(), onContinue: continueTier })
+
+    expect(step).toMatchObject({
+      prompt: 'Click me to continue to the next scenario!',
+      detail: 'Next: Publish and track',
+    })
+    step?.onSelect()
+    expect(continueTier).toHaveBeenCalledOnce()
+  })
+
+  it('offers the next difficulty once the tier is cleared', () => {
+    const nextLevel = vi.fn()
+    const run = clearedScenario({
+      next_difficulty: { id: 8, difficulty: 'medium' } as TierRun['next_difficulty'],
+      progress: { completed: 2, total: 2, cleared: true, next_scenario: null },
+    })
+    const step = tierOutcomeNextStep({ run, onBackToMap: vi.fn(), onNextLevel: nextLevel })
+
+    expect(step?.prompt).toBe('Click me to continue to the Medium tier!')
+    step?.onSelect()
+    expect(nextLevel).toHaveBeenCalledOnce()
+  })
+
+  it('offers a retry after a failed run', () => {
+    const retry = vi.fn()
+    const step = tierOutcomeNextStep({ run: clearedScenario({ status: 'failed' }), onBackToMap: vi.fn(), onRetry: retry })
+
+    expect(step?.prompt).toBe('Click me to try again!')
+    step?.onSelect()
+    expect(retry).toHaveBeenCalledOnce()
+  })
+
+  it('returns to the map after the final difficulty', () => {
     const backToMap = vi.fn()
     const run = clearedScenario({ difficulty: 'hard', progress: { completed: 2, total: 2, cleared: true, next_scenario: null } })
-    render(<TierOutcomeModal open run={run} onClose={() => {}} onBackToMap={backToMap} />)
+    const step = tierOutcomeNextStep({ run, onBackToMap: backToMap, onRetry: vi.fn() })
 
-    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    expect(step?.prompt).toBe('Click me to head back to the map!')
+    step?.onSelect()
     expect(backToMap).toHaveBeenCalledOnce()
+  })
+
+  it('offers nothing while the run is still in progress', () => {
+    expect(tierOutcomeNextStep({ run: clearedScenario({ status: 'started' }), onBackToMap: vi.fn() })).toBeNull()
   })
 })

@@ -3,41 +3,29 @@ import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
 
 import type { ChallengeRun } from '@/features/challenges/types'
+import { canAdvanceFrom, difficultyLabel } from '@/features/challenges/components/challengeOutcome'
 import { GameOutcomeModal } from '@/shared/level/components/game-outcome/GameOutcomeModal'
 import { Badge } from '@/shared/components/Badge'
-import { Button } from '@/shared/components/Button'
 import { playGameOverSound, playVictorySound } from '@/shared/audio/battleAudio'
-
-function difficultyLabel(run: ChallengeRun) {
-  if (!run.difficulty) return 'Challenge'
-  return run.difficulty.charAt(0).toUpperCase() + run.difficulty.slice(1)
-}
 
 export function ChallengeOutcomeModal({
   open,
   run,
   onClose,
   onBackToMap,
-  onNextLevel,
   onRetry,
-  isStartingNextLevel = false,
   isRetrying = false,
-  nextDifficultyLabel,
 }: {
   open: boolean
   run: ChallengeRun
   onClose: () => void
   onBackToMap: () => void
-  onNextLevel?: () => void
   onRetry?: () => void
-  isStartingNextLevel?: boolean
   isRetrying?: boolean
-  nextDifficultyLabel?: string | null
 }) {
   const isFailed = run.status === 'failed'
   const isReplay = run.replay
-  const isNavigating = isStartingNextLevel || isRetrying
-  const canAdvance = !isReplay && run.status === 'completed' && Boolean(run.next_difficulty)
+  const canAdvance = canAdvanceFrom(run)
 
   useEffect(() => {
     if (!open) return
@@ -135,7 +123,7 @@ export function ChallengeOutcomeModal({
         <button
           type="button"
           className="game-outcome-header-btn"
-          disabled={isNavigating}
+          disabled={isRetrying}
           onClick={onRetry}
           aria-label={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
           title={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
@@ -146,7 +134,7 @@ export function ChallengeOutcomeModal({
       <button
         type="button"
         className="game-outcome-header-btn"
-        disabled={isNavigating}
+        disabled={isRetrying}
         onClick={onBackToMap}
         aria-label="Back to Map"
         title="Back to Map"
@@ -155,36 +143,6 @@ export function ChallengeOutcomeModal({
       </button>
     </>
   )
-
-  const actions = canAdvance ? (
-    onNextLevel && nextDifficultyLabel ? (
-      <Button type="button" disabled={isNavigating} onClick={onNextLevel}>
-        {isStartingNextLevel ? 'Opening next level…' : 'Continue'}
-      </Button>
-    ) : (
-      <Button type="button" variant="secondary" disabled={isNavigating} onClick={onClose}>
-        Stay in workspace
-      </Button>
-    )
-  ) : isFailed ? (
-    onRetry ? (
-      <Button type="button" disabled={isNavigating} onClick={onRetry}>
-        <RefreshCcw data-icon="inline-start" />
-        {isRetrying ? 'Starting fresh variant…' : 'Try again'}
-      </Button>
-    ) : null
-  ) : isReplay ? (
-    onRetry ? (
-      <Button type="button" disabled={isNavigating} onClick={onRetry}>
-        <RefreshCcw data-icon="inline-start" />
-        {isRetrying ? 'Starting…' : 'Play again'}
-      </Button>
-    ) : null
-  ) : run.status === 'completed' ? (
-    <Button type="button" disabled={isNavigating} onClick={onBackToMap}>
-      Continue
-    </Button>
-  ) : null
 
   return (
     <GameOutcomeModal
@@ -200,7 +158,6 @@ export function ChallengeOutcomeModal({
       headline={headline}
       message={message}
       stats={stats}
-      actions={actions}
       headerActions={headerActions}
     />
   )

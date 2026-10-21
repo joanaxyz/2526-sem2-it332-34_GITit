@@ -4,6 +4,12 @@ import { useEffect, useId, useRef } from 'react'
 import { Modal } from '@/shared/components/Modal'
 import { ScenarioInline } from '@/shared/level/components/ScenarioInline'
 
+function StoryParagraphs({ text }: { text: string }) {
+  return text.trim().split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => (
+    <p key={index}><ScenarioInline text={paragraph} /></p>
+  ))
+}
+
 /**
  * An open briefing over the game world. Authored text stays intact; clicking
  * anywhere or pressing Enter, Space or Escape returns focus to the terminal.
@@ -42,9 +48,9 @@ export function WorkspaceStoryModal({
   const context = realWorldContext?.trim()
   const startingPointText = startingPoint?.trim()
   const result = expectedResult?.trim()
-  const paragraphs = intro.trim().split(/\n\s*\n/).filter(Boolean)
+  const introText = intro.trim()
   const taskText = task.trim()
-  const hasStory = Boolean(paragraphs.length || startingPointText || taskText || context || result)
+  const hasStory = Boolean(introText || startingPointText || taskText || context || result)
 
   return (
     <Modal
@@ -69,16 +75,16 @@ export function WorkspaceStoryModal({
         {taskText ? (
           <section className="tier-story-modal__mission" aria-labelledby={`${headingId}-task`}>
             <h3 id={`${headingId}-task`} className="tier-story-modal__heading"><Target aria-hidden="true" />Your task</h3>
-            <p><ScenarioInline text={taskText} /></p>
+            <StoryParagraphs text={taskText} />
           </section>
         ) : null}
 
-        <div className={`tier-story-modal__spread${paragraphs.length ? ' has-story' : ''}${startingPointText || result ? ' has-reference' : ''}`}>
-          {paragraphs.length ? (
+        <div className={`tier-story-modal__spread${introText ? ' has-story' : ''}${startingPointText || result ? ' has-reference' : ''}`}>
+          {introText ? (
             <section className="tier-story-modal__story" aria-labelledby={`${headingId}-situation`}>
               <h3 id={`${headingId}-situation`} className="tier-story-modal__heading">The situation</h3>
               <div className="tier-story-modal__prose">
-                {paragraphs.map((paragraph, index) => <p key={index}><ScenarioInline text={paragraph} /></p>)}
+                <StoryParagraphs text={introText} />
               </div>
             </section>
           ) : null}
@@ -88,13 +94,13 @@ export function WorkspaceStoryModal({
               {startingPointText ? (
                 <section aria-labelledby={`${headingId}-starting-point`}>
                   <h3 id={`${headingId}-starting-point`} className="tier-story-modal__heading"><MapPin aria-hidden="true" />Starting point</h3>
-                  <p><ScenarioInline text={startingPointText} /></p>
+                  <StoryParagraphs text={startingPointText} />
                 </section>
               ) : null}
               {result ? (
                 <section aria-labelledby={`${headingId}-expected-result`}>
                   <h3 id={`${headingId}-expected-result`} className="tier-story-modal__heading"><Flag aria-hidden="true" />Expected result</h3>
-                  <p><ScenarioInline text={result} /></p>
+                  <StoryParagraphs text={result} />
                 </section>
               ) : null}
             </div>
@@ -104,7 +110,7 @@ export function WorkspaceStoryModal({
         {context ? (
           <section className="tier-story-modal__context" aria-labelledby={`${headingId}-context`}>
             <h3 id={`${headingId}-context`} className="tier-story-modal__heading"><Lightbulb aria-hidden="true" />Why this matters</h3>
-            <p><ScenarioInline text={context} /></p>
+            <StoryParagraphs text={context} />
           </section>
         ) : null}
         {hasStory ? null : <p className="tier-story-modal__empty">No story is available for this level.</p>}
