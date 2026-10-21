@@ -209,16 +209,6 @@
   border-top: 1px solid var(--border-subtle);
 }
 
-.gameplay-workspace .command-input,
-.gameplay-workspace .terminal-input-dock {
-  border-top-color: var(--border-subtle);
-  background: var(--surface-canvas);
-}
-
-.gameplay-workspace .terminal-input-dock .command-input {
-  background: transparent;
-}
-
 .gameplay-workspace .terminal-line {
   border-left: 0;
   padding-left: 0;

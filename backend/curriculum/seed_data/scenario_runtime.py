@@ -680,7 +680,7 @@ def _runtime_overrides() -> dict[str, dict[str, Any]]:
 RUNTIME_OVERRIDES = _runtime_overrides()
 
 
-# Scenarios the wave plan does not place, and why (docs/goals/curriculum-waves-and-repetition).
+# Scenarios the wave plan does not place, and why.
 UNPLACED_CASE_IDS = {
     "init-hard-safe-rerun": "re-running git init leaves no state to grade",
     # A wave's variants are one problem; these differ from every wave of their level.

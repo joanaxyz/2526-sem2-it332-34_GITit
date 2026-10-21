@@ -32,7 +32,7 @@
 .mascot-knowledge__heading button { width: 24px; min-height: 24px; margin: 0; }
 .mascot-knowledge button:hover { background: hsl(var(--primary) / 0.15); }
 .mascot-knowledge button:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
-.mascot-knowledge__content--plain { padding-top: 20px; }
+.mascot-knowledge__content--plain > :first-child { margin-top: 0; padding-right: 28px; }
 .mascot-knowledge__kind { display: block; margin-top: 0; padding-right: 28px; color: hsl(var(--primary)); font-size: var(--text-xs); font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; }
 .mascot-knowledge__title { margin-top: 2px; font-weight: 650; line-height: 1.35; }
 .mascot-knowledge__token { display: inline-block; margin-top: 4px; color: hsl(var(--primary)); font: 600 var(--text-xs) / 1.5 var(--font-mono); overflow-wrap: anywhere; }

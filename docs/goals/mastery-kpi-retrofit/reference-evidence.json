@@ -1,8 +1,0 @@
-{
-  "database": "isolated in-memory SQLite",
-  "published_variants": 265,
-  "validated_references": 265,
-  "unscored": 0,
-  "smallest_reference": 1,
-  "largest_reference": 4
-}

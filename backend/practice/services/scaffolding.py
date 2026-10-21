@@ -55,7 +55,6 @@ TIER_SCAFFOLDING_LADDER = {
 }
 
 
-
 class ScaffoldingService:
     def supports_for(self, difficulty: str) -> dict:
         """Support flags for a challenge trial. Unknown difficulty gets the least support."""

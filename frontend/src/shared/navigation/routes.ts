@@ -4,8 +4,7 @@ const DEFAULT_STORY_SLUG = 'arcane-spire'
 
 export const HOME_ROUTE = '/home'
 export const SHOP_ROUTE = '/shop'
-export const STORIES_ROUTE = '/stories'
-export const STORY_DETAIL_ROUTE = `${STORIES_ROUTE}/:storySlug`
+export const STORY_DETAIL_ROUTE = '/stories/:storySlug'
 export const DESIGN_PREVIEW_STORY_MAP_ROUTE = '/design-preview/story-map'
 export const ADMIN_ROUTES = {
   dashboard: '/admin',
@@ -19,7 +18,7 @@ export const ADMIN_ROUTES = {
 } as const
 
 export function storyPath(slug: string = DEFAULT_STORY_SLUG): string {
-  return `${STORIES_ROUTE}/${slug}`
+  return `/stories/${slug}`
 }
 
 export function storyPathWithQuery(slug: string = DEFAULT_STORY_SLUG, query: string): string {
@@ -28,5 +27,5 @@ export function storyPathWithQuery(slug: string = DEFAULT_STORY_SLUG, query: str
 }
 
 export function isStoryMapRoute(pathname: string): boolean {
-  return matchPath(STORIES_ROUTE, pathname) !== null || matchPath(STORY_DETAIL_ROUTE, pathname) !== null
+  return matchPath(STORY_DETAIL_ROUTE, pathname) !== null
 }

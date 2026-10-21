@@ -29,11 +29,12 @@ describe('shared tutoring surfaces', () => {
     setGuideMascotVisibility(false)
     render(<HomeTutor />)
     expect(screen.queryByRole('button', { name: 'Ask Git-It' })).not.toBeInTheDocument()
-    expect(screen.getByRole('dialog').querySelector('img')).toHaveAttribute('src', '/mascot/portrait.png')
+    expect(screen.getByRole('dialog').parentElement?.querySelector('.tutor-window__speaker')).toHaveAttribute('src', '/mascot/portrait.png')
+    expect(screen.getByRole('dialog').querySelector('img')).not.toBeInTheDocument()
     ask('Explain staging')
     expect(await screen.findByText(reply.reply)).toBeInTheDocument()
-    expect(screen.getByText(reply.reply).closest('.tutor-chat__bubble')).toBeInTheDocument()
-    expect(screen.getByText(reply.reply).closest('.tutor-chat__message')?.querySelector('img')).toHaveAttribute('src', '/mascot/portrait.png')
+    expect(screen.getByRole('article', { name: 'Git-It' })).toHaveTextContent(reply.reply)
+    expect(screen.getByRole('dialog').querySelector('img')).not.toBeInTheDocument()
     expect(tutorApi.chat).toHaveBeenCalledWith({ message: 'Explain staging', context: { surface: 'home' }, history: [] }, expect.any(AbortSignal))
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -54,7 +55,7 @@ describe('shared tutoring surfaces', () => {
     })
     const view = render(<section aria-label="Guide container"><GuideTutor runId={17} teachingKey="form:git add <path>" usageForm="git add <path>" guideToken="signed-guide" /></section>)
     const window = screen.getByRole('dialog', { name: 'Ask Git-It' })
-    expect(window.querySelector('img')).toHaveAttribute('src', '/mascot/portrait.png')
+    expect(window.querySelector('img')).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Guide container' })).not.toContainElement(window)
     expect(screen.getByRole('textbox')).toHaveFocus()
     ask('Explain this placeholder')
@@ -89,7 +90,11 @@ describe('shared tutoring surfaces', () => {
     expect(elsewhere).toHaveFocus()
   })
 
-  it('moves when its header is dragged and resizes from its edges', () => {
+  it.each([
+    { name: 'header', selector: '.tutor-window__heading', x: 120, y: 30 },
+    { name: 'body', selector: '.tutor-chat__transcript', x: 120, y: 200 },
+    { name: 'side mascot', selector: '.tutor-window__speaker', x: -40, y: 40 },
+  ])('moves from its $name and resizes from its edges', ({ selector, x, y }) => {
     render(<HomeTutor />)
     const frame = screen.getByRole('dialog').parentElement!
     const box = () => {
@@ -101,9 +106,9 @@ describe('shared tutoring surfaces', () => {
       return DOMRect.fromRect({ x: left, y: top, width, height })
     }
     const start = box()
-    const header = screen.getByRole('heading', { name: 'Ask Git-It' })
-    fireEvent.pointerDown(header, { button: 0, pointerId: 1, clientX: start.left + 120, clientY: start.top + 30 })
-    fireEvent.pointerMove(frame, { pointerId: 1, clientX: start.left + 70, clientY: start.top + 50 })
+    const handle = frame.querySelector(selector)!
+    fireEvent.pointerDown(handle, { button: 0, pointerId: 1, clientX: start.left + x, clientY: start.top + y })
+    fireEvent.pointerMove(frame, { pointerId: 1, clientX: start.left + x - 50, clientY: start.top + y + 20 })
     fireEvent.pointerUp(frame, { pointerId: 1 })
     expect(box()).toEqual({ ...start, left: start.left - 50, top: start.top + 20 })
 
@@ -114,10 +119,17 @@ describe('shared tutoring surfaces', () => {
     fireEvent.pointerUp(frame, { pointerId: 2 })
     expect(box()).toEqual({ ...moved, width: moved.width - 40 })
 
-    // A press inside the conversation selects text instead of moving the window.
-    fireEvent.pointerDown(screen.getByRole('log'), { button: 0, pointerId: 3, clientX: moved.left + 100, clientY: moved.top + 200 })
-    fireEvent.pointerMove(frame, { pointerId: 3, clientX: moved.left + 10, clientY: moved.top + 300 })
-    expect(box()).toEqual({ ...moved, width: moved.width - 40 })
+    // Text selection, typing and topic buttons keep their native pointer behavior.
+    for (const target of [
+      screen.getByText('Ask what a command means, why it works, or which idea feels unclear.'),
+      screen.getByRole('textbox'),
+      screen.getByRole('button', { name: 'Repository' }),
+    ]) {
+      fireEvent.pointerDown(target, { button: 0, pointerId: 3, clientX: moved.left + 100, clientY: moved.top + 200 })
+      fireEvent.pointerMove(frame, { pointerId: 3, clientX: moved.left + 10, clientY: moved.top + 300 })
+      fireEvent.pointerUp(frame, { pointerId: 3 })
+      expect(box()).toEqual({ ...moved, width: moved.width - 40 })
+    }
   })
 
   it('moves and resizes with keyboard controls and stays within a resized viewport', () => {

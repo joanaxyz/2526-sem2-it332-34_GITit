@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { KeyboardEvent, PointerEvent } from 'react'
 
-import { edgesAt, resizeCursor, SOUTH_EAST, type Edges } from '@/shared/level/components/workspaceTourGeometry'
+import { edgesAt, onScrollbar, resizeCursor, SOUTH_EAST, type Edges } from '@/shared/level/components/workspaceTourGeometry'
 import { usePersistentState } from '@/shared/utils/persistentState'
 
 type Rect = { x: number; y: number; width: number; height: number }
@@ -21,7 +21,7 @@ const ARROWS: Record<string, [number, number]> = {
   ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1],
 }
 // Pressing these uses them; it never moves or resizes the window.
-const CONTROLS = 'button, a, input, textarea, select, summary, label'
+const CONTROLS = 'button, a, input, textarea, select, summary, label, [contenteditable]:not([contenteditable="false"]), [data-tutor-selectable]'
 
 function clamp(value: number, low: number, high: number) {
   return Math.max(low, Math.min(value, high))
@@ -64,6 +64,12 @@ function move(rect: Rect, dx: number, dy: number, area: Area): Rect {
 }
 
 function defaultRect(workspace: boolean): Rect {
+  if (workspace) {
+    // Keep the chat in the lower-right portion of the workspace on smaller laptops too.
+    const width = clamp(window.innerWidth * 0.27, MINIMUM.width, 420)
+    const height = clamp(window.innerHeight * 0.44, MINIMUM.height, 424)
+    return fit({ x: window.innerWidth - width - 52, y: window.innerHeight - height - 38, width, height }, viewportArea(workspace))
+  }
   return fit({ x: window.innerWidth - 440, y: window.innerHeight - 680, width: 420, height: 640 }, viewportArea(workspace))
 }
 
@@ -74,8 +80,9 @@ function isRect(value: unknown): value is Rect {
 
 /**
  * Where the chat window sits and how big it is, remembered between openings.
- * A mouse resizes it from any edge, and the header (`grip`) drags it; touch
- * drags the header. Keyboard controls move and resize it with the arrow keys.
+ * Its background and side mascot drag it; a mouse resizes it from any edge.
+ * Text, controls and scrollbars retain their native interactions.
+ * Keyboard controls move and resize it with the arrow keys.
  */
 export function useTutorWindowLayout(workspace: boolean) {
   const [rect, setRect] = usePersistentState<Rect>(
@@ -84,7 +91,6 @@ export function useTutorWindowLayout(workspace: boolean) {
     (saved) => (isRect(saved) ? fit(saved, viewportArea(workspace)) : defaultRect(workspace)),
   )
   const [cursor, setCursor] = useState<string | null>(null)
-  const grip = useRef<HTMLElement>(null)
   const drag = useRef<Drag | null>(null)
 
   useEffect(() => {
@@ -93,7 +99,7 @@ export function useTutorWindowLayout(workspace: boolean) {
     return () => window.removeEventListener('resize', refit)
   }, [setRect, workspace])
 
-  /** The window edges under a mouse or pen; touch only drags the header. */
+  /** The window edges under a mouse or pen; touch moves instead of resizing. */
   function edgesUnder(event: PointerEvent<HTMLElement>) {
     if (event.pointerType === 'touch' || (event.target as Element).closest(CONTROLS)) return null
     return edgesAt(event.currentTarget.getBoundingClientRect(), event.clientX, event.clientY)
@@ -103,13 +109,13 @@ export function useTutorWindowLayout(workspace: boolean) {
     if (drag.current?.pointerId !== event.pointerId) return
     drag.current = null
     setCursor(null)
+    if (event.currentTarget.hasPointerCapture?.(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId)
   }
 
   const frameHandlers = {
     onPointerDown(event: PointerEvent<HTMLElement>) {
-      if (event.button !== 0 || (event.target as Element).closest(CONTROLS)) return
+      if (event.button !== 0 || (event.target as Element).closest(CONTROLS) || onScrollbar(event)) return
       const edges = edgesUnder(event)
-      if (!edges && !grip.current?.contains(event.target as Node)) return
       event.preventDefault()
       event.currentTarget.setPointerCapture?.(event.pointerId)
       drag.current = { pointerId: event.pointerId, x: event.clientX, y: event.clientY, rect, edges }
@@ -131,6 +137,7 @@ export function useTutorWindowLayout(workspace: boolean) {
     },
     onPointerUp: endDrag,
     onPointerCancel: endDrag,
+    onLostPointerCapture: endDrag,
     onPointerLeave() {
       if (!drag.current) setCursor(null)
     },
@@ -157,7 +164,6 @@ export function useTutorWindowLayout(workspace: boolean) {
     rect,
     /** The cursor while the pointer is on an edge or dragging; null otherwise. */
     cursor,
-    grip,
     frameHandlers,
     moveWithKeyboard: keyboard('move'),
     resizeWithKeyboard: keyboard('resize'),

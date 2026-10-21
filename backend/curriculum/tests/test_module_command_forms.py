@@ -1,6 +1,6 @@
 """The module curriculum registers, attaches and credits the forms it teaches.
 
-Regressions for docs/goals/curriculum-waves-and-repetition/PLAN.md §7.
+The authoring rules are documented in CONTENT_AUTHORING_GUIDE.md.
 """
 
 from django.core.management import call_command

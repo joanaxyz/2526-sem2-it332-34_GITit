@@ -181,6 +181,8 @@ export function HomeCombatShowcase({
                 animation={companionRuntime.sprites.idle}
                 scale={companionRuntime.metrics.scale}
                 anchorToPixelBounds
+                layoutAnimation={companionRuntime.sprites.idle}
+                pixelAnchorAnimation={companionRuntime.sprites.idle}
                 pixelAnchorFallback={{ bottomOffset: companionRuntime.metrics.footOffset }}
                 pixelated
                 aria-label={`${companion.definition.label} ${activeMove.toLowerCase()} animation`}

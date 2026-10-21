@@ -100,21 +100,19 @@ export function GameplayWorkspaceTourOverlay({
   const viewportWidth = window.innerWidth
   const viewportHeight = window.innerHeight
   // Until the learner moves one, the cards sit side by side where layout put them.
-  const mainWidth = paneSizes.main?.width ?? (separate ? DESKTOP_CARD_WIDTH : layout.card.width)
+  const mainWidth = paneSizes.main?.width ?? layout.paneLayout?.main.width ?? (separate ? DESKTOP_CARD_WIDTH : layout.card.width)
   const autoPositions: Record<Pane, Position> = {
     main: layout.card,
-    aside: { left: layout.card.left + mainWidth + ASIDE_GAP, top: layout.card.top },
+    aside: { left: layout.card.left + mainWidth + (layout.paneLayout?.gap ?? ASIDE_GAP), top: layout.card.top },
   }
   const positionOf = (pane: Pane) => panePositions[pane] ?? autoPositions[pane]
-  const mainFrame = workspaceTourFrame(positionOf('main'), paneSizes.main ?? layout.mainSize ?? layout.card)
-  // The connector leaves the card that explains the target: the main one.
-  const arrowPath = transformed
-    ? connectorPathFor(mainFrame, layout.target)
-    : layout.arrowPath
+  const mainFrame = workspaceTourFrame(positionOf('main'), paneSizes.main ?? layout.paneLayout?.main ?? layout.mainSize ?? layout.card)
+  const spotlight = spotlightRect(layout.target, viewportWidth, viewportHeight)
+  // Join the main card to the outline, keeping the connector out of the target itself.
+  const arrowPath = connectorPathFor(mainFrame, spotlight)
   const targetVisible = layout.target.bottom > HEADER_CLEARANCE
     && layout.target.top < viewportHeight - VIEWPORT_GAP
     && layout.target.right > 0 && layout.target.left < viewportWidth
-  const spotlight = spotlightRect(layout.target, viewportWidth, viewportHeight)
   const holes = [
     ...(targetVisible ? [spotlight] : []),
     ...(layout.reveals ?? []).map((box) => spotlightRect(box, viewportWidth, viewportHeight, 3)),
@@ -143,7 +141,7 @@ export function GameplayWorkspaceTourOverlay({
     } : {}),
   } as CSSProperties
   const paneStyle = (pane: Pane, defaultWidth: number): CSSProperties => {
-    const size = paneSizes[pane]
+    const size = paneSizes[pane] ?? layout.paneLayout?.[pane]
     const position = positionOf(pane)
     return {
       left: position.left,
@@ -309,30 +307,29 @@ export function GameplayWorkspaceTourOverlay({
       {targetVisible ? <><div
         className="workspace-tour__spotlight"
         data-testid="workspace-tour-spotlight"
+        aria-hidden="true"
         style={{
           left: spotlight.left,
           top: spotlight.top,
           width: spotlight.width,
           height: spotlight.height,
         }}
-      >
-        <span className="workspace-tour__beacon" aria-hidden="true" />
-      </div>
+      />
 
       <svg className="workspace-tour__connector" aria-hidden="true">
         <defs>
           <marker
             id={markerId}
-            markerHeight="10"
-            markerWidth="10"
-            orient="auto"
-            refX="8"
+            markerHeight="8"
+            markerWidth="8"
+            markerUnits="userSpaceOnUse"
+            viewBox="0 0 8 8"
+            refX="4"
             refY="4"
           >
-            <path d="M0,0 L0,8 L9,4 z" />
+            <circle cx="4" cy="4" r="2.5" />
           </marker>
         </defs>
-        <path className="workspace-tour__connector-glow" d={arrowPath} />
         <path
           className="workspace-tour__connector-line"
           d={arrowPath}

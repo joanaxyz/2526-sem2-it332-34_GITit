@@ -1,3 +1,5 @@
+import type { ApiSchemas } from '@/shared/api/generated/apiTypes'
+
 // A command-skill the player has learned (their "spellbook"). Learned = the
 // player has solved with one of the skill's command forms at least once.
 export type LearnedSkill = {
@@ -10,4 +12,5 @@ export type LearnedSkill = {
   chapter_number: number
   chapter_title: string
   learned_at?: string
+  knowledge?: ApiSchemas['CommandKnowledgeResponse'][]
 }

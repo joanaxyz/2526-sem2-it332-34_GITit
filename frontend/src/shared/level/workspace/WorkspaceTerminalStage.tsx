@@ -3,7 +3,7 @@ import { useTerminalCwd } from '@/shared/level-runtime/terminalCwd'
 import type { TerminalLine } from '@/shared/level/types'
 import type { WorkspaceRun, WorkspaceScene } from '@/shared/level/workspace/types'
 
-/** Full-width terminal under the battle stage, input docked at its foot; contextual feedback lives in the sidebar. */
+/** Full-width terminal under the battle stage, with the prompt following its output. */
 export function WorkspaceTerminalStage({
   run,
   scene,
@@ -35,7 +35,6 @@ export function WorkspaceTerminalStage({
           runDisabled={mutationPending || dagAnimating || battleAnimating}
           processing={mutationPending}
           className="h-full"
-          dockInput
           onCommand={onCommand}
         />
       </div>

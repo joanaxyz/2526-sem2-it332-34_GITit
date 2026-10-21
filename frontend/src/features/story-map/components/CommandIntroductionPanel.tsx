@@ -19,6 +19,12 @@ type Tab = 'command' | 'change'
 // Room for the command card and the "What changes" card side by side, with
 // the workspace still visible around them. Below this they share one card.
 const WIDE_QUERY = '(min-width: 1180px) and (min-height: 640px)'
+const DEFAULT_PANE_LAYOUT = {
+  main: { width: 454, height: 410 },
+  aside: { width: 426, height: 396 },
+  gap: 52,
+  top: 24,
+}
 // The scenario and project files stay readable while a guide is open.
 const CONTEXT_REGIONS = ['[data-tour-target="level-story"]', '[data-tour-target="project-files"]']
 const FEEDBACK_REGIONS = [...CONTEXT_REGIONS, '[data-tour-target="terminal"]']
@@ -150,6 +156,7 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
         showSpeaker={false}
         transformable
         transformPreferenceKey={COMMAND_GUIDE_LAYOUT_KEY}
+        paneLayout={DEFAULT_PANE_LAYOUT}
         paneLabels={{ main: 'command card', aside: `${changeTitle.toLowerCase()} card` }}
         reveal={introduction ? CONTEXT_REGIONS : FEEDBACK_REGIONS}
         collapseTarget='[data-mascot-launcher="command-guide"]'

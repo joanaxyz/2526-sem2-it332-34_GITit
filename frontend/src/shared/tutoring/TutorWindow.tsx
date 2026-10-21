@@ -10,13 +10,13 @@ import './tutor.css'
 
 export type TutorWindowDismissal = 'escape' | 'outside'
 
-// Beside the window, Git-It needs this much room; closer to the edge it sits in the header.
+// Keep the side mascot outside the panel, hiding it when there is no room beside it.
 const SPEAKER_ROOM = 84
 // Shorter windows keep only the conversation and the composer.
 const COMPACT_HEIGHT = 450
 
 /**
- * The floating, nonmodal "Ask Git-It" chat. Its header drags it and its edges
+ * The floating, nonmodal "Ask Git-It" chat. Its background and side mascot drag it; its edges
  * resize it. Keyboard users get move and resize controls that show on focus.
  */
 export function TutorWindow({ context, workspace = false, onDismiss }: {
@@ -28,7 +28,7 @@ export function TutorWindow({ context, workspace = false, onDismiss }: {
 }) {
   const titleId = useId()
   const frame = useRef<HTMLDivElement>(null)
-  const { rect, cursor, grip, frameHandlers, moveWithKeyboard, resizeWithKeyboard } = useTutorWindowLayout(workspace)
+  const { rect, cursor, frameHandlers, moveWithKeyboard, resizeWithKeyboard } = useTutorWindowLayout(workspace)
 
   useEffect(() => {
     frame.current?.querySelector('textarea')?.focus()
@@ -60,17 +60,15 @@ export function TutorWindow({ context, workspace = false, onDismiss }: {
       className={`tutor-window${workspace ? ' tutor-window--workspace' : ''}`}
       style={{ left: rect.x, top: rect.y, width: rect.width, height: rect.height, cursor: cursor ?? undefined }}
       data-cursor={cursor ? '' : undefined}
-      data-speaker-inside={rect.x < SPEAKER_ROOM || undefined}
+      data-speaker-hidden={rect.x < SPEAKER_ROOM || undefined}
       data-compact={rect.height < COMPACT_HEIGHT || undefined}
       {...frameHandlers}
     >
       <MascotPortrait className="tutor-window__speaker" alt="" width={54} height={68} />
       <section className="tutor-window__panel" role="dialog" aria-labelledby={titleId}>
-        <header ref={grip} className="tutor-window__header">
-          <MascotPortrait className="tutor-window__avatar" alt="" width={40} height={48} />
+        <header className="tutor-window__header">
           <div className="tutor-window__heading">
             <h2 id={titleId}>Ask Git-It</h2>
-            <p>{workspace ? 'Explore your open command guide' : 'Your Git learning companion'}</p>
           </div>
           <button
             type="button"

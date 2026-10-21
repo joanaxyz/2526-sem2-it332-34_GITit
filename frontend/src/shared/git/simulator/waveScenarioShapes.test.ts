@@ -5,8 +5,7 @@ import { writeWorkspaceFile } from '@/shared/git/simulator/workspaceFiles'
 import type { MutableRepositoryState } from '@/shared/git/simulator/types'
 import type { RepositoryValue } from '@/shared/level/types'
 
-// Shapes the curriculum wave plan's new scenarios rely on
-// (docs/goals/curriculum-waves-and-repetition/PLAN.md, Task 0).
+// Shapes required by the scenarios in backend/curriculum/seed_data/source/wave_plan/.
 
 function state(overrides: Partial<MutableRepositoryState>): MutableRepositoryState {
   return {

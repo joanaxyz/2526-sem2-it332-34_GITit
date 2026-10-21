@@ -1,6 +1,6 @@
 # GIT it! wave scenarios
 
-Scenarios written for the ordered-wave curriculum (docs/goals/curriculum-waves-and-repetition/).
+Scenarios written for the ordered-wave curriculum; see CONTENT_AUTHORING_GUIDE.md.
 They use the same sections as the team's revised scenario bank and compile with
 `python scripts/curriculum/import_revised_scenarios.py --extension backend/curriculum/seed_data/source/wave_scenarios.md`
 into `backend/curriculum/seed_data/scenario_bank_waves.json`. Runtime fixtures (starting repository,

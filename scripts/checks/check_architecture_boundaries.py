@@ -1870,7 +1870,7 @@ def check_backend_service_packages() -> list[str]:
 
 
 # The retired multi-story curriculum and its wave-based adventure runtime were
-# removed (docs/goals/curriculum-waves-and-repetition/PLAN.md, Task L). The live
+# removed. The live
 # curriculum is seeded by `seed_curriculum` onto difficulty tiers only.
 RETIRED_CURRICULUM_PATHS = (
     "curriculum/management/commands/seed_curriculum_fixture.py",

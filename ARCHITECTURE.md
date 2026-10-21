@@ -1,6 +1,6 @@
 # Architecture Notes
 
-This file is the root-level architecture guide for GIT it!. Current architecture and contributor rules live in the root markdown files. `docs/goals/` is reserved for scoped implementation goals and their supporting artifacts; it is not a second architecture source of truth.
+This file is the root-level architecture guide for GIT it!. Current architecture and contributor rules live in the root markdown files. Keep temporary planning notes and supporting artifacts local and out of the source repository.
 
 ## Domain Glossary
 

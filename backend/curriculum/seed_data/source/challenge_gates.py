@@ -1,4 +1,4 @@
-"""The Challenge Gate at the end of each module (docs/goals/curriculum-waves-and-repetition/PLAN.md §14).
+"""The Challenge Gate at the end of each module; see CONTENT_AUTHORING_GUIDE.md.
 
 A gate is one ChallengeLevel with an Easy, a Medium and a Hard trial. Each
 trial is a workflow that combines what the module taught, in two variants so

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+
 from django.db.models import Prefetch
 
 from curriculum.library import library_key_for_command
@@ -217,13 +218,17 @@ def _matching_semantic_pages(*, command_key: str, syntax: str, pages: list[dict]
     for alias in _option_aliases_for_pages(option_pages):
         if not _contains_option(syntax, alias):
             continue
-        hits = [index for index, page in enumerate(option_pages) if alias in _page_option_aliases(page)]
+        hits = [
+            index for index, page in enumerate(option_pages) if alias in _page_option_aliases(page)
+        ]
         if len(hits) > 1:
             ambiguous_options.update(hits)
         else:
             option_hits.update(hits)
     matching.extend(
-        page for index, page in enumerate(option_pages) if index in option_hits and index not in ambiguous_options
+        page
+        for index, page in enumerate(option_pages)
+        if index in option_hits and index not in ambiguous_options
     )
 
     placeholders = list(re.finditer(r"<[^<>]+>", syntax))
@@ -264,7 +269,9 @@ def _contains_option(syntax: str, alias: str) -> bool:
     return bool(re.search(rf"(?<!\S){re.escape(alias)}(?=$|[=\s])", syntax))
 
 
-def _page_matches_placeholder(*, command_key: str, page: dict, placeholder: str, before: str) -> bool:
+def _page_matches_placeholder(
+    *, command_key: str, page: dict, placeholder: str, before: str
+) -> bool:
     page_id = str(page.get("id") or "")
     token = _page_token(page).casefold()
     if placeholder == token:

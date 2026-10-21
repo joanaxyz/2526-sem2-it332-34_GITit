@@ -26,8 +26,7 @@ def admin_analytics_payload(*, now=None, kpi_range: KpiRange = ALL_TIME) -> dict
     adventure_runs = AdventureLevelTierRun.objects.all()
     adventure_passed_runs = adventure_runs.filter(status=AdventureLevelTierRun.Status.COMPLETED)
     adventure_by_status = {
-        row["status"]: row["n"]
-        for row in adventure_runs.values("status").annotate(n=Count("id"))
+        row["status"]: row["n"] for row in adventure_runs.values("status").annotate(n=Count("id"))
     }
     challenge_by_status = {
         row["status"]: row["n"]

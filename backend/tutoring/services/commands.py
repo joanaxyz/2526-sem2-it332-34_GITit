@@ -98,14 +98,16 @@ def record_command_feedback(run, candidate, execution, previous_feedback=None, s
 
 def introduction_copy(candidate) -> dict:
     form = candidate.form
-    return safe_guide({
-        "title": form.label or form.usage_form,
-        # What the repository needs from this move, as structured changes.
-        "needs": [dict(change) for change in candidate.step_effect if isinstance(change, dict)],
-        "command_form": form.payload(),
-        "anatomy": anatomy(form.usage_form),
-        "concepts": [dict(concept) for concept in candidate.concepts],
-    })
+    return safe_guide(
+        {
+            "title": form.label or form.usage_form,
+            # What the repository needs from this move, as structured changes.
+            "needs": [dict(change) for change in candidate.step_effect if isinstance(change, dict)],
+            "command_form": form.payload(),
+            "anatomy": anatomy(form.usage_form),
+            "concepts": [dict(concept) for concept in candidate.concepts],
+        }
+    )
 
 
 def _advanced_route(run, candidate, execution) -> bool:

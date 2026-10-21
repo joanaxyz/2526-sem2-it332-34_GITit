@@ -374,7 +374,9 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
     }
     for schema_name, expected_properties in expected_schema_properties.items():
         expected_fields = set(expected_properties)
-        expected_required = expected_fields - {"unit"} if schema_name == "RateMetric" else expected_fields
+        expected_required = (
+            expected_fields - {"unit"} if schema_name == "RateMetric" else expected_fields
+        )
         component = schemas.get(schema_name)
         actual_properties = component.get("properties", {}) if isinstance(component, dict) else {}
         actual_fields = set(actual_properties)

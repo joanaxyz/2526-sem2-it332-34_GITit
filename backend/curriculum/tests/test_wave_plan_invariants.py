@@ -1,4 +1,4 @@
-"""The wave grammar (docs/goals/curriculum-waves-and-repetition/PLAN.md §3).
+"""The wave grammar documented in CONTENT_AUTHORING_GUIDE.md.
 
 The wave plan owns placement, so these rules are checked on the plan itself,
 with the guides' real resolver and technique detectors, walking every

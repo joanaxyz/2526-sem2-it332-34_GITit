@@ -9,6 +9,12 @@ const skills: LearnedSkill[] = [
   { id: 3, slug: 'git-merge', base_command: 'git merge', title: 'Merge', summary: 'Combine another branch into this one.', chapter_id: 30, chapter_number: 3, chapter_title: 'Merging' },
 ]
 
+const initKnowledge: NonNullable<LearnedSkill['knowledge']> = [
+  { id: 'form:1:command', kind: 'command', command: 'git init', title: 'Initialize', token: '', syntax: 'git init -b <branch>', text: 'Create Git metadata.', when_to_use: 'Choose the first branch.' },
+  { id: 'form:1:branch', kind: 'option', command: 'git init', title: 'Initial branch', token: '-b / --initial-branch', syntax: 'git init -b <branch>', text: 'Name the first branch.', when_to_use: 'Choose the first branch.' },
+  { id: 'form:2:directory', kind: 'argument', command: 'git init', title: 'Directory', token: '<directory>', syntax: 'git init <directory>', text: 'Choose the repository directory.', when_to_use: 'Initialize another directory.' },
+]
+
 describe('knowledge matched to the learner', () => {
   it('uses earned skills and their authored descriptions, with the latest chapter first at home', () => {
     const tips = knowledgeForMascot(skills)
@@ -31,5 +37,23 @@ describe('knowledge matched to the learner', () => {
   it('ignores missing teaching copy and supplies a source for unassigned skills', () => {
     expect(knowledgeForMascot([{ ...skills[0], summary: '  ' }])).toEqual([])
     expect(knowledgeForMascot([{ ...skills[0], chapter_title: '' }])[0].source).toBe('Your spellbook')
+  })
+
+  it('cycles through learned options and arguments even when only git init is learned', () => {
+    const tips = knowledgeForMascot([{ ...skills[0], knowledge: initKnowledge }])
+    expect(tips.map((tip) => tip.id)).toEqual([
+      'skill:1', 'skill:1:form:1:branch', 'skill:1:form:2:directory', COMMAND_ANATOMY_TIP.id,
+    ])
+    expect(tips[1]).toMatchObject({ kind: 'option', token: '-b / --initial-branch', whenToUse: 'Choose the first branch.' })
+  })
+
+  it('deduplicates map guidance while retaining other learned forms of the same command', () => {
+    const tips = knowledgeForMascot([{ ...skills[0], knowledge: initKnowledge }], undefined, {
+      currentLevelId: 1,
+      levels: [{ id: 1, title: 'Initialize a project', is_passed: false, knowledge: initKnowledge.slice(0, 2) }],
+    })
+    expect(tips.map((tip) => tip.id)).toEqual([
+      'level:1:form:1:command', 'level:1:form:1:branch', 'skill:1:form:2:directory', COMMAND_ANATOMY_TIP.id,
+    ])
   })
 })

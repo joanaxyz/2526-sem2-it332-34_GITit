@@ -23,7 +23,7 @@ function setup(path: string) {
 }
 
 describe('general learning help routes', () => {
-  it.each(['/home', '/stories', '/stories/arcane-spire', '/shop'])('offers independent help on %s', (path) => {
+  it.each(['/home', '/stories/arcane-spire', '/shop'])('offers independent help on %s', (path) => {
     setup(path)
     expect(screen.getByRole('dialog', { name: 'Ask Git-It' })).toBeInTheDocument()
   })

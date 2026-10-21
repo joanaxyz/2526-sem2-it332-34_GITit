@@ -69,4 +69,3 @@ def verify_backend_transitions(replays: dict) -> list[str]:
             except BadRequest as exc:
                 rejected.append(f"{case_id} step {index + 1} ({command}): {exc}")
     return rejected
-
