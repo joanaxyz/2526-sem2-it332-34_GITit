@@ -120,10 +120,4 @@
   :root:not([data-custom-cursors='off']) .stage-ed-land-handle.is-se {
     cursor: nwse-resize;
   }
-  :root:not([data-custom-cursors='off']) .resize-handle--vertical {
-    cursor: col-resize;
-  }
-  :root:not([data-custom-cursors='off']) .resize-handle--horizontal {
-    cursor: row-resize;
-  }
 }

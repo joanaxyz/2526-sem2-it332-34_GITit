@@ -4,7 +4,7 @@ import { COMMAND_ANATOMY_TIP, type MascotKnowledgeTip } from '@/shared/mascot/ma
 
 export type MascotChapterContext = { id: number; number: number }
 
-export type MascotMapLevel = {
+type MascotMapLevel = {
   id: number
   title: string
   is_passed: boolean

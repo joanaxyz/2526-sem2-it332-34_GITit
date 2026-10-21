@@ -31,6 +31,11 @@ function vendorChunkName(moduleId: string): string | null {
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
   plugins: [react()],
+  optimizeDeps: {
+    // Only the real pages. Scratch previews in the gitignored .tmp/ must never
+    // break dev-server startup when the code they import moves.
+    entries: ['index.html', 'diagram-review.html'],
+  },
   resolve: {
     alias: [
       ...(mode === 'test'

@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react'
 import { Handle, Position } from 'reactflow'
 import type { NodeProps } from 'reactflow'
 
@@ -30,7 +31,6 @@ export function CommitNode({ data }: NodeProps<CommitNodeData>) {
       className={cn(
         'relative z-10 flex w-36 flex-col items-center gap-2',
         data.isEntering && 'dag-node-enter',
-        data.isEntering && `dag-node-enter--${data.layoutDirection}`,
       )}
       onMouseEnter={() => activate(commitId)}
       onMouseLeave={() => dismiss(commitId)}
@@ -53,7 +53,8 @@ export function CommitNode({ data }: NodeProps<CommitNodeData>) {
           data.isHead
             ? cn('is-head', colors.headNode)
             : 'text-foreground',
-          isActive && 'ring-2 ring-primary/70 ring-offset-2 ring-offset-background',
+          isActive && 'is-inspected',
+          data.enteringHead && !data.isEntering && 'is-head-arriving',
         )}
       >
         <DagSealOrnament head={data.isHead} />
@@ -149,36 +150,55 @@ export function CommitDetailsPanel({ data }: { data: CommitNodeData | null }) {
 export function EmptyRepositoryNode({ data }: NodeProps<EmptyRepositoryNodeData>) {
   const colors = VARIANT_COLORS[data.variant]
   if (!data.initialized) {
-    return <div className="repository-folder-node"><strong>Project folder</strong><span>Git is not initialized</span></div>
+    return (
+      <div className="flex w-32 flex-col items-center gap-2">
+        <div className="dag-commit-seal is-void" aria-hidden="true">
+          <DagSealOrnament />
+        </div>
+        <span className="dag-orb-caption">Git is not initialized</span>
+      </div>
+    )
   }
+  // The burst sits beside the seal, not inside it, so the shell's shards fly
+  // at full size while the new HEAD orb swells in from nothing.
   return (
-    <div className="flex w-32 flex-col items-center gap-2">
+    <div className={cn('relative flex w-32 flex-col items-center gap-2', data.isInitializing && 'dag-node-enter')}>
+      {data.isInitializing ? <DagOrbBurst /> : null}
       <div className={cn('dag-commit-seal is-head font-mono text-xs font-semibold', colors.emptyHead)}>
         <DagSealOrnament head />
         <span className="dag-commit-seal__label">HEAD</span>
       </div>
-      <span className={cn('dag-ref-banner is-active max-w-28 truncate text-[11px] font-semibold leading-none', colors.emptyPill)}>
+      <span className={cn(
+        'dag-ref-banner is-active max-w-28 truncate text-[11px] font-semibold leading-none',
+        colors.emptyPill,
+        data.isInitializing && 'dag-ref-enter',
+      )}>
         {data.branchName}
       </span>
-      <div className="mt-0.5 rounded border border-dashed border-muted-foreground/20 px-2.5 py-1.5 text-center">
-        <span className="text-[11px] font-medium leading-none text-muted-foreground">No commits yet</span>
-      </div>
+      <span className="dag-orb-caption">No commits yet</span>
     </div>
   )
 }
 
+const BURST_SHARDS = Array.from({ length: 10 }, (_, index) => index)
+
+function DagOrbBurst() {
+  return (
+    <span className="dag-orb-burst" aria-hidden="true">
+      {BURST_SHARDS.map((shard) => (
+        <i key={shard} style={{ '--shard': shard } as CSSProperties} />
+      ))}
+    </span>
+  )
+}
+
 function DagSealOrnament({ head = false }: { head?: boolean }) {
+  // pathLength normalises the ring so its draw-on animation is size-independent.
   return (
     <svg className="dag-commit-seal__ornament" viewBox="0 0 64 64" aria-hidden="true">
-      <polygon className="dag-commit-seal__facet" points="22,3 42,3 58,17 61,32 58,47 42,61 22,61 6,47 3,32 6,17" />
-      <circle className="dag-commit-seal__ring" cx="32" cy="32" r="24" />
-      {head ? (
-        <g className="dag-commit-seal__runes">
-          <path d="M32 5v8M32 51v8M5 32h8M51 32h8" />
-          <path d="m13 13 5 5m28 28 5 5m0-38-5 5M18 46l-5 5" />
-          <path d="m32 15 3 6-3-2-3 2 3-6Zm17 17-6 3 2-3-2-3 6 3ZM32 49l-3-6 3 2 3-2-3 6ZM15 32l6-3-2 3 2 3-6-3Z" />
-        </g>
-      ) : null}
+      {head ? <circle className="dag-commit-seal__halo" cx="32" cy="32" r="30" /> : null}
+      <circle className="dag-commit-seal__core" cx="32" cy="32" r="24" />
+      <circle className="dag-commit-seal__ring" cx="32" cy="32" r="24" pathLength={1} transform="rotate(-90 32 32)" />
     </svg>
   )
 }

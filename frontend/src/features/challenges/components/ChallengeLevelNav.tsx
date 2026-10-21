@@ -1,9 +1,6 @@
 import { Check, Loader2, Lock, Play, Swords } from 'lucide-react'
 import type { ComponentType } from 'react'
 
-import checkNodeImage from '@/assets/images/battle-outcome/check.png'
-import lockNodeImage from '@/assets/images/battle-outcome/lock.png'
-import targetNodeImage from '@/assets/images/battle-outcome/target.png'
 import type { ChallengeStatus, ChallengeTrialAccess, Difficulty } from '@/features/challenges/types'
 import { cn } from '@/shared/utils/cn'
 
@@ -31,13 +28,6 @@ const TONE_ICON: Record<NodeTone, ComponentType<{ className?: string }>> = {
   current: Swords,
   available: Play,
   locked: Lock,
-}
-
-/** Baked neon node art (battle-outcome assets); lucide stays for `available`/busy. */
-const TONE_ICON_ART: Partial<Record<NodeTone, string>> = {
-  completed: checkNodeImage,
-  current: targetNodeImage,
-  locked: lockNodeImage,
 }
 
 /**
@@ -105,22 +95,18 @@ export function ChallengeLevelNav({
                 />
               ) : null}
 
-              {!isBusy && TONE_ICON_ART[tone] ? (
-                <img className="game-outcome-node-art" src={TONE_ICON_ART[tone]} alt="" aria-hidden="true" />
-              ) : (
-                <span
-                  className={cn(
-                    'grid size-7 place-items-center rounded-full border',
-                    tone === 'current' && 'border-primary/60 bg-primary/15 text-primary',
-                    tone === 'completed' && 'border-primary/55 bg-primary/15 text-primary',
-                    tone === 'available' &&
-                      'border-border/70 bg-background/60 text-muted-foreground group-hover:text-primary',
-                    isLocked && 'border-border/50 bg-background/40 text-muted-foreground',
-                  )}
-                >
-                  <Icon className={cn('size-3.5', isBusy && 'animate-spin')} />
-                </span>
-              )}
+              <span
+                className={cn(
+                  'grid size-7 place-items-center rounded-full border',
+                  tone === 'current' && 'border-primary/60 bg-primary/15 text-primary',
+                  tone === 'completed' && 'border-warning/55 bg-warning/10 text-warning',
+                  tone === 'available' &&
+                    'border-border/70 bg-background/60 text-muted-foreground group-hover:text-primary',
+                  isLocked && 'border-border/50 bg-background/40 text-muted-foreground',
+                )}
+              >
+                <Icon className={cn('size-3.5', isBusy && 'animate-spin')} />
+              </span>
               <span
                 className={cn(
                   'text-xs font-bold',

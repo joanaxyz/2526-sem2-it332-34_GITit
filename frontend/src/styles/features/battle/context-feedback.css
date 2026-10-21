@@ -106,13 +106,11 @@
 }
 
 @media (max-width: 1280px) {
-  .gameplay-header-profile { display: none; }
   .gameplay-workspace { grid-template-columns: 17.5rem minmax(0, 1fr); }
   .tier-gameplay-workspace { grid-template-columns: 17.5rem minmax(0, 1fr) minmax(18rem, 28vw); }
 }
 
 @media (max-width: 1080px) {
-  .gameplay-header-account { display: none; }
   .gameplay-header-mission { max-width: 28vw; }
 }
 
@@ -151,10 +149,7 @@
 
   .gameplay-workspace__sidebar,
   .gameplay-workspace__main,
-  .challenge-diagram-grid,
-  .gameplay-terminal-grid,
-  .gameplay-terminal-grid.has-feedback,
-  .challenge-diagram-grid.has-target {
+  .gameplay-terminal-grid {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
   }
@@ -175,10 +170,6 @@
   .gameplay-battle-slot,
   .gameplay-battle-panel {
     min-height: 18rem;
-  }
-
-  .gameplay-resize {
-    display: none;
   }
 
   .gameplay-pane {

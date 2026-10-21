@@ -8,16 +8,28 @@ import { writePreference } from '@/shared/utils/persistentState'
 import { cn } from '@/shared/utils/cn'
 
 import { CommitActivationContext } from './live-dag/activation'
+import { CommitLinkEdge } from './live-dag/edges'
 import { RepositoryStateMap } from './live-dag/RepositoryStateMap'
 import { MAX_DAG_ZOOM, MIN_DAG_ZOOM, NO_DELTA, VARIANT_COLORS } from './live-dag/constants'
 import { FitViewOnTopologyChange } from './live-dag/FitViewOnTopologyChange'
 import { buildGraph, layoutPositionsCache, normalizeSnapshot, rememberLayoutPositions, snapshotDelta } from './live-dag/graph'
 import { CommitDetailsPanel, CommitNode, EmptyRepositoryNode, RepositoryDetails } from './live-dag/nodes'
-import type { CommitNodeData, DagActivity, DagLayoutDirection, DagVariant, EnteringDelta } from './live-dag/types'
+import type {
+  CommitNodeData,
+  DagActivity,
+  DagLayoutDirection,
+  DagVariant,
+  EmptyRepositoryNodeData,
+  EnteringDelta,
+} from './live-dag/types'
 
 const commitNodeTypes = {
   commit: memo(CommitNode),
   emptyRepository: memo(EmptyRepositoryNode),
+}
+
+const commitEdgeTypes = {
+  commitLink: memo(CommitLinkEdge),
 }
 
 function handleReactFlowError(code: string, message: string) {
@@ -136,9 +148,13 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   }, [animateChanges, normalizedSnapshot])
 
   useEffect(() => {
-    const hasDelta = entering.commits.size > 0 || entering.refsByCommit.size > 0 || Boolean(entering.headTarget)
+    const hasDelta =
+      entering.commits.size > 0 ||
+      entering.refsByCommit.size > 0 ||
+      Boolean(entering.headTarget) ||
+      entering.repositoryInitialized
     if (!hasDelta) return
-    const timer = window.setTimeout(() => setEntering(NO_DELTA), 760)
+    const timer = window.setTimeout(() => setEntering(NO_DELTA), 1100)
     return () => window.clearTimeout(timer)
   }, [entering])
 
@@ -169,6 +185,10 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   const diagramNodes = useMemo(
     () =>
       nodes.map((node) => {
+        if (node.type === 'emptyRepository') {
+          if (!entering.repositoryInitialized) return node
+          return { ...node, data: { ...(node.data as EmptyRepositoryNodeData), isInitializing: true } }
+        }
         if (node.type !== 'commit') return node
         const commitId = node.id
         return {
@@ -187,7 +207,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
     () =>
       entering.commits.size
         ? edges.map((edge) =>
-            entering.commits.has(edge.target) ? { ...edge, className: 'dag-edge-enter' } : edge,
+            entering.commits.has(edge.target) ? { ...edge, className: cn(edge.className, 'dag-edge-enter') } : edge,
           )
         : edges,
     [edges, entering],
@@ -207,7 +227,6 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
     <Card
       className={cn(
         'live-dag-panel min-h-0 overflow-hidden shadow-none',
-        activity === 'processing' && 'is-processing',
         className,
       )}
       style={showHeader ? { borderTop: `1.5px solid ${colors.border}` } : undefined}
@@ -242,6 +261,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
               nodesDraggable={false}
               nodesConnectable={false}
               nodeTypes={nodeTypes}
+              edgeTypes={commitEdgeTypes}
               panOnScroll
               minZoom={MIN_DAG_ZOOM}
               maxZoom={MAX_DAG_ZOOM}
@@ -258,7 +278,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
                   : undefined
               }
             >
-              <Background gap={18} color="hsl(var(--foreground) / 0.05)" />
+              <Background gap={20} size={1} color="hsl(var(--foreground) / 0.07)" />
               <Controls
                 className="dag-controls"
                 position="top-right"

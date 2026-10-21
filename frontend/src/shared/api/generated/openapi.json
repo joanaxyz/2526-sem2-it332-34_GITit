@@ -3212,6 +3212,46 @@
                     }
                 }
             }
+        },
+        "/api/tutoring/chat/": {
+            "post": {
+                "operationId": "tutor_chat",
+                "tags": [
+                    "tutoring"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorChatRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorChatRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorChatRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TutorChatResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -5547,6 +5587,9 @@
                     "teaching_key": {
                         "type": "string"
                     },
+                    "help_token": {
+                        "type": "string"
+                    },
                     "run_revision": {
                         "type": "integer"
                     },
@@ -5583,10 +5626,6 @@
                         "type": "string",
                         "nullable": true
                     },
-                    "example_command": {
-                        "type": "string",
-                        "nullable": true
-                    },
                     "completion_token": {
                         "type": "string",
                         "nullable": true
@@ -5614,8 +5653,8 @@
                     "completion_token",
                     "concepts",
                     "context_id",
-                    "example_command",
                     "explanation",
+                    "help_token",
                     "needs",
                     "phase",
                     "run_revision",
@@ -7189,6 +7228,16 @@
                 "type": "string",
                 "description": "* `repository` - repository\n* `commit` - commit\n* `branch` - branch\n* `head` - head\n* `staging` - staging\n* `working_tree` - working_tree\n* `conflict` - conflict\n* `tag` - tag\n* `remote` - remote\n* `config` - config\n* `stash` - stash\n* `operation` - operation"
             },
+            "ResponseKindEnum": {
+                "enum": [
+                    "explanation",
+                    "concept_redirect",
+                    "clarification",
+                    "unavailable"
+                ],
+                "type": "string",
+                "description": "* `explanation` - explanation\n* `concept_redirect` - concept_redirect\n* `clarification` - clarification\n* `unavailable` - unavailable"
+            },
             "SessionResponse": {
                 "type": "object",
                 "properties": {
@@ -7590,6 +7639,14 @@
                     "title"
                 ]
             },
+            "SurfaceEnum": {
+                "enum": [
+                    "home",
+                    "command_guide"
+                ],
+                "type": "string",
+                "description": "* `home` - home\n* `command_guide` - command_guide"
+            },
             "SyntaxPart": {
                 "type": "object",
                 "properties": {
@@ -7622,6 +7679,105 @@
                 "required": [
                     "run_id",
                     "tier_id",
+                    "title"
+                ]
+            },
+            "TutorChatContext": {
+                "type": "object",
+                "properties": {
+                    "surface": {
+                        "$ref": "#/components/schemas/SurfaceEnum"
+                    },
+                    "run_id": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "teaching_key": {
+                        "type": "string",
+                        "maxLength": 160
+                    },
+                    "usage_form": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "guide_token": {
+                        "type": "string",
+                        "maxLength": 4000
+                    }
+                },
+                "required": [
+                    "surface"
+                ]
+            },
+            "TutorChatRequest": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "maxLength": 4000
+                    },
+                    "context": {
+                        "$ref": "#/components/schemas/TutorChatContext"
+                    },
+                    "history": {
+                        "type": "array",
+                        "items": {
+                            "type": "string",
+                            "maxLength": 4000
+                        },
+                        "maxItems": 8
+                    }
+                },
+                "required": [
+                    "context",
+                    "message"
+                ]
+            },
+            "TutorChatResponse": {
+                "type": "object",
+                "properties": {
+                    "reply": {
+                        "type": "string"
+                    },
+                    "sources": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TutorTeachingSource"
+                        }
+                    },
+                    "suggested_topics": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TutorTeachingSource"
+                        }
+                    },
+                    "response_kind": {
+                        "$ref": "#/components/schemas/ResponseKindEnum"
+                    },
+                    "scenario_related": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "reply",
+                    "response_kind",
+                    "scenario_related",
+                    "sources",
+                    "suggested_topics"
+                ]
+            },
+            "TutorTeachingSource": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
                     "title"
                 ]
             },

@@ -1,10 +1,16 @@
+import { queryKeys } from '@/shared/api/queryKeys'
+import type { WorkspaceScene } from '@/shared/level/workspace/types'
 import { storyPath, storyPathWithQuery } from '@/shared/navigation/routes'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 
-export const DAG_ZOOM_KEY = 'tier-workspace:dag-zoom-vertical'
-
-export function stringList(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
+/** Where a tier run sits, for the shared gameplay workspace. */
+export function tierScene(run: Pick<TierRun, 'id' | 'tier'>): WorkspaceScene {
+  return {
+    title: run.tier.adventure_level_title,
+    rootName: run.tier.adventure_level_slug,
+    runQueryKey: queryKeys.adventureTierRun(run.id),
+    battle: { stageKey: String(run.tier.id), levelKey: String(run.tier.adventure_level_id) },
+  }
 }
 
 export function mapUrlForRun(run: Pick<TierRun, 'chapter' | 'story'>) {

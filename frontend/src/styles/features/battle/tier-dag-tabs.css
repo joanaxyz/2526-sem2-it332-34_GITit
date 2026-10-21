@@ -248,10 +248,6 @@
   box-shadow: none;
 }
 
-.tier-dag-pane > .challenge-dag-stage::before {
-  top: 0;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .tier-dag-toggle::before,
   .tier-dag-tab,

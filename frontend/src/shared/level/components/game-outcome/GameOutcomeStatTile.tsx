@@ -1,5 +1,7 @@
 import type { CSSProperties, ComponentType, HTMLAttributes } from 'react'
-import { CheckCircle2 } from 'lucide-react'
+import { Star } from 'lucide-react'
+
+import { cn } from '@/shared/utils/cn'
 
 import { useCountUp } from './useCountUp'
 
@@ -11,7 +13,7 @@ export type GameOutcomeStatTileProps = {
   helper: string
   accentColor: string
   animationDelay: number
-  /** Shows a small "Target met" chip in the header row. */
+  /** Shows a small "On target" chip beside the value. */
   targetMet?: boolean
   /** Optional glyph rendered in the accent chip; lucide icons satisfy this. */
   icon?: ComponentType<{ className?: string }>
@@ -21,10 +23,9 @@ export type GameOutcomeStatTileProps = {
 }
 
 /**
- * Animated stat tile. All three tiles maintain identical height via
- * min-height on `.game-outcome-stat-tile`, and a progress-bar slot is
- * always reserved (empty track when there is no denominator) so numbers
- * and captions stay horizontally aligned across the row.
+ * Animated scoreboard cell. Every cell reserves the same rows (header, value,
+ * bar, caption) so values and captions line up across the scoreboard; the bar
+ * track is drawn only when the stat has a denominator.
  */
 export function GameOutcomeStatTile({
   label,
@@ -46,56 +47,41 @@ export function GameOutcomeStatTile({
   return (
     <div
       className="game-outcome-stat-tile"
-      style={{ animationDelay: `${animationDelay}ms`, ...style } as CSSProperties}
+      style={{ animationDelay: `${animationDelay}ms`, '--stat-accent': accentColor, ...style } as CSSProperties}
     >
-      {/* Header: icon + label + optional target-met chip */}
       <div className="game-outcome-stat-header">
         {iconSrc ? (
           <img className="game-outcome-stat-icon" src={iconSrc} alt="" aria-hidden="true" />
         ) : Icon ? (
-          <span
-            className="game-outcome-stat-chip"
-            style={{ color: accentColor, background: `color-mix(in srgb, ${accentColor} 18%, transparent)` }}
-          >
+          <span className="game-outcome-stat-chip" aria-hidden="true">
             <Icon className="size-3.5" />
           </span>
         ) : null}
         <span className="game-outcome-stat-label">{label}</span>
-        {targetMet ? (
-          <span className="game-outcome-stat-target-chip">
-            <CheckCircle2 className="size-2.5" />
-            Target
-          </span>
-        ) : null}
       </div>
 
-      {/* Main content */}
       <div className="game-outcome-stat-tile-main">
-        {/* Big number */}
         <div className="game-outcome-stat-number-row">
-          <span className="game-outcome-stat-value" style={{ color: accentColor }}>
+          <span className="game-outcome-stat-value">
             {animatedNum}{suffix}
           </span>
           {denominator !== undefined ? (
             <span className="game-outcome-stat-denom">/ {denominator}</span>
           ) : null}
-        </div>
-
-        {/* Progress bar slot — always reserves height; empty if no denominator */}
-        <div className="game-outcome-stat-bar-track">
-          {hasBar ? (
-            <div
-              className="game-outcome-stat-bar-fill"
-              style={{
-                transform: `scaleX(${fillPercent / 100})`,
-                background: accentColor,
-                boxShadow: `0 0 10px color-mix(in srgb, ${accentColor} 70%, transparent)`,
-              }}
-            />
+          {targetMet ? (
+            <span className="game-outcome-stat-target-chip">
+              <Star className="size-2.5" fill="currentColor" aria-hidden="true" />
+              On target
+            </span>
           ) : null}
         </div>
 
-        {/* Caption */}
+        <div className={cn('game-outcome-stat-bar-track', !hasBar && 'is-empty')} aria-hidden="true">
+          {hasBar ? (
+            <div className="game-outcome-stat-bar-fill" style={{ transform: `scaleX(${fillPercent / 100})` }} />
+          ) : null}
+        </div>
+
         <p className="game-outcome-stat-caption">{helper}</p>
       </div>
     </div>

@@ -3,6 +3,7 @@
 from simulator.trajectory import describe_transition, route_position
 from tutoring.models import PendingCommandIntroduction
 from tutoring.services.anatomy import anatomy
+from tutoring.services.guide_privacy import safe_guide
 from tutoring.services.introductions import context_hash
 
 # Marks a feedback row that has not been read yet (``None`` means there is none).
@@ -50,12 +51,7 @@ def record_command_feedback(run, candidate, execution, previous_feedback=None, s
         # Reading feedback must not race the next terminal submission. Keep the
         # same lesson until acknowledged; refresh its binding after every command.
         if not (used_form and candidate.teaching_key == previous_feedback.teaching_key):
-            if execution.state_mutated and previous_feedback.payload.get("example_command"):
-                previous_feedback.payload = {
-                    **previous_feedback.payload,
-                    "example_command": None,
-                    "explanation": "Your repository changed, so the earlier example no longer applies.",
-                }
+            previous_feedback.payload = safe_guide(previous_feedback.payload)
             previous_feedback.revision = run.total_attempts
             previous_feedback.context_hash = context_hash(run)
             previous_feedback.save(update_fields=["revision", "context_hash", "payload"])
@@ -75,7 +71,6 @@ def record_command_feedback(run, candidate, execution, previous_feedback=None, s
             if _advanced_route(run, candidate, execution)
             else "That worked. Check the task for your next step."
         )
-        example = None
     elif execution.state_mutated:
         # A different route changed what is useful next. The planner decides
         # afresh from the new repository; never reveal an obsolete example.
@@ -87,7 +82,6 @@ def record_command_feedback(run, candidate, execution, previous_feedback=None, s
         verdict = "incorrect"
         explanation = "That wasn't the command this step needs."
         changes = []
-        example = candidate.example
     return PendingCommandIntroduction.objects.create(
         run=run,
         teaching_key=candidate.teaching_key,
@@ -98,21 +92,20 @@ def record_command_feedback(run, candidate, execution, previous_feedback=None, s
             "changes": changes,
             "verdict": verdict,
             "explanation": explanation,
-            "example_command": example,
         },
     )
 
 
 def introduction_copy(candidate) -> dict:
     form = candidate.form
-    return {
+    return safe_guide({
         "title": form.label or form.usage_form,
         # What the repository needs from this move, as structured changes.
         "needs": [dict(change) for change in candidate.step_effect if isinstance(change, dict)],
         "command_form": form.payload(),
         "anatomy": anatomy(form.usage_form),
         "concepts": [dict(concept) for concept in candidate.concepts],
-    }
+    })
 
 
 def _advanced_route(run, candidate, execution) -> bool:

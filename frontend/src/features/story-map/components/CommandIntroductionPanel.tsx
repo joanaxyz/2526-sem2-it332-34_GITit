@@ -6,10 +6,11 @@ import type { CommandIntroduction } from '@/features/story-map/api/commandIntrod
 import { RepositoryChangeDiagram } from '@/features/story-map/components/RepositoryChangeDiagram'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { useCommandIntroduction } from '@/features/story-map/hooks/useCommandIntroduction'
-import { useMediaQuery } from '@/features/story-map/hooks/useMediaQuery'
+import { useMediaQuery } from '@/shared/utils/useMediaQuery'
 import { commandFamilyIcon, repositoryChangeIcon } from '@/features/story-map/utils/commandIntroductionIcons'
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
 import { COMMAND_GUIDE_LAYOUT_KEY } from '@/shared/level/workspaceKeys'
+import { GuideTutor } from '@/shared/tutoring/GuideTutor'
 
 type RepositoryChange = CommandIntroduction['needs'][number]
 type Concept = CommandIntroduction['concepts'][number]
@@ -21,6 +22,8 @@ const WIDE_QUERY = '(min-width: 1180px) and (min-height: 640px)'
 // The scenario and project files stay readable while a guide is open.
 const CONTEXT_REGIONS = ['[data-tour-target="level-story"]', '[data-tour-target="project-files"]']
 const FEEDBACK_REGIONS = [...CONTEXT_REGIONS, '[data-tour-target="terminal"]']
+// The guide's chat window and the terminal belong with the guide: clicks there keep it open.
+const CLOSE_ON_OUTSIDE_CLICK = { except: ['.tutor-window', '[data-tour-target="terminal"]'] }
 
 /**
  * "Command guide": introduces the one new command form, or technique, the
@@ -31,10 +34,12 @@ const FEEDBACK_REGIONS = [...CONTEXT_REGIONS, '[data-tour-target="terminal"]']
  * show the guide as one frame holding the explanation and the change as their
  * own cards, each resized on its own; narrower screens use tabs in one card.
  *
- * Before a command it has no buttons: it stays beside the terminal while the
- * learner types and turns into feedback once the command runs. Hiding it (×)
- * is the only way to put it away; the command-bar book can bring it back.
- * After a command, "Got it" records the guide (and its new words) as done.
+ * Before a command its only button is close (×): it stays beside the terminal
+ * while the learner types and turns into feedback once the command runs. Close,
+ * Escape, or a click outside collapses it into the mascot launcher, which
+ * brings it back. After a command, "Got it" records the guide (and its new
+ * words) as done.
+ * Its "Ask Git-It" chat window opens and closes with it.
  */
 export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss }: {
   run: TierRun
@@ -46,6 +51,8 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
   const wide = useMediaQuery(WIDE_QUERY)
   const [tab, setTab] = useState<Tab>('command')
   const introduction = tutor.phase === 'introduction'
+  // Feedback waits for "Got it"; introductions and replays can be put away.
+  const dismissible = replay || introduction
   const missed = tutor.verdict === 'incorrect'
   const form = tutor.command_form
   const primer = tutor.concepts.find((concept) => concept.key === 'commands')
@@ -62,8 +69,8 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
   const hasChange = (introduction || missed) && (tutor.needs.length > 0 || words.length > 0)
   const change = hasChange ? (
     <>
-      <RepositoryChangeDiagram changes={tutor.needs} repository={run.repository_state} />
-      <ChangeList label={introduction ? 'Your repository needs' : 'It will'} changes={tutor.needs} />
+      <RepositoryChangeDiagram changes={tutor.needs} repository={undefined} />
+      <ChangeList label="What this command does" changes={tutor.needs} />
       <Words concepts={words} />
     </>
   ) : null
@@ -87,12 +94,7 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
     command = (
       <>
         <Verdict tone="miss">{tutor.explanation}</Verdict>
-        {tutor.example_command ? (
-          <section className="command-intro__section" aria-label="Command to try">
-            <h3 className="command-intro__label">Try this</h3>
-            <code className="command-intro__example">{tutor.example_command}</code>
-          </section>
-        ) : <CommandSyntax usage={form.usage_form} />}
+        <CommandSyntax usage={form.usage_form} />
         {error}
       </>
     )
@@ -130,44 +132,51 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
   }
 
   return (
-    <GameplayWorkspaceTour
-      label="Command guide"
-      steps={[step]}
-      refreshKey={tutor.context_id}
-      finishLabel={lesson.pending ? 'Saving…' : 'Got it'}
-      finishDisabled={lesson.pending}
-      cardClassName="command-intro"
-      skipLabel={replay ? 'Close command guide' : 'Hide command guide'}
-      skipIconOnly
-      showSkip={replay || introduction}
-      showActions={!replay && !introduction}
-      focusCard={replay || !introduction}
-      showProgress={false}
-      transformable
-      transformPreferenceKey={COMMAND_GUIDE_LAYOUT_KEY}
-      paneLabels={{ main: 'command card', aside: `${changeTitle.toLowerCase()} card` }}
-      reveal={introduction ? CONTEXT_REGIONS : FEEDBACK_REGIONS}
-      collapseTarget="[data-command-guide-launcher]"
-      aside={split ? (
-        <section className="command-intro__aside" aria-label={changeTitle}>
-          <h3 className="command-intro__aside-title">{changeTitle}</h3>
-          {change}
-        </section>
-      ) : undefined}
-      onClose={(reason) => {
-        if (replay) {
+    <>
+      <GameplayWorkspaceTour
+        label="Command guide"
+        steps={[step]}
+        refreshKey={tutor.context_id}
+        finishLabel={lesson.pending ? 'Saving…' : 'Got it'}
+        finishDisabled={lesson.pending}
+        cardClassName="command-intro"
+        skipLabel="Close command guide"
+        skipIconOnly
+        showSkip={dismissible}
+        closeOnOutsideClick={dismissible ? CLOSE_ON_OUTSIDE_CLICK : undefined}
+        showActions={!replay && !introduction}
+        focusCard={replay || !introduction}
+        showProgress={false}
+        showSpeaker={false}
+        transformable
+        transformPreferenceKey={COMMAND_GUIDE_LAYOUT_KEY}
+        paneLabels={{ main: 'command card', aside: `${changeTitle.toLowerCase()} card` }}
+        reveal={introduction ? CONTEXT_REGIONS : FEEDBACK_REGIONS}
+        collapseTarget='[data-mascot-launcher="command-guide"]'
+        aside={split ? (
+          <section className="command-intro__aside" aria-label={changeTitle}>
+            <h3 className="command-intro__aside-title">{changeTitle}</h3>
+            {change}
+          </section>
+        ) : undefined}
+        onClose={(reason) => {
+          if (reason === 'finish') {
+            void lesson.complete().then((completed) => { if (completed) focusTerminal() })
+            return
+          }
           onDismiss()
-          focusTerminal()
-          return
-        }
-        if (reason === 'skip') {
-          onDismiss()
-          focusTerminal()
-        } else {
-          void lesson.complete().then((completed) => { if (completed) focusTerminal() })
-        }
-      }}
-    />
+          // After a click elsewhere, focus stays where the learner clicked.
+          if (reason === 'skip') focusTerminal()
+        }}
+      />
+      <GuideTutor
+        key={tutor.context_id}
+        runId={run.id}
+        teachingKey={tutor.teaching_key}
+        usageForm={form.usage_form}
+        guideToken={tutor.help_token}
+      />
+    </>
   )
 }
 

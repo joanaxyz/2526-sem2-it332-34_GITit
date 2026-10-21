@@ -141,13 +141,12 @@ class ChallengeRunService:
         return queryset.first()
 
     def _ensure_unlocked(self, *, player, trial: ChallengeTrial) -> None:
-        from curriculum.selectors.adventure_access import cleared_tier_difficulties
+        from curriculum.selectors.adventure_access import chapter_tiers_cleared
 
         self._ensure_previous_challenge_level_complete(player=player, trial=trial)
-        cleared = cleared_tier_difficulties(player=player, chapter_id=trial.chapter.id)
-        if cleared is not None and trial.difficulty not in cleared:
+        if chapter_tiers_cleared(player=player, chapter_id=trial.chapter.id) is False:
             raise Locked(
-                f"Clear every level's {trial.difficulty} tier in this chapter to open this trial."
+                "Clear every tier of every level in this chapter to open its Challenge Gate."
             )
         if trial.difficulty == DIFFICULTY_EASY:
             return

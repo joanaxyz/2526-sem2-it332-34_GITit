@@ -1,37 +1,19 @@
-import { GitBranch, Layers, Smile, Target, TerminalSquare } from 'lucide-react'
-import type { ComponentType, ReactNode, RefObject } from 'react'
+import { Layers, Smile, Target, TerminalSquare } from 'lucide-react'
 
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
-import { DifficultyChip, StarTriplet } from '@/shared/level/components/LevelContextPanel'
+import { DifficultyChip, StarTriplet } from '@/shared/level/components/LevelStatValues'
 import { RookIcon, StarSolidIcon } from '@/shared/level/components/workspaceIcons'
-import { cn } from '@/shared/utils/cn'
+import type { RepoGraphTrigger, WorkspaceStat } from '@/shared/level/workspace/types'
+import { WorkspaceStatsBar } from '@/shared/level/workspace/WorkspaceStatsBar'
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 
-type TierStat = {
-  label: string
-  icon: ComponentType<{ className?: string }>
-  iconClass?: string
-  value: ReactNode
-}
+const HIDDEN_FOR_TRANSFER = new Set(['Stars', 'Star target', 'Reward'])
 
-/** The drawer trigger, present only while the layout puts the graph in a drawer. */
-export type RepoGraphTrigger = {
-  open: boolean
-  hasUpdate: boolean
-  controls: string
-  buttonRef: RefObject<HTMLButtonElement | null>
-  onOpen: () => void
-}
-
-/**
- * Full-width run status strip under the command bar: the level facts that used
- * to close the context card. The command budget and star target keep their
- * tour anchors here.
- */
+/** The adventure tier's facts in the shared stats strip under the command bar. */
 export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: RepoGraphTrigger }) {
   const starTarget = run.policy.min_counted_commands
   const rewardClaimed = run.reward.claimed || Boolean(run.rewards?.coins_awarded)
-  const stats: TierStat[] = [
+  const stats: WorkspaceStat[] = [
     { label: 'Mode', icon: RookIcon, value: run.transfer ? 'Transfer checkpoint' : `Adventure${run.replay ? ' · Replay' : ''}` },
     ...(run.difficulty
       ? [{ label: 'Difficulty', icon: Smile, value: <DifficultyChip difficulty={run.difficulty} /> }]
@@ -83,42 +65,11 @@ export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: Rep
       ),
     },
   ]
-  const hiddenForTransfer = new Set(['Stars', 'Star target', 'Reward'])
 
   return (
-    <div className="tier-stats-bar" role="group" aria-label="Level status">
-      <dl className="tier-stats">
-        {stats.filter((stat) => !run.transfer || !hiddenForTransfer.has(stat.label)).map((stat) => (
-          <div className="tier-stat" key={stat.label}>
-            <dt>
-              <stat.icon aria-hidden="true" className={cn('tier-stat-icon', stat.iconClass)} />
-              {stat.label}
-            </dt>
-            <dd>{stat.value}</dd>
-          </div>
-        ))}
-      </dl>
-      {repoGraph ? (
-        <button
-          ref={repoGraph.buttonRef}
-          type="button"
-          className="tier-repo-graph-button"
-          aria-haspopup="dialog"
-          aria-expanded={repoGraph.open}
-          aria-controls={repoGraph.controls}
-          data-tour-target="live-dag"
-          onClick={repoGraph.onOpen}
-        >
-          <GitBranch aria-hidden="true" />
-          Repo graph
-          {repoGraph.hasUpdate ? (
-            <>
-              <span className="tier-repo-graph-dot" aria-hidden="true" />
-              <span className="sr-only">, updated</span>
-            </>
-          ) : null}
-        </button>
-      ) : null}
-    </div>
+    <WorkspaceStatsBar
+      stats={stats.filter((stat) => !run.transfer || !HIDDEN_FOR_TRANSFER.has(stat.label))}
+      repoGraph={repoGraph}
+    />
   )
 }

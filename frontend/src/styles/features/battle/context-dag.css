@@ -50,35 +50,28 @@
 
 .dag-legend-symbol.is-head,
 .dag-legend-symbol.is-commit {
-  border: 1px solid currentColor;
-  background: rgba(var(--theme-primary-rgb), 0.12);
-  box-shadow: 0 0 5px rgba(var(--theme-primary-rgb), 0.34);
+  border: 1.5px solid currentColor;
+  border-radius: 50%;
+  background: rgb(var(--theme-surface-rgb));
 }
 
 .dag-legend-symbol.is-head {
-  border-radius: 50%;
-}
-
-.dag-legend-symbol.is-head::after {
-  position: absolute;
-  inset: 0.19rem;
-  border: 1px solid currentColor;
-  border-radius: inherit;
-  content: '';
-}
-
-.dag-legend-symbol.is-branch {
-  width: 1rem;
-  height: 0.58rem;
-  background: currentColor;
-  clip-path: polygon(0 50%, 0.2rem 0, calc(100% - 0.2rem) 0, 100% 50%, calc(100% - 0.2rem) 100%, 0.2rem 100%);
-  opacity: 0.82;
+  background: rgba(var(--theme-primary-rgb), 0.2);
+  box-shadow: 0 0 0 2px rgb(var(--theme-surface-rgb)), 0 0 0 3px rgba(var(--theme-primary-rgb), 0.45);
 }
 
 .dag-legend-symbol.is-commit {
-  width: 0.66rem;
-  height: 0.66rem;
-  transform: rotate(45deg);
+  width: 0.7rem;
+  height: 0.7rem;
+  border-color: rgba(var(--theme-primary-rgb), 0.62);
+}
+
+.dag-legend-symbol.is-branch {
+  width: 1.05rem;
+  height: 0.58rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  background: rgba(var(--theme-primary-rgb), 0.18);
 }
 
 /* A compact top-right zoom row that recedes until the learner reaches for it. */
@@ -104,23 +97,41 @@
   top: 2.5rem;
 }
 
-/* Lightweight SVG/CSS graph chrome. Dimensions are explicit because this app
-   uses a curated utility sheet rather than Tailwind; content must never size a
-   HEAD or commit seal into an oval. ReactFlow applies a uniform viewport scale. */
+/* Commit graph chrome. Dimensions are explicit because this app uses a curated
+   utility sheet rather than Tailwind; content must never size a seal into an
+   oval. A commit is a quiet disc; HEAD adds one halo ring and the only glow.
+   ReactFlow applies a uniform viewport scale. */
 .dag-commit-seal {
   position: relative;
   display: grid;
-  width: 4rem;
-  min-width: 4rem;
-  height: 4rem;
-  min-height: 4rem;
+  width: 3.5rem;
+  min-width: 3.5rem;
+  height: 3.5rem;
+  min-height: 3.5rem;
   aspect-ratio: 1 / 1;
   place-items: center;
   isolation: isolate;
-  color: hsl(var(--foreground));
+  color: hsl(var(--foreground) / 0.86);
   background: transparent;
   border: 0;
   border-radius: 50%;
+  transition: transform var(--motion-fast) var(--ease-out);
+}
+
+.dag-commit-seal:hover {
+  transform: scale(1.06);
+}
+
+/* The arrival ripple; idle it is invisible and costs nothing. */
+.dag-commit-seal::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: 12.5%;
+  z-index: -2;
+  border: 1.5px solid rgba(var(--theme-primary-rgb), 0.7);
+  border-radius: 50%;
+  opacity: 0;
 }
 
 .dag-commit-seal__ornament {
@@ -130,99 +141,175 @@
   width: 100%;
   height: 100%;
   overflow: visible;
-  fill: rgba(var(--theme-surface-rgb), 0.94);
-  filter: drop-shadow(0 3px 5px rgba(0, 0, 0, 0.52));
 }
 
-.dag-commit-seal__facet {
-  stroke: rgba(var(--theme-accent-rgb), 0.66);
-  stroke-width: 1.25;
+.dag-commit-seal__core {
+  fill: rgb(var(--theme-surface-rgb));
+  stroke: rgba(var(--theme-primary-rgb), 0.16);
+  stroke-width: 6;
+  transition: fill var(--motion-fast) var(--ease-out);
 }
 
 .dag-commit-seal__ring {
-  fill: rgba(var(--theme-primary-rgb), 0.08);
-  stroke: rgba(var(--theme-primary-rgb), 0.44);
-  stroke-width: 1;
+  fill: none;
+  stroke: rgba(var(--theme-primary-rgb), 0.62);
+  stroke-width: 1.75;
+  transition: stroke var(--motion-fast) var(--ease-out);
 }
 
-.dag-commit-seal.is-head .dag-commit-seal__ornament {
-  fill: rgba(var(--theme-surface-rgb), 0.98);
-  filter:
-    drop-shadow(0 0 5px rgba(var(--theme-primary-rgb), 0.56))
-    drop-shadow(0 3px 5px rgba(0, 0, 0, 0.55));
+.dag-commit-seal:hover .dag-commit-seal__ring,
+.dag-commit-seal.is-inspected .dag-commit-seal__ring {
+  stroke: rgb(var(--theme-primary-rgb));
 }
 
-.dag-commit-seal.is-head .dag-commit-seal__facet {
-  stroke: rgba(var(--theme-primary-rgb), 0.96);
-  stroke-width: 1.8;
+.dag-commit-seal.is-inspected .dag-commit-seal__core {
+  fill: rgba(var(--theme-primary-rgb), 0.12);
+}
+
+.dag-commit-seal.is-head {
+  color: rgb(var(--theme-spark-rgb));
+}
+
+.dag-commit-seal.is-head .dag-commit-seal__core {
+  fill: rgba(var(--theme-primary-rgb), 0.16);
+  stroke: rgba(var(--theme-primary-rgb), 0.22);
 }
 
 .dag-commit-seal.is-head .dag-commit-seal__ring {
-  stroke: rgba(var(--theme-spark-rgb), 0.82);
-  stroke-width: 1.4;
+  stroke: rgb(var(--theme-primary-rgb));
+  stroke-width: 2.5;
 }
 
-.dag-commit-seal__runes {
-  fill: rgba(var(--theme-secondary-rgb), 0.72);
-  stroke: rgba(var(--theme-spark-rgb), 0.78);
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  stroke-width: 1.15;
+.dag-commit-seal__halo {
+  fill: none;
+  stroke: rgba(var(--theme-primary-rgb), 0.38);
+  stroke-width: 1;
+  transform-box: fill-box;
+  transform-origin: center;
+}
+
+.dag-commit-seal.is-head .dag-commit-seal__ornament {
+  filter: drop-shadow(0 0 7px rgba(var(--theme-primary-rgb), 0.45));
+}
+
+/* Ordinary folder: a hollow orb with nothing inside yet. `git init` bursts its
+   shell (stage-effects.css) and the HEAD orb takes its place. */
+.dag-commit-seal.is-void .dag-commit-seal__core {
+  fill: hsl(var(--foreground) / 0.025);
+  stroke: none;
+}
+
+.dag-commit-seal.is-void .dag-commit-seal__ring {
+  stroke: hsl(var(--foreground) / 0.3);
+  stroke-width: 1.5;
+  stroke-dasharray: 0.035 0.03;
+}
+
+.dag-orb-caption {
+  color: hsl(var(--muted-foreground));
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1;
+  white-space: nowrap;
+}
+
+.dag-orb-burst {
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  left: 50%;
+  width: 3.5rem;
+  height: 3.5rem;
+  transform: translateX(-50%);
+}
+
+.dag-orb-burst::before {
+  content: '';
+  position: absolute;
+  inset: 12.5%;
+  border: 1.5px dashed hsl(var(--foreground) / 0.3);
+  border-radius: 50%;
+}
+
+.dag-orb-burst i {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 2px;
+  height: 0.45rem;
+  margin: -0.225rem 0 0 -1px;
+  border-radius: 999px;
+  background: rgb(var(--theme-spark-rgb));
+  box-shadow: 0 0 6px rgba(var(--theme-primary-rgb), 0.8);
+}
+
+.dag-commit-seal:focus-visible {
+  outline: 2px solid rgba(var(--theme-primary-rgb), 0.8);
+  outline-offset: 3px;
 }
 
 .dag-commit-seal__label {
   display: block;
-  max-width: 2.75rem;
+  max-width: 2.6rem;
   overflow: hidden;
   color: inherit;
+  font-size: 0.75rem;
   line-height: 1;
   text-align: center;
   text-overflow: ellipsis;
-  text-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.38);
   white-space: nowrap;
 }
 
 .dag-head-marker {
   position: absolute;
-  top: -0.42rem;
+  top: -0.55rem;
   left: 50%;
-  padding: 0.12rem 0.35rem;
+  padding: 0.14rem 0.38rem;
   transform: translateX(-50%);
-  border: 1px solid hsl(var(--warning) / 0.72);
   border-radius: 999px;
-  background: rgba(var(--theme-surface-rgb), 0.96);
-  color: hsl(var(--warning));
-  font-size: var(--text-2xs);
+  background: hsl(var(--warning));
+  color: rgb(var(--theme-surface-rgb));
+  font-size: 0.56rem;
+  font-weight: 700;
   line-height: 1;
   letter-spacing: 0.08em;
-  box-shadow: 0 0 7px hsl(var(--warning) / 0.22);
+  box-shadow: 0 0 0 2px rgb(var(--theme-surface-rgb));
 }
 
 .dag-ref-banner {
   position: relative;
   display: inline-block;
   min-height: 1.25rem;
-  padding: 0.28rem 0.72rem;
-  border: 1px solid rgba(var(--theme-accent-rgb), 0.3);
-  background: rgba(var(--theme-surface-rgb), 0.92);
-  clip-path: polygon(0 50%, 0.38rem 0, calc(100% - 0.38rem) 0, 100% 50%, calc(100% - 0.38rem) 100%, 0.38rem 100%);
+  padding: 0.28rem 0.6rem;
+  border: 1px solid hsl(var(--foreground) / 0.14);
+  border-radius: 999px;
+  background: rgb(var(--theme-surface-rgb));
 }
 
 .dag-ref-banner.is-active {
-  border-color: rgba(var(--theme-primary-rgb), 0.7);
-  background: linear-gradient(90deg, rgba(var(--theme-primary-rgb), 0.08), rgba(var(--theme-secondary-rgb), 0.15), rgba(var(--theme-primary-rgb), 0.08));
+  border-color: rgba(var(--theme-primary-rgb), 0.62);
+  background: rgba(var(--theme-primary-rgb), 0.14);
   color: rgb(var(--theme-spark-rgb));
-  box-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.2);
+  box-shadow: none;
 }
 
 .dag-ref-banner.is-remote {
+  border-style: dashed;
   border-color: rgba(var(--theme-secondary-rgb), 0.55);
-  background: rgba(var(--theme-secondary-rgb), 0.1);
+  background: rgba(var(--theme-secondary-rgb), 0.08);
 }
 
-.dag-ley-edge .react-flow__edge-path {
-  stroke-dasharray: 5 5;
+.dag-ref-banner.is-head {
+  border-color: hsl(var(--warning) / 0.6);
+  background: hsl(var(--warning) / 0.12);
+  color: hsl(var(--warning));
+}
+
+.react-flow__edge.dag-ley-edge .react-flow__edge-path {
+  stroke: rgba(var(--theme-primary-rgb), 0.42);
   stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-dasharray: none;
 }
 
 .tier-repository-view {

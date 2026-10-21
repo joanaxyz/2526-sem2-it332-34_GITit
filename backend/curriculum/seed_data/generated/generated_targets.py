@@ -15243,9 +15243,9 @@ TARGET_STATES = json.loads(r"""
     },
     "working_tree": {}
   },
-  "gate1-easy-first-snapshot-field-log": {
+  "gate1-easy-two-commit-start-field-log": {
     "branches": {
-      "main": "c0"
+      "main": "c1"
     },
     "commits": [
       {
@@ -15275,13 +15275,38 @@ TARGET_STATES = json.loads(r"""
           "notes.md": "field-notes-v1",
           "readings.csv": "readings-v1"
         }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "README.md": {
+            "after": "README.md-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add field log guide",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "README.md-v1",
+          "notes.md": "field-notes-v1",
+          "readings.csv": "readings-v1"
+        }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
     "head": {
       "name": "main",
-      "target": "c0",
+      "target": "c1",
       "type": "branch"
     },
     "last_init_branch": "main",
@@ -15305,6 +15330,11 @@ TARGET_STATES = json.loads(r"""
         "message": "move HEAD",
         "ref": "HEAD@{0}",
         "target": "c0"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c1"
       }
     ],
     "remote_branches": {},
@@ -15325,9 +15355,9 @@ TARGET_STATES = json.loads(r"""
       }
     }
   },
-  "gate1-easy-first-snapshot-quiz": {
+  "gate1-easy-two-commit-start-quiz": {
     "branches": {
-      "main": "c0"
+      "main": "c1"
     },
     "commits": [
       {
@@ -15357,13 +15387,38 @@ TARGET_STATES = json.loads(r"""
           "index.html": "quiz-home-v1",
           "quiz.js": "quiz-logic-v1"
         }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "README.md": {
+            "after": "README.md-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add quiz setup notes",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "README.md-v1",
+          "index.html": "quiz-home-v1",
+          "quiz.js": "quiz-logic-v1"
+        }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
     "head": {
       "name": "main",
-      "target": "c0",
+      "target": "c1",
       "type": "branch"
     },
     "last_init_branch": "main",
@@ -15387,6 +15442,11 @@ TARGET_STATES = json.loads(r"""
         "message": "move HEAD",
         "ref": "HEAD@{0}",
         "target": "c0"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{1}",
+        "target": "c1"
       }
     ],
     "remote_branches": {},
@@ -17135,10 +17195,11 @@ TARGET_STATES = json.loads(r"""
       }
     }
   },
-  "gate3-easy-merge-and-resolve-banner": {
+  "gate3-easy-merge-then-backport-banner": {
     "branches": {
       "feature/banner": "c2",
-      "main": "c3"
+      "main": "c4",
+      "release/1.4": "c5"
     },
     "commits": [
       {
@@ -17147,10 +17208,16 @@ TARGET_STATES = json.loads(r"""
             "after": "src/banner.html base",
             "before": null,
             "change_type": "added"
+          },
+          "src/checkout.js": {
+            "after": "src/checkout.js v1",
+            "before": null,
+            "change_type": "added"
           }
         },
         "files": {
-          "src/banner.html": "added"
+          "src/banner.html": "added",
+          "src/checkout.js": "added"
         },
         "id": "c0",
         "is_merge": false,
@@ -17158,7 +17225,8 @@ TARGET_STATES = json.loads(r"""
         "order": 0,
         "parents": [],
         "tree": {
-          "src/banner.html": "src/banner.html base"
+          "src/banner.html": "src/banner.html base",
+          "src/checkout.js": "src/checkout.js v1"
         }
       },
       {
@@ -17180,7 +17248,8 @@ TARGET_STATES = json.loads(r"""
           "c0"
         ],
         "tree": {
-          "src/banner.html": "src/banner.html main"
+          "src/banner.html": "src/banner.html main",
+          "src/checkout.js": "src/checkout.js v1"
         }
       },
       {
@@ -17202,7 +17271,31 @@ TARGET_STATES = json.loads(r"""
           "c0"
         ],
         "tree": {
-          "src/banner.html": "src/banner.html feature"
+          "src/banner.html": "src/banner.html feature",
+          "src/checkout.js": "src/checkout.js v1"
+        }
+      },
+      {
+        "changes": {
+          "src/checkout.js": {
+            "after": "src/checkout.js fixed",
+            "before": "src/checkout.js v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/checkout.js": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Fix checkout total",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/banner.html": "src/banner.html main",
+          "src/checkout.js": "src/checkout.js fixed"
         }
       },
       {
@@ -17217,42 +17310,77 @@ TARGET_STATES = json.loads(r"""
         "files": {
           "src/banner.html": "modified"
         },
-        "id": "c3",
+        "id": "c4",
         "is_merge": true,
         "message": "Merge branch 'feature/banner'",
-        "order": 3,
+        "order": 4,
         "parents": [
-          "c1",
+          "c3",
           "c2"
         ],
         "tree": {
-          "src/banner.html": "<p>Welcome back, team!</p>"
+          "src/banner.html": "<p>Welcome back, team!</p>",
+          "src/checkout.js": "src/checkout.js fixed"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/checkout.js": {
+            "after": "src/checkout.js fixed",
+            "before": "src/checkout.js v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/checkout.js": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Fix checkout total",
+        "order": 5,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/banner.html": "src/banner.html base",
+          "src/checkout.js": "src/checkout.js fixed"
         }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "main",
-      "target": "c3",
+      "name": "release/1.4",
+      "target": "c5",
       "type": "branch"
     },
+    "last_cherry_pick_created_commit": "c5",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c3",
     "last_merge_branch": "feature/banner",
     "last_merge_conflict_paths": [
       "src/banner.html"
     ],
     "last_merge_conflicted": true,
-    "last_merge_created_commit": "c3",
+    "last_merge_created_commit": "c4",
     "last_merge_target": "c2",
+    "last_switch_branch": "release/1.4",
+    "last_switched_to": "release/1.4",
     "last_workspace_file_written": "src/banner.html",
     "operation_metadata": {
+      "last_cherry_pick_created_commit": "c5",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c3",
       "last_merge_branch": "feature/banner",
       "last_merge_conflict_paths": [
         "src/banner.html"
       ],
       "last_merge_conflicted": true,
-      "last_merge_created_commit": "c3",
+      "last_merge_created_commit": "c4",
       "last_merge_target": "c2",
+      "last_switch_branch": "release/1.4",
+      "last_switched_to": "release/1.4",
       "last_workspace_file_written": "src/banner.html"
     },
     "partial_hunks": {},
@@ -17260,7 +17388,17 @@ TARGET_STATES = json.loads(r"""
       {
         "message": "move HEAD",
         "ref": "HEAD@{0}",
-        "target": "c3"
+        "target": "c4"
+      },
+      {
+        "message": "checkout: moving from main to release/1.4",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c5"
       }
     ],
     "remote_branches": {},
@@ -17274,10 +17412,11 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "gate3-easy-merge-and-resolve-footer": {
+  "gate3-easy-merge-then-backport-footer": {
     "branches": {
       "feature/footer": "c2",
-      "main": "c3"
+      "main": "c4",
+      "release/2.0": "c5"
     },
     "commits": [
       {
@@ -17286,10 +17425,16 @@ TARGET_STATES = json.loads(r"""
             "after": "src/footer.html base",
             "before": null,
             "change_type": "added"
+          },
+          "src/invoice.js": {
+            "after": "src/invoice.js v1",
+            "before": null,
+            "change_type": "added"
           }
         },
         "files": {
-          "src/footer.html": "added"
+          "src/footer.html": "added",
+          "src/invoice.js": "added"
         },
         "id": "c0",
         "is_merge": false,
@@ -17297,7 +17442,8 @@ TARGET_STATES = json.loads(r"""
         "order": 0,
         "parents": [],
         "tree": {
-          "src/footer.html": "src/footer.html base"
+          "src/footer.html": "src/footer.html base",
+          "src/invoice.js": "src/invoice.js v1"
         }
       },
       {
@@ -17319,7 +17465,8 @@ TARGET_STATES = json.loads(r"""
           "c0"
         ],
         "tree": {
-          "src/footer.html": "src/footer.html main"
+          "src/footer.html": "src/footer.html main",
+          "src/invoice.js": "src/invoice.js v1"
         }
       },
       {
@@ -17341,7 +17488,31 @@ TARGET_STATES = json.loads(r"""
           "c0"
         ],
         "tree": {
-          "src/footer.html": "src/footer.html feature"
+          "src/footer.html": "src/footer.html feature",
+          "src/invoice.js": "src/invoice.js v1"
+        }
+      },
+      {
+        "changes": {
+          "src/invoice.js": {
+            "after": "src/invoice.js fixed",
+            "before": "src/invoice.js v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/invoice.js": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Fix tax rounding",
+        "order": 3,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "src/footer.html": "src/footer.html main",
+          "src/invoice.js": "src/invoice.js fixed"
         }
       },
       {
@@ -17356,42 +17527,77 @@ TARGET_STATES = json.loads(r"""
         "files": {
           "src/footer.html": "modified"
         },
-        "id": "c3",
+        "id": "c4",
         "is_merge": true,
         "message": "Merge branch 'feature/footer'",
-        "order": 3,
+        "order": 4,
         "parents": [
-          "c1",
+          "c3",
           "c2"
         ],
         "tree": {
-          "src/footer.html": "<footer>Contact support</footer>"
+          "src/footer.html": "<footer>Contact support</footer>",
+          "src/invoice.js": "src/invoice.js fixed"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/invoice.js": {
+            "after": "src/invoice.js fixed",
+            "before": "src/invoice.js v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/invoice.js": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Fix tax rounding",
+        "order": 5,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "src/footer.html": "src/footer.html base",
+          "src/invoice.js": "src/invoice.js fixed"
         }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
     "head": {
-      "name": "main",
-      "target": "c3",
+      "name": "release/2.0",
+      "target": "c5",
       "type": "branch"
     },
+    "last_cherry_pick_created_commit": "c5",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c3",
     "last_merge_branch": "feature/footer",
     "last_merge_conflict_paths": [
       "src/footer.html"
     ],
     "last_merge_conflicted": true,
-    "last_merge_created_commit": "c3",
+    "last_merge_created_commit": "c4",
     "last_merge_target": "c2",
+    "last_switch_branch": "release/2.0",
+    "last_switched_to": "release/2.0",
     "last_workspace_file_written": "src/footer.html",
     "operation_metadata": {
+      "last_cherry_pick_created_commit": "c5",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c3",
       "last_merge_branch": "feature/footer",
       "last_merge_conflict_paths": [
         "src/footer.html"
       ],
       "last_merge_conflicted": true,
-      "last_merge_created_commit": "c3",
+      "last_merge_created_commit": "c4",
       "last_merge_target": "c2",
+      "last_switch_branch": "release/2.0",
+      "last_switched_to": "release/2.0",
       "last_workspace_file_written": "src/footer.html"
     },
     "partial_hunks": {},
@@ -17399,7 +17605,17 @@ TARGET_STATES = json.loads(r"""
       {
         "message": "move HEAD",
         "ref": "HEAD@{0}",
-        "target": "c3"
+        "target": "c4"
+      },
+      {
+        "message": "checkout: moving from main to release/2.0",
+        "ref": "HEAD@{1}",
+        "target": "c0"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c5"
       }
     ],
     "remote_branches": {},
@@ -18155,42 +18371,49 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
-  "gate4-easy-recover-receipt-fix": {
+  "gate4-easy-recover-replay-publish-receipts": {
     "branches": {
-      "main": "c0",
-      "recovery/receipts": "c3"
+      "main": "c3",
+      "recovery/receipts": "c5"
     },
     "commits": [
       {
         "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      },
+      {
+        "changes": {
           "src/receipts.py": {
-            "after": "baseline",
+            "after": "src/receipts.py draft",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
           "src/receipts.py": "added"
-        },
-        "id": "c0",
-        "is_merge": false,
-        "message": "Reset position",
-        "order": 0,
-        "parents": [],
-        "tree": {
-          "src/receipts.py": "baseline"
-        }
-      },
-      {
-        "changes": {
-          "src/receipts.py": {
-            "after": "groundwork",
-            "before": "baseline",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/receipts.py": "modified"
         },
         "id": "c1",
         "is_merge": false,
@@ -18200,14 +18423,16 @@ TARGET_STATES = json.loads(r"""
           "c0"
         ],
         "tree": {
-          "src/receipts.py": "groundwork"
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "src/receipts.py": "src/receipts.py draft"
         }
       },
       {
         "changes": {
           "src/receipts.py": {
-            "after": "continued",
-            "before": "groundwork",
+            "after": "src/receipts.py fixed",
+            "before": "src/receipts.py draft",
             "change_type": "modified"
           }
         },
@@ -18216,145 +18441,226 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Continue receipts",
+        "message": "Fix receipt totals",
         "order": 2,
         "parents": [
           "c1"
         ],
         "tree": {
-          "src/receipts.py": "continued"
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "src/receipts.py": "src/receipts.py fixed"
         }
       },
       {
         "changes": {
-          "src/receipts.py": {
-            "after": "Fix receipt totals done",
-            "before": "continued",
+          "src/app.py": {
+            "after": "app-v2",
+            "before": "app-v1",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/receipts.py": "modified"
+          "src/app.py": "modified"
         },
         "id": "c3",
         "is_merge": false,
-        "message": "Fix receipt totals",
+        "message": "Patch tax rate",
         "order": 3,
         "parents": [
-          "c2"
+          "c0"
         ],
         "tree": {
-          "src/receipts.py": "Fix receipt totals done"
+          "README.md": "readme-v1",
+          "src/app.py": "app-v2"
         }
       },
       {
+        "author": "GIT it",
         "changes": {
           "src/receipts.py": {
-            "after": "abandoned experiment",
-            "before": "continued",
+            "after": "src/receipts.py draft",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/receipts.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Start receipts",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v2",
+          "src/receipts.py": "src/receipts.py draft"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/receipts.py": {
+            "after": "src/receipts.py fixed",
+            "before": "src/receipts.py draft",
             "change_type": "modified"
           }
         },
         "files": {
           "src/receipts.py": "modified"
         },
-        "id": "c4",
+        "id": "c5",
         "is_merge": false,
-        "message": "Abandoned experiment",
-        "order": 4,
+        "message": "Fix receipt totals",
+        "order": 5,
         "parents": [
-          "c2"
+          "c4"
         ],
         "tree": {
-          "src/receipts.py": "abandoned experiment"
+          "README.md": "readme-v1",
+          "src/app.py": "app-v2",
+          "src/receipts.py": "src/receipts.py fixed"
         }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
     "head": {
       "name": "recovery/receipts",
-      "target": "c3",
+      "target": "c5",
       "type": "branch"
     },
     "last_branch_created": "recovery/receipts",
+    "last_push_branch": "recovery/receipts",
+    "last_push_commit": "c5",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/recovery/receipts",
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c5",
+    "last_rebase_onto": null,
+    "last_rebase_replayed_commits": [
+      "c4",
+      "c5"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c3",
     "last_switch_branch": "recovery/receipts",
     "last_switched_to": "recovery/receipts",
     "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
       "last_branch_created": "recovery/receipts",
+      "last_push_branch": "recovery/receipts",
+      "last_push_commit": "c5",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/recovery/receipts",
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c5",
+      "last_rebase_onto": null,
+      "last_rebase_replayed_commits": [
+        "c4",
+        "c5"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c3",
       "last_switch_branch": "recovery/receipts",
       "last_switched_to": "recovery/receipts"
     },
     "partial_hunks": {},
     "reflog": [
       {
-        "action": "checkout",
-        "commit": "c4",
+        "action": "commit",
+        "commit": "c1",
         "ref": "main"
       },
       {
         "action": "commit",
-        "commit": "c3",
+        "commit": "c2",
         "ref": "main"
       },
       {
-        "action": "reset: moving to HEAD~3",
-        "commit": "c0",
+        "action": "reset: moving to origin/main",
+        "commit": "c3",
         "ref": "main"
       },
       {
         "message": "checkout: moving from main to recovery/receipts",
         "ref": "HEAD@{3}",
-        "target": "c3"
+        "target": "c2"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{4}",
+        "target": "c5"
       }
     ],
-    "remote_branches": {},
+    "remote_branches": {
+      "origin/main": "c3",
+      "origin/recovery/receipts": "c5"
+    },
     "remote_tags": {},
-    "remotes": {},
+    "remotes": {
+      "origin": "https://example.test/team/pos.git"
+    },
     "replaced_commits": {},
     "repository_initialized": true,
     "staging": {},
     "stash_stack": [],
     "tags": {},
-    "upstream_tracking": {},
+    "upstream_tracking": {
+      "main": "origin/main",
+      "recovery/receipts": "origin/recovery/receipts"
+    },
     "working_tree": {}
   },
-  "gate4-easy-recover-search-fix": {
+  "gate4-easy-recover-replay-publish-search": {
     "branches": {
-      "main": "c0",
-      "recovery/search": "c3"
+      "main": "c3",
+      "recovery/search": "c5"
     },
     "commits": [
       {
         "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/app.py": {
+            "after": "app-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/app.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1"
+        }
+      },
+      {
+        "changes": {
           "src/search.py": {
-            "after": "baseline",
+            "after": "src/search.py draft",
             "before": null,
             "change_type": "added"
           }
         },
         "files": {
           "src/search.py": "added"
-        },
-        "id": "c0",
-        "is_merge": false,
-        "message": "Reset position",
-        "order": 0,
-        "parents": [],
-        "tree": {
-          "src/search.py": "baseline"
-        }
-      },
-      {
-        "changes": {
-          "src/search.py": {
-            "after": "groundwork",
-            "before": "baseline",
-            "change_type": "modified"
-          }
-        },
-        "files": {
-          "src/search.py": "modified"
         },
         "id": "c1",
         "is_merge": false,
@@ -18364,14 +18670,16 @@ TARGET_STATES = json.loads(r"""
           "c0"
         ],
         "tree": {
-          "src/search.py": "groundwork"
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "src/search.py": "src/search.py draft"
         }
       },
       {
         "changes": {
           "src/search.py": {
-            "after": "continued",
-            "before": "groundwork",
+            "after": "src/search.py fixed",
+            "before": "src/search.py draft",
             "change_type": "modified"
           }
         },
@@ -18380,107 +18688,181 @@ TARGET_STATES = json.loads(r"""
         },
         "id": "c2",
         "is_merge": false,
-        "message": "Continue search",
+        "message": "Fix borrower search",
         "order": 2,
         "parents": [
           "c1"
         ],
         "tree": {
-          "src/search.py": "continued"
+          "README.md": "readme-v1",
+          "src/app.py": "app-v1",
+          "src/search.py": "src/search.py fixed"
         }
       },
       {
         "changes": {
-          "src/search.py": {
-            "after": "Fix borrower search done",
-            "before": "continued",
+          "src/app.py": {
+            "after": "app-v2",
+            "before": "app-v1",
             "change_type": "modified"
           }
         },
         "files": {
-          "src/search.py": "modified"
+          "src/app.py": "modified"
         },
         "id": "c3",
         "is_merge": false,
-        "message": "Fix borrower search",
+        "message": "Patch login timeout",
         "order": 3,
         "parents": [
-          "c2"
+          "c0"
         ],
         "tree": {
-          "src/search.py": "Fix borrower search done"
+          "README.md": "readme-v1",
+          "src/app.py": "app-v2"
         }
       },
       {
+        "author": "GIT it",
         "changes": {
           "src/search.py": {
-            "after": "abandoned experiment",
-            "before": "continued",
+            "after": "src/search.py draft",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/search.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Start search",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/app.py": "app-v2",
+          "src/search.py": "src/search.py draft"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/search.py": {
+            "after": "src/search.py fixed",
+            "before": "src/search.py draft",
             "change_type": "modified"
           }
         },
         "files": {
           "src/search.py": "modified"
         },
-        "id": "c4",
+        "id": "c5",
         "is_merge": false,
-        "message": "Abandoned experiment",
-        "order": 4,
+        "message": "Fix borrower search",
+        "order": 5,
         "parents": [
-          "c2"
+          "c4"
         ],
         "tree": {
-          "src/search.py": "abandoned experiment"
+          "README.md": "readme-v1",
+          "src/app.py": "app-v2",
+          "src/search.py": "src/search.py fixed"
         }
       }
     ],
     "conflict_details": {},
     "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
     "head": {
       "name": "recovery/search",
-      "target": "c3",
+      "target": "c5",
       "type": "branch"
     },
     "last_branch_created": "recovery/search",
+    "last_push_branch": "recovery/search",
+    "last_push_commit": "c5",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/recovery/search",
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c5",
+    "last_rebase_onto": null,
+    "last_rebase_replayed_commits": [
+      "c4",
+      "c5"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c3",
     "last_switch_branch": "recovery/search",
     "last_switched_to": "recovery/search",
     "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
       "last_branch_created": "recovery/search",
+      "last_push_branch": "recovery/search",
+      "last_push_commit": "c5",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/recovery/search",
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c5",
+      "last_rebase_onto": null,
+      "last_rebase_replayed_commits": [
+        "c4",
+        "c5"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c3",
       "last_switch_branch": "recovery/search",
       "last_switched_to": "recovery/search"
     },
     "partial_hunks": {},
     "reflog": [
       {
-        "action": "checkout",
-        "commit": "c4",
+        "action": "commit",
+        "commit": "c1",
         "ref": "main"
       },
       {
         "action": "commit",
-        "commit": "c3",
+        "commit": "c2",
         "ref": "main"
       },
       {
-        "action": "reset: moving to HEAD~3",
-        "commit": "c0",
+        "action": "reset: moving to origin/main",
+        "commit": "c3",
         "ref": "main"
       },
       {
         "message": "checkout: moving from main to recovery/search",
         "ref": "HEAD@{3}",
-        "target": "c3"
+        "target": "c2"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{4}",
+        "target": "c5"
       }
     ],
-    "remote_branches": {},
+    "remote_branches": {
+      "origin/main": "c3",
+      "origin/recovery/search": "c5"
+    },
     "remote_tags": {},
-    "remotes": {},
+    "remotes": {
+      "origin": "https://example.test/team/library.git"
+    },
     "replaced_commits": {},
     "repository_initialized": true,
     "staging": {},
     "stash_stack": [],
     "tags": {},
-    "upstream_tracking": {},
+    "upstream_tracking": {
+      "main": "origin/main",
+      "recovery/search": "origin/recovery/search"
+    },
     "working_tree": {}
   },
   "gate4-hard-move-branch-onto-main-coupons": {

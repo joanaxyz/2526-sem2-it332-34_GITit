@@ -1,0 +1,114 @@
+{
+  "authenticated": true,
+  "isolated_database": true,
+  "run_id": 52,
+  "home_scenario": {
+    "reply": "I can help you understand the ideas without choosing the solution. Separate what a task wants to change from the values it supplies. Git concepts and placeholder meanings can help you reason about those differences. Choose a topic below, or ask what a specific command or option means.",
+    "sources": [],
+    "suggested_topics": [
+      {
+        "id": "concept:repository",
+        "title": "Repository"
+      },
+      {
+        "id": "concept:working-tree",
+        "title": "Working tree"
+      },
+      {
+        "id": "concept:staging-area",
+        "title": "Staging area"
+      },
+      {
+        "id": "concept:commit",
+        "title": "Commit"
+      },
+      {
+        "id": "concept:branch",
+        "title": "Branch"
+      },
+      {
+        "id": "concept:head",
+        "title": "HEAD"
+      },
+      {
+        "id": "concept:placeholders",
+        "title": "Reading placeholders"
+      }
+    ],
+    "response_kind": "concept_redirect",
+    "scenario_related": true
+  },
+  "workspace_explanation": {
+    "reply": "Syntax: git init -b <branch> [<directory>]\n\ngit: runs Git\ninit: the Git command to run\n-b: choose the name of the first branch\n<branch>: you fill this in: the branch name\n[<directory>]: optional: you fill this in: a folder name\n\nWords in angle brackets are placeholders, not text to copy. Replace each with a value you determine from your task. A branch name and a folder path are different inputs; Git does not infer one from the other.",
+    "sources": [
+      {
+        "id": "syntax:fee7ab4e781097a1",
+        "title": "git init -b <branch> [<directory>]"
+      },
+      {
+        "id": "concept:placeholders",
+        "title": "Reading placeholders"
+      }
+    ],
+    "suggested_topics": [
+      {
+        "id": "concept:repository",
+        "title": "Repository"
+      },
+      {
+        "id": "concept:working-tree",
+        "title": "Working tree"
+      },
+      {
+        "id": "concept:staging-area",
+        "title": "Staging area"
+      },
+      {
+        "id": "concept:commit",
+        "title": "Commit"
+      },
+      {
+        "id": "concept:branch",
+        "title": "Branch"
+      },
+      {
+        "id": "concept:head",
+        "title": "HEAD"
+      },
+      {
+        "id": "concept:placeholders",
+        "title": "Reading placeholders"
+      }
+    ],
+    "response_kind": "explanation",
+    "scenario_related": true
+  },
+  "guide_safe_fields": {
+    "teaching_key": "form:git init -b <branch> [<directory>]",
+    "command_form": {
+      "teaching_key": "form:git init -b <branch> [<directory>]",
+      "usage_form": "git init -b <branch> [<directory>]",
+      "label": "git init -b <branch> [<directory>]",
+      "summary": "Create Git metadata in the current directory or a named directory."
+    },
+    "needs": [
+      {
+        "kind": "repository",
+        "text": "A folder becomes a Git repository.",
+        "subjects": [
+          "<directory>"
+        ],
+        "action": "create"
+      },
+      {
+        "kind": "branch",
+        "text": "A branch pointer changes.",
+        "subjects": [
+          "<branch>"
+        ],
+        "action": "create"
+      }
+    ]
+  },
+  "chat_counts_unchanged": true
+}

@@ -24,7 +24,7 @@ describe('level tour storage', () => {
 
     expect(hasSeenLevelTour(11)).toBe(true)
     expect(hasSeenLevelTour(11, 'adventure')).toBe(false)
-    expect(window.localStorage.getItem('git-it-practice-workspace-tour:v5:11:challenge')).toBe(
+    expect(window.localStorage.getItem('git-it-practice-workspace-tour:v6:11:challenge')).toBe(
       'seen',
     )
   })

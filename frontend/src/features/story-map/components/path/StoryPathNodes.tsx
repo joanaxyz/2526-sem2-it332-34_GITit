@@ -128,7 +128,7 @@ export function StoryChallengeNode({
         state === 'locked' && !loading
           ? chapterLocked
             ? chapterLockReason
-            : 'Clear the adventure levels to unlock the trials.'
+            : 'Clear every tier of every level to open the Challenge Gate.'
           : undefined
       }
       aria-label={state === 'locked' ? 'Challenge trials (locked)' : 'Challenge trials'}

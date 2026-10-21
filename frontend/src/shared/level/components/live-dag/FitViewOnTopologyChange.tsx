@@ -6,6 +6,8 @@ import { readPreference } from '@/shared/utils/persistentState'
 
 import { MAX_DAG_ZOOM, MIN_DAG_ZOOM } from './constants'
 
+const TOPOLOGY_GLIDE_MS = 360
+
 export function FitViewOnTopologyChange({
   fitSignature,
   topologySignature,
@@ -27,6 +29,7 @@ export function FitViewOnTopologyChange({
     (state) => `${Math.round(state.width)}x${Math.round(state.height)}`,
   )
   const previousSignature = useRef<string | null>(null)
+  const previousTopology = useRef<string | null>(null)
   const viewportIsReady = viewportSizeSignature.split('x').every((dimension) => Number(dimension) > 0)
   const currentSignature = `${fitSignature}:${preserveViewportOnResize ? 'fixed-viewport' : viewportSizeSignature}:${fitViewPadding}`
 
@@ -59,15 +62,20 @@ export function FitViewOnTopologyChange({
       }
       if (consecutiveReadyFrames === 0) return
       previousSignature.current = currentSignature
+      // Glide only when commits change under an already-fitted view, so the
+      // camera follows a new commit; first fits and resizes stay instant.
+      const topologyChanged = previousTopology.current !== null && previousTopology.current !== topologySignature
+      previousTopology.current = topologySignature
+      const duration = topologyChanged && !prefersReducedMotion() ? TOPOLOGY_GLIDE_MS : 0
 
       // Pinning fitView's min/max zoom to the saved level makes it re-center the
       // graph at the learner's chosen zoom instead of refitting to the contents.
       const savedZoom = zoomStorageKey ? readPreference<number | null>(zoomStorageKey, null) : null
       if (savedZoom != null && Number.isFinite(savedZoom)) {
         const zoom = Math.min(Math.max(savedZoom, MIN_DAG_ZOOM), MAX_DAG_ZOOM)
-        void fitView({ padding: fitViewPadding, duration: 0, minZoom: zoom, maxZoom: zoom })
+        void fitView({ padding: fitViewPadding, duration, minZoom: zoom, maxZoom: zoom })
       } else {
-        void fitView({ padding: fitViewPadding, duration: 0 })
+        void fitView({ padding: fitViewPadding, duration })
       }
     }
 
@@ -79,6 +87,10 @@ export function FitViewOnTopologyChange({
   }, [currentSignature, fitView, fitViewPadding, getEdges, getNodes, preserveViewportOnResize, topologySignature, viewportIsReady, viewportSizeSignature, zoomStorageKey])
 
   return null
+}
+
+function prefersReducedMotion() {
+  return typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches
 }
 
 function flowTopologySignature(nodes: Node[], edges: Edge[]): string {

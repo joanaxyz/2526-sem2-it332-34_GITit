@@ -189,12 +189,13 @@ export function useWorkspaceTourTransform({
    */
   const pointerDownOnPane = useCallback((pane: Pane, event: ReactPointerEvent<HTMLElement>) => {
     if (event.defaultPrevented || event.pointerType !== 'mouse' || event.button !== 0) return
+    // Controls keep their click/focus behavior even when they sit near a resize edge.
+    if ((event.target as Element).closest(NO_DRAG) || onScrollbar(event)) return
     const edges = paneEdgesAt(pane, event)
     if (edges) {
       beginTransform(pane, event, 'resize', edges)
       return
     }
-    if ((event.target as Element).closest(NO_DRAG) || onScrollbar(event)) return
     beginTransform(pane, event, 'move')
   }, [beginTransform, paneEdgesAt])
 

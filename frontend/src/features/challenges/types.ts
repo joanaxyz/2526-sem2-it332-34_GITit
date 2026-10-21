@@ -194,11 +194,6 @@ export type ChallengeRun = Omit<ChallengeRunResponse, 'steps'> & {
   steps: ChallengeStepLog[]
 }
 
-/** `result_category` value the backend sends when the command reached the
- * scenario's target repository state (mirrors RESULT_TARGET_MATCHED in
- * common/constants.py). */
-export const RESULT_TARGET_MATCHED = 'TargetMatched'
-
 type ChallengeCommandStep = Omit<
   ApiSchemas['ChallengeCommandStepResponse'],
   'visualization_snapshot'

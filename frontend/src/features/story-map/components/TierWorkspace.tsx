@@ -3,13 +3,8 @@ import { useBlocker, useNavigate, useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
-import { TierExitConfirmModal } from '@/features/story-map/components/TierExitConfirmModal'
 import { TierStatusHeader } from '@/features/story-map/components/TierStatusHeader'
-import { TierStoryModal } from '@/features/story-map/components/tier-workspace/TierStoryModal'
 import { TierOutcomeModal } from '@/features/story-map/components/TierOutcomeModal'
-import { TierStartOverConfirmModal } from '@/features/story-map/components/TierStartOverConfirmModal'
-import { TierWorkspaceMain } from '@/features/story-map/components/TierWorkspaceMain'
-import { TierWorkspaceTour } from '@/features/story-map/components/TierWorkspaceTour'
 import { CommandIntroductionPanel } from '@/features/story-map/components/CommandIntroductionPanel'
 import { useTierCommandSubmission } from '@/features/story-map/hooks/useTierCommandSubmission'
 import { useCommandGuideHistory } from '@/features/story-map/hooks/useCommandGuideHistory'
@@ -19,17 +14,22 @@ import { useLeaveAbandonedRun } from '@/features/story-map/hooks/useLeaveAbandon
 import { useTierRun } from '@/features/story-map/hooks/useTierRun'
 import { useTierRunAssets } from '@/features/story-map/hooks/useTierRunAssets'
 import { invalidateTierProgressQueries } from '@/features/story-map/utils/tierRunCache'
-import { mapUrlForRun } from '@/features/story-map/components/tierWorkspaceLayout'
+import { mapUrlForRun, tierScene } from '@/features/story-map/components/tierWorkspaceLayout'
 import { useTierScaffolding } from '@/features/story-map/scaffolding/useTierScaffolding'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { terminalPrompt } from '@/shared/level/terminalPrompt'
 import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
 import { useOutcomeAnimationGate } from '@/shared/level-runtime/outcomeAnimation'
-import { useTierDagAnimation } from '@/features/story-map/hooks/useTierDagAnimation'
-import { useTierAutoOpenQueue } from '@/features/story-map/hooks/useTierAutoOpenQueue'
-import { useTierRepoDrawer } from '@/features/story-map/hooks/useTierRepoDrawer'
-import { TIER_REPO_GRAPH_ID } from '@/features/story-map/components/tier-workspace/TierDiagramStage'
-import { tierStoryContent } from '@/features/story-map/utils/tierStory'
+import { ExitConfirmModal } from '@/shared/level/workspace/ExitConfirmModal'
+import { GameplayWorkspaceMain } from '@/shared/level/workspace/GameplayWorkspaceMain'
+import { StartOverConfirmModal } from '@/shared/level/workspace/StartOverConfirmModal'
+import { useDagAnimation } from '@/shared/level/workspace/useDagAnimation'
+import { useRepoGraphDrawer } from '@/shared/level/workspace/useRepoGraphDrawer'
+import { useWorkspaceAutoOpen } from '@/shared/level/workspace/useWorkspaceAutoOpen'
+import { REPO_GRAPH_ID } from '@/shared/level/workspace/WorkspaceDiagramStage'
+import { WorkspaceStoryModal } from '@/shared/level/workspace/WorkspaceStoryModal'
+import { workspaceStoryContent } from '@/shared/level/workspace/workspaceStory'
+import { WorkspaceTour } from '@/shared/level/workspace/WorkspaceTour'
 import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { ErrorState } from '@/shared/components/ErrorState'
@@ -40,11 +40,9 @@ import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { SkillLearnedOverlay } from '@/shared/skill-learning/SkillLearnedOverlay'
 import { useSkillLearnedQueue } from '@/shared/skill-learning/useSkillLearnedQueue'
 
-/** Mirrors ChallengeWorkspace.tsx for the adventure-tier run lifecycle - new
- * and parallel, ChallengeWorkspace itself is untouched. Its first-run tour is
- * TierWorkspaceTour, not ChallengeWorkspaceTour: this screen is where every
- * difficulty-tiered adventure level is played, and the Challenge Gate copy
- * does not describe it. */
+/** The adventure-tier run lifecycle around the shared gameplay workspace
+ * (shared/level/workspace): command guides, learned skills and wave flow.
+ * ChallengeWorkspace wraps the same workspace for Challenge Gate trials. */
 export function TierWorkspace() {
   const params = useParams()
   const navigate = useNavigate()
@@ -63,7 +61,7 @@ export function TierWorkspace() {
   const { clearToast, evaluateAndNotify } = useTierScaffolding(runId)
   const [dismissedCompletionRunId, setDismissedCompletionRunId] = useState<number | null>(null)
   const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
-  const dagAnimation = useTierDagAnimation()
+  const dagAnimation = useDagAnimation()
   const battleDirector = useBattleDirector()
   const { completionAnimationReady, queueOutcomeAnimation } = useOutcomeAnimationGate({
     runId: observedRunId,
@@ -77,13 +75,14 @@ export function TierWorkspace() {
   const [selectedGuideKey, setSelectedGuideKey] = useState<string | null>(null)
   const commandGuides = useCommandGuideHistory(runId, run?.tutor)
   const user = useAuthStore((state) => state.user)
-  const autoOpen = useTierAutoOpenQueue({
+  const autoOpen = useWorkspaceAutoOpen({
     userId: user?.id,
-    adventureLevelId: run?.tier.adventure_level_id,
+    storyLevelKey: run?.tier.adventure_level_id,
     difficulty: run?.tier.difficulty,
+    tourMode: 'tier',
     started: run?.status === 'started',
   })
-  const repoDrawer = useTierRepoDrawer(run?.repository_state)
+  const repoDrawer = useRepoGraphDrawer(run?.repository_state)
   const [exitNavigationRunId, setExitNavigationRunId] = useState<number | null>(null)
   const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
   const latestRunRef = useRef<TierRun | null>(null)
@@ -152,7 +151,8 @@ export function TierWorkspace() {
 
   const shellPrompt = terminalPrompt(user?.username)
   const { storyOpen, tourOpen, guideAllowed } = autoOpen
-  const story = tierStoryContent(run)
+  const scene = tierScene(run)
+  const story = workspaceStoryContent(run, scene.title)
   const guideHidden = run.tutor?.phase === 'introduction' && run.tutor.teaching_key === hiddenGuideKey
   const introductionOpen = Boolean(run.tutor && guideAllowed
     && !learnedSkills.pending
@@ -212,12 +212,12 @@ export function TierWorkspace() {
         repoGraph={repoDrawer.drawerMode ? {
           open: repoDrawer.open,
           hasUpdate: repoDrawer.hasUpdate,
-          controls: TIER_REPO_GRAPH_ID,
+          controls: REPO_GRAPH_ID,
           buttonRef: repoDrawer.buttonRef,
           onOpen: repoDrawer.openDrawer,
         } : undefined}
       />
-      <TierWorkspaceMain
+      <GameplayWorkspaceMain
         teachingActive={introductionOpen}
         repoGraphDrawer={repoDrawer.drawerMode ? {
           open: repoDrawer.open,
@@ -225,6 +225,7 @@ export function TierWorkspace() {
           onClose: repoDrawer.closeDrawer,
         } : undefined}
         run={run}
+        scene={scene}
         lines={lines}
         shellPrompt={shellPrompt}
         projectFilesOpen={projectFilesOpen}
@@ -291,7 +292,7 @@ export function TierWorkspace() {
             : null
         }
       />
-      <TierStoryModal
+      <WorkspaceStoryModal
         open={storyOpen && !learnedSkills.pending}
         title={story.title}
         intro={story.intro}
@@ -302,21 +303,22 @@ export function TierWorkspace() {
         onClose={autoOpen.closeStory}
       />
       {tourOpen && !learnedSkills.pending ? (
-        <TierWorkspaceTour
+        <WorkspaceTour
           key={`${user?.id ?? 'guest'}:tier:${run.id}`}
           runId={run.id}
           onClose={autoOpen.closeTour}
           repoGraphInDrawer={repoDrawer.drawerMode}
         />
       ) : null}
-      <TierExitConfirmModal
+      <ExitConfirmModal
         open={exitConfirmOpen}
+        title="Exit adventure?"
         isExiting={exitMutation.isPending || exitNavigationPending}
         onClose={() => setExitConfirmOpen(false)}
         onRetry={retry}
         onExit={() => exitMutation.mutate()}
       />
-      <TierStartOverConfirmModal
+      <StartOverConfirmModal
         open={startOverConfirmOpen}
         onClose={() => setStartOverConfirmOpen(false)}
         onStartFresh={retry}

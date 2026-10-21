@@ -23,7 +23,8 @@ export function GuideCharacterPortrait({ className, alt = 'Git-It guide', width 
     : <EquippedCompanionPortrait className={className} alt={alt} width={width} height={height} />
 }
 
-function MascotPortrait({ className, alt, width, height }: PortraitProps) {
+/** Git-It itself, whatever the guide appearance setting. */
+export function MascotPortrait({ className, alt, width, height }: PortraitProps) {
   return <img
     className={className}
     src={MASCOT_PORTRAIT_SRC}

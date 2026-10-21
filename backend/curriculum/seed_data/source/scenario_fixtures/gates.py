@@ -9,7 +9,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from curriculum.seed_data.source.scenario_fixtures.module_1 import _first_snapshot
 from curriculum.seed_data.source.scenario_fixtures.shapes import (
     ORIGIN,
     amended,
@@ -17,7 +16,9 @@ from curriculum.seed_data.source.scenario_fixtures.shapes import (
     commit,
     hunks,
     modified,
+    matches_origin,
     origin,
+    points_to,
     repo,
     tip,
     untracked,
@@ -26,6 +27,38 @@ from curriculum.seed_data.source.scenario_fixtures.shapes import (
 # ---------------------------------------------------------------------------
 # Module 1 - Local Repository Foundations
 # ---------------------------------------------------------------------------
+
+
+def _two_commit_start(
+    *, first: dict[str, str], doc: str, private: str, messages: tuple[str, str]
+) -> dict[str, Any]:
+    """A new folder recorded as two purposeful commits: the project, then its docs."""
+    files = {**first, doc: f"{doc}-v1"}
+    return {
+        "initial_state": repo(
+            initialized=False,
+            working_tree={
+                **{path: untracked(content) for path, content in files.items()},
+                private: untracked(f"{private}-private"),
+            },
+        ),
+        "state_requirements": {
+            "repository_initialized": True,
+            "head_branch": "main",
+            "staging_empty": True,
+            "working_tree_contains": [private],
+            "rules": [
+                {"type": "commit_count_equals", "count": 2},
+                tip(
+                    "main~1",
+                    message_equals=messages[0],
+                    changes_include=sorted(first),
+                    tree_excludes=[doc, private],
+                ),
+                tip("main", message_equals=messages[1], changes_include=[doc], tree_excludes=[private]),
+            ],
+        },
+    }
 
 
 def _complete_last_commit(
@@ -225,19 +258,38 @@ def _land_and_retire(*, name: str, branch: str, path: str, message: str) -> dict
 # ---------------------------------------------------------------------------
 
 
-def _merge_and_resolve(*, branch: str, path: str, resolved: str) -> dict[str, Any]:
+def _merge_then_backport(
+    *, branch: str, path: str, resolved: str, release: str, fix_path: str, fix: str
+) -> dict[str, Any]:
+    """Settle a merge conflict on main, then copy main's latest fix to a release branch."""
+    base = {path: f"{path} base", fix_path: f"{fix_path} v1"}
     commits = [
-        commit("c0", "Common base", [], {path: f"{path} base"}),
-        commit("c1", "Main update", ["c0"], {path: f"{path} main"}),
-        commit("c2", f"Update {branch}", ["c0"], {path: f"{path} feature"}),
+        commit("c0", "Common base", [], base),
+        commit("c1", "Main update", ["c0"], {**base, path: f"{path} main"}),
+        commit("c2", f"Update {branch}", ["c0"], {**base, path: f"{path} feature"}),
+        commit("c3", fix, ["c1"], {path: f"{path} main", fix_path: f"{fix_path} fixed"}),
     ]
     return {
-        "initial_state": repo(commits=commits, branches={"main": "c1", f"feature/{branch}": "c2"}),
+        "initial_state": repo(
+            commits=commits,
+            branches={"main": "c3", f"feature/{branch}": "c2", release: "c0"},
+        ),
         "state_requirements": clean(
-            "main",
+            release,
             {"type": "commit_is_merge", "branch": "main"},
             {"type": "commit_has_parent", "branch": "main", "parent": "c2"},
-            {"type": "commit_tree_contains", "branch": "main", "tree": {path: resolved}},
+            {
+                "type": "commit_tree_contains",
+                "branch": "main",
+                "tree": {path: resolved, fix_path: f"{fix_path} fixed"},
+            },
+            {"type": "commit_count_on_branch_equals", "branch": release, "count": 2},
+            tip(
+                release,
+                message_contains=[fix],
+                tree_contains={path: f"{path} base", fix_path: f"{fix_path} fixed"},
+            ),
+            {"type": "cherry_pick_not_in_progress"},
             conflict_free=True,
         ),
     }
@@ -326,28 +378,43 @@ def _abort_then_tool_merge(*, wrong: str, right: str, path: str, resolved: str) 
 # ---------------------------------------------------------------------------
 
 
-def _recover_lost_work(*, branch: str, path: str, fix: str) -> dict[str, Any]:
+def _recover_replay_publish(
+    *, name: str, branch: str, path: str, fix: str, teammate: str
+) -> dict[str, Any]:
+    """Two commits a hard reset dropped: save them, replay them onto main, publish them."""
+    recovery = f"recovery/{branch}"
+    base = {"README.md": "readme-v1", "src/app.py": "app-v1"}
     commits = [
-        commit("c0", "Reset position", [], {path: "baseline"}),
-        commit("c1", f"Start {branch}", ["c0"], {path: "groundwork"}),
-        commit("c2", f"Continue {branch}", ["c1"], {path: "continued"}),
-        commit("c3", fix, ["c2"], {path: f"{fix} done"}),
-        commit("c4", "Abandoned experiment", ["c2"], {path: "abandoned experiment"}),
+        commit("c0", "Project baseline", [], base),
+        commit("c1", f"Start {branch}", ["c0"], {**base, path: f"{path} draft"}),
+        commit("c2", fix, ["c1"], {**base, path: f"{path} fixed"}),
+        commit("c3", teammate, ["c0"], {**base, "src/app.py": "app-v2"}),
     ]
     return {
         "initial_state": repo(
             commits=commits,
-            branches={"main": "c0"},
+            branches={"main": "c3"},
             reflog=[
-                {"ref": "main", "commit": "c4", "action": "checkout"},
-                {"ref": "main", "commit": "c3", "action": "commit"},
-                {"ref": "main", "commit": "c0", "action": "reset: moving to HEAD~3"},
+                {"ref": "main", "commit": "c1", "action": "commit"},
+                {"ref": "main", "commit": "c2", "action": "commit"},
+                {"ref": "main", "commit": "c3", "action": "reset: moving to origin/main"},
             ],
+            **origin(name, branches={"origin/main": "c3"}, tracking={"main": "origin/main"}),
         ),
         "state_requirements": clean(
-            f"recovery/{branch}",
-            {"type": "branch_points_to", "branch": f"recovery/{branch}", "commit": "c3"},
-            {"type": "branch_points_to", "branch": "main", "commit": "c0"},
+            recovery,
+            {"type": "rebase_not_in_progress"},
+            points_to("main", "c3"),
+            {"type": "commit_count_on_branch_equals", "branch": recovery, "count": 4},
+            {"type": "branch_history_contains", "branch": recovery, "commits": ["c3"]},
+            {"type": "branch_history_excludes", "branch": recovery, "commits": ["c1", "c2"]},
+            tip(
+                recovery,
+                message_equals=fix,
+                tree_contains={path: f"{path} fixed", "src/app.py": "app-v2"},
+            ),
+            tip(f"{recovery}~1", message_equals=f"Start {branch}"),
+            matches_origin(recovery),
         ),
     }
 
@@ -443,15 +510,17 @@ def _move_branch_onto_main(*, name: str, branch: str, path: str) -> dict[str, An
 
 FIXTURES: dict[str, dict[str, Any]] = {
     # Module 1 gate
-    "gate1-easy-first-snapshot-field-log": _first_snapshot(
-        files={"notes.md": "field-notes-v1", "readings.csv": "readings-v1"},
+    "gate1-easy-two-commit-start-field-log": _two_commit_start(
+        first={"notes.md": "field-notes-v1", "readings.csv": "readings-v1"},
+        doc="README.md",
         private="scratch.txt",
-        message="Start field log",
+        messages=("Start field log", "Add field log guide"),
     ),
-    "gate1-easy-first-snapshot-quiz": _first_snapshot(
-        files={"index.html": "quiz-home-v1", "quiz.js": "quiz-logic-v1"},
+    "gate1-easy-two-commit-start-quiz": _two_commit_start(
+        first={"index.html": "quiz-home-v1", "quiz.js": "quiz-logic-v1"},
+        doc="README.md",
         private="todo.txt",
-        message="Start quiz app",
+        messages=("Start quiz app", "Add quiz setup notes"),
     ),
     "gate1-medium-complete-last-commit-search": _complete_last_commit(
         path="src/search.py",
@@ -511,11 +580,21 @@ FIXTURES: dict[str, dict[str, Any]] = {
         name="ledger", branch="export", path="src/export.py", message="Add CSV export"
     ),
     # Module 3 gate
-    "gate3-easy-merge-and-resolve-banner": _merge_and_resolve(
-        branch="banner", path="src/banner.html", resolved="<p>Welcome back, team!</p>"
+    "gate3-easy-merge-then-backport-banner": _merge_then_backport(
+        branch="banner",
+        path="src/banner.html",
+        resolved="<p>Welcome back, team!</p>",
+        release="release/1.4",
+        fix_path="src/checkout.js",
+        fix="Fix checkout total",
     ),
-    "gate3-easy-merge-and-resolve-footer": _merge_and_resolve(
-        branch="footer", path="src/footer.html", resolved="<footer>Contact support</footer>"
+    "gate3-easy-merge-then-backport-footer": _merge_then_backport(
+        branch="footer",
+        path="src/footer.html",
+        resolved="<footer>Contact support</footer>",
+        release="release/2.0",
+        fix_path="src/invoice.js",
+        fix="Fix tax rounding",
     ),
     "gate3-medium-backport-tax": _backport_with_origin(
         release="release/2.1",
@@ -542,11 +621,19 @@ FIXTURES: dict[str, dict[str, Any]] = {
         resolved="const label = 'Place order'",
     ),
     # Module 4 gate
-    "gate4-easy-recover-search-fix": _recover_lost_work(
-        branch="search", path="src/search.py", fix="Fix borrower search"
+    "gate4-easy-recover-replay-publish-search": _recover_replay_publish(
+        name="library",
+        branch="search",
+        path="src/search.py",
+        fix="Fix borrower search",
+        teammate="Patch login timeout",
     ),
-    "gate4-easy-recover-receipt-fix": _recover_lost_work(
-        branch="receipts", path="src/receipts.py", fix="Fix receipt totals"
+    "gate4-easy-recover-replay-publish-receipts": _recover_replay_publish(
+        name="pos",
+        branch="receipts",
+        path="src/receipts.py",
+        fix="Fix receipt totals",
+        teammate="Patch tax rate",
     ),
     "gate4-medium-drop-local-revert-published-banner": _drop_local_revert_published(
         name="storefront", path="src/banner.py", bug="Add discount banner", local="Try banner animation"

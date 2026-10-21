@@ -107,15 +107,20 @@ Each module ends in a Challenge Gate: a workflow that tests what the module
 taught. `seed_data/source/challenge_gates.py` composes each gate's title,
 narrative, and the two scenarios behind each of its Easy, Medium, and Hard
 trials. Gate scenarios are extension scenarios numbered `N.G.k` in
-`seed_data/source/wave_scenarios.md`. A trial of a given difficulty opens once
-every required level of the module has cleared its tier of that difficulty.
+`seed_data/source/wave_scenarios.md`. The gate opens once every required level
+of the module has cleared all three of its tiers; inside the gate, Medium opens
+after the Easy trial and Hard after Medium. A gate is the module's capstone, so
+even its Easy trial is played by someone who has finished every Hard tier.
 
 Each trial should have:
 
-- two variants
-- a new scenario not copied from adventures
-- a workflow that combines the module's commands
-- a repository-state transition that changes the DAG or refs
+- two variants, shaped like an Easy wave's variants (the same steps)
+- a new scenario, never the steps of an adventure wave on a new story
+- a workflow of at least three counted commands that spans two or more of the
+  module's levels, in the order a real task needs them
+- at least one change the Live diagram draws: a new or rewritten commit, a
+  merge, a branch tip that moves, or a ref that appears or disappears. A new
+  label on an existing commit is not enough on its own
 - evaluation specs that verify final state instead of command text alone
 
 ## Scaffolding

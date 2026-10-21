@@ -544,6 +544,16 @@ describe('GameplayWorkspaceTour', () => {
     fireEvent.pointerUp(window, { pointerId: 3 })
     expect(main).toHaveStyle({ left: '180px', top: '120px', width: '392px', height: '300px' })
 
+    // A control at the bubble edge must keep pointer clicks and focus (AI help
+    // expands at the bottom of a guide, next to the resize hit area).
+    const control = document.createElement('button')
+    control.textContent = 'Ask about this guide'
+    main.appendChild(control)
+    fireEvent.pointerDown(control, { ...mouse, clientX: 286, clientY: 250, pointerId: 9 })
+    fireEvent.pointerMove(window, { clientX: 200, clientY: 250, pointerId: 9 })
+    fireEvent.pointerUp(window, { pointerId: 9 })
+    expect(main).toHaveStyle({ left: '180px', top: '120px', width: '392px', height: '300px' })
+
     // Touch leaves the card body to scroll; it moves cards with the grip.
     fireEvent.pointerDown(asideText, { pointerType: 'touch', button: 0, clientX: 700, clientY: 300, pointerId: 4 })
     fireEvent.pointerMove(window, { clientX: 600, clientY: 300, pointerId: 4 })
@@ -566,6 +576,39 @@ describe('GameplayWorkspaceTour', () => {
 
     expect(onClose).toHaveBeenCalledWith('skip')
     await waitFor(() => expect(launcher).toHaveFocus())
+  })
+
+  it('closes on a click outside, leaving focus where the learner clicked', async () => {
+    const target = addTarget('first')
+    const companion = document.createElement('div')
+    companion.className = 'test-companion'
+    const elsewhere = document.createElement('button')
+    document.body.append(companion, elsewhere)
+    const onClose = vi.fn()
+
+    const view = render(
+      <GameplayWorkspaceTour
+        label="Gameplay guide"
+        steps={[step('first')]}
+        showSkip={false}
+        closeOnOutsideClick={{ except: ['.test-companion'] }}
+        onClose={onClose}
+      />,
+    )
+
+    const dialog = await screen.findByRole('dialog', { name: 'first title' })
+    expect(screen.queryByRole('button', { name: 'Skip tour' })).not.toBeInTheDocument()
+    // The card, what it points at, and its companion regions are inside.
+    for (const inside of [dialog, target, companion]) fireEvent.pointerDown(inside)
+    expect(onClose).not.toHaveBeenCalled()
+
+    elsewhere.focus()
+    fireEvent.pointerDown(elsewhere)
+    expect(onClose).toHaveBeenCalledWith('outside')
+    view.unmount()
+    expect(elsewhere).toHaveFocus()
+    companion.remove()
+    elsewhere.remove()
   })
 
   it('collapses into a supplied launcher before closing', async () => {

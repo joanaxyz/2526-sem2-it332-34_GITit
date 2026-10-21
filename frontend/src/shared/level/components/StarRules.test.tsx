@@ -1,7 +1,7 @@
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-import { StarTriplet } from './LevelContextPanel'
+import { StarTriplet } from './LevelStatValues'
 
 afterEach(() => {
   cleanup()

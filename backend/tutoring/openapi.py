@@ -49,6 +49,7 @@ class ConceptSerializer(serializers.Serializer):
 class CommandIntroductionResponseSerializer(serializers.Serializer):
     context_id = serializers.CharField()
     teaching_key = serializers.CharField()
+    help_token = serializers.CharField()
     run_revision = serializers.IntegerField()
     phase = serializers.ChoiceField(choices=["introduction", "feedback"])
     title = serializers.CharField()
@@ -56,7 +57,6 @@ class CommandIntroductionResponseSerializer(serializers.Serializer):
     changes = RepositoryChangeSerializer(many=True)
     verdict = serializers.ChoiceField(choices=["correct", "incorrect"], allow_null=True)
     explanation = serializers.CharField(allow_null=True)
-    example_command = serializers.CharField(allow_null=True)
     completion_token = serializers.CharField(allow_null=True)
     command_form = CommandIntroductionFormSerializer()
     anatomy = SyntaxPartSerializer(many=True)
@@ -65,3 +65,16 @@ class CommandIntroductionResponseSerializer(serializers.Serializer):
 
 class IntroductionCompleteResponseSerializer(serializers.Serializer):
     tutor = CommandIntroductionResponseSerializer(allow_null=True)
+
+
+class TutorTeachingSourceSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    title = serializers.CharField()
+
+
+class TutorChatResponseSerializer(serializers.Serializer):
+    reply = serializers.CharField()
+    sources = TutorTeachingSourceSerializer(many=True)
+    suggested_topics = TutorTeachingSourceSerializer(many=True)
+    response_kind = serializers.ChoiceField(choices=["explanation", "concept_redirect", "clarification", "unavailable"])
+    scenario_related = serializers.BooleanField()

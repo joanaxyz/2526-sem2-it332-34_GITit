@@ -6,6 +6,7 @@ django-environ==0.13.0
 django-redis==6.0.0
 whitenoise==6.11.0
 redis==7.4.0
+httpx==0.28.1
 drf-spectacular==0.29.0
 psycopg[binary,pool]==3.3.4
 sqlparse==0.6.0
