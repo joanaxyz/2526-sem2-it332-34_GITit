@@ -30,6 +30,11 @@ MATCHED, UNCERTAIN, UNMATCHED = "matched", "uncertain", "unmatched"
 _RANK = {UNMATCHED: 0, UNCERTAIN: 1, MATCHED: 2}
 CANDIDATES = 3
 RECOGNITION_TTL = 86400
+# Cosine similarity to the nearest scenario. General Git questions score up to
+# about 0.74 against this index while tasks retold in a learner's own words score
+# from about 0.76, so a confident match starts above the general questions.
+MATCH_SCORE = 0.75
+UNCERTAIN_SCORE = 0.55
 
 
 @dataclass(frozen=True)
@@ -160,11 +165,12 @@ def _semantic(vector, index):
         ((math.sumprod(vector, values), case_id) for case_id, values in index), reverse=True
     )
     top = scores[0][0] if scores else 0.0
-    if top >= 0.72:
+    if top >= MATCH_SCORE:
         return Recognition(
-            MATCHED, tuple(case_id for score, case_id in scores[:CANDIDATES] if score >= 0.72)
+            MATCHED,
+            tuple(case_id for score, case_id in scores[:CANDIDATES] if score >= MATCH_SCORE),
         )
-    if top >= 0.55:
+    if top >= UNCERTAIN_SCORE:
         return Recognition(UNCERTAIN, tuple(case_id for _, case_id in scores[:CANDIDATES]))
     return Recognition(UNMATCHED)
 

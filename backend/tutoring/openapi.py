@@ -77,4 +77,6 @@ class TutorChatResponseSerializer(serializers.Serializer):
     suggested_topics = TutorTopicSerializer(many=True)
     # "guarded": scenario protection was active, so the reply teaches without solving.
     response_kind = serializers.ChoiceField(choices=["answer", "guarded", "unavailable"])
+    # True only when a scenario was recognised with confidence (or inside a level);
+    # a guarded reply to an uncertain match is protected without claiming a scenario.
     scenario_related = serializers.BooleanField()
