@@ -1,4 +1,4 @@
-"""Module 3 wave scenarios: conflict resolution (levels 3.1-3.3)."""
+"""Module 3 planned scenarios: conflict resolution (levels 3.1-3.3)."""
 
 from __future__ import annotations
 

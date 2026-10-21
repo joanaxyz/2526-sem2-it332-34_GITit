@@ -7,37 +7,37 @@ This guide explains how to author curriculum content that teaches Git through sc
 | Type | Purpose | Shape | Completion |
 |---|---|---|---|
 | Lesson | Explain a concept briefly before practice | Chapter book pages | Read/progress state |
-| Adventure | Teach command mastery through guided scenarios | Levels → easy/medium/hard tiers → ordered waves → variants | Every wave of the tier cleared, verified by state |
+| Adventure | Teach command mastery through guided scenarios | Levels → easy/medium/hard tiers → ordered scenarios → variants | Every scenario of the tier cleared, verified by state |
 | Challenge | Assess transfer on new scenarios | Easy/medium/hard trials → variants | Whole-state evaluation |
 
 ## Authoring Principles
 
-1. **Introduce, then compose.** First exposure to a command may be a small single-command wave. After that, prefer multi-command workflows.
+1. **Introduce, then compose.** First exposure to a command may be a small single-command scenario. After that, prefer multi-command workflows.
 2. **Repeat commands in new scenarios.** Mastery comes from revisiting command forms in different repository states, not from repeating the same story.
 3. **Never repeat scenarios.** Commands repeat; narrative setup and initial repository state should not.
 4. **Challenges must change repository state.** A challenge trial should visibly change commits, branches, refs, or HEAD.
 5. **Author the ideal scenario.** If the simulator lacks a needed behavior, improve the simulator and verifier rather than weakening the curriculum.
-6. **Variants are the same problem.** A retry must not hand the learner a different task. At Easy, variants change only names, paths, messages and story: the same steps, options, kinds of argument and starting repository. Medium may also change counts and option values (two files or three, `--depth 1` or `2`). Hard may also change the starting repository (distractors, which candidate is right). A variant never adds a step, an option or a kind of argument its siblings lack, such as an SSH address, a target folder, a start point or a folder pathspec. A scenario that differs becomes its own wave or stays unplaced.
+6. **Variants are the same problem.** A retry must not hand the learner a different task. At Easy, variants change only names, paths, messages and story: the same steps, options, kinds of argument and starting repository. Medium may also change counts and option values (two files or three, `--depth 1` or `2`). Hard may also change the starting repository (distractors, which candidate is right). A variant never adds a step, an option or a kind of argument its siblings lack, such as an SSH address, a target folder, a start point or a folder pathspec. A case that differs becomes its own scenario or stays unplaced.
 7. **Grade the repository, not the route.** Every requirement describes the resulting state: commits, branches, refs, files, config, remotes, stash, reflog. Do not require typed commands or check how an operation ran; an equivalent Git route must pass. A task that ends where it started (re-running `git init`, a stash round trip) needs evidence in state, such as the reflog entry a branch switch leaves, or it cannot be graded. The objective checklist promises only what the requirements check.
-8. **Start plain, then bring it back.** A level's first Easy wave uses the plainest form of its command (`git init` before `git init -b`). Each wave adds one new thing, so the guide shows one lesson at a time. Whatever Easy introduces comes back, unguided, later in Easy; whatever Medium introduces comes back in Medium or Hard.
+8. **Start plain, then bring it back.** A level's first Easy scenario uses the plainest form of its command (`git init` before `git init -b`). Each scenario adds one new thing, so the guide shows one lesson at a time. Whatever Easy introduces comes back, unguided, later in Easy; whatever Medium introduces comes back in Medium or Hard.
 
 ## Adventure Authoring
 
 `MODULE_LEVELS` in `backend/curriculum/management/commands/seed_curriculum.py`
 defines each module level and holds the repository fixtures of the team's
 scenarios. The levels and the commands each one teaches are fixed by the team;
-waves, variants, and the difficulty a command form appears at may change.
+scenarios, variants, and the difficulty a command form appears at may change.
 
-**Placement** lives in the wave plan,
-`backend/curriculum/seed_data/source/wave_plan/module_N.py`. For each level and
-tier it lists 2–3 waves in play order (Easy up to 4). Each wave has a stable slug (learners'
+**Placement** lives in the scenario plan,
+`backend/curriculum/seed_data/source/scenario_plan/module_N.py`. For each level and
+tier it lists 2–3 scenarios in play order (Easy up to 4). Each scenario has a stable slug (learners'
 progress names it), a title the learner sees, a role, and its variant IDs. The
 first variant is the one a first-time learner gets, and a retry rotates within
-the same wave. A run plays the learner's next uncleared wave, one solve clears
-it, and the tier completes when every wave is cleared. Every level must be in
+the same scenario. A run plays the learner's next uncleared scenario, one solve clears
+it, and the tier completes when every scenario is cleared. Every level must be in
 the plan; the seed refuses a level without one.
 
-Each wave has one role:
+Each scenario has one role:
 
 | Role | Use |
 |---|---|
@@ -47,26 +47,26 @@ Each wave has one role:
 | spiral | The level's command plus forms from earlier levels, as a real workflow. |
 | transfer | Hard: unfamiliar state or distractors, known forms only. |
 
-The wave grammar (`curriculum/tests/test_wave_plan_invariants.py` checks all of
+The scenario grammar (`curriculum/tests/test_scenario_plan_invariants.py` checks all of
 it with the real guide resolver):
 
 1. Nothing debuts at Hard, and diagnostics (`status`, `log`, `show`, `reflog`,
    `diff`) never debut.
-2. Whatever a wave debuts, every variant of it uses, so a retry never skips the
-   guide's lesson. Keep a wave's variants on the same skill.
+2. Whatever a scenario debuts, every variant of it uses, so a retry never skips the
+   guide's lesson. Keep a scenario's variants on the same skill.
 3. A debuted form comes back at a harder tier or a later level. Core workflow
    forms (add, commit, amend, restore, switch, branch, stash, push, fetch,
-   pull, merge) come back in two later waves, one in a later level. Setup
+   pull, merge) come back in two later scenarios, one in a later level. Setup
    forms (`init`, `clone`) are exempt.
 4. Every scenario is placed exactly once, in its own level, and no two variants
    share both a starting repository and a target.
 5. A learner who never fails finishes Modules 1–4 in about 5.5 hours (the suite
-   fails above 335 minutes). It counts 1 min per wave, 0.4 min per typed command, 1 min
+   fails above 335 minutes). It counts 1 min per scenario, 0.4 min per typed command, 1 min
    per file edit, and 0.5 min per first-time guide. Re-measure before adding
-   waves.
+   scenarios.
 
-A wave's command forms are the level forms every one of its variants' answer
-keys uses, and a level's forms come from its non-spiral waves. A clear credits
+A scenario's command forms are the level forms every one of its variants' answer
+keys uses, and a level's forms come from its non-spiral scenarios. A clear credits
 the forms the learner actually typed toward mastery. A scenario placed in an
 easier tier than it was written for gets that tier's command limit.
 
@@ -75,8 +75,8 @@ Scenarios come from two banks:
 - `seed_data/scenario_bank.json`, the main bank, compiled from the revised
   Markdown scenario document with
   `python scripts/curriculum/import_revised_scenarios.py <document.md>`.
-- `seed_data/scenario_bank_waves.json`, the extension bank, compiled from
-  `seed_data/source/wave_scenarios.md` with the same script and `--extension`.
+- `seed_data/scenario_bank_extension.json`, the extension bank, compiled from
+  `seed_data/source/extension_scenarios.md` with the same script and `--extension`.
   Each extension scenario's repository fixture, evaluation rules, and answer
   key live in `seed_data/source/scenario_fixtures/` under the same ID. The
   importer rejects an ID or number that collides with the main bank.
@@ -90,16 +90,16 @@ Each scenario should define:
 - state requirements the evaluator verifies
 - a counted-command budget when the tier default does not fit
 
-A new scenario also needs its place in the wave plan. Then run, from `backend/`:
+A new scenario also needs its place in the scenario plan. Then run, from `backend/`:
 
-1. `python ../scripts/curriculum/import_revised_scenarios.py --extension curriculum/seed_data/source/wave_scenarios.md`
+1. `python ../scripts/curriculum/import_revised_scenarios.py --extension curriculum/seed_data/source/extension_scenarios.md`
 2. `python manage.py generate_targets`
-3. `python -m pytest curriculum/tests/test_wave_plan_invariants.py curriculum/tests/test_scenario_bank_content.py -q`
+3. `python -m pytest curriculum/tests/test_scenario_plan_invariants.py curriculum/tests/test_scenario_bank_content.py -q`
 
-The content suite checks every wave and gate answer key against its own
+The content suite checks every scenario and gate answer key against its own
 evaluation, and that the starting state does not already pass. The target state
 must rule out wrong routes or accept their equivalents. For example, an amend
-wave must not pass a new commit (`branch_tip_replaces_commit`).
+scenario must not pass a new commit (`branch_tip_replaces_commit`).
 
 ## Challenge Authoring
 
@@ -107,15 +107,15 @@ Each module ends in a Challenge Gate: a workflow that tests what the module
 taught. `seed_data/source/challenge_gates.py` composes each gate's title,
 narrative, and the two scenarios behind each of its Easy, Medium, and Hard
 trials. Gate scenarios are extension scenarios numbered `N.G.k` in
-`seed_data/source/wave_scenarios.md`. The gate opens once every required level
+`seed_data/source/extension_scenarios.md`. The gate opens once every required level
 of the module has cleared all three of its tiers; inside the gate, Medium opens
 after the Easy trial and Hard after Medium. A gate is the module's capstone, so
 even its Easy trial is played by someone who has finished every Hard tier.
 
 Each trial should have:
 
-- two variants, shaped like an Easy wave's variants (the same steps)
-- a new scenario, never the steps of an adventure wave on a new story
+- two variants, shaped like an Easy scenario's variants (the same steps)
+- a new scenario, never the steps of an adventure scenario on a new story
 - a workflow of at least three counted commands that spans two or more of the
   module's levels, in the order a real task needs them
 - at least one change the Live diagram draws: a new or rewritten commit, a
@@ -153,7 +153,7 @@ Targets come from `python manage.py generate_targets` - never by hand.
 
 ## Objective Checks
 
-Where a wave defines objective checks, they should be:
+Where a scenario defines objective checks, they should be:
 
 - **Modular** — one visible checklist row per meaningful step.
 - **Variant-safe** — do not hard-code a file/branch/commit that differs between variants.
@@ -204,7 +204,7 @@ Create a repository in a new `ci-configs` folder, with `main` as its first branc
 ```
 
 The normalizer preserves these markers without a schema change. Apply edits to the
-authored scenario bank or `source/wave_scenarios.md` (then recompile it), then run
+authored scenario bank or `source/extension_scenarios.md` (then recompile it), then run
 `seed_curriculum` to update variant content. Reload the workspace to fetch the updated brief.
 
 ## Generated Targets

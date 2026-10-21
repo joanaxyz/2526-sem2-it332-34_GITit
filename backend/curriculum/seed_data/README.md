@@ -1,16 +1,16 @@
 # Curriculum seed data
 
 `seed_curriculum` seeds the current Arcane Spire Module 0-4 curriculum: each
-level's difficulty tiers, their ordered waves and variants, and each module's
+level's difficulty tiers, their ordered scenarios and variants, and each module's
 Challenge Gate. It writes only the tier and gate models.
 `scenario_bank.json` owns the main authored scenario contract and
-`scenario_bank_waves.json` the extension scenarios (extra wave variants and
+`scenario_bank_extension.json` the extension scenarios (extra scenario variants and
 gate trials), both compiled from `source/*.md` by
 `scripts/curriculum/import_revised_scenarios.py`. `scenario_bank.py` reads both
 banks. `scenario_runtime.py` joins the main bank to the canonical command's
 cases, and `source/scenario_fixtures/` joins each extension scenario to its
-repository fixture. `source/wave_plan/` places every scenario in its level,
-tier and wave, in play order; gate composition lives in
+repository fixture. `source/scenario_plan/` places every scenario in its level,
+tier and scenario, in play order; gate composition lives in
 `source/challenge_gates.py`. The stable story/chapter/level scaffold is owned
 by the canonical command.
 

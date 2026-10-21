@@ -15,7 +15,7 @@ export function ProblemsEditor({
   problems: AuthoredProblem[]
   onChange: (problems: AuthoredProblem[]) => void
 }) {
-  const problemNoun = kind === 'challenge' ? 'trial' : 'wave'
+  const problemNoun = kind === 'challenge' ? 'trial' : 'scenario'
 
   function patch(index: number, next: Partial<AuthoredProblem>) {
     onChange(problems.map((problem, i) => (i === index ? { ...problem, ...next } : problem)))
@@ -38,7 +38,7 @@ export function ProblemsEditor({
 
   return (
     <div className="author-field">
-      <span className="author-label">{kind === 'challenge' ? 'Trials' : 'Waves'}</span>
+      <span className="author-label">{kind === 'challenge' ? 'Trials' : 'Scenarios'}</span>
       <span className="author-hint">
         {kind === 'challenge'
           ? 'Difficulty tiers for this stage. Harder trials expect more complex repository changes.'
@@ -49,7 +49,7 @@ export function ProblemsEditor({
         <div className="author-variant" key={index}>
           <div className="author-inline-row">
             <span className="author-label">
-              {kind === 'challenge' ? 'Trial' : 'Wave'} {index + 1}
+              {kind === 'challenge' ? 'Trial' : 'Scenario'} {index + 1}
             </span>
             <button
               type="button"

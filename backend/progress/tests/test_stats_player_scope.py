@@ -10,8 +10,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from challenges.models import ChallengeLevel, ChallengeRun, ChallengeTrial, ChallengeTrialVariant
 from curriculum.models import Chapter, Story
@@ -27,8 +27,8 @@ def stats_players(db, django_user_model):
     chapter = Chapter.objects.create(story=story, slug="stats", number=1, title="Stats")
     level = AdventureLevel.objects.create(chapter=chapter, slug="stats", title="Stats")
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    tier_wave = AdventureLevelTierWave.objects.create(tier=tier, slug="stats")
-    tier_variant = AdventureLevelTierWaveVariant.objects.create(wave=tier_wave, slug="stats")
+    tier_scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug="stats")
+    tier_variant = AdventureLevelTierScenarioVariant.objects.create(scenario=tier_scenario, slug="stats")
     challenge = ChallengeLevel.objects.create(chapter=chapter, slug="stats", title="Stats")
     trial = ChallengeTrial.objects.create(challenge_level=challenge, difficulty="easy")
     trial_variant = ChallengeTrialVariant.objects.create(trial=trial, slug="stats")
@@ -46,7 +46,7 @@ def stats_players(db, django_user_model):
             "adventure_tier_run": AdventureLevelTierRun.objects.create(
                 player=player,
                 tier=tier,
-                current_wave=tier_wave,
+                current_scenario=tier_scenario,
                 selected_variant=tier_variant,
                 status="completed",
             ),
@@ -89,15 +89,15 @@ def _completed_tier_run(player, *, story_slug: str, suffix: str, chapter_number:
         title=f"{suffix} level",
     )
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    wave = AdventureLevelTierWave.objects.create(tier=tier, slug=f"{suffix}-wave")
-    variant = AdventureLevelTierWaveVariant.objects.create(
-        wave=wave,
+    scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug=f"{suffix}-scenario")
+    variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
         slug=f"{suffix}-variant",
     )
     run = AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variant,
         status="completed",
     )

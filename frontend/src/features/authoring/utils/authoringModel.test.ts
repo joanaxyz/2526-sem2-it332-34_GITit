@@ -10,7 +10,7 @@ import {
 } from './authoringModel'
 
 describe('authoring serde round-trip', () => {
-  it('preserves waves and variants through the definition', () => {
+  it('preserves scenarios and variants through the definition', () => {
     const form = initialForm('adventure')
     form.levels = [
       {
@@ -49,11 +49,11 @@ describe('authoring serde round-trip', () => {
 
     const level = restored.levels[0]
     expect(level.problems).toHaveLength(2)
-    const wave = level.problems[0]
-    expect(wave.story).toBe('The history got tangled.')
-    expect(wave.task).toBe('Inspect the repository state.')
-    expect(wave.variants).toHaveLength(1)
-    expect(wave.variants[0].slug).toBe('case-1')
+    const scenario = level.problems[0]
+    expect(scenario.story).toBe('The history got tangled.')
+    expect(scenario.task).toBe('Inspect the repository state.')
+    expect(scenario.variants).toHaveLength(1)
+    expect(scenario.variants[0].slug).toBe('case-1')
     expect(level.problems[1].task).toBe('Commit the staged snapshot.')
   })
 
@@ -83,13 +83,13 @@ describe('authoring serde round-trip', () => {
         problems: [{ ...emptyProblem('adventure', 0) }],
       },
     ]
-    expect(compileSummary(adventure)).toBe('1 level · 1 wave · 1 variant')
+    expect(compileSummary(adventure)).toBe('1 level · 1 scenario · 1 variant')
   })
 
-  it('emits nested waves for adventures and trials for challenges', () => {
+  it('emits nested scenarios for adventures and trials for challenges', () => {
     const adventure = initialForm('adventure')
     const advDef = formToDefinition(adventure) as { levels: Record<string, unknown>[] }
-    expect(Array.isArray(advDef.levels[0].waves)).toBe(true)
+    expect(Array.isArray(advDef.levels[0].scenarios)).toBe(true)
 
     const challenge = initialForm('challenge')
     const chalDef = formToDefinition(challenge) as { levels: Record<string, unknown>[] }
@@ -98,9 +98,9 @@ describe('authoring serde round-trip', () => {
 
   it('omits scenario context when the author leaves story and task empty', () => {
     const form = initialForm('adventure')
-    const definition = formToDefinition(form) as { levels: { waves: Record<string, unknown>[] }[] }
-    const wave = definition.levels[0].waves[0]
-    expect(wave.scenario_context).toBeUndefined()
+    const definition = formToDefinition(form) as { levels: { scenarios: Record<string, unknown>[] }[] }
+    const scenario = definition.levels[0].scenarios[0]
+    expect(scenario.scenario_context).toBeUndefined()
   })
 
   it('reads legacy flat levels as a single problem', () => {

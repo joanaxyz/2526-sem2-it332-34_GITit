@@ -107,7 +107,7 @@ def live_records(runs, *, end_before=None):
     )
     checkpoints = KpiCheckpoint.objects.filter(
         player_id__in=players, tier_id__in=tiers
-    ).select_related("variant__wave")
+    ).select_related("variant__scenario")
     if end_before:
         checkpoints = checkpoints.filter(assigned_at__lt=end_before)
     points = {(c.player_id, c.tier_id, c.kind): c for c in checkpoints}

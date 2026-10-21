@@ -14,7 +14,7 @@ function makeRun(overrides: Partial<TierRun> = {}): TierRun {
     policy: { min_counted_commands: 1, max_counted_commands: 12 },
     counts: { counted_action_total: 3 },
     reward: { coins: 35, claimed: false },
-    wave: { index: 1, total: 1, title: '' },
+    scenario: { index: 1, total: 1, title: '' },
     ...overrides,
   } as unknown as TierRun
 }
@@ -46,13 +46,13 @@ describe('TierStatsBar', () => {
     expect(statValue('Reward')).toHaveTextContent('Claimed')
   })
 
-  it('shows the wave position only for a tier with several waves', () => {
+  it('shows the scenario position only for a tier with several scenarios', () => {
     const { unmount } = render(<TierStatsBar run={makeRun()} />)
-    expect(screen.queryByText('Wave', { selector: 'dt' })).not.toBeInTheDocument()
+    expect(screen.queryByText('Scenario', { selector: 'dt' })).not.toBeInTheDocument()
     unmount()
 
-    render(<TierStatsBar run={makeRun({ wave: { index: 2, total: 3, title: 'Publish and track' } })} />)
-    expect(statValue('Wave')).toHaveTextContent('2 / 3')
+    render(<TierStatsBar run={makeRun({ scenario: { index: 2, total: 3, title: 'Publish and track' } })} />)
+    expect(statValue('Scenario')).toHaveTextContent('2 / 3')
   })
 
   it('counts a reward paid by this run as claimed', () => {

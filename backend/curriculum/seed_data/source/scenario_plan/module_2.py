@@ -1,26 +1,26 @@
-"""Module 2 wave placement: Branching and Collaboration (WAVE_MAP.md).
+"""Module 2 scenario placement: Branching and Collaboration (SCENARIO_MAP.md).
 
-Each tier's waves are listed in play order; each wave's first variant is a
-first-time learner's pick. Wave slugs are stable: progress rows name them.
+Each tier's scenarios are listed in play order; each scenario's first variant is a
+first-time learner's pick. Scenario slugs are stable: progress rows name them.
 """
 
 from __future__ import annotations
 
-from curriculum.seed_data.source.wave_plan.types import (
+from curriculum.seed_data.source.scenario_plan.types import (
     COMPOSE,
     DEBUT,
     PRACTICE,
     SPIRAL,
     TRANSFER,
-    ModuleWaves,
-    WaveSpec,
+    ModuleScenarios,
+    ScenarioSpec,
 )
 
-WAVES: ModuleWaves = {
+SCENARIOS: ModuleScenarios = {
     # Creating and Switching Branches
     "creating-and-switching-branches": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "create-and-switch",
                 "Create a branch and switch to it",
                 DEBUT,
@@ -33,7 +33,7 @@ WAVES: ModuleWaves = {
                     "bc-med-oss-develop",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "go-back-to-main",
                 "Go back to main",
                 DEBUT,
@@ -42,7 +42,7 @@ WAVES: ModuleWaves = {
                     "switch-easy-back-to-main-api",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "branch-off-then-return",
                 "Branch off, then come back",
                 COMPOSE,
@@ -53,7 +53,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "create-without-switching",
                 "Create a branch without switching",
                 DEBUT,
@@ -63,7 +63,7 @@ WAVES: ModuleWaves = {
                     "v21m-export",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "start-from-another-tip",
                 "Start from a chosen commit",
                 DEBUT,
@@ -74,7 +74,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "save-detached-work-then-return",
                 "Save detached work, then go back",
                 TRANSFER,
@@ -83,7 +83,7 @@ WAVES: ModuleWaves = {
                     "switch-hard-detached-save-and-return",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "mark-a-release-point",
                 "Mark a release point without leaving main",
                 TRANSFER,
@@ -97,7 +97,7 @@ WAVES: ModuleWaves = {
     # Branch Naming Conventions
     "branch-naming-and-housekeeping": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "follow-the-convention",
                 "Follow the naming convention",
                 PRACTICE,
@@ -109,7 +109,7 @@ WAVES: ModuleWaves = {
                     "bn-easy-free-client",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "delete-a-merged-branch",
                 "Delete a merged branch",
                 DEBUT,
@@ -118,7 +118,7 @@ WAVES: ModuleWaves = {
                     "bn-easy-delete-merged-spike",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "replace-a-badly-named-branch",
                 "Replace a badly named branch",
                 COMPOSE,
@@ -129,7 +129,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "build-the-name-from-the-brief",
                 "Build the name from the brief",
                 PRACTICE,
@@ -140,7 +140,7 @@ WAVES: ModuleWaves = {
                     "bn-med-oss-infer",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "fix-the-name-keep-the-convention",
                 "Fix the name, keep the convention",
                 COMPOSE,
@@ -151,7 +151,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "start-the-fix-on-a-well-named-branch",
                 "Start the fix on a well-named branch",
                 SPIRAL,
@@ -160,7 +160,7 @@ WAVES: ModuleWaves = {
                     "bn-hard-named-branch-commit-billing",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "clear-out-merged-branches",
                 "Clear out the merged branches",
                 TRANSFER,
@@ -174,7 +174,7 @@ WAVES: ModuleWaves = {
     # Stashing Work in Progress
     "stashing-work-in-progress": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "shelve-and-switch",
                 "Shelve work and switch",
                 DEBUT,
@@ -186,7 +186,7 @@ WAVES: ModuleWaves = {
                     "stash-easy-docs-switch",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "bring-it-back",
                 "Bring the shelved work back",
                 DEBUT,
@@ -195,7 +195,7 @@ WAVES: ModuleWaves = {
                     "stash-easy-pop-profile",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "stash-visit-return-restore",
                 "Stash, visit, return, restore",
                 COMPOSE,
@@ -208,7 +208,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "discard-a-cancelled-draft",
                 "Discard a cancelled draft",
                 DEBUT,
@@ -217,7 +217,7 @@ WAVES: ModuleWaves = {
                     "v23h-dropped-api",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "two-stashes-keep-the-right-one",
                 "Two stashes, keep the right one",
                 COMPOSE,
@@ -228,7 +228,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "cancelled-work-clean-exit",
                 "Cancelled work, clean exit",
                 TRANSFER,
@@ -237,7 +237,7 @@ WAVES: ModuleWaves = {
                     "stash-hard-cancelled-experiment",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "park-the-draft-for-later",
                 "Park the draft for later",
                 TRANSFER,
@@ -251,7 +251,7 @@ WAVES: ModuleWaves = {
     # Pushing to a Remote
     "pushing-to-a-remote": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "publish-a-branch",
                 "Publish a branch",
                 DEBUT,
@@ -263,7 +263,7 @@ WAVES: ModuleWaves = {
                     "push-easy-free-landing",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "publish-and-track",
                 "Publish and track",
                 DEBUT,
@@ -272,7 +272,7 @@ WAVES: ModuleWaves = {
                     "v24m-orders",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "track-another-branch",
                 "Publish and track another branch",
                 PRACTICE,
@@ -283,7 +283,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "branch-commit-publish",
                 "Branch, commit, publish",
                 SPIRAL,
@@ -292,7 +292,7 @@ WAVES: ModuleWaves = {
                     "push-medium-branch-commit-publish-invoices",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "republish-rewritten-history",
                 "Republish rewritten history safely",
                 DEBUT,
@@ -303,7 +303,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "amend-then-republish",
                 "Amend a published commit, republish",
                 SPIRAL,
@@ -312,7 +312,7 @@ WAVES: ModuleWaves = {
                     "push-hard-amend-then-lease-docs",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "rewritten-branch-careful-publish",
                 "Rewritten branch, careful publish",
                 TRANSFER,
@@ -326,7 +326,7 @@ WAVES: ModuleWaves = {
     # Fetching and Pulling from a Remote
     "fetching-and-pulling": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "see-whats-new",
                 "See what's new on origin",
                 DEBUT,
@@ -336,7 +336,7 @@ WAVES: ModuleWaves = {
                     "v25e-develop",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "bring-new-commits-in",
                 "Bring the new commits in",
                 DEBUT,
@@ -345,7 +345,7 @@ WAVES: ModuleWaves = {
                     "v25m-feature",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "check-origin-again",
                 "Check origin again",
                 PRACTICE,
@@ -354,7 +354,7 @@ WAVES: ModuleWaves = {
                     "fetch-easy-corp-list",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "bring-more-commits-in",
                 "Bring more commits in",
                 PRACTICE,
@@ -365,7 +365,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "review-before-integrating",
                 "Review before integrating",
                 COMPOSE,
@@ -374,7 +374,7 @@ WAVES: ModuleWaves = {
                     "v25h-feature",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "update-then-branch",
                 "Update, then branch from fresh main",
                 SPIRAL,
@@ -385,7 +385,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "review-incoming-work",
                 "Review incoming work",
                 TRANSFER,
@@ -394,7 +394,7 @@ WAVES: ModuleWaves = {
                     "fetch-hard-oss-review",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "pull-with-work-in-progress",
                 "Pull with local work in progress",
                 SPIRAL,
@@ -408,7 +408,7 @@ WAVES: ModuleWaves = {
     # Reconciling Diverged Local and Remote Histories
     "reconciling-diverged-histories": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "pull-then-push-again",
                 "Pull, then push again",
                 PRACTICE,
@@ -420,7 +420,7 @@ WAVES: ModuleWaves = {
                     "rec-easy-docs-chapter",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "fetch-merge-push",
                 "Fetch, merge the remote branch, push",
                 DEBUT,
@@ -429,7 +429,7 @@ WAVES: ModuleWaves = {
                     "v26m-payments",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "fetch-merge-push-practice",
                 "Reconcile a teammate's branch",
                 PRACTICE,
@@ -440,7 +440,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "commit-reconcile-publish",
                 "Commit, reconcile, publish",
                 SPIRAL,
@@ -449,7 +449,7 @@ WAVES: ModuleWaves = {
                     "rec-medium-commit-then-reconcile-api",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "reconcile-from-the-wrong-branch",
                 "Reconcile from the wrong branch",
                 TRANSFER,
@@ -460,7 +460,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "reconcile-and-publish-under-pressure",
                 "Reconcile and publish under pressure",
                 TRANSFER,
@@ -469,7 +469,7 @@ WAVES: ModuleWaves = {
                     "rec-hard-corp-audit",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "commit-fetch-merge-publish",
                 "Commit, fetch, merge, publish",
                 SPIRAL,
@@ -483,7 +483,7 @@ WAVES: ModuleWaves = {
     # Completing Branch Merges
     "completing-branch-merges": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "fast-forward-merge",
                 "Fast-forward merge",
                 PRACTICE,
@@ -495,7 +495,7 @@ WAVES: ModuleWaves = {
                     "merge-easy-free-contact",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "keep-a-visible-merge",
                 "Keep a visible merge commit",
                 DEBUT,
@@ -504,7 +504,7 @@ WAVES: ModuleWaves = {
                     "v27m-payments",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "no-ff-practice",
                 "Merge with a merge commit",
                 PRACTICE,
@@ -515,7 +515,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "finish-then-land",
                 "Finish the feature, then land it",
                 SPIRAL,
@@ -524,7 +524,7 @@ WAVES: ModuleWaves = {
                     "merge-medium-commit-switch-noff-auth",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "land-from-the-wrong-branch",
                 "Land from the wrong branch",
                 TRANSFER,
@@ -535,7 +535,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "land-a-release-fix-from-the-wrong-branch",
                 "Land a release fix from the wrong branch",
                 TRANSFER,
@@ -544,7 +544,7 @@ WAVES: ModuleWaves = {
                     "merge-hard-devops-cert",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "land-publish-tidy-up",
                 "Land, publish, tidy up",
                 SPIRAL,
@@ -558,7 +558,7 @@ WAVES: ModuleWaves = {
     # Squash Merging
     "squash-merging": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "squash-into-one-commit",
                 "Squash a branch into one commit",
                 DEBUT,
@@ -570,7 +570,7 @@ WAVES: ModuleWaves = {
                     "squash-easy-free-payment",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "squash-then-force-delete",
                 "Squash, then force-delete the branch",
                 DEBUT,
@@ -579,7 +579,7 @@ WAVES: ModuleWaves = {
                     "v28h-orders",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "one-commit-no-leftovers",
                 "One commit, no leftovers",
                 PRACTICE,
@@ -590,7 +590,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "squash-a-remote-branch",
                 "Squash a teammate's remote branch",
                 PRACTICE,
@@ -601,7 +601,7 @@ WAVES: ModuleWaves = {
                     "squash-med-corp-gdpr",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "squash-and-publish",
                 "Squash and publish",
                 SPIRAL,
@@ -612,7 +612,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "squash-land-from-another-branch",
                 "Squash-land from another branch",
                 SPIRAL,
@@ -621,7 +621,7 @@ WAVES: ModuleWaves = {
                     "squash-hard-switch-squash-cleanup-ui",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "squash-a-remote-branch-publish-tidy",
                 "Squash a remote branch, publish, tidy up",
                 TRANSFER,
@@ -635,7 +635,7 @@ WAVES: ModuleWaves = {
     # Deleting and Recovering Remote Branches
     "deleting-and-recovering-remote-branches": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "delete-a-remote-branch",
                 "Delete a remote branch",
                 DEBUT,
@@ -647,7 +647,7 @@ WAVES: ModuleWaves = {
                     "rb-easy-corp-sprint",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "prune-stale-refs",
                 "Prune stale remote-tracking refs",
                 DEBUT,
@@ -658,7 +658,7 @@ WAVES: ModuleWaves = {
                     "rb-med-free-prune",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "delete-then-prune",
                 "Delete one, prune the rest",
                 COMPOSE,
@@ -669,7 +669,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "retire-a-branch-everywhere",
                 "Retire a branch everywhere",
                 COMPOSE,
@@ -678,7 +678,7 @@ WAVES: ModuleWaves = {
                     "v29h-orders",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "land-and-retire",
                 "Land and retire",
                 SPIRAL,
@@ -689,7 +689,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "retire-safely",
                 "Retire safely",
                 TRANSFER,
@@ -698,7 +698,7 @@ WAVES: ModuleWaves = {
                     "rb-hard-oss-full",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "fetch-land-publish-retire-prune",
                 "Fetch, land, publish, retire, prune",
                 SPIRAL,

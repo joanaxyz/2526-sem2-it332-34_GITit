@@ -680,15 +680,15 @@ def _runtime_overrides() -> dict[str, dict[str, Any]]:
 RUNTIME_OVERRIDES = _runtime_overrides()
 
 
-# Scenarios the wave plan does not place, and why.
+# Scenarios the scenario plan does not place, and why.
 UNPLACED_CASE_IDS = {
     "init-hard-safe-rerun": "re-running git init leaves no state to grade",
-    # A wave's variants are one problem; these differ from every wave of their level.
+    # A scenario's variants are one problem; these differ from every scenario of their level.
     "clone-easy-oss-ssh": "an SSH clone without a folder; SSH debuts with a named folder",
-    "commit-easy-auth-dir": "stages a folder; the level's waves stage files",
-    "v21h-detach-save": "saves a detached commit without returning; the Hard wave also returns",
-    "cherry-medium-login-timeout": "two picks in order; no cherry-pick wave copies two commits",
-    "cherry-medium-invoice-rounding": "picks a branch tip by name; the waves pick commits",
+    "commit-easy-auth-dir": "stages a folder; the level's scenarios stage files",
+    "v21h-detach-save": "saves a detached commit without returning; the Hard scenario also returns",
+    "cherry-medium-login-timeout": "two picks in order; no cherry-pick scenario copies two commits",
+    "cherry-medium-invoice-rounding": "picks a branch tip by name; the scenarios pick commits",
 }
 
 _ROUTE_RULES = frozenset(

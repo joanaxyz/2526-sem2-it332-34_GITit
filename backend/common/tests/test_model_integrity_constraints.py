@@ -1,7 +1,7 @@
 import pytest
 from django.db import IntegrityError, transaction
 
-from adventures.models import AdventureLevelTierRun, AdventureLevelTierWave
+from adventures.models import AdventureLevelTierRun, AdventureLevelTierScenario
 from authoring.compiler import ContentRuntimeCompiler
 from authoring.models import ContentDefinition, ContentKind, PublishedContentRuntime
 from challenges.models import ChallengeRun, ChallengeTrial
@@ -29,7 +29,7 @@ def test_adventure_budget_and_star_constraints(django_user_model):
     fixture = create_stage_readme_tier_run(django_user_model)
 
     _assert_constraint_rejects(
-        lambda: AdventureLevelTierWave.objects.filter(pk=fixture.wave.pk).update(
+        lambda: AdventureLevelTierScenario.objects.filter(pk=fixture.scenario.pk).update(
             min_counted_commands=4,
             max_counted_commands=3,
         )

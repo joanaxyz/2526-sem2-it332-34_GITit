@@ -26,7 +26,7 @@ def test_reads_do_not_complete_or_allow_question_ack(teaching_run):
 def test_completion_survives_run_and_form_deletion(teaching_run):
     key = tutor_payload(teaching_run)["teaching_key"]
     PlayerCommandIntroduction.objects.create(player=teaching_run.player, teaching_key=key)
-    teaching_run.current_wave.command_forms.all().delete()
+    teaching_run.current_scenario.command_forms.all().delete()
     teaching_run.delete()
     assert PlayerCommandIntroduction.objects.get().teaching_key == key
 
@@ -42,15 +42,15 @@ def test_file_edits_invalidate_ack_and_ended_runs_get_no_new_lesson(teaching_run
 
 
 def test_identity_survives_variants_but_is_per_player(teaching_run, django_user_model):
-    from adventures.models import AdventureLevelTierWaveVariant
+    from adventures.models import AdventureLevelTierScenarioVariant
     from players.services import get_or_create_player
 
     PlayerCommandIntroduction.objects.create(
         player=teaching_run.player, teaching_key="git-init/current-directory"
     )
     original = teaching_run.selected_variant
-    teaching_run.selected_variant = AdventureLevelTierWaveVariant.objects.create(
-        wave=teaching_run.current_wave,
+    teaching_run.selected_variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=teaching_run.current_scenario,
         slug="second",
         label="Second",
         initial_state=original.initial_state,

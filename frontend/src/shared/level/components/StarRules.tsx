@@ -18,7 +18,7 @@ export function StarRulesContent({ mode = 'tier' }: { mode?: LevelTourMode }) {
       </dl>
       <p>The Star target is your command goal. Commands that change the repository and invalid commands count. Valid checks like <code>git status</code> are free.</p>
       {mode === 'adventure' ? (
-        <p>Clear every wave; your lowest wave score becomes your level score. Opening the command guide takes away one star, down to a minimum of 1.</p>
+        <p>Clear every scenario; your lowest scenario score becomes your level score. Opening the command guide takes away one star, down to a minimum of 1.</p>
       ) : null}
       <p>Click the stars any time to see these rules again.</p>
     </div>

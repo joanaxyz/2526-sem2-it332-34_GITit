@@ -14,7 +14,7 @@ from common.exceptions import Locked
 from curriculum.models import Chapter
 from curriculum.seed_data.scenario_bank import scenario_for_case
 from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES
-from curriculum.seed_data.source.wave_plan import MODULE_WAVE_PLAN
+from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN
 from curriculum.selectors.content import chapter_content_overview
 from players.services import get_or_create_player
 from progress.models import AdventureLevelTierCompletion, ChallengeTrialCompletion
@@ -144,13 +144,13 @@ def _counted_skeleton(commands: list[str]) -> tuple[str, ...]:
     return tuple(steps)
 
 
-def test_every_gate_trial_is_a_module_workflow_not_an_adventure_wave():
+def test_every_gate_trial_is_a_module_workflow_not_an_adventure_scenario():
     adventure = {
         _counted_skeleton(scenario_for_case(case_id)["solution_commands"]): case_id
-        for tiers in MODULE_WAVE_PLAN.values()
-        for waves in tiers.values()
-        for wave in waves
-        for case_id in wave.variants
+        for tiers in MODULE_SCENARIO_PLAN.values()
+        for scenarios in tiers.values()
+        for scenario in scenarios
+        for case_id in scenario.variants
     }
     for gate in CHALLENGE_GATES.values():
         for case_ids in gate["trials"].values():
@@ -158,7 +158,7 @@ def test_every_gate_trial_is_a_module_workflow_not_an_adventure_wave():
                 steps = _counted_skeleton(scenario_for_case(case_id)["solution_commands"])
                 assert len(steps) >= 3, f"{case_id}: a gate trial is a workflow"
                 assert steps not in adventure, (
-                    f"{case_id} repeats the steps of adventure wave {adventure.get(steps)}"
+                    f"{case_id} repeats the steps of adventure scenario {adventure.get(steps)}"
                 )
 
 

@@ -9,8 +9,12 @@ import { useAuthStore } from '@/shared/auth/useAuth'
  */
 const SNAPSHOT_PREFIX = 'git-it:story-map-snapshot:'
 const SNAPSHOT_TTL_MS = 7 * 24 * 60 * 60 * 1000
+// Bump when the cached payload shape changes, so an older snapshot is dropped
+// instead of seeding the map with fields it no longer has.
+const SNAPSHOT_VERSION = 2
 
 type SnapshotEntry<T> = {
+  version: number
   userId: number
   storedAt: number
   data: T
@@ -40,7 +44,8 @@ export function readStoryMapSnapshot<T>(key: string): T | undefined {
     if (!raw) return undefined
     const entry = JSON.parse(raw) as SnapshotEntry<T>
     if (
-      entry?.userId !== userId
+      entry?.version !== SNAPSHOT_VERSION
+      || entry.userId !== userId
       || !Number.isFinite(entry.storedAt)
       || Date.now() - entry.storedAt > SNAPSHOT_TTL_MS
       || entry.data == null
@@ -59,7 +64,7 @@ export function writeStoryMapSnapshot<T>(key: string, data: T) {
   const userId = confirmedUserId()
   if (userId === undefined) return
   try {
-    const entry: SnapshotEntry<T> = { userId, storedAt: Date.now(), data }
+    const entry: SnapshotEntry<T> = { version: SNAPSHOT_VERSION, userId, storedAt: Date.now(), data }
     window.localStorage.setItem(snapshotKey(userId, key), JSON.stringify(entry))
   } catch {
     // localStorage may be unavailable in private mode or quota exceeded.

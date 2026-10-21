@@ -7,8 +7,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from common.constants import SESSION_STATUS_COMPLETED, SESSION_STATUS_FAILED
 from curriculum.models import Chapter, Story
@@ -137,15 +137,15 @@ def test_authenticated_dashboard_exposes_typed_runebound_chapter_and_retry_rows(
         title="Runebound Branching",
     )
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="medium")
-    wave = AdventureLevelTierWave.objects.create(tier=tier, slug="dashboard-wave")
-    variant = AdventureLevelTierWaveVariant.objects.create(
-        wave=wave,
+    scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug="dashboard-scenario")
+    variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
         slug="dashboard-variant",
     )
     first = AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variant,
         source_entry_point="runtime_test",
         status=SESSION_STATUS_COMPLETED,
@@ -153,7 +153,7 @@ def test_authenticated_dashboard_exposes_typed_runebound_chapter_and_retry_rows(
     AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variant,
         prior_run=first,
         source_entry_point="runtime_test",

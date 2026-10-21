@@ -1,4 +1,4 @@
-"""Module 1 wave scenarios: repository foundations (levels 1.1-1.6)."""
+"""Module 1 planned scenarios: repository foundations (levels 1.1-1.6)."""
 
 from __future__ import annotations
 

@@ -2,7 +2,7 @@ from django.db import models
 
 
 class VariantBase(models.Model):
-    """Shared shape for authored problem variants (adventure waves, challenge
+    """Shared shape for authored problem variants (adventure scenarios, challenge
     trials): one authored case with an initial/target state pair and an
     evaluation spec. Concrete subclasses add only their parent FK.
 

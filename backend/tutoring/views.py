@@ -16,7 +16,7 @@ from tutoring.services.introductions import complete_introduction
 def locked_run(request, run_id):
     return get_object_or_404(
         AdventureLevelTierRun.objects.select_for_update(of=("self",)).select_related(
-            "current_wave",
+            "current_scenario",
             "selected_variant",
         ),
         pk=run_id,

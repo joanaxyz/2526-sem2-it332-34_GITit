@@ -259,7 +259,7 @@ def parse_document(
 
 SEED_DATA = Path(__file__).resolve().parents[2] / "backend" / "curriculum" / "seed_data"
 BANK_PATH = SEED_DATA / "scenario_bank.json"
-EXTENSION_PATH = SEED_DATA / "scenario_bank_waves.json"
+EXTENSION_PATH = SEED_DATA / "scenario_bank_extension.json"
 
 
 def render_document(path: Path, *, extension: bool = False, bank_path: Path = BANK_PATH) -> str:
@@ -288,8 +288,8 @@ def main(argv: list[str] | None = None) -> int:
         "--extension",
         action="store_true",
         help=(
-            "Compile the wave scenario document (any count, IDs disjoint from the bank) "
-            "into scenario_bank_waves.json"
+            "Compile the extension scenario document (any count, IDs disjoint from the bank) "
+            "into scenario_bank_extension.json"
         ),
     )
     parser.add_argument("--output", type=Path, default=None)

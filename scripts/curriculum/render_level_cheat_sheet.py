@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
-"""Render LEVEL_CHEAT_SHEET.md: every wave's variants and answer keys, in play order.
+"""Render LEVEL_CHEAT_SHEET.md: every scenario's variants and answer keys, in play order.
 
-Reads the wave plan, the scenario banks and the gate composition, so the sheet
+Reads the scenario plan, the scenario banks and the gate composition, so the sheet
 always matches what `seed_curriculum` publishes. Run from the repository root:
 
     python scripts/curriculum/render_level_cheat_sheet.py
@@ -29,7 +29,7 @@ from curriculum.management.commands.seed_curriculum import (  # noqa: E402
 )
 from curriculum.seed_data.scenario_bank import scenario_for_case  # noqa: E402
 from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES  # noqa: E402
-from curriculum.seed_data.source.wave_plan import MODULE_WAVE_PLAN  # noqa: E402
+from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN  # noqa: E402
 
 MODULES = {
     1: ("Local Repository Foundations", MODULE_1_LEVELS),
@@ -64,37 +64,37 @@ def _row(label: str, case_id: str) -> str:
 
 
 def render() -> str:
-    waves = sum(len(w) for tiers in MODULE_WAVE_PLAN.values() for w in tiers.values())
+    scenarios = sum(len(w) for tiers in MODULE_SCENARIO_PLAN.values() for w in tiers.values())
     variants = sum(
-        len(wave.variants)
-        for tiers in MODULE_WAVE_PLAN.values()
-        for waves_ in tiers.values()
-        for wave in waves_
+        len(scenario.variants)
+        for tiers in MODULE_SCENARIO_PLAN.values()
+        for scenarios_ in tiers.values()
+        for scenario in scenarios_
     )
     lines = [
         "# GIT it! — Level answer sheet (STAFF ONLY)",
         "",
-        "Generated from the wave plan by `python scripts/curriculum/render_level_cheat_sheet.py`;",
+        "Generated from the scenario plan by `python scripts/curriculum/render_level_cheat_sheet.py`;",
         "do not edit by hand. "
-        f"Covers {len(MODULE_WAVE_PLAN)} levels, {waves} waves and {variants} variants in Modules 1–4,",
+        f"Covers {len(MODULE_SCENARIO_PLAN)} levels, {scenarios} scenarios and {variants} variants in Modules 1–4,",
         "plus each module's Challenge Gate.",
         "",
-        "A tier's waves play in order. The first variant listed is a first-time learner's;",
-        "a retry rotates within the same wave. Commands run left to right, and file edits",
+        "A tier's scenarios play in order. The first variant listed is a first-time learner's;",
+        "a retry rotates within the same scenario. Commands run left to right, and file edits",
         "happen in Project Files at the point shown.",
     ]
     for module, (title, levels) in MODULES.items():
         lines += ["", f"## Module {module} — {title}"]
         for level in levels:
-            plan = MODULE_WAVE_PLAN.get(level["slug"])
+            plan = MODULE_SCENARIO_PLAN.get(level["slug"])
             if not plan:
                 continue
             lines += ["", f"### {level['title']}", ""]
-            lines += ["| Wave | Variant | Answer key |", "|---|---|---|"]
+            lines += ["| Scenario | Variant | Answer key |", "|---|---|---|"]
             for tier in TIERS:
-                for index, wave in enumerate(plan[tier], start=1):
-                    label = f"{tier.title()} {index}. {wave.title} ({wave.role})"
-                    for position, case_id in enumerate(wave.variants):
+                for index, scenario in enumerate(plan[tier], start=1):
+                    label = f"{tier.title()} {index}. {scenario.title} ({scenario.role})"
+                    for position, case_id in enumerate(scenario.variants):
                         lines.append(_row(label if position == 0 else "", case_id))
         gate = CHALLENGE_GATES.get(module)
         if gate:

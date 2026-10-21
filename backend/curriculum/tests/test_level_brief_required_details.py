@@ -1,14 +1,14 @@
 from django.core.management import call_command
 
-from adventures.models import AdventureLevelTierWaveVariant
+from adventures.models import AdventureLevelTierScenarioVariant
 from challenges.models import ChallengeTrialVariant
 from curriculum.seed_data.spec_helpers import required_commit_message_details
 from practice.services.context import ScenarioContextNormalizer
 
 
 def _seeded_variants():
-    """Every published tier-wave and Challenge Gate variant of the live seed."""
-    yield from AdventureLevelTierWaveVariant.objects.filter(is_published=True)
+    """Every published tier-scenario and Challenge Gate variant of the live seed."""
+    yield from AdventureLevelTierScenarioVariant.objects.filter(is_published=True)
     yield from ChallengeTrialVariant.objects.filter(is_published=True)
 
 

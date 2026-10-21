@@ -7,7 +7,7 @@ Payload shapes are part of the frontend contract - change them deliberately.
 
 from adventures.models import AdventureLevelTier, AdventureLevelTierRun
 from adventures.rewards import claimed_tier_reward_keys, tier_reward_payload
-from adventures.tier_waves import published_waves, wave_progress
+from adventures.tier_scenarios import published_scenarios, scenario_progress
 from common.constants import DIFFICULTIES, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
 from practice.services.context import ScenarioContextNormalizer
 from practice.services.scaffolding import ScaffoldingService
@@ -88,7 +88,7 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
             "label": run.selected_variant.label,
             "changed_variant": run.changed_variant,
         },
-        "wave": wave_payload(run),
+        "scenario": scenario_payload(run),
         "progress": progress_payload(run),
         "policy": {
             "min_counted_commands": run.min_counted_commands,
@@ -156,9 +156,9 @@ def command_run_payload(
 
 
 def progress_payload(run: AdventureLevelTierRun) -> dict:
-    """The tier's wave counter - "1/2" and the next wave to play - sourced
+    """The tier's scenario counter - "1/2" and the next scenario to play - sourced
     from AdventureLevelTierProgress (persists across runs), counted over the
-    tier's published waves."""
+    tier's published scenarios."""
     from adventures.models import AdventureLevelTierProgress
 
     if run.is_transfer:
@@ -166,7 +166,7 @@ def progress_payload(run: AdventureLevelTierRun) -> dict:
             "completed": int(run.status == SESSION_STATUS_COMPLETED),
             "total": 1,
             "cleared": run.status == SESSION_STATUS_COMPLETED,
-            "next_wave": None,
+            "next_scenario": None,
         }
     # A solve already holds the row it just counted.
     progress = getattr(run, "_prefetched_progress", None)
@@ -175,30 +175,30 @@ def progress_payload(run: AdventureLevelTierRun) -> dict:
             player_id=run.player_id, tier_id=run.tier_id
         ).first()
     prefetch_run_payload_context(run)
-    return wave_progress(
-        _run_waves(run), progress, tier_completed=run._prefetched_completion is not None
+    return scenario_progress(
+        _run_scenarios(run), progress, tier_completed=run._prefetched_completion is not None
     )
 
 
-def wave_payload(run: AdventureLevelTierRun) -> dict:
-    """Which of the tier's waves this run plays, for the workspace header."""
-    waves = _run_waves(run)
+def scenario_payload(run: AdventureLevelTierRun) -> dict:
+    """Which of the tier's scenarios this run plays, for the workspace header."""
+    scenarios = _run_scenarios(run)
     index = next(
-        (number for number, wave in enumerate(waves, start=1) if wave.id == run.current_wave_id),
+        (number for number, scenario in enumerate(scenarios, start=1) if scenario.id == run.current_scenario_id),
         None,
     )
     return {
         "index": index,
-        "total": len(waves),
-        "title": run.current_wave.title if run.current_wave_id else "",
+        "total": len(scenarios),
+        "title": run.current_scenario.title if run.current_scenario_id else "",
     }
 
 
-def _run_waves(run: AdventureLevelTierRun) -> list:
-    waves = getattr(run, "_published_waves", None)
-    if waves is None:
-        waves = run._published_waves = published_waves(run.tier)
-    return waves
+def _run_scenarios(run: AdventureLevelTierRun) -> list:
+    scenarios = getattr(run, "_published_scenarios", None)
+    if scenarios is None:
+        scenarios = run._published_scenarios = published_scenarios(run.tier)
+    return scenarios
 
 
 def completion_payload(run: AdventureLevelTierRun) -> dict | None:
@@ -258,13 +258,13 @@ def next_difficulty_payload(run: AdventureLevelTierRun) -> dict | None:
 
 def _scenario_context(run: AdventureLevelTierRun) -> dict:
     variant = run.selected_variant
-    wave = run.current_wave
+    scenario = run.current_scenario
     raw = (variant.scenario_context if variant else None) or {
         "schema_version": 3,
-        "story": wave.story if wave else "",
-        "task": wave.task if wave else "",
+        "story": scenario.story if scenario else "",
+        "task": scenario.task if scenario else "",
     }
-    fallback_story = wave.story if wave else ""
+    fallback_story = scenario.story if scenario else ""
     return ScenarioContextNormalizer().normalize(raw, fallback_story=fallback_story)
 
 

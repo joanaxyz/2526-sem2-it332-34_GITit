@@ -93,7 +93,7 @@ function makeRun(row: Row, repositoryState = snapshot(['c1'])): TierRun {
     policy: { min_counted_commands: 1, max_counted_commands: row.maxCommands },
     counts: { counted_action_total: 0 },
     reward: { coins: 25, claimed: false },
-    wave: { index: 1, total: 1, title: '' },
+    scenario: { index: 1, total: 1, title: '' },
     repository_state: repositoryState,
     // The backend sends a target only when the flag allows it.
     expected_state: row.scaffolding.expected_state ? snapshot(['t1']) : null,

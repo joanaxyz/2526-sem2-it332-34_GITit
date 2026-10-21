@@ -1,9 +1,9 @@
-# Curriculum waves cutover (Render)
+# Curriculum scenarios cutover (Render)
 
-Ships the ordered-wave curriculum (docs/goals/curriculum-waves-and-repetition/):
+Ships the ordered-scenario curriculum (docs/goals/curriculum-waves-and-repetition/):
 
-- Every adventure tier of Modules 1–4 becomes 2–3 designed waves, 132 in all.
-- Each wave plays once, in order.
+- Every adventure tier of Modules 1–4 becomes 2–3 designed scenarios, 132 in all.
+- Each scenario plays once, in order.
 - 84 new scenarios join the team's 265.
 - Each module gets a Challenge Gate (3 trials × 2 variants).
 - GitCoins are paid on every tier's first clear: Easy 25 / Medium 35 / Hard 50.
@@ -14,21 +14,21 @@ module; the content and checks are complete for all four, so they ship together.
 ## What changes
 
 - **Schema migrations** run on startup (`DJANGO_MIGRATE_ON_STARTUP`, on by default):
-  - `adventures 0013`: wave progress and variant order.
+  - `adventures 0013`: scenario progress and variant order.
   - `adventures 0014`, `0015`, `progress 0004` and `practice 0004`: drop the
     retired pre-tier adventure tables.
-  - `adventures 0016`: drops `AdventureLevelTierWave.required_successful_attempts`;
-    a wave is now always cleared once.
-- **Curriculum data** comes from `seed_all`, reading the wave plan
-  (`backend/curriculum/seed_data/source/wave_plan/`).
-- **Old waves and variants stay.** Each tier's previous single wave
+  - `adventures 0016`: drops `AdventureLevelTierScenario.required_successful_attempts`;
+    a scenario is now always cleared once.
+- **Curriculum data** comes from `seed_all`, reading the scenario plan
+  (`backend/curriculum/seed_data/source/scenario_plan/`).
+- **Old scenarios and variants stay.** Each tier's previous single scenario
   (`{level}-{difficulty}`) and its variant rows are unpublished, never deleted,
   because past runs reference them.
-- **Completed tiers stay completed.** Their new waves are free play.
-- **In-flight runs** on an old wave can still be finished. A solve counts as
-  clearing the learner's next uncleared wave.
+- **Completed tiers stay completed.** Their new scenarios are free play.
+- **In-flight runs** on an old scenario can still be finished. A solve counts as
+  clearing the learner's next uncleared scenario.
 - **Free play changes.** Replaying a completed tier now cycles through its
-  waves, instead of reopening the variant that completed it. Mention this to
+  scenarios, instead of reopening the variant that completed it. Mention this to
   returning learners.
 
 ## Before you start
@@ -53,7 +53,7 @@ module; the content and checks are complete for all four, so they ship together.
    - Gunicorn's `Listening at: http://0.0.0.0:10000`.
 3. **Turn the seed off.** Set `DJANGO_SEED_ON_STARTUP=False` and save, so later
    restarts do not reseed.
-4. **Map partial progress onto the first waves** (decision D2). Learners who
+4. **Map partial progress onto the first scenarios** (decision D2). Learners who
    were part-way through a tier keep their place. No tier is completed for
    anyone.
 
@@ -78,7 +78,7 @@ module; the content and checks are complete for all four, so they ship together.
    python manage.py kpi_refs
    ```
 
-   Transfer reservations live on variant rows. The new waves are new rows, so
+   Transfer reservations live on variant rows. The new scenarios are new rows, so
    re-reserve each transfer case with
    `python manage.py kpi_refs --cases <slug> --reserve --reason "<what differs>"`.
    The shared dev database had none on 2026-10-20.
@@ -105,13 +105,13 @@ upsert.
 
 Run these read-only queries in **Supabase → SQL Editor**.
 
-**1. Exactly the planned waves are published.** Expect `132` waves and `349`
+**1. Exactly the planned scenarios are published.** Expect `132` scenarios and `349`
 variants.
 
 ```sql
-select count(distinct w.id) as waves, count(v.id) as variants
-from adventures_adventureleveltierwave w
-join adventures_adventureleveltierwavevariant v on v.wave_id = w.id and v.is_published
+select count(distinct w.id) as scenarios, count(v.id) as variants
+from adventures_adventureleveltierscenario w
+join adventures_adventureleveltierscenariovariant v on v.scenario_id = w.id and v.is_published
 join adventures_adventureleveltier t on t.id = w.tier_id
 join adventures_adventurelevel l on l.id = t.adventure_level_id
 join curriculum_chapter c on c.id = l.chapter_id
@@ -119,11 +119,11 @@ join curriculum_story s on s.id = c.story_id
 where s.slug = 'arcane-spire' and w.is_published;
 ```
 
-**2. The old single waves are unpublished.** Expect `0`.
+**2. The old single scenarios are unpublished.** Expect `0`.
 
 ```sql
 select count(*)
-from adventures_adventureleveltierwave w
+from adventures_adventureleveltierscenario w
 join adventures_adventureleveltier t on t.id = w.tier_id
 join adventures_adventurelevel l on l.id = t.adventure_level_id
 where w.is_published and w.slug = l.slug || '-' || t.difficulty;
@@ -133,8 +133,8 @@ where w.is_published and w.slug = l.slug || '-' || t.difficulty;
 
 ```sql
 select count(*)
-from adventures_adventureleveltierwavevariant v
-join adventures_adventureleveltierwave w on w.id = v.wave_id
+from adventures_adventureleveltierscenariovariant v
+join adventures_adventureleveltierscenario w on w.id = v.scenario_id
 where v.is_published and w.is_published and v.target_state = '{}'::jsonb;
 ```
 
@@ -152,24 +152,24 @@ order by cl.slug, tr.difficulty;
 
 **5. In the app**, as a disposable learner who has not played Module 2:
 
-1. Open **Pushing to a Remote → Easy**. The header shows wave 1 of 2,
+1. Open **Pushing to a Remote → Easy**. The header shows scenario 1 of 2,
    "Publish a branch", with the `git push` guide.
-2. Clear it. The outcome reads "Wave 1 of 2 cleared — next: Publish and
+2. Clear it. The outcome reads "Scenario 1 of 2 cleared — next: Publish and
    track".
-3. Wave 2 shows the `git push -u` guide.
+3. Scenario 2 shows the `git push -u` guide.
 4. Clearing it shows "+25 GitCoins".
 
 ## KPI periods
 
 Report KPIs before and after the cutover time separately, following
-`MODULE4_VARIANT_RESEED.md`. Runs on an old wave name it by
-`{level}-{difficulty}`; runs on the new waves name a designed wave slug. To split
+`MODULE4_VARIANT_RESEED.md`. Runs on an old scenario name it by
+`{level}-{difficulty}`; runs on the new scenarios name a designed scenario slug. To split
 any run query by period:
 
 ```sql
-select r.id, w.slug as wave, (w.slug = l.slug || '-' || t.difficulty) as before_cutover
+select r.id, w.slug as scenario, (w.slug = l.slug || '-' || t.difficulty) as before_cutover
 from adventures_adventureleveltierrun r
-join adventures_adventureleveltierwave w on w.id = r.current_wave_id
+join adventures_adventureleveltierscenario w on w.id = r.current_scenario_id
 join adventures_adventureleveltier t on t.id = r.tier_id
 join adventures_adventurelevel l on l.id = t.adventure_level_id;
 ```

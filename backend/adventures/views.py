@@ -140,7 +140,7 @@ class AdventureLevelTierCommandSubmitAPIView(APIView):
                 .select_related(
                     "tier__adventure_level__chapter__story",
                     "tier__adventure_level__chapter",
-                    "current_wave",
+                    "current_scenario",
                     "selected_variant",
                     "player",
                     "pendingcommandintroduction",
@@ -293,6 +293,6 @@ def _get_tier_workspace_run(run_id: int, player) -> AdventureLevelTierRun:
     return AdventureLevelTierRun.objects.select_related(
         "tier__adventure_level__chapter__story",
         "tier__adventure_level__chapter",
-        "current_wave",
+        "current_scenario",
         "selected_variant",
     ).get(id=run_id, player=player)

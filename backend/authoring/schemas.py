@@ -21,22 +21,22 @@ def content_levels(definition: dict) -> list[dict]:
 
 
 def _level_as_problem(level: dict) -> dict:
-    """A flat (pre-wave) authored level IS a single problem: its scenario fields
+    """A flat (pre-scenario) authored level IS a single problem: its scenario fields
     (slug/solution_commands/initial_state/.../variants) describe one playable
-    wave or trial."""
+    scenario or trial."""
     problem = dict(level)
     problem.setdefault("slug", level.get("slug"))
     return problem
 
 
-def level_waves(level: dict) -> list[dict]:
-    """Ordered playable problems (waves) inside an authored adventure level.
+def level_scenarios(level: dict) -> list[dict]:
+    """Ordered playable problems (scenarios) inside an authored adventure level.
 
-    New content nests ``waves: [...]``; legacy flat content (no ``waves``) is
-    treated as one wave so old definitions keep compiling."""
-    waves = level.get("waves")
-    if isinstance(waves, list) and any(isinstance(wave, dict) for wave in waves):
-        return [wave for wave in waves if isinstance(wave, dict)]
+    New content nests ``scenarios: [...]``; legacy flat content (no ``scenarios``) is
+    treated as one scenario so old definitions keep compiling."""
+    scenarios = level.get("scenarios")
+    if isinstance(scenarios, list) and any(isinstance(scenario, dict) for scenario in scenarios):
+        return [scenario for scenario in scenarios if isinstance(scenario, dict)]
     return [_level_as_problem(level)]
 
 

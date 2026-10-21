@@ -8,7 +8,7 @@ from authoring.schemas import (
     BOOK_BLOCK_TYPES,
     content_levels,
     level_trials,
-    level_waves,
+    level_scenarios,
 )
 from evaluation.compiler import compile_evaluation_spec
 from evaluation.engine import EvaluationEngine
@@ -77,11 +77,11 @@ class ContentDefinitionValidator:
             errors.append(_error("definition.levels", "At least one level is required."))
             return
         is_adventure = content.kind == ContentKind.ADVENTURE
-        nested_key = "waves" if is_adventure else "trials"
+        nested_key = "scenarios" if is_adventure else "trials"
         for index, level in enumerate(levels):
             path = f"definition.levels[{index}]"
             self._validate_level_meta(level, path, errors)
-            problems = level_waves(level) if is_adventure else level_trials(level)
+            problems = level_scenarios(level) if is_adventure else level_trials(level)
             has_nested = isinstance(level.get(nested_key), list) and any(
                 isinstance(item, dict) for item in level.get(nested_key)
             )

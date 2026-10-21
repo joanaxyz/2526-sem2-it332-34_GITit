@@ -60,7 +60,7 @@ def test_a_form_used_successfully_before_counts_as_known(teaching_run):
     other = AdventureLevelTierRun.objects.create(
         player=teaching_run.player,
         tier=teaching_run.tier,
-        current_wave=teaching_run.current_wave,
+        current_scenario=teaching_run.current_scenario,
         selected_variant=teaching_run.selected_variant,
         repository_state={},
         max_counted_commands=12,
@@ -82,7 +82,7 @@ def test_a_failed_earlier_attempt_does_not_count_as_known(teaching_run):
     other = AdventureLevelTierRun.objects.create(
         player=teaching_run.player,
         tier=teaching_run.tier,
-        current_wave=teaching_run.current_wave,
+        current_scenario=teaching_run.current_scenario,
         selected_variant=teaching_run.selected_variant,
         repository_state={},
         max_counted_commands=12,
@@ -101,7 +101,7 @@ def test_a_failed_earlier_attempt_does_not_count_as_known(teaching_run):
 
 
 def test_practised_mastery_counts_as_known(teaching_run):
-    form = teaching_run.current_wave.command_forms.get(usage_form="git init")
+    form = teaching_run.current_scenario.command_forms.get(usage_form="git init")
     SkillMastery.objects.create(player=teaching_run.player, command_form=form, solves=1)
     assert tutor_payload(teaching_run) is None
 
@@ -135,7 +135,7 @@ def test_missing_or_stale_trajectory_is_silent(teaching_run):
     assert tutor_payload(teaching_run) is None
 
 
-def test_any_seeded_command_is_taught_even_without_a_wave_form(teaching_run):
+def test_any_seeded_command_is_taught_even_without_a_scenario_form(teaching_run):
     variant = teaching_run.selected_variant
     initial = initialized_state(variant.initial_state)
     move_to(teaching_run, initial)
@@ -174,7 +174,7 @@ def test_any_seeded_command_is_taught_even_without_a_wave_form(teaching_run):
 
 
 def test_same_syntax_is_the_same_lesson_whatever_the_seed_slug(teaching_run):
-    for form in teaching_run.current_wave.command_forms.all():
+    for form in teaching_run.current_scenario.command_forms.all():
         form.slug = f"renamed-by-another-seed-{form.pk}"
         form.save(update_fields=["slug"])
     assert tutor_payload(teaching_run)["teaching_key"] == INIT

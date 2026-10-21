@@ -11,8 +11,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from common.constants import (
     SESSION_STATUS_COMPLETED,
@@ -33,19 +33,19 @@ def _tier(story, number):
         chapter=chapter, slug=f"{story.slug}-level-{number}", title=f"Level {number}"
     )
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    wave = AdventureLevelTierWave.objects.create(tier=tier, slug=f"{story.slug}-wave-{number}")
-    variant = AdventureLevelTierWaveVariant.objects.create(
-        wave=wave, slug=f"{story.slug}-v{number}", label="v"
+    scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug=f"{story.slug}-scenario-{number}")
+    variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario, slug=f"{story.slug}-v{number}", label="v"
     )
-    return tier, wave, variant
+    return tier, scenario, variant
 
 
 def _run(player, tier_bundle, status, **extra):
-    tier, wave, variant = tier_bundle
+    tier, scenario, variant = tier_bundle
     return AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variant,
         status=status,
         **extra,

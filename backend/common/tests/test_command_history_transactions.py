@@ -7,8 +7,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from adventures.services.tier_history import TierCommandHistoryCache
 from challenges.models import ChallengeLevel, ChallengeRun, ChallengeTrial, ChallengeTrialVariant
@@ -71,10 +71,10 @@ def history_session(request, transactional_db, django_user_model):
     else:
         level = AdventureLevel.objects.create(chapter=chapter, slug="history", title="History")
         tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-        wave = AdventureLevelTierWave.objects.create(tier=tier, slug="history")
-        variant = AdventureLevelTierWaveVariant.objects.create(wave=wave, slug="history")
+        scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug="history")
+        variant = AdventureLevelTierScenarioVariant.objects.create(scenario=scenario, slug="history")
         run = AdventureLevelTierRun.objects.create(
-            player=player, tier=tier, current_wave=wave, selected_variant=variant
+            player=player, tier=tier, current_scenario=scenario, selected_variant=variant
         )
         session = HistorySession(run, TierCommandHistoryCache(), "adventure_tier_run")
     session.cache._cache.clear()

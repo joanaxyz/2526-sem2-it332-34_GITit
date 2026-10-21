@@ -1,7 +1,7 @@
 """Seed the current Arcane Spire Module 0-4 curriculum.
 
 Module 0 contains orientation lessons; Modules 1-4 contain adventure levels,
-difficulty tiers, and repeatable scenario waves. This command owns their stable
+difficulty tiers, and repeatable planned scenarios. This command owns their stable
 scaffold and repository fixtures. ``seed_data/scenario_bank.json`` supplies the
 current authored scenario contract through ``scenario_bank`` and
 ``scenario_runtime``.
@@ -21,8 +21,8 @@ from django.db import transaction
 from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from adventures.rewards import CHALLENGE_GATE_REWARD_COINS
 from challenges.models import ChallengeLevel, ChallengeTrial, ChallengeTrialVariant
@@ -40,8 +40,8 @@ from curriculum.seed_data.scenario_bank import scenario_for_case
 from curriculum.seed_data.scenario_runtime import apply_scenario_bank, graded_checks
 from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES, GATE_MAX_COUNTED_COMMANDS
 from curriculum.seed_data.source.scenario_fixtures import extension_case
-from curriculum.seed_data.source.wave_plan import MODULE_WAVE_PLAN, WaveSpec
-from curriculum.seed_data.source.wave_plan.types import SPIRAL
+from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN, ScenarioSpec
+from curriculum.seed_data.source.scenario_plan.types import SPIRAL
 from curriculum.seed_data.spec_helpers import required_commit_message_details
 from tutoring.services.forms import catalog_forms, forms_used_by
 
@@ -790,7 +790,7 @@ ORIENTATION_LESSON_SPECS: list[dict[str, Any]] = [
 # Module 1 - Local Repository Foundations
 #
 # Source: seed_module1_scenarios.py. These specs hold each level's archived
-# repository fixtures; the wave plan (source/wave_plan/) places them.
+# repository fixtures; the scenario plan (source/scenario_plan/) places them.
 # "Inspecting Repository State" (diagnostic_scenario) has no difficulties in
 # the source - it becomes a level with an empty "tiers" list.
 # ---------------------------------------------------------------------------
@@ -4784,7 +4784,7 @@ MODULE_1_LEVELS: list[dict[str, Any]] = [
 # Module 2 - Branching and Collaboration
 #
 # Source: seed_module2_scenarios.py. All 9 anchors are wired (no dead
-# scenarios in this module); the wave plan places their cases.
+# scenarios in this module); the scenario plan places their cases.
 # ---------------------------------------------------------------------------
 
 MODULE_2_LEVELS: list[dict[str, Any]] = [
@@ -9612,7 +9612,7 @@ MODULE_2_LEVELS: list[dict[str, Any]] = [
 # ---------------------------------------------------------------------------
 # Module 3 - Conflict Resolution
 #
-# Source: seed_module3_scenarios.py; the wave plan places these cases.
+# Source: seed_module3_scenarios.py; the scenario plan places these cases.
 # Confirmed dead code
 # excluded per prior agreement: prevention_case, capstone_case,
 # accept_ours_easy/theirs_medium/side_hard, merge_abort_easy/medium/hard,
@@ -11920,7 +11920,7 @@ MODULE_3_LEVELS: list[dict[str, Any]] = [
 # ---------------------------------------------------------------------------
 # Module 4 - Advanced Recovery and History
 #
-# Source: seed_module4_scenarios.py; the wave plan places these cases.
+# Source: seed_module4_scenarios.py; the scenario plan places these cases.
 # Hard-reset cases are still generated from one template per
 # difficulty (the recovery branch and incident text vary per case). Revert
 # and rebase cases are authored explicitly below: the source generator loop
@@ -12888,7 +12888,7 @@ MODULE_4_REBASE_CASES: dict[str, list[dict[str, Any]]] = {
     ],
 }
 
-# Retired variant keys. Each of these waves used to hold five exact copies of
+# Retired variant keys. Each of these scenarios used to hold five exact copies of
 # one scenario (identical repository, target, grading and text), so a retry
 # after a failure replayed the same puzzle. They are unpublished rather than
 # deleted: run records keep pointing at them (PROTECT), so historical runs and
@@ -13186,29 +13186,29 @@ class Command(BaseCommand):
                     "command_skill"
                 )
             )
-            planned = MODULE_WAVE_PLAN.get(level_spec["slug"])
+            planned = MODULE_SCENARIO_PLAN.get(level_spec["slug"])
             if planned is None:
                 raise CommandError(
-                    f"{level_spec['slug']} has no waves in source/wave_plan/; every level needs a plan."
+                    f"{level_spec['slug']} has no scenarios in source/scenario_plan/; every level needs a plan."
                 )
             cases = self._planned_cases(level_spec, planned)
-            # A spiral wave reviews earlier levels' forms; they are not this level's.
+            # A spiral scenario reviews earlier levels' forms; they are not this level's.
             taught = {
                 difficulty: {
                     "cases": [
                         cases[case_id]
-                        for wave in waves
-                        if wave.role != SPIRAL
-                        for case_id in wave.variants
+                        for scenario in scenarios
+                        if scenario.role != SPIRAL
+                        for case_id in scenario.variants
                     ]
                 }
-                for difficulty, waves in planned.items()
+                for difficulty, scenarios in planned.items()
             }
             forms = self._level_forms({"tiers": taught}, chapter_forms, catalog=self._form_catalog)
             level.command_forms.set(forms)
-            for difficulty, waves in planned.items():
+            for difficulty, scenarios in planned.items():
                 self._seed_planned_tier(
-                    level, difficulty, waves, cases, level_spec["tiers"][difficulty], forms
+                    level, difficulty, scenarios, cases, level_spec["tiers"][difficulty], forms
                 )
 
     def _form_catalog(self, family: str) -> list[CommandForm]:
@@ -13220,18 +13220,18 @@ class Command(BaseCommand):
 
     @staticmethod
     def _planned_cases(
-        level_spec: dict[str, Any], planned: dict[str, tuple[WaveSpec, ...]]
+        level_spec: dict[str, Any], planned: dict[str, tuple[ScenarioSpec, ...]]
     ) -> dict[str, dict[str, Any]]:
-        """Every case the level's planned waves name: its own bank cases or new ones."""
+        """Every case the level's planned scenarios name: its own bank cases or new ones."""
         pool = {
             case["case_id"]: case
             for tier_spec in level_spec["tiers"].values()
             for case in tier_spec["cases"]
         }
         cases: dict[str, dict[str, Any]] = {}
-        for waves in planned.values():
-            for wave in waves:
-                for case_id in wave.variants:
+        for scenarios in planned.values():
+            for scenario in scenarios:
+                for case_id in scenario.variants:
                     if case_id in cases:
                         raise CommandError(f"{case_id!r} is planned twice in {level_spec['slug']}.")
                     try:
@@ -13246,9 +13246,9 @@ class Command(BaseCommand):
     def _variant_defaults(
         case: dict[str, Any], *, placed_difficulty: str | None = None
     ) -> dict[str, Any]:
-        """The persisted fields of one authored case, for a tier wave or a gate trial.
+        """The persisted fields of one authored case, for a tier scenario or a gate trial.
 
-        A case the wave plan moved to another tier takes that tier's command limit.
+        A case the scenario plan moved to another tier takes that tier's command limit.
         """
         revised = scenario_for_case(case["case_id"])
         difficulty = placed_difficulty or revised["difficulty"]
@@ -13388,14 +13388,14 @@ class Command(BaseCommand):
         ]
 
     @staticmethod
-    def _wave_forms(
+    def _scenario_forms(
         level_forms: list[CommandForm], cases: list[dict[str, Any]], *, catalog
     ) -> list[CommandForm]:
-        """Level forms every variant of the wave uses.
+        """Level forms every variant of the scenario uses.
 
-        A wave's forms are the mastery targets' denominator
+        A scenario's forms are the mastery targets' denominator
         (``form_solve_targets``), so only forms a learner is sure to type on
-        any variant of the wave count.
+        any variant of the scenario count.
         """
         shared: set[int] | None = None
         for case in cases:
@@ -13412,16 +13412,16 @@ class Command(BaseCommand):
         self,
         level: AdventureLevel,
         difficulty: str,
-        waves: tuple[WaveSpec, ...],
+        scenarios: tuple[ScenarioSpec, ...],
         cases: dict[str, dict[str, Any]],
         tier_spec: dict[str, Any],
         level_forms: list[CommandForm],
     ) -> None:
-        """The tier's designed waves, in play order, each cleared once.
+        """The tier's designed scenarios, in play order, each cleared once.
 
-        Waves and variants are upserted by slug and keep the plan's order, so
-        the first listed variant is a first-time learner's pick. Waves the plan
-        no longer names - the tier's single pool wave before cutover - stay
+        Scenarios and variants are upserted by slug and keep the plan's order, so
+        the first listed variant is a first-time learner's pick. Scenarios the plan
+        no longer names - the tier's single pool scenario before cutover - stay
         for the runs that reference them (PROTECT) but are no longer played.
         """
         tier, _ = AdventureLevelTier.objects.update_or_create(
@@ -13429,16 +13429,16 @@ class Command(BaseCommand):
             difficulty=difficulty,
             defaults={"is_published": True},
         )
-        for order, spec in enumerate(waves):
-            wave_cases = [cases[case_id] for case_id in spec.variants]
-            wave, _ = AdventureLevelTierWave.objects.update_or_create(
+        for order, spec in enumerate(scenarios):
+            scenario_cases = [cases[case_id] for case_id in spec.variants]
+            scenario, _ = AdventureLevelTierScenario.objects.update_or_create(
                 tier=tier,
                 slug=spec.slug,
                 defaults={
                     "title": spec.title,
                     "sort_order": order,
                     "story": tier_spec["story"],
-                    # Drills pair the wave's task with any of its variants.
+                    # Drills pair the scenario's task with any of its variants.
                     "task": spec.title,
                     "min_counted_commands": min(
                         scenario_for_case(case_id)["minimum_counted_commands"]
@@ -13449,17 +13449,17 @@ class Command(BaseCommand):
                     "is_published": True,
                 },
             )
-            wave.command_forms.set(
-                self._wave_forms(level_forms, wave_cases, catalog=self._form_catalog)
+            scenario.command_forms.set(
+                self._scenario_forms(level_forms, scenario_cases, catalog=self._form_catalog)
             )
-            for index, case in enumerate(wave_cases):
-                AdventureLevelTierWaveVariant.objects.update_or_create(
-                    wave=wave,
+            for index, case in enumerate(scenario_cases):
+                AdventureLevelTierScenarioVariant.objects.update_or_create(
+                    scenario=scenario,
                     slug=case["case_id"],
                     defaults={
                         **self._variant_defaults(case, placed_difficulty=difficulty),
                         "sort_order": index,
                     },
                 )
-            wave.variants.exclude(slug__in=spec.variants).update(is_published=False)
-        tier.waves.exclude(slug__in=[spec.slug for spec in waves]).update(is_published=False)
+            scenario.variants.exclude(slug__in=spec.variants).update(is_published=False)
+        tier.scenarios.exclude(slug__in=[spec.slug for spec in scenarios]).update(is_published=False)

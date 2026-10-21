@@ -144,13 +144,13 @@ def test_study_rejects_retroactive_enrollment_and_missing_reference(django_user_
 def test_changed_required_clears_are_missing_evidence_not_failed_mastery(
     django_user_model, monkeypatch
 ):
-    player, tier, wave, _ = bundle(django_user_model, required=3)
+    player, tier, scenario, _ = bundle(django_user_model, required=3)
     cutoff = timezone.now() + timedelta(hours=1)
     study = create_study(
         slug="changed-requirement", player_ids=[player.id], tier_ids=[tier.id], cutoff=cutoff
     )
-    # A reseed now gives the tier a single wave: mastery means something else.
-    tier.waves.exclude(id=wave.id).update(is_published=False)
+    # A reseed now gives the tier a single scenario: mastery means something else.
+    tier.scenarios.exclude(id=scenario.id).update(is_published=False)
     end(start(player, tier))
     monkeypatch.setattr(
         "progress.services.studies.timezone.now", lambda: cutoff + timedelta(seconds=1)

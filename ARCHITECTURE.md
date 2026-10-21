@@ -10,8 +10,8 @@ Use these terms in product copy, code names, tests, and seed data:
 - `Chapter` — a section inside a story.
 - `Lesson` — short conceptual reading attached to a chapter.
 - `Adventure` — guided practice made of ordered levels.
-- `Tier` — the Easy, Medium, or Hard difficulty of an adventure level, made of ordered waves.
-- `Wave` — one stage of a tier; each run of it serves one of its variants (scenarios).
+- `Tier` — the Easy, Medium, or Hard difficulty of an adventure level, made of ordered scenarios.
+- `Scenario` — one stage of a tier; each run of it serves one of its variants.
 - `Challenge` — independent assessment practice.
 - `Challenge Gate` — a module's closing challenge: a workflow testing what the module taught.
 - `Trial` — an easy, medium, or hard scenario inside a challenge.
@@ -119,7 +119,7 @@ component-name/                focused child views and pure helpers
 shared/battle/effects/...      playback cores split by DOM helpers, layer playback, companion playback, monster playback
 ```
 
-`seed_curriculum` owns the module levels and their tiers (`MODULE_LEVELS`). Scenario content comes from the committed banks `backend/curriculum/seed_data/scenario_bank.json` and `scenario_bank_waves.json`; the extension bank's Markdown, repository fixtures, and the Challenge Gate composition live under `backend/curriculum/seed_data/source/`. Generated artifacts remain under `backend/curriculum/seed_data/generated/` and must not be hand-edited.
+`seed_curriculum` owns the module levels and their tiers (`MODULE_LEVELS`). Scenario content comes from the committed banks `backend/curriculum/seed_data/scenario_bank.json` and `scenario_bank_extension.json`; the extension bank's Markdown, repository fixtures, and the Challenge Gate composition live under `backend/curriculum/seed_data/source/`. Generated artifacts remain under `backend/curriculum/seed_data/generated/` and must not be hand-edited.
 
 
 ## Command Execution Boundary
@@ -302,7 +302,7 @@ Ownership:
 - `backend/drills/services/composer.py` derives every question from
   authored curriculum data, and runs at **seed time only**. Nothing is
   hand-authored per level: cards come from the level's `CommandForm` rows
-  (`usage_form` / `label`), and the ordering finale from a wave variant's
+  (`usage_form` / `label`), and the ordering finale from a scenario variant's
   `solution_commands`. Pass a shared `DrillCatalog` when composing many
   levels so the published command list is read once per run.
 - Distractors are always other real command forms, siblings of the same
@@ -342,15 +342,15 @@ database honestly has none rather than synthesising it per request.
 
 ## Adventure Tiers and Challenge Gates
 
-- Each `AdventureLevel` has Easy, Medium, and Hard `AdventureLevelTier`s. A tier holds ordered `AdventureLevelTierWave`s, and each wave holds ordered variants.
-- `seed_data/source/wave_plan/` owns placement: each level's waves per tier, in play order, with their roles and variants. `seed_curriculum` upserts them by slug and unpublishes the waves and variants it no longer names; runs keep their rows.
-- An `AdventureLevelTierRun` is one attempt at one wave. One solve clears a wave; `AdventureLevelTierProgress.cleared_wave_slugs` records the cleared waves, and the tier completes (`AdventureLevelTierCompletion`) once every published wave is cleared. Starting a tier plays the next uncleared wave, and a retry rotates variants within that wave; replay cycles through the waves (`adventures/tier_waves.py`, `services/tier_runs.py`, `services/tier_variants.py`). A solve on a wave that a reseed unpublished clears the learner's next uncleared wave.
-- A tier's stars are the lowest of its waves' best stars. A run's star budget comes from its variant, falling back to the wave's (`services/tier_budget.py`).
-- Each wave clear credits mastery to the published forms the clearing run's commands used (`tutoring.services.forms.forms_used_by`), so a guide the learner has not earned keeps firing.
-- `adventures/rewards.py` owns the GitCoin ladder: Easy 25, Medium 35, Hard 50 once per tier, and 50/75/100 for Challenge Gate trials, all through idempotent wallet keys. The one-time cutover commands `award_missing_tier_rewards` and `map_partial_tier_progress` backfill rewards and partial progress (`deploy/CURRICULUM_WAVES_RESEED.md`).
+- Each `AdventureLevel` has Easy, Medium, and Hard `AdventureLevelTier`s. A tier holds ordered `AdventureLevelTierScenario`s, and each scenario holds ordered variants.
+- `seed_data/source/scenario_plan/` owns placement: each level's scenarios per tier, in play order, with their roles and variants. `seed_curriculum` upserts them by slug and unpublishes the scenarios and variants it no longer names; runs keep their rows.
+- An `AdventureLevelTierRun` is one attempt at one scenario. One solve clears a scenario; `AdventureLevelTierProgress.cleared_scenario_slugs` records the cleared scenarios, and the tier completes (`AdventureLevelTierCompletion`) once every published scenario is cleared. Starting a tier plays the next uncleared scenario, and a retry rotates variants within that scenario; replay cycles through the scenarios (`adventures/tier_scenarios.py`, `services/tier_runs.py`, `services/tier_variants.py`). A solve on a scenario that a reseed unpublished clears the learner's next uncleared scenario.
+- A tier's stars are the lowest of its scenarios' best stars. A run's star budget comes from its variant, falling back to the scenario's (`services/tier_budget.py`).
+- Each scenario clear credits mastery to the published forms the clearing run's commands used (`tutoring.services.forms.forms_used_by`), so a guide the learner has not earned keeps firing.
+- `adventures/rewards.py` owns the GitCoin ladder: Easy 25, Medium 35, Hard 50 once per tier, and 50/75/100 for Challenge Gate trials, all through idempotent wallet keys. The one-time cutover commands `award_missing_tier_rewards` and `map_partial_tier_progress` backfill rewards and partial progress (`deploy/CURRICULUM_SCENARIOS_RESEED.md`).
 - A level counts as passed on the map and in chapter progress once its Easy tier is complete. Chapter completion counts each published level once plus each published gate trial.
 - `seed_curriculum` seeds one Challenge Gate per module from `source/challenge_gates.py`: Easy, Medium, and Hard trials with two variants each. The gate opens once every required level of the module has completed all three tiers (`chapter_tiers_cleared`); inside it, Medium waits for the Easy trial and Hard for Medium. Challenge runs play in the same workspace as adventure tiers (`frontend/src/shared/level/workspace/`): battle stage, terminal, Live and Expected diagrams.
-- Authored adventures compile to one Easy tier with ordered waves (`authoring/compiler.py`).
+- Authored adventures compile to one Easy tier with ordered scenarios (`authoring/compiler.py`).
 
 ## Generated Curriculum Targets
 
@@ -360,7 +360,7 @@ database honestly has none rather than synthesising it per request.
 
 Rules:
 
-- Humans edit `MODULE_LEVELS` in `seed_curriculum`, the scenario Markdown compiled by `scripts/curriculum/import_revised_scenarios.py`, and the wave plan, fixtures and gate composition under `backend/curriculum/seed_data/source/`.
+- Humans edit `MODULE_LEVELS` in `seed_curriculum`, the scenario Markdown compiled by `scripts/curriculum/import_revised_scenarios.py`, and the scenario plan, fixtures and gate composition under `backend/curriculum/seed_data/source/`.
 - `generate_targets` replays every module case and extension scenario, and fails unless the backend transition verifier accepts each replayed command (`solution_replay.verify_backend_transitions`), so a published answer key can always be submitted live.
 - Humans do not edit files under `backend/curriculum/seed_data/generated/` directly.
 - After changing a variant initial state, solution commands, or workspace-file edits, run `cd backend && python manage.py generate_targets`. It rewrites both generated targets and trajectories.
@@ -369,7 +369,7 @@ Rules:
 
 ## Command Introductions
 
-`backend/tutoring` shows a "Command guide" the first time a problem needs a command form or technique the player has not used. The planner locates the learner's repository on the variant's `solution_trajectory` (learner history resolves routes that revisit a state), takes the next non-diagnostic solution command, and resolves it to one command form: wave forms first, then the published catalog, else a shape derived from the command. Lesson identity is the form's syntax (`form:<usage>`), so the same syntax is one lesson across seeds. A form is not introduced when the player has completed its introduction, solved with it (`SkillMastery.solves`), or run it successfully in any run. Back-to-back path-only steps that one command can do together (`git add a` then `git add b`) are offered as that command (`git add a b`); interactive modes never merge. Once a command's form is known, an unseen technique in it gets the guide instead: `tutoring/services/techniques.py` holds a small detector list (several paths, `.`, path patterns, `--`, `HEAD~n`, `a..b`, remote-tracking branches, `@{upstream}`) keyed `technique:<name>`, recognised by command shape only. One-or-more forms (`<path>...`) are separate lessons and only count as used with several operands. For beginners each guide also carries a part-by-part reading of its syntax (`tutoring/services/anatomy.py`) and plain-language concepts chosen from what the move changes (`tutoring/services/concepts.py`), each shown until a guide that explained it is completed; change entries carry `action` and `subjects` so the client can draw a before/after diagram. Off-route repositories get no lesson. Tier runs expose the result as the nullable `tutor` payload; acknowledgement goes through `POST /api/adventure-tier-runs/{id}/introduction/complete/`.
+`backend/tutoring` shows a "Command guide" the first time a problem needs a command form or technique the player has not used. The planner locates the learner's repository on the variant's `solution_trajectory` (learner history resolves routes that revisit a state), takes the next non-diagnostic solution command, and resolves it to one command form: scenario forms first, then the published catalog, else a shape derived from the command. Lesson identity is the form's syntax (`form:<usage>`), so the same syntax is one lesson across seeds. A form is not introduced when the player has completed its introduction, solved with it (`SkillMastery.solves`), or run it successfully in any run. Back-to-back path-only steps that one command can do together (`git add a` then `git add b`) are offered as that command (`git add a b`); interactive modes never merge. Once a command's form is known, an unseen technique in it gets the guide instead: `tutoring/services/techniques.py` holds a small detector list (several paths, `.`, path patterns, `--`, `HEAD~n`, `a..b`, remote-tracking branches, `@{upstream}`) keyed `technique:<name>`, recognised by command shape only. One-or-more forms (`<path>...`) are separate lessons and only count as used with several operands. For beginners each guide also carries a part-by-part reading of its syntax (`tutoring/services/anatomy.py`) and plain-language concepts chosen from what the move changes (`tutoring/services/concepts.py`), each shown until a guide that explained it is completed; change entries carry `action` and `subjects` so the client can draw a before/after diagram. Off-route repositories get no lesson. Tier runs expose the result as the nullable `tutor` payload; acknowledgement goes through `POST /api/adventure-tier-runs/{id}/introduction/complete/`.
 
 ## Testing Strategy
 

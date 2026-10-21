@@ -7,8 +7,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from common.git.repository_state import VariantTargetStateHashCache
 from curriculum.models import Chapter, CommandForm, CommandSkill, Story
@@ -102,7 +102,7 @@ def teaching_run(db, django_user_model):
     chapter = Chapter.objects.create(story=story, slug="teaching", number=1, title="Teaching")
     level = AdventureLevel.objects.create(chapter=chapter, slug="teaching", title="Teaching")
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    wave = AdventureLevelTierWave.objects.create(
+    scenario = AdventureLevelTierScenario.objects.create(
         tier=tier,
         slug="teaching",
         max_counted_commands=12,
@@ -119,7 +119,7 @@ def teaching_run(db, django_user_model):
                 slug=slug, title=slug, base_command=slug.replace("-", " ")
             )
         skill = skills[slug]
-        wave.command_forms.add(
+        scenario.command_forms.add(
             CommandForm.objects.create(
                 command_skill=skill,
                 chapter=chapter,
@@ -136,8 +136,8 @@ def teaching_run(db, django_user_model):
         }
     )
     states, final = solution_states(state)
-    variant = AdventureLevelTierWaveVariant.objects.create(
-        wave=wave,
+    variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
         slug="first",
         label="First",
         initial_state=state,
@@ -161,7 +161,7 @@ def teaching_run(db, django_user_model):
     return AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variant,
         repository_state=state,
         max_counted_commands=12,

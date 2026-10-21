@@ -2,7 +2,7 @@
 
 from django.core.management import call_command
 
-from adventures.models import AdventureLevel, AdventureLevelTier, AdventureLevelTierWave
+from adventures.models import AdventureLevel, AdventureLevelTier, AdventureLevelTierScenario
 from adventures.rewards import (
     TIER_REWARD_COINS,
     award_tier_reward,
@@ -32,9 +32,9 @@ def _tiers(django_user_model):
         for difficulty in ("easy", "medium", "hard")
     }
     for tier in tiers.values():
-        AdventureLevelTierWave.objects.create(
+        AdventureLevelTierScenario.objects.create(
             tier=tier,
-            slug=f"wave-{tier.difficulty}",
+            slug=f"scenario-{tier.difficulty}",
             min_counted_commands=1,
             max_counted_commands=8,
         )

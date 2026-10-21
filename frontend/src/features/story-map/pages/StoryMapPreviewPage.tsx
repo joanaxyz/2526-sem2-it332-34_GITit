@@ -114,7 +114,7 @@ function previewTiers(levelIndex: number): AdventureLevelTierAccess[] {
       id: levelIndex * 10 + tierIndex + 1,
       difficulty,
       locked: !cleared && !inProgress && !(levelIndex === 4 && tierIndex === 1),
-      wave_progress: { completed: cleared ? total : inProgress ? 1 : 0, total },
+      scenario_progress: { completed: cleared ? total : inProgress ? 1 : 0, total },
       completion: cleared
         ? { stars: 3 - tierIndex, counted_action_total: 1, completed_at: '2026-08-25T00:00:00Z' }
         : null,

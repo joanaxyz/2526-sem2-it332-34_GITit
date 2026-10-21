@@ -120,8 +120,8 @@ def test_an_unwired_level_still_drills_what_its_solutions_type(db):
     level = _levels_with_forms(1)[0]
     level.command_forms.clear()
     for tier in level.tiers.all():
-        for wave in tier.waves.all():
-            wave.command_forms.clear()
+        for scenario in tier.scenarios.all():
+            scenario.command_forms.clear()
 
     recovered = level_command_forms(level)
 
@@ -134,9 +134,9 @@ def test_a_level_with_nothing_to_teach_composes_no_cards(db):
     level = _levels_with_forms(1)[0]
     level.command_forms.clear()
     for tier in level.tiers.all():
-        for wave in tier.waves.all():
-            wave.command_forms.clear()
-            wave.variants.all().delete()
+        for scenario in tier.scenarios.all():
+            scenario.command_forms.clear()
+            scenario.variants.all().delete()
 
     assert level_command_forms(level) == []
     assert compose_level_drill(level)["cards"] == []

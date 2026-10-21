@@ -4582,8 +4582,8 @@
                         "type": "object",
                         "additionalProperties": {}
                     },
-                    "wave": {
-                        "$ref": "#/components/schemas/AdventureLevelTierWavePositionResponse"
+                    "scenario": {
+                        "$ref": "#/components/schemas/AdventureLevelTierScenarioPositionResponse"
                     },
                     "progress": {
                         "type": "object",
@@ -4650,6 +4650,7 @@
                     "repository_state",
                     "reward",
                     "scaffolding",
+                    "scenario",
                     "scenario_context",
                     "stars",
                     "status",
@@ -4658,8 +4659,7 @@
                     "tier",
                     "tutor",
                     "variant",
-                    "visualization",
-                    "wave"
+                    "visualization"
                 ]
             },
             "AdventureLevelTierRunStart": {
@@ -4728,9 +4728,9 @@
                     "visualization_snapshot"
                 ]
             },
-            "AdventureLevelTierWavePositionResponse": {
+            "AdventureLevelTierScenarioPositionResponse": {
                 "type": "object",
-                "description": "Which of the tier's ordered waves the run plays.",
+                "description": "Which of the tier's ordered scenarios the run plays.",
                 "properties": {
                     "index": {
                         "type": "integer",

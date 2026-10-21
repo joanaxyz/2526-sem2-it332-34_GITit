@@ -12,7 +12,7 @@ from collections.abc import Iterable
 
 from simulator.services import is_diagnostic_command
 
-# Inspection-only waves cost nothing to solve, but a target of 0 renders as
+# Inspection-only scenarios cost nothing to solve, but a target of 0 renders as
 # "Star target: <= 0 commands" and would dock a star for a single typo
 # (unprocessable commands are counted), so every level keeps one command of room.
 MINIMUM_STAR_TARGET = 1
@@ -30,7 +30,7 @@ def star_target_for_variants(
     authored: int | None = None,
     solution_key: str = "solution_commands_template",
 ) -> int:
-    """The counted-command star target for a wave/trial spec.
+    """The counted-command star target for a scenario/trial spec.
 
     Taken across every variant so the target is reachable whichever variant is
     served. An authored value is honoured only when it is at least that cost:

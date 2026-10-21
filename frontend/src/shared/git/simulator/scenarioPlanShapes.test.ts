@@ -5,7 +5,7 @@ import { writeWorkspaceFile } from '@/shared/git/simulator/workspaceFiles'
 import type { MutableRepositoryState } from '@/shared/git/simulator/types'
 import type { RepositoryValue } from '@/shared/level/types'
 
-// Shapes required by the scenarios in backend/curriculum/seed_data/source/wave_plan/.
+// Shapes required by the scenarios in backend/curriculum/seed_data/source/scenario_plan/.
 
 function state(overrides: Partial<MutableRepositoryState>): MutableRepositoryState {
   return {
@@ -51,7 +51,7 @@ function remoteMain(overrides: Partial<MutableRepositoryState> = {}) {
   })
 }
 
-describe('wave plan scenario shapes', () => {
+describe('scenario plan scenario shapes', () => {
   it('rejects a plain push of rewritten history and accepts a lease or force (state-only grading)', () => {
     const rewritten = state({
       commits: [

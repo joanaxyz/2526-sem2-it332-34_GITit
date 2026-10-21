@@ -18,8 +18,8 @@ class AdventureLevel(models.Model):
 
     The content tree is:
 
-        Chapter -> AdventureLevel -> AdventureLevelTier -> AdventureLevelTierWave
-                                                        -> AdventureLevelTierWaveVariant
+        Chapter -> AdventureLevel -> AdventureLevelTier -> AdventureLevelTierScenario
+                                                        -> AdventureLevelTierScenarioVariant
     """
 
     chapter = models.ForeignKey(
@@ -91,9 +91,9 @@ class SkillMastery(models.Model):
 class AdventureLevelTier(models.Model):
     """One difficulty (Easy, Medium or Hard) of an AdventureLevel.
 
-        AdventureLevel -> AdventureLevelTier -> AdventureLevelTierWave (ordered)
-                                              -> AdventureLevelTierWaveVariant
-                        -> AdventureLevelTierRun (one attempt at one wave)
+        AdventureLevel -> AdventureLevelTier -> AdventureLevelTierScenario (ordered)
+                                              -> AdventureLevelTierScenarioVariant
+                        -> AdventureLevelTierRun (one attempt at one scenario)
 
     A tier's GitCoin reward is the ladder in ``adventures/rewards.py``.
     """
@@ -122,13 +122,13 @@ class AdventureLevelTier(models.Model):
         return f"{self.adventure_level_id}:tier:{self.difficulty}"
 
 
-class AdventureLevelTierWave(models.Model):
+class AdventureLevelTierScenario(models.Model):
     """One ordered, playable Git problem inside a difficulty tier.
 
-    A run plays the learner's next uncleared wave (``adventures/tier_waves.py``).
+    A run plays the learner's next uncleared scenario (``adventures/tier_scenarios.py``).
     """
 
-    tier = models.ForeignKey(AdventureLevelTier, related_name="waves", on_delete=models.CASCADE)
+    tier = models.ForeignKey(AdventureLevelTier, related_name="scenarios", on_delete=models.CASCADE)
     slug = models.SlugField()
     title = models.CharField(max_length=180, blank=True)
     sort_order = models.PositiveIntegerField(default=0)
@@ -136,7 +136,7 @@ class AdventureLevelTierWave(models.Model):
     task = models.TextField(blank=True)
     command_forms = models.ManyToManyField(
         "curriculum.CommandForm",
-        related_name="adventure_level_tier_waves",
+        related_name="adventure_level_tier_scenarios",
         blank=True,
     )
     min_counted_commands = models.PositiveIntegerField(default=1)
@@ -148,31 +148,31 @@ class AdventureLevelTierWave(models.Model):
         ordering = ["tier_id", "sort_order", "id"]
         constraints = [
             models.UniqueConstraint(
-                fields=["tier", "slug"], name="unique_adv_level_tier_wave_slug"
+                fields=["tier", "slug"], name="unique_adv_level_tier_scenario_slug"
             ),
             models.CheckConstraint(
                 condition=(
                     Q(min_counted_commands__gte=0)
                     & Q(max_counted_commands__gte=models.F("min_counted_commands"))
                 ),
-                name="adv_level_tier_wave_valid_command_budget",
+                name="adv_level_tier_scenario_valid_command_budget",
             ),
         ]
         indexes = [
-            models.Index(fields=["tier", "sort_order"], name="adv_lvl_tier_wave_slot_idx"),
+            models.Index(fields=["tier", "sort_order"], name="adv_lvl_tier_scenario_slot_idx"),
         ]
 
     def __str__(self) -> str:
-        return f"{self.tier_id}:wave:{self.slug}"
+        return f"{self.tier_id}:scenario:{self.slug}"
 
     @property
     def adventure_level(self):
         return self.tier.adventure_level
 
 
-class AdventureLevelTierWaveVariant(VariantBase):
-    wave = models.ForeignKey(
-        AdventureLevelTierWave, related_name="variants", on_delete=models.CASCADE
+class AdventureLevelTierScenarioVariant(VariantBase):
+    scenario = models.ForeignKey(
+        AdventureLevelTierScenario, related_name="variants", on_delete=models.CASCADE
     )
     # Validated reference route, independent of the star-scoring budget.
     # KPI columns carry database defaults so code predating them can still
@@ -182,20 +182,20 @@ class AdventureLevelTierWaveVariant(VariantBase):
     assess_diag = models.BooleanField(default=False, db_default=False)
     is_transfer = models.BooleanField(default=False, db_default=False)
     transfer_note = models.TextField(blank=True, db_default="")
-    # Authored order within the wave: the first published variant is a
+    # Authored order within the scenario: the first published variant is a
     # first-time learner's pick, and retries rotate in this order.
     sort_order = models.PositiveIntegerField(default=0, db_default=0)
 
     class Meta:
-        ordering = ["wave_id", "sort_order", "semantic_key", "id"]
+        ordering = ["scenario_id", "sort_order", "semantic_key", "id"]
         constraints = [
             models.UniqueConstraint(
-                fields=["wave", "slug"], name="unique_adv_level_tier_wave_variant_slug"
+                fields=["scenario", "slug"], name="unique_adv_level_tier_scenario_variant_slug"
             ),
         ]
 
     def __str__(self) -> str:
-        return f"adventure-level-tier-wave:{self.wave_id}:{self.slug}"
+        return f"adventure-level-tier-scenario:{self.scenario_id}:{self.slug}"
 
 
 class AdventureLevelTierRun(models.Model):
@@ -203,7 +203,7 @@ class AdventureLevelTierRun(models.Model):
 
     Mirrors ChallengeRun's lifecycle shape (one row per attempt; a fresh row
     is created for each retry rather than one long-lived row looping
-    internally). A tier's progress through its waves is NOT tracked here - a
+    internally). A tier's progress through its scenarios is NOT tracked here - a
     run field would reset every attempt - see AdventureLevelTierProgress for
     the per-(player, tier) rollup.
     """
@@ -218,15 +218,15 @@ class AdventureLevelTierRun(models.Model):
         "players.Player", on_delete=models.CASCADE, related_name="adventure_tier_runs"
     )
     tier = models.ForeignKey(AdventureLevelTier, related_name="runs", on_delete=models.PROTECT)
-    current_wave = models.ForeignKey(
-        AdventureLevelTierWave,
+    current_scenario = models.ForeignKey(
+        AdventureLevelTierScenario,
         null=True,
         blank=True,
         related_name="current_runs",
         on_delete=models.PROTECT,
     )
     selected_variant = models.ForeignKey(
-        AdventureLevelTierWaveVariant,
+        AdventureLevelTierScenarioVariant,
         related_name="runs",
         on_delete=models.PROTECT,
     )
@@ -299,12 +299,12 @@ class AdventureLevelTierRun(models.Model):
 
 
 class AdventureLevelTierProgress(models.Model):
-    """Per-(player, tier) rollup of the tier's cleared waves.
+    """Per-(player, tier) rollup of the tier's cleared scenarios.
 
     Each AdventureLevelTierRun is one attempt and ends (completed/failed) on
     its own - a run field can't hold this since it would reset on every new
     attempt. This row persists across attempts; AdventureLevelTierCompletion
-    is written once every published wave of the tier is cleared.
+    is written once every published scenario of the tier is cleared.
     """
 
     player = models.ForeignKey(
@@ -314,10 +314,10 @@ class AdventureLevelTierProgress(models.Model):
         AdventureLevelTier, on_delete=models.CASCADE, related_name="progress_rows"
     )
     successful_clears = models.PositiveIntegerField(default=0)
-    # Slugs of the tier's waves this player has cleared, in clear order. Wave
+    # Slugs of the tier's scenarios this player has cleared, in clear order. Scenario
     # slugs are authored and stable across reseeds; the tier completes once
-    # every published wave's slug is here.
-    cleared_wave_slugs = models.JSONField(
+    # every published scenario's slug is here.
+    cleared_scenario_slugs = models.JSONField(
         default=list, blank=True, db_default=models.Value([], output_field=models.JSONField())
     )
     # Legacy histories can have deleted launches; only prospective tracking
@@ -331,7 +331,7 @@ class AdventureLevelTierProgress(models.Model):
     # an exit-without-solving. Set on every start_run call, independent of
     # successful_clears.
     last_shown_variant = models.ForeignKey(
-        "AdventureLevelTierWaveVariant",
+        "AdventureLevelTierScenarioVariant",
         on_delete=models.SET_NULL,
         null=True,
         blank=True,

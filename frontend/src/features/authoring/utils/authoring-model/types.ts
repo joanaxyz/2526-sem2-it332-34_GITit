@@ -7,7 +7,7 @@ export type AuthoredVariant = {
   solutionCommands: string[]
 }
 
-/** One playable problem: a wave (adventure) or a difficulty trial (challenge). */
+/** One playable problem: a scenario (adventure) or a difficulty trial (challenge). */
 export type AuthoredProblem = {
   slug: string
   title: string

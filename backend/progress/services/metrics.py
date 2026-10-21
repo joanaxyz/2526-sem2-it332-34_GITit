@@ -296,12 +296,12 @@ class MetricsService:
 
         The command library is intentionally broader than the active learner
         curriculum: it also contains other story tracks, reference-only entries,
-        and forms the simulator may support before a required Arcane Spire wave
+        and forms the simulator may support before a required Arcane Spire scenario
         teaches them. Those entries must not show up as learner mastery because
         they are outside this dashboard's curriculum boundary.
 
         Mastery for each included skill = average of (solves / target) across its
-        published, playable forms that are exercised by a required published wave,
+        published, playable forms that are exercised by a required published scenario,
         capped at 100%.
         """
         from adventures.services import form_solve_targets
@@ -313,11 +313,11 @@ class MetricsService:
                 command_skill__is_published=True,
             )
             .filter(
-                adventure_level_tier_waves__is_published=True,
-                adventure_level_tier_waves__tier__is_published=True,
-                adventure_level_tier_waves__tier__adventure_level__is_published=True,
-                adventure_level_tier_waves__tier__adventure_level__is_required=True,
-                adventure_level_tier_waves__tier__adventure_level__chapter__story__slug=(
+                adventure_level_tier_scenarios__is_published=True,
+                adventure_level_tier_scenarios__tier__is_published=True,
+                adventure_level_tier_scenarios__tier__adventure_level__is_published=True,
+                adventure_level_tier_scenarios__tier__adventure_level__is_required=True,
+                adventure_level_tier_scenarios__tier__adventure_level__chapter__story__slug=(
                     self.LEARNER_CURRICULUM_STORY_SLUG
                 ),
             )

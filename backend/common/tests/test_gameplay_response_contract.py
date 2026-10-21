@@ -187,7 +187,7 @@ def test_adventure_tier_full_success_endpoints_match_the_domain_schema(db, djang
 
     for response in (start, detail, workspace):
         _assert_valid(AdventureLevelTierRunResponseSerializer, response.json())
-        assert response.json()["wave"] == {"index": 1, "total": 1, "title": "Stage README"}
+        assert response.json()["scenario"] == {"index": 1, "total": 1, "title": "Stage README"}
         assert response.json()["reward"] == {"coins": 25, "claimed": False}
     run = AdventureLevelTierRun.objects.get(id=run_id)
     assert "NOTES.md" in run.repository_state["working_tree"]
@@ -217,7 +217,7 @@ def test_adventure_tier_command_response_validates_started_and_terminal_updates(
         "completed": 1,
         "total": 1,
         "cleared": True,
-        "next_wave": None,
+        "next_scenario": None,
     }
     assert terminal_payload["run"]["rewards"]["coins_awarded"] == 25
     assert (

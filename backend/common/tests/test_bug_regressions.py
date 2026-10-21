@@ -99,14 +99,14 @@ def test_active_run_constraints_and_completion_history_survive_deletion():
     player = get_or_create_player(_user("run-safety"))
     tier = AdventureLevelTier.objects.filter(is_published=True).order_by("id").first()
     assert tier is not None
-    wave = tier.waves.filter(is_published=True).order_by("sort_order", "id").first()
-    assert wave is not None
-    variant = wave.variants.filter(is_published=True).first()
+    scenario = tier.scenarios.filter(is_published=True).order_by("sort_order", "id").first()
+    assert scenario is not None
+    variant = scenario.variants.filter(is_published=True).first()
     assert variant is not None
     run = AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variant,
         repository_state=variant.initial_state,
     )
@@ -116,7 +116,7 @@ def test_active_run_constraints_and_completion_history_survive_deletion():
             AdventureLevelTierRun.objects.create(
                 player=player,
                 tier=tier,
-                current_wave=wave,
+                current_scenario=scenario,
                 selected_variant=variant,
                 repository_state=variant.initial_state,
             )

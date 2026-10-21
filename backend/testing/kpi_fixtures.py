@@ -9,8 +9,8 @@ from django.utils import timezone
 from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from adventures.services import (
     AdventureLevelTierCommandProcessingService,
@@ -32,10 +32,10 @@ def routes():
 
 
 def bundle(user_model, *, username="kpi", required=3, module=3):
-    """A Hard tier of ``required`` single-clear waves, with real KPI routes.
+    """A Hard tier of ``required`` single-clear scenarios, with real KPI routes.
 
-    The first wave holds the practice and the reserved transfer variant; each
-    later wave has its own practice variant. Returns the first wave and its
+    The first scenario holds the practice and the reserved transfer variant; each
+    later scenario has its own practice variant. Returns the first scenario and its
     two variants.
     """
     player = get_or_create_player(user_model.objects.create_user(username=username))
@@ -54,10 +54,10 @@ def bundle(user_model, *, username="kpi", required=3, module=3):
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="hard")
     medium = AdventureLevelTier.objects.create(adventure_level=level, difficulty="medium")
     AdventureLevelTierCompletion.objects.create(player=player, tier=medium)
-    waves = [
-        AdventureLevelTierWave.objects.create(
+    scenarios = [
+        AdventureLevelTierScenario.objects.create(
             tier=tier,
-            slug=f"wave-{username}" if index == 0 else f"wave-{username}-{index + 1}",
+            slug=f"scenario-{username}" if index == 0 else f"scenario-{username}-{index + 1}",
             sort_order=index,
             min_counted_commands=3,
             max_counted_commands=8,
@@ -66,9 +66,9 @@ def bundle(user_model, *, username="kpi", required=3, module=3):
     ]
     cases, targets, _ = routes()
 
-    def variant(wave, slug, key):
-        created = AdventureLevelTierWaveVariant.objects.create(
-            wave=wave,
+    def variant(scenario, slug, key):
+        created = AdventureLevelTierScenarioVariant.objects.create(
+            scenario=scenario,
             slug=slug,
             label=key,
             semantic_key=key,
@@ -86,10 +86,10 @@ def bundle(user_model, *, username="kpi", required=3, module=3):
         created.save(update_fields=["ref_hash"])
         return created
 
-    variants = [variant(waves[0], f"{username}-{key}", key) for key in ("practice", "transfer")]
-    for index, wave in enumerate(waves[1:], start=2):
-        variant(wave, f"{username}-practice-{index}", "practice")
-    return player, tier, waves[0], variants
+    variants = [variant(scenarios[0], f"{username}-{key}", key) for key in ("practice", "transfer")]
+    for index, scenario in enumerate(scenarios[1:], start=2):
+        variant(scenario, f"{username}-practice-{index}", "practice")
+    return player, tier, scenarios[0], variants
 
 
 def start(player, tier, **kwargs):

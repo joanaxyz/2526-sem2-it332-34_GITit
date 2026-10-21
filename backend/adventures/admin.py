@@ -4,8 +4,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
     SkillMastery,
 )
 
@@ -23,18 +23,18 @@ class AdventureLevelAdmin(admin.ModelAdmin):
     inlines = [AdventureLevelTierInline]
 
 
-class AdventureLevelTierWaveVariantInline(admin.TabularInline):
-    model = AdventureLevelTierWaveVariant
+class AdventureLevelTierScenarioVariantInline(admin.TabularInline):
+    model = AdventureLevelTierScenarioVariant
     extra = 0
     fields = ("slug", "label", "sort_order", "is_transfer", "is_published")
 
 
-@admin.register(AdventureLevelTierWave)
-class AdventureLevelTierWaveAdmin(admin.ModelAdmin):
+@admin.register(AdventureLevelTierScenario)
+class AdventureLevelTierScenarioAdmin(admin.ModelAdmin):
     list_display = ("slug", "title", "tier", "sort_order", "is_published")
     list_filter = ("is_published", "tier__difficulty")
     search_fields = ("title", "slug")
-    inlines = [AdventureLevelTierWaveVariantInline]
+    inlines = [AdventureLevelTierScenarioVariantInline]
 
 
 @admin.register(AdventureLevelTierRun)
@@ -43,7 +43,7 @@ class AdventureLevelTierRunAdmin(admin.ModelAdmin):
         "id",
         "player",
         "tier",
-        "current_wave",
+        "current_scenario",
         "is_replay",
         "is_transfer",
         "stars",

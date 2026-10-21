@@ -13,7 +13,7 @@ import { ProblemsEditor } from '@/features/authoring/components/levels-editor/Pr
 /** Structured editor for an adventure/challenge's levels.
  *
  * A level groups ordered problems: for an adventure a problem is a playable
- * WAVE, for a challenge a difficulty TRIAL. Each problem owns its scenario and
+ * SCENARIO, for a challenge a difficulty TRIAL. Each problem owns its scenario and
  * its own extra variants. */
 export function LevelsEditor({
   kind,
@@ -26,7 +26,7 @@ export function LevelsEditor({
   onChange: (levels: AuthoredLevel[]) => void
   commandFormOptions?: CommandFormOption[]
 }) {
-  const problemNoun = kind === 'challenge' ? 'trial' : 'wave'
+  const problemNoun = kind === 'challenge' ? 'trial' : 'scenario'
   const [collapsedLevels, setCollapsedLevels] = useState<Set<number>>(
     () => new Set(levels.map((_, index) => index).filter((index) => index > 0)),
   )

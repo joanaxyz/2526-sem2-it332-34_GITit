@@ -43,7 +43,7 @@ const TIER_ACTION_LABELS: Record<Exclude<LevelTierRowStatus, 'locked'>, string> 
 function tierRowStatus(tier: AdventureLevelTierAccess | undefined): LevelTierRowStatus {
   if (!tier || tier.locked) return 'locked'
   if (tier.completion) return 'cleared'
-  return tier.wave_progress.completed > 0 ? 'in_progress' : 'not_started'
+  return tier.scenario_progress.completed > 0 ? 'in_progress' : 'not_started'
 }
 
 /** The level callout: a level node's title, brief, and one row per difficulty
@@ -154,7 +154,7 @@ export function StoryLevelTierPanel({
       <ul className="story-level-tier-rows">
         {rows.map(({ difficulty, tier, status }, index) => {
           const tierLabel = DIFFICULTY_TIER_LABELS[difficulty]
-          const progress = tier?.wave_progress ?? { completed: 0, total: 0 }
+          const progress = tier?.scenario_progress ?? { completed: 0, total: 0 }
           const isLocked = status === 'locked'
           const actionLabel = isLocked ? 'Locked' : TIER_ACTION_LABELS[status]
 
@@ -189,7 +189,7 @@ export function StoryLevelTierPanel({
                     )}
                     {progress.total > 0
                       ? isLocked
-                        ? `${progress.total} ${progress.total === 1 ? 'wave' : 'waves'}`
+                        ? `${progress.total} ${progress.total === 1 ? 'scenario' : 'scenarios'}`
                         : `${progress.completed}/${progress.total}`
                       : null}
                     {tier && !tier.reward.claimed && tier.reward.coins > 0 ? (

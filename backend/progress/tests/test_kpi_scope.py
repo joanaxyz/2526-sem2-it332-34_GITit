@@ -10,8 +10,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from common.constants import (
     DIFFICULTY_HARD,
@@ -41,10 +41,10 @@ def tier(db):
         chapter=chapter, slug="resolving-conflicts-manually", title="Level"
     )
     hard = AdventureLevelTier.objects.create(adventure_level=level, difficulty=DIFFICULTY_HARD)
-    wave = AdventureLevelTierWave.objects.create(tier=hard, slug="m3-hard")
+    scenario = AdventureLevelTierScenario.objects.create(tier=hard, slug="m3-hard")
     variants = {
-        key: AdventureLevelTierWaveVariant.objects.create(
-            wave=wave,
+        key: AdventureLevelTierScenarioVariant.objects.create(
+            scenario=scenario,
             slug=f"scope-{key}",
             label=key,
             semantic_key=f"scope-{key}",
@@ -53,7 +53,7 @@ def tier(db):
         )
         for key in ("a", "b")
     }
-    return hard, wave, variants
+    return hard, scenario, variants
 
 
 def _player(django_user_model, username, *, staff=False):
@@ -64,11 +64,11 @@ def _player(django_user_model, username, *, staff=False):
 
 
 def _run(player, bundle, variant, status, *, prior=None, started_at=None, steps=(True,)):
-    tier, wave, variants = bundle
+    tier, scenario, variants = bundle
     run = AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variants[variant],
         prior_run=prior,
         status=status,

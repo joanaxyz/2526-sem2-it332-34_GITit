@@ -591,8 +591,8 @@ def test_staff_analytics_returns_shape(django_user_model):
         AdventureLevel,
         AdventureLevelTier,
         AdventureLevelTierRun,
-        AdventureLevelTierWave,
-        AdventureLevelTierWaveVariant,
+        AdventureLevelTierScenario,
+        AdventureLevelTierScenarioVariant,
     )
     from challenges.models import (
         ChallengeLevel,
@@ -622,16 +622,16 @@ def test_staff_analytics_returns_shape(django_user_model):
         title="Analytics Adventure",
     )
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    wave = AdventureLevelTierWave.objects.create(tier=tier, slug="wave", title="Wave")
-    adventure_variant = AdventureLevelTierWaveVariant.objects.create(
-        wave=wave,
+    scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug="scenario", title="Scenario")
+    adventure_variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
         slug="main",
         label="Main",
     )
     AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=adventure_variant,
         status=AdventureLevelTierRun.Status.COMPLETED,
         completed_at=timezone.now(),

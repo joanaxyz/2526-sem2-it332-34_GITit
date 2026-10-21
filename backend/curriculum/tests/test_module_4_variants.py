@@ -4,7 +4,7 @@ Two layers:
 
 * Always-on checks (normal pytest job): the seeded variant set, retirement of
   the old duplicate keys, the committed target states passing the stricter
-  grading, and the content rule that no two variants in a Module 3-4 wave share
+  grading, and the content rule that no two variants in a Module 3-4 scenario share
   both initial_state and target_state.
 * Replay checks (need Node and frontend/node_modules; CI runs them in the
   generated-targets job): every correct, wrong and alternative solution is
@@ -22,7 +22,7 @@ from types import SimpleNamespace
 import pytest
 from django.core.management import call_command
 
-from adventures.models import AdventureLevelTierRun, AdventureLevelTierWaveVariant
+from adventures.models import AdventureLevelTierRun, AdventureLevelTierScenarioVariant
 from common.constants import SESSION_STATUS_COMPLETED
 from common.runtime import counted_command_total
 from curriculum.management.commands.seed_curriculum import (
@@ -283,20 +283,20 @@ def test_committed_target_passes_strict_grading_and_start_state_does_not(case_id
 
 def test_seed_unpublishes_retired_duplicates_and_keeps_their_runs(db, django_user_model):
     call_command("seed_curriculum", verbosity=0)
-    wave = AdventureLevelTierWaveVariant.objects.get(
-        slug="re6", wave__tier__adventure_level__chapter__story__slug=CURRICULUM_STORY_SLUG
-    ).wave
+    scenario = AdventureLevelTierScenarioVariant.objects.get(
+        slug="re6", scenario__tier__adventure_level__chapter__story__slug=CURRICULUM_STORY_SLUG
+    ).scenario
     # A production database still holds the old copies, with runs on them.
-    retired = AdventureLevelTierWaveVariant.objects.create(
-        wave=wave, slug="re1", label="Revert c3 safely", semantic_key="re1", case_id="re1"
+    retired = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario, slug="re1", label="Revert c3 safely", semantic_key="re1", case_id="re1"
     )
     player = get_or_create_player(
         django_user_model.objects.create_user(username="m4-history", password="pass12345")
     )
     run = AdventureLevelTierRun.objects.create(
         player=player,
-        tier=wave.tier,
-        current_wave=wave,
+        tier=scenario.tier,
+        current_scenario=scenario,
         selected_variant=retired,
         status=SESSION_STATUS_COMPLETED,
     )
@@ -307,7 +307,7 @@ def test_seed_unpublishes_retired_duplicates_and_keeps_their_runs(db, django_use
     run.refresh_from_db()
     assert retired.is_published is False
     assert run.selected_variant_id == retired.id
-    published = set(wave.variants.filter(is_published=True).values_list("slug", flat=True))
+    published = set(scenario.variants.filter(is_published=True).values_list("slug", flat=True))
     assert published == {"re6", "re7", "re8"}
 
 
@@ -317,26 +317,26 @@ def test_seeding_keeps_committed_target_states_on_every_rerun(db):
     call_command("seed_curriculum", verbosity=0)
 
     targets = _committed_targets()
-    variants = AdventureLevelTierWaveVariant.objects.filter(
-        wave__tier__adventure_level__chapter__story__slug=CURRICULUM_STORY_SLUG
+    variants = AdventureLevelTierScenarioVariant.objects.filter(
+        scenario__tier__adventure_level__chapter__story__slug=CURRICULUM_STORY_SLUG
     )
     assert variants.exists()
     mismatched = [v.case_id for v in variants if v.target_state != targets.get(v.case_id)]
     assert not mismatched, mismatched
 
 
-def test_no_two_variants_in_a_module_3_4_wave_share_start_and_target(db):
+def test_no_two_variants_in_a_module_3_4_scenario_share_start_and_target(db):
     """A retry must be able to land on a structurally different scenario.
 
     TODO: extend to Modules 1-2 once their start-state-only overlaps are
     reviewed (they currently differ in target_state, so they would pass).
     """
     call_command("seed_curriculum", verbosity=0)
-    variants = AdventureLevelTierWaveVariant.objects.filter(
+    variants = AdventureLevelTierScenarioVariant.objects.filter(
         is_published=True,
-        wave__tier__adventure_level__chapter__story__slug=CURRICULUM_STORY_SLUG,
-        wave__tier__adventure_level__chapter__number__in=(3, 4),
-    ).select_related("wave")
+        scenario__tier__adventure_level__chapter__story__slug=CURRICULUM_STORY_SLUG,
+        scenario__tier__adventure_level__chapter__number__in=(3, 4),
+    ).select_related("scenario")
 
     missing_targets = [v.slug for v in variants if not v.target_state]
     assert not missing_targets, f"variants without a target_state: {missing_targets}"
@@ -345,9 +345,9 @@ def test_no_two_variants_in_a_module_3_4_wave_share_start_and_target(db):
     duplicates = []
     for variant in variants:
         fingerprint = json.dumps([variant.initial_state, variant.target_state], sort_keys=True)
-        key = (variant.wave_id, fingerprint)
+        key = (variant.scenario_id, fingerprint)
         if key in seen:
-            duplicates.append((variant.wave.slug, seen[key], variant.slug))
+            duplicates.append((variant.scenario.slug, seen[key], variant.slug))
         else:
             seen[key] = variant.slug
     assert not duplicates, duplicates
