@@ -112,6 +112,9 @@ def chat(player, message, context, history=()):
         variant_context = getattr(run.selected_variant, "scenario_context", None) or {}
         task = str(variant_context.get("task") or getattr(run.current_scenario, "task", "") or "")
     protected = run is not None or recognition.related
+    # Protection covers anything that may be a scenario, but the learner is only
+    # told a scenario was spotted when one was recognised with confidence.
+    spotted = run is not None or recognition.status == MATCHED
     kind = "guarded" if protected else "answer"
     system = system_prompt(context["surface"], protected, recognition, usage, task)
     turns = conversation(history, message)
@@ -121,7 +124,7 @@ def chat(player, message, context, history=()):
             "reply": reply,
             "suggested_topics": topic_choices(),
             "response_kind": response_kind,
-            "scenario_related": protected,
+            "scenario_related": spotted and response_kind != "unavailable",
         }
 
     memo = reply_memo(system, turns)

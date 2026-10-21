@@ -1,4 +1,5 @@
 import json
+import math
 from unittest.mock import patch
 
 import pytest
@@ -81,6 +82,19 @@ def test_general_questions_are_unmatched_when_retrieval_is_far():
         patch("tutoring.services.scenario_recognition.embed", return_value=[far]),
     ):
         assert recognize("What is the difference between merge and rebase?").status == UNMATCHED
+
+
+@pytest.mark.parametrize(("score", "status"), [(0.74, UNCERTAIN), (0.76, MATCHED)])
+def test_a_confident_match_starts_above_general_question_scores(score, status):
+    query = [score, math.sqrt(1 - score * score)] + [0.0] * 766
+    with (
+        patch(
+            "tutoring.services.scenario_recognition.load_index",
+            return_value=[(NESTED_SERVICE, [1.0] + [0.0] * 767)],
+        ),
+        patch("tutoring.services.scenario_recognition.embed", return_value=[query]),
+    ):
+        assert recognize("How do I undo my last commit?").status == status
 
 
 def test_limited_embeddings_stay_protective_and_retry_later():
@@ -212,6 +226,8 @@ def test_uncertain_retrieval_still_answers_but_protected():
     ):
         reply = chat(None, "Explain branches", HOME)
     assert reply["response_kind"] == "guarded"
+    # Protected, but an uncertain match is not presented as a spotted scenario.
+    assert reply["scenario_related"] is False
     assert reply["reply"] == "A branch is a movable pointer."
     assert "may contain a practice task" in provider.call_args.args[0]
 
@@ -380,6 +396,7 @@ def test_offline_help_says_so_and_history_is_bounded(client):
     assert result.status_code == 200
     assert result.data["response_kind"] == "unavailable"
     assert result.data["reply"] == UNAVAILABLE
+    assert result.data["scenario_related"] is False
     assert "sources" not in result.data
     body["history"] = [{"role": "user", "text": "x" * 6000}] * 6
     assert client.post("/api/tutoring/chat/", body, format="json").status_code == 400
