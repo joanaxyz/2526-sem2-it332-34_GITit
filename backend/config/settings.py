@@ -367,8 +367,20 @@ REST_FRAMEWORK = {
             "THROTTLE_AUTH_PASSWORD_RESET_CONFIRM", default="60/hour"
         ),
         "command_submit": env("THROTTLE_COMMAND_SUBMIT", default="120/min"),
+        "tutor_chat": env("THROTTLE_TUTOR_CHAT", default="12/min"),
     },
 }
+
+# Tutor credentials never enter frontend configuration or response payloads.
+GOOGLE_AI_STUDIO_API_KEY = env("GOOGLE_AI_STUDIO_API_KEY", default="").strip()
+GROQ_API_KEY = env("GROQ_API_KEY", default="").strip()
+TUTOR_GEMINI_MODELS = tuple(dict.fromkeys(
+    model.strip() for model in env("TUTOR_GEMINI_MODELS", default="gemini-3.5-flash-lite:minimal,gemini-3.8-flash:low").split(",") if model.strip()
+))[:4]
+TUTOR_GROQ_MODEL = env("TUTOR_GROQ_MODEL", default="openai/gpt-oss-20b:low").strip()
+TUTOR_PROVIDER_ATTEMPT_SECONDS = env.float("TUTOR_PROVIDER_ATTEMPT_SECONDS", default=4)
+TUTOR_PROVIDER_DEADLINE_SECONDS = env.float("TUTOR_PROVIDER_DEADLINE_SECONDS", default=12)
+TUTOR_SCENARIO_INDEX_PATH = env("TUTOR_SCENARIO_INDEX_PATH", default=str(BASE_DIR / "tutoring" / "data" / "scenario-index.json"))
 
 JWT_ACCESS_TOKEN_LIFETIME_MINUTES = env("JWT_ACCESS_TOKEN_LIFETIME_MINUTES")
 JWT_REFRESH_TOKEN_LIFETIME_DAYS = env("JWT_REFRESH_TOKEN_LIFETIME_DAYS")

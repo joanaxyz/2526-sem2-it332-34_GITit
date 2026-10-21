@@ -28,20 +28,21 @@ def complete(client, run, token):
     )
 
 
-def test_wrong_terminal_command_reveals_and_keeps_normal_penalty(client, teaching_run):
+def test_wrong_terminal_command_keeps_syntax_private_and_normal_penalty(client, teaching_run):
     before = deepcopy(teaching_run.repository_state)
     response = submit(client, teaching_run, "git start", before, processed=False, exit_code=129)
     assert response.status_code == 200, response.data
     tutor = response.data["run"]["tutor"]
     assert tutor["phase"] == "feedback"
     assert tutor["verdict"] == "incorrect"
-    assert tutor["example_command"] == "git init"
+    assert "example_command" not in tutor
+    assert tutor["command_form"]["usage_form"] == "git init"
     assert teaching_run.repository_state == before
     assert teaching_run.total_attempts == teaching_run.counted_action_total == 1
     assert teaching_run.steps.count() == 1
     assert not SkillMastery.objects.exists()
     assert not PlayerCommandIntroduction.objects.exists()
-    assert tutor_payload(teaching_run)["example_command"] == "git init"  # reload resumes
+    assert "example_command" not in tutor_payload(teaching_run)  # reload remains safe
     for _ in range(2):
         result = complete(client, teaching_run, tutor["completion_token"])
         assert result.status_code == 200, result.data
@@ -99,7 +100,7 @@ def test_the_combined_command_completes_both_steps(client, teaching_run):
     assert tutor["explanation"] == "That's the right command."
 
 
-def test_a_miss_reveals_the_combined_command(client, teaching_run):
+def test_a_miss_shows_placeholder_syntax_without_combined_answer(client, teaching_run):
     at_first_add(teaching_run)
     response = submit(
         client,
@@ -109,7 +110,10 @@ def test_a_miss_reveals_the_combined_command(client, teaching_run):
         processed=False,
         exit_code=1,
     )
-    assert response.data["run"]["tutor"]["example_command"] == "git add README.md app.py"
+    tutor = response.data["run"]["tutor"]
+    assert "example_command" not in tutor
+    assert tutor["command_form"]["usage_form"] == "git add <path>..."
+    assert "README.md" not in str(tutor["needs"])
 
 
 def test_one_file_at_a_time_is_left_alone(client, teaching_run):

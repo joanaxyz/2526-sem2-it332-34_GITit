@@ -63,7 +63,7 @@ _PLACEHOLDERS: dict[str, str] = {
     "paths": "one or more file paths",
     "commit": "a commit, by its ID or a name like HEAD",
     "message": "your message, in quotes",
-    "remote": "the remote's name, like origin",
+    "remote": "the remote's name, supplied by your task",
     "url": "the repository's address",
     "directory": "a folder name",
     "tag": "the tag name",

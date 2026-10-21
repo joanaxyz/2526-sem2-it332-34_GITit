@@ -33,6 +33,8 @@
   transform: rotate(45deg);
   pointer-events: none;
 }
+.mascot-message--no-speaker { grid-template-columns: minmax(0, 1fr); gap: 0; }
+.mascot-message--no-speaker > .mascot-message__bubble::before { display: none; }
 .mascot-message__bubble :where(p) { color: #bdd0df; line-height: 1.6; }
 .mascot-message__bubble :where(h2, h3, strong) { color: hsl(var(--foreground)); }
 

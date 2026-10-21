@@ -11,11 +11,16 @@ export const VARIANT_COLORS = {
     titleClass: 'text-primary',
     gradientBg: 'radial-gradient(ellipse at 30% 40%, rgba(var(--theme-primary-rgb),0.05) 0%, transparent 62%)',
     dotColor: 'rgba(var(--theme-primary-rgb),0.06)',
-    headNode: 'border-2 border-primary bg-primary/15 text-primary dag-head-glow',
+    headNode: 'text-primary',
     activePill: 'border-primary/55 bg-primary/10 text-primary shadow-[0_0_8px_rgba(var(--theme-primary-rgb),0.22)]',
-    emptyHead: 'dag-head-glow border-2 border-dashed border-primary bg-primary/10 text-primary',
+    emptyHead: 'text-primary',
     emptyPill: 'border-primary/50 bg-primary/10 text-primary shadow-[0_0_6px_rgba(var(--theme-primary-rgb),0.2)]',
   },
 } as const
 
-export const NO_DELTA: EnteringDelta = { commits: new Set(), refsByCommit: new Map(), headTarget: null }
+export const NO_DELTA: EnteringDelta = {
+  commits: new Set(),
+  refsByCommit: new Map(),
+  headTarget: null,
+  repositoryInitialized: false,
+}

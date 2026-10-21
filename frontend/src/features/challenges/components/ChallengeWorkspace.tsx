@@ -1,86 +1,77 @@
 import { useEffect, useRef, useState } from 'react'
-import type { CSSProperties } from 'react'
 import { useBlocker, useNavigate, useParams } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
 
 import { challengesApi } from '@/features/challenges/api/challengesApi'
-import { ChallengeExitConfirmModal } from '@/features/challenges/components/ChallengeExitConfirmModal'
 import { ChallengeStatusHeader } from '@/features/challenges/components/ChallengeStatusHeader'
 import { ChallengeOutcomeModal } from '@/features/challenges/components/ChallengeOutcomeModal'
-import { ChallengeStartOverConfirmModal } from '@/features/challenges/components/ChallengeStartOverConfirmModal'
-import { ChallengeWorkspaceMain } from '@/features/challenges/components/ChallengeWorkspaceMain'
+import { challengeScene, mapUrlForRun } from '@/features/challenges/components/challengeWorkspaceLayout'
 import { useChallengeCommandSubmission } from '@/features/challenges/hooks/useChallengeCommandSubmission'
-import { useChallengeWorkspaceMutations } from '@/features/challenges/hooks/useChallengeWorkspaceMutations'
-import { createChallengeWorkspaceCommandHandler } from '@/features/challenges/utils/challengeWorkspaceCommand'
 import { useChallengeRun } from '@/features/challenges/hooks/useChallengeRun'
-import { invalidateLevelProgressQueries } from '@/features/challenges/utils/challengeRunCache'
-import { ChallengeWorkspaceTour } from '@/features/challenges/components/ChallengeWorkspaceTour'
-import {
-  DEFAULT_TARGET_DIAGRAM_RATIO,
-  DEFAULT_TERMINAL_PANE_RATIO,
-  DEFAULT_TERMINAL_RATIO,
-  TARGET_DIAGRAM_RATIO_KEY,
-  TERMINAL_PANE_RATIO_KEY,
-  TERMINAL_RATIO_KEY,
-  clamp,
-  constrainedTerminalPaneRatio,
-  mapUrlForRun,
-  ratioSanitizer,
-} from '@/features/challenges/components/challengeWorkspaceLayout'
+import { useChallengeRunAssets } from '@/features/challenges/hooks/useChallengeRunAssets'
+import { useChallengeWorkspaceMutations } from '@/features/challenges/hooks/useChallengeWorkspaceMutations'
 import { useScaffolding } from '@/features/challenges/scaffolding/useScaffolding'
-import { useDragResize } from '@/shared/level/hooks/useDragResize'
-import { terminalPrompt } from '@/shared/level/terminalPrompt'
-import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
-import { hasSeenLevelTour, markLevelTourSeen } from '@/shared/level/utils/levelTour'
-import { useOutcomeAnimationGate } from '@/shared/level-runtime/outcomeAnimation'
-import { useChallengeDagAnimation } from '@/features/challenges/hooks/useChallengeDagAnimation'
 import type { ChallengeRun } from '@/features/challenges/types'
+import { invalidateLevelProgressQueries } from '@/features/challenges/utils/challengeRunCache'
+import { createChallengeWorkspaceCommandHandler } from '@/features/challenges/utils/challengeWorkspaceCommand'
+import { queryKeys } from '@/shared/api/queryKeys'
 import { useAuthStore } from '@/shared/auth/useAuth'
+import { useBattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
-import { queryKeys } from '@/shared/api/queryKeys'
+import { useOutcomeAnimationGate } from '@/shared/level-runtime/outcomeAnimation'
+import { terminalPrompt } from '@/shared/level/terminalPrompt'
+import { PROJECT_FILES_OPEN_KEY } from '@/shared/level/workspaceKeys'
+import { ExitConfirmModal } from '@/shared/level/workspace/ExitConfirmModal'
+import { GameplayWorkspaceMain } from '@/shared/level/workspace/GameplayWorkspaceMain'
+import { StartOverConfirmModal } from '@/shared/level/workspace/StartOverConfirmModal'
+import { useDagAnimation } from '@/shared/level/workspace/useDagAnimation'
+import { useRepoGraphDrawer } from '@/shared/level/workspace/useRepoGraphDrawer'
+import { useWorkspaceAutoOpen } from '@/shared/level/workspace/useWorkspaceAutoOpen'
+import { REPO_GRAPH_ID } from '@/shared/level/workspace/WorkspaceDiagramStage'
+import { WorkspaceStoryModal } from '@/shared/level/workspace/WorkspaceStoryModal'
+import { workspaceStoryContent } from '@/shared/level/workspace/workspaceStory'
+import { WorkspaceTour } from '@/shared/level/workspace/WorkspaceTour'
+import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { usePersistentState } from '@/shared/utils/persistentState'
 
+/** The Challenge Gate trial lifecycle around the shared gameplay workspace:
+ * the same battle stage, terminal and diagrams as an adventure tier, with the
+ * trial's own scaffolding, outcome and retry flow. */
 export function ChallengeWorkspace() {
   const params = useParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
   const runId = Number(params.runId)
   const { query, run, lines } = useChallengeRun(runId)
+  const { companionSlug, isLoading: loadoutLoading } = usePlayerLoadout()
+  const assetsReady = useChallengeRunAssets({ run, companionSlug, enabled: !loadoutLoading })
   const observedRunId = run?.id ?? null
   const observedRunStatus = run?.status ?? null
   const mutation = useChallengeCommandSubmission(runId)
   const { clearToast, evaluateAndNotify } = useScaffolding(runId)
   const [dismissedCompletionRunId, setDismissedCompletionRunId] = useState<number | null>(null)
-  const [terminalRatio, setTerminalRatio] = usePersistentState(
-    TERMINAL_RATIO_KEY,
-    DEFAULT_TERMINAL_RATIO,
-    ratioSanitizer(0.22, 0.58, DEFAULT_TERMINAL_RATIO),
-  )
-  const [targetDiagramRatio, setTargetDiagramRatio] = usePersistentState(
-    TARGET_DIAGRAM_RATIO_KEY,
-    DEFAULT_TARGET_DIAGRAM_RATIO,
-    ratioSanitizer(0.34, 0.66, DEFAULT_TARGET_DIAGRAM_RATIO),
-  )
-  const [terminalPaneRatio, setTerminalPaneRatio] = usePersistentState(
-    TERMINAL_PANE_RATIO_KEY,
-    DEFAULT_TERMINAL_PANE_RATIO,
-    ratioSanitizer(0.4, 0.92, DEFAULT_TERMINAL_PANE_RATIO),
-  )
   const [projectFilesOpen, setProjectFilesOpen] = usePersistentState(PROJECT_FILES_OPEN_KEY, true)
-  const dagAnimation = useChallengeDagAnimation()
+  const dagAnimation = useDagAnimation()
+  const battleDirector = useBattleDirector()
   const { completionAnimationReady, queueOutcomeAnimation } = useOutcomeAnimationGate({
     runId: observedRunId,
     status: observedRunStatus,
-    animating: dagAnimation.animating,
+    animating: dagAnimation.animating || battleDirector.animating,
   })
-  const [tourOpen, setTourOpen] = useState(false)
-  const [dismissedTourKey, setDismissedTourKey] = useState<string | null>(null)
   const [startOverConfirmOpen, setStartOverConfirmOpen] = useState(false)
   const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
   const [exitNavigationRunId, setExitNavigationRunId] = useState<number | null>(null)
   const [workspaceEditorPath, setWorkspaceEditorPath] = useState<string | null>(null)
   const user = useAuthStore((state) => state.user)
+  const autoOpen = useWorkspaceAutoOpen({
+    userId: user?.id,
+    storyLevelKey: run ? `challenge:${run.challenge.level_id}` : undefined,
+    difficulty: run?.difficulty ?? undefined,
+    tourMode: 'challenge',
+    started: run?.status === 'started',
+  })
+  const repoDrawer = useRepoGraphDrawer(run?.repository_state)
   const latestRunRef = useRef<ChallengeRun | null>(null)
   const bypassNavigationRunId = useRef<number | null>(null)
   const exitNavigationPending = exitNavigationRunId === runId
@@ -89,29 +80,6 @@ export function ChallengeWorkspace() {
     if (!activeRunId || bypassNavigationRunId.current === activeRunId) return false
     return currentLocation.pathname !== nextLocation.pathname || currentLocation.search !== nextLocation.search
   })
-  const workspaceGridRef = useRef<HTMLElement>(null)
-  const diagramGridRef = useRef<HTMLDivElement>(null)
-  const terminalGridRef = useRef<HTMLDivElement>(null)
-  const beginTerminalResize = useDragResize(workspaceGridRef, 'row-resize', (event, bounds) => {
-    setTerminalRatio(clamp((bounds.bottom - event.clientY) / bounds.height, 0.22, 0.58))
-  })
-  const beginDiagramResize = useDragResize(diagramGridRef, 'col-resize', (event, bounds) => {
-    setTargetDiagramRatio(clamp((event.clientX - bounds.left) / bounds.width, 0.34, 0.66))
-  })
-  const beginTerminalPaneResize = useDragResize(terminalGridRef, 'col-resize', (event, bounds) => {
-    setTerminalPaneRatio(constrainedTerminalPaneRatio(event.clientX, bounds))
-  })
-
-  const resizeStep = 0.03
-  const keyboardResizeDiagram = (delta: number) => {
-    setTargetDiagramRatio((value) => clamp(value + delta * resizeStep, 0.34, 0.66))
-  }
-  const keyboardResizeTerminal = (delta: number) => {
-    setTerminalRatio((value) => clamp(value + delta * resizeStep, 0.22, 0.58))
-  }
-  const keyboardResizeTerminalPane = (delta: number) => {
-    setTerminalPaneRatio((value) => clamp(value + delta * resizeStep, 0.4, 0.92))
-  }
 
   useEffect(() => {
     latestRunRef.current = run
@@ -153,12 +121,11 @@ export function ChallengeWorkspace() {
     setStartOverConfirmOpen,
     setDismissedCompletionRunId,
   })
-  if (query.isLoading) {
+  if (query.isLoading || (!query.isError && !assetsReady)) {
     return (
       <LoadingScreen
         description="Preparing the repository, terminal, and challenge workspace."
         label="Loading challenge"
-        showCompanion={false}
       />
     )
   }
@@ -166,14 +133,15 @@ export function ChallengeWorkspace() {
   if (!run) return <ErrorState title="Could not load challenge workspace" description="The API returned no run data." />
 
   const shellPrompt = terminalPrompt(user?.username)
-  const tourKey = `${user?.id ?? 'guest'}:challenge:${run.challenge.level_id}`
-  const shouldAutoOpenTour = dismissedTourKey !== tourKey && !hasSeenLevelTour(user?.id)
-  const isTourOpen = run.status === 'started' && (tourOpen || shouldAutoOpenTour)
+  const scene = challengeScene(run)
+  const story = workspaceStoryContent(run, scene.title)
+  const { storyOpen, tourOpen } = autoOpen
 
   const submit = createChallengeWorkspaceCommandHandler({
     runId,
     mutation,
     dagAnimation,
+    battleDirector,
     queryClient,
     clearToast,
     evaluateAndNotify,
@@ -184,29 +152,15 @@ export function ChallengeWorkspace() {
 
   const isReplaying = retryMutation.isPending || replayMutation.isPending
   const outcomeModalOpen =
+    !storyOpen &&
     !exitNavigationPending &&
     (run.status === 'completed' || run.status === 'failed') &&
     !mutation.isPending &&
     dismissedCompletionRunId !== run.id &&
     completionAnimationReady(run.id)
 
-  const workspaceGridStyle = {
-    // The repository puzzle is the primary stage. Challenge no longer reserves
-    // space for battle actors; command feedback happens directly in the DAG.
-    gridTemplateRows: `minmax(0, ${1 - terminalRatio}fr) 0.375rem minmax(0, ${terminalRatio}fr)`,
-  }
-  const hasTargetDiagram = Boolean(run.scaffolding.expected_state && run.expected_state)
-  const diagramGridStyle = {
-    '--live-dag-size': `${targetDiagramRatio}fr`,
-    '--expected-dag-size': `${1 - targetDiagramRatio}fr`,
-  } as CSSProperties
-  const terminalGridStyle = {
-    '--terminal-pane-size': `${terminalPaneRatio}fr`,
-    '--feedback-pane-size': `${1 - terminalPaneRatio}fr`,
-  } as CSSProperties
-
   return (
-    <div className="workspace-bg gameplay-workspace-screen">
+    <div className="workspace-bg gameplay-workspace-screen tier-workspace-screen">
       <ChallengeStatusHeader
         run={run}
         isExiting={exitMutation.isPending || exitNavigationPending}
@@ -215,9 +169,22 @@ export function ChallengeWorkspace() {
         onRetry={() => retryMutation.mutate()}
         onStartOver={() => setStartOverConfirmOpen(true)}
         onReplay={() => replayMutation.mutate(run.challenge.level_id)}
+        repoGraph={repoDrawer.drawerMode ? {
+          open: repoDrawer.open,
+          hasUpdate: repoDrawer.hasUpdate,
+          controls: REPO_GRAPH_ID,
+          buttonRef: repoDrawer.buttonRef,
+          onOpen: repoDrawer.openDrawer,
+        } : undefined}
       />
-      <ChallengeWorkspaceMain
+      <GameplayWorkspaceMain
+        repoGraphDrawer={repoDrawer.drawerMode ? {
+          open: repoDrawer.open,
+          openCount: repoDrawer.openCount,
+          onClose: repoDrawer.closeDrawer,
+        } : undefined}
         run={run}
+        scene={scene}
         lines={lines}
         shellPrompt={shellPrompt}
         projectFilesOpen={projectFilesOpen}
@@ -229,20 +196,11 @@ export function ChallengeWorkspace() {
           deleteFileMutation.isPending
         }
         writeDisabled={run.status !== 'started' || writeFileMutation.isPending}
-        workspaceGridRef={workspaceGridRef}
-        workspaceGridStyle={workspaceGridStyle}
         dagAnimation={dagAnimation}
-        hasTargetDiagram={hasTargetDiagram}
-        diagramGridRef={diagramGridRef}
-        diagramGridStyle={diagramGridStyle}
-        terminalGridRef={terminalGridRef}
-        terminalGridStyle={terminalGridStyle}
+        battleDirector={battleDirector}
         mutationPending={mutation.isPending}
         onToggleProjectFiles={() => setProjectFilesOpen((value) => !value)}
-        onCreateFile={async (input) => {
-          const updatedRun = await createFileMutation.mutateAsync(input)
-          return updatedRun
-        }}
+        onCreateFile={(input) => createFileMutation.mutateAsync(input)}
         onRenameFile={async (input) => {
           const updatedRun = await renameFileMutation.mutateAsync(input)
           if (workspaceEditorPath === input.path) setWorkspaceEditorPath(null)
@@ -256,15 +214,7 @@ export function ChallengeWorkspace() {
           return updatedRun
         }}
         onOpenFile={setWorkspaceEditorPath}
-        onBeginDiagramResize={beginDiagramResize}
-        onBeginTerminalResize={beginTerminalResize}
-        onBeginTerminalPaneResize={beginTerminalPaneResize}
-        onKeyboardDiagramResize={keyboardResizeDiagram}
-        onKeyboardTerminalResize={keyboardResizeTerminal}
-        onKeyboardTerminalPaneResize={keyboardResizeTerminalPane}
-        onResetDiagramResize={() => setTargetDiagramRatio(DEFAULT_TARGET_DIAGRAM_RATIO)}
-        onResetTerminalResize={() => setTerminalRatio(DEFAULT_TERMINAL_RATIO)}
-        onResetTerminalPaneResize={() => setTerminalPaneRatio(DEFAULT_TERMINAL_PANE_RATIO)}
+        onOpenStory={autoOpen.openStory}
         onCommand={submit}
         onCloseEditor={() => setWorkspaceEditorPath(null)}
         onWriteFile={(input) => writeFileMutation.mutateAsync(input)}
@@ -290,31 +240,40 @@ export function ChallengeWorkspace() {
             : null
         }
       />
-      <ChallengeExitConfirmModal
+      <WorkspaceStoryModal
+        open={storyOpen}
+        title={story.title}
+        intro={story.intro}
+        startingPoint={story.startingPoint}
+        realWorldContext={story.realWorldContext}
+        task={story.task}
+        expectedResult={story.expectedResult}
+        onClose={autoOpen.closeStory}
+      />
+      {tourOpen ? (
+        <WorkspaceTour
+          key={`${user?.id ?? 'guest'}:challenge:${run.id}`}
+          mode="challenge"
+          runId={run.id}
+          onClose={autoOpen.closeTour}
+          repoGraphInDrawer={repoDrawer.drawerMode}
+        />
+      ) : null}
+      <ExitConfirmModal
         open={exitConfirmOpen}
+        title="Exit challenge?"
         isExiting={exitMutation.isPending || exitNavigationPending}
         isRetrying={retryMutation.isPending}
         onClose={() => setExitConfirmOpen(false)}
         onRetry={startFreshAttempt}
         onExit={() => exitMutation.mutate()}
       />
-      <ChallengeStartOverConfirmModal
+      <StartOverConfirmModal
         open={startOverConfirmOpen}
         isStarting={retryMutation.isPending}
         onClose={() => setStartOverConfirmOpen(false)}
         onStartFresh={startFreshAttempt}
       />
-      {isTourOpen ? (
-        <ChallengeWorkspaceTour
-          key={tourKey}
-          run={run}
-          onClose={() => {
-            markLevelTourSeen(user?.id)
-            setDismissedTourKey(tourKey)
-            setTourOpen(false)
-          }}
-        />
-      ) : null}
     </div>
   )
 }

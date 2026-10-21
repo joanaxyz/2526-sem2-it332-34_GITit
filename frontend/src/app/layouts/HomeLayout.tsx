@@ -6,7 +6,8 @@ import { CursorGlow } from '@/shared/components/CursorGlow'
 import { OnboardingProvider } from '@/features/onboarding/components/OnboardingProvider'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { AppMobileNav, AppTopbar } from '@/shared/navigation/AppNavigation'
-import { isStoryMapRoute } from '@/shared/navigation/routes'
+import { HOME_ROUTE, SHOP_ROUTE, isStoryMapRoute } from '@/shared/navigation/routes'
+import { HomeTutor } from '@/shared/tutoring/HomeTutor'
 import { cn } from '@/shared/utils/cn'
 
 export function HomeLayout() {
@@ -14,6 +15,7 @@ export function HomeLayout() {
   const location = useLocation()
   const isStoryMapPage = isStoryMapRoute(location.pathname)
   const isAuthoringPage = location.pathname.startsWith('/level-editor')
+  const showTutor = isStoryMapPage || location.pathname === HOME_ROUTE || location.pathname === SHOP_ROUTE
 
   useEffect(() => {
     startBackgroundMusic('outside')
@@ -35,6 +37,7 @@ export function HomeLayout() {
         </OnboardingProvider>
       </main>
       <AppMobileNav />
+      {showTutor ? <HomeTutor key={userId ?? 'guest'} /> : null}
     </div>
   )
 }

@@ -172,9 +172,9 @@ export function SettingsPage() {
                 checked={guideMascotVisible}
                 onChange={(event) => updateGuideMascotVisibility(event.target.checked)}
               />
-              <span>Show floating mascot</span>
+              <span>Show roaming mascot</span>
             </label>
-            <p className="settings-note">Turn this off to remove the floating mascot from the map and guide launcher. While it is shown, guide messages use Git-It’s portrait; when it is hidden, they use your companion’s portrait if one is equipped. Drills always use Git-It. Saved on this device.</p>
+            <p className="settings-note">Show or hide the roaming mascot on Home and the map. AI help and the command-guide launcher stay available. Guide messages use your companion’s portrait when the roaming mascot is hidden. Saved on this device.</p>
           </div>
         </section>
 

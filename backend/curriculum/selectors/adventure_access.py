@@ -290,48 +290,31 @@ def adventure_level_tier_payload(
     }
 
 
-def cleared_tier_difficulties(*, player, chapter_id: int) -> set[str] | None:
-    """Difficulties whose tier every required level of the chapter has cleared.
+def chapter_tiers_cleared(*, player, chapter_id: int) -> bool | None:
+    """Whether every tier of every required level of the chapter is complete.
 
-    This is the Challenge Gate rule for tier-based chapters: a gate trial of
-    difficulty *d* opens once every level's *d* tier is complete. Returns
-    None for chapters without tiers, which keep their own rule.
+    This is the Challenge Gate rule for tier-based chapters: the gate opens
+    once the learner has finished the module's adventures, Easy through Hard.
+    Returns None for chapters without tiers, which keep their own rule.
     """
     from progress.models import AdventureLevelTierCompletion
 
-    tiers = list(
+    tier_ids = list(
         AdventureLevelTier.objects.filter(
             adventure_level__chapter_id=chapter_id,
             adventure_level__is_published=True,
             adventure_level__is_required=True,
             is_published=True,
-        ).values_list("id", "adventure_level_id", "difficulty")
+        ).values_list("id", flat=True)
     )
-    if not tiers:
+    if not tier_ids:
         return None
     if player is None:
-        return set()
-    completed = set(
-        AdventureLevelTierCompletion.objects.filter(
-            player=player, tier_id__in=[tier_id for tier_id, _, _ in tiers]
-        ).values_list("tier_id", flat=True)
-    )
-    return cleared_difficulties(tiers, completed)
-
-
-def cleared_difficulties(tiers, completed_tier_ids) -> set[str]:
-    """``tiers``: (tier id, level id, difficulty) for a chapter's required levels."""
-    level_ids = {level_id for _, level_id, _ in tiers}
-    cleared = set()
-    for difficulty in (DIFFICULTY_EASY, DIFFICULTY_MEDIUM, DIFFICULTY_HARD):
-        done = {
-            level_id
-            for tier_id, level_id, tier_difficulty in tiers
-            if tier_difficulty == difficulty and tier_id in completed_tier_ids
-        }
-        if done == level_ids:
-            cleared.add(difficulty)
-    return cleared
+        return False
+    completed = AdventureLevelTierCompletion.objects.filter(
+        player=player, tier_id__in=tier_ids
+    ).count()
+    return completed == len(tier_ids)
 
 
 def _adventure_passed(*, player, chapter_id: int) -> bool:

@@ -5302,71 +5302,79 @@ Minimum counted commands: 2 · Maximum counted commands: 12
 
 ## Module 1 Challenge Gate — Foundations Gate
 
-### 1.G.1 Start the field log · Easy
+### 1.G.1 Start the field log in two commits · Easy
 
-**Variant ID:** `gate1-easy-first-snapshot-field-log`
+**Variant ID:** `gate1-easy-two-commit-start-field-log`
 
 **Story**
-Maeve has been logging bird counts in a plain folder all semester: `notes.md`, `readings.csv` and a `scratch.txt` full of half-finished guesses. Before the field trip she wants the real data under version control, so nothing can be overwritten without a trace. Your guesses in `scratch.txt` stay private.
+Maeve has been logging bird counts in a plain folder all semester: `notes.md` and `readings.csv` hold the data, `README.md` explains how to read it, and `scratch.txt` is full of half-finished guesses.
 
-**Starting point:** You are in `field-log`. It is not a repository yet. `notes.md`, `readings.csv` and `scratch.txt` are new files.
+She wants the data in history first, so the log shows when the readings arrived, and the guide as a commit of its own that can change later without touching the data. Your guesses in `scratch.txt` stay private.
+
+**Starting point:** You are in `field-log`. It is not a repository yet. `notes.md`, `readings.csv`, `README.md` and `scratch.txt` are new files.
 
 **Real-World Context**
-Most projects start exactly like this: a folder that already has work in it. You create the repository, choose what belongs in history, and record a first snapshot.
+A clear history starts with its first commits. Recording a project in purposeful snapshots, data first and documentation second, makes each one easy to review, revert or reword later.
 
 **Your Task**
-Make `field-log` a Git repository on `main`, then commit `notes.md` and `readings.csv` with the message `Start field log`. **Leave `scratch.txt` untracked.**
+Make `field-log` a Git repository on `main`. Commit `notes.md` and `readings.csv` with the message `Start field log`, then commit `README.md` on top of it with the message `Add field log guide`. **Leave `scratch.txt` untracked.**
 
 **Objective Checklist**
 
 - [ ] field-log is a Git repository on main.
-- [ ] A commit named “Start field log” contains notes.md and readings.csv.
+- [ ] The first commit, “Start field log”, holds notes.md and readings.csv but not README.md.
+- [ ] The second commit, “Add field log guide”, adds README.md.
 - [ ] scratch.txt is not committed and is still in the folder.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
 1. `git init -b main` — Create the repository on main.
-2. `git add notes.md readings.csv` — Stage the two data files.
+2. `git add notes.md readings.csv` — Stage the data files.
 3. `git commit -m "Start field log"` — Record the first snapshot.
+4. `git add README.md` — Stage the guide.
+5. `git commit -m "Add field log guide"` — Record it as its own commit.
 
 **Accepted Alternatives (STAFF ONLY)**
 
-- `git init` when the simulator's first branch is main; the two files staged in one command or two; `--message` forms and single quotes. The message must match exactly.
+- `git init` when the simulator's first branch is main; the data files staged in one command or two; `--message` forms and single quotes. Both messages must match exactly.
 - Common patterns that apply: P1, P19, P20.
 
 **Not accepted**
 
-- `git add .` or `git add -A`: they would commit scratch.txt.
+- `git add .` or `git add -A`: they would commit scratch.txt, or put the guide in the first commit.
 
 **Expected Result**
-`field-log` is a repository on `main` with one commit, “Start field log”, holding `notes.md` and `readings.csv`. `scratch.txt` stays untracked.
+`field-log` is a repository on `main` with two commits: “Start field log” with `notes.md` and `readings.csv`, then “Add field log guide” with `README.md`. `scratch.txt` stays untracked.
 
 **Evaluation (STAFF ONLY)**
 
-Minimum counted commands: 3 · Maximum counted commands: 12
+Minimum counted commands: 5 · Maximum counted commands: 12
 
-- Repository initialized; HEAD on `main`; exactly one commit.
-- Latest commit `Start field log` contains `notes.md` and `readings.csv`, not `scratch.txt`; `scratch.txt` still untracked.
+- Repository initialized; HEAD on `main`; exactly two commits.
+- `main~1` is `Start field log` with `notes.md` and `readings.csv`, not `README.md` or `scratch.txt`; `main` is `Add field log guide` and adds `README.md`; `scratch.txt` still untracked.
 
-### 1.G.2 Start the quiz app · Easy
+### 1.G.2 Start the quiz app in two commits · Easy
 
-**Variant ID:** `gate1-easy-first-snapshot-quiz`
+**Variant ID:** `gate1-easy-two-commit-start-quiz`
 
 **Story**
-Raven sketched a quiz app for the department's orientation week: `index.html`, `quiz.js` and a `todo.txt` of features nobody has agreed on yet. Raven asks you to put the project under version control tonight so the group can start working on it tomorrow. The to-do list is Raven's own and stays out.
+Raven sketched a quiz app for the department's orientation week: `index.html` and `quiz.js` are the app, `README.md` explains how to run it, and `todo.txt` lists features nobody has agreed on yet.
 
-**Starting point:** You are in `quiz-app`. It is not a repository yet. `index.html`, `quiz.js` and `todo.txt` are new files.
+Raven asks you to put the project under version control tonight: the app as the first commit and the setup notes as a second one, so tomorrow's reviewers can read them apart. The to-do list is Raven's own and stays out.
+
+**Starting point:** You are in `quiz-app`. It is not a repository yet. `index.html`, `quiz.js`, `README.md` and `todo.txt` are new files.
 
 **Real-World Context**
-A first commit is a promise about what the project is. Committing only the files that make up the app keeps personal planning notes out of shared history.
+A first commit is a promise about what the project is. Keeping the app and its setup notes in separate commits, and personal planning notes out of history, gives the team a history they can follow.
 
 **Your Task**
-Make `quiz-app` a Git repository on `main`, then commit `index.html` and `quiz.js` with the message `Start quiz app`. **Leave `todo.txt` untracked.**
+Make `quiz-app` a Git repository on `main`. Commit `index.html` and `quiz.js` with the message `Start quiz app`, then commit `README.md` on top of it with the message `Add quiz setup notes`. **Leave `todo.txt` untracked.**
 
 **Objective Checklist**
 
 - [ ] quiz-app is a Git repository on main.
-- [ ] A commit named “Start quiz app” contains index.html and quiz.js.
+- [ ] The first commit, “Start quiz app”, holds index.html and quiz.js but not README.md.
+- [ ] The second commit, “Add quiz setup notes”, adds README.md.
 - [ ] todo.txt is not committed and is still in the folder.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -5374,25 +5382,27 @@ Make `quiz-app` a Git repository on `main`, then commit `index.html` and `quiz.j
 1. `git init -b main` — Create the repository on main.
 2. `git add index.html quiz.js` — Stage the app files.
 3. `git commit -m "Start quiz app"` — Record the first snapshot.
+4. `git add README.md` — Stage the setup notes.
+5. `git commit -m "Add quiz setup notes"` — Record them as their own commit.
 
 **Accepted Alternatives (STAFF ONLY)**
 
-- `git init` when the simulator's first branch is main; the two files staged in one command or two; `--message` forms and single quotes. The message must match exactly.
+- `git init` when the simulator's first branch is main; the app files staged in one command or two; `--message` forms and single quotes. Both messages must match exactly.
 - Common patterns that apply: P1, P19, P20.
 
 **Not accepted**
 
-- `git add .` or `git add -A`: they would commit todo.txt.
+- `git add .` or `git add -A`: they would commit todo.txt, or put the setup notes in the first commit.
 
 **Expected Result**
-`quiz-app` is a repository on `main` with one commit, “Start quiz app”, holding `index.html` and `quiz.js`. `todo.txt` stays untracked.
+`quiz-app` is a repository on `main` with two commits: “Start quiz app” with `index.html` and `quiz.js`, then “Add quiz setup notes” with `README.md`. `todo.txt` stays untracked.
 
 **Evaluation (STAFF ONLY)**
 
-Minimum counted commands: 3 · Maximum counted commands: 12
+Minimum counted commands: 5 · Maximum counted commands: 12
 
-- Repository initialized; HEAD on `main`; exactly one commit.
-- Latest commit `Start quiz app` contains `index.html` and `quiz.js`, not `todo.txt`; `todo.txt` still untracked.
+- Repository initialized; HEAD on `main`; exactly two commits.
+- `main~1` is `Start quiz app` with `index.html` and `quiz.js`, not `README.md` or `todo.txt`; `main` is `Add quiz setup notes` and adds `README.md`; `todo.txt` still untracked.
 
 ### 1.G.3 Finish the search page commit · Medium
 
@@ -5898,20 +5908,22 @@ Minimum counted commands: 7 · Maximum counted commands: 8
 
 ## Module 3 Challenge Gate — Conflict Gate
 
-### 3.G.1 Merge the banner and settle its conflict · Easy
+### 3.G.1 Merge the banner, then backport the checkout fix · Easy
 
-**Variant ID:** `gate3-easy-merge-and-resolve-banner`
+**Variant ID:** `gate3-easy-merge-then-backport-banner`
 
 **Story**
 `feature/banner` reworded the welcome banner, and `main` reworded it differently last week. Sage has decided on the final wording and wants the branch merged with *exactly that text*, using Git's prepared merge message.
 
-**Starting point:** You are on `main`. `feature/banner` and `main` both changed `src/banner.html` since they split.
+There is a second job. `main` also has “Fix checkout total”, and the store's `release/1.4` branch needs that fix today, without the banner work.
+
+**Starting point:** You are on `main`. `feature/banner` and `main` both changed `src/banner.html` since they split. “Fix checkout total” is the latest commit on `main`, and `release/1.4` has not moved since the common base.
 
 **Real-World Context**
-Two branches that edit the same lines stop a merge. You decide the final content, mark the file resolved, and let the merge commit record both histories.
+Conflict work rarely ends at the merge. A fix that landed on `main` often has to reach a release branch too, and copying just that commit keeps unfinished work off the release.
 
 **Your Task**
-Merge `feature/banner` into `main`, resolve `src/banner.html` to the content below, and complete the merge with its prepared message. Finish on `main`.
+Merge `feature/banner` into `main`, resolve `src/banner.html` to the content below, and complete the merge with its prepared message. Then copy __only__ “Fix checkout total” onto `release/1.4`. Finish on `release/1.4`.
 
 **Required resolved file content**
 
@@ -5924,8 +5936,9 @@ Merge `feature/banner` into `main`, resolve `src/banner.html` to the content bel
 **Objective Checklist**
 
 - [ ] main has a merge commit with feature/banner as a parent.
-- [ ] src/banner.html contains exactly the required content.
-- [ ] No conflicts remain and the working folder is clean.
+- [ ] src/banner.html on main contains exactly the required content.
+- [ ] release/1.4 has a copy of “Fix checkout total” and nothing else new.
+- [ ] You are on release/1.4 with no conflicts and a clean working folder.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -5937,40 +5950,45 @@ Merge `feature/banner` into `main`, resolve `src/banner.html` to the content bel
    ```
 3. `git add src/banner.html` — Mark the file resolved.
 4. `git commit --no-edit` — Complete the merge.
+5. `git switch release/1.4` — Go to the release branch.
+6. `git cherry-pick c3` — Copy only the checkout fix.
 
 **Accepted Alternatives (STAFF ONLY)**
 
-- `git merge --continue` instead of the final commit; `git commit -m` with any message.
+- `git merge --continue` instead of the merge commit, or `git commit -m` with any message; `git cherry-pick -x c3`; copying the fix before the merge, as long as you finish on `release/1.4`.
 - Common patterns that apply: P15, P16, P17, P18.
 
 **Not accepted**
 
-- Aborting the merge, or committing with conflict markers left in the file.
+- Merging `main` or `feature/banner` into `release/1.4`, or copying the banner commits to it.
 
 **Expected Result**
-`main` has a merge commit joining `feature/banner`, with the agreed banner text.
+`main` has a merge commit joining `feature/banner` with the agreed banner text, and `release/1.4` has its own copy of “Fix checkout total”.
 
 **Evaluation (STAFF ONLY)**
 
-Minimum counted commands: 3 · Maximum counted commands: 12
+Minimum counted commands: 5 · Maximum counted commands: 12
 
-- HEAD on `main`; tip is a merge with parent `c2`; tree `src/banner.html` = the required content.
+- `main` tip is a merge with parent `c2`; its tree has the required `src/banner.html` and the fixed `src/checkout.js`.
+- HEAD on `release/1.4`; two commits; tip message contains `Fix checkout total`; its tree has the fixed checkout and the base banner.
 - No conflicts; clean tree.
 
-### 3.G.2 Merge the footer and settle its conflict · Easy
+### 3.G.2 Merge the footer, then backport the tax fix · Easy
 
-**Variant ID:** `gate3-easy-merge-and-resolve-footer`
+**Variant ID:** `gate3-easy-merge-then-backport-footer`
 
 **Story**
-Raven rewrote the footer on `feature/footer` while `main` gained a different footer link. The group settled on one line, and Raven wants the branch merged with it.
+`feature/footer` rewrote the support footer while `main` changed the same line. Raven has picked the final text and wants the branch merged with *exactly that footer*, using Git's prepared merge message.
 
-**Starting point:** You are on `main`. `feature/footer` and `main` both changed `src/footer.html` since they split.
+Then the billing team asks for “Fix tax rounding”, already on `main`, on `release/2.0` before the invoices go out, without the footer work.
+
+**Starting point:** You are on `main`. `feature/footer` and `main` both changed `src/footer.html` since they split. “Fix tax rounding” is the latest commit on `main`, and `release/2.0` has not moved since the common base.
 
 **Real-World Context**
-Resolving a conflict is a decision, not a guess: you write the content you mean, stage it, and finish the merge.
+Conflict work rarely ends at the merge. A fix that landed on `main` often has to reach a release branch too, and copying just that commit keeps unfinished work off the release.
 
 **Your Task**
-Merge `feature/footer` into `main`, resolve `src/footer.html` to the content below, and complete the merge with its prepared message. Finish on `main`.
+Merge `feature/footer` into `main`, resolve `src/footer.html` to the content below, and complete the merge with its prepared message. Then copy __only__ “Fix tax rounding” onto `release/2.0`. Finish on `release/2.0`.
 
 **Required resolved file content**
 
@@ -5983,8 +6001,9 @@ Merge `feature/footer` into `main`, resolve `src/footer.html` to the content bel
 **Objective Checklist**
 
 - [ ] main has a merge commit with feature/footer as a parent.
-- [ ] src/footer.html contains exactly the required content.
-- [ ] No conflicts remain and the working folder is clean.
+- [ ] src/footer.html on main contains exactly the required content.
+- [ ] release/2.0 has a copy of “Fix tax rounding” and nothing else new.
+- [ ] You are on release/2.0 with no conflicts and a clean working folder.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -5996,24 +6015,27 @@ Merge `feature/footer` into `main`, resolve `src/footer.html` to the content bel
    ```
 3. `git add src/footer.html` — Mark the file resolved.
 4. `git commit --no-edit` — Complete the merge.
+5. `git switch release/2.0` — Go to the release branch.
+6. `git cherry-pick c3` — Copy only the tax fix.
 
 **Accepted Alternatives (STAFF ONLY)**
 
-- `git merge --continue` instead of the final commit; `git commit -m` with any message.
+- `git merge --continue` instead of the merge commit, or `git commit -m` with any message; `git cherry-pick -x c3`; copying the fix before the merge, as long as you finish on `release/2.0`.
 - Common patterns that apply: P15, P16, P17, P18.
 
 **Not accepted**
 
-- Aborting the merge, or committing with conflict markers left in the file.
+- Merging `main` or `feature/footer` into `release/2.0`, or copying the footer commits to it.
 
 **Expected Result**
-`main` has a merge commit joining `feature/footer`, with the agreed footer.
+`main` has a merge commit joining `feature/footer` with the agreed footer text, and `release/2.0` has its own copy of “Fix tax rounding”.
 
 **Evaluation (STAFF ONLY)**
 
-Minimum counted commands: 3 · Maximum counted commands: 12
+Minimum counted commands: 5 · Maximum counted commands: 12
 
-- HEAD on `main`; tip is a merge with parent `c2`; tree `src/footer.html` = the required content.
+- `main` tip is a merge with parent `c2`; its tree has the required `src/footer.html` and the fixed `src/invoice.js`.
+- HEAD on `release/2.0`; two commits; tip message contains `Fix tax rounding`; its tree has the fixed invoice and the base footer.
 - No conflicts; clean tree.
 
 ### 3.G.3 Backport the tax fix with its origin noted · Medium
@@ -6270,95 +6292,103 @@ Minimum counted commands: 5 · Maximum counted commands: 8
 
 ## Module 4 Challenge Gate — Recovery Gate
 
-### 4.G.1 Rescue the lost search fix · Easy
+### 4.G.1 Rescue the search work and send it for review · Easy
 
-**Variant ID:** `gate4-easy-recover-search-fix`
+**Variant ID:** `gate4-easy-recover-replay-publish-search`
 
 **Story**
-A late-night reset moved `main` back three commits, and with it went “Fix borrower search”, the commit Sage needs for tomorrow's library demo. Nothing points at it any more, but Git still remembers where `HEAD` has been. Main itself should stay where it is for now.
+Yesterday you made two commits on `main` for the borrower search, “Start search” and “Fix borrower search”. Then you ran `git reset --hard origin/main` to pick up Maeve's login patch, and both commits vanished from `main`.
 
-**Starting point:** You are on `main`, which was reset. The lost commit is still in the reflog.
+Sage still needs the search fix for tomorrow's demo, reviewed on its own branch against the current code. Git remembers where `HEAD` has been.
+
+**Starting point:** You are on `main`, which matches `origin/main` and its “Patch login timeout” commit. Your two search commits are only in the reflog.
 
 **Real-World Context**
-The reflog records where `HEAD` has been, including commits no branch points at. Putting a branch on the lost commit makes it safe again.
+Lost commits are not gone while the reflog remembers them. Once they are safe on a branch, replaying them onto the current `main` lets reviewers read them against the code that will actually ship.
 
 **Your Task**
-Find the lost “Fix borrower search” commit in the reflog, inspect it to be sure, and create `recovery/search` at it. **Leave `main` where it is.**
+Create `recovery/search` at your lost “Fix borrower search” commit, replay the branch onto `main`, and publish it to `origin` for review. **Leave `main` where it is.**
 
 **Objective Checklist**
 
-- [ ] recovery/search points at the “Fix borrower search” commit and is checked out.
-- [ ] main still points where the reset left it.
+- [ ] recovery/search holds both search commits, replayed on top of main.
+- [ ] origin/recovery/search matches your local branch.
+- [ ] main still points at “Patch login timeout”.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
-1. `git reflog` — Find where HEAD has been.
-2. `git show c3` — Confirm it is the search fix.
-3. `git switch -c recovery/search c3` — Save it on a new branch.
+1. `git reflog` — Find the lost commits.
+2. `git switch -c recovery/search c2` — Save them on a new branch.
+3. `git rebase main` — Replay them onto the current main.
+4. `git push -u origin recovery/search` — Publish the branch for review.
 
 **Accepted Alternatives (STAFF ONLY)**
 
-- `git log -g`; `git checkout -b recovery/search c3`; `git branch recovery/search c3` then `git switch recovery/search`.
+- `git log -g`; `git branch recovery/search c2` then `git switch recovery/search`; `git rebase main recovery/search`; a new branch from `main` with `git cherry-pick c1` then `git cherry-pick c2`; `git push origin recovery/search` without `-u`.
 - Common patterns that apply: P21, P22.
 
 **Not accepted**
 
-- Resetting main to the lost commit, or recovering the abandoned experiment.
+- Resetting or moving `main`, or publishing only one of the two search commits.
 
 **Expected Result**
-`recovery/search` holds the search fix, and `main` is untouched.
+`recovery/search` holds “Start search” and “Fix borrower search” on top of `main`, and `origin` has the same branch. `main` has not moved.
 
 **Evaluation (STAFF ONLY)**
 
-Minimum counted commands: 1 · Maximum counted commands: 12
+Minimum counted commands: 3 · Maximum counted commands: 12
 
-- HEAD on `recovery/search` at `c3`; `main` still at `c0`.
-- Clean tree.
+- HEAD on `recovery/search`; four commits including `c3`, without the original `c1` and `c2`; tip `Fix borrower search` with the search fix and the login patch.
+- `origin/recovery/search` matches the branch; `main` still at `c3`; clean tree.
 
-### 4.G.2 Rescue the lost receipt fix · Easy
+### 4.G.2 Rescue the receipts work and send it for review · Easy
 
-**Variant ID:** `gate4-easy-recover-receipt-fix`
+**Variant ID:** `gate4-easy-recover-replay-publish-receipts`
 
 **Story**
-Maeve reset `main` to try something, and “Fix receipt totals” vanished from the branch. The fix is finished and tested; it just has no branch any more. Main can stay as it is until Maeve decides what to do with it.
+Yesterday you made two commits on `main` for the receipts screen, “Start receipts” and “Fix receipt totals”. Then you ran `git reset --hard origin/main` to pick up Raven's tax patch, and both commits vanished from `main`.
 
-**Starting point:** You are on `main`, which was reset. The lost commit is still in the reflog.
+The shop needs the receipt fix reviewed before Friday's release, on its own branch against the current code. Git remembers where `HEAD` has been.
+
+**Starting point:** You are on `main`, which matches `origin/main` and its “Patch tax rate” commit. Your two receipts commits are only in the reflog.
 
 **Real-World Context**
-A commit with no branch is not deleted yet. Finding it in the reflog and branching from it is the quickest, safest rescue.
+Lost commits are not gone while the reflog remembers them. Once they are safe on a branch, replaying them onto the current `main` lets reviewers read them against the code that will actually ship.
 
 **Your Task**
-Find the lost “Fix receipt totals” commit in the reflog, inspect it to be sure, and create `recovery/receipts` at it. **Leave `main` where it is.**
+Create `recovery/receipts` at your lost “Fix receipt totals” commit, replay the branch onto `main`, and publish it to `origin` for review. **Leave `main` where it is.**
 
 **Objective Checklist**
 
-- [ ] recovery/receipts points at the “Fix receipt totals” commit and is checked out.
-- [ ] main still points where the reset left it.
+- [ ] recovery/receipts holds both receipts commits, replayed on top of main.
+- [ ] origin/recovery/receipts matches your local branch.
+- [ ] main still points at “Patch tax rate”.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
-1. `git reflog` — Find where HEAD has been.
-2. `git show c3` — Confirm it is the receipt fix.
-3. `git switch -c recovery/receipts c3` — Save it on a new branch.
+1. `git reflog` — Find the lost commits.
+2. `git switch -c recovery/receipts c2` — Save them on a new branch.
+3. `git rebase main` — Replay them onto the current main.
+4. `git push -u origin recovery/receipts` — Publish the branch for review.
 
 **Accepted Alternatives (STAFF ONLY)**
 
-- `git log -g`; `git checkout -b recovery/receipts c3`; `git branch recovery/receipts c3` then `git switch recovery/receipts`.
+- `git log -g`; `git branch recovery/receipts c2` then `git switch recovery/receipts`; `git rebase main recovery/receipts`; a new branch from `main` with `git cherry-pick c1` then `git cherry-pick c2`; `git push origin recovery/receipts` without `-u`.
 - Common patterns that apply: P21, P22.
 
 **Not accepted**
 
-- Resetting main to the lost commit, or recovering the abandoned experiment.
+- Resetting or moving `main`, or publishing only one of the two receipts commits.
 
 **Expected Result**
-`recovery/receipts` holds the receipt fix, and `main` is untouched.
+`recovery/receipts` holds “Start receipts” and “Fix receipt totals” on top of `main`, and `origin` has the same branch. `main` has not moved.
 
 **Evaluation (STAFF ONLY)**
 
-Minimum counted commands: 1 · Maximum counted commands: 12
+Minimum counted commands: 3 · Maximum counted commands: 12
 
-- HEAD on `recovery/receipts` at `c3`; `main` still at `c0`.
-- Clean tree.
+- HEAD on `recovery/receipts`; four commits including `c3`, without the original `c1` and `c2`; tip `Fix receipt totals` with the receipts fix and the tax patch.
+- `origin/recovery/receipts` matches the branch; `main` still at `c3`; clean tree.
 
 ### 4.G.3 Drop the experiment, reverse the published banner · Medium
 

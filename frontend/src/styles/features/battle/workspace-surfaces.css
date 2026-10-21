@@ -16,7 +16,6 @@
 }
 
 .gameplay-workspace .gameplay-pane > .ui-card,
-.gameplay-workspace .gameplay-panel-scroll > .ui-card,
 .gameplay-workspace .gameplay-project-region > .ui-card,
 .gameplay-workspace .challenge-dag-stage,
 .gameplay-workspace .terminal-panel,
@@ -56,30 +55,12 @@
   text-transform: none;
 }
 
-.gameplay-workspace .lvlctx-section {
-  padding: var(--space-4);
-}
-
-.gameplay-workspace .lvlctx-section + .lvlctx-section {
-  border-top-color: var(--border-subtle);
-}
-
 .gameplay-workspace .lvlctx-eyebrow {
   color: var(--text-secondary);
   font-family: var(--font-sans);
   font-size: var(--text-xs);
   letter-spacing: normal;
   text-transform: none;
-}
-
-.gameplay-workspace .lvlctx-story,
-.gameplay-workspace .lvlctx-task {
-  font-size: var(--text-sm);
-  line-height: 1.65;
-}
-
-.gameplay-workspace .lvlctx-task {
-  margin-top: 0;
 }
 
 /* Objectives are a checklist, with status carried by the check itself. */
@@ -224,25 +205,6 @@
   text-transform: none;
 }
 
-/* Keep resize hit areas generous; only one quiet hairline is visible. */
-.gameplay-workspace .gameplay-resize::before {
-  inset: 0;
-  width: auto;
-  height: auto;
-  background: transparent;
-  box-shadow: none;
-}
-
-.gameplay-workspace .gameplay-resize .resize-handle__grip {
-  opacity: 0;
-}
-
-.gameplay-workspace .gameplay-resize:hover .resize-handle__grip,
-.gameplay-workspace .gameplay-resize:focus-visible .resize-handle__grip,
-.gameplay-workspace .gameplay-resize:active .resize-handle__grip {
-  opacity: 1;
-}
-
 .gameplay-workspace .tier-terminal-stage {
   border-top: 1px solid var(--border-subtle);
 }
@@ -265,27 +227,6 @@
 @media (min-width: 1100px) {
   .gameplay-workspace .tier-dag-rail {
     border-left: 1px solid var(--border-subtle);
-  }
-}
-
-@media (max-width: 900px) {
-  .gameplay-workspace:not(.tier-gameplay-workspace) .gameplay-workspace__sidebar {
-    grid-template-rows: auto auto !important;
-    border-right: 0;
-  }
-
-  .gameplay-workspace:not(.tier-gameplay-workspace) .gameplay-panel-scroll > .ui-card {
-    height: auto;
-  }
-
-  .gameplay-workspace:not(.tier-gameplay-workspace) .gameplay-workspace__main,
-  .gameplay-workspace .challenge-diagram-grid.has-target > .gameplay-pane + .gameplay-resize + .gameplay-pane,
-  .gameplay-workspace .gameplay-terminal-grid.has-feedback > .gameplay-pane + .gameplay-resize + .gameplay-pane {
-    border-top: 1px solid var(--border-subtle);
-  }
-
-  .gameplay-workspace:not(.tier-gameplay-workspace) .gameplay-terminal-grid {
-    border-top: 1px solid var(--border-subtle);
   }
 }
 
@@ -315,11 +256,5 @@
   .tier-gameplay-workspace > .tier-dag-rail,
   .tier-gameplay-workspace .tier-objectives-region {
     border-top: 1px solid var(--border-subtle);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .gameplay-workspace .gameplay-resize .resize-handle__grip {
-    transition: none;
   }
 }

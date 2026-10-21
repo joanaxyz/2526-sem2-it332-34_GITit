@@ -6153,10 +6153,10 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
-  "gate1-easy-first-snapshot-field-log": {
+  "gate1-easy-two-commit-start-field-log": {
     "final": {
-      "coarse": "3c3e358c35b6764d",
-      "exact": "7a8072056b83f8d5"
+      "coarse": "ee587b227b869f8c",
+      "exact": "2f8e46339b416a71"
     },
     "steps": [
       {
@@ -6180,8 +6180,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "cf76f55426e8a348",
-            "exact": "3700ad646f943ed3"
+            "coarse": "e96f637237069003",
+            "exact": "4118dc6b3680b1f1"
           }
         ]
       },
@@ -6201,8 +6201,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "0ce1be21facebaa7",
-            "exact": "53456a4dd806afb7"
+            "coarse": "46a40cf13bc4f5dc",
+            "exact": "c2a36bf0c0c419c5"
           }
         ]
       },
@@ -6223,18 +6223,59 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "bce7833677a8bb8f",
-            "exact": "090ba1cb137a8269"
+            "coarse": "0b2f4bb3cd5d1991",
+            "exact": "62f1e38dca9686c1"
+          }
+        ]
+      },
+      {
+        "command": "git add README.md",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "README.md"
+            ],
+            "text": "README.md is staged."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "1ca10b9fb58529ce",
+            "exact": "90d58dc2d3815e2a"
+          }
+        ]
+      },
+      {
+        "command": "git commit -m \"Add field log guide\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "README.md"
+            ],
+            "text": "New commit on main, saving README.md."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "f69b0c59894c9d04",
+            "exact": "8b9389758a35e8f2"
           }
         ]
       }
     ],
     "version": 2
   },
-  "gate1-easy-first-snapshot-quiz": {
+  "gate1-easy-two-commit-start-quiz": {
     "final": {
-      "coarse": "ad2f3f8924b6ed3c",
-      "exact": "d9fe471e040e6a48"
+      "coarse": "021db31745b65464",
+      "exact": "847db13c318542be"
     },
     "steps": [
       {
@@ -6258,8 +6299,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "9e49e68051954827",
-            "exact": "7bea866e7ffa6a2f"
+            "coarse": "fd22218de66a44dc",
+            "exact": "3495d43aba399759"
           }
         ]
       },
@@ -6279,8 +6320,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "d5ed89ec7294f6bc",
-            "exact": "9d82fb5286c8ca37"
+            "coarse": "9d79e5b501ba890e",
+            "exact": "97cfe353eb5d8821"
           }
         ]
       },
@@ -6301,8 +6342,49 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "3575664548298fea",
-            "exact": "c23dd05db737f124"
+            "coarse": "fa08e2d5c215f7e2",
+            "exact": "e7dbd2c1ffae924a"
+          }
+        ]
+      },
+      {
+        "command": "git add README.md",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "README.md"
+            ],
+            "text": "README.md is staged."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "99f75cbc796690ad",
+            "exact": "9d6667e472418d99"
+          }
+        ]
+      },
+      {
+        "command": "git commit -m \"Add quiz setup notes\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "README.md"
+            ],
+            "text": "New commit on main, saving README.md."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "a3fab76d34f9ad3e",
+            "exact": "dbd6e3a38e5c1cb2"
           }
         ]
       }
@@ -7495,10 +7577,10 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
-  "gate3-easy-merge-and-resolve-banner": {
+  "gate3-easy-merge-then-backport-banner": {
     "final": {
-      "coarse": "b0a434790749239e",
-      "exact": "6b33349371c6bb3c"
+      "coarse": "5e1e91fd1c837777",
+      "exact": "febd13526e641c59"
     },
     "steps": [
       {
@@ -7532,8 +7614,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "936e403e6d3e17f4",
-            "exact": "3fe17153db45b5c3"
+            "coarse": "f65d7b380c6764b4",
+            "exact": "c602542f66bc850b"
           }
         ]
       },
@@ -7560,12 +7642,12 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "ca316c35d8ac62eb",
-            "exact": "6aa65bdabc77ad23"
+            "coarse": "a4709cacdeb8ac75",
+            "exact": "facda748fe375b44"
           },
           {
-            "coarse": "ca35429be7034d69",
-            "exact": "9b883262e1eb4424"
+            "coarse": "2df1126fe1b7b7f6",
+            "exact": "a039f059a432843e"
           }
         ]
       },
@@ -7593,18 +7675,57 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "1b5fe5422b37eb17",
-            "exact": "e849946320f05d75"
+            "coarse": "d906b0ab503113c3",
+            "exact": "89338ea94a86a634"
+          }
+        ]
+      },
+      {
+        "command": "git switch release/1.4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "release/1.4"
+            ],
+            "text": "HEAD moves to release/1.4."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "f10d5bcb645ad8ed",
+            "exact": "d5d182bb28af9044"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick c3",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "release/1.4",
+            "subjects": [],
+            "text": "New commit on release/1.4."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "c0e256f5bc7d9e90",
+            "exact": "053522b42bdfaec5"
           }
         ]
       }
     ],
     "version": 2
   },
-  "gate3-easy-merge-and-resolve-footer": {
+  "gate3-easy-merge-then-backport-footer": {
     "final": {
-      "coarse": "6f7b95515cb0dcef",
-      "exact": "7f82d8c8e629478f"
+      "coarse": "0ccf40deb85b9aea",
+      "exact": "6f9016df0c71cd3f"
     },
     "steps": [
       {
@@ -7638,8 +7759,8 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "ff5bc43480ca90a7",
-            "exact": "8681e7a583709acf"
+            "coarse": "ddcfabca58417011",
+            "exact": "59c97a08e4329ce6"
           }
         ]
       },
@@ -7666,12 +7787,12 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "010e1a1c0590936c",
-            "exact": "86dc99a766b12720"
+            "coarse": "8c9f2473ed353284",
+            "exact": "7e270a79bf51c96d"
           },
           {
-            "coarse": "4583d1e539b003cc",
-            "exact": "4a541e94d47b7313"
+            "coarse": "fdb5f01fe1bc5b38",
+            "exact": "0d4570e36436e1b5"
           }
         ]
       },
@@ -7699,8 +7820,47 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "a19fab494de28a1b",
-            "exact": "0956a6703e113e38"
+            "coarse": "93246df8e3fff5f6",
+            "exact": "d48154793b4e63d3"
+          }
+        ]
+      },
+      {
+        "command": "git switch release/2.0",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "release/2.0"
+            ],
+            "text": "HEAD moves to release/2.0."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "e8d7aa74668bad16",
+            "exact": "64779e57585af755"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick c3",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "release/2.0",
+            "subjects": [],
+            "text": "New commit on release/2.0."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "54e69c559124f7e4",
+            "exact": "a12d483f8ea6fb70"
           }
         ]
       }
@@ -8249,10 +8409,10 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
-  "gate4-easy-recover-receipt-fix": {
+  "gate4-easy-recover-replay-publish-receipts": {
     "final": {
-      "coarse": "5c12fc4cb4371762",
-      "exact": "6ac7dc3f253297ea"
+      "coarse": "90e05541f1313ea3",
+      "exact": "e80fa5526d633813"
     },
     "steps": [
       {
@@ -8261,24 +8421,13 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "effect": [],
         "positions": [
           {
-            "coarse": "e95e0ef3de50c71b",
-            "exact": "17d2f0c35b342bba"
+            "coarse": "e76ef09af629c96a",
+            "exact": "311237a6f9a6bfb6"
           }
         ]
       },
       {
-        "command": "git show c3",
-        "diagnostic": true,
-        "effect": [],
-        "positions": [
-          {
-            "coarse": "e95e0ef3de50c71b",
-            "exact": "17d2f0c35b342bba"
-          }
-        ]
-      },
-      {
-        "command": "git switch -c recovery/receipts c3",
+        "command": "git switch -c recovery/receipts c2",
         "diagnostic": false,
         "effect": [
           {
@@ -8300,18 +8449,57 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "e95e0ef3de50c71b",
-            "exact": "17d2f0c35b342bba"
+            "coarse": "e76ef09af629c96a",
+            "exact": "311237a6f9a6bfb6"
+          }
+        ]
+      },
+      {
+        "command": "git rebase main",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "recovery/receipts",
+            "subjects": [],
+            "text": "2 new commits on recovery/receipts."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "42e50fc30c51fa82",
+            "exact": "54da386c20fb9053"
+          }
+        ]
+      },
+      {
+        "command": "git push -u origin recovery/receipts",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/recovery/receipts"
+            ],
+            "text": "origin/recovery/receipts is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "d9e57bdca96ebd03",
+            "exact": "856927b70431e912"
           }
         ]
       }
     ],
     "version": 2
   },
-  "gate4-easy-recover-search-fix": {
+  "gate4-easy-recover-replay-publish-search": {
     "final": {
-      "coarse": "869a2c972f7ce4b8",
-      "exact": "d751d53b5833f4a0"
+      "coarse": "56a3e21ed3299008",
+      "exact": "802850258af107a5"
     },
     "steps": [
       {
@@ -8320,24 +8508,13 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         "effect": [],
         "positions": [
           {
-            "coarse": "566edf4ea436fd3e",
-            "exact": "ea8d2b8a9e07d443"
+            "coarse": "e76ef09af629c96a",
+            "exact": "886d83fe76f04f84"
           }
         ]
       },
       {
-        "command": "git show c3",
-        "diagnostic": true,
-        "effect": [],
-        "positions": [
-          {
-            "coarse": "566edf4ea436fd3e",
-            "exact": "ea8d2b8a9e07d443"
-          }
-        ]
-      },
-      {
-        "command": "git switch -c recovery/search c3",
+        "command": "git switch -c recovery/search c2",
         "diagnostic": false,
         "effect": [
           {
@@ -8359,8 +8536,47 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
         ],
         "positions": [
           {
-            "coarse": "566edf4ea436fd3e",
-            "exact": "ea8d2b8a9e07d443"
+            "coarse": "e76ef09af629c96a",
+            "exact": "886d83fe76f04f84"
+          }
+        ]
+      },
+      {
+        "command": "git rebase main",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "recovery/search",
+            "subjects": [],
+            "text": "2 new commits on recovery/search."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "dfcad0bde3762fa2",
+            "exact": "63719b02bb0e8800"
+          }
+        ]
+      },
+      {
+        "command": "git push -u origin recovery/search",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/recovery/search"
+            ],
+            "text": "origin/recovery/search is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "964124808da20a54",
+            "exact": "ec3508d33bed6736"
           }
         ]
       }

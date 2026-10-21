@@ -124,6 +124,38 @@ shared/battle/effects/...      playback cores split by DOM helpers, layer playba
 
 ## Command Execution Boundary
 
+### Learning tutor boundary
+
+The `tutoring` backend app owns independent Home AI help and command-guide help
+through authenticated `POST /api/tutoring/chat/`. Scenario recognition searches
+public fields from both seed banks; reviewed teaching material is a separate
+catalog. Gemini/Groq return eligible teaching IDs only. The server renders approved
+text and placeholder syntax, never provider-authored replies, task operands,
+solution sequences, or answer verification. Recognition failure does not relax this rule.
+Provider attempts use bounded time and cached rate-limit cooldowns, in configured
+Gemini order followed by Groq, over one pooled keep-alive client per process.
+Recognition runs beside selection; a single eligible block skips the provider, and
+validated selections are cached by prompt digest. The committed semantic index is cached locally;
+see [index regeneration](backend/tutoring/data/README.md). Missing or limited
+embeddings fall back to local matching and conservative protection.
+
+Workspace chat requires an owned run and a server-signed safe guide context.
+Guide payloads generalize prospective changes and omit exact command examples;
+completion tokens contain a context digest instead of evaluation data. Internal
+lesson identity remains stable; literal-bearing outward IDs are opaque.
+Verified terminal feedback, command accounting and rewards retain their owners.
+
+`frontend/src/shared/tutoring/` owns reusable chat presentation and bounded,
+sign-in-scoped in-memory conversations. HomeLayout composes the floating chat launcher
+across Dashboard, Modules and Shop. The command guide owns the lifetime of a
+separate chat window, rendered outside its card with a portal. Mascot portraits
+appear beside the chat card (in its header on mobile), in assistant message
+bubbles, and as the floating launchers, with accessible names and no visible labels.
+Chat opens by default with pointer/keyboard movement and resizing. Its launcher
+appears only when collapsed. Command guides omit the mascot and retain a separate
+command icon for reopening and history.
+The decorative mascot preference does not disable help controls.
+
 Frontend command simulation remains instant for user experience. Backend verification is authoritative for persisted progress, rewards, and completion state.
 
 ```txt
@@ -317,7 +349,7 @@ database honestly has none rather than synthesising it per request.
 - Each wave clear credits mastery to the published forms the clearing run's commands used (`tutoring.services.forms.forms_used_by`), so a guide the learner has not earned keeps firing.
 - `adventures/rewards.py` owns the GitCoin ladder: Easy 25, Medium 35, Hard 50 once per tier, and 50/75/100 for Challenge Gate trials, all through idempotent wallet keys. The one-time cutover commands `award_missing_tier_rewards` and `map_partial_tier_progress` backfill rewards and partial progress (`deploy/CURRICULUM_WAVES_RESEED.md`).
 - A level counts as passed on the map and in chapter progress once its Easy tier is complete. Chapter completion counts each published level once plus each published gate trial.
-- `seed_curriculum` seeds one Challenge Gate per module from `source/challenge_gates.py`: Easy, Medium, and Hard trials with two variants each. A trial opens once every required level of the module has completed its tier of the same difficulty (`cleared_tier_difficulties`).
+- `seed_curriculum` seeds one Challenge Gate per module from `source/challenge_gates.py`: Easy, Medium, and Hard trials with two variants each. The gate opens once every required level of the module has completed all three tiers (`chapter_tiers_cleared`); inside it, Medium waits for the Easy trial and Hard for Medium. Challenge runs play in the same workspace as adventure tiers (`frontend/src/shared/level/workspace/`): battle stage, terminal, Live and Expected diagrams.
 - Authored adventures compile to one Easy tier with ordered waves (`authoring/compiler.py`).
 
 ## Generated Curriculum Targets

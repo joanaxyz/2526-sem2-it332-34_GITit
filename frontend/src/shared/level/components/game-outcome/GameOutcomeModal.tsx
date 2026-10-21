@@ -27,7 +27,7 @@ export type GameOutcomeStat = {
   denominator?: number
   suffix?: string
   helper: string
-  /** Per-tile accent color; falls back to the tone's primary/destructive. */
+  /** Per-tile accent color; falls back to the tone's accent (neon blue / window amber). */
   accentColor?: string
   /** Shows a "Target met" chip in the tile header. */
   targetMet?: boolean
@@ -89,7 +89,7 @@ export function GameOutcomeModal({
   // Graded failures show unlit stars; assessments keep the icon crest.
   const starArtKey = !showStars ? null : isFailed ? 'lose' : earnedStars && earnedStars > 0 ? `win-${earnedStars}` : null
   const starArt = useLazyImage(starArtKey, STAR_ART_LOADERS)
-  const defaultAccent = isFailed ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'
+  const defaultAccent = isFailed ? 'hsl(var(--warning))' : 'hsl(var(--primary))'
 
   return (
     <Modal
@@ -123,7 +123,7 @@ export function GameOutcomeModal({
         <div className="game-outcome-hero relative text-center">
           {starArt ? (
             <img
-              className={cn('game-outcome-star-art', !isFailed && 'game-outcome-sparkle-glow')}
+              className={cn('game-outcome-star-art', isFailed ? 'is-lost' : 'game-outcome-sparkle-glow')}
               src={starArt}
               width={1774}
               height={887}
@@ -144,13 +144,15 @@ export function GameOutcomeModal({
             aria-label={displayLabel}
             style={{ backgroundImage: `url(${titlesImage})` }}
           />
-          <h3 className="game-outcome-subline mx-auto mt-2 max-w-xl text-balance text-base font-extrabold sm:text-lg">
-            {headline}
+          <h3 className="game-outcome-subline">
+            <span className="game-outcome-subline-rule" aria-hidden="true" />
+            <span className="text-balance">{headline}</span>
+            <span className="game-outcome-subline-rule is-end" aria-hidden="true" />
           </h3>
 
-          <p className="game-outcome-message mx-auto mt-2 max-w-xl text-sm leading-6">{message}</p>
-          {note ? <p className="mx-auto mt-2 max-w-xl text-xs font-medium leading-5 text-warning">{note}</p> : null}
-          {badges ? <div className="mt-3 flex flex-wrap justify-center gap-2">{badges}</div> : null}
+          {badges ? <div className="game-outcome-badges">{badges}</div> : null}
+          <p className="game-outcome-message">{message}</p>
+          {note ? <p className="game-outcome-note">{note}</p> : null}
 
           {stats && stats.length ? (
             <div className="game-outcome-stat-grid">

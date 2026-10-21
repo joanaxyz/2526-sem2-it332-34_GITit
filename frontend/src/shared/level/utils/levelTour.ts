@@ -3,10 +3,10 @@ export type LevelTourMode = 'adventure' | 'challenge' | 'tier'
 // Versioned per mode so a tour change replays only the affected onboarding.
 const LEVEL_TOUR_VERSIONS: Record<LevelTourMode, string> = {
   adventure: 'v5',
-  challenge: 'v5',
+  challenge: 'v6',
   tier: 'v6',
 }
-export const levelTourModes: readonly LevelTourMode[] = ['adventure', 'challenge', 'tier']
+const levelTourModes: readonly LevelTourMode[] = ['adventure', 'challenge', 'tier']
 
 export function levelTourStorageKey(
   userId?: number | null,

@@ -14,11 +14,11 @@ vi.mock('@/features/story-map/hooks/useTierCommandSubmission', () => ({ useTierC
 vi.mock('@/features/story-map/scaffolding/useTierScaffolding', () => ({ useTierScaffolding: () => ({ clearToast: vi.fn(), evaluateAndNotify: vi.fn() }) }))
 vi.mock('@/features/story-map/hooks/useLeaveAbandonedRun', () => ({ useLeaveAbandonedRun: vi.fn() }))
 vi.mock('@/features/story-map/hooks/useCommandGuideHistory', () => ({ useCommandGuideHistory: () => [] }))
-vi.mock('@/features/story-map/hooks/useTierAutoOpenQueue', () => ({ useTierAutoOpenQueue: () => ({ storyOpen: false, tourOpen: false, guideAllowed: true }) }))
-vi.mock('@/features/story-map/hooks/useTierRepoDrawer', () => ({ useTierRepoDrawer: () => ({ drawerMode: false }) }))
-vi.mock('@/features/story-map/utils/tierStory', () => ({ tierStoryContent: () => ({}) }))
+vi.mock('@/shared/level/workspace/useWorkspaceAutoOpen', () => ({ useWorkspaceAutoOpen: () => ({ storyOpen: false, tourOpen: false, guideAllowed: true }) }))
+vi.mock('@/shared/level/workspace/useRepoGraphDrawer', () => ({ useRepoGraphDrawer: () => ({ drawerMode: false }) }))
+vi.mock('@/shared/level/workspace/workspaceStory', () => ({ workspaceStoryContent: () => ({}) }))
 vi.mock('@/shared/player-loadout/usePlayerLoadout', () => ({ usePlayerLoadout: () => ({ companionSlug: 'blue', isLoading: false }) }))
-vi.mock('@/features/story-map/hooks/useTierDagAnimation', () => ({ useTierDagAnimation: () => ({ animating: false, onCommandStart: vi.fn(), onCommandResolved: vi.fn(), onCommandError: vi.fn() }) }))
+vi.mock('@/shared/level/workspace/useDagAnimation', () => ({ useDagAnimation: () => ({ animating: false, onCommandStart: vi.fn(), onCommandResolved: vi.fn(), onCommandError: vi.fn() }) }))
 vi.mock('@/shared/battle/hooks/useBattleDirector', async () => {
   const { useState } = await import('react')
   return {
@@ -37,14 +37,14 @@ vi.mock('@/features/story-map/hooks/useTierWorkspaceMutations', () => ({
 }))
 vi.mock('@/features/story-map/components/TierStatusHeader', () => ({ TierStatusHeader: () => null }))
 vi.mock('@/features/story-map/components/tier-workspace/TierStatsBar', () => ({ TierStatsBar: () => null }))
-vi.mock('@/features/story-map/components/TierWorkspaceMain', () => ({
-  TierWorkspaceMain: ({ onCommand }: { onCommand: (command: string) => void }) => <button onClick={() => onCommand('git init')}>Run git init</button>,
+vi.mock('@/shared/level/workspace/GameplayWorkspaceMain', () => ({
+  GameplayWorkspaceMain: ({ onCommand }: { onCommand: (command: string) => void }) => <button onClick={() => onCommand('git init')}>Run git init</button>,
 }))
 vi.mock('@/features/story-map/components/CommandIntroductionPanel', () => ({ CommandIntroductionPanel: () => <div role="dialog" aria-label="Next command introduction" /> }))
 vi.mock('@/features/story-map/components/TierOutcomeModal', () => ({ TierOutcomeModal: ({ open }: { open: boolean }) => open ? <div role="dialog" aria-label="Level complete" /> : null }))
-vi.mock('@/features/story-map/components/tier-workspace/TierStoryModal', () => ({ TierStoryModal: () => null }))
-vi.mock('@/features/story-map/components/TierExitConfirmModal', () => ({ TierExitConfirmModal: () => null }))
-vi.mock('@/features/story-map/components/TierStartOverConfirmModal', () => ({ TierStartOverConfirmModal: () => null }))
+vi.mock('@/shared/level/workspace/WorkspaceStoryModal', () => ({ WorkspaceStoryModal: () => null }))
+vi.mock('@/shared/level/workspace/ExitConfirmModal', () => ({ ExitConfirmModal: () => null }))
+vi.mock('@/shared/level/workspace/StartOverConfirmModal', () => ({ StartOverConfirmModal: () => null }))
 
 const run = { id: 1, status: 'started', tier: { id: 1, adventure_level_id: 1, difficulty: 'easy' }, scaffolding: {}, repository_state: {}, replay: false, tutor: null } as unknown as TierRun
 const skill = { id: 7, slug: 'git-init', title: 'Create a repository', base_command: 'git init', summary: '', chapter_number: 1, chapter_title: 'Foundations' }

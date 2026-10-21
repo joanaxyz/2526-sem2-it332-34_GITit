@@ -1,7 +1,5 @@
 import type { LevelScenarioContext } from '@/shared/level/types'
 
-export type ObjectiveCheck = { label: string; satisfied: boolean }
-
 export type NormalizedLevelContext = {
   story: string
   startingPoint: string
@@ -12,7 +10,7 @@ export type NormalizedLevelContext = {
   details: { label: string; value: string }[]
 }
 
-/** Flatten a schema_version 3 scenario context into the fields the story card renders. */
+/** Flatten a schema_version 3 scenario context into the fields the workspace renders. */
 export function normalizeLevelContext(
   context?: LevelScenarioContext | null,
 ): NormalizedLevelContext {
@@ -27,19 +25,6 @@ export function normalizeLevelContext(
       .map((item) => ({ label: cleanText(item.label), value: cleanText(item.value) }))
       .filter((item) => item.value),
   }
-}
-
-/** True when the normalized context carries any learner-facing detail. */
-export function hasLevelContext(context: NormalizedLevelContext) {
-  return Boolean(
-    context.story ||
-      context.startingPoint ||
-      context.realWorldContext ||
-      context.task ||
-      context.objectiveChecks.length ||
-      context.expectedResult ||
-      context.details.length,
-  )
 }
 
 function cleanText(value?: string) {

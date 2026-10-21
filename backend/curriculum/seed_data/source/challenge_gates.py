@@ -2,8 +2,8 @@
 
 A gate is one ChallengeLevel with an Easy, a Medium and a Hard trial. Each
 trial is a workflow that combines what the module taught, in two variants so
-a retry gets a fresh scenario. A trial of difficulty *d* opens once every
-level of the module has cleared its *d* tier.
+a retry gets a fresh scenario. The gate opens once every level of the module
+has cleared all three tiers; inside it, the trials open Easy, Medium, Hard.
 
 Scenario text and answer keys live in ``wave_scenarios.md``; repositories and
 grading in ``scenario_fixtures/gates.py``.
@@ -22,8 +22,8 @@ CHALLENGE_GATES: dict[int, dict] = {
         ),
         "trials": {
             "easy": [
-                "gate1-easy-first-snapshot-field-log",
-                "gate1-easy-first-snapshot-quiz",
+                "gate1-easy-two-commit-start-field-log",
+                "gate1-easy-two-commit-start-quiz",
             ],
             "medium": [
                 "gate1-medium-complete-last-commit-search",
@@ -62,8 +62,8 @@ CHALLENGE_GATES: dict[int, dict] = {
         ),
         "trials": {
             "easy": [
-                "gate3-easy-merge-and-resolve-banner",
-                "gate3-easy-merge-and-resolve-footer",
+                "gate3-easy-merge-then-backport-banner",
+                "gate3-easy-merge-then-backport-footer",
             ],
             "medium": ["gate3-medium-backport-tax", "gate3-medium-backport-locale"],
             "hard": [
@@ -81,7 +81,10 @@ CHALLENGE_GATES: dict[int, dict] = {
             "between rewriting and reversing, and republish rewritten work safely."
         ),
         "trials": {
-            "easy": ["gate4-easy-recover-search-fix", "gate4-easy-recover-receipt-fix"],
+            "easy": [
+                "gate4-easy-recover-replay-publish-search",
+                "gate4-easy-recover-replay-publish-receipts",
+            ],
             "medium": [
                 "gate4-medium-drop-local-revert-published-banner",
                 "gate4-medium-drop-local-revert-published-alerts",

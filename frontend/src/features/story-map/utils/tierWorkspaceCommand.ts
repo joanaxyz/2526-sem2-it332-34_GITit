@@ -1,9 +1,9 @@
 import type { QueryClient } from '@tanstack/react-query'
 
 import { useTierCommandSubmission } from '@/features/story-map/hooks/useTierCommandSubmission'
-import type { TierDagAnimationController } from '@/features/story-map/hooks/useTierDagAnimation'
+import type { DagAnimationController } from '@/shared/level/workspace/useDagAnimation'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
-import { stringList } from '@/features/story-map/components/tierWorkspaceLayout'
+import { stringList } from '@/shared/level/workspace/layout'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { isExitCommand } from '@/shared/level-runtime/commands'
 import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
@@ -30,7 +30,7 @@ export function createTierWorkspaceCommandHandler({
 }: {
   runId: number
   mutation: ReturnType<typeof useTierCommandSubmission>
-  dagAnimation: TierDagAnimationController
+  dagAnimation: DagAnimationController
   battleDirector: BattleDirector
   queryClient: QueryClient
   clearToast: () => void

@@ -12,7 +12,7 @@ from .access import (
     adventure_summary_payload,
     challenge_summary_payload,
 )
-from .adventure_access import _build_adventure_tier_access, cleared_difficulties
+from .adventure_access import _build_adventure_tier_access
 from .book import chapter_adventure_knowledge, lesson_summary_payload
 from .challenge_queries import challenge_queryset
 
@@ -84,22 +84,19 @@ def chapter_content_overview(*, player, chapter_id: int) -> dict:
     }
     required_adventure_ids = {adventure.id for adventure in adventures if adventure.is_required}
     adventure_passed = required_adventure_ids <= adventure_access.passed_adventure_ids
-    required_tiers = [
-        (tier.id, adventure.id, tier.difficulty)
-        for adventure in adventures
-        if adventure.is_required
-        for tier in adventure.overview_tiers
-    ]
+    required_tier_ids = {
+        tier.id for adventure in adventures if adventure.is_required for tier in adventure.overview_tiers
+    }
     access = _build_challenge_access(
         player=player,
         chapter_id=chapter_id,
         challenges=challenges,
         adventure_passed=adventure_passed,
-        # The gate opens per difficulty from the tiers and completions the map
-        # already loaded (None for chapters without tiers).
-        cleared_difficulties=(
-            (cleared_difficulties(required_tiers, set(tier_access.completions)) if player else set())
-            if required_tiers
+        # The gate opens once every tier the map already loaded is complete
+        # (None for chapters without tiers).
+        tiers_cleared=(
+            bool(player) and required_tier_ids <= set(tier_access.completions)
+            if required_tier_ids
             else None
         ),
     )

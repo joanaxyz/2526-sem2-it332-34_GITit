@@ -77,7 +77,7 @@ export type ApiSchemas = {
   "CommandFormPreviewResponse": { "command_preview": { [key: string]: JsonValue }; "id": number; "is_playable": boolean; "label": string; "skill": ApiSchemas["CommandFormPreviewSkillResponse"]; "slug": string; "summary": string; "usage_form": string }
   "CommandFormPreviewSkillResponse": { "base_command": string; "id": number; "slug": string; "title": string }
   "CommandIntroductionForm": { "label": string; "summary": string; "teaching_key": string; "usage_form": string }
-  "CommandIntroductionResponse": { "anatomy": Array<ApiSchemas["SyntaxPart"]>; "changes": Array<ApiSchemas["RepositoryChange"]>; "command_form": ApiSchemas["CommandIntroductionForm"]; "completion_token": string | null; "concepts": Array<ApiSchemas["Concept"]>; "context_id": string; "example_command": string | null; "explanation": string | null; "needs": Array<ApiSchemas["RepositoryChange"]>; "phase": ApiSchemas["PhaseEnum"]; "run_revision": number; "teaching_key": string; "title": string; "verdict": ApiSchemas["VerdictEnum"] | ApiSchemas["NullEnum"] | null }
+  "CommandIntroductionResponse": { "anatomy": Array<ApiSchemas["SyntaxPart"]>; "changes": Array<ApiSchemas["RepositoryChange"]>; "command_form": ApiSchemas["CommandIntroductionForm"]; "completion_token": string | null; "concepts": Array<ApiSchemas["Concept"]>; "context_id": string; "explanation": string | null; "help_token": string; "needs": Array<ApiSchemas["RepositoryChange"]>; "phase": ApiSchemas["PhaseEnum"]; "run_revision": number; "teaching_key": string; "title": string; "verdict": ApiSchemas["VerdictEnum"] | ApiSchemas["NullEnum"] | null }
   "CommandSubmit": { "command": string; "execution": ApiSchemas["ClientCommandExecution"] }
   "Concept": { "key": string; "text": string; "title": string }
   "ContentDefinition": { "chapter_id": number | null; "command_family": string; "created_at": string; "definition": { [key: string]: JsonValue }; "difficulty": string; "id": number; "kind": ApiSchemas["KindA5eEnum"]; "official_chapter_id": number | null; "owner_id": number | null; "published_at": string | null; "slug": string; "source_definition_id": number | null; "status": ApiSchemas["StatusEnum"]; "summary": string; "tags": Array<string>; "title": string; "updated_at": string; "validation_errors": Array<ApiSchemas["ValidationErrorRow"]>; "visibility": ApiSchemas["VisibilityEnum"] }
@@ -135,6 +135,7 @@ export type ApiSchemas = {
   "RepositoryChange": { "action"?: ApiSchemas["RepositoryChangeActionEnum"]; "kind": ApiSchemas["RepositoryChangeKindEnum"]; "ref"?: string; "subjects"?: Array<string>; "text": string }
   "RepositoryChangeActionEnum": "create" | "delete" | "move" | "add" | "remove" | "set" | "start" | "finish"
   "RepositoryChangeKindEnum": "repository" | "commit" | "branch" | "head" | "staging" | "working_tree" | "conflict" | "tag" | "remote" | "config" | "stash" | "operation"
+  "ResponseKindEnum": "explanation" | "concept_redirect" | "clarification" | "unavailable"
   "SessionResponse": { "access": string; "user": ApiSchemas["User"] }
   "ShopEquipResponse": { "active_companion": string | null; "shop": ApiSchemas["ShopResponse"] }
   "ShopItemResponse": { "active": boolean; "kind": ApiSchemas["ShopItemResponseKindEnum"]; "label": string; "owned": boolean; "price": number; "slug": string }
@@ -152,8 +153,13 @@ export type ApiSchemas = {
   "StatusEnum": "draft" | "testable" | "published" | "archived"
   "Story": { "completed": boolean; "difficulty": ApiSchemas["DifficultyEnum"]; "id": number; "is_published": boolean; "lock_reason": string; "locked": boolean; "prerequisite_story": ApiSchemas["StoryPrerequisite"] | null; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }
   "StoryPrerequisite": { "completed": boolean; "slug": string; "title": string }
+  "SurfaceEnum": "home" | "command_guide"
   "SyntaxPart": { "text": string; "token": string }
   "TransferCheckpoint": { "run_id": number | null; "tier_id": number; "title": string }
+  "TutorChatContext": { "guide_token"?: string; "run_id"?: number; "surface": ApiSchemas["SurfaceEnum"]; "teaching_key"?: string; "usage_form"?: string }
+  "TutorChatRequest": { "context": ApiSchemas["TutorChatContext"]; "history"?: Array<string>; "message": string }
+  "TutorChatResponse": { "reply": string; "response_kind": ApiSchemas["ResponseKindEnum"]; "scenario_related": boolean; "sources": Array<ApiSchemas["TutorTeachingSource"]>; "suggested_topics": Array<ApiSchemas["TutorTeachingSource"]> }
+  "TutorTeachingSource": { "id": string; "title": string }
   "UnitEnum": "participants"
   "User": { "email": string; "id": number; "is_staff": boolean; "username": string }
   "ValidationErrorRow": { "field": string; "message": string }
@@ -238,6 +244,7 @@ export type ApiPath =
   | "/api/shop/catalog/purchase/"
   | "/api/skills/learned/"
   | "/api/stories/"
+  | "/api/tutoring/chat/"
 
 export type ApiMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
 
@@ -314,6 +321,7 @@ export type ApiMethodByPath = {
   "/api/shop/catalog/purchase/": "POST"
   "/api/skills/learned/": "GET"
   "/api/stories/": "GET"
+  "/api/tutoring/chat/": "POST"
 }
 
 export const apiOperations = {
@@ -407,6 +415,7 @@ export const apiOperations = {
   shop_catalog_purchase_create: { method: "POST", path: "/api/shop/catalog/purchase/", operationId: "shop_catalog_purchase_create", tags: ["shop"] },
   skills_learned_retrieve: { method: "GET", path: "/api/skills/learned/", operationId: "skills_learned_retrieve", tags: ["skills"] },
   stories_list: { method: "GET", path: "/api/stories/", operationId: "stories_list", tags: ["stories"] },
+  tutor_chat: { method: "POST", path: "/api/tutoring/chat/", operationId: "tutor_chat", tags: ["tutoring"] },
 } as const
 
 export type ApiOperationId = keyof typeof apiOperations
@@ -503,6 +512,7 @@ export type ApiRequestBodyByOperation = {
   shop_catalog_purchase_create: ApiSchemas["ShopMutationRequest"]
   skills_learned_retrieve: null
   stories_list: null
+  tutor_chat: ApiSchemas["TutorChatRequest"]
 }
 
 export type ApiResponseBodyByOperation = {
@@ -596,6 +606,7 @@ export type ApiResponseBodyByOperation = {
   shop_catalog_purchase_create: ApiSchemas["ShopPurchaseResponse"]
   skills_learned_retrieve: ApiSchemas["LearnedSkillsResponse"]
   stories_list: Array<ApiSchemas["Story"]>
+  tutor_chat: ApiSchemas["TutorChatResponse"]
 }
 
 export type ApiRequestBody<TOperation extends ApiOperationId> = ApiRequestBodyByOperation[TOperation]

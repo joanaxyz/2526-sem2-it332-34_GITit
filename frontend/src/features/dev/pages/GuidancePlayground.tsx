@@ -9,6 +9,7 @@ import { Button } from '@/shared/components/Button'
 import { GameplayWorkspaceTour } from '@/shared/level/components/GameplayWorkspaceTour'
 import { CommandGuideLauncher } from '@/features/story-map/components/CommandGuideLauncher'
 import type { CommandIntroduction } from '@/features/story-map/api/commandIntroductionsApi'
+import { GuideTutor } from '@/shared/tutoring/GuideTutor'
 import './guidance-preview.css'
 
 const STEPS = [
@@ -21,6 +22,8 @@ const GUIDES = [
   { teaching_key: 'status', title: 'Read repository state', command_form: { usage_form: 'git status' } },
   { teaching_key: 'add', title: 'Stage your changes', command_form: { usage_form: 'git add <path>' } },
 ] as CommandIntroduction[]
+// As in the real command guide, its chat window belongs with it.
+const CLOSE_ON_OUTSIDE_CLICK = { except: ['.tutor-window'] }
 
 /** Dev-only review of the real guide components, without an account or API. */
 export function Component() {
@@ -65,8 +68,11 @@ export function Component() {
       title: GUIDES.find((guide) => guide.teaching_key === guideKey)!.title,
       body: guideKey === 'status' ? 'Use git status to see your current branch and check which files are staged, modified, or untracked.' : 'Use git add <path> to put a file’s changes into the staging area for your next commit.',
       placement: 'left',
-    }]} showProgress={false} skipIconOnly skipLabel="Hide command guide" finishLabel="Got it" transformable
-      collapseTarget="[data-command-guide-launcher]" onClose={() => setMode('page')} /> : null}
+    }]} showProgress={false} showSpeaker={false} skipIconOnly skipLabel="Close command guide" closeOnOutsideClick={CLOSE_ON_OUTSIDE_CLICK}
+      finishLabel="Got it" transformable collapseTarget='[data-mascot-launcher="command-guide"]'
+      onClose={() => setMode('page')} /> : null}
+    {mode === 'command' ? <GuideTutor runId={0} teachingKey={guideKey} guideToken="preview"
+      usageForm={GUIDES.find((guide) => guide.teaching_key === guideKey)!.command_form.usage_form} /> : null}
     <OnboardingContext.Provider value={{ phase: mode === 'welcome' ? 'welcome' : 'done', setPhase: () => setMode('page') }}>
       <StoryOnboarding ready={false} compact={false} hasCompanion orientationAvailable
         onStartOrientation={() => setMode('primer')} onSkipOrientation={() => setMode('page')} />

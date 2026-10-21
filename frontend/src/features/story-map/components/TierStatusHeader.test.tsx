@@ -8,10 +8,6 @@ vi.mock('@/shared/audio/AudioControls', () => ({
   AudioControls: () => <div data-testid="audio-controls" />,
 }))
 
-vi.mock('@/shared/level/components/WorkspaceHeaderAccount', () => ({
-  WorkspaceHeaderAccount: () => <div data-testid="workspace-account" />,
-}))
-
 import { TierStatusHeader } from './TierStatusHeader'
 
 afterEach(cleanup)
@@ -68,9 +64,9 @@ describe('TierStatusHeader', () => {
     )
 
     const button = screen.getByRole('button', { name: 'Open command guide' })
-    expect(button).toHaveAttribute('data-command-guide-launcher')
+    expect(button).toHaveAttribute('data-mascot-launcher', 'command-guide')
     expect(button).not.toHaveTextContent('Command guide')
-    expect(button).toHaveClass('guide-mascot__button')
+    expect(button.querySelector('img')).toHaveAttribute('src', '/mascot/portrait.png')
     expect(button.closest('.gameplay-workspace-header')).toBeNull()
     fireEvent.click(button)
     expect(onSelectCommandGuide).toHaveBeenCalledWith('form:git init')
@@ -106,7 +102,7 @@ describe('TierStatusHeader', () => {
 
     expect(screen.queryByRole('button', { name: 'Command guide is open' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Browse command guides' })).not.toBeInTheDocument()
-    expect(document.querySelector('.guide-mascot')).toHaveAttribute('inert')
+    expect(document.querySelector('.mascot-launcher')).toHaveAttribute('inert')
   })
 
   it('reopens the current guide directly when several commands have been encountered', () => {

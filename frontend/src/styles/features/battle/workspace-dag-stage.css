@@ -25,115 +25,33 @@
   background: transparent;
 }
 
-.challenge-dag-stage::before,
+/* The graph's own deltas carry command feedback (see stage-effects.css), so
+   processing and plain updates add nothing on top. Only the verdicts that
+   change no topology get a frame: a soft inner glow that fades out. */
 .challenge-dag-stage::after {
   content: '';
   pointer-events: none;
   position: absolute;
   inset: 0;
   z-index: var(--z-raised);
+  border-radius: inherit;
   opacity: 0;
 }
 
-/* While the command is resolving, a restrained scan passes through the graph.
-   New topology renders optimistically and its delta animation plays at once;
-   the result flash below arrives with the verified state. */
-.challenge-dag-stage::before {
-  top: 2.75rem;
-  background: linear-gradient(
-    180deg,
-    transparent 0%,
-    transparent 43%,
-    rgba(var(--theme-primary-rgb), 0.04) 48%,
-    rgba(var(--theme-primary-rgb), 0.52) 50%,
-    rgba(var(--theme-primary-rgb), 0.04) 52%,
-    transparent 57%,
-    transparent 100%
-  );
-  background-position: 0 -100%;
-  background-size: 100% 200%;
-}
-
-.challenge-dag-stage.is-processing::before {
-  opacity: 1;
-  animation: challenge-dag-scan 900ms linear infinite;
-}
-
-/* Resolution feedback is bounded to the DAG and clears before the terminal is
-   re-enabled. Node, edge, and ref deltas carry the primary state change. */
-.challenge-dag-stage::after {
-  border: 1px solid transparent;
-}
-
-.challenge-dag-stage.is-updated::after {
-  animation: challenge-dag-impact 520ms var(--ease-out) both;
-  border-color: rgba(var(--theme-primary-rgb), 0.58);
-  background: radial-gradient(circle at 50% 48%, rgba(var(--theme-primary-rgb), 0.14), transparent 52%);
-}
-
-.challenge-dag-stage.is-unchanged::after {
-  animation: challenge-dag-stable 360ms var(--ease-out) both;
-  border-color: hsl(var(--muted-foreground) / 0.32);
+.challenge-dag-stage.is-solved::after {
+  box-shadow: inset 0 0 0 1px hsl(var(--success) / 0.7), inset 0 0 36px hsl(var(--success) / 0.18);
+  animation: challenge-dag-verdict 1000ms var(--ease-out) both;
 }
 
 .challenge-dag-stage.is-error::after {
-  animation: challenge-dag-stable 420ms var(--ease-out) both;
-  border-color: hsl(var(--destructive) / 0.52);
-  background: radial-gradient(circle at 50% 48%, hsl(var(--destructive) / 0.08), transparent 58%);
+  box-shadow: inset 0 0 0 1px hsl(var(--destructive) / 0.6), inset 0 0 28px hsl(var(--destructive) / 0.12);
+  animation: challenge-dag-verdict 520ms var(--ease-out) both;
 }
 
-.challenge-dag-stage.is-solved::after {
-  animation: challenge-dag-solved 760ms var(--ease-out) both;
-  border-color: hsl(var(--success) / 0.74);
-  background: radial-gradient(circle at 50% 48%, hsl(var(--success) / 0.16), transparent 58%);
-}
-
-/* Idle state is quiet. HEAD remains readable without a constant battle-like
-   pulse competing with command-driven topology changes. */
-.challenge-dag-stage .dag-head-glow {
-  animation: none;
-  box-shadow:
-    inset 0 0 8px rgba(var(--theme-primary-rgb), 0.12),
-    0 0 0 3px rgba(var(--theme-primary-rgb), 0.18),
-    0 0 16px rgba(var(--theme-primary-rgb), 0.3);
-}
-
-@keyframes challenge-dag-scan {
-  from { background-position: 0 -100%; }
-  to { background-position: 0 100%; }
-}
-
-@keyframes challenge-dag-impact {
-  from {
-    opacity: 0;
-    clip-path: inset(48% 0 48% 0);
-  }
-  35% { opacity: 1; }
-  to {
-    opacity: 0;
-    clip-path: inset(0 0 0 0);
-  }
-}
-
-@keyframes challenge-dag-stable {
+@keyframes challenge-dag-verdict {
   from { opacity: 0; }
-  40% { opacity: 0.78; }
+  30% { opacity: 1; }
   to { opacity: 0; }
-}
-
-@keyframes challenge-dag-solved {
-  from {
-    opacity: 0;
-    filter: brightness(1);
-  }
-  42% {
-    opacity: 1;
-    filter: brightness(1.2);
-  }
-  to {
-    opacity: 0;
-    filter: brightness(1);
-  }
 }
 
 @media (max-width: 900px) {
@@ -153,15 +71,9 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .challenge-dag-stage::before,
-  .challenge-dag-stage::after {
+  .challenge-dag-stage.is-solved::after,
+  .challenge-dag-stage.is-error::after {
     animation: none;
-  }
-
-  .challenge-dag-stage.is-updated::after,
-  .challenge-dag-stage.is-unchanged::after,
-  .challenge-dag-stage.is-error::after,
-  .challenge-dag-stage.is-solved::after {
     opacity: 0.55;
   }
 }

@@ -1,6 +1,6 @@
 const STORAGE_KEY = 'git-it-guide-appearance'
 
-export function readGuideMascotVisibility(): boolean {
+function readGuideMascotVisibility(): boolean {
   if (typeof window === 'undefined') return true
   try {
     const value = window.localStorage.getItem(STORAGE_KEY)

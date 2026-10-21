@@ -1,10 +1,14 @@
 import { Check } from 'lucide-react'
-import { type CSSProperties, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
+import { type CSSProperties, type Ref, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 import type { CommandIntroduction } from '@/features/story-map/api/commandIntroductionsApi'
-import { FloatingGuideMascot } from '@/shared/mascot/FloatingGuideMascot'
+import { FloatingMascotLauncher } from '@/shared/mascot/FloatingMascotLauncher'
 
+/**
+ * Git-It floating over the workspace. A click reopens the current command
+ * guide; once the run has met several, its badge lists them to pick from.
+ */
 export function CommandGuideLauncher({
   guides,
   currentGuideKey,
@@ -47,9 +51,9 @@ export function CommandGuideLauncher({
   useEffect(() => {
     if (!pickerOpen) return
     const closeOnOutsidePointer = (event: PointerEvent) => {
-      const target = event.target as Node
-      if (triggerRef.current?.contains(target) || pickerRef.current?.contains(target)) return
-      if (target instanceof Element && target.closest('.guide-mascot')) return
+      const pressed = event.target
+      // Presses on the launcher toggle or drag it; dragging closes the picker itself.
+      if (pressed instanceof Element && (pickerRef.current?.contains(pressed) || pressed.closest('.mascot-launcher'))) return
       setPickerOpen(false)
     }
     const closeOnEscape = (event: KeyboardEvent) => {
@@ -75,11 +79,7 @@ export function CommandGuideLauncher({
 
   if (guides.length === 0) return null
 
-  const hasSelection = guides.length > 1
-  const label = guideOpen
-    ? 'Command guide is open'
-    : 'Open command guide'
-
+  const currentGuide = guides.find((guide) => guide.teaching_key === currentGuideKey) ?? guides[guides.length - 1]
   const selectGuide = (teachingKey: string) => {
     setPickerOpen(false)
     onSelectGuide(teachingKey)
@@ -87,55 +87,90 @@ export function CommandGuideLauncher({
 
   return (
     <>
-      <FloatingGuideMascot buttonRef={triggerRef} label={label} active={guideOpen}
+      <FloatingMascotLauncher
+        name="command-guide"
+        label={guideOpen ? 'Command guide is open' : 'Open command guide'}
+        caption="Guide"
+        open={guideOpen}
+        buttonRef={triggerRef}
+        onOpen={() => selectGuide(currentGuide.teaching_key)}
         onDragStart={() => setPickerOpen(false)}
-        onActivate={() => selectGuide(guides.find((guide) => guide.teaching_key === currentGuideKey)?.teaching_key ?? guides[guides.length - 1].teaching_key)}>
-        {hasSelection ? <button type="button" className="guide-mascot__history"
-          aria-label="Browse command guides" aria-controls={pickerId} aria-expanded={pickerOpen}
-          title={`Browse ${guides.length} command guides`} disabled={guideOpen}
-          onClick={() => setPickerOpen((open) => !open)}>{guides.length}</button> : null}
-      </FloatingGuideMascot>
+      >
+        {guides.length > 1 ? (
+          <button
+            type="button"
+            className="mascot-launcher__badge"
+            aria-label="Browse command guides"
+            aria-controls={pickerId}
+            aria-expanded={pickerOpen}
+            title={`Browse ${guides.length} command guides`}
+            onClick={() => setPickerOpen((open) => !open)}
+          >
+            {guides.length}
+          </button>
+        ) : null}
+      </FloatingMascotLauncher>
 
       {pickerOpen && pickerStyle ? createPortal(
-        <div
-          ref={pickerRef}
+        <CommandGuidePicker
+          pickerRef={pickerRef}
           id={pickerId}
-          className="command-guide-picker dropdown-menu app-scrollbar"
           style={pickerStyle}
-          role="group"
-          aria-label="Command guides"
-        >
-          <div className="command-guide-picker__heading">
-            <strong>Command guides</strong>
-            <span>{guides.length} found</span>
-          </div>
-          {guides.map((guide, index) => {
-            const current = guide.teaching_key === currentGuideKey
-            return (
-              <button
-                type="button"
-                className="command-guide-picker__option"
-                key={guide.teaching_key}
-                data-current={current || undefined}
-                onClick={() => selectGuide(guide.teaching_key)}
-              >
-                <span className="command-guide-picker__number">{String(index + 1).padStart(2, '0')}</span>
-                <span className="command-guide-picker__copy">
-                  <strong>{guide.title}</strong>
-                  <code>{guide.command_form.usage_form}</code>
-                </span>
-                {current ? (
-                  <span className="command-guide-picker__current">
-                    <Check aria-hidden="true" />
-                    Current
-                  </span>
-                ) : null}
-              </button>
-            )
-          })}
-        </div>,
+          guides={guides}
+          currentGuideKey={currentGuideKey}
+          onSelect={selectGuide}
+        />,
         document.body,
       ) : null}
     </>
+  )
+}
+
+function CommandGuidePicker({ pickerRef, id, style, guides, currentGuideKey, onSelect }: {
+  pickerRef: Ref<HTMLDivElement>
+  id: string
+  style: CSSProperties
+  guides: readonly CommandIntroduction[]
+  currentGuideKey?: string | null
+  onSelect: (teachingKey: string) => void
+}) {
+  return (
+    <div
+      ref={pickerRef}
+      id={id}
+      className="command-guide-picker dropdown-menu app-scrollbar"
+      style={style}
+      role="group"
+      aria-label="Command guides"
+    >
+      <div className="command-guide-picker__heading">
+        <strong>Command guides</strong>
+        <span>{guides.length} found</span>
+      </div>
+      {guides.map((guide, index) => {
+        const current = guide.teaching_key === currentGuideKey
+        return (
+          <button
+            type="button"
+            className="command-guide-picker__option"
+            key={guide.teaching_key}
+            data-current={current || undefined}
+            onClick={() => onSelect(guide.teaching_key)}
+          >
+            <span className="command-guide-picker__number">{String(index + 1).padStart(2, '0')}</span>
+            <span className="command-guide-picker__copy">
+              <strong>{guide.title}</strong>
+              <code>{guide.command_form.usage_form}</code>
+            </span>
+            {current ? (
+              <span className="command-guide-picker__current">
+                <Check aria-hidden="true" />
+                Current
+              </span>
+            ) : null}
+          </button>
+        )
+      })}
+    </div>
   )
 }

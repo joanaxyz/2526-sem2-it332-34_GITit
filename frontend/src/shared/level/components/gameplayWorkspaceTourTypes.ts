@@ -13,7 +13,8 @@ export type WorkspaceTourStep = {
   optional?: boolean
 }
 
-export type WorkspaceTourCloseReason = 'finish' | 'skip'
+/** The finish button, Escape or the skip button, or a click outside the card. */
+export type WorkspaceTourCloseReason = 'finish' | 'skip' | 'outside'
 
 export type CollapseVector = {
   x: number

@@ -1,12 +1,57 @@
-import { RefreshCcw, X } from 'lucide-react'
+import { Smile, Target, TerminalSquare } from 'lucide-react'
 
-import gitLogoImage from '@/assets/images/g34-icon.webp'
-import { AudioControls } from '@/shared/audio/AudioControls'
 import type { ChallengeRun } from '@/features/challenges/types'
+import { DifficultyChip, StarTriplet } from '@/shared/level/components/LevelStatValues'
+import { RookIcon, StarSolidIcon } from '@/shared/level/components/workspaceIcons'
+import type { RepoGraphTrigger, WorkspaceStat } from '@/shared/level/workspace/types'
+import { WorkspaceStatsBar } from '@/shared/level/workspace/WorkspaceStatsBar'
+import { WorkspaceStatusHeader } from '@/shared/level/workspace/WorkspaceStatusHeader'
+import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 
-// Level type, difficulty, stars, and reward live in the Level Context panel —
-// the command bar carries only identity, the title, and run controls. No Guide
-// button on challenges (user decree): the first-run tour still auto-opens once.
+function challengeStats(run: ChallengeRun): WorkspaceStat[] {
+  const starTarget = run.policy.min_counted_commands
+  // The trial reward is paid once; every run after a clear is a replay.
+  const rewardClaimed = run.replay || run.mastery_progress.cleared
+  return [
+    { label: 'Mode', icon: RookIcon, value: `Challenge Gate${run.replay ? ' · Replay' : ''}` },
+    ...(run.difficulty
+      ? [{ label: 'Difficulty', icon: Smile, value: <DifficultyChip difficulty={run.difficulty} /> }]
+      : []),
+    {
+      label: 'Stars',
+      icon: StarSolidIcon,
+      iconClass: 'tier-stat-icon--amber',
+      value: <StarTriplet count={run.stars || run.mastery_progress.stars || 0} mode="challenge" />,
+    },
+    {
+      label: 'Commands',
+      icon: TerminalSquare,
+      value: (
+        <span className="lvlctx-num" data-tour-target="command-budget">
+          {run.counts.counted_action_total} / {run.policy.max_counted_commands}
+        </span>
+      ),
+    },
+    {
+      label: 'Star target',
+      icon: Target,
+      value: (
+        <span className="lvlctx-num" data-tour-target="star-budget">
+          ≤ {starTarget} {starTarget === 1 ? 'command' : 'commands'}
+        </span>
+      ),
+    },
+    ...(run.reward_coins
+      ? [{
+          label: 'Reward',
+          icon: GitCoinIcon,
+          value: rewardClaimed ? 'Claimed' : <span className="lvlctx-num">+{run.reward_coins} GitCoins</span>,
+        }]
+      : []),
+  ]
+}
+
+/** The Challenge Gate trial's command bar, in the adventure workspace's shape. */
 export function ChallengeStatusHeader({
   run,
   isExiting = false,
@@ -15,6 +60,7 @@ export function ChallengeStatusHeader({
   onRetry,
   onStartOver,
   onReplay,
+  repoGraph,
 }: {
   run: ChallengeRun
   isExiting?: boolean
@@ -23,77 +69,21 @@ export function ChallengeStatusHeader({
   onRetry?: () => void
   onStartOver?: () => void
   onReplay?: () => void
+  repoGraph?: RepoGraphTrigger
 }) {
-  const exitLabel = run.status === 'started' ? 'Exit' : 'Back'
-  const canRetry = !run.replay && run.status === 'failed' && !!onRetry
-  const canStartOver = !run.replay && run.status === 'started' && !!onStartOver
-  const canReplay = run.replay && !!onReplay
-  const replayLabel = run.status === 'started' ? 'Start over' : 'Play again'
-  const replayIsStartOver = replayLabel === 'Start over'
-  const replayActionLabel = isRetrying ? 'Starting' : replayLabel
-  const startOverLabel = isRetrying ? 'Starting over' : 'Start over'
-
   return (
-    <header className="gameplay-workspace-header" aria-label="Challenge command bar">
-      <button
-        type="button"
-        className="gameplay-header-close"
-        disabled={isExiting}
-        title={exitLabel}
-        aria-label={isExiting ? 'Exiting' : exitLabel}
-        onClick={onExit}
-      >
-        <X aria-hidden="true" />
-      </button>
-
-      <a className="gameplay-header-brand" href="/home" aria-label="GIT it! home">
-        <img src={gitLogoImage} alt="" />
-        <span>IT it!</span>
-      </a>
-
-      <div className="gameplay-header-mission" aria-label="Current challenge">
-        <span>Challenge · {run.difficulty ?? 'Trial'}</span>
-        <strong>{run.challenge.title}</strong>
-      </div>
-
-      <span className="gameplay-header-spacer" aria-hidden="true" />
-
-      <AudioControls
-        className="gameplay-header-audio-controls"
-        buttonClassName="gameplay-header-button gameplay-header-icon-button gameplay-header-audio"
-      />
-
-      {canRetry ? (
-        <button type="button" className="gameplay-header-button" disabled={isRetrying} onClick={onRetry}>
-          <RefreshCcw aria-hidden="true" />
-          {isRetrying ? 'Starting retry' : 'Retry'}
-        </button>
-      ) : null}
-      {canStartOver ? (
-        <button
-          type="button"
-          className="gameplay-header-button gameplay-header-icon-button"
-          disabled={isRetrying}
-          title={startOverLabel}
-          aria-label={startOverLabel}
-          onClick={onStartOver}
-        >
-          <RefreshCcw aria-hidden="true" />
-        </button>
-      ) : null}
-      {canReplay ? (
-        <button
-          type="button"
-          className={`gameplay-header-button${replayIsStartOver ? ' gameplay-header-icon-button' : ''}`}
-          disabled={isRetrying}
-          title={replayActionLabel}
-          aria-label={replayActionLabel}
-          onClick={onReplay}
-        >
-          <RefreshCcw aria-hidden="true" />
-          {replayIsStartOver ? null : replayActionLabel}
-        </button>
-      ) : null}
-    </header>
+    <WorkspaceStatusHeader
+      label="Challenge command bar"
+      missionLabel="Current challenge"
+      title={run.challenge.title}
+      stats={<WorkspaceStatsBar stats={challengeStats(run)} repoGraph={repoGraph} />}
+      status={run.status}
+      isExiting={isExiting}
+      busy={isRetrying}
+      onExit={onExit}
+      onRetry={!run.replay && run.status === 'failed' ? onRetry : undefined}
+      onStartOver={!run.replay && run.status === 'started' ? onStartOver : undefined}
+      onReplay={run.replay ? onReplay : undefined}
+    />
   )
 }

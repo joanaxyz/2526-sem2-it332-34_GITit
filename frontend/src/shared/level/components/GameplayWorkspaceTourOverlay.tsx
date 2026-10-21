@@ -34,6 +34,7 @@ export function GameplayWorkspaceTourOverlay({
   showSkip,
   skipIconOnly,
   showProgress,
+  showSpeaker,
   showActions,
   finishDisabled,
   cardClassName,
@@ -59,6 +60,7 @@ export function GameplayWorkspaceTourOverlay({
   showSkip: boolean
   skipIconOnly: boolean
   showProgress: boolean
+  showSpeaker: boolean
   showActions: boolean
   finishDisabled: boolean
   cardClassName?: string
@@ -182,7 +184,7 @@ export function GameplayWorkspaceTourOverlay({
   } : {}
 
   const content = (
-    <MascotMessage className="workspace-tour__conversation">
+    <MascotMessage className="workspace-tour__conversation" showSpeaker={showSpeaker}>
       <header className="workspace-tour__header">
         <div className="workspace-tour__meta">
           <span className="workspace-tour__eyebrow">{label}</span>

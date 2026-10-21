@@ -53,11 +53,25 @@ describe('snapshotDelta', () => {
     expect(delta.headTarget).toBe('c1')
   })
 
+  it('flags git init so the hollow orb can burst into the HEAD orb', () => {
+    const folder: RepositorySnapshot = {
+      ...baseSnapshot,
+      repository_initialized: false,
+      commits: [],
+      branches: {},
+      head: { type: 'branch', name: 'main', target: null },
+    }
+    const initialized: RepositorySnapshot = { ...folder, repository_initialized: true, branches: { main: null } }
+
+    expect(snapshotDelta(folder, initialized).repositoryInitialized).toBe(true)
+    expect(snapshotDelta(initialized, { ...initialized })).toBe(NO_DELTA)
+  })
+
   it('returns the stable empty delta when the repository state is unchanged', () => {
     expect(snapshotDelta(baseSnapshot, { ...baseSnapshot })).toBe(NO_DELTA)
   })
 
-  it('marks connectors as lightweight arcane ley lines', () => {
+  it('marks connectors as length-normalised commit links', () => {
     const snapshot: RepositorySnapshot = {
       ...baseSnapshot,
       commits: [
@@ -71,6 +85,7 @@ describe('snapshotDelta', () => {
     const { edges } = buildGraph(snapshot, 'cyan', 'vertical')
 
     expect(edges[0]?.className).toBe('dag-ley-edge')
-    expect(edges[0]?.style).toMatchObject({ strokeWidth: 1.5 })
+    expect(edges[0]?.type).toBe('commitLink')
+    expect(edges[0]?.style).toMatchObject({ strokeWidth: 2 })
   })
 })

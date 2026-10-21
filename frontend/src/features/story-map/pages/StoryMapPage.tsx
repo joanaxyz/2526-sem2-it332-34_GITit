@@ -206,7 +206,8 @@ export function StoryMapPage() {
   const adventures = overview?.adventures ?? []
   const challenges = overview?.challenges ?? []
   const levels = adventures
-  const challengesLocked = activeChapter.locked
+  // A Challenge Gate opens once every tier of every level in the chapter is cleared.
+  const challengesLocked = activeChapter.locked || (challenges.length > 0 && challenges.every((gate) => gate.locked))
   const leftRailHidden = compactStoryMap && !leftRailOpen
   const rightRailHidden = compactStoryMap && !rightRailOpen
   const showingOrientation = activeChapter.is_orientation

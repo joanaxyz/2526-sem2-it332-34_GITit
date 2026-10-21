@@ -2,21 +2,22 @@ import { act, cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
-import type { TierDagAnimationController } from '@/features/story-map/hooks/useTierDagAnimation'
-import { useTierRepoDrawer } from '@/features/story-map/hooks/useTierRepoDrawer'
+import { tierScene } from '@/features/story-map/components/tierWorkspaceLayout'
+import type { DagAnimationController } from '@/shared/level/workspace/useDagAnimation'
+import { useRepoGraphDrawer } from '@/shared/level/workspace/useRepoGraphDrawer'
 import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import type { RepositorySnapshot } from '@/shared/level/types'
 
 // Heavy leaves are stubbed; every panel decision under test stays real.
-vi.mock('@/features/story-map/components/TierBattlePanel', () => ({
-  TierBattlePanel: () => <div data-testid="battle-stage" />,
+vi.mock('@/shared/level/workspace/WorkspaceBattlePanel', () => ({
+  WorkspaceBattlePanel: () => <div data-testid="battle-stage" />,
 }))
 vi.mock('@/shared/level/components/WorkspaceEditorOverlay', () => ({ WorkspaceEditorOverlay: () => null }))
 vi.mock('@/shared/level/components/ProjectStructurePanel', () => ({
   ProjectStructurePanel: () => <div data-testid="project-files" />,
 }))
-vi.mock('@/features/story-map/components/TierDagStage', () => ({
-  TierDagStage: ({ showHeader = true }: { showHeader?: boolean }) => (
+vi.mock('@/shared/level/workspace/WorkspaceDagStage', () => ({
+  WorkspaceDagStage: ({ showHeader = true }: { showHeader?: boolean }) => (
     <div data-testid="live-dag">{showHeader ? 'Live DAG' : null}</div>
   ),
 }))
@@ -25,8 +26,8 @@ vi.mock('@/shared/level/components/LiveDagPanel', () => ({
 }))
 
 import { TierStatsBar } from './TierStatsBar'
-import { TierWorkspaceMain } from '../TierWorkspaceMain'
-import { TIER_REPO_GRAPH_ID } from './TierDiagramStage'
+import { GameplayWorkspaceMain } from '@/shared/level/workspace/GameplayWorkspaceMain'
+import { REPO_GRAPH_ID } from '@/shared/level/workspace/WorkspaceDiagramStage'
 
 /**
  * Fading scaffolding for adventure level tiers, as the backend tier ladder
@@ -56,7 +57,7 @@ const animation = {
   onCommandStart: vi.fn(),
   onCommandResolved: vi.fn(),
   onCommandError: vi.fn(),
-} satisfies TierDagAnimationController
+} satisfies DagAnimationController
 
 const director = { animating: false } as unknown as BattleDirector
 
@@ -102,7 +103,7 @@ function makeRun(row: Row, repositoryState = snapshot(['c1'])): TierRun {
 
 /** Wires the real drawer hook into the stats bar and workspace like TierWorkspace does. */
 function Harness({ run, teachingActive = false }: { run: TierRun; teachingActive?: boolean }) {
-  const drawer = useTierRepoDrawer(run.repository_state)
+  const drawer = useRepoGraphDrawer(run.repository_state)
   return (
     <>
       <TierStatsBar
@@ -110,15 +111,16 @@ function Harness({ run, teachingActive = false }: { run: TierRun; teachingActive
         repoGraph={drawer.drawerMode ? {
           open: drawer.open,
           hasUpdate: drawer.hasUpdate,
-          controls: TIER_REPO_GRAPH_ID,
+          controls: REPO_GRAPH_ID,
           buttonRef: drawer.buttonRef,
           onOpen: drawer.openDrawer,
         } : undefined}
       />
-      <TierWorkspaceMain
+      <GameplayWorkspaceMain
         teachingActive={teachingActive}
         repoGraphDrawer={drawer.drawerMode ? { open: drawer.open, openCount: drawer.openCount, onClose: drawer.closeDrawer } : undefined}
         run={run}
+        scene={tierScene(run)}
         lines={[]}
         shellPrompt="learner"
         projectFilesOpen
@@ -182,7 +184,7 @@ describe.each(LAYOUTS)('tier fading scaffolding, $name', ({ drawer }) => {
     expect(document.querySelector('[data-tour-target="command-budget"]')).toHaveTextContent(`0 / ${row.maxCommands}`)
 
     // Drawer layout: a Repo graph button and a dialog rail; otherwise neither.
-    const rail = document.getElementById(TIER_REPO_GRAPH_ID)!
+    const rail = document.getElementById(REPO_GRAPH_ID)!
     expect(Boolean(screen.queryByRole('button', { name: /repo graph/i }))).toBe(drawer)
     expect(rail.getAttribute('role')).toBe(drawer ? 'dialog' : null)
   })

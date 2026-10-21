@@ -1,11 +1,7 @@
-import { Map, RefreshCcw, RotateCcw, Sparkles, XCircle } from 'lucide-react'
+import { Map, RefreshCcw, Repeat2, RotateCcw, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, XCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
 
-import bugIconImage from '@/assets/images/battle-outcome/bug.png'
-import skullIconImage from '@/assets/images/battle-outcome/skull.png'
-import terminalIconImage from '@/assets/images/battle-outcome/terminal.png'
-import warnIconImage from '@/assets/images/battle-outcome/warn.png'
 import { ChallengeLevelNav } from '@/features/challenges/components/ChallengeLevelNav'
 import type { ChallengeRun } from '@/features/challenges/types'
 import { GameOutcomeModal } from '@/shared/level/components/game-outcome/GameOutcomeModal'
@@ -72,7 +68,7 @@ export function ChallengeOutcomeModal({
   const message = isReplay
     ? isFailed
       ? "This free-play run ended before reaching the target state. It doesn't affect your saved progress. Play again whenever you like."
-      : "Free play complete. This run is just a replay and doesn't change your saved progress."
+      : "Nice run. Free play doesn't touch your saved progress, so replay as often as you like."
     : isFailed
       ? hitActionLimit
         ? run.failure_reason ??
@@ -87,7 +83,8 @@ export function ChallengeOutcomeModal({
     run.counts.counted_action_total > 0 &&
     run.counts.counted_action_total <= run.counts.minimum_counted_commands
 
-  const actionsAccent = targetActionsMet ? 'hsl(142 70% 55%)' : '#f59e0b'
+  // Hitting the target lights the stat gold, matching the star and wordmark art.
+  const actionsAccent = targetActionsMet ? 'hsl(var(--warning))' : 'hsl(var(--primary))'
 
   const stats = [
     {
@@ -95,7 +92,7 @@ export function ChallengeOutcomeModal({
       numerator: run.counts.counted_action_total,
       denominator: run.counts.minimum_counted_commands,
       helper: `Max allowed: ${run.counts.maximum_counted_commands}`,
-      iconSrc: terminalIconImage,
+      icon: SquareTerminal,
       accentColor: actionsAccent,
       targetMet: targetActionsMet,
     },
@@ -103,14 +100,14 @@ export function ChallengeOutcomeModal({
       label: 'Diagnostics',
       numerator: run.counts.non_counted_diagnostic_total,
       helper: 'Free inspections used',
-      iconSrc: bugIconImage,
+      icon: ScanSearch,
       accentColor: 'hsl(var(--primary))',
     },
     {
       label: 'Attempts',
       numerator: run.counts.total_attempts,
       helper: isReplay ? 'Free-play attempt' : 'Saved attempt count',
-      iconSrc: skullIconImage,
+      icon: Repeat2,
       accentColor: 'hsl(var(--primary))',
     },
   ]
@@ -118,11 +115,11 @@ export function ChallengeOutcomeModal({
   const badges = (
     <>
       <Badge
-        variant={isFailed ? 'destructive' : 'default'}
+        variant={isFailed ? 'secondary' : 'default'}
         className="game-outcome-badge"
         style={{ animationDelay: '60ms' } as CSSProperties}
       >
-        {isFailed ? <img className="game-outcome-badge-icon" src={warnIconImage} alt="" aria-hidden="true" /> : null}
+        {isFailed ? <TriangleAlert className="size-3.5" aria-hidden="true" /> : null}
         {difficultyLabel(run)} {isFailed ? 'failed' : 'complete'}
       </Badge>
       {isReplay ? (

@@ -1,0 +1,69 @@
+/* The floating "Ask Git-It" window. Git-It speaks from beside it. */
+.tutor-window { position: fixed; z-index: var(--z-overlay); }
+.tutor-window--workspace { z-index: var(--z-tutor); }
+/* On an edge or mid-drag, the whole window shows the frame's cursor. */
+.tutor-window[data-cursor] { user-select: none; }
+.tutor-window[data-cursor] * { cursor: inherit; }
+.tutor-window::before { content: ''; position: absolute; top: 30px; left: -6px; width: 10px; height: 10px; border-bottom: 1px solid var(--border-active); border-left: 1px solid var(--border-active); background: hsl(var(--card)); transform: rotate(45deg); z-index: 1; pointer-events: none; }
+.tutor-window__speaker { position: absolute; top: 8px; right: calc(100% + 12px); width: 54px; height: 68px; object-fit: contain; }
+/* Without room beside the window, Git-It moves into its header. */
+.tutor-window[data-speaker-inside] .tutor-window__speaker, .tutor-window[data-speaker-inside]::before { display: none; }
+.tutor-window[data-speaker-inside] .tutor-window__avatar { display: block; }
+.tutor-window[data-compact] :is(.tutor-chat__intro, .tutor-chat__topics, .tutor-chat__footnote) { display: none; }
+html[data-home-tutor-open] .world-mascot { visibility: hidden; }
+
+.tutor-window__panel { position: relative; height: 100%; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border-active); border-radius: 12px; background: hsl(var(--card)); color: var(--text-primary); box-shadow: var(--shadow-overlay); }
+.tutor-window__panel .tutor-chat { flex: 1; overflow: hidden; }
+.tutor-window__panel .tutor-chat__transcript { flex: 1; min-height: 48px; max-height: none; }
+.tutor-window__header { display: flex; flex-shrink: 0; align-items: center; gap: .4rem; padding: .8rem 1rem; border-bottom: 1px solid var(--border-subtle); cursor: grab; touch-action: none; user-select: none; }
+.tutor-window__avatar { display: none; width: 40px; height: 48px; object-fit: contain; }
+.tutor-window__heading { display: grid; flex: 1; gap: .15rem; min-width: 0; }
+.tutor-window__heading h2 { margin: 0; color: var(--text-primary); font-size: .95rem; font-weight: 700; line-height: 1.3; }
+.tutor-window__heading p { margin: 0; color: var(--text-secondary); font-size: .78rem; }
+
+/* The header drags the window and its edges resize it, so these controls are
+   for the keyboard: they show only on keyboard focus, where arrow keys work. */
+.tutor-window__key-control { display: grid; place-items: center; flex-shrink: 0; width: 32px; height: 32px; padding: 0; border: 0; border-radius: 6px; background: transparent; color: var(--text-secondary); cursor: pointer; }
+.tutor-window__key-control svg { width: 17px; height: 17px; }
+.tutor-window__resize { position: absolute; right: 2px; bottom: 2px; }
+.tutor-window__key-control:not(:focus-visible) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+
+.tutor-chat { min-height: 0; display: flex; flex-direction: column; gap: .7rem; padding: 1rem; font: 400 .875rem/1.55 var(--font-body, Inter, system-ui, sans-serif); }
+.tutor-chat__intro { position: relative; flex-shrink: 0; padding-right: 26px; padding-bottom: .25rem; }
+.tutor-chat__intro p { margin: 0; font-weight: 650; }
+.tutor-chat__intro span { display: block; margin-top: .25rem; font-size: .8rem; color: var(--text-secondary); }
+.tutor-chat__reset { position: absolute; right: -8px; top: -7px; display: grid; place-items: center; width: 36px; height: 36px; padding: 0; border: 0; background: transparent; color: var(--text-secondary); cursor: pointer; }
+.tutor-chat__transcript { min-height: 90px; max-height: min(350px, 36dvh); overflow-y: auto; overscroll-behavior: contain; padding-right: .25rem; }
+.tutor-chat__empty { padding: 1rem; margin: .25rem 0; border: 1px solid var(--border-subtle); border-radius: 4px 14px 14px; background: var(--surface-raised); color: var(--text-secondary); }
+.tutor-chat__message { display: flex; align-items: flex-end; gap: .5rem; margin: .8rem 0; overflow-wrap: anywhere; }
+.tutor-chat__avatar { flex-shrink: 0; width: 30px; height: 38px; object-fit: contain; }
+.tutor-chat__bubble { min-width: 0; max-width: calc(100% - 38px); padding: .75rem .9rem; background: var(--surface-raised); border: 1px solid var(--border-subtle); border-radius: 14px 14px 14px 4px; }
+.tutor-chat__message--user { justify-content: flex-end; }
+.tutor-chat__message--user .tutor-chat__bubble { background: hsl(var(--primary) / .12); border-color: hsl(var(--primary) / .25); border-radius: 14px 14px 4px 14px; }
+.tutor-chat__bubble > strong { color: hsl(var(--primary)); font-size: .7rem; }
+.tutor-chat__message--user strong { color: var(--text-secondary); }
+.tutor-chat__message p { white-space: pre-wrap; margin: .3rem 0 0; }
+.tutor-chat__sources { margin-top: .5rem; font-size: .75rem; color: var(--text-secondary); }
+.tutor-chat__sources summary { cursor: pointer; }
+.tutor-chat__sources ul { margin: .35rem 0 0; padding-left: 1rem; }
+.tutor-chat__topics { display: flex; flex-shrink: 0; gap: .4rem; flex-wrap: wrap; }
+.tutor-chat__topics button { min-height: 32px; padding: .25rem .6rem; border: 1px solid var(--border-subtle); border-radius: 7px; background: transparent; color: var(--text-primary); font: inherit; font-size: .75rem; cursor: pointer; }
+.tutor-chat__topics button:hover { background: var(--surface-raised); }
+.tutor-chat__composer { display: flex; flex-shrink: 0; gap: .4rem; align-items: flex-end; padding: .5rem; border: 1px solid var(--border-subtle); border-radius: 8px; background: hsl(var(--background)); }
+.tutor-chat__composer:focus-within { border-color: var(--border-active); }
+.tutor-chat__composer textarea { min-width: 0; flex: 1; max-height: 140px; resize: vertical; border: 0; outline: none; padding: .1rem; background: transparent; color: var(--text-primary); font: inherit; }
+.tutor-chat__composer textarea::placeholder { color: var(--text-secondary); }
+.tutor-chat__composer button { display: grid; place-items: center; flex-shrink: 0; width: 36px; height: 36px; border: 0; border-radius: 7px; background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); cursor: pointer; }
+.tutor-chat button:disabled { opacity: .5; cursor: default; }
+.tutor-chat__footnote { flex-shrink: 0; margin: 0; padding-right: 24px; font-size: .7rem; color: var(--text-secondary); }
+.tutor-chat__error { margin: 0; color: hsl(var(--destructive)); }
+.tutor-chat__pending { color: var(--text-secondary); margin: .6rem 0; }
+.tutor-window button:focus-visible, .tutor-chat button:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 3px; }
+@media (max-width: 720px) {
+  .tutor-window__speaker, .tutor-window::before { display: none; }
+  .tutor-window__avatar { display: block; }
+  .tutor-chat__topics button { min-height: 36px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .tutor-window * { scroll-behavior: auto; transition: none; }
+}

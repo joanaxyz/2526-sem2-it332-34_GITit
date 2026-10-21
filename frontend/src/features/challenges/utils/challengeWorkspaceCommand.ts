@@ -1,21 +1,24 @@
 import type { QueryClient } from '@tanstack/react-query'
 
 import { useChallengeCommandSubmission } from '@/features/challenges/hooks/useChallengeCommandSubmission'
-import type { ChallengeDagAnimationController } from '@/features/challenges/hooks/useChallengeDagAnimation'
 import type { ChallengeRun } from '@/features/challenges/types'
-import { stringList } from '@/features/challenges/components/challengeWorkspaceLayout'
 import { queryKeys } from '@/shared/api/queryKeys'
+import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
+import { battleEventsForSubmittedCommand } from '@/shared/level-runtime/commandBattle'
 import {
   confirmsPrediction,
   predictLocalOutcome,
   type CommandSubmissionOutcome,
 } from '@/shared/level-runtime/commandOutcome'
 import { isExitCommand } from '@/shared/level-runtime/commands'
+import { stringList } from '@/shared/level/workspace/layout'
+import type { DagAnimationController } from '@/shared/level/workspace/useDagAnimation'
 
 export function createChallengeWorkspaceCommandHandler({
   runId,
   mutation,
   dagAnimation,
+  battleDirector,
   queryClient,
   clearToast,
   evaluateAndNotify,
@@ -25,7 +28,8 @@ export function createChallengeWorkspaceCommandHandler({
 }: {
   runId: number
   mutation: ReturnType<typeof useChallengeCommandSubmission>
-  dagAnimation: ChallengeDagAnimationController
+  dagAnimation: DagAnimationController
+  battleDirector: BattleDirector
   queryClient: QueryClient
   clearToast: () => void
   evaluateAndNotify: (run: ChallengeRun, commandClassification: string) => void
@@ -45,16 +49,26 @@ export function createChallengeWorkspaceCommandHandler({
 
     clearToast()
     dagAnimation.onCommandStart()
+    battleDirector.onAttackStart()
 
+    const resolveTurn = (outcome: CommandSubmissionOutcome) => {
+      dagAnimation.onCommandResolved(outcome)
+      battleDirector.onResolve(battleEventsForSubmittedCommand({
+        command,
+        outcome,
+        monsters: battleDirector.currentMonsters(),
+        storyWorldSlug: runStorySlug(queryClient, runId),
+      }))
+    }
     const counts = queryClient.getQueryData<ChallengeRun>(queryKeys.challengeRun(runId))?.counts
     let predicted: CommandSubmissionOutcome | null = null
 
     const execution = mutation.mutate(command, {
       onSuccess: (response) => {
-        // A turn already shown from the local outcome only replays when the
+        // A turn already played from the local outcome only replays when the
         // server judged it differently (it is the authority on progress).
         if (!predicted || !confirmsPrediction(predicted, response.command_outcome)) {
-          dagAnimation.onCommandResolved(response.command_outcome)
+          resolveTurn(response.command_outcome)
         }
         if (response.run.status === 'completed' || response.run.status === 'failed') {
           queueOutcomeAnimation(response.run.id)
@@ -75,15 +89,24 @@ export function createChallengeWorkspaceCommandHandler({
           }
         }
       },
-      onError: () => dagAnimation.onCommandError(),
+      onError: () => {
+        dagAnimation.onCommandError()
+        battleDirector.onError()
+      },
     })
-    // Misses and read-only looks need no server verdict.
+    // Misses and read-only looks need no server verdict, so their turn plays
+    // now instead of after the round trip.
     predicted = execution && counts
       ? predictLocalOutcome(execution, {
           counted: counts.counted_action_total,
           max: counts.maximum_counted_commands,
         })
       : null
-    if (predicted) dagAnimation.onCommandResolved(predicted)
+    if (predicted) resolveTurn(predicted)
   }
+}
+
+function runStorySlug(queryClient: QueryClient, runId: number) {
+  const run = queryClient.getQueryData<ChallengeRun>(queryKeys.challengeRun(runId))
+  return run?.story?.world_slug ?? run?.story?.slug
 }

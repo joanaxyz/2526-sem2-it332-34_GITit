@@ -25,12 +25,12 @@ def test_introduces_exactly_the_one_form_the_next_step_needs(teaching_run):
 
     assert payload["phase"] == "introduction"
     assert payload["teaching_key"] == INIT
-    assert payload["title"] == "Start a repository here"
+    assert payload["title"] == "git init"
     assert payload["command_form"]["usage_form"] == "git init"
     assert payload["needs"][0]["kind"] == "repository"
     assert payload["changes"] == []
     # The concrete solution command is withheld until a missed attempt.
-    assert payload["example_command"] is None
+    assert "example_command" not in payload
 
 
 def test_follows_the_repository_through_the_solution(teaching_run):
@@ -148,9 +148,9 @@ def test_any_seeded_command_is_taught_even_without_a_wave_form(teaching_run):
     assert payload["command_form"]["usage_form"] == "git switch -c <value>"
     assert {
         "kind": "branch",
-        "text": "Branch feature is created.",
+        "text": "A branch pointer changes.",
         "action": "create",
-        "subjects": ["feature"],
+        "subjects": ["<branch>"],
     } in payload["needs"]
 
     # Once the catalog has the form, its authored syntax and label are used.
@@ -168,8 +168,9 @@ def test_any_seeded_command_is_taught_even_without_a_wave_form(teaching_run):
     )
     payload = tutor_payload(teaching_run)
     assert payload["teaching_key"] == "form:git switch -c <branch>"
-    assert payload["title"] == "Create and switch"
-    assert payload["command_form"]["summary"] == "Move HEAD to another branch."
+    assert payload["title"] == "git switch -c <branch>"
+    assert payload["command_form"]["summary"]
+    assert "feature" not in str(payload["needs"])
 
 
 def test_same_syntax_is_the_same_lesson_whatever_the_seed_slug(teaching_run):
@@ -198,11 +199,10 @@ def test_back_to_back_steps_are_offered_as_one_command(teaching_run):
     states, _ = solution_states(teaching_run.selected_variant.initial_state)
     move_to(teaching_run, states[1])
     payload = tutor_payload(teaching_run)
-    assert payload["title"] == "Stage selected paths"
+    assert payload["title"] == "git add <path>..."
     assert payload["command_form"]["usage_form"] == "git add <path>..."
     assert [change["text"] for change in payload["needs"]] == [
-        "README.md is staged.",
-        "app.py is staged.",
+        "The staging area changes for the paths you choose.",
     ]
 
 
@@ -226,7 +226,7 @@ def test_a_known_command_still_introduces_an_unseen_technique(teaching_run):
 
     payload = tutor_payload(teaching_run)
     assert payload["teaching_key"] == "technique:relative-commit"
-    assert payload["title"] == "Count back from a commit"
+    assert payload["title"] == "git reset HEAD~<n>"
     assert payload["command_form"]["usage_form"] == "git reset HEAD~<n>"
     learn(teaching_run, "technique:relative-commit")
     assert tutor_payload(teaching_run) is None
