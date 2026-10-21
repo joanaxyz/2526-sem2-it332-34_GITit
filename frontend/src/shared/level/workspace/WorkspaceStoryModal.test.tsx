@@ -113,6 +113,23 @@ describe('WorkspaceStoryModal', () => {
     expect(situation.querySelector('script, a')).toBeNull()
   })
 
+  it('preserves paragraphs and nested inline formatting in every briefing section', () => {
+    const text = 'Work on `main`.\n\n**Keep __only__ the *reviewed* change.**'
+    render(<WorkspaceStoryModal open title="Formatted briefing" intro={text}
+      task={text} startingPoint={text} expectedResult={text} realWorldContext={text}
+      onClose={vi.fn()} />)
+
+    for (const name of ['Your task', 'The situation', 'Starting point', 'Expected result', 'Why this matters']) {
+      const section = screen.getByRole('region', { name })
+      expect(Array.from(section.querySelectorAll('p'), (paragraph) => paragraph.textContent)).toEqual([
+        'Work on main.', 'Keep only the reviewed change.',
+      ])
+      expect(section.querySelector('code')?.textContent).toBe('main')
+      expect(section.querySelector('strong u')?.textContent).toBe('only')
+      expect(section.querySelector('strong em')?.textContent).toBe('reviewed')
+    }
+  })
+
   it('ignores unrelated keys and held Enter keys', () => {
     const onClose = vi.fn()
     render(<WorkspaceStoryModal open {...story} onClose={onClose} />)

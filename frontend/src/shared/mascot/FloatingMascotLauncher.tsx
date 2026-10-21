@@ -1,8 +1,8 @@
-import type { ReactNode, Ref } from 'react'
+import { useEffect, type ReactNode, type Ref } from 'react'
 import { createPortal } from 'react-dom'
 
 import { MascotPortrait } from './GuideCharacterPortrait'
-import { useFloatingPosition } from './useFloatingPosition'
+import { FLOATING_LAUNCHER_SIZES, rememberShownPosition, useFloatingPosition } from './useFloatingPosition'
 import './mascot-launcher.css'
 
 /**
@@ -10,13 +10,17 @@ import './mascot-launcher.css'
  * moves it. While that is open the launcher hides but keeps its place, so a
  * closing window can collapse back into it (`[data-mascot-launcher="<name>"]`).
  */
-export function FloatingMascotLauncher({ name, label, caption, open = false, onOpen, onDragStart, buttonRef, children }: {
+export function FloatingMascotLauncher({ name, label, caption, size = 'default', takeOverFrom, open = false, onOpen, onDragStart, buttonRef, children }: {
   /** Identifies the launcher: its saved position and its collapse selector. */
   name: string
   /** The button's accessible name, e.g. "Open command guide". */
   label: string
   /** The short tag under the portrait, e.g. "Guide". */
   caption: string
+  /** `large` when Git-It itself is the main call to action, e.g. a finished run's next step. */
+  size?: keyof typeof FLOATING_LAUNCHER_SIZES
+  /** Launchers this one replaces: it first appears where the latest of them was last seen. */
+  takeOverFrom?: readonly string[]
   open?: boolean
   onOpen: () => void
   onDragStart?: () => void
@@ -24,12 +28,27 @@ export function FloatingMascotLauncher({ name, label, caption, open = false, onO
   /** Controls pinned to the launcher, beside its button. */
   children?: ReactNode
 }) {
-  const { position, dragging, handlers, clicked } = useFloatingPosition(`mascot-launcher:${name}`, onDragStart)
+  const box = FLOATING_LAUNCHER_SIZES[size]
+  const storageKey = `mascot-launcher:${name}`
+  const { position, dragging, handlers, clicked } = useFloatingPosition(
+    storageKey,
+    onDragStart,
+    box,
+    takeOverFrom?.map((other) => `mascot-launcher:${other}`),
+  )
+
+  useEffect(() => {
+    if (!open) rememberShownPosition(storageKey, position, box)
+  }, [box, open, position, storageKey])
+  // Which half of the viewport it sits in, so pinned callouts open toward the middle.
+  const side = position.x + box.width / 2 > window.innerWidth / 2 ? 'end' : 'start'
 
   return createPortal(
     <div
       className="mascot-launcher"
       style={{ left: position.x, top: position.y }}
+      data-side={side}
+      data-size={size === 'default' ? undefined : size}
       data-dragging={dragging || undefined}
       aria-hidden={open || undefined}
       inert={open || undefined}

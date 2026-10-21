@@ -134,6 +134,12 @@
   gap: var(--space-5);
 }
 
+.tier-story-modal__mission p + p,
+.tier-story-modal__reference p + p,
+.tier-story-modal__context p + p {
+  margin-top: var(--space-3);
+}
+
 .has-story .tier-story-modal__reference {
   border-left: 1px solid var(--border-subtle);
   padding-left: var(--space-6);

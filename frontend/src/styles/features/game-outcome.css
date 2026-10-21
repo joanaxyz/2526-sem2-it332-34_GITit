@@ -360,17 +360,57 @@
   object-fit: contain;
 }
 
-/* A compact action row under the result. */
-.game-outcome-actions {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  justify-content: center;
-  gap: 0.75rem;
+/* The result dismisses on any click; the next step waits on the mascot. */
+.game-outcome-hint {
   margin-top: 1.5rem;
+  color: hsl(var(--foreground) / 0.72);
+  font-size: var(--text-xs);
+  line-height: 1.5;
 }
 
-.game-outcome-actions > .ui-button { min-width: 9rem; min-height: 2.75rem; }
+/* Git-It's speech bubble beside the workspace mascot after a run ends.
+   It opens toward the middle of the viewport, tail pointing at the portrait. */
+.outcome-next-step {
+  --outcome-bubble-bg: #102133;
+  --outcome-bubble-border: hsl(var(--primary) / 0.6);
+  position: absolute;
+  top: 28px;
+  right: calc(100% + 12px);
+  display: grid;
+  gap: 2px;
+  width: max-content;
+  max-width: min(15rem, calc(100vw - 7.5rem));
+  padding: 0.6rem 0.8rem;
+  border: 1px solid var(--outcome-bubble-border);
+  border-radius: 14px;
+  background: var(--outcome-bubble-bg);
+  box-shadow: 0 0 22px rgba(var(--theme-primary-rgb), 0.22);
+  color: hsl(var(--foreground));
+  cursor: pointer;
+  animation: outcome-next-step-in 260ms cubic-bezier(0.16, 1, 0.3, 1) both, outcome-next-step-nudge 2.8s ease-in-out 1s infinite;
+}
+.mascot-launcher[data-side="start"] .outcome-next-step { right: auto; left: calc(100% + 12px); }
+.outcome-next-step::after {
+  content: '';
+  position: absolute;
+  top: 22px;
+  right: -6px;
+  width: 10px;
+  height: 10px;
+  border-top: 1px solid var(--outcome-bubble-border);
+  border-right: 1px solid var(--outcome-bubble-border);
+  background: var(--outcome-bubble-bg);
+  transform: rotate(45deg);
+}
+.mascot-launcher[data-side="start"] .outcome-next-step::after { right: auto; left: -6px; transform: rotate(225deg); }
+.outcome-next-step:hover { --outcome-bubble-bg: #173b58; }
+.outcome-next-step[data-pending] { cursor: progress; animation: none; }
+.outcome-next-step__prompt { font-size: var(--text-sm); font-weight: 700; line-height: 1.35; }
+.outcome-next-step__detail { color: #bdd0df; font-size: var(--text-xs); line-height: 1.4; }
+
+@keyframes outcome-next-step-in { from { opacity: 0; transform: translateY(6px) scale(0.96); } }
+@keyframes outcome-next-step-nudge { 0%, 85%, 100% { transform: translateY(0); } 90% { transform: translateY(-3px); } 95% { transform: translateY(1px); } }
+@media (prefers-reduced-motion: reduce) { .outcome-next-step { animation: none; } }
 
 /* mastery child panels */
 .game-outcome-mastery-panel { border: 0 !important; background: transparent !important; box-shadow: none !important; backdrop-filter: none; }
@@ -386,19 +426,6 @@
 @media (max-width: 480px) {
   .game-outcome {
     padding: 2.75rem 0.5rem calc(0.75rem + env(safe-area-inset-bottom));
-  }
-
-  .game-outcome-actions {
-    flex-direction: column;
-    align-items: stretch;
-    width: 100%;
-    padding: 0.5rem 0 calc(0.25rem + env(safe-area-inset-bottom));
-    background: transparent;
-  }
-
-  .game-outcome-actions > * {
-    width: 100% !important;
-    max-width: none !important;
   }
 
   .game-outcome-star-art {

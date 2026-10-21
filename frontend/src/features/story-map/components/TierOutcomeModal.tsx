@@ -5,44 +5,27 @@ import type { CSSProperties } from 'react'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { GameOutcomeModal } from '@/shared/level/components/game-outcome/GameOutcomeModal'
 import { Badge } from '@/shared/components/Badge'
-import { Button } from '@/shared/components/Button'
 import { playGameOverSound, playVictorySound } from '@/shared/audio/battleAudio'
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
-
-function difficultyLabel(run: TierRun) {
-  if (!run.difficulty) return 'Adventure'
-  return run.difficulty.charAt(0).toUpperCase() + run.difficulty.slice(1)
-}
+import { difficultyLabel, tierOutcomeState } from '@/features/story-map/components/tierOutcome'
 
 /** Mirrors ChallengeOutcomeModal. Tiers have no sibling-level navigator - a
- * tier's only lateral move is next_difficulty (easy -> medium -> hard),
- * already surfaced via the "Next" action below. */
+ * tier's only lateral move is next_difficulty (easy -> medium -> hard), which
+ * tierOutcomeNextStep offers once the modal is dismissed. */
 export function TierOutcomeModal({
   open,
   run,
   onClose,
   onBackToMap,
-  onNextLevel,
   onRetry,
-  onContinue,
-  nextDifficultyLabel,
 }: {
   open: boolean
   run: TierRun
   onClose: () => void
   onBackToMap: () => void
-  onNextLevel?: () => void
   onRetry?: () => void
-  /** Starts the next run on the same tier after a scenario clear that left scenarios
-   * to play; the server picks the learner's next uncleared scenario. */
-  onContinue?: () => void
-  nextDifficultyLabel?: string | null
 }) {
-  const isFailed = run.status === 'failed'
-  const isReplay = run.replay
-  const isTransfer = Boolean(run.transfer)
-  const canAdvance = !isTransfer && !isReplay && run.status === 'completed' && Boolean(run.next_difficulty)
-  const isPartialClear = !isTransfer && !isReplay && run.status === 'completed' && !canAdvance && !run.progress.cleared
+  const { isFailed, isReplay, isTransfer, canAdvance, isPartialClear } = tierOutcomeState(run)
   // A cleared scenario that is not the tier's last names itself and the next scenario.
   const nextScenario = run.progress.next_scenario
   const rewardHint =
@@ -193,44 +176,6 @@ export function TierOutcomeModal({
     </>
   )
 
-  const actions = isTransfer ? (
-    <Button type="button" onClick={onRetry ?? onBackToMap}>Continue free practice</Button>
-  ) : canAdvance ? (
-    onNextLevel && nextDifficultyLabel ? (
-      <Button type="button" onClick={onNextLevel}>
-        Continue
-      </Button>
-    ) : (
-      <Button type="button" variant="secondary" onClick={onClose}>
-        Stay in workspace
-      </Button>
-    )
-  ) : isPartialClear ? (
-    onContinue ? (
-      <Button type="button" onClick={onContinue}>
-        Continue
-      </Button>
-    ) : null
-  ) : isFailed ? (
-    onRetry ? (
-      <Button type="button" onClick={onRetry}>
-        <RefreshCcw data-icon="inline-start" />
-        Try again
-      </Button>
-    ) : null
-  ) : isReplay ? (
-    onRetry ? (
-      <Button type="button" onClick={onRetry}>
-        <RefreshCcw data-icon="inline-start" />
-        Play again
-      </Button>
-    ) : null
-  ) : run.status === 'completed' ? (
-    <Button type="button" onClick={onBackToMap}>
-      Continue
-    </Button>
-  ) : null
-
   return (
     <GameOutcomeModal
       open={open}
@@ -246,7 +191,6 @@ export function TierOutcomeModal({
       headline={headline}
       message={message}
       stats={stats}
-      actions={actions}
       headerActions={headerActions}
     />
   )

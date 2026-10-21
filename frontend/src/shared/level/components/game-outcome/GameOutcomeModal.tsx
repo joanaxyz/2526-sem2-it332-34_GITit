@@ -1,5 +1,4 @@
 import type { ComponentType, ReactNode } from 'react'
-import { X } from 'lucide-react'
 
 import titlesImage from '@/assets/images/battle-outcome/titles.webp'
 import { Modal } from '@/shared/components/Modal'
@@ -39,6 +38,8 @@ export type GameOutcomeStat = {
 /**
  * Shared game result overlay for challenge and adventure run endings. Feature
  * wrappers own outcome state and copy; this component owns the visual chrome.
+ * A click anywhere dismisses it; the run's next step then waits on the
+ * workspace's OutcomeNextStepMascot.
  */
 export function GameOutcomeModal({
   open,
@@ -56,7 +57,6 @@ export function GameOutcomeModal({
   note,
   stats,
   children,
-  actions,
   headerActions,
   className,
 }: {
@@ -79,10 +79,9 @@ export function GameOutcomeModal({
   /** Optional emphasised aside under the message. */
   note?: ReactNode
   stats?: GameOutcomeStat[]
-  /** Surface-specific section rendered between the stats and the actions. */
+  /** Surface-specific section rendered under the stats. */
   children?: ReactNode
-  actions?: ReactNode
-  /** Icon-button actions rendered in the top-right header cluster (alongside the close button). */
+  /** Icon-button actions rendered in the top-right header cluster. */
   headerActions?: ReactNode
   className?: string
 }) {
@@ -102,25 +101,11 @@ export function GameOutcomeModal({
       overlayClassName="game-outcome-backdrop"
       contentClassName="p-0"
       hideHeader
+      dismissOnClick
       onClose={onClose}
     >
       <div className={cn('game-outcome relative overflow-hidden', isFailed ? 'is-failure' : 'is-success')}>
-        <div className="game-outcome-header-actions">
-          {headerActions ? (
-            <>
-              {headerActions}
-              <span className="game-outcome-header-divider" aria-hidden="true" />
-            </>
-          ) : null}
-          <button
-            type="button"
-            className="game-outcome-header-btn"
-            onClick={onClose}
-            aria-label="Close modal"
-          >
-            <X className="size-3.5" />
-          </button>
-        </div>
+        {headerActions ? <div className="game-outcome-header-actions">{headerActions}</div> : null}
         {!isFailed ? <GameOutcomeConfetti /> : null}
 
         <div className="game-outcome-hero relative text-center">
@@ -179,7 +164,9 @@ export function GameOutcomeModal({
 
           {children}
 
-          {actions ? <div className="game-outcome-actions">{actions}</div> : null}
+          <p className="game-outcome-hint">
+            Click anywhere to continue<span className="sr-only">, or press Enter, Space, or Escape.</span>
+          </p>
         </div>
       </div>
     </Modal>

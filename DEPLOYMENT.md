@@ -2,13 +2,16 @@
 
 The optional learning tutor reads `GOOGLE_AI_STUDIO_API_KEY` and `GROQ_API_KEY`
 on the backend only. `TUTOR_GEMINI_MODELS` is an ordered comma-separated list
-(default `gemini-3.5-flash-lite:minimal,gemini-3.8-flash:low`), followed by
+(default `gemini-3.5-flash:minimal,gemini-3.6-flash:minimal`), followed by
 `TUTOR_GROQ_MODEL` (default `openai/gpt-oss-20b:low`). The optional `:effort` suffix
 sets Gemini `thinkingLevel` or Groq `reasoning_effort`; use only levels the model
 supports, because a rejected request is a configuration failure. Limited models enter
 a shared-cache cooldown; authentication/configuration failures do not trigger
 rate-limit rotation. Each attempt is capped by `TUTOR_PROVIDER_ATTEMPT_SECONDS`
-(default 10) within `TUTOR_PROVIDER_DEADLINE_SECONDS` (default 20);
+(default 10) within `TUTOR_PROVIDER_DEADLINE_SECONDS` (default 20). A model with no
+reply after `TUTOR_PROVIDER_HEDGE_SECONDS` (default 4) keeps running while the next
+one starts; the first usable reply wins, and a model outrun this way sits out for two
+minutes. A hedge of at least the attempt budget tries models strictly one at a time.
 `THROTTLE_TUTOR_CHAT` defaults to `12/min` per authenticated user. If every provider
 fails, the tutor says it is unavailable; scenario protection never relaxes.
 

@@ -1,5 +1,8 @@
 import json
 import math
+import threading
+import time
+from concurrent.futures import Future
 from unittest.mock import patch
 
 import pytest
@@ -256,47 +259,117 @@ def test_validated_replies_are_reused():
 
 # Providers.
 
-
-def test_gemini_to_alternate_to_groq_and_cooldowns(settings):
-    settings.GOOGLE_AI_STUDIO_API_KEY = "test-google"
-    settings.GROQ_API_KEY = "test-groq"
-    settings.TUTOR_GEMINI_MODELS = ("first", "second")
-    turns = [{"role": "user", "text": "Explain repositories"}]
-    with (
-        patch(
-            "tutoring.services.providers._gemini", side_effect=ProviderError(429, "60")
-        ) as google,
-        patch("tutoring.services.providers._groq", return_value=" A repository... ") as groq,
-    ):
-        assert generate("system", turns) == "A repository..."
-        assert google.call_count == 2 and groq.call_count == 1
-        assert generate("system", turns) == "A repository..."
-        assert google.call_count == 2  # Both Gemini models remain on cooldown.
-        assert groq.call_count == 2
+TURNS = [{"role": "user", "text": "Explain repositories"}]
 
 
-def test_empty_candidates_rotate_and_auth_errors_stop(settings):
+def gemini_says(text):
+    return {"candidates": [{"content": {"parts": [{"text": text}]}}]}
+
+
+def groq_says(text):
+    return {"choices": [{"message": {"content": text}}]}
+
+
+def transport(gemini, groq):
+    """A fake `start_json`. Each provider's outcome is a response, an error or a Future,
+    or a list of those for its successive attempts."""
+    calls = []
+
+    def start(url, headers, body, timeout):
+        provider = "gemini" if "generativelanguage" in url else "groq"
+        calls.append(provider)
+        outcome = gemini if provider == "gemini" else groq
+        if isinstance(outcome, list):
+            outcome = outcome[calls.count(provider) - 1]
+        if isinstance(outcome, Future):
+            return outcome
+        future = Future()
+        if isinstance(outcome, Exception):
+            future.set_exception(outcome)
+        else:
+            future.set_result(outcome)
+        return future
+
+    return start, calls
+
+
+@pytest.fixture
+def provider_keys(settings):
     settings.GOOGLE_AI_STUDIO_API_KEY = "test-google"
     settings.GROQ_API_KEY = "test-groq"
     settings.TUTOR_GEMINI_MODELS = ("first",)
-    turns = [{"role": "user", "text": "Explain repositories"}]
-    with (
-        patch("tutoring.services.providers._gemini", return_value="  "),
-        patch("tutoring.services.providers._groq", return_value="Fallback") as groq,
-    ):
-        assert generate("system", turns) == "Fallback"
-        assert groq.call_count == 1
-    with (
-        patch("tutoring.services.providers._gemini", side_effect=ProviderError(403)),
-        patch("tutoring.services.providers._groq") as groq,
-    ):
-        assert generate("system", turns) is None
-        groq.assert_not_called()
 
 
-def test_provider_requests_carry_system_turns_and_effort(settings):
-    settings.GOOGLE_AI_STUDIO_API_KEY = "test-google"
-    settings.GROQ_API_KEY = "test-groq"
+def test_gemini_to_alternate_to_groq_and_cooldowns(provider_keys, settings):
+    settings.TUTOR_GEMINI_MODELS = ("first", "second")
+    start, calls = transport(ProviderError(429, "60"), groq_says(" A repository... "))
+    with patch("tutoring.services.providers.start_json", side_effect=start):
+        assert generate("system", TURNS) == "A repository..."
+        assert calls == ["gemini", "gemini", "groq"]
+        assert generate("system", TURNS) == "A repository..."
+        assert calls[3:] == ["groq"]  # Both Gemini models remain on cooldown.
+
+
+def test_empty_candidates_rotate_and_auth_errors_stop(provider_keys):
+    start, calls = transport(gemini_says("  "), groq_says("Fallback"))
+    with patch("tutoring.services.providers.start_json", side_effect=start):
+        assert generate("system", TURNS) == "Fallback"
+    assert calls == ["gemini", "groq"]
+    start, calls = transport(ProviderError(403), groq_says("Fallback"))
+    with patch("tutoring.services.providers.start_json", side_effect=start):
+        assert generate("system", TURNS) is None
+    assert calls == ["gemini"]
+
+
+def test_a_model_answering_within_the_hedge_starts_no_backup(provider_keys, settings):
+    settings.TUTOR_PROVIDER_HEDGE_SECONDS = 5
+    answer = Future()
+    threading.Timer(0.05, answer.set_result, [gemini_says("From Gemini")]).start()
+    start, calls = transport(answer, groq_says("From Groq"))
+    with patch("tutoring.services.providers.start_json", side_effect=start):
+        assert generate("system", TURNS) == "From Gemini"
+    assert calls == ["gemini"]
+
+
+def test_a_stalled_model_is_hedged_cancelled_and_sits_out(provider_keys, settings):
+    settings.TUTOR_PROVIDER_HEDGE_SECONDS = 0.05
+    stalled = Future()
+    start, calls = transport(stalled, groq_says("From Groq"))
+    with patch("tutoring.services.providers.start_json", side_effect=start):
+        began = time.monotonic()
+        assert generate("system", TURNS) == "From Groq"
+        # The learner waits out the hedge delay, not the stalled attempt's budget.
+        assert time.monotonic() - began < 1
+        assert stalled.cancelled() and calls == ["gemini", "groq"]
+        # The outrun model sits out, so the next learner goes straight to Groq.
+        assert generate("system", TURNS) == "From Groq"
+        assert calls[2:] == ["groq"]
+
+
+def test_a_backup_failing_outright_starts_the_next_model_at_once(provider_keys, settings):
+    settings.TUTOR_GEMINI_MODELS = ("first", "second")
+    settings.TUTOR_PROVIDER_HEDGE_SECONDS = 0.5
+    start, calls = transport([Future(), ProviderError(503)], groq_says("From Groq"))
+    with patch("tutoring.services.providers.start_json", side_effect=start):
+        began = time.monotonic()
+        assert generate("system", TURNS) == "From Groq"
+        # One hedge delay for the stalled model; none after the overloaded one.
+        assert time.monotonic() - began < 0.9
+    assert calls == ["gemini", "gemini", "groq"]
+
+
+def test_attempts_that_never_settle_end_at_the_deadline(provider_keys, settings):
+    settings.TUTOR_PROVIDER_HEDGE_SECONDS = 0.05
+    settings.TUTOR_PROVIDER_DEADLINE_SECONDS = 0.1
+    gemini, groq = Future(), Future()
+    start, calls = transport(gemini, groq)
+    with patch("tutoring.services.providers.start_json", side_effect=start):
+        assert generate("system", TURNS) is None
+    assert calls == ["gemini", "groq"]
+    assert gemini.cancelled() and groq.cancelled()
+
+
+def test_provider_requests_carry_system_turns_and_effort(provider_keys, settings):
     settings.TUTOR_GEMINI_MODELS = ("lite:minimal", "plain")
     settings.TUTOR_GROQ_MODEL = "oss:low"
     turns = [
@@ -304,7 +377,8 @@ def test_provider_requests_carry_system_turns_and_effort(settings):
         {"role": "assistant", "text": "a"},
         {"role": "user", "text": "more"},
     ]
-    with patch("tutoring.services.providers.post_json", side_effect=ProviderError(429)) as post:
+    start, _ = transport(ProviderError(429), ProviderError(429))
+    with patch("tutoring.services.providers.start_json", side_effect=start) as post:
         assert generate("rules", turns) is None
     lite, plain, oss = (call.args for call in post.call_args_list)
     assert lite[0].endswith("/models/lite:generateContent")

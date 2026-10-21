@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { Star } from 'lucide-react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
@@ -61,5 +61,27 @@ describe('GameOutcomeModal star artwork', () => {
 
     expect(document.querySelector('.game-outcome-star-art')).not.toBeInTheDocument()
     expect(document.querySelector('.game-outcome-icon-crest')).toBeInTheDocument()
+  })
+})
+
+describe('GameOutcomeModal dismissal', () => {
+  it('has no close button and closes on a click anywhere', () => {
+    const close = vi.fn()
+    render(<GameOutcomeModal open onClose={close} title="Run result" icon={Star} headline="Run complete" message="Your result" />)
+
+    expect(screen.queryByRole('button', { name: 'Close modal' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByText('Your result'))
+    expect(close).toHaveBeenCalledOnce()
+  })
+
+  it('lets header actions keep their own keyboard activation', () => {
+    const close = vi.fn()
+    render(<GameOutcomeModal open onClose={close} title="Run result" icon={Star} headline="Run complete" message="Your result"
+      headerActions={<button type="button">Back to Map</button>} />)
+
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Back to Map' }), { key: 'Enter' })
+    expect(close).not.toHaveBeenCalled()
+    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Enter' })
+    expect(close).toHaveBeenCalledOnce()
   })
 })
