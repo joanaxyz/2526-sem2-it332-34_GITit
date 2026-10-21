@@ -199,10 +199,10 @@ def _write_bank(tmp_path, scenarios: dict) -> object:
 
 def test_extension_mode_ends_scenarios_at_module_headings_and_accepts_gate_numbers(tmp_path):
     module = _importer_module()
-    source = tmp_path / "waves.md"
+    source = tmp_path / "scenarios.md"
     source.write_text(
-        "# Waves\n\n## Module 1\n"
-        + _EXTENSION_SCENARIO.format(number="1.1.12", title="One", variant="wave-one")
+        "# Scenarios\n\n## Module 1\n"
+        + _EXTENSION_SCENARIO.format(number="1.1.12", title="One", variant="scenario-one")
         + "\n## Module 2\n"
         + _EXTENSION_SCENARIO.format(number="2.G.1", title="Gate", variant="gate-one"),
         encoding="utf-8",
@@ -214,14 +214,14 @@ def test_extension_mode_ends_scenarios_at_module_headings_and_accepts_gate_numbe
         module.render_document(source, extension=True, bank_path=_write_bank(tmp_path, {}))
     )
 
-    assert list(rendered) == ["wave-one", "gate-one"]
-    assert rendered["wave-one"]["evaluation"] == ["First check.", "Last check."]
+    assert list(rendered) == ["scenario-one", "gate-one"]
+    assert rendered["scenario-one"]["evaluation"] == ["First check.", "Last check."]
     assert rendered["gate-one"]["scenario_number"] == "2.G.1"
 
 
 def test_extension_mode_rejects_ids_or_numbers_already_in_the_bank(tmp_path):
     module = _importer_module()
-    source = tmp_path / "waves.md"
+    source = tmp_path / "scenarios.md"
     source.write_text(
         _EXTENSION_SCENARIO.format(number="1.1.12", title="One", variant="taken"),
         encoding="utf-8",
@@ -241,10 +241,10 @@ def test_extension_mode_rejects_ids_or_numbers_already_in_the_bank(tmp_path):
         )
 
 
-def test_committed_wave_bank_is_current_with_its_markdown():
+def test_committed_scenario_bank_is_current_with_its_markdown():
     module = _importer_module()
-    source = REPO_ROOT / "backend/curriculum/seed_data/source/wave_scenarios.md"
-    compiled = REPO_ROOT / "backend/curriculum/seed_data/scenario_bank_waves.json"
+    source = REPO_ROOT / "backend/curriculum/seed_data/source/extension_scenarios.md"
+    compiled = REPO_ROOT / "backend/curriculum/seed_data/scenario_bank_extension.json"
 
     assert module.render_document(source, extension=True) == compiled.read_text(encoding="utf-8")
 

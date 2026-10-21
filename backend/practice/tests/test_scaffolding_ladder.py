@@ -96,8 +96,8 @@ def _tier_run(django_user_model, difficulty: str):
         AdventureLevel,
         AdventureLevelTier,
         AdventureLevelTierRun,
-        AdventureLevelTierWave,
-        AdventureLevelTierWaveVariant,
+        AdventureLevelTierScenario,
+        AdventureLevelTierScenarioVariant,
     )
     from curriculum.models import Chapter, Story
     from players.services import get_or_create_player
@@ -115,12 +115,12 @@ def _tier_run(django_user_model, difficulty: str):
         chapter=chapter, slug=f"ladder-{difficulty}", title="Ladder"
     )
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty=difficulty)
-    wave = AdventureLevelTierWave.objects.create(
+    scenario = AdventureLevelTierScenario.objects.create(
         tier=tier, slug=f"ladder-{difficulty}", max_counted_commands=8
     )
     states = stage_readme_states()
-    variant = AdventureLevelTierWaveVariant.objects.create(
-        wave=wave,
+    variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
         slug=f"ladder-{difficulty}",
         label="Ladder",
         initial_state=states.initial,
@@ -131,7 +131,7 @@ def _tier_run(django_user_model, difficulty: str):
     return AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variant,
         repository_state=states.initial,
         max_counted_commands=8,

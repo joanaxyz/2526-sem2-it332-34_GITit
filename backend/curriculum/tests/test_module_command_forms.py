@@ -5,7 +5,7 @@ The authoring rules are documented in CONTENT_AUTHORING_GUIDE.md.
 
 from django.core.management import call_command
 
-from adventures.models import AdventureLevel, AdventureLevelTierWaveVariant
+from adventures.models import AdventureLevel, AdventureLevelTierScenarioVariant
 from adventures.services import AdventureLevelTierRunService
 from adventures.services.tier_command_processing import AdventureLevelTierCommandProcessingService
 from curriculum.models import CommandForm
@@ -14,7 +14,7 @@ from practice.models import CommandStep
 from tutoring.services.forms import resolve_form
 from tutoring.services.planner import plan_introduction
 
-REGISTERED_FOR_WAVES = {
+REGISTERED_FOR_SCENARIOS = {
     2: ["git branch <branch> [<start-point>]"],
     3: [
         "git commit --no-edit",
@@ -40,10 +40,10 @@ def _level(slug: str) -> AdventureLevel:
     return AdventureLevel.objects.get(slug=slug, is_published=True)
 
 
-def test_the_forms_the_waves_need_are_registered_under_their_module(db):
+def test_the_forms_the_scenarios_need_are_registered_under_their_module(db):
     call_command("seed_curriculum", verbosity=0)
 
-    for module, usages in REGISTERED_FOR_WAVES.items():
+    for module, usages in REGISTERED_FOR_SCENARIOS.items():
         published = set(
             CommandForm.objects.filter(
                 is_published=True, chapter__number=module, slug__startswith="legacy-m"
@@ -60,7 +60,7 @@ def test_every_solution_command_resolves_to_a_registered_form(db):
     call_command("seed_curriculum", verbosity=0)
 
     unregistered = set()
-    for variant in AdventureLevelTierWaveVariant.objects.filter(is_published=True):
+    for variant in AdventureLevelTierScenarioVariant.objects.filter(is_published=True):
         for command in variant.solution_commands:
             guide = resolve_form(command)
             assert guide is not None, command
@@ -106,7 +106,7 @@ def test_a_veteran_still_gets_the_add_patch_guide_after_clearing_basic_commits(
             was_processable=True,
         )
     credited = AdventureLevelTierCommandProcessingService()._credit_mastery(
-        cleared, list(cleared.current_wave.command_forms.all())
+        cleared, list(cleared.current_scenario.command_forms.all())
     )
     assert "git add -p <path>" not in {
         CommandForm.objects.get(

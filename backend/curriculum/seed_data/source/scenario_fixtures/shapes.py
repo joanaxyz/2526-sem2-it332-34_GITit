@@ -1,4 +1,4 @@
-"""Small builders shared by the wave scenario fixture modules."""
+"""Small builders shared by the scenario fixture modules."""
 
 from __future__ import annotations
 

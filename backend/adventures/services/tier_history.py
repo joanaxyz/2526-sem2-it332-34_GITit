@@ -6,7 +6,7 @@ class TierCommandHistoryCache(LRUCommandHistoryCache):
     """Mirrors challenges.services.history.CommandHistoryCache for the
     AdventureLevelTierRun surface. LRUCommandHistoryCache gives each
     subclass its own isolated cache store, so this never collides with the
-    challenge or adventure-wave caches on overlapping integer ids/counts."""
+    challenge or adventure-scenario caches on overlapping integer ids/counts."""
 
     @staticmethod
     def key_for(*, run: AdventureLevelTierRun, attempt_count: int) -> tuple[object, ...]:

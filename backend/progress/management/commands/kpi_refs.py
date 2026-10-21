@@ -2,7 +2,7 @@ from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
-from adventures.models import AdventureLevelTierWaveVariant
+from adventures.models import AdventureLevelTierScenarioVariant
 from progress.services.references import state_key, validate_refs
 
 
@@ -19,12 +19,12 @@ class Command(BaseCommand):
 
     @transaction.atomic
     def handle(self, *args, **options):
-        variants = AdventureLevelTierWaveVariant.objects.filter(
+        variants = AdventureLevelTierScenarioVariant.objects.filter(
             is_published=True,
-            wave__is_published=True,
-            wave__tier__is_published=True,
-            wave__tier__adventure_level__chapter__story__slug="arcane-spire",
-        ).select_related("wave__tier__adventure_level__chapter")
+            scenario__is_published=True,
+            scenario__tier__is_published=True,
+            scenario__tier__adventure_level__chapter__story__slug="arcane-spire",
+        ).select_related("scenario__tier__adventure_level__chapter")
         if options["cases"]:
             variants = variants.filter(slug__in=options["cases"])
         variants = list(variants)
@@ -41,11 +41,11 @@ class Command(BaseCommand):
             if options["diagnostics"]:
                 variant.assess_diag = True
             if options["reserve"]:
-                ordinary = variant.wave.variants.filter(
+                ordinary = variant.scenario.variants.filter(
                     is_published=True, is_transfer=False
                 ).exclude(pk__in=reserved_ids)
                 if (
-                    variant.wave.tier.adventure_level.chapter.number not in (3, 4)
+                    variant.scenario.tier.adventure_level.chapter.number not in (3, 4)
                     or not ordinary.exists()
                     or any(state_key(v) == state_key(variant) for v in ordinary)
                 ):

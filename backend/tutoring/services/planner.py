@@ -56,7 +56,7 @@ class PlannerReads:
         self._history: dict[tuple[int, int], list[str]] = {}
         self._used: dict[str, list[str]] = {}
         self._catalog: dict[str, list[CommandForm]] = {}
-        self._wave_forms: dict[int, list[CommandForm]] = {}
+        self._scenario_forms: dict[int, list[CommandForm]] = {}
 
     def history(self, run) -> list[str]:
         """The run's processable commands so far."""
@@ -120,12 +120,12 @@ class PlannerReads:
             self._catalog[family] = catalog_forms(family)
         return self._catalog[family]
 
-    def wave_forms(self, wave) -> list[CommandForm]:
-        if wave.id not in self._wave_forms:
-            self._wave_forms[wave.id] = list(
-                wave.command_forms.filter(is_published=True).select_related("command_skill")
+    def scenario_forms(self, scenario) -> list[CommandForm]:
+        if scenario.id not in self._scenario_forms:
+            self._scenario_forms[scenario.id] = list(
+                scenario.command_forms.filter(is_published=True).select_related("command_skill")
             )
-        return self._wave_forms[wave.id]
+        return self._scenario_forms[scenario.id]
 
 
 @dataclass(frozen=True)
@@ -148,7 +148,7 @@ class Candidate:
 
 
 def plan_introduction(run, reads: PlannerReads | None = None) -> Candidate | None:
-    if run.status != SESSION_STATUS_STARTED or not run.current_wave_id:
+    if run.status != SESSION_STATUS_STARTED or not run.current_scenario_id:
         return None
     reads = reads or PlannerReads(run.player_id)
     trajectory = run.selected_variant.solution_trajectory
@@ -180,7 +180,7 @@ def plan_introduction(run, reads: PlannerReads | None = None) -> Candidate | Non
 
 def _next_lesson(run, command: str, reads: PlannerReads) -> FormGuide | None:
     form = resolve_form(
-        command, preferred=reads.wave_forms(run.current_wave), catalog=reads.catalog
+        command, preferred=reads.scenario_forms(run.current_scenario), catalog=reads.catalog
     )
     if form is None:
         return None

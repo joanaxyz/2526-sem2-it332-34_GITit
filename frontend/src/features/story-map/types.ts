@@ -12,7 +12,7 @@ export type AdventureLevelTierAccess = {
   id: number
   difficulty: 'easy' | 'medium' | 'hard'
   locked: boolean
-  wave_progress: { completed: number; total: number }
+  scenario_progress: { completed: number; total: number }
   completion: LevelCompletionSummary | null
   /** First-clear GitCoins for this tier; `claimed` once it has been paid. */
   reward: { coins: number; claimed: boolean }
@@ -55,7 +55,7 @@ type AdventureSummary = {
   // the challenge gate and progress so a post-pass replay can't relock anything.
   is_passed: boolean
   // Per-difficulty tiers for levels ported from the old Module 1-4 scenario
-  // system. Empty for every existing arcane-spire level (single-wave flow) -
+  // system. Empty for every existing arcane-spire level (single-scenario flow) -
   // StoryAdventurePath falls back to the plain Play pill in that case.
   tiers: AdventureLevelTierAccess[]
   // Optional on the type as well as at runtime: a client can outlive the

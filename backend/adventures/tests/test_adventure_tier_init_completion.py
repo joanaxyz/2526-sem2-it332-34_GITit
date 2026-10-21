@@ -6,8 +6,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierProgress,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from adventures.services import AdventureLevelTierRunService
 from curriculum.models import Chapter, CommandForm, CommandSkill, Story
@@ -34,13 +34,13 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
     )
     easy = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
     medium = AdventureLevelTier.objects.create(adventure_level=level, difficulty="medium")
-    easy_wave = AdventureLevelTierWave.objects.create(
+    easy_scenario = AdventureLevelTierScenario.objects.create(
         tier=easy,
         slug="init-easy",
         min_counted_commands=1,
         max_counted_commands=12,
     )
-    medium_wave = AdventureLevelTierWave.objects.create(
+    medium_scenario = AdventureLevelTierScenario.objects.create(
         tier=medium,
         slug="init-medium",
         min_counted_commands=1,
@@ -59,8 +59,8 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
         label="Initialize the current folder",
     )
     level.command_forms.add(command_form)
-    easy_wave.command_forms.add(command_form)
-    medium_wave.command_forms.add(command_form)
+    easy_scenario.command_forms.add(command_form)
+    medium_scenario.command_forms.add(command_form)
     initial_state = {
         "repository_initialized": False,
         "commits": [],
@@ -90,8 +90,8 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
             "value": False,
         },
     ]
-    variant = AdventureLevelTierWaveVariant.objects.create(
-        wave=easy_wave,
+    variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=easy_scenario,
         slug="init-easy-current-empty",
         label="Initialize the current folder",
         initial_state=initial_state,
@@ -107,8 +107,8 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
         },
         solution_commands=["git init"],
     )
-    AdventureLevelTierWaveVariant.objects.create(
-        wave=medium_wave,
+    AdventureLevelTierScenarioVariant.objects.create(
+        scenario=medium_scenario,
         slug="init-medium-placeholder",
         label="Initialize a named folder",
         initial_state=initial_state,
@@ -176,7 +176,7 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
         "completed": 1,
         "total": 1,
         "cleared": True,
-        "next_wave": None,
+        "next_scenario": None,
     }
     assert payload["run"]["completion"] is not None
     assert payload["run"]["next_difficulty"] == {"id": medium.id, "difficulty": "medium"}

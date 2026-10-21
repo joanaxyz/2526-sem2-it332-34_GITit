@@ -1,20 +1,20 @@
-"""Ordered waves inside a tier, as documented in CONTENT_AUTHORING_GUIDE.md.
+"""Ordered scenarios inside a tier, as documented in CONTENT_AUTHORING_GUIDE.md.
 
-A run plays the learner's next uncleared wave and rotates variants within it;
-the tier completes on its last wave; free play cycles the waves. A tier with
-one wave needing several clears behaves exactly as before.
+A run plays the learner's next uncleared scenario and rotates variants within it;
+the tier completes on its last scenario; free play cycles the scenarios. A tier with
+one scenario needing several clears behaves exactly as before.
 """
 
 from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierProgress,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from adventures.services import AdventureLevelTierRunService
 from adventures.services.tier_command_processing import AdventureLevelTierCommandProcessingService
-from adventures.tier_payloads import progress_payload, wave_payload
+from adventures.tier_payloads import progress_payload, scenario_payload
 from curriculum.models import Chapter, Story
 from players.services import get_or_create_player
 from progress.models import AdventureLevelTierCompletion
@@ -30,8 +30,8 @@ STATE = {
 }
 
 
-def _tier(django_user_model, *, waves: list[tuple[str, list[str]]], name: str = "waves"):
-    """``waves``: (slug, variant slugs in authored order); one clear each."""
+def _tier(django_user_model, *, scenarios: list[tuple[str, list[str]]], name: str = "scenarios"):
+    """``scenarios``: (slug, variant slugs in authored order); one clear each."""
     player = get_or_create_player(
         django_user_model.objects.create_user(username=name, password="pass12345")
     )
@@ -41,8 +41,8 @@ def _tier(django_user_model, *, waves: list[tuple[str, list[str]]], name: str = 
     )
     level = AdventureLevel.objects.create(chapter=chapter, slug=f"{name}-level", title="Level")
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    for order, (slug, variants) in enumerate(waves):
-        wave = AdventureLevelTierWave.objects.create(
+    for order, (slug, variants) in enumerate(scenarios):
+        scenario = AdventureLevelTierScenario.objects.create(
             tier=tier,
             slug=slug,
             title=slug.replace("-", " ").title(),
@@ -52,8 +52,8 @@ def _tier(django_user_model, *, waves: list[tuple[str, list[str]]], name: str = 
         )
         # Authored order wins over alphabetical case IDs.
         for variant_order, variant_slug in enumerate(variants):
-            AdventureLevelTierWaveVariant.objects.create(
-                wave=wave,
+            AdventureLevelTierScenarioVariant.objects.create(
+                scenario=scenario,
                 slug=variant_slug,
                 semantic_key=variant_slug,
                 sort_order=variant_order,
@@ -86,26 +86,26 @@ def _fail(run):
     run.save(update_fields=["status"])
 
 
-def test_runs_walk_the_waves_in_order_and_the_last_wave_completes_the_tier(db, django_user_model):
+def test_runs_walk_the_scenarios_in_order_and_the_last_scenario_completes_the_tier(db, django_user_model):
     player, tier = _tier(
         django_user_model,
-        waves=[
+        scenarios=[
             ("publish-a-branch", ["z-first", "a-second"]),
             ("publish-and-track", ["track-one", "track-two"]),
         ],
     )
 
     first = _start(player, tier)
-    assert first.current_wave.slug == "publish-a-branch"
+    assert first.current_scenario.slug == "publish-a-branch"
     assert first.selected_variant.slug == "z-first"  # authored order, not alphabetical
-    assert wave_payload(first) == {"index": 1, "total": 2, "title": "Publish A Branch"}
+    assert scenario_payload(first) == {"index": 1, "total": 2, "title": "Publish A Branch"}
 
     rewards = _solve(first)
     first._payload_context_loaded = False
     progress = progress_payload(first)
     assert progress["completed"] == 1 and progress["total"] == 2
     assert progress["cleared"] is False
-    assert progress["next_wave"] == {
+    assert progress["next_scenario"] == {
         "index": 2,
         "slug": "publish-and-track",
         "title": "Publish And Track",
@@ -114,24 +114,24 @@ def test_runs_walk_the_waves_in_order_and_the_last_wave_completes_the_tier(db, d
     assert not AdventureLevelTierCompletion.objects.filter(player=player, tier=tier).exists()
 
     second = _start(player, tier)
-    assert second.current_wave.slug == "publish-and-track"
+    assert second.current_scenario.slug == "publish-and-track"
     assert second.selected_variant.slug == "track-one"
     rewards = _solve(second, within_budget=False)
 
     completion = AdventureLevelTierCompletion.objects.get(player=player, tier=tier)
     assert rewards["coins_awarded"] == 25
-    # The tier is graded by its weakest wave (decision D3).
+    # The tier is graded by its weakest scenario (decision D3).
     assert completion.stars == 1
-    assert AdventureLevelTierProgress.objects.get(player=player, tier=tier).cleared_wave_slugs == [
+    assert AdventureLevelTierProgress.objects.get(player=player, tier=tier).cleared_scenario_slugs == [
         "publish-a-branch",
         "publish-and-track",
     ]
 
 
-def test_a_retry_rotates_variants_within_the_failed_wave(db, django_user_model):
+def test_a_retry_rotates_variants_within_the_failed_scenario(db, django_user_model):
     player, tier = _tier(
         django_user_model,
-        waves=[("wave-one", ["one-a", "one-b"]), ("wave-two", ["two-a", "two-b"])],
+        scenarios=[("scenario-one", ["one-a", "one-b"]), ("scenario-two", ["two-a", "two-b"])],
         name="rotate",
     )
     _solve(_start(player, tier))
@@ -141,18 +141,18 @@ def test_a_retry_rotates_variants_within_the_failed_wave(db, django_user_model):
     _fail(failed)
     retry = _start(player, tier)
 
-    assert retry.current_wave.slug == "wave-two"
+    assert retry.current_scenario.slug == "scenario-two"
     assert retry.selected_variant.slug == "two-b"
     assert retry.prior_run_id == failed.id
 
 
-def test_free_play_cycles_the_waves_after_the_tier_is_complete(db, django_user_model):
+def test_free_play_cycles_the_scenarios_after_the_tier_is_complete(db, django_user_model):
     player, tier = _tier(
         django_user_model,
-        waves=[
-            ("wave-one", ["one-a"]),
-            ("wave-two", ["two-a"]),
-            ("wave-three", ["three-a"]),
+        scenarios=[
+            ("scenario-one", ["one-a"]),
+            ("scenario-two", ["two-a"]),
+            ("scenario-three", ["three-a"]),
         ],
         name="replay",
     )
@@ -163,7 +163,7 @@ def test_free_play_cycles_the_waves_after_the_tier_is_complete(db, django_user_m
     for _ in range(4):
         run = _start(player, tier)
         assert run.is_replay
-        replays.append(run.current_wave.slug)
+        replays.append(run.current_scenario.slug)
         _solve(run)
 
-    assert replays == ["wave-one", "wave-two", "wave-three", "wave-one"]
+    assert replays == ["scenario-one", "scenario-two", "scenario-three", "scenario-one"]

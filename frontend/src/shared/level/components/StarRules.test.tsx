@@ -36,7 +36,7 @@ describe('star rules reminder', () => {
     expect(trigger).toHaveAttribute('aria-expanded', 'false')
   })
 
-  it('includes the wave and guide rules for plain adventures', async () => {
+  it('includes the scenario and guide rules for plain adventures', async () => {
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
       x: 80, y: 100, left: 80, top: 100, right: 380, bottom: 260,
       width: 300, height: 160, toJSON: () => ({}),
@@ -45,7 +45,7 @@ describe('star rules reminder', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Star rules: 0 of 3 stars' }))
 
     await screen.findByRole('dialog', { name: 'How to earn stars' })
-    expect(screen.getByText(/your lowest wave score becomes your level score/)).toBeInTheDocument()
+    expect(screen.getByText(/your lowest scenario score becomes your level score/)).toBeInTheDocument()
     expect(screen.getByText(/Opening the command guide takes away one star/)).toBeInTheDocument()
   })
 })

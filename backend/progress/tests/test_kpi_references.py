@@ -42,9 +42,9 @@ def test_diagnostic_assessment_uses_one_shared_reference_policy(django_user_mode
 
 @pytest.mark.django_db
 def test_real_solution_replay_validates_reference_independently_of_star_budget(django_user_model):
-    _, _, wave, variants = bundle(django_user_model)
-    wave.min_counted_commands = 7
-    wave.save()
+    _, _, scenario, variants = bundle(django_user_model)
+    scenario.min_counted_commands = 7
+    scenario.save()
     assert validate_refs(variants) == {v.id: 3 for v in variants}
     assert valid_ref(variants[0]) == 3
     variants[0].solution_commands = ["git status"]

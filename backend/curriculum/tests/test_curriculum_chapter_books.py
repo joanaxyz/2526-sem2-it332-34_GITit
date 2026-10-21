@@ -119,7 +119,7 @@ def test_curriculum_levels_seed_gamification_rewards_and_skill_forms(db):
     levels = list(
         AdventureLevel.objects.filter(chapter__story__slug="arcane-spire")
         .exclude(chapter__number=0)
-        .prefetch_related("command_forms", "tiers__waves__command_forms")
+        .prefetch_related("command_forms", "tiers__scenarios__command_forms")
     )
 
     assert levels
@@ -130,11 +130,11 @@ def test_curriculum_levels_seed_gamification_rewards_and_skill_forms(db):
         for level in levels
     )
     assert all(level.command_forms.exists() for level in levels)
-    # A wave attaches the level forms every one of its variants types: they
+    # A scenario attaches the level forms every one of its variants types: they
     # are the mastery targets' denominator, so a learner can always reach
     # them. A pool whose variants each teach a different form attaches none.
     for level in levels:
         level_forms = {form.id for form in level.command_forms.all()}
         for tier in level.tiers.all():
-            for wave in tier.waves.all():
-                assert {form.id for form in wave.command_forms.all()} <= level_forms
+            for scenario in tier.scenarios.all():
+                assert {form.id for form in scenario.command_forms.all()} <= level_forms

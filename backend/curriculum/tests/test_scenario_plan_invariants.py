@@ -1,8 +1,8 @@
-"""The wave grammar documented in CONTENT_AUTHORING_GUIDE.md.
+"""The scenario grammar documented in CONTENT_AUTHORING_GUIDE.md.
 
-The wave plan owns placement, so these rules are checked on the plan itself,
+The scenario plan owns placement, so these rules are checked on the plan itself,
 with the guides' real resolver and technique detectors, walking every
-level's designed waves in play order.
+level's designed scenarios in play order.
 """
 
 from __future__ import annotations
@@ -27,12 +27,12 @@ from curriculum.management.commands.seed_curriculum import (
     MODULE_LEVELS,
 )
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
-from curriculum.seed_data.scenario_bank import scenario_bank, wave_scenario_bank
+from curriculum.seed_data.scenario_bank import scenario_bank, extension_scenario_bank
 from curriculum.seed_data.scenario_runtime import UNPLACED_CASE_IDS
 from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES
-from curriculum.seed_data.source.scenario_fixtures import WAVE_FIXTURES, extension_case
-from curriculum.seed_data.source.wave_plan import MODULE_WAVE_PLAN
-from curriculum.seed_data.source.wave_plan.types import DEBUT
+from curriculum.seed_data.source.scenario_fixtures import SCENARIO_FIXTURES, extension_case
+from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN
+from curriculum.seed_data.source.scenario_plan.types import DEBUT
 from tutoring.services.forms import command_family, resolve_form
 from tutoring.services.techniques import techniques_in
 
@@ -41,7 +41,7 @@ DIAGNOSTIC = {"status", "log", "show", "reflog", "diff"}
 SETUP = {"init", "clone"}
 SUBCOMMANDS = {"stash"}
 ALIASES = {"--initial-branch": "-b", "--branch": "-b", "--set-upstream": "-u", "--patch": "-p"}
-# Core workflow parts must come back in two later waves, one of them in a later level.
+# Core workflow parts must come back in two later scenarios, one of them in a later level.
 CORE = {
     ("cmd", "add"), ("opt", "add", "-p"), ("cmd", "commit"), ("opt", "commit", "-m"),
     ("opt", "commit", "--amend"), ("cmd", "restore"), ("opt", "restore", "--staged"),
@@ -51,7 +51,7 @@ CORE = {
 }  # fmt: skip
 # Time model (minutes), PLAN.md §4: brief and outcome, typed command, file edit, first guide.
 PER_RUN, PER_COMMAND, PER_EDIT, PER_GUIDE = 1.0, 0.4, 1.0, 0.5
-# ~5.5 h since true variants added same-tier recall waves (2026-10-21; was ~4.9 h on 2026-10-20).
+# ~5.5 h since true variants added same-tier recall scenarios (2026-10-21; was ~4.9 h on 2026-10-20).
 # Re-measure before raising.
 NO_FAIL_BUDGET_MINUTES = 335
 
@@ -75,7 +75,7 @@ GATE_IDS = {
 
 
 @dataclass(frozen=True)
-class Wave:
+class Scenario:
     order: int
     level: str
     tier: str
@@ -97,14 +97,14 @@ def _case(case_id: str) -> dict:
     return extension_case(case_id)
 
 
-def _walk() -> list[Wave]:
-    waves: list[Wave] = []
+def _walk() -> list[Scenario]:
+    scenarios: list[Scenario] = []
     for level in MODULE_LEVELS:
         slug = level["slug"]
         for tier in TIERS:
-            for spec in MODULE_WAVE_PLAN.get(slug, {}).get(tier, ()):
-                waves.append(Wave(len(waves), slug, tier, spec.slug, spec.role, spec.variants))
-    return waves
+            for spec in MODULE_SCENARIO_PLAN.get(slug, {}).get(tier, ()):
+                scenarios.append(Scenario(len(scenarios), slug, tier, spec.slug, spec.role, spec.variants))
+    return scenarios
 
 
 @cache
@@ -184,48 +184,48 @@ def _label(part: tuple) -> str:
     return f"technique:{part[1]}" if part[0] == "tech" else "git " + " ".join(part[1:])
 
 
-def _wave_name(wave: Wave) -> str:
-    return f"{wave.level}/{wave.tier}/{wave.slug}"
+def _scenario_name(scenario: Scenario) -> str:
+    return f"{scenario.level}/{scenario.tier}/{scenario.slug}"
 
 
-def _walk_knowledge(waves: list[Wave]):
-    """Per wave: parts it introduces and guide forms first shown, in play order."""
+def _walk_knowledge(scenarios: list[Scenario]):
+    """Per scenario: parts it introduces and guide forms first shown, in play order."""
     known_parts: set[tuple] = set()
     known_forms: set[str] = set()
-    for wave in waves:
-        module = MODULE_OF[wave.level]
-        per_variant = {case_id: _parts(case_id) for case_id in wave.variants}
-        forms = {case_id: _guide_forms(case_id, module) for case_id in wave.variants}
+    for scenario in scenarios:
+        module = MODULE_OF[scenario.level]
+        per_variant = {case_id: _parts(case_id) for case_id in scenario.variants}
+        forms = {case_id: _guide_forms(case_id, module) for case_id in scenario.variants}
         union = frozenset().union(*per_variant.values())
         all_forms = frozenset().union(*forms.values())
-        yield wave, per_variant, union - known_parts, forms, all_forms - known_forms
+        yield scenario, per_variant, union - known_parts, forms, all_forms - known_forms
         known_parts |= union
         known_forms |= all_forms
 
 
-def test_every_curriculum_level_has_a_wave_plan():
-    assert sorted(set(POOLS) - set(MODULE_WAVE_PLAN)) == []
+def test_every_curriculum_level_has_a_scenario_plan():
+    assert sorted(set(POOLS) - set(MODULE_SCENARIO_PLAN)) == []
 
 
-def test_plan_shape_is_two_to_three_waves_of_two_or_more_variants():
+def test_plan_shape_is_two_to_three_scenarios_of_two_or_more_variants():
     problems = []
-    for level, tiers in MODULE_WAVE_PLAN.items():
+    for level, tiers in MODULE_SCENARIO_PLAN.items():
         if level not in POOLS:
             problems.append(f"{level}: not a curriculum level")
             continue
         if set(tiers) != set(TIERS):
             problems.append(f"{level}: plans tiers {sorted(tiers)}")
-        for tier, waves in tiers.items():
-            # Easy may add a fourth wave so its last guided form comes back unguided.
-            if not 2 <= len(waves) <= (4 if tier == "easy" else 3):
-                problems.append(f"{level}/{tier}: {len(waves)} waves")
-            slugs = [wave.slug for wave in waves]
+        for tier, scenarios in tiers.items():
+            # Easy may add a fourth scenario so its last guided form comes back unguided.
+            if not 2 <= len(scenarios) <= (4 if tier == "easy" else 3):
+                problems.append(f"{level}/{tier}: {len(scenarios)} scenarios")
+            slugs = [scenario.slug for scenario in scenarios]
             if len(set(slugs)) != len(slugs):
-                problems.append(f"{level}/{tier}: repeated wave slugs {slugs}")
+                problems.append(f"{level}/{tier}: repeated scenario slugs {slugs}")
             problems += [
-                f"{level}/{tier}/{wave.slug}: fewer than two variants"
-                for wave in waves
-                if len(wave.variants) < 2
+                f"{level}/{tier}/{scenario.slug}: fewer than two variants"
+                for scenario in scenarios
+                if len(scenario.variants) < 2
             ]
     assert problems == [], "\n".join(problems)
 
@@ -233,22 +233,22 @@ def test_plan_shape_is_two_to_three_waves_of_two_or_more_variants():
 def test_every_scenario_is_placed_exactly_once():
     placed: dict[str, str] = {}
     problems = []
-    for wave in _walk():
-        for case_id in wave.variants:
+    for scenario in _walk():
+        for case_id in scenario.variants:
             if case_id in placed:
-                problems.append(f"{case_id}: placed in {placed[case_id]} and {_wave_name(wave)}")
-            placed[case_id] = _wave_name(wave)
-            in_level = case_id in POOLS[wave.level]
-            authored = wave_scenario_bank().get(case_id)
-            if not in_level and (authored is None or case_id not in WAVE_FIXTURES):
-                problems.append(f"{case_id}: neither a {wave.level} scenario nor a new one")
+                problems.append(f"{case_id}: placed in {placed[case_id]} and {_scenario_name(scenario)}")
+            placed[case_id] = _scenario_name(scenario)
+            in_level = case_id in POOLS[scenario.level]
+            authored = extension_scenario_bank().get(case_id)
+            if not in_level and (authored is None or case_id not in SCENARIO_FIXTURES):
+                problems.append(f"{case_id}: neither a {scenario.level} scenario nor a new one")
             elif authored and authored["scenario_number"].rsplit(".", 1)[0] != _level_number(
-                wave.level
+                scenario.level
             ):
                 problems.append(f"{case_id}: authored for level {authored['scenario_number']}")
             if case_id in GATE_IDS:
                 problems.append(f"{case_id}: a Challenge Gate scenario")
-    for level in MODULE_WAVE_PLAN:
+    for level in MODULE_SCENARIO_PLAN:
         number = _level_number(level)
         problems += [
             f"{case_id}: {level} scenario not placed"
@@ -257,54 +257,54 @@ def test_every_scenario_is_placed_exactly_once():
         ]
         problems += [
             f"{case_id}: new {number} scenario not placed"
-            for case_id, authored in wave_scenario_bank().items()
+            for case_id, authored in extension_scenario_bank().items()
             if authored["scenario_number"].rsplit(".", 1)[0] == number and case_id not in placed
         ]
     assert problems == [], "\n".join(problems)
 
 
-def test_debuts_happen_before_hard_and_in_every_variant_of_the_wave():
+def test_debuts_happen_before_hard_and_in_every_variant_of_the_scenario():
     problems = []
-    for wave, per_variant, novel, forms, new_forms in _walk_knowledge(_walk()):
+    for scenario, per_variant, novel, forms, new_forms in _walk_knowledge(_walk()):
         for part in sorted(novel):
             missing = [case_id for case_id, parts in per_variant.items() if part not in parts]
             if missing:
-                problems.append(f"{_wave_name(wave)}: debut {_label(part)} missing in {missing}")
-            if wave.tier == "hard":
-                problems.append(f"{_wave_name(wave)}: {_label(part)} debuts at hard")
+                problems.append(f"{_scenario_name(scenario)}: debut {_label(part)} missing in {missing}")
+            if scenario.tier == "hard":
+                problems.append(f"{_scenario_name(scenario)}: {_label(part)} debuts at hard")
         for form in sorted(new_forms):
             missing = [case_id for case_id, used in forms.items() if form not in used]
             if missing:
-                problems.append(f"{_wave_name(wave)}: guide {form!r} missing in {missing}")
+                problems.append(f"{_scenario_name(scenario)}: guide {form!r} missing in {missing}")
     assert problems == [], "\n".join(problems)
 
 
-def test_roles_match_what_each_wave_introduces():
+def test_roles_match_what_each_scenario_introduces():
     problems = []
-    for wave, _, novel, _, new_forms in _walk_knowledge(_walk()):
-        if wave.role == DEBUT and not (novel or new_forms):
-            problems.append(f"{_wave_name(wave)}: a debut that introduces nothing")
-        if wave.role != DEBUT and novel:
+    for scenario, _, novel, _, new_forms in _walk_knowledge(_walk()):
+        if scenario.role == DEBUT and not (novel or new_forms):
+            problems.append(f"{_scenario_name(scenario)}: a debut that introduces nothing")
+        if scenario.role != DEBUT and novel:
             problems.append(
-                f"{_wave_name(wave)}: {wave.role} introduces {[_label(p) for p in sorted(novel)]}"
+                f"{_scenario_name(scenario)}: {scenario.role} introduces {[_label(p) for p in sorted(novel)]}"
             )
     assert problems == [], "\n".join(problems)
 
 
-def test_what_a_wave_debuts_comes_back_later():
-    waves = _walk()
-    level_of = {wave.order: wave.level for wave in waves}
-    tier_of = {wave.order: wave.tier for wave in waves}
-    # Reuse counts only where every variant of the later wave uses it.
+def test_what_a_scenario_debuts_comes_back_later():
+    scenarios = _walk()
+    level_of = {scenario.order: scenario.level for scenario in scenarios}
+    tier_of = {scenario.order: scenario.tier for scenario in scenarios}
+    # Reuse counts only where every variant of the later scenario uses it.
     every = {
-        wave.order: frozenset.intersection(*(_parts(case_id) for case_id in wave.variants))
-        for wave in waves
+        scenario.order: frozenset.intersection(*(_parts(case_id) for case_id in scenario.variants))
+        for scenario in scenarios
     }
     every_form = {
-        wave.order: frozenset.intersection(
-            *(_guide_forms(case_id, MODULE_OF[wave.level]) for case_id in wave.variants)
+        scenario.order: frozenset.intersection(
+            *(_guide_forms(case_id, MODULE_OF[scenario.level]) for case_id in scenario.variants)
         )
-        for wave in waves
+        for scenario in scenarios
     }
 
     def spaced(start: int, order: int) -> bool:
@@ -313,59 +313,59 @@ def test_what_a_wave_debuts_comes_back_later():
         )
 
     problems = []
-    for wave, _, novel, _, new_forms in _walk_knowledge(waves):
+    for scenario, _, novel, _, new_forms in _walk_knowledge(scenarios):
         for part in sorted(novel):
             if part[0] != "tech" and part[1] in SETUP:
                 continue
             later = [
-                order for order, parts in every.items() if order > wave.order and part in parts
+                order for order, parts in every.items() if order > scenario.order and part in parts
             ]
-            later_levels = {level_of[order] for order in later} - {wave.level}
-            if not any(spaced(wave.order, order) for order in later):
+            later_levels = {level_of[order] for order in later} - {scenario.level}
+            if not any(spaced(scenario.order, order) for order in later):
                 problems.append(
-                    f"{_label(part)} ({_wave_name(wave)}) is never reused at a harder tier or later level"
+                    f"{_label(part)} ({_scenario_name(scenario)}) is never reused at a harder tier or later level"
                 )
             elif part in CORE and (len(later) < 2 or not later_levels):
                 problems.append(
-                    f"core {_label(part)} ({_wave_name(wave)}) needs two later waves, one in a later level"
+                    f"core {_label(part)} ({_scenario_name(scenario)}) needs two later scenarios, one in a later level"
                 )
         for form in sorted(new_forms):
             if form.split()[1] in SETUP:
                 continue
             if not any(
-                order > wave.order and form in forms and spaced(wave.order, order)
+                order > scenario.order and form in forms and spaced(scenario.order, order)
                 for order, forms in every_form.items()
             ):
                 problems.append(
-                    f"guide {form!r} ({_wave_name(wave)}) is never reused at a harder tier or later level"
+                    f"guide {form!r} ({_scenario_name(scenario)}) is never reused at a harder tier or later level"
                 )
     assert problems == [], "\n".join(problems)
 
 
 def test_no_two_variants_repeat_a_scenario():
     """Never repeat: no two variants share both a starting repository and a target."""
-    seen: dict[str, tuple[Wave, str]] = {}
+    seen: dict[str, tuple[Scenario, str]] = {}
     problems = []
-    for wave in _walk():
-        for case_id in wave.variants:
+    for scenario in _walk():
+        for case_id in scenario.variants:
             key = json.dumps(
                 [_case(case_id)["initial_state"], TARGET_STATES.get(case_id)], sort_keys=True
             )
-            earlier, first = seen.setdefault(key, (wave, case_id))
+            earlier, first = seen.setdefault(key, (scenario, case_id))
             if first != case_id:
                 problems.append(
-                    f"{case_id} ({_wave_name(wave)}) repeats {first} ({_wave_name(earlier)})"
+                    f"{case_id} ({_scenario_name(scenario)}) repeats {first} ({_scenario_name(earlier)})"
                 )
     assert problems == [], "\n".join(problems)
 
 
-def _no_fail_minutes(waves: list[Wave]) -> float:
-    """A learner who never fails plays the first variant of every wave."""
+def _no_fail_minutes(scenarios: list[Scenario]) -> float:
+    """A learner who never fails plays the first variant of every scenario."""
     minutes = 0.0
     known: set[str] = set()
-    for wave in waves:
-        case_id = wave.variants[0]
-        forms = _guide_forms(case_id, MODULE_OF[wave.level])
+    for scenario in scenarios:
+        case_id = scenario.variants[0]
+        forms = _guide_forms(case_id, MODULE_OF[scenario.level])
         minutes += (
             PER_RUN
             + PER_COMMAND * len(_git_commands(case_id))
@@ -382,31 +382,31 @@ def test_no_fail_path_stays_within_the_agreed_time():
 
 
 @pytest.mark.django_db
-def test_seed_publishes_exactly_the_planned_waves_and_is_idempotent():
+def test_seed_publishes_exactly_the_planned_scenarios_and_is_idempotent():
     call_command("seed_curriculum", verbosity=0)
 
     def published() -> dict[tuple[str, str], list[tuple[str, list[str]]]]:
         result = defaultdict(list)
         for tier in AdventureLevelTier.objects.filter(
             adventure_level__slug__in=list(POOLS)
-        ).prefetch_related("waves__variants", "adventure_level"):
-            for wave in sorted(tier.waves.all(), key=lambda row: (row.sort_order, row.id)):
-                if not wave.is_published:
+        ).prefetch_related("scenarios__variants", "adventure_level"):
+            for scenario in sorted(tier.scenarios.all(), key=lambda row: (row.sort_order, row.id)):
+                if not scenario.is_published:
                     continue
                 variants = sorted(
-                    (variant for variant in wave.variants.all() if variant.is_published),
+                    (variant for variant in scenario.variants.all() if variant.is_published),
                     key=lambda row: (row.sort_order, row.semantic_key, row.id),
                 )
                 result[(tier.adventure_level.slug, tier.difficulty)].append(
-                    (wave.slug, [v.slug for v in variants])
+                    (scenario.slug, [v.slug for v in variants])
                 )
         return dict(result)
 
     first = published()
     assert first == {
-        (level, tier): [(wave.slug, list(wave.variants)) for wave in waves]
-        for level, tiers in MODULE_WAVE_PLAN.items()
-        for tier, waves in tiers.items()
+        (level, tier): [(scenario.slug, list(scenario.variants)) for scenario in scenarios]
+        for level, tiers in MODULE_SCENARIO_PLAN.items()
+        for tier, scenarios in tiers.items()
     }
 
     call_command("seed_curriculum", verbosity=0)

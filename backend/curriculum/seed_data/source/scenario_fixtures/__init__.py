@@ -1,8 +1,8 @@
-"""Runtime fixtures for the wave and gate scenarios authored in ``wave_scenarios.md``.
+"""Runtime fixtures for the planned and gate scenarios authored in ``extension_scenarios.md``.
 
 Each module maps a Variant ID to the parts of a case the Markdown cannot own:
 the starting repository, the state requirements and any required commands.
-The learner-facing text and the answer key come from ``scenario_bank_waves.json``.
+The learner-facing text and the answer key come from ``scenario_bank_extension.json``.
 """
 
 from __future__ import annotations
@@ -15,20 +15,20 @@ from curriculum.seed_data.source.scenario_fixtures.module_2 import FIXTURES as M
 from curriculum.seed_data.source.scenario_fixtures.module_3 import FIXTURES as MODULE_3
 from curriculum.seed_data.source.scenario_fixtures.module_4 import FIXTURES as MODULE_4
 
-WAVE_FIXTURES: dict[str, dict[str, Any]] = {}
+SCENARIO_FIXTURES: dict[str, dict[str, Any]] = {}
 for _module in (MODULE_1, MODULE_2, MODULE_3, MODULE_4, GATES):
-    _overlap = WAVE_FIXTURES.keys() & _module.keys()
+    _overlap = SCENARIO_FIXTURES.keys() & _module.keys()
     if _overlap:
-        raise RuntimeError(f"Duplicate wave fixture IDs: {sorted(_overlap)}")
-    WAVE_FIXTURES.update(_module)
+        raise RuntimeError(f"Duplicate scenario fixture IDs: {sorted(_overlap)}")
+    SCENARIO_FIXTURES.update(_module)
 
 
 def extension_case(case_id: str) -> dict[str, Any]:
-    """A seedable case for a wave or gate scenario: fixture plus authored bank entry."""
-    from curriculum.seed_data.scenario_bank import wave_scenario_bank
+    """A seedable case for a planned or gate scenario: fixture plus authored bank entry."""
+    from curriculum.seed_data.scenario_bank import extension_scenario_bank
 
-    authored = wave_scenario_bank()[case_id]
-    fixture = WAVE_FIXTURES[case_id]
+    authored = extension_scenario_bank()[case_id]
+    fixture = SCENARIO_FIXTURES[case_id]
     return {
         "case_id": case_id,
         "label": authored["label"],
@@ -42,10 +42,10 @@ def extension_case(case_id: str) -> dict[str, Any]:
 
 
 def extension_cases() -> dict[str, dict[str, Any]]:
-    from curriculum.seed_data.scenario_bank import wave_scenario_bank
+    from curriculum.seed_data.scenario_bank import extension_scenario_bank
 
-    missing = sorted(set(WAVE_FIXTURES) - set(wave_scenario_bank()))
+    missing = sorted(set(SCENARIO_FIXTURES) - set(extension_scenario_bank()))
     if missing:
-        raise RuntimeError(f"Wave fixtures without authored scenarios: {missing}")
-    return {case_id: extension_case(case_id) for case_id in WAVE_FIXTURES}
+        raise RuntimeError(f"Scenario fixtures without authored scenarios: {missing}")
+    return {case_id: extension_case(case_id) for case_id in SCENARIO_FIXTURES}
 

@@ -10,8 +10,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from challenges.models import ChallengeLevel, ChallengeRun, ChallengeTrial, ChallengeTrialVariant
 from common.constants import DIFFICULTY_EASY
@@ -47,8 +47,8 @@ class AdventureTierRunFixture:
     chapter: Chapter
     level: AdventureLevel
     tier: AdventureLevelTier
-    wave: AdventureLevelTierWave
-    variant: AdventureLevelTierWaveVariant
+    scenario: AdventureLevelTierScenario
+    variant: AdventureLevelTierScenarioVariant
     run: AdventureLevelTierRun
     states: SimpleRepositoryStates
 
@@ -165,7 +165,7 @@ def create_stage_readme_tier_run(
     *,
     username: str = "adventure-runtime",
 ) -> AdventureTierRunFixture:
-    """A one-wave Easy tier whose started run stages README.md to finish."""
+    """A one-scenario Easy tier whose started run stages README.md to finish."""
     user = make_user(django_user_model, username=username)
     player = get_or_create_player(user)
     suffix = unique_suffix()
@@ -180,17 +180,17 @@ def create_stage_readme_tier_run(
     tier = AdventureLevelTier.objects.create(
         adventure_level=level, difficulty=DIFFICULTY_EASY, is_published=True
     )
-    wave = AdventureLevelTierWave.objects.create(
+    scenario = AdventureLevelTierScenario.objects.create(
         tier=tier,
-        slug=f"stage-readme-wave-{suffix}",
+        slug=f"stage-readme-scenario-{suffix}",
         title="Stage README",
         min_counted_commands=1,
         max_counted_commands=3,
         is_published=True,
     )
     states = stage_readme_states()
-    variant = AdventureLevelTierWaveVariant.objects.create(
-        wave=wave,
+    variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
         slug=f"stage-readme-{suffix}",
         label="Stage README",
         initial_state=states.initial,
@@ -203,11 +203,11 @@ def create_stage_readme_tier_run(
     run = AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variant,
         source_entry_point="runtime_test",
-        min_counted_commands=wave.min_counted_commands,
-        max_counted_commands=wave.max_counted_commands,
+        min_counted_commands=scenario.min_counted_commands,
+        max_counted_commands=scenario.max_counted_commands,
         repository_state=states.initial,
     )
     return AdventureTierRunFixture(
@@ -217,7 +217,7 @@ def create_stage_readme_tier_run(
         chapter=chapter,
         level=level,
         tier=tier,
-        wave=wave,
+        scenario=scenario,
         variant=variant,
         run=run,
         states=states,

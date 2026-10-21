@@ -25,8 +25,8 @@ def _submit(
 
 
 def _one_command_left(fixture) -> None:
-    fixture.run.total_attempts = fixture.wave.max_counted_commands - 1
-    fixture.run.counted_action_total = fixture.wave.max_counted_commands - 1
+    fixture.run.total_attempts = fixture.scenario.max_counted_commands - 1
+    fixture.run.counted_action_total = fixture.scenario.max_counted_commands - 1
     fixture.run.save(update_fields=["total_attempts", "counted_action_total"])
 
 

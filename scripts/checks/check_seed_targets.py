@@ -87,7 +87,7 @@ def _collect_case_ids(module_levels: list[dict[str, Any]]) -> set[str]:
             for case in tier.get("cases", []):
                 add(case.get("case_id"))
 
-    # Wave and Challenge Gate scenarios (seed_data/source/scenario_fixtures/).
+    # Planned and Challenge Gate scenarios (seed_data/source/scenario_fixtures/).
     from curriculum.seed_data.source.scenario_fixtures import extension_cases  # noqa: PLC0415
 
     for case_id in extension_cases():

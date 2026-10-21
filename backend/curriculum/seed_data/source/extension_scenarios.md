@@ -1,9 +1,9 @@
-# GIT it! wave scenarios
+# GIT it! extension scenarios
 
-Scenarios written for the ordered-wave curriculum; see CONTENT_AUTHORING_GUIDE.md.
+Scenarios written for the ordered-scenario curriculum; see CONTENT_AUTHORING_GUIDE.md.
 They use the same sections as the team's revised scenario bank and compile with
-`python scripts/curriculum/import_revised_scenarios.py --extension backend/curriculum/seed_data/source/wave_scenarios.md`
-into `backend/curriculum/seed_data/scenario_bank_waves.json`. Runtime fixtures (starting repository,
+`python scripts/curriculum/import_revised_scenarios.py --extension backend/curriculum/seed_data/source/extension_scenarios.md`
+into `backend/curriculum/seed_data/scenario_bank_extension.json`. Runtime fixtures (starting repository,
 state requirements) live in `source/scenario_fixtures/`, keyed by the same Variant ID.
 
 Numbering continues each level's scenario list. Gate scenarios use `N.G.k`.

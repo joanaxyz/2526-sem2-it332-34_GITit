@@ -38,8 +38,8 @@ from adventures.models import (
     AdventureLevelTier,
     AdventureLevelTierProgress,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from challenges.models import ChallengeLevel, ChallengeRun, ChallengeTrial, ChallengeTrialVariant
 from common.constants import DIFFICULTY_EASY, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
@@ -52,18 +52,18 @@ COMMAND = "git add README.md"
 DIAGNOSTIC_COMMAND = "git status"
 DEFAULT_SAMPLE_COUNT = 15
 STRESS_LEVELS = 10
-STRESS_WAVES_PER_LEVEL = 4
-STRESS_VARIANTS_PER_WAVE = 3
+STRESS_SCENARIOS_PER_LEVEL = 4
+STRESS_VARIANTS_PER_SCENARIO = 3
 STRESS_VARIANT_BYTES = 16 * 1024
 
 
 @dataclass(frozen=True)
 class BenchmarkCatalog:
     adventure_tier: AdventureLevelTier
-    first_wave: AdventureLevelTierWave
-    final_wave: AdventureLevelTierWave
-    first_variant: AdventureLevelTierWaveVariant
-    final_variant: AdventureLevelTierWaveVariant
+    first_scenario: AdventureLevelTierScenario
+    final_scenario: AdventureLevelTierScenario
+    first_variant: AdventureLevelTierScenarioVariant
+    final_variant: AdventureLevelTierScenarioVariant
     challenge_trial: ChallengeTrial
     challenge_variant: ChallengeTrialVariant
 
@@ -215,31 +215,31 @@ def _build_catalog() -> BenchmarkCatalog:
         difficulty=DIFFICULTY_EASY,
         is_published=True,
     )
-    first_wave = AdventureLevelTierWave.objects.create(
+    first_scenario = AdventureLevelTierScenario.objects.create(
         tier=adventure_tier,
         slug="measured-first",
-        title="Measured first wave",
+        title="Measured first scenario",
         sort_order=0,
         min_counted_commands=1,
         max_counted_commands=3,
     )
-    final_wave = AdventureLevelTierWave.objects.create(
+    final_scenario = AdventureLevelTierScenario.objects.create(
         tier=adventure_tier,
         slug="measured-final",
-        title="Measured final wave",
+        title="Measured final scenario",
         sort_order=1,
         min_counted_commands=1,
         max_counted_commands=3,
     )
     first_variant = _create_adventure_variant(
-        wave=first_wave,
+        scenario=first_scenario,
         slug="measured-first",
         semantic_key="latency:first",
         initial_state=states.initial,
         target_state=states.target,
     )
     final_variant = _create_adventure_variant(
-        wave=final_wave,
+        scenario=final_scenario,
         slug="measured-final",
         semantic_key="latency:final",
         initial_state=states.initial,
@@ -280,8 +280,8 @@ def _build_catalog() -> BenchmarkCatalog:
     )
     return BenchmarkCatalog(
         adventure_tier=adventure_tier,
-        first_wave=first_wave,
-        final_wave=final_wave,
+        first_scenario=first_scenario,
+        final_scenario=final_scenario,
         first_variant=first_variant,
         final_variant=final_variant,
         challenge_trial=challenge_trial,
@@ -291,14 +291,14 @@ def _build_catalog() -> BenchmarkCatalog:
 
 def _create_adventure_variant(
     *,
-    wave: AdventureLevelTierWave,
+    scenario: AdventureLevelTierScenario,
     slug: str,
     semantic_key: str,
     initial_state: dict,
     target_state: dict,
-) -> AdventureLevelTierWaveVariant:
-    return AdventureLevelTierWaveVariant.objects.create(
-        wave=wave,
+) -> AdventureLevelTierScenarioVariant:
+    return AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
         slug=slug,
         label=slug.replace("-", " ").title(),
         initial_state=initial_state,
@@ -335,38 +335,38 @@ def _create_adventure_payload_stress(
     tiers = AdventureLevelTier.objects.bulk_create(
         [AdventureLevelTier(adventure_level=level, difficulty=DIFFICULTY_EASY) for level in levels]
     )
-    waves = AdventureLevelTierWave.objects.bulk_create(
+    scenarios = AdventureLevelTierScenario.objects.bulk_create(
         [
-            AdventureLevelTierWave(
+            AdventureLevelTierScenario(
                 tier=tier,
-                slug=f"stress-wave-{wave_index}",
-                title=f"Stress wave {wave_index}",
-                sort_order=wave_index,
+                slug=f"stress-scenario-{scenario_index}",
+                title=f"Stress scenario {scenario_index}",
+                sort_order=scenario_index,
                 min_counted_commands=1,
                 max_counted_commands=3,
                 is_published=True,
             )
             for tier in tiers
-            for wave_index in range(STRESS_WAVES_PER_LEVEL)
+            for scenario_index in range(STRESS_SCENARIOS_PER_LEVEL)
         ]
     )
     padding = "x" * STRESS_VARIANT_BYTES
-    AdventureLevelTierWaveVariant.objects.bulk_create(
+    AdventureLevelTierScenarioVariant.objects.bulk_create(
         [
-            AdventureLevelTierWaveVariant(
-                wave=wave,
+            AdventureLevelTierScenarioVariant(
+                scenario=scenario,
                 slug=f"stress-variant-{variant_index}",
                 label=f"Stress variant {variant_index}",
                 initial_state=initial_state,
                 target_state=target_state,
                 evaluation_spec={"completion_policy": {"mode": "state_hash"}},
                 solution_commands=[COMMAND],
-                semantic_key=f"latency:stress:{suffix}:{wave.id}:{variant_index}",
+                semantic_key=f"latency:stress:{suffix}:{scenario.id}:{variant_index}",
                 scenario_context={"benchmark_padding": padding},
                 is_published=True,
             )
-            for wave in waves
-            for variant_index in range(STRESS_VARIANTS_PER_WAVE)
+            for scenario in scenarios
+            for variant_index in range(STRESS_VARIANTS_PER_SCENARIO)
         ],
         batch_size=100,
     )
@@ -377,29 +377,29 @@ def _prepare_adventure(
     catalog: BenchmarkCatalog,
     *,
     lane: str,
-    final_wave: bool,
+    final_scenario: bool,
     diagnostic: bool,
 ) -> PreparedRequest:
     user = make_user(django_user_model, username=f"latency-{lane}")
     player = get_or_create_player(user)
-    wave = catalog.final_wave if final_wave else catalog.first_wave
-    variant = catalog.final_variant if final_wave else catalog.first_variant
-    if final_wave:
-        # The final wave completes the tier only once the first is cleared.
+    scenario = catalog.final_scenario if final_scenario else catalog.first_scenario
+    variant = catalog.final_variant if final_scenario else catalog.first_variant
+    if final_scenario:
+        # The final scenario completes the tier only once the first is cleared.
         AdventureLevelTierProgress.objects.create(
             player=player,
             tier=catalog.adventure_tier,
             successful_clears=1,
-            cleared_wave_slugs=[catalog.first_wave.slug],
+            cleared_scenario_slugs=[catalog.first_scenario.slug],
         )
     run = AdventureLevelTierRun.objects.create(
         player=player,
         tier=catalog.adventure_tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variant,
         source_entry_point="latency_profiler",
-        min_counted_commands=wave.min_counted_commands,
-        max_counted_commands=wave.max_counted_commands,
+        min_counted_commands=scenario.min_counted_commands,
+        max_counted_commands=scenario.max_counted_commands,
         repository_state=variant.initial_state,
     )
     assert run.total_attempts == 0
@@ -423,12 +423,12 @@ def _prepare_adventure(
         if diagnostic:
             assert run.status == SESSION_STATUS_STARTED
             assert payload["run"]["status"] == SESSION_STATUS_STARTED
-        elif final_wave:
+        elif final_scenario:
             assert run.status == SESSION_STATUS_COMPLETED
             assert payload["run"]["status"] == SESSION_STATUS_COMPLETED
             assert payload["run"]["completion"] is not None
         else:
-            # Clearing the first wave ends this run; the tier stays open.
+            # Clearing the first scenario ends this run; the tier stays open.
             assert run.status == SESSION_STATUS_COMPLETED
             assert payload["run"]["completion"] is None
             assert payload["run"]["progress"]["completed"] == 1
@@ -509,7 +509,7 @@ def test_profile_adventure_cold(django_user_model):
         django_user_model,
         catalog,
         lane="adventure_completion",
-        final_wave=True,
+        final_scenario=True,
         diagnostic=False,
     )
     _emit(_result_payload("adventure_cold_completion", [_timed_post(prepared)], cold=True))
@@ -538,7 +538,7 @@ def test_profile_steady_state(django_user_model):
             django_user_model,
             catalog,
             lane="adventure_warmup",
-            final_wave=True,
+            final_scenario=True,
             diagnostic=False,
         )
     )
@@ -559,17 +559,17 @@ def test_profile_steady_state(django_user_model):
                 django_user_model,
                 catalog,
                 lane="adventure_diagnostic",
-                final_wave=False,
+                final_scenario=False,
                 diagnostic=True,
             ),
         ),
         (
-            "adventure_wave_clear",
+            "adventure_scenario_clear",
             lambda: _prepare_adventure(
                 django_user_model,
                 catalog,
-                lane="adventure_wave_clear",
-                final_wave=False,
+                lane="adventure_scenario_clear",
+                final_scenario=False,
                 diagnostic=False,
             ),
         ),
@@ -579,7 +579,7 @@ def test_profile_steady_state(django_user_model):
                 django_user_model,
                 catalog,
                 lane="adventure_completion",
-                final_wave=True,
+                final_scenario=True,
                 diagnostic=False,
             ),
         ),

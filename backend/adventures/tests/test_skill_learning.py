@@ -6,8 +6,8 @@ from rest_framework.test import APIClient
 from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
     SkillMastery,
 )
 from adventures.services import (
@@ -116,12 +116,12 @@ def test_verified_command_teaches_before_completion_and_survives_discard(learner
         "solution_commands": ['git commit -m "First"'],
     }
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    wave = AdventureLevelTierWave.objects.create(tier=tier, slug="learning")
-    AdventureLevelTierWaveVariant.objects.create(wave=wave, **variant_fields)
+    scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug="learning")
+    AdventureLevelTierScenarioVariant.objects.create(scenario=scenario, **variant_fields)
     run_service = AdventureLevelTierRunService()
     run = run_service.start_run(player=learner, tier=tier, source_entry_point="level_page")
     endpoint = f"/api/adventure-tier-runs/{run.id}/submit-command/"
-    wave.command_forms.add(status_form, commit_form)
+    scenario.command_forms.add(status_form, commit_form)
     client = APIClient()
     client.force_authenticate(user=learner.user)
 
@@ -191,16 +191,16 @@ def test_verified_command_teaches_before_completion_and_survives_discard(learner
 
 
 def test_completion_without_command_use_credits_nothing(learner):
-    """Clearing a wave credits only the forms its runs typed (PLAN.md §7.2)."""
+    """Clearing a scenario credits only the forms its runs typed (PLAN.md §7.2)."""
     story = Story.objects.create(slug="completion-story", title="Completion")
     chapter = Chapter.objects.create(story=story, slug="completion", number=1, title="Completion")
     unused = form("git status", chapter=chapter)
     level = AdventureLevel.objects.create(chapter=chapter, slug="completion", title="Completion")
     level.command_forms.add(unused)
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    wave = AdventureLevelTierWave.objects.create(tier=tier, slug="completion")
-    wave.command_forms.add(unused)
-    AdventureLevelTierWaveVariant.objects.create(wave=wave, slug="completion")
+    scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug="completion")
+    scenario.command_forms.add(unused)
+    AdventureLevelTierScenarioVariant.objects.create(scenario=scenario, slug="completion")
     run = AdventureLevelTierRunService().start_run(
         player=learner, tier=tier, source_entry_point="level_page"
     )

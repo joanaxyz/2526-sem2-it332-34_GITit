@@ -5,7 +5,7 @@ trial is a workflow that combines what the module taught, in two variants so
 a retry gets a fresh scenario. The gate opens once every level of the module
 has cleared all three tiers; inside it, the trials open Easy, Medium, Hard.
 
-Scenario text and answer keys live in ``wave_scenarios.md``; repositories and
+Scenario text and answer keys live in ``extension_scenarios.md``; repositories and
 grading in ``scenario_fixtures/gates.py``.
 """
 

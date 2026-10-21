@@ -132,7 +132,7 @@ FEET_TOP_PERCENTILE = 0.05
 #       ring on the floor) whose base must plant on the enemy's ground line so it
 #       does not float on the enemy's head.
 #   ground     - rooted on the floor and travels along it from caster to enemy
-#       (push shockwave, switch cresting wave). Always feet-anchored.
+#       (push shockscenario, switch cresting scenario). Always feet-anchored.
 # A few commands were generated with genuinely different anchoring per companion,
 # so those diverging cases live in COMPANION_COMMAND_OVERRIDES below.
 # Authoritative playback buckets specified by the designer:
@@ -1517,7 +1517,7 @@ def detect_feet_anchor(frame: Image.Image) -> FrameAnchor | None:
     """Detect the horizontal core and planted base of a ground-rooted frame.
 
     Ground/feet effects (tornadoes, geysers, crystal blooms, floor rings, the
-    push shockwave, the switch wave) grow upward from the floor. The stable
+    push shockscenario, the switch scenario) grow upward from the floor. The stable
     landmark is not the centroid - it rises as the effect blooms - but the
     horizontal energy centre and the visible *base*. `x` carries the weighted
     core x, `y` carries a robust bottom percentile so a couple of low embers do
@@ -1581,7 +1581,7 @@ def scale_frame_centered(frame: Image.Image, scale: float) -> Image.Image:
     """Uniformly shrink a frame's content about the cell centre.
 
     Used to fit tall ground-rooted sequences inside the cell before planting, so
-    the crest of a switch wave or the tip of a geyser does not clip the top edge.
+    the crest of a switch scenario or the tip of a geyser does not clip the top edge.
     """
     if scale >= 0.999:
         return frame

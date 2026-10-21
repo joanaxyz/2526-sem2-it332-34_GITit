@@ -11,15 +11,15 @@ from rest_framework.exceptions import ValidationError
 from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from authoring.models import ContentDefinition, ContentKind, PublishedContentRuntime
 from authoring.schemas import (
     challenge_is_nested,
     content_levels,
     level_trials,
-    level_waves,
+    level_scenarios,
 )
 from challenges.models import ChallengeLevel, ChallengeTrial, ChallengeTrialVariant
 from common.constants import DIFFICULTY_EASY
@@ -33,8 +33,8 @@ from curriculum.models import (
 from simulator.services import RepositoryStateSimulator
 from simulator.trajectory import build_solution_trajectory
 
-# Adventures compile to difficulty tiers with ordered waves.
-RUNTIME_SHAPE = "tier-waves-v1"
+# Adventures compile to difficulty tiers with ordered scenarios.
+RUNTIME_SHAPE = "tier-scenarios-v1"
 HIDDEN_CHAPTER_NUMBER_BASE = 900_000
 GROUPED_CHAPTER_NUMBER_BASE = 800_000
 
@@ -160,9 +160,9 @@ class ContentRuntimeCompiler:
         """Compile authored levels onto the difficulty-tier runtime.
 
         Each authored level becomes an AdventureLevel with one Easy tier whose
-        ordered waves are the level's authored problems, one clear each. Rows
+        ordered scenarios are the level's authored problems, one clear each. Rows
         are upserted by slug and removed ones unpublished, never deleted:
-        playtest runs reference tiers, waves and variants.
+        playtest runs reference tiers, scenarios and variants.
         """
         fallback_form = self._command_form_for_content(content=content, chapter=chapter)
         kept_level_ids: list[int] = []
@@ -185,47 +185,47 @@ class ContentRuntimeCompiler:
                 difficulty=DIFFICULTY_EASY,
                 defaults={"is_published": True},
             )
-            kept_wave_slugs: list[str] = []
-            for wave_index, authored_wave in enumerate(level_waves(authored)):
-                ctx = authored_wave.get("scenario_context") or {}
-                budget = authored_wave.get("command_budget") or {}
-                wave, _ = AdventureLevelTierWave.objects.update_or_create(
+            kept_scenario_slugs: list[str] = []
+            for scenario_index, authored_scenario in enumerate(level_scenarios(authored)):
+                ctx = authored_scenario.get("scenario_context") or {}
+                budget = authored_scenario.get("command_budget") or {}
+                scenario, _ = AdventureLevelTierScenario.objects.update_or_create(
                     tier=tier,
-                    slug=authored_wave.get("slug") or f"{level.slug}-wave-{wave_index + 1}",
+                    slug=authored_scenario.get("slug") or f"{level.slug}-scenario-{scenario_index + 1}",
                     defaults={
-                        "title": authored_wave.get("title", "") or "",
-                        "sort_order": wave_index,
+                        "title": authored_scenario.get("title", "") or "",
+                        "sort_order": scenario_index,
                         "story": ctx.get("story", "") or "",
                         "task": ctx.get("task", "") or "",
                         "min_counted_commands": int(
                             budget.get("min_counted_commands")
-                            or authored_wave.get("min_counted_commands")
+                            or authored_scenario.get("min_counted_commands")
                             or 1
                         ),
                         "max_counted_commands": int(
                             budget.get("max_counted_commands")
-                            or authored_wave.get("max_counted_commands")
+                            or authored_scenario.get("max_counted_commands")
                             or 8
                         ),
-                        "objective_checks": authored_wave.get("objective_checks") or [],
+                        "objective_checks": authored_scenario.get("objective_checks") or [],
                         "is_published": True,
                     },
                 )
-                kept_wave_slugs.append(wave.slug)
-                wave_forms = self._resolve_level_forms(
-                    authored_wave,
+                kept_scenario_slugs.append(scenario.slug)
+                scenario_forms = self._resolve_level_forms(
+                    authored_scenario,
                     fallback=None,
                     required=False,
                 )
-                wave.command_forms.set(wave_forms or level_forms)
+                scenario.command_forms.set(scenario_forms or level_forms)
                 self._replace_variants(
-                    parent=wave,
-                    variant_model=AdventureLevelTierWaveVariant,
-                    parent_field="wave",
-                    authored=authored_wave,
-                    index=wave_index,
+                    parent=scenario,
+                    variant_model=AdventureLevelTierScenarioVariant,
+                    parent_field="scenario",
+                    authored=authored_scenario,
+                    index=scenario_index,
                 )
-            tier.waves.exclude(slug__in=kept_wave_slugs).update(is_published=False)
+            tier.scenarios.exclude(slug__in=kept_scenario_slugs).update(is_published=False)
         if first_level is None:
             first_level = self._upsert_adventure_level(
                 content=content,
@@ -439,7 +439,7 @@ class ContentRuntimeCompiler:
     ) -> None:
         kept_slugs: set[str] = set()
         parent_key = self._parent_key(parent)
-        # A wave carries its own slug; a challenge trial is keyed by difficulty
+        # A scenario carries its own slug; a challenge trial is keyed by difficulty
         # and has none, so fall back to the parent's stable key.
         primary_slug = authored.get("variant_slug") or authored.get("slug") or parent_key
         self._upsert_variant(

@@ -12,8 +12,8 @@ from adventures.models import (
     AdventureLevelTier,
     AdventureLevelTierProgress,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from players.models import Player
 from progress.models import AdventureLevelTierCompletion, KpiCheckpoint, KpiExposure, KpiStudy
@@ -34,11 +34,11 @@ def _reference(variant):
 def _available(variant, reference):
     if variant is None:
         return False
-    wave, tier = variant.wave, variant.wave.tier
+    scenario, tier = variant.scenario, variant.scenario.tier
     level = tier.adventure_level
     return bool(
         variant.is_published
-        and wave.is_published
+        and scenario.is_published
         and tier.is_published
         and level.is_published
         and level.chapter.is_published
@@ -80,7 +80,7 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
             player_id__in=player_ids, tier_id__in=tier_ids
         ).exists()
         or KpiExposure.objects.filter(
-            player_id__in=player_ids, variant__wave__tier_id__in=tier_ids
+            player_id__in=player_ids, variant__scenario__tier_id__in=tier_ids
         ).exists()
         or AdventureLevelTierProgress.objects.filter(
             player_id__in=player_ids, tier_id__in=tier_ids
@@ -94,16 +94,16 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
         )
     specs = []
     for tier in tiers:
-        waves = list(tier.waves.filter(is_published=True).order_by("sort_order", "id"))
-        if not waves:
+        scenarios = list(tier.scenarios.filter(is_published=True).order_by("sort_order", "id"))
+        if not scenarios:
             raise ValidationError(f"Tier {tier.id} has no published exercise.")
-        # Each wave is cleared once, so mastery is the clear of the tier's last
-        # wave and any wave's variant is evidence. Transfer stays reserved on
-        # the first wave.
+        # Each scenario is cleared once, so mastery is the clear of the tier's last
+        # scenario and any scenario's variant is evidence. Transfer stays reserved on
+        # the first scenario.
         variants = list(
-            AdventureLevelTierWaveVariant.objects.filter(
-                wave__in=waves, is_published=True
-            ).order_by("wave__sort_order", "id")
+            AdventureLevelTierScenarioVariant.objects.filter(
+                scenario__in=scenarios, is_published=True
+            ).order_by("scenario__sort_order", "id")
         )
         ordinary = [v for v in variants if not v.is_transfer]
         if not ordinary:
@@ -112,7 +112,7 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
             (
                 v
                 for v in variants
-                if v.is_transfer and v.transfer_note.strip() and v.wave_id == waves[0].id
+                if v.is_transfer and v.transfer_note.strip() and v.scenario_id == scenarios[0].id
             ),
             None,
         )
@@ -137,7 +137,7 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
                 "module": tier.adventure_level.chapter.number,
                 "slug": tier.adventure_level.slug,
                 "difficulty": tier.difficulty,
-                "required": len(waves),
+                "required": len(scenarios),
                 "variants": [_reference(v) for v in ordinary],
                 "transfer": _reference(transfer) if transfer else None,
                 "transfer_missing": missing,
@@ -169,12 +169,12 @@ def _records(study):
     specs = {s["id"]: s for s in manifest["tiers"]}
     content = {
         v.id: v
-        for v in AdventureLevelTierWaveVariant.objects.filter(
-            wave__tier_id__in=specs,
-        ).select_related("wave__tier__adventure_level__chapter")
+        for v in AdventureLevelTierScenarioVariant.objects.filter(
+            scenario__tier_id__in=specs,
+        ).select_related("scenario__tier__adventure_level__chapter")
     }
-    wave_counts = dict(
-        AdventureLevelTierWave.objects.filter(tier_id__in=specs, is_published=True)
+    scenario_counts = dict(
+        AdventureLevelTierScenario.objects.filter(tier_id__in=specs, is_published=True)
         .values("tier_id")
         .annotate(count=Count("id"))
         .values_list("tier_id", "count")
@@ -207,8 +207,8 @@ def _records(study):
             attempts = grouped[player_id, tier_id]
             refs = {r["id"]: r for r in spec["variants"]}
             available = all(_available(content.get(ref_id), ref) for ref_id, ref in refs.items())
-            # A reseed that changed the tier's waves changes what mastery means.
-            requirements_match = wave_counts.get(tier_id) == spec["required"] and all(
+            # A reseed that changed the tier's scenarios changes what mastery means.
+            requirements_match = scenario_counts.get(tier_id) == spec["required"] and all(
                 ref_id in content for ref_id in refs
             )
             ended = [r for r in attempts if r.ended_at and r.ended_at <= study.cutoff]

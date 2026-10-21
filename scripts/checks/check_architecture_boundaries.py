@@ -1869,7 +1869,7 @@ def check_backend_service_packages() -> list[str]:
     return violations
 
 
-# The retired multi-story curriculum and its wave-based adventure runtime were
+# The retired multi-story curriculum and its old adventure runtime were
 # removed. The live
 # curriculum is seeded by `seed_curriculum` onto difficulty tiers only.
 RETIRED_CURRICULUM_PATHS = (
@@ -1891,7 +1891,7 @@ RETIRED_CURRICULUM_PATHS = (
 
 def check_retired_curriculum_stays_removed() -> list[str]:
     return [
-        f"backend/{path}: the retired curriculum seed and wave runtime must not return"
+        f"backend/{path}: the retired curriculum seed and old adventure runtime must not return"
         for path in RETIRED_CURRICULUM_PATHS
         if (BACKEND / path).exists()
     ]

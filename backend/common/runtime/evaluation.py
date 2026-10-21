@@ -11,7 +11,7 @@ def rule_counts(outcome) -> tuple[int, int]:
 
 
 def progress_rule_counts(outcome, initial_outcome) -> tuple[int, int]:
-    """Count objective progress without rewarding rules true at wave start.
+    """Count objective progress without rewarding rules true at scenario start.
 
     Final-state contracts often contain invariants such as ``staging_empty``.
     Those are already true before a workflow starts, then temporarily become

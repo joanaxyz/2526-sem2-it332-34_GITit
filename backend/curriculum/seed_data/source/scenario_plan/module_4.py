@@ -1,25 +1,25 @@
-"""Module 4 wave placement: Advanced Recovery and History (WAVE_MAP.md).
+"""Module 4 scenario placement: Advanced Recovery and History (SCENARIO_MAP.md).
 
-Each tier's waves are listed in play order; each wave's first variant is a
-first-time learner's pick. Wave slugs are stable: progress rows name them.
+Each tier's scenarios are listed in play order; each scenario's first variant is a
+first-time learner's pick. Scenario slugs are stable: progress rows name them.
 """
 
 from __future__ import annotations
 
-from curriculum.seed_data.source.wave_plan.types import (
+from curriculum.seed_data.source.scenario_plan.types import (
     DEBUT,
     PRACTICE,
     SPIRAL,
     TRANSFER,
-    ModuleWaves,
-    WaveSpec,
+    ModuleScenarios,
+    ScenarioSpec,
 )
 
-WAVES: ModuleWaves = {
+SCENARIOS: ModuleScenarios = {
     # Recovering from Hard Resets
     "recovering-from-hard-resets": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "recover-the-lost-tip",
                 "Recover the lost tip",
                 DEBUT,
@@ -29,7 +29,7 @@ WAVES: ModuleWaves = {
                     "e3",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "recover-again",
                 "Recover after another reset",
                 PRACTICE,
@@ -40,7 +40,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "deeper-in-the-reflog",
                 "Deeper in the reflog",
                 PRACTICE,
@@ -52,7 +52,7 @@ WAVES: ModuleWaves = {
                     "m5",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "recover-and-share",
                 "Recover and share it",
                 SPIRAL,
@@ -63,7 +63,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "pick-the-right-candidate",
                 "Pick the right candidate",
                 TRANSFER,
@@ -75,7 +75,7 @@ WAVES: ModuleWaves = {
                     "h5",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "recover-and-bring-the-fix-to-main",
                 "Recover, then bring the fix to main",
                 SPIRAL,
@@ -89,7 +89,7 @@ WAVES: ModuleWaves = {
     # Reversing Pushed Commits Safely
     "reversing-pushed-commits-safely": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "undo-a-pushed-commit",
                 "Undo a pushed commit safely",
                 DEBUT,
@@ -99,7 +99,7 @@ WAVES: ModuleWaves = {
                     "re8",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "sync-then-revert",
                 "Sync first, then revert",
                 SPIRAL,
@@ -110,7 +110,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "find-the-culprit",
                 "Find the culprit from the symptom",
                 PRACTICE,
@@ -120,7 +120,7 @@ WAVES: ModuleWaves = {
                     "rm8",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "revert-on-the-release-branch",
                 "Revert on the release branch",
                 SPIRAL,
@@ -131,7 +131,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "two-faulty-commits-one-publish",
                 "Two faulty commits, one publish",
                 TRANSFER,
@@ -141,7 +141,7 @@ WAVES: ModuleWaves = {
                     "rh8",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "rewrite-only-unpublished",
                 "Rewrite only what isn't published",
                 SPIRAL,
@@ -155,7 +155,7 @@ WAVES: ModuleWaves = {
     # Completing Rebase Recovery Sequences
     "completing-rebase-recovery-sequences": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "replay-onto-main",
                 "Replay your branch onto main",
                 DEBUT,
@@ -165,7 +165,7 @@ WAVES: ModuleWaves = {
                     "be8",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "resolve-and-continue-a-rebase",
                 "Resolve and continue a rebase",
                 DEBUT,
@@ -174,7 +174,7 @@ WAVES: ModuleWaves = {
                     "rebase-easy-continue-config",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "resolve-another-stopped-rebase",
                 "Resolve another stopped rebase",
                 PRACTICE,
@@ -185,7 +185,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "abandon-a-stopped-rebase",
                 "Abandon a stopped rebase",
                 DEBUT,
@@ -194,7 +194,7 @@ WAVES: ModuleWaves = {
                     "rebase-easy-abort-stopped-docs",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "move-only-your-commits",
                 "Move only your commits",
                 DEBUT,
@@ -203,7 +203,7 @@ WAVES: ModuleWaves = {
                     "bm7",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "reset-then-rebase",
                 "Reset to the original tip, then rebase",
                 DEBUT,
@@ -214,7 +214,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "abort-then-move-only-your-commits",
                 "Abort, then move only your commits",
                 TRANSFER,
@@ -223,7 +223,7 @@ WAVES: ModuleWaves = {
                     "rebase-hard-abort-then-onto-ui",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "continue-then-publish-safely",
                 "Continue the rebase, then publish safely",
                 SPIRAL,
@@ -232,7 +232,7 @@ WAVES: ModuleWaves = {
                     "rebase-hard-continue-then-lease-billing",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "undo-a-bad-rebase-and-republish",
                 "Undo a bad rebase and republish",
                 SPIRAL,

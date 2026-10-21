@@ -216,7 +216,7 @@ function tier(
     id,
     difficulty,
     locked: false,
-    wave_progress: { completed: 0, total: 2 },
+    scenario_progress: { completed: 0, total: 2 },
     completion: null,
     reward: { coins: 25, claimed: false },
     ...overrides,
@@ -232,10 +232,10 @@ const tieredLevel: AdventureLevelSummary = {
   completion: null,
   tiers: [
     tier(31, 'easy', {
-      wave_progress: { completed: 1, total: 1 },
+      scenario_progress: { completed: 1, total: 1 },
       completion: { stars: 3, counted_action_total: 1, completed_at: '2026-08-25T00:00:00Z' },
     }),
-    tier(32, 'medium', { wave_progress: { completed: 1, total: 2 } }),
+    tier(32, 'medium', { scenario_progress: { completed: 1, total: 2 } }),
     tier(33, 'hard', { locked: true }),
   ],
 }
@@ -291,7 +291,7 @@ describe('StoryAdventurePath level callout', () => {
     expect(cleared).not.toHaveAttribute('data-next')
     expect(next).toHaveAttribute('data-next', 'true')
     expect(locked).toBeDisabled()
-    expect(within(locked).getByText('2 waves')).toBeInTheDocument()
+    expect(within(locked).getByText('2 scenarios')).toBeInTheDocument()
   })
 
   it('docks the callout clear of the path instead of over the nodes', () => {

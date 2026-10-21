@@ -4,7 +4,7 @@ import type { AuthoredLevel, AuthoredProblem, AuthoredVariant, AuthoringForm, Bo
 
 export function emptyProblem(kind: ContentKind, index = 0): AuthoredProblem {
   return {
-    slug: index === 0 ? 'wave-one' : `wave-${index + 1}`,
+    slug: index === 0 ? 'scenario-one' : `scenario-${index + 1}`,
     title: index === 0 ? 'First problem' : `Problem ${index + 1}`,
     difficulty: kind === 'challenge' ? 'easy' : '',
     story: '',

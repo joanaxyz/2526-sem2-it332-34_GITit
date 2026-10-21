@@ -123,7 +123,7 @@ class ChallengeLevelCompletion(PlayerCompletion):
 
 
 class AdventureLevelTierCompletion(ScoredPlayerCompletion):
-    """Written once all of a tier's waves are cleared - mirrors
+    """Written once all of a tier's scenarios are cleared - mirrors
     ChallengeTrialCompletion for the adventures/AdventureLevelTier chain."""
 
     tier = models.ForeignKey(
@@ -161,7 +161,7 @@ class KpiExposure(models.Model):
 
     player = models.ForeignKey("players.Player", on_delete=models.CASCADE)
     variant = models.ForeignKey(
-        "adventures.AdventureLevelTierWaveVariant", on_delete=models.PROTECT
+        "adventures.AdventureLevelTierScenarioVariant", on_delete=models.PROTECT
     )
     state_key = models.CharField(max_length=64)
     seen_at = models.DateTimeField(auto_now_add=True)
@@ -198,7 +198,7 @@ class KpiCheckpoint(models.Model):
         related_name="kpi_checkpoint",
     )
     variant = models.ForeignKey(
-        "adventures.AdventureLevelTierWaveVariant",
+        "adventures.AdventureLevelTierScenarioVariant",
         null=True,
         blank=True,
         on_delete=models.PROTECT,

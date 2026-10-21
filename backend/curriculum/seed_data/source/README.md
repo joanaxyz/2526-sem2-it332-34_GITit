@@ -2,10 +2,10 @@
 
 This directory is the canonical home for human-authored curriculum definitions:
 
-- `wave_plan/` — placement: each level's waves per tier, in play order, with
+- `scenario_plan/` — placement: each level's scenarios per tier, in play order, with
   their roles and variant IDs (one module per file).
-- `wave_scenarios.md` — extension scenarios (extra wave variants and Challenge
-  Gate trials), compiled to `../scenario_bank_waves.json` with
+- `extension_scenarios.md` — extension scenarios (extra scenario variants and Challenge
+  Gate trials), compiled to `../scenario_bank_extension.json` with
   `python scripts/curriculum/import_revised_scenarios.py --extension`.
 - `scenario_fixtures/` — the repository fixture, evaluation rules, and answer
   key for each extension scenario, keyed by scenario ID.

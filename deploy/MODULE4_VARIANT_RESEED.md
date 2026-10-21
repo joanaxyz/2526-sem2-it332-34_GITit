@@ -85,8 +85,8 @@ with `is_published = true` and `blank_target = false`.
 ```sql
 select l.slug as level, t.difficulty, v.slug as variant, v.is_published,
        v.target_state = '{}'::jsonb as blank_target
-from adventures_adventureleveltierwavevariant v
-join adventures_adventureleveltierwave w on w.id = v.wave_id
+from adventures_adventureleveltierscenariovariant v
+join adventures_adventureleveltierscenario w on w.id = v.scenario_id
 join adventures_adventureleveltier t on t.id = w.tier_id
 join adventures_adventurelevel l on l.id = t.adventure_level_id
 where v.slug ~ '^(re|rm|rh|be|bm|bh)[678]$'
@@ -98,7 +98,7 @@ order by l.slug, t.difficulty, v.slug;
 
 ```sql
 select v.slug, v.is_published
-from adventures_adventureleveltierwavevariant v
+from adventures_adventureleveltierscenariovariant v
 where v.slug ~ '^(re|rm|rh|be|bm|bh)[1-5]$'
 order by v.slug;
 ```
@@ -107,8 +107,8 @@ order by v.slug;
 
 ```sql
 select count(*)
-from adventures_adventureleveltierwavevariant v
-join adventures_adventureleveltierwave w on w.id = v.wave_id
+from adventures_adventureleveltierscenariovariant v
+join adventures_adventureleveltierscenario w on w.id = v.scenario_id
 join adventures_adventureleveltier t on t.id = w.tier_id
 join adventures_adventurelevel l on l.id = t.adventure_level_id
 join curriculum_chapter c on c.id = l.chapter_id
@@ -130,7 +130,7 @@ leave `…6`–`…8` published, because the reverted seed does not know about t
 Restore the previous published set directly instead:
 
 ```sql
-update adventures_adventureleveltierwavevariant
+update adventures_adventureleveltierscenariovariant
 set is_published = (slug ~ '^(re|rm|rh|be|bm|bh)[1-5]$')
 where slug ~ '^(re|rm|rh|be|bm|bh)[1-8]$';
 ```
@@ -147,7 +147,7 @@ On a first attempt you get the `…6` variant. To reach `…7` and `…8`, fail 
 press **Retry**, or clear the tier and press **Continue** on easy tiers, which
 need two clears. `re6` and `be6` keep the MVP repository; every medium and hard
 tier is a new exercise (see "Tier changes" below). The variant key is the `case_id`, visible in Django admin
-under *Adventure level tier wave variants*.
+under *Adventure level tier scenario variants*.
 
 | Variant | Level / tier | Repository to expect | Correct | Wrong (must not complete) |
 |---|---|---|---|---|

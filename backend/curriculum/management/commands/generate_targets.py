@@ -1,7 +1,7 @@
 """Regenerate ``curriculum/seed_data/generated/generated_targets.py``.
 
 The git command engine lives in the frontend now, so target repository states are
-no longer derived in Python. This command collects every module tier, wave and Challenge Gate case's
+no longer derived in Python. This command collects every module tier, scenario and Challenge Gate case's
 ``initial_state`` + ``solution_commands`` (+ mid-sequence workspace file edits),
 replays each through the real browser engine via a small Vite-driven Node script
 (``frontend/scripts/generate-targets.mjs``), verifies that every command is
@@ -138,7 +138,7 @@ class Command(BaseCommand):
                         },
                         max_counted_commands=tier.get("max_counted_commands") or 0,
                     )
-        # Wave and Challenge Gate scenarios (source/scenario_fixtures/) are live
+        # Planned and Challenge Gate scenarios (source/scenario_fixtures/) are live
         # cases too; their budget is the authored maximum.
         for case_id, case in extension_cases().items():
             add(

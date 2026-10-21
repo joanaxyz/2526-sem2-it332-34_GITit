@@ -78,8 +78,8 @@ export type TierRunResponse = Omit<
     completed: number
     total: number
     cleared: boolean
-    /** The next wave to play in this tier, or null once every wave is cleared. */
-    next_wave: { index: number; slug: string; title: string } | null
+    /** The next scenario to play in this tier, or null once every scenario is cleared. */
+    next_scenario: { index: number; slug: string; title: string } | null
   }
   policy: {
     min_counted_commands: number

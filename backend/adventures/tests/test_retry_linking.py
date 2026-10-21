@@ -12,8 +12,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from adventures.services import AdventureLevelTierRunService
 from common.constants import (
@@ -30,10 +30,10 @@ from progress.services import MetricsService
 def _tier(chapter, slug):
     level = AdventureLevel.objects.create(chapter=chapter, slug=slug, title=slug)
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    wave = AdventureLevelTierWave.objects.create(tier=tier, slug=f"{slug}-wave")
+    scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug=f"{slug}-scenario")
     for key in ("a", "b"):
-        AdventureLevelTierWaveVariant.objects.create(
-            wave=wave,
+        AdventureLevelTierScenarioVariant.objects.create(
+            scenario=scenario,
             slug=f"{slug}-{key}",
             label=key,
             semantic_key=f"{slug}-{key}",
@@ -183,7 +183,7 @@ def test_an_empty_run_left_open_after_the_failure_does_not_block_the_link(tiers,
     AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=failed.current_wave,
+        current_scenario=failed.current_scenario,
         selected_variant=failed.selected_variant,
         status=SESSION_STATUS_STARTED,
     )
@@ -213,7 +213,7 @@ def test_a_failure_that_already_has_a_retry_is_never_linked_again(tiers, player)
     older_retry = AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=failed.current_wave,
+        current_scenario=failed.current_scenario,
         selected_variant=failed.selected_variant,
         prior_run=failed,
         retry_index=1,

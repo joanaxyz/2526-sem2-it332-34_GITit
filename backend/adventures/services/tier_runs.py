@@ -2,7 +2,7 @@ from django.db import IntegrityError, transaction
 from django.utils import timezone
 
 from adventures.models import AdventureLevelTier, AdventureLevelTierProgress, AdventureLevelTierRun
-from adventures.tier_waves import next_wave, published_waves, replay_wave
+from adventures.tier_scenarios import next_scenario, published_scenarios, replay_scenario
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
@@ -23,9 +23,9 @@ RUN_HYDRATE_SELECT_RELATED = (
     "tier__adventure_level",
     "tier__adventure_level__chapter",
     "tier__adventure_level__chapter__story",
-    "current_wave",
+    "current_scenario",
     "selected_variant",
-    "selected_variant__wave",
+    "selected_variant__scenario",
     "prior_run",
     "player",
 )
@@ -112,9 +112,9 @@ class AdventureLevelTierRunService:
 
         # Replay semantics are authoritative on the server, mirroring
         # ChallengeRunService: once a tier has a completion (every published
-        # wave cleared), every new direct launch is free play regardless of a
+        # scenario cleared), every new direct launch is free play regardless of a
         # stale or omitted client flag. Before that, a solved attempt clears
-        # its wave on AdventureLevelTierProgress even though the tier is not
+        # its scenario on AdventureLevelTierProgress even though the tier is not
         # complete yet - see AdventureLevelTierCommandProcessingService.
         is_replay = bool(is_replay or already_completed or (prior_run and prior_run.is_replay))
         if not is_replay:
@@ -134,43 +134,43 @@ class AdventureLevelTierRunService:
             if prior_run is not None:
                 selection_reference = prior_run
 
-        waves = published_waves(tier)
-        if not waves:
-            raise Locked("This difficulty tier has no published wave.")
+        scenarios = published_scenarios(tier)
+        if not scenarios:
+            raise Locked("This difficulty tier has no published scenario.")
         if is_replay:
             if not already_completed:
                 raise Locked("Free play is available only after completing this difficulty tier.")
-            if prior_run is not None and prior_run.current_wave_id in {w.id for w in waves}:
-                # Retrying a free-play attempt stays on the wave that was tried.
-                wave = next(w for w in waves if w.id == prior_run.current_wave_id)
+            if prior_run is not None and prior_run.current_scenario_id in {w.id for w in scenarios}:
+                # Retrying a free-play attempt stays on the scenario that was tried.
+                scenario = next(w for w in scenarios if w.id == prior_run.current_scenario_id)
                 selection_reference = prior_run
             else:
-                wave = replay_wave(player=player, tier=tier, waves=waves)
-                selection_reference = self._latest_run_on_wave(player=player, wave=wave)
+                scenario = replay_scenario(player=player, tier=tier, scenarios=scenarios)
+                selection_reference = self._latest_run_on_scenario(player=player, scenario=scenario)
         else:
-            wave = (
-                next_wave(
-                    waves,
+            scenario = (
+                next_scenario(
+                    scenarios,
                     AdventureLevelTierProgress.objects.filter(player=player, tier=tier).first(),
                 )
-                or waves[0]
+                or scenarios[0]
             )
-        # A run from another wave says nothing about which of this wave's
+        # A run from another scenario says nothing about which of this scenario's
         # variants the learner has just seen.
         if (
             selection_reference is not None
-            and selection_reference.selected_variant.wave_id != wave.id
+            and selection_reference.selected_variant.scenario_id != scenario.id
         ):
             selection_reference = None
 
         selector = TierVariantSelectionService()
-        published_variants = selector._published_variants(wave)
+        published_variants = selector._published_variants(scenario)
         tried_keys = (
-            selector._tried_variant_keys(player=player, wave=wave) if selection_reference else set()
+            selector._tried_variant_keys(player=player, scenario=scenario) if selection_reference else set()
         )
         variant = selector.select_variant(
             player=player,
-            wave=wave,
+            scenario=scenario,
             prior_run=selection_reference,
             published_variants=published_variants,
             tried_variant_keys=tried_keys,
@@ -214,7 +214,7 @@ class AdventureLevelTierRunService:
         if not is_replay:
             retry_index = failed_attempts(player_id=player.id, tier_id=tier.id)
 
-        # Revised scenario-bank budgets are authored per variant. Older waves
+        # Revised scenario-bank budgets are authored per variant. Older scenarios
         # still fall back to their shared budget. A run's star budget must be
         # at least 1 because of the database constraint and to leave read-only
         # scenarios one command of room.
@@ -224,7 +224,7 @@ class AdventureLevelTierRunService:
             run = AdventureLevelTierRun.objects.create(
                 player=player,
                 tier=tier,
-                current_wave=wave,
+                current_scenario=scenario,
                 selected_variant=variant,
                 prior_run=prior_reference,
                 source_entry_point=source_entry_point,
@@ -257,7 +257,7 @@ class AdventureLevelTierRunService:
                 tier=tier,
                 kind=KpiCheckpoint.Kind.TRANSFER,
             )
-            .select_related("variant__wave", "run")
+            .select_related("variant__scenario", "run")
             .first()
         )
         if checkpoint is None:
@@ -280,7 +280,7 @@ class AdventureLevelTierRunService:
         run = AdventureLevelTierRun.objects.create(
             player=player,
             tier=tier,
-            current_wave=variant.wave,
+            current_scenario=variant.scenario,
             selected_variant=variant,
             source_entry_point=source_entry_point,
             is_transfer=True,
@@ -348,10 +348,10 @@ class AdventureLevelTierRunService:
             raise Locked("This difficulty tier is locked until the previous tier is completed.")
 
     @staticmethod
-    def _latest_run_on_wave(*, player, wave):
+    def _latest_run_on_scenario(*, player, scenario):
         return (
             AdventureLevelTierRun.objects.select_related("selected_variant")
-            .filter(player=player, current_wave=wave)
+            .filter(player=player, current_scenario=scenario)
             .order_by("-started_at", "-id")
             .first()
         )

@@ -61,4 +61,16 @@ describe('storyMapSnapshot', () => {
     expect(readStoryMapSnapshot(key)).toBeUndefined()
     expect(window.localStorage.length).toBe(0)
   })
+
+  it('drops a snapshot written in an older payload shape', () => {
+    signIn(1)
+    const storageKey = `git-it:story-map-snapshot:1:${key}`
+    window.localStorage.setItem(
+      storageKey,
+      JSON.stringify({ userId: 1, storedAt: Date.now(), data: { chapter_id: 7 } }),
+    )
+
+    expect(readStoryMapSnapshot(key)).toBeUndefined()
+    expect(window.localStorage.getItem(storageKey)).toBeNull()
+  })
 })

@@ -1,4 +1,4 @@
-"""A cleared wave credits only the command forms the learner actually typed.
+"""A cleared scenario credits only the command forms the learner actually typed.
 
 Crediting every form attached to a level used to mark unused forms as
 practised, which silently suppressed their command guides in later levels.
@@ -12,8 +12,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
     SkillMastery,
 )
 from adventures.services import AdventureLevelTierRunService
@@ -47,7 +47,7 @@ def _init_level(player_name: str, django_user_model):
         chapter=chapter, slug="initializing-a-local-repository", title="Initializing"
     )
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    wave = AdventureLevelTierWave.objects.create(
+    scenario = AdventureLevelTierScenario.objects.create(
         tier=tier,
         slug="init-easy",
         min_counted_commands=1,
@@ -65,9 +65,9 @@ def _init_level(player_name: str, django_user_model):
         ]
     }
     level.command_forms.set(forms.values())
-    wave.command_forms.set(forms.values())
-    AdventureLevelTierWaveVariant.objects.create(
-        wave=wave,
+    scenario.command_forms.set(forms.values())
+    AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
         slug="init-easy-current",
         label="Initialize the current folder",
         initial_state=INITIAL,
@@ -78,7 +78,7 @@ def _init_level(player_name: str, django_user_model):
         },
         solution_commands=["git init"],
     )
-    return user, player, tier, wave, forms
+    return user, player, tier, scenario, forms
 
 
 def _initialized(state: dict) -> dict:
@@ -108,7 +108,7 @@ def _initialized(state: dict) -> dict:
     return initialized
 
 
-def test_a_cleared_wave_credits_only_the_forms_the_learner_typed(db, django_user_model):
+def test_a_cleared_scenario_credits_only_the_forms_the_learner_typed(db, django_user_model):
     user, player, tier, _, forms = _init_level("credit-used", django_user_model)
     run = AdventureLevelTierRunService().start_run(
         player=player, tier=tier, source_entry_point="level_page"
@@ -141,8 +141,8 @@ def test_a_cleared_wave_credits_only_the_forms_the_learner_typed(db, django_user
     assert not lesson_is_known(reads, branch_guide)
 
 
-def test_a_wave_clear_credits_only_the_clearing_runs_processed_commands(db, django_user_model):
-    _, player, tier, wave, _ = _init_level("credit-union", django_user_model)
+def test_a_scenario_clear_credits_only_the_clearing_runs_processed_commands(db, django_user_model):
+    _, player, tier, scenario, _ = _init_level("credit-union", django_user_model)
     service = AdventureLevelTierRunService()
 
     def step(run, command: str, *, processable: bool = True) -> None:
@@ -164,5 +164,5 @@ def test_a_wave_clear_credits_only_the_clearing_runs_processed_commands(db, djan
     step(current, "git init")
     step(current, "git start", processable=False)
 
-    assert current.current_wave_id == wave.id
+    assert current.current_scenario_id == scenario.id
     assert _processed_commands(current) == ["git init"]

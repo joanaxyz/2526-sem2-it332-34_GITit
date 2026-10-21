@@ -20,7 +20,7 @@ from django.db.models import Prefetch
 
 from adventures.models import (
     AdventureLevel,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenarioVariant,
 )
 from curriculum.models import CommandForm
 from drills.models import LevelDrill, LevelDrillCard
@@ -158,20 +158,20 @@ def seed_all_level_drills(*, level_ids: list[int] | None = None) -> DrillSeedSum
     # published command list twice, and re-reading it 261 times is the
     # difference between seconds and minutes over a pooled connection.
     catalog = DrillCatalog.load()
-    # Prefetch the whole wave tree in a handful of queries rather than a
+    # Prefetch the whole scenario tree in a handful of queries rather than a
     # handful per level. Variants carry large initial/target repository
     # JSON that the drill never reads, so only the authored solution is
     # loaded - prefetching the full rows would pull hundreds of megabytes.
-    variant_fields = ("id", "wave_id", "slug", "label", "solution_commands", "is_published")
+    variant_fields = ("id", "scenario_id", "slug", "label", "solution_commands", "is_published")
     levels = (
         AdventureLevel.objects.filter(is_published=True)
         .select_related("chapter")
         .prefetch_related(
             "tiers",
-            "tiers__waves",
+            "tiers__scenarios",
             Prefetch(
-                "tiers__waves__variants",
-                queryset=AdventureLevelTierWaveVariant.objects.only(*variant_fields),
+                "tiers__scenarios__variants",
+                queryset=AdventureLevelTierScenarioVariant.objects.only(*variant_fields),
             ),
         )
     )

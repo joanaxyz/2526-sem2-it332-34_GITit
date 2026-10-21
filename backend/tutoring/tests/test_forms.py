@@ -55,7 +55,7 @@ def test_catalog_prefers_the_most_specific_playable_form(db):
     assert resolve_form("git add README.md").usage_form == "git add <file>"
 
 
-def test_wave_forms_win_over_the_catalog(db):
+def test_scenario_forms_win_over_the_catalog(db):
     skill = CommandSkill.objects.create(
         slug="git-switch", title="git switch", base_command="git switch"
     )
@@ -65,7 +65,7 @@ def test_wave_forms_win_over_the_catalog(db):
         usage_form="git switch -c <branch>",
         label="Create",
     )
-    wave_form = CommandForm.objects.create(
+    scenario_form = CommandForm.objects.create(
         command_skill=skill,
         slug="recover",
         usage_form="git switch -c <branch> [<start-point>]",
@@ -73,7 +73,7 @@ def test_wave_forms_win_over_the_catalog(db):
     )
     assert resolve_form("git switch -c fix").usage_form == catalog.usage_form
     assert (
-        resolve_form("git switch -c fix", preferred=[wave_form]).usage_form == wave_form.usage_form
+        resolve_form("git switch -c fix", preferred=[scenario_form]).usage_form == scenario_form.usage_form
     )
 
 

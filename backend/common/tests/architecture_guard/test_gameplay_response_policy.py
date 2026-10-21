@@ -71,7 +71,7 @@ def test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift()
     schemas["ChallengeCommandStepResponse"]["properties"].pop("evaluation_result")
     schemas["ChallengeCommandStepResponse"]["required"].remove("evaluation_result")
     schemas["AdventureRunResponse"] = {"type": "object", "additionalProperties": {}}
-    schemas["AdventureLevelTierRunResponse"]["properties"]["wave"] = {"type": "object"}
+    schemas["AdventureLevelTierRunResponse"]["properties"]["scenario"] = {"type": "object"}
     schemas["ChallengeCommandRunResponse"]["required"].append("completion")
     schema["paths"]["/api/challenge-runs/{run_id}/"]["get"]["responses"]["200"]["content"][
         "application/json"
@@ -85,7 +85,7 @@ def test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift()
     assert any("ChallengeCommandStepResponse properties/required" in row for row in violations)
     assert any("retired AdventureRunResponse must stay absent" in row for row in violations)
     assert any(
-        "AdventureLevelTierRunResponse.wave must reference AdventureLevelTierWavePositionResponse"
+        "AdventureLevelTierRunResponse.scenario must reference AdventureLevelTierScenarioPositionResponse"
         in row
         for row in violations
     )
@@ -135,15 +135,15 @@ def test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift()
         for row in gameplay_response_openapi_violations(status_schema)
     )
 
-    wave_nullable_schema = json.loads(
+    scenario_nullable_schema = json.loads(
         (ROOT / GAMEPLAY_RESPONSE_GENERATED_OPENAPI).read_text(encoding="utf-8")
     )
-    wave_nullable_schema["components"]["schemas"]["AdventureLevelTierWavePositionResponse"][
+    scenario_nullable_schema["components"]["schemas"]["AdventureLevelTierScenarioPositionResponse"][
         "properties"
     ]["index"].pop("nullable")
     assert any(
-        "AdventureLevelTierWavePositionResponse nullable fields" in row
-        for row in gameplay_response_openapi_violations(wave_nullable_schema)
+        "AdventureLevelTierScenarioPositionResponse nullable fields" in row
+        for row in gameplay_response_openapi_violations(scenario_nullable_schema)
     )
 
 

@@ -1,4 +1,4 @@
-"""Module 2 wave scenarios: branching and collaboration (levels 2.1-2.9)."""
+"""Module 2 planned scenarios: branching and collaboration (levels 2.1-2.9)."""
 
 from __future__ import annotations
 

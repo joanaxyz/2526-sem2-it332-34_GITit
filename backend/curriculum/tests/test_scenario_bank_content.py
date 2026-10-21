@@ -3,14 +3,14 @@ from __future__ import annotations
 import pytest
 from django.core.management import call_command
 
-from adventures.models import AdventureLevelTierWaveVariant
+from adventures.models import AdventureLevelTierScenarioVariant
 from curriculum.management.commands.seed_curriculum import MODULE_LEVELS, Command, ev
 from curriculum.seed_data.generated.generated_targets import TARGET_STATES
 from curriculum.seed_data.scenario_bank import scenario_bank
 from curriculum.seed_data.scenario_runtime import DISPLACED_REVISED_CASE_IDS, UNPLACED_CASE_IDS
 from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES
 from curriculum.seed_data.source.scenario_fixtures import extension_case
-from curriculum.seed_data.source.wave_plan import MODULE_WAVE_PLAN
+from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN
 from evaluation.services.rule_builders import rules_from_state_requirements
 from evaluation.services.state_based import StateBasedEvaluator
 
@@ -122,14 +122,14 @@ ROUTE_RULES = {
 
 
 def _published_cases() -> dict[str, dict]:
-    """Every case a learner can be served: each planned wave variant and gate trial."""
+    """Every case a learner can be served: each planned scenario variant and gate trial."""
     pool = {case["case_id"]: case for case in _curriculum_cases()}
     case_ids = [
         case_id
-        for tiers in MODULE_WAVE_PLAN.values()
-        for waves in tiers.values()
-        for wave in waves
-        for case_id in wave.variants
+        for tiers in MODULE_SCENARIO_PLAN.values()
+        for scenarios in tiers.values()
+        for scenario in scenarios
+        for case_id in scenario.variants
     ]
     case_ids += [
         case_id
@@ -194,7 +194,7 @@ def test_every_published_answer_key_passes_and_no_starting_state_does():
 def test_curriculum_seed_persists_the_complete_scenario_contract():
     call_command("seed_curriculum", verbosity=0)
 
-    variant = AdventureLevelTierWaveVariant.objects.get(case_id="init-easy-invoice")
+    variant = AdventureLevelTierScenarioVariant.objects.get(case_id="init-easy-invoice")
     authored = scenario_bank()["init-easy-invoice"]
     assert variant.label == authored["label"]
     assert variant.solution_commands == authored["solution_commands"]
@@ -217,26 +217,26 @@ def test_curriculum_seed_persists_the_complete_scenario_contract():
         == authored["maximum_counted_commands"]
     )
 
-    conflict = AdventureLevelTierWaveVariant.objects.get(case_id="manual-easy-auth-copy")
+    conflict = AdventureLevelTierScenarioVariant.objects.get(case_id="manual-easy-auth-copy")
     assert conflict.scenario_context["details"][0] == {
         "label": "Required file: src/auth.js",
         "value": "timeout=5000\nretry=enabled",
     }
-    # Planned levels publish their waves' variants; the rest still publish their pools.
+    # Planned levels publish their scenarios' variants; the rest still publish their pools.
     planned = sum(
-        len(wave.variants)
-        for tiers in MODULE_WAVE_PLAN.values()
-        for waves in tiers.values()
-        for wave in waves
+        len(scenario.variants)
+        for tiers in MODULE_SCENARIO_PLAN.values()
+        for scenarios in tiers.values()
+        for scenario in scenarios
     )
     pooled = sum(
         len(tier["cases"])
         for level in MODULE_LEVELS
-        if level["slug"] not in MODULE_WAVE_PLAN
+        if level["slug"] not in MODULE_SCENARIO_PLAN
         for tier in level["tiers"].values()
     )
     assert (
-        AdventureLevelTierWaveVariant.objects.filter(is_published=True).count() == planned + pooled
+        AdventureLevelTierScenarioVariant.objects.filter(is_published=True).count() == planned + pooled
     )
 
 
@@ -245,9 +245,9 @@ def test_reseed_unpublishes_all_displaced_revised_ids():
     call_command("seed_curriculum", verbosity=0)
 
     for displaced_id, replacement_id in DISPLACED_REVISED_CASE_IDS.items():
-        replacement = AdventureLevelTierWaveVariant.objects.get(case_id=replacement_id)
-        AdventureLevelTierWaveVariant.objects.create(
-            wave=replacement.wave,
+        replacement = AdventureLevelTierScenarioVariant.objects.get(case_id=replacement_id)
+        AdventureLevelTierScenarioVariant.objects.create(
+            scenario=replacement.scenario,
             slug=displaced_id,
             label=f"Retired {displaced_id}",
             initial_state=replacement.initial_state,
@@ -265,6 +265,6 @@ def test_reseed_unpublishes_all_displaced_revised_ids():
 
     call_command("seed_curriculum", verbosity=0)
 
-    displaced = AdventureLevelTierWaveVariant.objects.filter(case_id__in=DISPLACED_REVISED_CASE_IDS)
+    displaced = AdventureLevelTierScenarioVariant.objects.filter(case_id__in=DISPLACED_REVISED_CASE_IDS)
     assert displaced.count() == len(DISPLACED_REVISED_CASE_IDS)
     assert not displaced.filter(is_published=True).exists()

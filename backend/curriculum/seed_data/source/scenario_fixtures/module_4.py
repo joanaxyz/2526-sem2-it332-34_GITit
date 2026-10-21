@@ -1,4 +1,4 @@
-"""Module 4 wave scenarios: advanced recovery and history (levels 4.1-4.3)."""
+"""Module 4 planned scenarios: advanced recovery and history (levels 4.1-4.3)."""
 
 from __future__ import annotations
 

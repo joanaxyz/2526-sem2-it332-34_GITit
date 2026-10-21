@@ -619,7 +619,7 @@ describe('ContentEditorPage workflow', () => {
     fireEvent.click(disclosure)
 
     expect(screen.getByRole('button', { name: /hide the generated json/i })).toHaveAttribute('aria-expanded', 'true')
-    expect(screen.getByText('Problem "wave-one" initial state is not valid JSON.')).toHaveAttribute(
+    expect(screen.getByText('Problem "scenario-one" initial state is not valid JSON.')).toHaveAttribute(
       'id',
       'content-editor-generated-json',
     )

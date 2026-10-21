@@ -1,4 +1,4 @@
-from adventures.models import AdventureLevelTierWaveVariant
+from adventures.models import AdventureLevelTierScenarioVariant
 from authoring.compiler import ContentRuntimeCompiler
 from authoring.models import ContentDefinition, ContentKind
 from challenges.models import ChallengeLevel, ChallengeTrialVariant
@@ -49,16 +49,16 @@ def test_adventure_compile_writes_direct_level_variants(db, django_user_model):
 
     runtime = ContentRuntimeCompiler().compile(content=content)
     level = runtime.adventure
-    # A flat authored level compiles to one Easy tier with one wave.
+    # A flat authored level compiles to one Easy tier with one scenario.
     tier = level.tiers.get(difficulty="easy")
-    wave = tier.waves.get(slug="authored-level")
+    scenario = tier.scenarios.get(slug="authored-level")
 
     assert level.command_forms.filter(usage_form="git status").exists()
-    assert wave.command_forms.filter(usage_form="git status").exists()
-    assert AdventureLevelTierWaveVariant.objects.filter(wave=wave, is_published=True).count() == 2
+    assert scenario.command_forms.filter(usage_form="git status").exists()
+    assert AdventureLevelTierScenarioVariant.objects.filter(scenario=scenario, is_published=True).count() == 2
 
 
-def test_recompiling_an_adventure_unpublishes_removed_waves_instead_of_deleting(
+def test_recompiling_an_adventure_unpublishes_removed_scenarios_instead_of_deleting(
     db, django_user_model
 ):
     owner = django_user_model.objects.create_user(username="recompiler")
@@ -69,7 +69,7 @@ def test_recompiling_an_adventure_unpublishes_removed_waves_instead_of_deleting(
         title="Recompiled",
         command_family="git status",
         definition={
-            "levels": [{"slug": "level-1", "title": "Level 1", "waves": [_wave("a"), _wave("b")]}]
+            "levels": [{"slug": "level-1", "title": "Level 1", "scenarios": [_scenario("a"), _scenario("b")]}]
         },
     )
     compiler = ContentRuntimeCompiler()
@@ -77,15 +77,15 @@ def test_recompiling_an_adventure_unpublishes_removed_waves_instead_of_deleting(
     tier = first.adventure.tiers.get(difficulty="easy")
 
     content.definition = {
-        "levels": [{"slug": "level-1", "title": "Level 1", "waves": [_wave("a")]}]
+        "levels": [{"slug": "level-1", "title": "Level 1", "scenarios": [_scenario("a")]}]
     }
     content.save(update_fields=["definition"])
     second = compiler.compile(content=content)
 
     assert second.adventure_id == first.adventure_id
     assert second.adventure.tiers.get(difficulty="easy").id == tier.id
-    assert set(tier.waves.filter(is_published=True).values_list("slug", flat=True)) == {"a"}
-    assert tier.waves.filter(slug="b", is_published=False).exists()
+    assert set(tier.scenarios.filter(is_published=True).values_list("slug", flat=True)) == {"a"}
+    assert tier.scenarios.filter(slug="b", is_published=False).exists()
 
 
 def test_challenge_compile_writes_level_trials_and_direct_variants(db, django_user_model):
@@ -114,7 +114,7 @@ def test_challenge_compile_writes_level_trials_and_direct_variants(db, django_us
     assert ChallengeTrialVariant.objects.filter(trial__in=trials, is_published=True).count() == 6
 
 
-def _wave(slug):
+def _scenario(slug):
     state = {
         "repository_initialized": True,
         "commits": [],
@@ -135,8 +135,8 @@ def _wave(slug):
     }
 
 
-def test_adventure_level_compiles_ordered_waves(db, django_user_model):
-    owner = django_user_model.objects.create_user(username="wave-author")
+def test_adventure_level_compiles_ordered_scenarios(db, django_user_model):
+    owner = django_user_model.objects.create_user(username="scenario-author")
     content = ContentDefinition.objects.create(
         owner=owner,
         kind=ContentKind.ADVENTURE,
@@ -148,7 +148,7 @@ def test_adventure_level_compiles_ordered_waves(db, django_user_model):
                 {
                     "slug": "level-1",
                     "title": "Level 1",
-                    "waves": [_wave("wave-a"), _wave("wave-b"), _wave("wave-c")],
+                    "scenarios": [_scenario("scenario-a"), _scenario("scenario-b"), _scenario("scenario-c")],
                 }
             ]
         },
@@ -156,19 +156,19 @@ def test_adventure_level_compiles_ordered_waves(db, django_user_model):
 
     runtime = ContentRuntimeCompiler().compile(content=content)
     level = runtime.adventure
-    waves = list(level.tiers.get(difficulty="easy").waves.order_by("sort_order"))
+    scenarios = list(level.tiers.get(difficulty="easy").scenarios.order_by("sort_order"))
 
-    assert [w.slug for w in waves] == ["wave-a", "wave-b", "wave-c"]
-    assert [w.sort_order for w in waves] == [0, 1, 2]
-    assert all(w.command_forms.filter(usage_form="git status").exists() for w in waves)
-    assert all(w.variants.filter(is_published=True).count() == 1 for w in waves)
+    assert [w.slug for w in scenarios] == ["scenario-a", "scenario-b", "scenario-c"]
+    assert [w.sort_order for w in scenarios] == [0, 1, 2]
+    assert all(w.command_forms.filter(usage_form="git status").exists() for w in scenarios)
+    assert all(w.variants.filter(is_published=True).count() == 1 for w in scenarios)
 
 
 def test_nested_challenge_un_collapses_to_multiple_levels(db, django_user_model):
     owner = django_user_model.objects.create_user(username="nested-challenge-author")
 
     def trial(difficulty):
-        return {**_wave(f"problem-{difficulty}"), "difficulty": difficulty}
+        return {**_scenario(f"problem-{difficulty}"), "difficulty": difficulty}
 
     content = ContentDefinition.objects.create(
         owner=owner,

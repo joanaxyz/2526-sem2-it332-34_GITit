@@ -54,8 +54,8 @@ class AdventureLevelTierRewardResponseSerializer(serializers.Serializer):
     claimed = serializers.BooleanField()
 
 
-class AdventureLevelTierWavePositionResponseSerializer(serializers.Serializer):
-    """Which of the tier's ordered waves the run plays."""
+class AdventureLevelTierScenarioPositionResponseSerializer(serializers.Serializer):
+    """Which of the tier's ordered scenarios the run plays."""
 
     index = serializers.IntegerField(allow_null=True)
     total = serializers.IntegerField()
@@ -77,7 +77,7 @@ class AdventureLevelTierRunResponseSerializer(serializers.Serializer):
     story = serializers.DictField(allow_null=True)
     difficulty = serializers.CharField(allow_null=True)
     variant = serializers.DictField()
-    wave = AdventureLevelTierWavePositionResponseSerializer()
+    scenario = AdventureLevelTierScenarioPositionResponseSerializer()
     progress = serializers.DictField()
     policy = serializers.DictField()
     counts = serializers.DictField()

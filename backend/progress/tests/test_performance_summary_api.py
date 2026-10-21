@@ -27,15 +27,15 @@ def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
         difficulty=DIFFICULTY_HARD,
     ).first()
     assert tier is not None
-    wave = tier.waves.first()
-    assert wave is not None
-    variant = wave.variants.first()
+    scenario = tier.scenarios.first()
+    assert scenario is not None
+    variant = scenario.variants.first()
     assert variant is not None
 
     first = AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variant,
         status=SESSION_STATUS_FAILED,
         retry_index=0,
@@ -43,7 +43,7 @@ def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
     retry = AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variant,
         prior_run=first,
         status=SESSION_STATUS_COMPLETED,
@@ -127,8 +127,8 @@ def test_admin_aggregate_spans_learners_while_player_endpoint_stays_scoped(db, d
         difficulty=DIFFICULTY_HARD,
     ).first()
     assert tier is not None
-    wave = tier.waves.first()
-    variant = wave.variants.first()
+    scenario = tier.scenarios.first()
+    variant = scenario.variants.first()
 
     players = []
     for index, status in enumerate((SESSION_STATUS_COMPLETED, SESSION_STATUS_FAILED)):
@@ -142,7 +142,7 @@ def test_admin_aggregate_spans_learners_while_player_endpoint_stays_scoped(db, d
         AdventureLevelTierRun.objects.create(
             player=player,
             tier=tier,
-            current_wave=wave,
+            current_scenario=scenario,
             selected_variant=variant,
             status=status,
             retry_index=0,

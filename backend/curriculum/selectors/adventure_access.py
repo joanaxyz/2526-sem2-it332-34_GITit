@@ -6,7 +6,7 @@ from typing import TYPE_CHECKING
 
 from adventures.models import AdventureLevel, AdventureLevelTier
 from adventures.rewards import tier_reward_payload
-from adventures.tier_waves import wave_progress
+from adventures.tier_scenarios import scenario_progress
 from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
 from drills.selectors import (
     drill_access_payload,
@@ -172,7 +172,7 @@ def adventure_summary_payload(
 # Mirrors the ChallengeLevel -> ChallengeTrial access pattern in
 # challenge_access.py: Easy unlocks with the level itself, Medium unlocks once
 # Easy has a completion row, Hard unlocks once Medium does. "Complete" means
-# every wave in the tier is cleared - tracked via AdventureLevelTierCompletion,
+# every scenario in the tier is cleared - tracked via AdventureLevelTierCompletion,
 # written once (mirrors ChallengeTrialCompletion), not re-derived per request.
 # ---------------------------------------------------------------------------
 
@@ -186,14 +186,14 @@ def _ordered_adventure_tiers(tiers: list[AdventureLevelTier]) -> list[AdventureL
 @dataclass(frozen=True)
 class AdventureTierAccessContext:
     """Batch-loaded per-tier facts: completion rows, each tier's published
-    waves, and the player's progress row (holding the cleared wave slugs) -
+    scenarios, and the player's progress row (holding the cleared scenario slugs) -
     so building a level's tier payloads costs a fixed handful of queries.
 
-    A tier is an ordered set of waves; "progress" counts the learner's cleared
-    waves (adventures/tier_waves.py)."""
+    A tier is an ordered set of scenarios; "progress" counts the learner's cleared
+    scenarios (adventures/tier_scenarios.py)."""
 
     completions: dict[int, object] = field(default_factory=dict)
-    waves: dict[int, list] = field(default_factory=dict)
+    scenarios: dict[int, list] = field(default_factory=dict)
     progress_rows: dict[int, object] = field(default_factory=dict)
     # (adventure_level_id, difficulty) -> published tier id, so unlock checks
     # find the previous difficulty without re-querying each level's tiers.
@@ -208,16 +208,16 @@ def _build_adventure_tier_access(
     if not tiers:
         return AdventureTierAccessContext()
 
-    from adventures.models import AdventureLevelTierWave
+    from adventures.models import AdventureLevelTierScenario
 
     tier_ids = [tier.id for tier in tiers]
-    waves: dict[int, list] = {}
-    for wave in (
-        AdventureLevelTierWave.objects.filter(tier_id__in=tier_ids, is_published=True)
+    scenarios: dict[int, list] = {}
+    for scenario in (
+        AdventureLevelTierScenario.objects.filter(tier_id__in=tier_ids, is_published=True)
         .only("id", "tier_id", "slug", "title", "sort_order")
         .order_by("sort_order", "id")
     ):
-        waves.setdefault(wave.tier_id, []).append(wave)
+        scenarios.setdefault(scenario.tier_id, []).append(scenario)
 
     completions: dict[int, object] = {}
     progress_rows: dict[int, object] = {}
@@ -238,14 +238,14 @@ def _build_adventure_tier_access(
             row.tier_id: row
             for row in AdventureLevelTierProgress.objects.filter(
                 player=player, tier_id__in=tier_ids
-            ).only("id", "tier_id", "successful_clears", "cleared_wave_slugs")
+            ).only("id", "tier_id", "successful_clears", "cleared_scenario_slugs")
         }
 
     from adventures.rewards import claimed_tier_reward_keys
 
     return AdventureTierAccessContext(
         completions=completions,
-        waves=waves,
+        scenarios=scenarios,
         progress_rows=progress_rows,
         claimed_reward_keys=claimed_tier_reward_keys(player=player, tiers=tiers),
         tier_ids_by_level_difficulty={
@@ -274,8 +274,8 @@ def adventure_level_tier_payload(
     *, tier: AdventureLevelTier, access: AdventureTierAccessContext
 ) -> dict:
     completion = access.completions.get(tier.id)
-    progress = wave_progress(
-        access.waves.get(tier.id, []),
+    progress = scenario_progress(
+        access.scenarios.get(tier.id, []),
         access.progress_rows.get(tier.id),
         tier_completed=completion is not None,
     )
@@ -284,7 +284,7 @@ def adventure_level_tier_payload(
         "id": tier.id,
         "difficulty": tier.difficulty,
         "locked": not _adventure_tier_unlocked(tier=tier, access=access),
-        "wave_progress": {"completed": completed, "total": total},
+        "scenario_progress": {"completed": completed, "total": total},
         "completion": _completion_payload(completion),
         "reward": tier_reward_payload(tier, claimed_keys=access.claimed_reward_keys),
     }

@@ -14,7 +14,7 @@ Use these terms consistently:
 - `Story` — a learning path.
 - `Chapter` — a section within a story.
 - `Lesson` — short conceptual reading.
-- `Adventure` / `Wave` — guided battle-style practice.
+- `Adventure` / `Scenario` — guided battle-style practice.
 - `Challenge` / `Trial` — independent state-based practice.
 - `Level map` — the visual chapter navigation surface.
 - `Story world` — site/map visual bundle.

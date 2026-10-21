@@ -26,7 +26,7 @@ from testing.kpi_fixtures import bundle, end, routes, start
 
 @pytest.mark.django_db
 def test_five_kpis_use_one_mastery_record_and_preserve_first_transfer(django_user_model):
-    player, tier, wave, variants = bundle(django_user_model)
+    player, tier, scenario, variants = bundle(django_user_model)
     prior = None
     for passed in (False, True, False, True):
         prior = end(start(player, tier, prior_run=prior), passed=passed)
@@ -79,7 +79,7 @@ def test_five_kpis_use_one_mastery_record_and_preserve_first_transfer(django_use
         "completed": 1,
         "total": 1,
         "cleared": True,
-        "next_wave": None,
+        "next_scenario": None,
     }
     report = MetricsService().performance_summary(player=player)
     assert {key: report["kpis"][key]["value"] for key in ("scr", "car", "hlcr", "arc", "rta")} == {
@@ -215,11 +215,11 @@ def test_changed_pending_transfer_is_missing_and_has_no_start_link(django_user_m
 
 
 @pytest.mark.django_db
-def test_unpublished_wave_does_not_rollback_a_valid_mastery(django_user_model):
-    player, tier, wave, _ = bundle(django_user_model, required=1)
+def test_unpublished_scenario_does_not_rollback_a_valid_mastery(django_user_model):
+    player, tier, scenario, _ = bundle(django_user_model, required=1)
     run = start(player, tier)
-    wave.is_published = False
-    wave.save(update_fields=["is_published"])
+    scenario.is_published = False
+    scenario.save(update_fields=["is_published"])
     end(run)
     assert AdventureLevelTierCompletion.objects.filter(player=player, tier=tier).exists()
     assert not KpiCheckpoint.objects.filter(player=player, tier=tier, kind="transfer").exists()

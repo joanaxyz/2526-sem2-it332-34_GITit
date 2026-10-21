@@ -100,10 +100,10 @@ def assign_transfer(*, player, tier):
         .exists()
     ):
         return None
-    wave = tier.waves.filter(is_published=True).order_by("sort_order", "id").first()
-    if wave is None:
+    scenario = tier.scenarios.filter(is_published=True).order_by("sort_order", "id").first()
+    if scenario is None:
         return None
-    for variant in wave.variants.filter(
+    for variant in scenario.variants.filter(
         is_published=True,
         is_transfer=True,
     ).order_by("id"):
@@ -134,7 +134,7 @@ def transfer_ready(point, *, seen=None) -> bool:
     if (
         variant is None
         or not variant.is_published
-        or not variant.wave.is_published
+        or not variant.scenario.is_published
         or not variant.is_transfer
         or not variant.transfer_note.strip()
         or valid_ref(variant) is None

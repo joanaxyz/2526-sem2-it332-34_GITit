@@ -1,12 +1,12 @@
 """Read helpers shared by the adventure tier runtime.
 
 An adventure level is played through its difficulty tiers; each tier is an
-ordered set of waves (see ``adventures/tier_waves.py``).
+ordered set of scenarios (see ``adventures/tier_scenarios.py``).
 """
 
 from django.db.models import Count, Q
 
-from adventures.models import AdventureLevelTierWave
+from adventures.models import AdventureLevelTierScenario
 
 
 def playable_level_publication_filter(prefix: str = "") -> Q:
@@ -31,12 +31,12 @@ MASTERY_TARGET_CAP = 8
 
 
 def form_solve_targets(form_ids) -> dict[int, int]:
-    """Mastery target = count of distinct published tier waves per command.
+    """Mastery target = count of distinct published tier scenarios per command.
 
-    Every wave that attaches a form (inside a required, published level) counts
+    Every scenario that attaches a form (inside a required, published level) counts
     toward its target, so a command is only "mastered" after it has been used
-    across many distinct scenarios. A wave attaches only the forms every one of
-    its variants uses, so each counted wave is one a learner is sure to practise
+    across many distinct scenarios. A scenario attaches only the forms every one of
+    its variants uses, so each counted scenario is one a learner is sure to practise
     the form in. The cap keeps the bar achievable for core commands that repeat
     across the whole curriculum.
     """
@@ -45,7 +45,7 @@ def form_solve_targets(form_ids) -> dict[int, int]:
     if not form_ids:
         return targets
     rows = (
-        AdventureLevelTierWave.objects.filter(
+        AdventureLevelTierScenario.objects.filter(
             is_published=True,
             tier__is_published=True,
             tier__adventure_level__is_published=True,

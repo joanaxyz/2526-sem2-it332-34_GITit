@@ -5,8 +5,8 @@ from django.core.management import call_command
 from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from challenges.models import ChallengeLevel, ChallengeTrial, ChallengeTrialVariant
 from curriculum.models import Chapter, CommandForm, CommandSkill, Story
@@ -23,8 +23,8 @@ def _snapshot() -> dict[str, list]:
         "forms": slugs(CommandForm, "slug"),
         "levels": slugs(AdventureLevel, "slug"),
         "tiers": slugs(AdventureLevelTier, "adventure_level__slug", "difficulty"),
-        "waves": slugs(AdventureLevelTierWave, "slug"),
-        "variants": slugs(AdventureLevelTierWaveVariant, "slug"),
+        "scenarios": slugs(AdventureLevelTierScenario, "slug"),
+        "variants": slugs(AdventureLevelTierScenarioVariant, "slug"),
         "gates": slugs(ChallengeLevel, "slug"),
         "trials": slugs(ChallengeTrial, "challenge_level__slug", "difficulty"),
         "trial_variants": slugs(ChallengeTrialVariant, "slug"),
@@ -38,4 +38,4 @@ def test_seeding_the_curriculum_twice_is_idempotent(db):
     call_command("seed_curriculum", verbosity=0)
 
     assert _snapshot() == first
-    assert first["levels"] and first["waves"] and first["trial_variants"]
+    assert first["levels"] and first["scenarios"] and first["trial_variants"]

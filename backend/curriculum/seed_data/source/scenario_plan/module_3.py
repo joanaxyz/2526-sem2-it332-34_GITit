@@ -1,26 +1,26 @@
-"""Module 3 wave placement: Conflict Resolution (WAVE_MAP.md).
+"""Module 3 scenario placement: Conflict Resolution (SCENARIO_MAP.md).
 
-Each tier's waves are listed in play order; each wave's first variant is a
-first-time learner's pick. Wave slugs are stable: progress rows name them.
+Each tier's scenarios are listed in play order; each scenario's first variant is a
+first-time learner's pick. Scenario slugs are stable: progress rows name them.
 """
 
 from __future__ import annotations
 
-from curriculum.seed_data.source.wave_plan.types import (
+from curriculum.seed_data.source.scenario_plan.types import (
     COMPOSE,
     DEBUT,
     PRACTICE,
     SPIRAL,
     TRANSFER,
-    ModuleWaves,
-    WaveSpec,
+    ModuleScenarios,
+    ScenarioSpec,
 )
 
-WAVES: ModuleWaves = {
+SCENARIOS: ModuleScenarios = {
     # Resolving Merge Conflicts Manually
     "resolving-conflicts-manually": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "resolve-one-conflicted-file",
                 "Resolve one conflicted file",
                 DEBUT,
@@ -30,7 +30,7 @@ WAVES: ModuleWaves = {
                     "manual-easy-billing-copy",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "resolve-another-file",
                 "Resolve another file",
                 PRACTICE,
@@ -41,7 +41,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "resolve-config-conflicts",
                 "Resolve config conflicts",
                 PRACTICE,
@@ -51,7 +51,7 @@ WAVES: ModuleWaves = {
                     "manual-medium-gateway",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "back-out-of-a-merge",
                 "Back out of a merge",
                 DEBUT,
@@ -60,7 +60,7 @@ WAVES: ModuleWaves = {
                     "manual-easy-abort-too-early",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "a-pull-that-conflicts",
                 "A pull that conflicts",
                 SPIRAL,
@@ -71,7 +71,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "resolve-with-less-guidance",
                 "Resolve with less guidance",
                 TRANSFER,
@@ -81,7 +81,7 @@ WAVES: ModuleWaves = {
                     "manual-hard-migration",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "abort-wrong-resolve-right",
                 "Abort the wrong merge, resolve the right one",
                 TRANSFER,
@@ -95,7 +95,7 @@ WAVES: ModuleWaves = {
     # Resolving Conflicts Using a Merge Tool
     "using-a-merge-tool": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "resolve-in-the-merge-tool",
                 "Resolve in the merge tool",
                 DEBUT,
@@ -105,7 +105,7 @@ WAVES: ModuleWaves = {
                     "mergetool-easy-upload-limit",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "merge-tool-practice",
                 "Another conflict, same tool",
                 PRACTICE,
@@ -116,7 +116,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "two-files-in-one-pass",
                 "Two files in one pass",
                 PRACTICE,
@@ -127,7 +127,7 @@ WAVES: ModuleWaves = {
                     "mergetool-medium-docs-sync",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "set-up-the-team-tool",
                 "Set up the team's tool first",
                 DEBUT,
@@ -138,7 +138,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "judge-which-side-to-keep",
                 "Judge which side to keep",
                 TRANSFER,
@@ -147,7 +147,7 @@ WAVES: ModuleWaves = {
                     "mergetool-hard-take-theirs",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "no-leftovers",
                 "No leftovers",
                 TRANSFER,
@@ -161,7 +161,7 @@ WAVES: ModuleWaves = {
     # Cherry-Picking Commits
     "cherry-picking-commits": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "copy-one-commit",
                 "Copy one commit",
                 DEBUT,
@@ -173,7 +173,7 @@ WAVES: ModuleWaves = {
                     "cherry-easy-null-check",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "pick-without-committing",
                 "Pick without committing",
                 DEBUT,
@@ -182,7 +182,7 @@ WAVES: ModuleWaves = {
                     "cherry-medium-staged-review",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "two-fixes-one-reviewed-commit",
                 "Two fixes, one reviewed commit",
                 COMPOSE,
@@ -193,7 +193,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "record-where-it-came-from",
                 "Record where it came from",
                 DEBUT,
@@ -202,7 +202,7 @@ WAVES: ModuleWaves = {
                     "cherry-easy-trace-source-hotfix",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "resolve-and-continue",
                 "Resolve and continue",
                 DEBUT,
@@ -211,7 +211,7 @@ WAVES: ModuleWaves = {
                     "cherry-medium-conflict-continue-auth",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "cancel-a-stopped-pick",
                 "Cancel a stopped pick",
                 DEBUT,
@@ -222,7 +222,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "review-two-backports-before-committing",
                 "Review two backports before committing",
                 TRANSFER,
@@ -231,7 +231,7 @@ WAVES: ModuleWaves = {
                     "cherry-hard-review-backports-export",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "backport-to-two-releases",
                 "Backport to two releases",
                 TRANSFER,
@@ -240,7 +240,7 @@ WAVES: ModuleWaves = {
                     "cherry-hard-two-releases-security",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "abort-the-wrong-pick-backport-the-right-one",
                 "Abort the wrong pick, backport the right one",
                 SPIRAL,

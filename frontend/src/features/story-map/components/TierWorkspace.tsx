@@ -41,7 +41,7 @@ import { SkillLearnedOverlay } from '@/shared/skill-learning/SkillLearnedOverlay
 import { useSkillLearnedQueue } from '@/shared/skill-learning/useSkillLearnedQueue'
 
 /** The adventure-tier run lifecycle around the shared gameplay workspace
- * (shared/level/workspace): command guides, learned skills and wave flow.
+ * (shared/level/workspace): command guides, learned skills and scenario flow.
  * ChallengeWorkspace wraps the same workspace for Challenge Gate trials. */
 export function TierWorkspace() {
   const params = useParams()

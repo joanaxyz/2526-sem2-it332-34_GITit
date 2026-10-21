@@ -58,7 +58,7 @@ def test_a_command_reads_each_tutor_table_once(client, teaching_run):
 def test_the_response_plan_sees_the_command_just_recorded(client, teaching_run):
     # Discovering a skill the first time is a one-off celebration with its own
     # reads; measure the everyday path.
-    for form in teaching_run.current_wave.command_forms.all():
+    for form in teaching_run.current_scenario.command_forms.all():
         SkillMastery.objects.create(
             player=teaching_run.player, command_form=form, learned_at=timezone.now()
         )

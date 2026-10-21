@@ -1,26 +1,26 @@
-"""Module 1 wave placement: Local Repository Foundations (WAVE_MAP.md).
+"""Module 1 scenario placement: Local Repository Foundations (SCENARIO_MAP.md).
 
-Each tier's waves are listed in play order; each wave's first variant is a
-first-time learner's pick. Wave slugs are stable: progress rows name them.
+Each tier's scenarios are listed in play order; each scenario's first variant is a
+first-time learner's pick. Scenario slugs are stable: progress rows name them.
 """
 
 from __future__ import annotations
 
-from curriculum.seed_data.source.wave_plan.types import (
+from curriculum.seed_data.source.scenario_plan.types import (
     COMPOSE,
     DEBUT,
     PRACTICE,
     SPIRAL,
     TRANSFER,
-    ModuleWaves,
-    WaveSpec,
+    ModuleScenarios,
+    ScenarioSpec,
 )
 
-WAVES: ModuleWaves = {
+SCENARIOS: ModuleScenarios = {
     # Initializing Repositories
     "initializing-a-local-repository": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "start-tracking-this-folder",
                 "Start tracking this folder",
                 DEBUT,
@@ -29,7 +29,7 @@ WAVES: ModuleWaves = {
                     "init-easy-plain-recipes",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "track-this-folder",
                 "Choose the first branch",
                 DEBUT,
@@ -38,7 +38,7 @@ WAVES: ModuleWaves = {
                     "init-easy-trunk-branch",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "new-project-folder",
                 "Start a new project folder",
                 DEBUT,
@@ -47,7 +47,7 @@ WAVES: ModuleWaves = {
                     "init-med-oss",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "new-folder-among-other-files",
                 "A new folder among other files",
                 PRACTICE,
@@ -58,7 +58,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "folder-and-branch-from-brief",
                 "Folder and branch from the brief",
                 PRACTICE,
@@ -67,7 +67,7 @@ WAVES: ModuleWaves = {
                     "init-medium-trunk-api-playground",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "existing-files-stay-untracked",
                 "Existing files stay untracked",
                 PRACTICE,
@@ -78,7 +78,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "only-the-right-subfolder",
                 "Only the right subfolder",
                 TRANSFER,
@@ -87,7 +87,7 @@ WAVES: ModuleWaves = {
                     "init-hard-ui-kit",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "nested-project-folder",
                 "A nested project folder",
                 TRANSFER,
@@ -101,7 +101,7 @@ WAVES: ModuleWaves = {
     # Cloning Remote Repositories
     "cloning-a-remote-repository": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "clone-a-repository",
                 "Clone a repository",
                 DEBUT,
@@ -110,7 +110,7 @@ WAVES: ModuleWaves = {
                     "clone-easy-style-guide",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "clone-into-named-folder",
                 "Clone into a named folder",
                 DEBUT,
@@ -119,7 +119,7 @@ WAVES: ModuleWaves = {
                     "clone-easy-corp",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "clone-a-specific-branch",
                 "Clone a specific branch",
                 DEBUT,
@@ -128,7 +128,7 @@ WAVES: ModuleWaves = {
                     "clone-med-feature",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "branch-into-named-folder",
                 "A branch into a named folder",
                 COMPOSE,
@@ -139,7 +139,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "shallow-history",
                 "Shallow history",
                 DEBUT,
@@ -148,7 +148,7 @@ WAVES: ModuleWaves = {
                     "clone-medium-shallow-icons",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "ssh-into-named-folder",
                 "SSH address, named folder",
                 DEBUT,
@@ -159,7 +159,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "shallow-copy-of-one-branch",
                 "Shallow copy of one branch",
                 TRANSFER,
@@ -168,7 +168,7 @@ WAVES: ModuleWaves = {
                     "clone-hard-lab-notebook-depth-branch",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "shallow-review-copy-over-ssh",
                 "Shallow review copy over SSH",
                 TRANSFER,
@@ -182,7 +182,7 @@ WAVES: ModuleWaves = {
     # Staging and Committing
     "staging-and-committing-basic-workflow": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "stage-and-commit-one-change",
                 "Stage and commit one change",
                 DEBUT,
@@ -192,7 +192,7 @@ WAVES: ModuleWaves = {
                     "commit-easy-navbar-spacing",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "stage-several-files",
                 "Stage several files at once",
                 DEBUT,
@@ -201,7 +201,7 @@ WAVES: ModuleWaves = {
                     "commit-medium-profile-card",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "a-two-file-change",
                 "A two-file change",
                 PRACTICE,
@@ -212,7 +212,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "first-snapshot-of-a-new-project",
                 "First snapshot of a new project",
                 SPIRAL,
@@ -221,7 +221,7 @@ WAVES: ModuleWaves = {
                     "commit-medium-new-project-recipes",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "a-bigger-change",
                 "A bigger change",
                 PRACTICE,
@@ -232,7 +232,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "leave-the-distractor-out",
                 "Leave the distractor out",
                 TRANSFER,
@@ -242,7 +242,7 @@ WAVES: ModuleWaves = {
                     "commit-hard-export-distractor",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "two-targets-two-distractors",
                 "Two targets, two distractors",
                 TRANSFER,
@@ -256,7 +256,7 @@ WAVES: ModuleWaves = {
     # Partial Staging
     "partial-staging-and-git-add-p": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "stage-one-hunk",
                 "Stage one hunk",
                 DEBUT,
@@ -266,7 +266,7 @@ WAVES: ModuleWaves = {
                     "partial-easy-export-format",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "another-file-another-hunk",
                 "Another file, another hunk",
                 PRACTICE,
@@ -277,7 +277,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "one-hunk-out-of-many",
                 "One hunk out of many",
                 PRACTICE,
@@ -289,7 +289,7 @@ WAVES: ModuleWaves = {
                     "partial-hard-terraform",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "a-hunk-and-a-whole-file",
                 "A hunk and a whole file",
                 SPIRAL,
@@ -300,7 +300,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "hunks-across-code-and-tests",
                 "Hunks across code and tests",
                 TRANSFER,
@@ -310,7 +310,7 @@ WAVES: ModuleWaves = {
                     "partial-hard-export-cross-file",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "split-one-file-into-two-commits",
                 "Split one file into two commits",
                 COMPOSE,
@@ -324,7 +324,7 @@ WAVES: ModuleWaves = {
     # Amending Commits
     "amending-commits": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "fix-the-last-message",
                 "Fix the last commit message",
                 DEBUT,
@@ -336,7 +336,7 @@ WAVES: ModuleWaves = {
                     "amend-hard-convention",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "add-the-forgotten-file",
                 "Add the forgotten file",
                 PRACTICE,
@@ -349,7 +349,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "amend-content-and-message",
                 "Amend content and message",
                 PRACTICE,
@@ -358,7 +358,7 @@ WAVES: ModuleWaves = {
                     "amend-hard-profile-message-and-layout",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "amend-in-one-hunk",
                 "Amend in one hunk",
                 SPIRAL,
@@ -369,7 +369,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "missing-file-and-wrong-message",
                 "Missing file and wrong message",
                 TRANSFER,
@@ -378,7 +378,7 @@ WAVES: ModuleWaves = {
                     "amend-hard-export-message-and-doc",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "fix-the-message-then-commit-the-rest",
                 "Fix the last message, then commit the rest",
                 COMPOSE,
@@ -392,7 +392,7 @@ WAVES: ModuleWaves = {
     # Unstaging and Discarding Changes
     "unstaging-and-discarding-changes": {
         "easy": (
-            WaveSpec(
+            ScenarioSpec(
                 "throw-away-a-working-change",
                 "Throw away a working change",
                 DEBUT,
@@ -401,7 +401,7 @@ WAVES: ModuleWaves = {
                     "restore-easy-discard-theme",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "unstage-keep-the-edit",
                 "Unstage but keep the edit",
                 DEBUT,
@@ -412,7 +412,7 @@ WAVES: ModuleWaves = {
                     "restore-easy-unstage-css",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "unstage-and-discard-together",
                 "Unstage one, discard another",
                 COMPOSE,
@@ -423,7 +423,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "medium": (
-            WaveSpec(
+            ScenarioSpec(
                 "unstage-one-discard-another",
                 "Sort out a mixed folder",
                 COMPOSE,
@@ -432,7 +432,7 @@ WAVES: ModuleWaves = {
                     "restore-medium-css-build",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "fix-the-staging-then-commit",
                 "Fix the staging, then commit",
                 SPIRAL,
@@ -443,7 +443,7 @@ WAVES: ModuleWaves = {
             ),
         ),
         "hard": (
-            WaveSpec(
+            ScenarioSpec(
                 "several-to-unstage-one-to-discard",
                 "Several to unstage, one to discard",
                 TRANSFER,
@@ -454,7 +454,7 @@ WAVES: ModuleWaves = {
                     "restore-hard-mixed-search",
                 ),
             ),
-            WaveSpec(
+            ScenarioSpec(
                 "clean-up-then-commit-only-the-fix",
                 "Clean up, then commit only the fix",
                 SPIRAL,

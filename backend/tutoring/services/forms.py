@@ -132,7 +132,7 @@ def resolve_form(
 ) -> FormGuide | None:
     """The authored form a concrete command is an instance of.
 
-    Forms attached to the current wave win over the wider catalog, and a more
+    Forms attached to the current scenario win over the wider catalog, and a more
     specific syntax (``git add .``) wins over a generic one (``git add <file>``).
     Commands with no authored form still get a syntax shape derived from the
     command itself, so any seeded solution can be taught. ``catalog`` looks up

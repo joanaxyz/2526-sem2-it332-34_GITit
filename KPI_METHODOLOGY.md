@@ -152,7 +152,7 @@ Case slugs and player/tier IDs above are placeholders. Validate references befor
 enrollment. The default command reports diagnostic-only routes as unscored;
 explicitly select appropriate cases with `--diagnostics` to assess them.
 Reserving a batch must leave at
-least one normal practice variant per wave. No case is automatically declared a
+least one normal practice variant per scenario. No case is automatically declared a
 transfer task simply because it is last in a list.
 
 Use a new study slug for every version. Default module weights are equal over

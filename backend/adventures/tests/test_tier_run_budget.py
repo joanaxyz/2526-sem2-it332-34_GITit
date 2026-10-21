@@ -3,8 +3,8 @@
 from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from adventures.services import AdventureLevelTierRunService
 from common.constants import SESSION_STATUS_STARTED
@@ -12,18 +12,18 @@ from curriculum.models import Chapter, Story
 from players.services import get_or_create_player
 
 
-def test_read_only_wave_with_zero_minimum_starts_with_a_budget_of_one(db, django_user_model):
-    """Waves allow min_counted_commands=0; runs require >= 1. Starting used to
+def test_read_only_scenario_with_zero_minimum_starts_with_a_budget_of_one(db, django_user_model):
+    """Scenarios allow min_counted_commands=0; runs require >= 1. Starting used to
     raise IntegrityError, reported as an unrelated "active run" conflict."""
     story = Story.objects.create(slug="budget-story", title="Budget")
     chapter = Chapter.objects.create(story=story, slug="budget-m1", number=1, title="Module 1")
     level = AdventureLevel.objects.create(chapter=chapter, slug="budget-level", title="Level")
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    wave = AdventureLevelTierWave.objects.create(
-        tier=tier, slug="budget-wave", min_counted_commands=0, max_counted_commands=0
+    scenario = AdventureLevelTierScenario.objects.create(
+        tier=tier, slug="budget-scenario", min_counted_commands=0, max_counted_commands=0
     )
-    AdventureLevelTierWaveVariant.objects.create(
-        wave=wave, slug="budget-v", label="v", initial_state={"repository_initialized": True}
+    AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario, slug="budget-v", label="v", initial_state={"repository_initialized": True}
     )
     player = get_or_create_player(
         django_user_model.objects.create_user(username="budget", password="pass12345")
@@ -38,7 +38,7 @@ def test_read_only_wave_with_zero_minimum_starts_with_a_budget_of_one(db, django
     assert run.max_counted_commands == 1
 
 
-def test_variant_budget_overrides_the_shared_wave_budget(db, django_user_model):
+def test_variant_budget_overrides_the_shared_scenario_budget(db, django_user_model):
     story = Story.objects.create(slug="variant-budget-story", title="Variant budget")
     chapter = Chapter.objects.create(
         story=story, slug="variant-budget-m1", number=1, title="Module 1"
@@ -47,11 +47,11 @@ def test_variant_budget_overrides_the_shared_wave_budget(db, django_user_model):
         chapter=chapter, slug="variant-budget-level", title="Level"
     )
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    wave = AdventureLevelTierWave.objects.create(
-        tier=tier, slug="variant-budget-wave", min_counted_commands=2, max_counted_commands=5
+    scenario = AdventureLevelTierScenario.objects.create(
+        tier=tier, slug="variant-budget-scenario", min_counted_commands=2, max_counted_commands=5
     )
-    AdventureLevelTierWaveVariant.objects.create(
-        wave=wave,
+    AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
         slug="variant-budget-v",
         label="v",
         initial_state={"repository_initialized": True},

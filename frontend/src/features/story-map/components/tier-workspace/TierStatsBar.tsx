@@ -18,14 +18,14 @@ export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: Rep
     ...(run.difficulty
       ? [{ label: 'Difficulty', icon: Smile, value: <DifficultyChip difficulty={run.difficulty} /> }]
       : []),
-    ...(run.wave.total > 1 && run.wave.index
+    ...(run.scenario.total > 1 && run.scenario.index
       ? [
           {
-            label: 'Wave',
+            label: 'Scenario',
             icon: Layers,
             value: (
-              <span className="lvlctx-num" title={run.wave.title || undefined}>
-                {run.wave.index} / {run.wave.total}
+              <span className="lvlctx-num" title={run.scenario.title || undefined}>
+                {run.scenario.index} / {run.scenario.total}
               </span>
             ),
           },

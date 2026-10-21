@@ -21,8 +21,8 @@ describe('transfer checkpoint outcomes', () => {
   it.each(['failed', 'completed'] as const)('preserves the first %s result and offers ungraded practice', (status) => {
     const run = {
       transfer: true, replay: false, status, stars: 0, difficulty: 'hard',
-      progress: { completed: status === 'completed' ? 1 : 0, total: 1, cleared: status === 'completed', next_wave: null },
-      wave: { index: 1, total: 1, title: '' },
+      progress: { completed: status === 'completed' ? 1 : 0, total: 1, cleared: status === 'completed', next_scenario: null },
+      scenario: { index: 1, total: 1, title: '' },
       reward: { coins: 50, claimed: true },
       counts: { counted_action_total: 4, minimum_counted_commands: 3, maximum_counted_commands: 4,
         non_counted_diagnostic_total: 1, total_attempts: 5, max_reached: true },
@@ -37,33 +37,33 @@ describe('transfer checkpoint outcomes', () => {
   })
 })
 
-describe('ordered wave outcomes', () => {
-  const clearedWave = (overrides: Partial<TierRun> = {}) =>
+describe('ordered scenario outcomes', () => {
+  const clearedScenario = (overrides: Partial<TierRun> = {}) =>
     ({
       transfer: false, replay: false, status: 'completed', stars: 3, difficulty: 'easy',
       next_difficulty: null,
       progress: {
         completed: 1, total: 2, cleared: false,
-        next_wave: { index: 2, slug: 'publish-and-track', title: 'Publish and track' },
+        next_scenario: { index: 2, slug: 'publish-and-track', title: 'Publish and track' },
       },
-      wave: { index: 1, total: 2, title: 'Publish a branch' },
+      scenario: { index: 1, total: 2, title: 'Publish a branch' },
       reward: { coins: 25, claimed: false },
       counts: { counted_action_total: 2, minimum_counted_commands: 2, maximum_counted_commands: 12,
         non_counted_diagnostic_total: 0, total_attempts: 2, max_reached: false },
       ...overrides,
     }) as TierRun
 
-  it('names the wave just cleared, the next wave and the reward it unlocks', () => {
-    render(<TierOutcomeModal open run={clearedWave()} onClose={() => {}} onBackToMap={() => {}} />)
-    expect(screen.getByText('Wave cleared')).toBeInTheDocument()
+  it('names the scenario just cleared, the next scenario and the reward it unlocks', () => {
+    render(<TierOutcomeModal open run={clearedScenario()} onClose={() => {}} onBackToMap={() => {}} />)
+    expect(screen.getByText('Scenario cleared')).toBeInTheDocument()
     expect(
-      screen.getByText('Wave 1 of 2 cleared — next: Publish and track. Clear it to earn 25 GitCoins.'),
+      screen.getByText('Scenario 1 of 2 cleared — next: Publish and track. Clear it to earn 25 GitCoins.'),
     ).toBeInTheDocument()
     // A partial clear does not claim the tier is complete.
     const props = shown.mock.calls.at(-1)?.[0]
-    expect(props).toMatchObject({ title: 'Wave complete' })
+    expect(props).toMatchObject({ title: 'Scenario complete' })
     render(<>{props?.badges}</>)
-    expect(screen.getByText('Easy wave 1 of 2')).toBeInTheDocument()
+    expect(screen.getByText('Easy scenario 1 of 2')).toBeInTheDocument()
     expect(screen.queryByText('Easy complete')).not.toBeInTheDocument()
   })
 })

@@ -28,7 +28,7 @@ def normalized(text):
 @cache
 def documents():
     rows = []
-    for bank in ("scenario_bank", "scenario_bank_waves"):
+    for bank in ("scenario_bank", "scenario_bank_extension"):
         source = json.loads((BANK_ROOT / f"{bank}.json").read_text(encoding="utf-8"))
         for case_id, row in source.items():
             fields = {key: str(row.get(key, "")) for key in PUBLIC_FIELDS}

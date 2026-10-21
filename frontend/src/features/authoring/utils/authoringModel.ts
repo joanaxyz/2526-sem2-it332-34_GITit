@@ -3,7 +3,7 @@
  * `definition` JSON the backend validates/compiles.
  *
  * Hierarchy: a LEVEL is a lesson stage that groups ordered PROBLEMS. For an
- * adventure a problem is a playable wave; for a challenge it is a difficulty
+ * adventure a problem is a playable scenario; for a challenge it is a difficulty
  * trial. Each problem owns its scenario (initial state + solution) and its own
  * extra VARIANTS. Only `initial_state` stays as guided JSON text; everything
  * else is real fields.
@@ -20,7 +20,7 @@ export { emptyLevel, emptyPage, emptyProblem, emptyVariant, initialForm } from '
 
 /** A plain-language summary of what this form will compile into, so the author
  *  can see — before and after publishing — that each problem/variant becomes a
- *  real runtime row (a level groups ordered waves/trials; each problem brings
+ *  real runtime row (a level groups ordered scenarios/trials; each problem brings
  *  its own variants). */
 export function compileSummary(form: AuthoringForm): string {
   if (form.kind === 'lesson') {
@@ -33,7 +33,7 @@ export function compileSummary(form: AuthoringForm): string {
     (sum, level) => sum + level.problems.reduce((p, problem) => p + 1 + problem.variants.length, 0),
     0,
   )
-  const unit = form.kind === 'challenge' ? 'trial' : 'wave'
+  const unit = form.kind === 'challenge' ? 'trial' : 'scenario'
   const parts = [
     `${levels} level${levels === 1 ? '' : 's'}`,
     `${problems} ${unit}${problems === 1 ? '' : 's'}`,
@@ -116,7 +116,7 @@ function levelToDefinition(level: AuthoredLevel, kind: ContentKind): Record<stri
   if (kind === 'challenge') {
     out.trials = problems
   } else {
-    out.waves = problems
+    out.scenarios = problems
   }
   return out
 }
@@ -187,7 +187,7 @@ function problemFromDefinition(raw: Record<string, unknown>, kind: ContentKind, 
   const policy = (evaluation.completion_policy as Record<string, unknown>) || {}
   const context = (raw.scenario_context as Record<string, unknown>) || {}
   return {
-    slug: String(raw.slug ?? `wave-${index + 1}`),
+    slug: String(raw.slug ?? `scenario-${index + 1}`),
     title: String(raw.title ?? `Problem ${index + 1}`),
     difficulty: String(raw.difficulty ?? (kind === 'challenge' ? 'easy' : '')),
     story: String(context.story ?? ''),
@@ -210,7 +210,7 @@ function problemFromDefinition(raw: Record<string, unknown>, kind: ContentKind, 
 }
 
 function levelFromDefinition(raw: Record<string, unknown>, kind: ContentKind, index: number): AuthoredLevel {
-  const nestedKey = kind === 'challenge' ? 'trials' : 'waves'
+  const nestedKey = kind === 'challenge' ? 'trials' : 'scenarios'
   const nested = raw[nestedKey]
   const problems =
     Array.isArray(nested) && nested.length

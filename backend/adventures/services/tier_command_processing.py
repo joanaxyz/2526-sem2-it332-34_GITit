@@ -4,7 +4,7 @@ from django.utils import timezone
 
 from adventures.models import AdventureLevelTierProgress, AdventureLevelTierRun, SkillMastery
 from adventures.rewards import award_tier_reward
-from adventures.tier_waves import cleared_slugs, next_wave, published_waves
+from adventures.tier_scenarios import cleared_slugs, next_scenario, published_scenarios
 from common.constants import (
     COMMAND_COUNTED,
     DIFFICULTY_EASY,
@@ -56,10 +56,10 @@ class AdventureLevelTierCommandProcessingService:
 
     The single behavioral divergence is completion: a ChallengeTrial needs
     one successful attempt, but an AdventureLevelTier is an ordered set of
-    waves, each cleared by its own run. See _complete_run below - it always
+    scenarios, each cleared by its own run. See _complete_run below - it always
     ends the run on solve (mirroring ChallengeRun: one row per attempt, never
     a long-lived looping run), but only writes AdventureLevelTierCompletion
-    once AdventureLevelTierProgress holds every published wave.
+    once AdventureLevelTierProgress holds every published scenario.
     """
 
     def __init__(self) -> None:
@@ -240,8 +240,8 @@ class AdventureLevelTierCommandProcessingService:
         if run.ref_hash:
             from progress.services.references import ref_hash
 
-            if run.current_wave_id == run.selected_variant.wave_id:
-                run.selected_variant.wave = run.current_wave
+            if run.current_scenario_id == run.selected_variant.scenario_id:
+                run.selected_variant.scenario = run.current_scenario
             if run.ref_hash != ref_hash(run.selected_variant):
                 run.ref_count, run.ref_hash = None, ""
                 update_fields.update({"ref_count", "ref_hash"})
@@ -249,7 +249,7 @@ class AdventureLevelTierCommandProcessingService:
         learned_skills = learn_from_command(player=run.player, result=command_result)
         if solved:
             completed_fields, rewards = self._complete_run(
-                run, tutor_reads.wave_forms(run.current_wave)
+                run, tutor_reads.scenario_forms(run.current_scenario)
             )
             update_fields.update(completed_fields)
         elif failed:
@@ -311,13 +311,13 @@ class AdventureLevelTierCommandProcessingService:
             "tutor_context": {"reads": tutor_reads, "pending": introduction_feedback},
         }
 
-    def _complete_run(self, run: AdventureLevelTierRun, wave_forms) -> tuple[set[str], dict | None]:
-        """Mark the run completed, clear its wave, and complete the tier once
-        every published wave is cleared. Returns the saved field names.
+    def _complete_run(self, run: AdventureLevelTierRun, scenario_forms) -> tuple[set[str], dict | None]:
+        """Mark the run completed, clear its scenario, and complete the tier once
+        every published scenario is cleared. Returns the saved field names.
 
-        A tier is an ordered set of waves (see ``tier_waves``). A graded solve
-        clears its wave and credits the forms the learner typed. The run that
-        clears the last wave writes
+        A tier is an ordered set of scenarios (see ``tier_scenarios``). A graded solve
+        clears its scenario and credits the forms the learner typed. The run that
+        clears the last scenario writes
         AdventureLevelTierCompletion and pays the tier's reward. Progress
         lives on AdventureLevelTierProgress because each run is one attempt;
         every solved run ends as COMPLETED, mirroring ChallengeRun."""
@@ -344,25 +344,25 @@ class AdventureLevelTierCommandProcessingService:
                 player=run.player, tier=run.tier
             )
             progress.successful_clears += 1
-            waves = published_waves(run.tier)
-            wave = run.current_wave
-            if not wave.is_published:
-                # A run started before a reseed superseded its wave still
-                # counts: it clears the learner's next uncleared wave.
-                wave = next_wave(waves, progress) or wave
+            scenarios = published_scenarios(run.tier)
+            scenario = run.current_scenario
+            if not scenario.is_published:
+                # A run started before a reseed superseded its scenario still
+                # counts: it clears the learner's next uncleared scenario.
+                scenario = next_scenario(scenarios, progress) or scenario
             cleared = cleared_slugs(progress)
             mastery_advanced: list[dict] = []
-            wave_cleared = wave.slug not in cleared
-            if wave_cleared:
-                cleared.append(wave.slug)
-                progress.cleared_wave_slugs = cleared
-                mastery_advanced = self._credit_mastery(run, wave_forms)
-            progress.save(update_fields=["successful_clears", "cleared_wave_slugs", "updated_at"])
+            scenario_cleared = scenario.slug not in cleared
+            if scenario_cleared:
+                cleared.append(scenario.slug)
+                progress.cleared_scenario_slugs = cleared
+                mastery_advanced = self._credit_mastery(run, scenario_forms)
+            progress.save(update_fields=["successful_clears", "cleared_scenario_slugs", "updated_at"])
             run._prefetched_progress = progress
 
             completion = None
-            tier_cleared = {w.slug for w in waves} <= set(cleared)
-            if wave_cleared and not tier_cleared:
+            tier_cleared = {w.slug for w in scenarios} <= set(cleared)
+            if scenario_cleared and not tier_cleared:
                 rewards = {
                     "first_level_clear": False,
                     "coins_awarded": 0,
@@ -375,7 +375,7 @@ class AdventureLevelTierCommandProcessingService:
                     tier=run.tier,
                     defaults={
                         "tier_run": run,
-                        "stars": tier_stars(run=run, waves=waves, wave=wave),
+                        "stars": tier_stars(run=run, scenarios=scenarios, scenario=scenario),
                         "counted_action_total": run.counted_action_total,
                     },
                 )
@@ -406,11 +406,11 @@ class AdventureLevelTierCommandProcessingService:
                 .filter(player=run.player, tier=run.tier)
                 .first()
             )
-            waves = published_waves(run.tier)
-            if len(waves) > 1 and completion is not None:
-                # Several waves: the tier is graded by its weakest wave, so a
+            scenarios = published_scenarios(run.tier)
+            if len(scenarios) > 1 and completion is not None:
+                # Several scenarios: the tier is graded by its weakest scenario, so a
                 # replay raises the tier only when it lifts that minimum.
-                best = tier_stars(run=run, waves=waves)
+                best = tier_stars(run=run, scenarios=scenarios)
                 if best > completion.stars:
                     completion.stars = best
                     completion.save(update_fields=["stars"])
@@ -421,15 +421,15 @@ class AdventureLevelTierCommandProcessingService:
         run._payload_context_loaded = True
         return {"status", "completed_at", "ended_at", "stars"}, rewards
 
-    def _credit_mastery(self, run: AdventureLevelTierRun, wave_forms) -> list[dict]:
-        """One solve for every published form the wave's clears actually used.
+    def _credit_mastery(self, run: AdventureLevelTierRun, scenario_forms) -> list[dict]:
+        """One solve for every published form the scenario's clears actually used.
 
-        Called once per cleared wave, with the clearing run's commands: it
+        Called once per cleared scenario, with the clearing run's commands: it
         credits each form the learner typed - and nothing they did not type,
         which would otherwise suppress that form's guide later.
-        ``wave_forms`` (the wave's published forms) only break resolver ties.
+        ``scenario_forms`` (the scenario's published forms) only break resolver ties.
         """
-        forms = forms_used_by(_processed_commands(run), preferred=wave_forms)
+        forms = forms_used_by(_processed_commands(run), preferred=scenario_forms)
         if not forms:
             return []
         targets = form_solve_targets({form.id for form in forms})
@@ -451,29 +451,29 @@ class AdventureLevelTierCommandProcessingService:
         return advanced
 
 
-def tier_stars(*, run: AdventureLevelTierRun, waves, wave=None) -> int:
-    """A tier's grade: its weakest wave's best stars (decision D3).
+def tier_stars(*, run: AdventureLevelTierRun, scenarios, scenario=None) -> int:
+    """A tier's grade: its weakest scenario's best stars (decision D3).
 
-    A single-wave tier keeps today's grade - the stars of the run that
+    A single-scenario tier keeps today's grade - the stars of the run that
     completed it. ``run`` is the solving run, not yet saved as completed;
-    ``wave`` is the wave it clears (its own unless that wave was superseded).
+    ``scenario`` is the scenario it clears (its own unless that scenario was superseded).
     """
-    if len(waves) <= 1:
+    if len(scenarios) <= 1:
         return run.stars
     best = dict(
         AdventureLevelTierRun.objects.filter(
             player=run.player,
-            current_wave__in=waves,
+            current_scenario__in=scenarios,
             status=SESSION_STATUS_COMPLETED,
             is_transfer=False,
         )
-        .values("current_wave_id")
+        .values("current_scenario_id")
         .annotate(best=Max("stars"))
-        .values_list("current_wave_id", "best")
+        .values_list("current_scenario_id", "best")
     )
-    wave_id = wave.id if wave is not None else run.current_wave_id
-    best[wave_id] = max(best.get(wave_id, 0), run.stars)
-    return min(best.get(wave.id, 0) for wave in waves)
+    scenario_id = scenario.id if scenario is not None else run.current_scenario_id
+    best[scenario_id] = max(best.get(scenario_id, 0), run.stars)
+    return min(best.get(scenario.id, 0) for scenario in scenarios)
 
 
 def _processed_commands(run: AdventureLevelTierRun) -> list[str]:

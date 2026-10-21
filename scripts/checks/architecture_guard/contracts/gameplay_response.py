@@ -51,7 +51,7 @@ def gameplay_response_backend_violations(sources: dict[str, str]) -> list[str]:
         },
         GAMEPLAY_ADVENTURE_OPENAPI: {
             "AdventureLevelTierRewardResponseSerializer",
-            "AdventureLevelTierWavePositionResponseSerializer",
+            "AdventureLevelTierScenarioPositionResponseSerializer",
             "AdventureLevelTierRunStepResponseSerializer",
             "AdventureLevelTierCommandStepResponseSerializer",
             "AdventureLevelTierCommandRunResponseSerializer",
@@ -182,7 +182,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
     schemas = schema.get("components", {}).get("schemas", {})
     exact_fields = {
         "AdventureLevelTierRewardResponse": {"coins", "claimed"},
-        "AdventureLevelTierWavePositionResponse": {"index", "total", "title"},
+        "AdventureLevelTierScenarioPositionResponse": {"index", "total", "title"},
         "ChallengeRunStepResponse": {
             "id",
             "command_text",
@@ -279,7 +279,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
             )
 
     expected_nullable = {
-        "AdventureLevelTierWavePositionResponse": {"index"},
+        "AdventureLevelTierScenarioPositionResponse": {"index"},
         "ChallengeRunResponse": {
             "failure_reason",
             "completed_at",
@@ -329,7 +329,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
             )
     expected_component_refs = {
         ("AdventureLevelTierRunResponse", "reward"): "AdventureLevelTierRewardResponse",
-        ("AdventureLevelTierRunResponse", "wave"): "AdventureLevelTierWavePositionResponse",
+        ("AdventureLevelTierRunResponse", "scenario"): "AdventureLevelTierScenarioPositionResponse",
         ("AdventureLevelTierRunResponse", "steps"): "AdventureLevelTierRunStepResponse",
         ("AdventureLevelTierCommandResponse", "run"): "AdventureLevelTierCommandRunResponse",
         ("AdventureLevelTierCommandResponse", "step"): "AdventureLevelTierCommandStepResponse",
