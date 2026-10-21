@@ -2,8 +2,6 @@ import pytest
 from django.db import IntegrityError, transaction
 
 from adventures.models import AdventureLevelTierRun, AdventureLevelTierScenario
-from authoring.compiler import ContentRuntimeCompiler
-from authoring.models import ContentDefinition, ContentKind, PublishedContentRuntime
 from challenges.models import ChallengeRun, ChallengeTrial
 from practice.models import CommandStep
 from progress.models import (
@@ -127,68 +125,3 @@ def test_progress_and_command_step_counters_are_consistent(django_user_model):
             counted_total_after=0,
         )
     )
-
-
-def test_system_content_slugs_are_unique_per_kind():
-    ContentDefinition.objects.create(
-        owner=None,
-        kind=ContentKind.LESSON,
-        slug="system-lesson",
-        title="System lesson",
-    )
-
-    _assert_constraint_rejects(
-        lambda: ContentDefinition.objects.create(
-            owner=None,
-            kind=ContentKind.LESSON,
-            slug="system-lesson",
-            title="Duplicate system lesson",
-        )
-    )
-
-
-def test_unknown_content_visibility_is_rejected():
-    _assert_constraint_rejects(
-        lambda: ContentDefinition.objects.create(
-            owner=None,
-            kind=ContentKind.LESSON,
-            slug="unknown-visibility",
-            title="Unknown visibility",
-            visibility="store",
-        )
-    )
-
-
-def test_published_runtime_requires_exactly_one_target(django_user_model):
-    owner = django_user_model.objects.create_user(username="runtime-constraint-author")
-    content = ContentDefinition.objects.create(
-        owner=owner,
-        kind=ContentKind.LESSON,
-        slug="runtime-constraint",
-        title="Runtime constraint",
-        definition={"pages": []},
-    )
-    runtime = ContentRuntimeCompiler().compile(content=content)
-
-    _assert_constraint_rejects(
-        lambda: PublishedContentRuntime.objects.filter(pk=runtime.pk).update(lesson=None)
-    )
-
-
-def test_compiler_can_replace_a_constrained_runtime(django_user_model):
-    owner = django_user_model.objects.create_user(username="runtime-recompile-author")
-    content = ContentDefinition.objects.create(
-        owner=owner,
-        kind=ContentKind.LESSON,
-        slug="runtime-recompile",
-        title="Runtime recompile",
-        definition={"pages": [{"title": "First"}]},
-    )
-    first = ContentRuntimeCompiler().compile(content=content)
-    content.definition = {"pages": [{"title": "Second"}]}
-    content.save(update_fields=["definition"])
-
-    second = ContentRuntimeCompiler().compile(content=content)
-
-    assert second.pk != first.pk
-    assert second.lesson.pages == [{"title": "Second"}]

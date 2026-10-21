@@ -232,8 +232,6 @@ export function ChallengeWorkspace() {
         isStartingNextLevel={
           startLevelMutation.isPending && startLevelMutation.variables === run.next_difficulty?.id
         }
-        onSelectLevel={(levelId) => startLevelMutation.mutate(levelId)}
-        busyLevelId={startLevelMutation.isPending ? startLevelMutation.variables : null}
         nextDifficultyLabel={
           run.next_difficulty
             ? run.next_difficulty.difficulty.charAt(0).toUpperCase() + run.next_difficulty.difficulty.slice(1)

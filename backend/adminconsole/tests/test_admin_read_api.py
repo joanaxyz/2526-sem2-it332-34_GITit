@@ -36,7 +36,6 @@ def test_staff_can_read_every_admin_get_contract(django_user_model):
         "/api/admin/economy/transactions/": {"results"},
         "/api/admin/stories/": {"results", "world_options"},
         "/api/admin/chapters/": {"results"},
-        "/api/admin/content/": {"results"},
         "/api/admin/analytics/": {
             "runs",
             "completions",
@@ -46,7 +45,6 @@ def test_staff_can_read_every_admin_get_contract(django_user_model):
             "objectives",
             "kpi_range",
         },
-        "/api/admin/moderation/": {"content"},
         "/api/admin/settings/": {"feature_flags"},
     }
 
@@ -242,99 +240,3 @@ def test_admin_curriculum_lists_preserve_order_counts_options_and_filter(
         later_chapter.id,
     ]
     assert {row["story_id"] for row in chapters} == {earlier_story.id}
-
-
-@pytest.mark.django_db
-def test_admin_official_content_preserves_eligibility_kind_order_and_cap(django_user_model):
-    from datetime import timedelta
-
-    from django.utils import timezone
-
-    from adminconsole.selectors import (
-        admin_moderation_list_payload,
-        admin_official_content_list_payload,
-    )
-    from authoring.models import STATUS_PUBLISHED, ContentDefinition
-    from curriculum.models import Chapter, Story
-
-    staff = make_user(django_user_model, "content-list-admin", is_staff=True)
-    author = make_user(django_user_model, "content-list-author")
-    story = Story.objects.create(
-        slug="content-list-story",
-        title="Content List Story",
-        world_slug="arcane-spire",
-    )
-    chapter = Chapter.objects.create(
-        story=story,
-        slug="content-list-chapter",
-        number=1,
-        title="Content List Chapter",
-        description="",
-    )
-    eligible = ContentDefinition.objects.bulk_create(
-        [
-            ContentDefinition(
-                owner=staff,
-                official_chapter=chapter,
-                kind="adventure",
-                slug=f"official-{index}",
-                title=f"Official {index}",
-            )
-            for index in range(201)
-        ]
-    )
-    now = timezone.now()
-    for index, content in enumerate(eligible):
-        content.updated_at = now + timedelta(minutes=index)
-    ContentDefinition.objects.bulk_update(eligible, ["updated_at"])
-    ownerless_challenge = ContentDefinition.objects.create(
-        owner=None,
-        official_chapter=chapter,
-        kind="challenge",
-        slug="ownerless-official",
-        title="Ownerless Official",
-    )
-    excluded_nonstaff = ContentDefinition.objects.create(
-        owner=author,
-        official_chapter=chapter,
-        kind="adventure",
-        slug="player-owned-official",
-        title="Player Owned",
-    )
-    excluded_without_chapter = ContentDefinition.objects.create(
-        owner=staff,
-        kind="adventure",
-        slug="staff-without-chapter",
-        title="No Official Chapter",
-    )
-    ContentDefinition.objects.bulk_create(
-        [
-            ContentDefinition(
-                owner=author,
-                kind="lesson",
-                slug=f"moderation-{index}",
-                title=f"Moderation {index}",
-                status=STATUS_PUBLISHED,
-                visibility="public",
-            )
-            for index in range(201)
-        ]
-    )
-    client = APIClient()
-    client.force_authenticate(user=staff)
-
-    adventures = client.get("/api/admin/content/", {"kind": "adventure"}).json()["results"]
-    challenges = client.get("/api/admin/content/", {"kind": "challenge"}).json()["results"]
-    direct_official_over_limit = admin_official_content_list_payload(
-        kind="adventure",
-        limit=10_000,
-    )["results"]
-    direct_moderation_over_limit = admin_moderation_list_payload(limit=10_000)["content"]
-
-    assert len(adventures) == 200
-    assert [row["id"] for row in adventures] == [content.id for content in reversed(eligible[1:])]
-    assert excluded_nonstaff.id not in {row["id"] for row in adventures}
-    assert excluded_without_chapter.id not in {row["id"] for row in adventures}
-    assert [row["id"] for row in challenges] == [ownerless_challenge.id]
-    assert [row["id"] for row in direct_official_over_limit] == [row["id"] for row in adventures]
-    assert len(direct_moderation_over_limit) == 200

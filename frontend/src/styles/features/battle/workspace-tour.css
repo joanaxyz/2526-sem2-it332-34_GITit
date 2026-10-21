@@ -17,7 +17,12 @@
 
 .workspace-tour[data-closing='true'] .workspace-tour__veil,
 .workspace-tour[data-closing='true'] .workspace-tour__spotlight,
-.workspace-tour[data-closing='true'] .workspace-tour__connector {
+.workspace-tour[data-closing='true'] .workspace-tour__connector,
+/* The workspace editor covers the regions the veil cuts out, so its holes and
+   outline would float over the editor; the editor has its own backdrop. */
+body:has(.workspace-editor-backdrop) .workspace-tour__veil,
+body:has(.workspace-editor-backdrop) .workspace-tour__spotlight,
+body:has(.workspace-editor-backdrop) .workspace-tour__connector {
   opacity: 0;
 }
 

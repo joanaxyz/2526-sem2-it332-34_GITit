@@ -295,12 +295,12 @@ function AppAccountCluster({ user }: { user: User | null }) {
   )
 }
 
-export function AppTopbar({ className }: { className?: string }) {
+export function AppTopbar() {
   const user = useAuthStore((state) => state.user)
   const scrolled = useScrolledPast()
 
   return (
-    <header className={cn('app-topbar', className)} data-scrolled={scrolled ? 'true' : undefined}>
+    <header className="app-topbar" data-scrolled={scrolled ? 'true' : undefined}>
       <NavLink to="/home" aria-label="GIT it! home" className="app-brand">
         <span className="app-brand-sigil">
           <img src={gitLogoImage} alt="" />

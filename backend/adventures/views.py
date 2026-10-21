@@ -1,6 +1,5 @@
 from django.db import OperationalError, transaction
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -43,11 +42,10 @@ ADVENTURE_TIER_WORKSPACE_FILES = RunWorkspaceFileService(
 
 
 def _assert_adventure_accessible(player, level: AdventureLevel) -> None:
-    """The gate every adventure tier run start owes: a companion, an unlocked
-    chapter, and launch access to player-authored content. (Challenge trials
-    deliberately have no companion requirement; see
-    challenges/tests/test_challenge_start_access.py.)"""
-    from shop.access import can_launch, require_companion
+    """The gate every adventure tier run start owes: a companion and an
+    unlocked chapter. (Challenge trials deliberately have no companion
+    requirement; see challenges/tests/test_challenge_start_access.py.)"""
+    from shop.access import require_companion
 
     require_companion(player)
     # chapter_locked resolves the owning story's prerequisite gate too and
@@ -55,10 +53,6 @@ def _assert_adventure_accessible(player, level: AdventureLevel) -> None:
     locked, reason = chapter_locked(player=player, chapter=level.chapter)
     if locked:
         raise Locked(reason or "Clear the previous chapter to unlock this adventure.")
-    if level.source_content_definition_id and not can_launch(
-        player.user, level.source_content_definition
-    ):
-        raise PermissionDenied("You do not have access to this adventure.")
 
 
 # ---------------------------------------------------------------------------
@@ -78,7 +72,6 @@ class AdventureLevelTierRunStartAPIView(APIView):
             "adventure_level",
             "adventure_level__chapter",
             "adventure_level__chapter__story",
-            "adventure_level__source_content_definition",
         ).get(
             playable_level_publication_filter("adventure_level__"),
             id=tier_id,

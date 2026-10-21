@@ -9,9 +9,6 @@ export const queryKeys = {
   stories: ['stories'] as const,
   chapters: ['chapters'] as const,
   storyChapters: (storySlug: string | null | undefined) => ['chapters', storySlug ?? 'all'] as const,
-  authoringContent: (kind?: string) => ['authoring-content', kind ?? 'all'] as const,
-  authoringContentDetail: (id: number) => ['authoring-content-detail', id] as const,
-  authoringChapters: ['authoring-chapters'] as const,
   shopCatalog: ['shop-catalog'] as const,
   preferences: ['player-preferences'] as const,
   chapterOverview: (chapterId: number | null | undefined) => ['chapter-overview', chapterId] as const,
@@ -33,12 +30,10 @@ export const queryKeys = {
   adminTransactions: (userId?: number) => ['admin-transactions', userId ?? 'all'] as const,
   adminStories: ['admin-stories'] as const,
   adminChapters: (storyId?: number) => ['admin-chapters', storyId ?? 'all'] as const,
-  adminContent: ['admin-content'] as const,
   adminAnalytics: ['admin-analytics'] as const,
   /** Same root as adminAnalytics, so invalidating that key refreshes every range. */
   adminAnalyticsRange: (startDate: string | null, endDate: string | null) =>
     ['admin-analytics', startDate, endDate] as const,
-  adminModeration: ['admin-moderation'] as const,
   adminSettings: ['admin-settings'] as const,
 }
 

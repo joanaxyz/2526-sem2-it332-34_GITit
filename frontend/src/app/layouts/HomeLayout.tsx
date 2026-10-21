@@ -14,7 +14,6 @@ export function HomeLayout() {
   const userId = useAuthStore((state) => state.user?.id)
   const location = useLocation()
   const isStoryMapPage = isStoryMapRoute(location.pathname)
-  const isAuthoringPage = location.pathname.startsWith('/level-editor')
   const showTutor = isStoryMapPage || location.pathname === HOME_ROUTE || location.pathname === SHOP_ROUTE
 
   useEffect(() => {
@@ -26,11 +25,7 @@ export function HomeLayout() {
     <div className="app-shell">
       <a className="skip-link" href="#app-main-content">Skip to content</a>
       <CursorGlow />
-      <AppTopbar
-        className={cn(
-          isAuthoringPage && 'home-workspace-header',
-        )}
-      />
+      <AppTopbar />
       <main id="app-main-content" tabIndex={-1} className={cn('app-main', isStoryMapPage && 'app-main--story-map')}>
         <OnboardingProvider key={userId ?? 'guest'} userId={userId}>
           <Outlet />

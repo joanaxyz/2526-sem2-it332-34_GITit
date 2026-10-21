@@ -78,8 +78,6 @@ Large visual surfaces should be decomposed into colocated subpackages instead of
 frontend/src/shared/level/components/live-dag/
 frontend/src/shared/level/components/project-structure/
 frontend/src/shared/battle/effects/skill-effects/
-frontend/src/features/authoring/components/levels-editor/
-frontend/src/features/authoring/utils/authoring-model/
 frontend/src/features/story-map/components/path/
 ```
 
@@ -361,13 +359,11 @@ database honestly has none rather than synthesising it per request.
 - `adventures/rewards.py` owns the GitCoin ladder: Easy 25, Medium 35, Hard 50 once per tier, and 50/75/100 for Challenge Gate trials, all through idempotent wallet keys. The one-time cutover commands `award_missing_tier_rewards` and `map_partial_tier_progress` backfill rewards and partial progress (`deploy/CURRICULUM_SCENARIOS_RESEED.md`).
 - A level counts as passed on the map and in chapter progress once its Easy tier is complete. Chapter completion counts each published level once plus each published gate trial.
 - `seed_curriculum` seeds one Challenge Gate per module from `source/challenge_gates.py`: Easy, Medium, and Hard trials with two variants each. The gate opens once every required level of the module has completed all three tiers (`chapter_tiers_cleared`); inside it, Medium waits for the Easy trial and Hard for Medium. Challenge runs play in the same workspace as adventure tiers (`frontend/src/shared/level/workspace/`): battle stage, terminal, Live and Expected diagrams.
-- Authored adventures compile to one Easy tier with ordered scenarios (`authoring/compiler.py`).
-
 ## Generated Curriculum Targets
 
 `backend/curriculum/seed_data/generated/generated_targets.py` is committed generated output. It exists so normal curriculum seeding can compare repository states without replaying every authored solution at runtime.
 
-`generated_trajectories.py` comes from the same replay. For every solution command it stores fingerprints of the repository in front of that command (`simulator/trajectory.py`), seeded onto each variant as `solution_trajectory`. Fingerprints describe repository meaning (trees, ancestry, refs, index, working tree, conflicts, stash, in-progress operations), not generated commit ids or `last_*` bookkeeping; an `exact` strength also covers file contents and commit messages, a `coarse` strength does not. Authored content gets the same field from the editor's browser replay (`solution_replay`).
+`generated_trajectories.py` comes from the same replay. For every solution command it stores fingerprints of the repository in front of that command (`simulator/trajectory.py`), seeded onto each variant as `solution_trajectory`. Fingerprints describe repository meaning (trees, ancestry, refs, index, working tree, conflicts, stash, in-progress operations), not generated commit ids or `last_*` bookkeeping; an `exact` strength also covers file contents and commit messages, a `coarse` strength does not.
 
 Rules:
 

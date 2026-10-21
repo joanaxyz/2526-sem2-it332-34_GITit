@@ -7,7 +7,7 @@ import type { ApiSchemas } from '@/shared/api/generated/apiTypes'
 import type { KnownDifficulty } from '@/features/challenges/utils/constants'
 import type { CommandSubmissionOutcome } from '@/shared/level-runtime/commandOutcome'
 
-export type Difficulty = KnownDifficulty | (string & {})
+type Difficulty = KnownDifficulty | (string & {})
 export type ChallengeStatus = 'not_started' | 'locked' | 'in_progress' | 'completed' | 'failed' | 'abandoned'
 type AttemptStatus = 'started' | 'completed' | 'failed' | 'abandoned'
 export type ChallengeActionIntent = 'start' | 'replay' | 'retry' | 'continue'

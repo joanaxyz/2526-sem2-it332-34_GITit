@@ -649,7 +649,7 @@
     },
     "is_catalog_contract_symbol": {
       "kind": "function",
-      "normalized_ast_sha256": "4707551090ed6812db556ef2c45b607c67cf9267d05f381bc166eb16fc10c1ce",
+      "normalized_ast_sha256": "1610febf24335c6aa6078ced3f2f4dfc3715ee33c25023ee732d6f54eef75bad",
       "owner": "scripts.checks.architecture_guard.contracts.catalog",
       "pre_cutover_lines": [
         1897,

@@ -49,6 +49,7 @@ export function GameOutcomeModal({
   resultLabel,
   stars,
   showStars = true,
+  level,
   badges,
   headline,
   message,
@@ -70,6 +71,8 @@ export function GameOutcomeModal({
   stars?: number
   /** Assessments record a first outcome without awarding a star grade. */
   showStars?: boolean
+  /** Names the level the outcome belongs to, e.g. "Level 3" and its title. */
+  level?: { label: string; title: string }
   badges?: ReactNode
   headline: string
   message: ReactNode
@@ -149,6 +152,13 @@ export function GameOutcomeModal({
             <span className="text-balance">{headline}</span>
             <span className="game-outcome-subline-rule is-end" aria-hidden="true" />
           </h3>
+
+          {level ? (
+            <p className="game-outcome-level">
+              <span className="game-outcome-level-label">{level.label}</span>
+              <span className="game-outcome-level-title">{level.title}</span>
+            </p>
+          ) : null}
 
           {badges ? <div className="game-outcome-badges">{badges}</div> : null}
           <p className="game-outcome-message">{message}</p>

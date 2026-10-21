@@ -15,7 +15,6 @@ type UserActionPayload = ApiRequestBody<'admin_users_actions_create'>
 type EconomyAdjustPayload = ApiRequestBody<'admin_economy_adjust_create'>
 type StoryUpdatePayload = ApiRequestBody<'admin_stories_partial_update'>
 type ChapterUpdatePayload = ApiRequestBody<'admin_chapters_partial_update'>
-type ModerationUnpublishPayload = ApiRequestBody<'admin_moderation_unpublish_create'>
 type FeatureFlagUpdatePayload = ApiRequestBody<'admin_settings_create'>
 
 function kpiRangeQuery(range?: KpiDateRange) {
@@ -77,22 +76,8 @@ export const adminApi = {
       body: patch,
     })
   },
-  content(kind?: ApiSchemas['AdminContentKindEnum']) {
-    const suffix = kind ? `?kind=${kind}` : ''
-    return apiOperationRequest('admin_content_retrieve', `/admin/content/${suffix}`)
-  },
   analytics(range?: KpiDateRange) {
     return apiOperationRequest('admin_analytics_retrieve', `/admin/analytics/${kpiRangeQuery(range)}`)
-  },
-  moderation() {
-    return apiOperationRequest('admin_moderation_retrieve', '/admin/moderation/')
-  },
-  unpublish(payload: ModerationUnpublishPayload) {
-    return apiOperationRequest(
-      'admin_moderation_unpublish_create',
-      '/admin/moderation/unpublish/',
-      { body: payload },
-    )
   },
   settings() {
     return apiOperationRequest('admin_settings_retrieve', '/admin/settings/')

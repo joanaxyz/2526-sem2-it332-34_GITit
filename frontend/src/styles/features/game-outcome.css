@@ -247,6 +247,31 @@
 }
 .game-outcome-subline-rule.is-end { transform: scaleX(-1); }
 
+/* Which level this outcome belongs to: a small label over the level's title. */
+.game-outcome-level {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.125rem;
+  width: min(100%, 26rem);
+  margin: 0.625rem auto 0;
+}
+.game-outcome-level-label {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+.game-outcome-level-title {
+  font-size: 1rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: hsl(var(--foreground));
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+
 /* Result meta reads as one dot-separated line, not a row of pills. */
 .game-outcome-badges {
   display: flex;
@@ -347,9 +372,8 @@
 
 .game-outcome-actions > .ui-button { min-width: 9rem; min-height: 2.75rem; }
 
-/* mastery / level-nav child panels */
-.game-outcome-mastery-panel,
-.game-outcome-level-nav { border: 0 !important; background: transparent !important; box-shadow: none !important; backdrop-filter: none; }
+/* mastery child panels */
+.game-outcome-mastery-panel { border: 0 !important; background: transparent !important; box-shadow: none !important; backdrop-filter: none; }
 .game-outcome-mastery-panel-head { background: transparent; }
 .game-outcome-pill-mastered { border: 1px solid hsl(var(--warning) / 0.45); background: hsl(var(--warning) / 0.1); color: hsl(var(--warning)); }
 

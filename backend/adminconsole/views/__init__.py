@@ -1,10 +1,5 @@
 """Public HTTP adapter exports for the staff admin console."""
 
-from .content import (
-    AdminContentListAPIView,
-    AdminModerationListAPIView,
-    AdminModerationUnpublishAPIView,
-)
 from .curriculum import (
     AdminChapterDetailAPIView,
     AdminChapterListAPIView,
@@ -25,10 +20,7 @@ __all__ = [
     "AdminAnalyticsAPIView",
     "AdminChapterDetailAPIView",
     "AdminChapterListAPIView",
-    "AdminContentListAPIView",
     "AdminEconomyAdjustAPIView",
-    "AdminModerationListAPIView",
-    "AdminModerationUnpublishAPIView",
     "AdminOverviewAPIView",
     "AdminSettingsAPIView",
     "AdminStoryDetailAPIView",

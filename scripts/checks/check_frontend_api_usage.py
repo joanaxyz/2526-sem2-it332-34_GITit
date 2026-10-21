@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """Fail CI when runtime frontend API wrappers bypass the generated API contract.
 
-Direct apiRequest calls are still allowed for low-schema admin/authoring tools and
-inside the HTTP client itself. User-facing runtime modules must call
-apiOperationRequest so methods and payload/response shapes stay tied to the
+Direct apiRequest calls are still allowed for low-schema admin tools and inside
+the HTTP client itself. User-facing runtime modules must call apiOperationRequest
+so methods and payload/response shapes stay tied to the
 committed OpenAPI contract.
 """
 

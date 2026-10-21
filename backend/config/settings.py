@@ -107,7 +107,6 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "accounts",
     "players",
-    "authoring",
     "shop",
     "curriculum",
     "adventures.apps.AdventuresConfig",

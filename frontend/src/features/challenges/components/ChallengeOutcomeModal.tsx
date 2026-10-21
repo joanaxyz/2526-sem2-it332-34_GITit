@@ -2,7 +2,6 @@ import { Map, RefreshCcw, Repeat2, RotateCcw, ScanSearch, Sparkles, SquareTermin
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
 
-import { ChallengeLevelNav } from '@/features/challenges/components/ChallengeLevelNav'
 import type { ChallengeRun } from '@/features/challenges/types'
 import { GameOutcomeModal } from '@/shared/level/components/game-outcome/GameOutcomeModal'
 import { Badge } from '@/shared/components/Badge'
@@ -21,8 +20,6 @@ export function ChallengeOutcomeModal({
   onBackToMap,
   onNextLevel,
   onRetry,
-  onSelectLevel,
-  busyLevelId,
   isStartingNextLevel = false,
   isRetrying = false,
   nextDifficultyLabel,
@@ -33,16 +30,13 @@ export function ChallengeOutcomeModal({
   onBackToMap: () => void
   onNextLevel?: () => void
   onRetry?: () => void
-  /** Start a fresh run on an arbitrary sibling level from the level navigator. */
-  onSelectLevel?: (levelId: number) => void
-  busyLevelId?: number | null
   isStartingNextLevel?: boolean
   isRetrying?: boolean
   nextDifficultyLabel?: string | null
 }) {
   const isFailed = run.status === 'failed'
   const isReplay = run.replay
-  const isNavigating = isStartingNextLevel || isRetrying || Boolean(busyLevelId)
+  const isNavigating = isStartingNextLevel || isRetrying
   const canAdvance = !isReplay && run.status === 'completed' && Boolean(run.next_difficulty)
 
   useEffect(() => {
@@ -186,7 +180,11 @@ export function ChallengeOutcomeModal({
         {isRetrying ? 'Starting…' : 'Play again'}
       </Button>
     ) : null
-  ) : run.status === 'completed' ? null : null
+  ) : run.status === 'completed' ? (
+    <Button type="button" disabled={isNavigating} onClick={onBackToMap}>
+      Continue
+    </Button>
+  ) : null
 
   return (
     <GameOutcomeModal
@@ -197,23 +195,13 @@ export function ChallengeOutcomeModal({
       icon={Icon}
       resultLabel={isFailed ? 'Game Over' : 'You Won'}
       stars={run.stars}
+      level={{ label: 'Challenge gate', title: run.challenge.title }}
       badges={badges}
       headline={headline}
       message={message}
       stats={stats}
       actions={actions}
       headerActions={headerActions}
-    >
-      {/* Level navigation is challenge-only - the adventure modal omits it. */}
-      {!isReplay && onSelectLevel && run.sibling_levels && run.difficulty ? (
-        <ChallengeLevelNav
-          levels={run.sibling_levels}
-          currentLevelId={run.challenge.level_id}
-          onSelectLevel={onSelectLevel}
-          busyLevelId={busyLevelId}
-          disabled={isNavigating}
-        />
-      ) : null}
-    </GameOutcomeModal>
+    />
   )
 }

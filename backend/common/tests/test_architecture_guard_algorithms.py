@@ -9,20 +9,15 @@ if str(_TEST_IMPORT_ROOT) not in sys.path:
 
 from scripts.checks.architecture_guard.typescript_analysis import (  # noqa: E402
     canonical_ts_module_reference,
-    ts_module_specifiers,
 )
 from scripts.checks.check_architecture_boundaries import (  # noqa: E402
-    admin_authoring_import_violations,
     adminconsole_selector_source_violations,
     adminconsole_view_init_source_violations,
     adminconsole_view_source_violations,
     check_adminconsole_http_read_ownership,
     check_adminconsole_selectors_are_http_free,
-    check_content_editor_workflow_ownership,
     check_home_hub_profile_ownership,
     check_home_overview_ownership,
-    content_editor_css_violations,
-    content_editor_source_violations,
     css_selector_list,
     css_top_level_rule_headers,
     home_hub_hook_owner_violations,
@@ -92,98 +87,6 @@ def test_adminconsole_layer_guard_rejects_wrong_owner_dependencies():
 def test_adminconsole_runtime_layers_obey_http_read_ownership():
     assert check_adminconsole_http_read_ownership() == []
     assert check_adminconsole_selectors_are_http_free() == []
-
-
-def test_content_editor_guard_detects_import_forms_and_controller_forwarding():
-    source = "\nimport { useQuery as readQuery } from '@tanstack/react-query'\nconst api = import('@/features/authoring/api/authoringApi')\nconst auth = require('@/shared/auth/useAuth')\nconst controller = useContentEditorController()\nexport const Page = () => (\n  <ContentMetadataSection {...controller} controller={controller} form={form} />\n)\n"
-    assert ts_module_specifiers(source) == [
-        "@tanstack/react-query",
-        "@/features/authoring/api/authoringApi",
-        "@/shared/auth/useAuth",
-    ]
-    violations = content_editor_source_violations(
-        source=source,
-        path_label=f"{_FRONTEND}/src/features/authoring/pages/ContentEditorPage.tsx",
-        role="page",
-    )
-    assert any("must not import @tanstack/react-query" in row for row in violations)
-    assert any("must not import @/features/authoring/api/authoringApi" in row for row in violations)
-    assert any("destructure useContentEditorController" in row for row in violations)
-    assert any("must not be forwarded" in row for row in violations)
-    assert any("must not receive form or setForm" in row for row in violations)
-
-
-def test_content_editor_guard_rejects_component_and_reverse_feature_edges():
-    component_violations = content_editor_source_violations(
-        source="import { useContentEditorController as useWorkflow } from '@/features/authoring/hooks/useContentEditorController'\nconst Page = import('@/features/authoring/pages/ContentEditorPage')\ntype Props = { form: unknown }\n",
-        path_label=f"{_FRONTEND}/src/features/authoring/components/content-editor/ContentMetadataSection.tsx",
-        role="component",
-    )
-    reverse_violations = admin_authoring_import_violations(
-        source="import { authoringApi as contentApi } from '@/features/authoring/api/authoringApi'\nconst editor = import('@/features/authoring/pages/ContentEditorPage')\n",
-        path_label=f"{_FRONTEND}/src/features/admin/api/example.ts",
-    )
-    assert len(component_violations) == 3
-    assert any("must not import" in row for row in component_violations)
-    assert any("only ContentEditorDiagnostics" in row for row in component_violations)
-    assert len(reverse_violations) == 2
-
-
-def test_content_editor_guard_rejects_relative_and_barrel_import_bypasses():
-    page_path = f"{_FRONTEND}/src/features/authoring/pages/ContentEditorPage.tsx"
-    component_path = f"{_FRONTEND}/src/features/authoring/components/content-editor/Escape.tsx"
-    hook_path = f"{_FRONTEND}/src/features/authoring/hooks/useContentEditorController.ts"
-    support_path = f"{_FRONTEND}/src/features/authoring/hooks/contentEditorDraftState.ts"
-    assert (
-        canonical_ts_module_reference(module="../../api", path_label=component_path)
-        == f"{_FRONTEND}/src/features/authoring/api"
-    )
-    assert (
-        canonical_ts_module_reference(
-            module="@/features/authoring/api/authoringApi.ts", path_label=page_path
-        )
-        == f"{_FRONTEND}/src/features/authoring/api/authoringApi"
-    )
-    page_violations = content_editor_source_violations(
-        source="import '../api'\nconst api = import(`../api/authoringApi`)\n",
-        path_label=page_path,
-        role="page",
-    )
-    component_violations = content_editor_source_violations(
-        source="import '../../api'\nconst workflow = import('../../hooks/useContentEditorController')\nconst Page = require(`../../pages/ContentEditorPage`)\n",
-        path_label=component_path,
-        role="component",
-    )
-    hook_violations = content_editor_source_violations(
-        source="import '../components'\nconst Page = import('../pages/ContentEditorPage')\n",
-        path_label=hook_path,
-        role="hook",
-    )
-    support_violations = content_editor_source_violations(
-        source="import '../api'\nimport controller from './useContentEditorController'\nconst guard = import(`./useUnsavedChangesGuard`)\nconst Page = import(`../pages/ContentEditorPage`)\n",
-        path_label=support_path,
-        role="support",
-    )
-    reverse_violations = admin_authoring_import_violations(
-        source="import '../../authoring'\nconst editor = import(`../../authoring/pages/ContentEditorPage`)\n",
-        path_label=f"{_FRONTEND}/src/features/admin/api/example.ts",
-    )
-    assert len(page_violations) == 3
-    assert len(component_violations) == 3
-    assert len(hook_violations) == 2
-    assert len(support_violations) == 4
-    assert len(reverse_violations) == 2
-
-
-def test_content_editor_runtime_obeys_workflow_ownership_and_css_boundary():
-    assert check_content_editor_workflow_ownership() == []
-    css_violations = content_editor_css_violations(
-        source=".author-destination-row { display: flex; }",
-        path_label=f"{_FRONTEND}/src/styles/features/authoring/editor-shell.css",
-    )
-    assert len(css_violations) == 4
-    assert any("must own align-items" in row for row in css_violations)
-    assert any("input must own flexible sizing" in row for row in css_violations)
 
 
 def test_home_hub_guard_rejects_role_bypasses_and_integration_forwarding():

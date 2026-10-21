@@ -109,36 +109,6 @@ const appRoutes: RouteObject[] = [
         }),
       },
       {
-        path: '/level-editor',
-        lazy: async () => ({
-          Component: (await import('@/features/authoring/pages/AuthoringLibraryPage')).AuthoringLibraryPage,
-        }),
-      },
-      {
-        path: '/level-editor/new/:kind',
-        lazy: async () => ({
-          Component: (await import('@/features/authoring/pages/ContentEditorPage')).ContentEditorPage,
-        }),
-      },
-      {
-        path: '/level-editor/chapters/new',
-        lazy: async () => ({
-          Component: (await import('@/features/authoring/pages/ChapterEditorPage')).ChapterEditorPage,
-        }),
-      },
-      {
-        path: '/level-editor/chapters/:chapterId',
-        lazy: async () => ({
-          Component: (await import('@/features/authoring/pages/ChapterEditorPage')).ChapterEditorPage,
-        }),
-      },
-      {
-        path: '/level-editor/:definitionId',
-        lazy: async () => ({
-          Component: (await import('@/features/authoring/pages/ContentEditorPage')).ContentEditorPage,
-        }),
-      },
-      {
         path: SHOP_ROUTE,
         lazy: async () => ({
           Component: (await import('@/features/shop/pages/ShopPage')).ShopPage,

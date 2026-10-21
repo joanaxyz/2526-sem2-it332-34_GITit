@@ -27,6 +27,8 @@ type TierRef = {
   adventure_level_id: number
   adventure_level_slug: string
   adventure_level_title: string
+  /** The level's place in its chapter, as the story map numbers it. */
+  adventure_level_number: number
 }
 
 type TierRunStepResponse = Omit<

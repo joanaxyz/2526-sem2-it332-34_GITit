@@ -28,6 +28,15 @@ function renderOutcome(stars?: number, tone: 'success' | 'failure' = 'success') 
 }
 
 describe('GameOutcomeModal star artwork', () => {
+  it.each(['success', 'failure'] as const)('identifies the level on the %s screen', (tone) => {
+    render(<GameOutcomeModal open onClose={() => {}} title="Run result" icon={Star}
+      headline="Result" message="Your result" tone={tone}
+      level={{ label: 'Level 3', title: 'Staging and Committing' }} />)
+
+    expect(screen.getByRole('dialog')).toContainElement(screen.getByText('Level 3'))
+    expect(screen.getByRole('dialog')).toContainElement(screen.getByText('Staging and Committing'))
+  })
+
   it('keeps assessments free of star grades, including failed checkpoints', () => {
     render(<GameOutcomeModal open onClose={() => {}} title="Transfer result" icon={Star}
       headline="Result recorded" message="First attempt preserved" tone="failure" stars={0} showStars={false} />)

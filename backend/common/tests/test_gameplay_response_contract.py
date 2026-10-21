@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from adventures.models import AdventureLevelTierRun
+from adventures.models import AdventureLevel, AdventureLevelTierRun
 from adventures.openapi import (
     AdventureLevelTierCommandResponseSerializer,
     AdventureLevelTierRunResponseSerializer,
 )
+from adventures.tier_payloads import tier_run_payload
 from challenges.models import ChallengeRun
 from challenges.openapi import (
     ChallengeCommandResponseSerializer,
@@ -150,6 +151,34 @@ def _submit_tier_command(fixture, *, diagnostic: bool = False):
     )
 
 
+def test_result_level_number_matches_published_chapter_order(db, django_user_model):
+    fixture = create_stage_readme_tier_run(django_user_model, username="result-level-number")
+    fixture.level.sort_order = 5
+    fixture.level.save(update_fields=["sort_order"])
+    for slug, sort_order, published in (
+        ("earlier", 1, True),
+        ("draft", 2, False),
+        ("later-tie", 5, True),
+        ("later", 8, True),
+    ):
+        AdventureLevel.objects.create(
+            chapter=fixture.chapter,
+            slug=slug,
+            title=slug,
+            sort_order=sort_order,
+            is_published=published,
+        )
+    # Later IDs at the same sort order follow this level on the map.
+    fixture.chapter.adventure_levels.filter(slug="earlier").update(sort_order=5)
+
+    tier = tier_run_payload(fixture.run)["tier"]
+    assert tier["adventure_level_number"] == 1
+    assert tier["adventure_level_title"] == fixture.level.title
+
+    fixture.chapter.adventure_levels.filter(slug="earlier").update(sort_order=1)
+    assert tier_run_payload(fixture.run)["tier"]["adventure_level_number"] == 2
+
+
 def _submit_challenge_command(fixture, *, diagnostic: bool = False):
     command = "git status" if diagnostic else "git add README.md"
     execution = (
@@ -189,6 +218,8 @@ def test_adventure_tier_full_success_endpoints_match_the_domain_schema(db, djang
         _assert_valid(AdventureLevelTierRunResponseSerializer, response.json())
         assert response.json()["scenario"] == {"index": 1, "total": 1, "title": "Stage README"}
         assert response.json()["reward"] == {"coins": 25, "claimed": False}
+        # The outcome modal names the level as the story map numbers it.
+        assert response.json()["tier"]["adventure_level_number"] == 1
     run = AdventureLevelTierRun.objects.get(id=run_id)
     assert "NOTES.md" in run.repository_state["working_tree"]
 
