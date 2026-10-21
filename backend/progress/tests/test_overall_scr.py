@@ -33,7 +33,9 @@ def _tier(story, number):
         chapter=chapter, slug=f"{story.slug}-level-{number}", title=f"Level {number}"
     )
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug=f"{story.slug}-scenario-{number}")
+    scenario = AdventureLevelTierScenario.objects.create(
+        tier=tier, slug=f"{story.slug}-scenario-{number}"
+    )
     variant = AdventureLevelTierScenarioVariant.objects.create(
         scenario=scenario, slug=f"{story.slug}-v{number}", label="v"
     )

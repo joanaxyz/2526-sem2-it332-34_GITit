@@ -311,7 +311,9 @@ class AdventureLevelTierCommandProcessingService:
             "tutor_context": {"reads": tutor_reads, "pending": introduction_feedback},
         }
 
-    def _complete_run(self, run: AdventureLevelTierRun, scenario_forms) -> tuple[set[str], dict | None]:
+    def _complete_run(
+        self, run: AdventureLevelTierRun, scenario_forms
+    ) -> tuple[set[str], dict | None]:
         """Mark the run completed, clear its scenario, and complete the tier once
         every published scenario is cleared. Returns the saved field names.
 
@@ -357,7 +359,9 @@ class AdventureLevelTierCommandProcessingService:
                 cleared.append(scenario.slug)
                 progress.cleared_scenario_slugs = cleared
                 mastery_advanced = self._credit_mastery(run, scenario_forms)
-            progress.save(update_fields=["successful_clears", "cleared_scenario_slugs", "updated_at"])
+            progress.save(
+                update_fields=["successful_clears", "cleared_scenario_slugs", "updated_at"]
+            )
             run._prefetched_progress = progress
 
             completion = None

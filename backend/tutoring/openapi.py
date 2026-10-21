@@ -67,16 +67,14 @@ class IntroductionCompleteResponseSerializer(serializers.Serializer):
     tutor = CommandIntroductionResponseSerializer(allow_null=True)
 
 
-class TutorTeachingSourceSerializer(serializers.Serializer):
+class TutorTopicSerializer(serializers.Serializer):
     id = serializers.CharField()
     title = serializers.CharField()
 
 
 class TutorChatResponseSerializer(serializers.Serializer):
     reply = serializers.CharField()
-    sources = TutorTeachingSourceSerializer(many=True)
-    suggested_topics = TutorTeachingSourceSerializer(many=True)
-    response_kind = serializers.ChoiceField(
-        choices=["explanation", "concept_redirect", "clarification", "unavailable"]
-    )
+    suggested_topics = TutorTopicSerializer(many=True)
+    # "guarded": scenario protection was active, so the reply teaches without solving.
+    response_kind = serializers.ChoiceField(choices=["answer", "guarded", "unavailable"])
     scenario_related = serializers.BooleanField()

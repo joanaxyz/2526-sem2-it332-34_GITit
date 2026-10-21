@@ -1,7 +1,8 @@
-import { ArrowUp, BookOpen, ChevronDown, SquarePen } from 'lucide-react'
+import { ArrowUp, ShieldCheck, SquarePen } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
 
 import { useAuthStore } from '@/shared/auth/useAuth'
+import { TutorMarkdown } from './TutorMarkdown'
 import type { TutorContext } from './tutorApi'
 import { useTutorChat, type TutorMessage } from './useTutorChat'
 import './tutor.css'
@@ -65,14 +66,14 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
         aria-busy={chat.pending}
       >
         {chat.messages.length
-          ? chat.messages.map((entry, index) => <Message key={index} entry={entry} />)
+          ? chat.messages.map((entry, index) => <Message key={index} entry={entry} home={context.surface === 'home'} />)
           : (
             <div className="tutor-chat__empty" data-tutor-selectable>
               <h3>What would you like to understand?</h3>
               <p>Ask what a command means, why it works, or which idea feels unclear.</p>
             </div>
           )}
-        {chat.pending ? <p className="tutor-chat__pending" role="status" data-tutor-selectable><span aria-hidden="true" />Finding an explanation…</p> : null}
+        {chat.pending ? <p className="tutor-chat__pending" role="status" data-tutor-selectable><span aria-hidden="true" />Thinking…</p> : null}
       </div>
 
       <div className="tutor-chat__topics" aria-label="Topics to explore">
@@ -116,18 +117,18 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
   )
 }
 
-function Message({ entry }: { entry: TutorMessage }) {
+function Message({ entry, home }: { entry: TutorMessage; home: boolean }) {
   const fromGitIt = entry.role === 'assistant'
   return (
     <article className={`tutor-chat__message tutor-chat__message--${entry.role}`} aria-label={fromGitIt ? 'Git-It' : 'You'}>
       <div className="tutor-chat__content" data-tutor-selectable>
-        {entry.text.split(/\n{2,}/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
-        {fromGitIt && entry.reply.sources.length ? (
-          <details className="tutor-chat__sources">
-            <summary><BookOpen size={13} aria-hidden="true" />Sources <span>{entry.reply.sources.length}</span><ChevronDown size={13} aria-hidden="true" /></summary>
-            <ul>{entry.reply.sources.map((source) => <li key={source.id}>{source.title}</li>)}</ul>
-          </details>
+        {/* Home is where a scenario can arrive from another tab; the workspace is always one. */}
+        {fromGitIt && home && entry.reply.scenario_related ? (
+          <p className="tutor-chat__guarded"><ShieldCheck size={13} aria-hidden="true" />Scenario spotted: explaining, not solving</p>
         ) : null}
+        {fromGitIt
+          ? <TutorMarkdown text={entry.text} />
+          : entry.text.split(/\n{2,}/).map((paragraph, index) => <p key={index}>{paragraph}</p>)}
       </div>
     </article>
   )

@@ -86,7 +86,9 @@ def _fail(run):
     run.save(update_fields=["status"])
 
 
-def test_runs_walk_the_scenarios_in_order_and_the_last_scenario_completes_the_tier(db, django_user_model):
+def test_runs_walk_the_scenarios_in_order_and_the_last_scenario_completes_the_tier(
+    db, django_user_model
+):
     player, tier = _tier(
         django_user_model,
         scenarios=[
@@ -122,7 +124,9 @@ def test_runs_walk_the_scenarios_in_order_and_the_last_scenario_completes_the_ti
     assert rewards["coins_awarded"] == 25
     # The tier is graded by its weakest scenario (decision D3).
     assert completion.stars == 1
-    assert AdventureLevelTierProgress.objects.get(player=player, tier=tier).cleared_scenario_slugs == [
+    assert AdventureLevelTierProgress.objects.get(
+        player=player, tier=tier
+    ).cleared_scenario_slugs == [
         "publish-a-branch",
         "publish-and-track",
     ]

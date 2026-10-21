@@ -137,7 +137,8 @@ export type ApiSchemas = {
   "RepositoryChange": { "action"?: ApiSchemas["RepositoryChangeActionEnum"]; "kind": ApiSchemas["RepositoryChangeKindEnum"]; "ref"?: string; "subjects"?: Array<string>; "text": string }
   "RepositoryChangeActionEnum": "create" | "delete" | "move" | "add" | "remove" | "set" | "start" | "finish"
   "RepositoryChangeKindEnum": "repository" | "commit" | "branch" | "head" | "staging" | "working_tree" | "conflict" | "tag" | "remote" | "config" | "stash" | "operation"
-  "ResponseKindEnum": "explanation" | "concept_redirect" | "clarification" | "unavailable"
+  "ResponseKindEnum": "answer" | "guarded" | "unavailable"
+  "RoleEnum": "user" | "assistant"
   "SessionResponse": { "access": string; "user": ApiSchemas["User"] }
   "ShopEquipResponse": { "active_companion": string | null; "shop": ApiSchemas["ShopResponse"] }
   "ShopItemResponse": { "active": boolean; "kind": ApiSchemas["ShopItemResponseKindEnum"]; "label": string; "owned": boolean; "price": number; "slug": string }
@@ -159,9 +160,10 @@ export type ApiSchemas = {
   "SyntaxPart": { "text": string; "token": string }
   "TransferCheckpoint": { "run_id": number | null; "tier_id": number; "title": string }
   "TutorChatContext": { "guide_token"?: string; "run_id"?: number; "surface": ApiSchemas["SurfaceEnum"]; "teaching_key"?: string; "usage_form"?: string }
-  "TutorChatRequest": { "context": ApiSchemas["TutorChatContext"]; "history"?: Array<string>; "message": string }
-  "TutorChatResponse": { "reply": string; "response_kind": ApiSchemas["ResponseKindEnum"]; "scenario_related": boolean; "sources": Array<ApiSchemas["TutorTeachingSource"]>; "suggested_topics": Array<ApiSchemas["TutorTeachingSource"]> }
-  "TutorTeachingSource": { "id": string; "title": string }
+  "TutorChatRequest": { "context": ApiSchemas["TutorChatContext"]; "history"?: Array<ApiSchemas["TutorChatTurn"]>; "message": string }
+  "TutorChatResponse": { "reply": string; "response_kind": ApiSchemas["ResponseKindEnum"]; "scenario_related": boolean; "suggested_topics": Array<ApiSchemas["TutorTopic"]> }
+  "TutorChatTurn": { "role": ApiSchemas["RoleEnum"]; "text": string }
+  "TutorTopic": { "id": string; "title": string }
   "UnitEnum": "participants"
   "User": { "email": string; "id": number; "is_staff": boolean; "username": string }
   "ValidationErrorRow": { "field": string; "message": string }

@@ -23,7 +23,10 @@ def test_read_only_scenario_with_zero_minimum_starts_with_a_budget_of_one(db, dj
         tier=tier, slug="budget-scenario", min_counted_commands=0, max_counted_commands=0
     )
     AdventureLevelTierScenarioVariant.objects.create(
-        scenario=scenario, slug="budget-v", label="v", initial_state={"repository_initialized": True}
+        scenario=scenario,
+        slug="budget-v",
+        label="v",
+        initial_state={"repository_initialized": True},
     )
     player = get_or_create_player(
         django_user_model.objects.create_user(username="budget", password="pass12345")

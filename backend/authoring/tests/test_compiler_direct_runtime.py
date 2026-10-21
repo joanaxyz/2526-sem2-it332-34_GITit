@@ -55,7 +55,12 @@ def test_adventure_compile_writes_direct_level_variants(db, django_user_model):
 
     assert level.command_forms.filter(usage_form="git status").exists()
     assert scenario.command_forms.filter(usage_form="git status").exists()
-    assert AdventureLevelTierScenarioVariant.objects.filter(scenario=scenario, is_published=True).count() == 2
+    assert (
+        AdventureLevelTierScenarioVariant.objects.filter(
+            scenario=scenario, is_published=True
+        ).count()
+        == 2
+    )
 
 
 def test_recompiling_an_adventure_unpublishes_removed_scenarios_instead_of_deleting(
@@ -69,7 +74,13 @@ def test_recompiling_an_adventure_unpublishes_removed_scenarios_instead_of_delet
         title="Recompiled",
         command_family="git status",
         definition={
-            "levels": [{"slug": "level-1", "title": "Level 1", "scenarios": [_scenario("a"), _scenario("b")]}]
+            "levels": [
+                {
+                    "slug": "level-1",
+                    "title": "Level 1",
+                    "scenarios": [_scenario("a"), _scenario("b")],
+                }
+            ]
         },
     )
     compiler = ContentRuntimeCompiler()
@@ -148,7 +159,11 @@ def test_adventure_level_compiles_ordered_scenarios(db, django_user_model):
                 {
                     "slug": "level-1",
                     "title": "Level 1",
-                    "scenarios": [_scenario("scenario-a"), _scenario("scenario-b"), _scenario("scenario-c")],
+                    "scenarios": [
+                        _scenario("scenario-a"),
+                        _scenario("scenario-b"),
+                        _scenario("scenario-c"),
+                    ],
                 }
             ]
         },

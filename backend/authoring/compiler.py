@@ -18,8 +18,8 @@ from authoring.models import ContentDefinition, ContentKind, PublishedContentRun
 from authoring.schemas import (
     challenge_is_nested,
     content_levels,
-    level_trials,
     level_scenarios,
+    level_trials,
 )
 from challenges.models import ChallengeLevel, ChallengeTrial, ChallengeTrialVariant
 from common.constants import DIFFICULTY_EASY
@@ -191,7 +191,8 @@ class ContentRuntimeCompiler:
                 budget = authored_scenario.get("command_budget") or {}
                 scenario, _ = AdventureLevelTierScenario.objects.update_or_create(
                     tier=tier,
-                    slug=authored_scenario.get("slug") or f"{level.slug}-scenario-{scenario_index + 1}",
+                    slug=authored_scenario.get("slug")
+                    or f"{level.slug}-scenario-{scenario_index + 1}",
                     defaults={
                         "title": authored_scenario.get("title", "") or "",
                         "sort_order": scenario_index,

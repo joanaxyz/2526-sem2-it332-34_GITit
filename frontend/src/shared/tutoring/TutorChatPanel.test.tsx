@@ -9,8 +9,7 @@ import { tutorApi, type TutorReply } from './tutorApi'
 
 vi.mock('./tutorApi', () => ({ tutorApi: { chat: vi.fn() } }))
 const reply: TutorReply = { reply: 'A waiting area for the changes you want in your next commit.',
-  sources: [{ id: 'concept:staging-area', title: 'Staging area' }], suggested_topics: [],
-  scenario_related: false, response_kind: 'explanation' }
+  suggested_topics: [], scenario_related: false, response_kind: 'answer' }
 
 beforeEach(() => {
   localStorage.clear()
@@ -18,6 +17,12 @@ beforeEach(() => {
   vi.mocked(tutorApi.chat).mockReset().mockResolvedValue(reply)
 })
 afterEach(() => { cleanup(); useAuthStore.getState().clearSession(); setGuideMascotVisibility(true) })
+
+function renderGuideTutor() {
+  const view = render(<GuideTutor runId={17} teachingKey="command:add" usageForm="git add <path>" guideToken="signed-guide" />)
+  fireEvent.click(screen.getByRole('button', { name: 'Ask Git-It' }))
+  return view
+}
 
 function ask(text: string) {
   fireEvent.change(screen.getByRole('textbox', { name: 'Ask Git-It a question' }), { target: { value: text } })
@@ -54,6 +59,7 @@ describe('shared tutoring surfaces', () => {
       return new Promise(() => {})
     })
     const view = render(<section aria-label="Guide container"><GuideTutor runId={17} teachingKey="form:git add <path>" usageForm="git add <path>" guideToken="signed-guide" /></section>)
+    fireEvent.click(screen.getByRole('button', { name: 'Ask Git-It' }))
     const window = screen.getByRole('dialog', { name: 'Ask Git-It' })
     expect(window.querySelector('img')).not.toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Guide container' })).not.toContainElement(window)
@@ -65,21 +71,36 @@ describe('shared tutoring surfaces', () => {
     expect(signal?.aborted).toBe(true)
   })
 
-  it('leaves closing to its command guide: no launcher of its own, and Escape reaches the guide', () => {
+  it('starts workspace help as a launcher so it never covers the guide, and remembers it open', () => {
+    const view = render(<GuideTutor runId={17} teachingKey="command:add" usageForm="git add <path>" guideToken="signed-guide" />)
+    expect(screen.queryByRole('dialog', { name: 'Ask Git-It' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Ask Git-It' }))
+    expect(screen.getByRole('dialog', { name: 'Ask Git-It' })).toBeInTheDocument()
+    view.unmount()
+    // The next guide opens with the chat as the learner left it.
+    render(<GuideTutor runId={17} teachingKey="command:status" usageForm="git status" guideToken="signed-guide" />)
+    expect(screen.getByRole('dialog', { name: 'Ask Git-It' })).toBeInTheDocument()
+  })
+
+  it('keeps workspace help open while the learner works elsewhere; Escape or close puts only the chat away', () => {
     const guideEscape = vi.fn()
     window.addEventListener('keydown', guideEscape)
-    render(<GuideTutor runId={17} teachingKey="command:add" usageForm="git add <path>" guideToken="signed-guide" />)
-    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Escape' })
+    renderGuideTutor()
     fireEvent.pointerDown(document.body)
-    expect(guideEscape).toHaveBeenCalledOnce()
     expect(screen.getByRole('dialog', { name: 'Ask Git-It' })).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Ask Git-It' })).not.toBeInTheDocument()
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Escape' })
+    expect(screen.queryByRole('dialog', { name: 'Ask Git-It' })).not.toBeInTheDocument()
+    expect(guideEscape).not.toHaveBeenCalled()
+    const launcher = screen.getByRole('button', { name: 'Ask Git-It' })
+    expect(launcher).toHaveFocus()
+    fireEvent.click(launcher)
+    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Git-It' }))
+    expect(screen.queryByRole('dialog', { name: 'Ask Git-It' })).not.toBeInTheDocument()
     window.removeEventListener('keydown', guideEscape)
   })
 
   it('collapses Home help into its launcher on a click outside, leaving focus alone', () => {
     render(<><button type="button">Elsewhere</button><HomeTutor /></>)
-    expect(screen.queryByRole('button', { name: /close/i })).not.toBeInTheDocument()
     fireEvent.pointerDown(screen.getByRole('dialog'))
     expect(screen.getByRole('dialog')).toBeInTheDocument()
     const elsewhere = screen.getByRole('button', { name: 'Elsewhere' })
@@ -88,6 +109,26 @@ describe('shared tutoring surfaces', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ask Git-It' })).toBeInTheDocument()
     expect(elsewhere).toHaveFocus()
+  })
+
+  it('closes Home help from a visible close button and stays closed on the next page', () => {
+    const view = render(<HomeTutor />)
+    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Git-It' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ask Git-It' })).toHaveFocus()
+    view.unmount()
+    render(<HomeTutor />)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ask Git-It' })).toBeInTheDocument()
+  })
+
+  it('starts Home help as its launcher on a phone', () => {
+    const width = window.innerWidth
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 })
+    render(<HomeTutor />)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ask Git-It' })).toBeInTheDocument()
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: width })
   })
 
   it.each([
@@ -150,6 +191,41 @@ describe('shared tutoring surfaces', () => {
     expect(Number.parseFloat(frame.style.top) + Number.parseFloat(frame.style.height)).toBeLessThanOrEqual(756)
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: width })
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: height })
+  })
+
+  it('sends both sides of the conversation so follow-ups can refer to the last answer', async () => {
+    render(<HomeTutor />)
+    ask('Explain staging')
+    await screen.findByText(reply.reply)
+    ask('What do you mean by waiting area?')
+    await waitFor(() => expect(tutorApi.chat).toHaveBeenCalledTimes(2))
+    expect(vi.mocked(tutorApi.chat).mock.calls[1][0].history).toEqual([
+      { role: 'user', text: 'Explain staging' },
+      { role: 'assistant', text: reply.reply },
+    ])
+  })
+
+  it('renders light Markdown and marks protected Home replies', async () => {
+    vi.mocked(tutorApi.chat).mockResolvedValue({
+      ...reply,
+      reply: 'Use **placeholders**:\n\n```\ngit switch -c <branch>\n```\n\n- one\n- two',
+      scenario_related: true,
+      response_kind: 'guarded',
+    })
+    render(<HomeTutor />)
+    ask('Pasted scenario')
+    const answer = await screen.findByRole('article', { name: 'Git-It' })
+    expect(answer).toHaveTextContent('Scenario spotted: explaining, not solving')
+    expect(answer.querySelector('strong')).toHaveTextContent('placeholders')
+    expect(answer.querySelector('pre')).toHaveTextContent('git switch -c <branch>')
+    expect(answer.querySelectorAll('li')).toHaveLength(2)
+  })
+
+  it('does not mark workspace replies, which are always protected', async () => {
+    vi.mocked(tutorApi.chat).mockResolvedValue({ ...reply, scenario_related: true, response_kind: 'guarded' })
+    renderGuideTutor()
+    ask('Explain this')
+    expect(await screen.findByRole('article', { name: 'Git-It' })).not.toHaveTextContent('Scenario spotted')
   })
 
   it('discards delayed responses and clears conversation across account changes', async () => {

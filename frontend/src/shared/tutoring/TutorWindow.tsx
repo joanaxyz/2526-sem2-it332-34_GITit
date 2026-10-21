@@ -1,4 +1,4 @@
-import { GripHorizontal, MoveDiagonal2 } from 'lucide-react'
+import { GripHorizontal, MoveDiagonal2, X } from 'lucide-react'
 import { useEffect, useId, useRef } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -8,7 +8,7 @@ import type { TutorContext } from './tutorApi'
 import { useTutorWindowLayout } from './useTutorWindowLayout'
 import './tutor.css'
 
-export type TutorWindowDismissal = 'escape' | 'outside'
+export type TutorWindowDismissal = 'escape' | 'outside' | 'close'
 
 // Keep the side mascot outside the panel, hiding it when there is no room beside it.
 const SPEAKER_ROOM = 84
@@ -23,7 +23,7 @@ export function TutorWindow({ context, workspace = false, onDismiss }: {
   context: TutorContext
   /** Over the gameplay workspace, as the open command guide's companion. */
   workspace?: boolean
-  /** When given, Escape or a click outside the window puts it away. */
+  /** When given, the close button, Escape or a click outside the window puts it away. */
   onDismiss?: (how: TutorWindowDismissal) => void
 }) {
   const titleId = useId()
@@ -79,6 +79,17 @@ export function TutorWindow({ context, workspace = false, onDismiss }: {
           >
             <GripHorizontal aria-hidden="true" />
           </button>
+          {onDismiss ? (
+            <button
+              type="button"
+              className="tutor-window__close"
+              aria-label="Close Ask Git-It"
+              title="Close"
+              onClick={() => onDismiss('close')}
+            >
+              <X aria-hidden="true" />
+            </button>
+          ) : null}
         </header>
         <TutorChatPanel context={context} />
         <button

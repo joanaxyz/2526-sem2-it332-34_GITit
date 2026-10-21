@@ -7284,13 +7284,20 @@
             },
             "ResponseKindEnum": {
                 "enum": [
-                    "explanation",
-                    "concept_redirect",
-                    "clarification",
+                    "answer",
+                    "guarded",
                     "unavailable"
                 ],
                 "type": "string",
-                "description": "* `explanation` - explanation\n* `concept_redirect` - concept_redirect\n* `clarification` - clarification\n* `unavailable` - unavailable"
+                "description": "* `answer` - answer\n* `guarded` - guarded\n* `unavailable` - unavailable"
+            },
+            "RoleEnum": {
+                "enum": [
+                    "user",
+                    "assistant"
+                ],
+                "type": "string",
+                "description": "* `user` - user\n* `assistant` - assistant"
             },
             "SessionResponse": {
                 "type": "object",
@@ -7776,10 +7783,8 @@
                     "history": {
                         "type": "array",
                         "items": {
-                            "type": "string",
-                            "maxLength": 4000
-                        },
-                        "maxItems": 8
+                            "$ref": "#/components/schemas/TutorChatTurn"
+                        }
                     }
                 },
                 "required": [
@@ -7793,16 +7798,10 @@
                     "reply": {
                         "type": "string"
                     },
-                    "sources": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/TutorTeachingSource"
-                        }
-                    },
                     "suggested_topics": {
                         "type": "array",
                         "items": {
-                            "$ref": "#/components/schemas/TutorTeachingSource"
+                            "$ref": "#/components/schemas/TutorTopic"
                         }
                     },
                     "response_kind": {
@@ -7816,11 +7815,26 @@
                     "reply",
                     "response_kind",
                     "scenario_related",
-                    "sources",
                     "suggested_topics"
                 ]
             },
-            "TutorTeachingSource": {
+            "TutorChatTurn": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "$ref": "#/components/schemas/RoleEnum"
+                    },
+                    "text": {
+                        "type": "string",
+                        "maxLength": 6000
+                    }
+                },
+                "required": [
+                    "role",
+                    "text"
+                ]
+            },
+            "TutorTopic": {
                 "type": "object",
                 "properties": {
                     "id": {

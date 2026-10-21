@@ -126,18 +126,28 @@ shared/battle/effects/...      playback cores split by DOM helpers, layer playba
 
 ### Learning tutor boundary
 
-The `tutoring` backend app owns independent Home AI help and command-guide help
-through authenticated `POST /api/tutoring/chat/`. Scenario recognition searches
-public fields from both seed banks; reviewed teaching material is a separate
-catalog. Gemini/Groq return eligible teaching IDs only. The server renders approved
-text and placeholder syntax, never provider-authored replies, task operands,
-solution sequences, or answer verification. Recognition failure does not relax this rule.
-Provider attempts use bounded time and cached rate-limit cooldowns, in configured
-Gemini order followed by Groq, over one pooled keep-alive client per process.
-Recognition runs beside selection; a single eligible block skips the provider, and
-validated selections are cached by prompt digest. The committed semantic index is cached locally;
-see [index regeneration](backend/tutoring/data/README.md). Missing or limited
-embeddings fall back to local matching and conservative protection.
+The `tutoring` backend app owns two independent tutors behind authenticated
+`POST /api/tutoring/chat/`. Both write free-text replies (Gemini, then Groq) from a
+system prompt and the conversation so far: the client sends both sides of recent
+turns, so follow-ups and clarifications refer to earlier answers.
+
+- **Home** is a general Git tutor. It is not tied to the command guide.
+- **Workspace** help belongs to the open command guide: it explains that guide's
+  usage form, and the run's public task is context.
+
+Scenario retrieval is the gate (RAG over public seed fields only). Every learner turn
+in the conversation is checked lexically and against the committed semantic index. A
+match, or an uncertain or unavailable lookup, switches Home into scenario protection:
+teach the ideas, use placeholders, never solve. A scenario pasted earlier keeps later
+turns protected. Workspace help is always protected. Protected replies pass the
+answer guard (`tutoring/services/answer_guard.py`): the matched scenarios' and the
+run's answer fields stay server-side and are never prompted. A reply that names a
+task value, writes it into a command, or covers the solution's command sequence is
+regenerated once with a stricter instruction, then replaced by a fixed teaching
+message. Validated replies are cached by prompt digest. Provider attempts use
+bounded time and cached rate-limit cooldowns over one pooled keep-alive client per
+process. The committed semantic index is cached locally; see
+[index regeneration](backend/tutoring/data/README.md).
 
 Workspace chat requires an owned run and a server-signed safe guide context.
 Guide payloads generalize prospective changes and omit exact command examples;
@@ -145,8 +155,9 @@ completion tokens contain a context digest instead of evaluation data. Internal
 lesson identity remains stable; literal-bearing outward IDs are opaque.
 Verified terminal feedback, command accounting and rewards retain their owners.
 
-`frontend/src/shared/tutoring/` owns reusable chat presentation and bounded,
-sign-in-scoped in-memory conversations. HomeLayout composes the floating chat launcher
+`frontend/src/shared/tutoring/` owns reusable chat presentation (light Markdown:
+paragraphs, code, lists, inline marks) and bounded, sign-in-scoped in-memory
+conversations. Home replies made under scenario protection carry a short caption. HomeLayout composes the floating chat launcher
 across Dashboard, Modules and Shop. The command guide owns the lifetime of a
 separate chat window, rendered outside its card with a portal. Mascot portraits
 appear beside the chat card (in its header on mobile), in assistant message

@@ -72,7 +72,9 @@ def history_session(request, transactional_db, django_user_model):
         level = AdventureLevel.objects.create(chapter=chapter, slug="history", title="History")
         tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
         scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug="history")
-        variant = AdventureLevelTierScenarioVariant.objects.create(scenario=scenario, slug="history")
+        variant = AdventureLevelTierScenarioVariant.objects.create(
+            scenario=scenario, slug="history"
+        )
         run = AdventureLevelTierRun.objects.create(
             player=player, tier=tier, current_scenario=scenario, selected_variant=variant
         )

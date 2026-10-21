@@ -236,7 +236,8 @@ def test_curriculum_seed_persists_the_complete_scenario_contract():
         for tier in level["tiers"].values()
     )
     assert (
-        AdventureLevelTierScenarioVariant.objects.filter(is_published=True).count() == planned + pooled
+        AdventureLevelTierScenarioVariant.objects.filter(is_published=True).count()
+        == planned + pooled
     )
 
 
@@ -265,6 +266,8 @@ def test_reseed_unpublishes_all_displaced_revised_ids():
 
     call_command("seed_curriculum", verbosity=0)
 
-    displaced = AdventureLevelTierScenarioVariant.objects.filter(case_id__in=DISPLACED_REVISED_CASE_IDS)
+    displaced = AdventureLevelTierScenarioVariant.objects.filter(
+        case_id__in=DISPLACED_REVISED_CASE_IDS
+    )
     assert displaced.count() == len(DISPLACED_REVISED_CASE_IDS)
     assert not displaced.filter(is_published=True).exists()

@@ -280,8 +280,12 @@
   }
 }
 
+/* The title is the part of the bar that gives way: it shrinks to an ellipsis
+   before the stats strip may overlap it. */
 .gameplay-header-mission {
   display: grid;
+  flex: 0 1 auto;
+  grid-template-columns: minmax(0, 1fr);
   min-width: 0;
   max-width: min(34vw, 30rem);
   align-content: center;

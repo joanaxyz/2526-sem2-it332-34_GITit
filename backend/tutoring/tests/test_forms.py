@@ -73,7 +73,8 @@ def test_scenario_forms_win_over_the_catalog(db):
     )
     assert resolve_form("git switch -c fix").usage_form == catalog.usage_form
     assert (
-        resolve_form("git switch -c fix", preferred=[scenario_form]).usage_form == scenario_form.usage_form
+        resolve_form("git switch -c fix", preferred=[scenario_form]).usage_form
+        == scenario_form.usage_form
     )
 
 
