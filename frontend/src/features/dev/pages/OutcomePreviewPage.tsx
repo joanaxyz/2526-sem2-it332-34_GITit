@@ -140,7 +140,6 @@ function OutcomePreviewPage() {
         onBackToMap={() => setMode('challenge-win')}
         onRetry={() => setMode('challenge-win')}
         onNextLevel={() => setMode('challenge-win')}
-        onSelectLevel={() => undefined}
         nextDifficultyLabel="Medium"
       />
     </div>

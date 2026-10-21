@@ -9,14 +9,14 @@ describe('admin routes', () => {
     expect(new Set(routes).size).toBe(routes.length)
     expect(routes).not.toContain('/admin/assets')
     expect(routes).not.toContain('/admin/shop')
+    expect(routes).not.toContain('/admin/content')
+    expect(routes).not.toContain('/admin/moderation')
     expect(routes).toEqual([
       '/admin',
       '/admin/users',
       '/admin/economy',
       '/admin/curriculum',
-      '/admin/content',
       '/admin/analytics',
-      '/admin/moderation',
       '/admin/settings',
     ])
   })

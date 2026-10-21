@@ -21,6 +21,7 @@ describe('transfer checkpoint outcomes', () => {
   it.each(['failed', 'completed'] as const)('preserves the first %s result and offers ungraded practice', (status) => {
     const run = {
       transfer: true, replay: false, status, stars: 0, difficulty: 'hard',
+      tier: { id: 7, difficulty: 'easy', adventure_level_id: 3, adventure_level_slug: 'staging-and-committing', adventure_level_title: 'Staging and Committing', adventure_level_number: 3 },
       progress: { completed: status === 'completed' ? 1 : 0, total: 1, cleared: status === 'completed', next_scenario: null },
       scenario: { index: 1, total: 1, title: '' },
       reward: { coins: 50, claimed: true },
@@ -41,6 +42,7 @@ describe('ordered scenario outcomes', () => {
   const clearedScenario = (overrides: Partial<TierRun> = {}) =>
     ({
       transfer: false, replay: false, status: 'completed', stars: 3, difficulty: 'easy',
+      tier: { id: 7, difficulty: 'easy', adventure_level_id: 3, adventure_level_slug: 'staging-and-committing', adventure_level_title: 'Staging and Committing', adventure_level_number: 3 },
       next_difficulty: null,
       progress: {
         completed: 1, total: 2, cleared: false,
@@ -52,6 +54,16 @@ describe('ordered scenario outcomes', () => {
         non_counted_diagnostic_total: 0, total_attempts: 2, max_reached: false },
       ...overrides,
     }) as TierRun
+
+  it.each([
+    { status: 'completed', replay: false },
+    { status: 'failed', replay: false },
+    { status: 'completed', replay: true },
+    { status: 'failed', replay: true },
+  ] as const)('names the level for a $status result (replay: $replay)', ({ status, replay }) => {
+    render(<TierOutcomeModal open run={clearedScenario({ status, replay })} onClose={() => {}} onBackToMap={() => {}} />)
+    expect(shown.mock.calls.at(-1)?.[0]).toMatchObject({ level: { label: 'Level 3', title: 'Staging and Committing' } })
+  })
 
   it('names the scenario just cleared, the next scenario and the reward it unlocks', () => {
     render(<TierOutcomeModal open run={clearedScenario()} onClose={() => {}} onBackToMap={() => {}} />)
@@ -65,5 +77,14 @@ describe('ordered scenario outcomes', () => {
     render(<>{props?.badges}</>)
     expect(screen.getByText('Easy scenario 1 of 2')).toBeInTheDocument()
     expect(screen.queryByText('Easy complete')).not.toBeInTheDocument()
+  })
+
+  it('keeps Continue after the final difficulty and returns to the map', () => {
+    const backToMap = vi.fn()
+    const run = clearedScenario({ difficulty: 'hard', progress: { completed: 2, total: 2, cleared: true, next_scenario: null } })
+    render(<TierOutcomeModal open run={run} onClose={() => {}} onBackToMap={backToMap} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    expect(backToMap).toHaveBeenCalledOnce()
   })
 })

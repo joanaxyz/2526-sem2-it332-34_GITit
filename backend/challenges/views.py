@@ -1,6 +1,5 @@
 from django.db import OperationalError, transaction
 from drf_spectacular.utils import OpenApiParameter, extend_schema
-from rest_framework.exceptions import PermissionDenied
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -53,11 +52,6 @@ class ChallengeRunStartAPIView(APIView):
             locked, reason = chapter_locked(player=player, chapter=chapter)
             if locked:
                 raise Locked(reason or "This chapter is locked.")
-        if trial.challenge_level.source_content_definition_id:
-            from shop.access import can_launch
-
-            if not can_launch(request.user, trial.challenge_level.source_content_definition):
-                raise PermissionDenied("You do not have access to this challenge.")
         prior_run = None
         prior_run_id = serializer.validated_data.get("prior_run_id")
         if prior_run_id:
@@ -110,7 +104,6 @@ class ChallengeCommandSubmitAPIView(APIView):
                     "challenge_trial__challenge_level",
                     "challenge_trial__challenge_level__chapter",
                     "challenge_trial__challenge_level__chapter__story",
-                    "challenge_trial__challenge_level__source_content_definition",
                     "selected_variant",
                 )
                 .get(id=run_id, player=player)
@@ -259,6 +252,5 @@ def _get_workspace_run(run_id: int, player):
         "challenge_trial__challenge_level",
         "challenge_trial__challenge_level__chapter",
         "challenge_trial__challenge_level__chapter__story",
-        "challenge_trial__challenge_level__source_content_definition",
         "selected_variant",
     ).get(id=run_id, player=player)

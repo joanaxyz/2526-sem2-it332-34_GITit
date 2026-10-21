@@ -61,17 +61,6 @@ SHARED_FEATURE_IMPORT = re.compile(r"@/features/")
 PAGE_IMPORT = re.compile(r"@/features/[^'\"]+/pages/")
 FRONTEND_PATH_REFERENCE = re.compile(r"frontend/(?:src|public|scripts)")
 
-CONTENT_EDITOR_PAGE = "frontend/src/features/authoring/pages/ContentEditorPage.tsx"
-CONTENT_EDITOR_HOOK = "frontend/src/features/authoring/hooks/useContentEditorController.ts"
-CONTENT_EDITOR_DRAFT_SUPPORT = "frontend/src/features/authoring/hooks/contentEditorDraftState.ts"
-CONTENT_EDITOR_COMPONENT_DIR = "frontend/src/features/authoring/components/content-editor"
-CONTENT_EDITOR_LINE_LIMITS = {
-    "page": 150,
-    "hook": 300,
-    "support": 120,
-    "component": 180,
-}
-
 HOME_HUB_VIEW = "frontend/src/features/home/components/HomeHubView.tsx"
 HOME_PROFILE_WORKSPACE = "frontend/src/features/home/components/home-hub/HomeProfileWorkspace.tsx"
 HOME_PROFILE_PANEL = "frontend/src/features/home/components/home-hub/HomeProfilePanel.tsx"
@@ -186,6 +175,7 @@ BACKEND_RUNTIME_EXCLUDED_PARTS = {
 DISPLACED_BACKEND_PATHS = {
     "backend/adventures/services/workspace_files.py",
     "backend/adminconsole/views.py",
+    "backend/authoring",
     "backend/challenges/services/workspace_files.py",
     "backend/curriculum/selectors/core.py",
     "backend/progress/chests.py",
@@ -467,204 +457,6 @@ def check_adminconsole_selectors_are_http_free() -> list[str]:
         violations.extend(
             adminconsole_selector_source_violations(
                 source=path.read_text(encoding="utf-8"),
-                path_label=rel(path),
-            )
-        )
-    return violations
-
-
-def content_editor_source_violations(
-    *,
-    source: str,
-    path_label: str,
-    role: str,
-) -> list[str]:
-    """Enforce the route-controller-rendering ownership cutover."""
-
-    violations: list[str] = []
-    line_count = len(source.splitlines())
-    limit = CONTENT_EDITOR_LINE_LIMITS[role]
-    if line_count > limit:
-        violations.append(
-            f"{path_label}: content editor {role} has {line_count} lines; limit is {limit}"
-        )
-
-    modules = ts_module_specifiers(source)
-    page_forbidden_modules = (
-        "@tanstack/react-query",
-        "frontend/src/features/admin/api",
-        "frontend/src/features/authoring/api",
-        "frontend/src/features/authoring/hooks/useUnsavedChangesGuard",
-        "frontend/src/features/authoring/utils/authoringModel",
-        "frontend/src/shared/api/queryKeys",
-        "frontend/src/shared/auth/useAuth",
-        "react-router-dom",
-        "sonner",
-    )
-    component_forbidden_modules = (
-        "@tanstack/react-query",
-        "frontend/src/features/admin/api",
-        "frontend/src/features/authoring/api",
-        "frontend/src/features/authoring/hooks/useContentEditorController",
-        "frontend/src/features/authoring/pages/ContentEditorPage",
-        "frontend/src/shared/api/queryKeys",
-        "frontend/src/shared/auth/useAuth",
-        "sonner",
-    )
-    hook_forbidden_modules = (
-        "frontend/src/features/authoring/components",
-        "frontend/src/features/authoring/pages",
-    )
-    support_forbidden_modules = (
-        "@tanstack/react-query",
-        "frontend/src/features/admin",
-        "frontend/src/features/authoring/api",
-        "frontend/src/features/authoring/components",
-        "frontend/src/features/authoring/hooks",
-        "frontend/src/features/authoring/pages",
-        "frontend/src/shared/api/queryKeys",
-        "frontend/src/shared/auth/useAuth",
-        "react",
-        "react-router-dom",
-        "sonner",
-    )
-    forbidden_modules = {
-        "page": page_forbidden_modules,
-        "component": component_forbidden_modules,
-        "hook": hook_forbidden_modules,
-        "support": support_forbidden_modules,
-    }[role]
-    for module in modules:
-        canonical_module = canonical_ts_module_reference(
-            module=module,
-            path_label=path_label,
-        )
-        if any(
-            ts_module_matches_boundary(canonical_module, boundary) for boundary in forbidden_modules
-        ):
-            violations.append(f"{path_label}: content editor {role} must not import {module}")
-
-    if role == "page":
-        displaced_markers = (
-            "DraftState",
-            "buildInput",
-            "formFromContent",
-            "formToDefinition",
-            "sameForm",
-            "useMutation",
-            "useNavigate",
-            "useParams",
-            "useQuery",
-            "useSearchParams",
-        )
-        for marker in displaced_markers:
-            if re.search(rf"\b{re.escape(marker)}\b", source):
-                violations.append(
-                    f"{path_label}: displaced workflow marker {marker} must stay in the controller"
-                )
-        if len(re.findall(r"\buseContentEditorController\s*\(", source)) != 1:
-            violations.append(
-                f"{path_label}: page must invoke useContentEditorController exactly once"
-            )
-        if re.search(
-            r"\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*useContentEditorController\s*\(",
-            source,
-        ):
-            violations.append(
-                f"{path_label}: destructure useContentEditorController at the call site"
-            )
-        if re.search(r"\bcontroller\s*=|\{\s*\.\.\.\s*[\w$]*controller\b", source, re.I):
-            violations.append(
-                f"{path_label}: controller objects must not be forwarded to rendering components"
-            )
-        for match in re.finditer(
-            r"<(ContentEditorHeader|ContentDestinationSection|ContentMetadataSection)\b(?P<props>.*?)/?>",
-            source,
-            re.S,
-        ):
-            if re.search(r"\b(?:form|setForm)\s*=", match.group("props")):
-                violations.append(
-                    f"{path_label}: {match.group(1)} must not receive form or setForm"
-                )
-
-    if role == "component" and not path_label.endswith("ContentEditorDiagnostics.tsx"):
-        if re.search(r"\bform\s*:", source) or re.search(r"\bsetForm\b", source):
-            violations.append(
-                f"{path_label}: only ContentEditorDiagnostics may receive the full form"
-            )
-    return violations
-
-
-def content_editor_css_violations(*, source: str, path_label: str) -> list[str]:
-    """Keep destination layout owned by editor-shell rather than battle-stage CSS."""
-
-    violations: list[str] = []
-    row = re.search(r"\.author-destination-row\s*\{(?P<body>[^}]*)\}", source, re.S)
-    input_rule = re.search(
-        r"\.author-destination-row\s*>\s*\.author-input\s*\{(?P<body>[^}]*)\}",
-        source,
-        re.S,
-    )
-    for property_name in ("display", "align-items", "gap", "flex-wrap"):
-        if not row or not re.search(rf"\b{property_name}\s*:", row.group("body")):
-            violations.append(f"{path_label}: .author-destination-row must own {property_name}")
-    if not input_rule or not re.search(r"\bflex\s*:", input_rule.group("body")):
-        violations.append(f"{path_label}: destination input must own flexible sizing")
-    return violations
-
-
-def admin_authoring_import_violations(*, source: str, path_label: str) -> list[str]:
-    """Keep the existing authoring-to-admin API edge from becoming a cycle."""
-
-    return [
-        f"{path_label}: admin feature must not import authoring feature module {module}"
-        for module in ts_module_specifiers(source)
-        if ts_module_matches_boundary(
-            canonical_ts_module_reference(module=module, path_label=path_label),
-            "frontend/src/features/authoring",
-        )
-    ]
-
-
-def check_content_editor_workflow_ownership() -> list[str]:
-    violations: list[str] = []
-    targets = [
-        (ROOT / CONTENT_EDITOR_PAGE, "page"),
-        (ROOT / CONTENT_EDITOR_HOOK, "hook"),
-        (ROOT / CONTENT_EDITOR_DRAFT_SUPPORT, "support"),
-    ]
-    component_dir = ROOT / CONTENT_EDITOR_COMPONENT_DIR
-    targets.extend((path, "component") for path in iter_files(component_dir, TS_SUFFIXES))
-    for path, role in targets:
-        if not path.exists():
-            violations.append(f"{rel(path)}: required content editor {role} is missing")
-            continue
-        violations.extend(
-            content_editor_source_violations(
-                source=path.read_text(encoding="utf-8"),
-                path_label=rel(path),
-                role=role,
-            )
-        )
-
-    destination = component_dir / "ContentDestinationSection.tsx"
-    if destination.exists() and "author-destination-row" not in destination.read_text(
-        encoding="utf-8"
-    ):
-        violations.append(
-            f"{rel(destination)}: destination must use the editor-shell-owned row selector"
-        )
-    css = ROOT / "frontend/src/styles/features/authoring/editor-shell.css"
-    violations.extend(
-        content_editor_css_violations(
-            source=css.read_text(encoding="utf-8"),
-            path_label=rel(css),
-        )
-    )
-    for path in iter_files(FRONTEND_SRC / "features" / "admin", TS_SUFFIXES):
-        violations.extend(
-            admin_authoring_import_violations(
-                source=path.read_text(encoding="utf-8", errors="ignore"),
                 path_label=rel(path),
             )
         )
@@ -1905,7 +1697,6 @@ def main() -> int:
         *check_frontend_feature_shape(),
         *check_frontend_feature_roots_are_thin(),
         *check_frontend_production_files_are_reviewable(),
-        *check_content_editor_workflow_ownership(),
         *check_home_hub_profile_ownership(),
         *check_home_overview_ownership(),
         *check_stats_summary_contract_ownership(),
@@ -1938,7 +1729,7 @@ def main() -> int:
             "gameplay mutation request contracts must stay shared, generated, and one-way; "
             "gameplay success response contracts must stay domain-owned, exact, generated, and one-way; "
             "Home Overview workflow ownership must stay one-way; "
-            "content editor and Home Hub workflow ownership must stay one-way; displaced architecture paths "
+            "Home Hub workflow ownership must stay one-way; displaced architecture paths "
             "must stay deleted.",
             file=sys.stderr,
         )

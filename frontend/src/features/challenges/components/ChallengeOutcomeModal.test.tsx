@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ChallengeOutcomeModal } from './ChallengeOutcomeModal'
@@ -61,7 +61,6 @@ describe('ChallengeOutcomeModal', () => {
         onClose={vi.fn()}
         onBackToMap={vi.fn()}
         onNextLevel={vi.fn()}
-        onSelectLevel={vi.fn()}
         nextDifficultyLabel="Medium"
       />,
     )
@@ -70,6 +69,10 @@ describe('ChallengeOutcomeModal', () => {
     expect(screen.getByRole('img', { name: 'You Won' })).toBeInTheDocument()
     expect(screen.getByText('Level ready')).toBeInTheDocument()
     expect(screen.queryByRole('img', { name: 'Game Over' })).not.toBeInTheDocument()
+    expect(screen.getByText('Challenge gate')).toBeInTheDocument()
+    expect(screen.getByText('Repository Basecamp')).toBeInTheDocument()
+    expect(screen.queryByText('Jump to a level')).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Continue' })).toBeInTheDocument()
   })
 
   it('renders failed challenges as game over', () => {
@@ -92,7 +95,19 @@ describe('ChallengeOutcomeModal', () => {
 
     expect(screen.getByRole('img', { name: 'Game Over' })).toBeInTheDocument()
     expect(screen.getByText('Attempt limit reached')).toBeInTheDocument()
+    expect(screen.getByText('Challenge gate')).toBeInTheDocument()
+    expect(screen.getByText('Repository Basecamp')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /start fresh variant/i })).toBeInTheDocument()
     expect(screen.queryByRole('img', { name: 'You Won' })).not.toBeInTheDocument()
+  })
+
+  it('keeps Continue after the final difficulty and returns to the map', () => {
+    const backToMap = vi.fn()
+    render(<ChallengeOutcomeModal open run={{ ...run, difficulty: 'hard', next_difficulty: null }}
+      onClose={vi.fn()} onBackToMap={backToMap} />)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Continue' }))
+    expect(backToMap).toHaveBeenCalledOnce()
+    expect(screen.queryByText('Jump to a level')).not.toBeInTheDocument()
   })
 })

@@ -58,6 +58,9 @@ describe('app entry routing', () => {
     '/archive/editor',
     '/archive/editor/1',
     '/my-tower',
+    '/level-editor',
+    '/level-editor/new/adventure',
+    '/level-editor/chapters/1',
     '/design-preview/tower',
     '/performance',
     '/gallery',
@@ -71,8 +74,6 @@ describe('app entry routing', () => {
   it.each([
     '/stories/arcane-spire',
     '/shop',
-    '/level-editor',
-    '/level-editor/new/adventure',
     '/adventure-level-tiers/1/runs',
     '/adventure-level-tiers/1/replay',
     '/admin/analytics',

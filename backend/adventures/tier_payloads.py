@@ -5,6 +5,8 @@ snapshots, visualization) - serializers hold input validation only.
 Payload shapes are part of the frontend contract - change them deliberately.
 """
 
+from django.db.models import Q
+
 from adventures.models import AdventureLevelTier, AdventureLevelTierRun
 from adventures.rewards import claimed_tier_reward_keys, tier_reward_payload
 from adventures.tier_scenarios import published_scenarios, scenario_progress
@@ -280,4 +282,14 @@ def _tier_payload(run: AdventureLevelTierRun) -> dict:
         "adventure_level_id": adventure_level.id,
         "adventure_level_slug": adventure_level.slug,
         "adventure_level_title": adventure_level.title,
+        "adventure_level_number": _level_number(adventure_level),
     }
+
+
+def _level_number(adventure_level) -> int:
+    """The level's place in its chapter, as the story map numbers it."""
+    earlier = adventure_level.chapter.adventure_levels.filter(is_published=True).filter(
+        Q(sort_order__lt=adventure_level.sort_order)
+        | Q(sort_order=adventure_level.sort_order, id__lt=adventure_level.id)
+    )
+    return earlier.count() + 1

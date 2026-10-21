@@ -21,7 +21,6 @@ RUN_HYDRATE_SELECT_RELATED = (
     "challenge_trial__challenge_level",
     "challenge_trial__challenge_level__chapter",
     "challenge_trial__challenge_level__chapter__story",
-    "challenge_trial__challenge_level__source_content_definition",
     "selected_variant",
     "selected_variant__trial",
     "prior_run",

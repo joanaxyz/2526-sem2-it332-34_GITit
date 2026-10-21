@@ -14,20 +14,11 @@ export type ApiSchemas = {
   "AdminChapterCreateRequest": { "battle_stage"?: { [key: string]: JsonValue }; "description"?: string; "is_playable"?: boolean; "is_published"?: boolean; "number": number; "slug": string; "sort_order"?: number; "story_id": number; "title": string }
   "AdminChapterListResponse": { "results": Array<ApiSchemas["AdminChapter"]> }
   "AdminCompletions": { "adventure": number; "challenge": number; "total": number }
-  "AdminContent": { "id": number; "kind": ApiSchemas["AdminContentKindEnum"]; "official_chapter": ApiSchemas["AdminOfficialChapterBrief"] | null; "slug": string; "status": string; "title": string; "updated_at": string; "visibility": string }
-  "AdminContentKindEnum": "adventure" | "challenge" | "lesson"
-  "AdminContentListResponse": { "results": Array<ApiSchemas["AdminContent"]> }
   "AdminEconomyAdjustRequest": { "amount": number; "reason": string; "request_id": string; "user_id": number }
   "AdminEconomyAdjustResponse": { "applied": boolean; "wallet": ApiSchemas["WalletSummary"] }
   "AdminFeatureFlag": { "description": string; "enabled": boolean; "key": ApiSchemas["KeyEnum"]; "label": string }
   "AdminFeatureFlagUpdateRequest": { "enabled": boolean; "key": ApiSchemas["KeyEnum"] }
   "AdminKpiRange": { "end_date": string | null; "start_date": string | null; "timezone": string }
-  "AdminModerationContent": { "id": number; "kind": string; "owner": string | null; "title": string; "updated_at": string }
-  "AdminModerationListResponse": { "content": Array<ApiSchemas["AdminModerationContent"]> }
-  "AdminModerationUnpublishRequest": { "id": number; "kind": ApiSchemas["AdminModerationUnpublishRequestKindEnum"] }
-  "AdminModerationUnpublishRequestKindEnum": "content"
-  "AdminOfficialChapterBrief": { "id": number; "title": string }
-  "AdminOkayResponse": { "ok": boolean }
   "AdminOverviewEconomy": { "coins_in_circulation": number; "coins_spent": number; "signup_grant": number }
   "AdminOverviewResponse": { "economy": ApiSchemas["AdminOverviewEconomy"]; "recent_admin_actions": Array<ApiSchemas["AdminRecentAction"]>; "recent_purchases": Array<ApiSchemas["AdminRecentPurchase"]>; "recent_signups": Array<ApiSchemas["AdminUserBrief"]>; "users": ApiSchemas["AdminOverviewUsers"] }
   "AdminOverviewUsers": { "new_30d": number; "new_7d": number; "total": number }
@@ -82,12 +73,6 @@ export type ApiSchemas = {
   "CommandKnowledgeResponseKindEnum": "command" | "option" | "argument"
   "CommandSubmit": { "command": string; "execution": ApiSchemas["ClientCommandExecution"] }
   "Concept": { "key": string; "text": string; "title": string }
-  "ContentDefinition": { "chapter_id": number | null; "command_family": string; "created_at": string; "definition": { [key: string]: JsonValue }; "difficulty": string; "id": number; "kind": ApiSchemas["KindA5eEnum"]; "official_chapter_id": number | null; "owner_id": number | null; "published_at": string | null; "slug": string; "source_definition_id": number | null; "status": ApiSchemas["StatusEnum"]; "summary": string; "tags": Array<string>; "title": string; "updated_at": string; "validation_errors": Array<ApiSchemas["ValidationErrorRow"]>; "visibility": ApiSchemas["VisibilityEnum"] }
-  "ContentDefinitionCreateRequest": { "chapter"?: number | null; "command_family"?: string; "definition"?: { [key: string]: JsonValue }; "difficulty"?: string; "kind": ApiSchemas["KindA5eEnum"]; "official_chapter"?: number | null; "slug": string; "summary"?: string; "tags"?: Array<string>; "title": string; "visibility"?: ApiSchemas["VisibilityEnum"] }
-  "ContentDefinitionListResponse": { "results": Array<ApiSchemas["ContentDefinitionSummary"]> }
-  "ContentDefinitionSummary": { "chapter_id": number | null; "command_family": string; "created_at": string; "difficulty": string; "id": number; "kind": ApiSchemas["KindA5eEnum"]; "official_chapter_id": number | null; "owner_id": number | null; "published_at": string | null; "slug": string; "source_definition_id": number | null; "status": ApiSchemas["StatusEnum"]; "summary": string; "tags": Array<string>; "title": string; "updated_at": string; "validation_errors": Array<ApiSchemas["ValidationErrorRow"]>; "visibility": ApiSchemas["VisibilityEnum"] }
-  "ContentTestRunResult": { "kind": ApiSchemas["KindA5eEnum"]; "pages"?: Array<JsonValue>; "runtime_id": number | null; "start_path"?: string | null }
-  "ContentValidationResult": { "errors": Array<ApiSchemas["ValidationErrorRow"]>; "valid": boolean }
   "DashboardCounts": { "abandoned": number; "completed": number; "failed": number; "started": number }
   "DashboardKpiSet": { "arc": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"] }
   "DashboardRetryTrend": { "attempts": number; "label": string; "level_title": string; "retries": number }
@@ -110,7 +95,6 @@ export type ApiSchemas = {
   "IntroductionComplete": { "token": string }
   "IntroductionCompleteResponse": { "tutor": ApiSchemas["CommandIntroductionResponse"] | null }
   "KeyEnum": "shop-purchases"
-  "KindA5eEnum": "adventure" | "challenge" | "lesson"
   "LearnedSkillResponse": { "base_command": string; "chapter_id"?: number | null; "chapter_number": number; "chapter_title": string; "id": number; "knowledge"?: Array<ApiSchemas["CommandKnowledgeResponse"]>; "learned_at": string; "slug": string; "summary": string; "title": string }
   "LearnedSkillsResponse": { "results": Array<ApiSchemas["LearnedSkillResponse"]> }
   "LevelDrillPlanResponse": { "available": boolean; "cards": Array<ApiSchemas["DrillCard"]>; "level": ApiSchemas["DrillLevel"]; "progress": ApiSchemas["DrillProgress"]; "resume": ApiSchemas["DrillResume"] | null; "sequence": ApiSchemas["DrillSequence"] | null }
@@ -123,7 +107,6 @@ export type ApiSchemas = {
   "PasswordResetRequest": { "email": string }
   "PatchedAdminChapterUpdateRequest": { "battle_stage"?: { [key: string]: JsonValue }; "description"?: string; "is_playable"?: boolean; "is_published"?: boolean; "number"?: number; "sort_order"?: number; "title"?: string }
   "PatchedAdminStoryUpdateRequest": { "difficulty"?: ApiSchemas["DifficultyEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "sort_order"?: number; "summary"?: string; "title"?: string; "world_slug"?: string }
-  "PatchedContentDefinitionUpdateRequest": { "chapter"?: number | null; "command_family"?: string; "definition"?: { [key: string]: JsonValue }; "difficulty"?: string; "kind"?: ApiSchemas["KindA5eEnum"]; "official_chapter"?: number | null; "slug"?: string; "summary"?: string; "tags"?: Array<string>; "title"?: string; "visibility"?: ApiSchemas["VisibilityEnum"] }
   "PatchedPlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
   "PerformanceKpiSet": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"] }
   "PerformanceModule": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "number": number; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"]; "title": string }
@@ -153,7 +136,6 @@ export type ApiSchemas = {
   "StatsSkillAxis": { "command": string; "hint": string; "key": string; "label": string; "value": number | null }
   "StatsSummaryResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "activity_window": ApiSchemas["ActivityWindowEnum"]; "headline": ApiSchemas["StatsHeadline"]; "skill_profile": Array<ApiSchemas["StatsSkillAxis"]> }
   "StatsTrendPoint": { "commands_run": number; "date": string; "levels_completed": number }
-  "StatusEnum": "draft" | "testable" | "published" | "archived"
   "Story": { "completed": boolean; "difficulty": ApiSchemas["DifficultyEnum"]; "id": number; "is_published": boolean; "lock_reason": string; "locked": boolean; "prerequisite_story": ApiSchemas["StoryPrerequisite"] | null; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }
   "StoryPrerequisite": { "completed": boolean; "slug": string; "title": string }
   "SurfaceEnum": "home" | "command_guide"
@@ -166,9 +148,7 @@ export type ApiSchemas = {
   "TutorTopic": { "id": string; "title": string }
   "UnitEnum": "participants"
   "User": { "email": string; "id": number; "is_staff": boolean; "username": string }
-  "ValidationErrorRow": { "field": string; "message": string }
   "VerdictEnum": "correct" | "incorrect"
-  "VisibilityEnum": "private" | "public"
   "WalletSummary": { "balance": number }
   "WalletSummaryResponse": { "balance": number }
   "WorkspaceFile": { "content"?: string; "path": string }
@@ -179,11 +159,8 @@ export type ApiPath =
   | "/api/admin/analytics/"
   | "/api/admin/chapters/"
   | "/api/admin/chapters/{chapter_id}/"
-  | "/api/admin/content/"
   | "/api/admin/economy/adjust/"
   | "/api/admin/economy/transactions/"
-  | "/api/admin/moderation/"
-  | "/api/admin/moderation/unpublish/"
   | "/api/admin/overview/"
   | "/api/admin/settings/"
   | "/api/admin/stories/"
@@ -211,15 +188,6 @@ export type ApiPath =
   | "/api/auth/register/"
   | "/api/auth/sessions/revoke-all/"
   | "/api/auth/sessions/revoke-others/"
-  | "/api/authoring/chapters/"
-  | "/api/authoring/chapters/{chapter_id}/"
-  | "/api/authoring/command-forms/"
-  | "/api/authoring/content-definitions/"
-  | "/api/authoring/content-definitions/{definition_id}/"
-  | "/api/authoring/content-definitions/{definition_id}/publish/"
-  | "/api/authoring/content-definitions/{definition_id}/remix/"
-  | "/api/authoring/content-definitions/{definition_id}/test-run/"
-  | "/api/authoring/content-definitions/{definition_id}/validate/"
   | "/api/challenge-runs/{run_id}/"
   | "/api/challenge-runs/{run_id}/files/"
   | "/api/challenge-runs/{run_id}/retry/"
@@ -256,11 +224,8 @@ export type ApiMethodByPath = {
   "/api/admin/analytics/": "GET"
   "/api/admin/chapters/": "GET" | "POST"
   "/api/admin/chapters/{chapter_id}/": "PATCH"
-  "/api/admin/content/": "GET"
   "/api/admin/economy/adjust/": "POST"
   "/api/admin/economy/transactions/": "GET"
-  "/api/admin/moderation/": "GET"
-  "/api/admin/moderation/unpublish/": "POST"
   "/api/admin/overview/": "GET"
   "/api/admin/settings/": "GET" | "POST"
   "/api/admin/stories/": "GET" | "POST"
@@ -288,15 +253,6 @@ export type ApiMethodByPath = {
   "/api/auth/register/": "POST"
   "/api/auth/sessions/revoke-all/": "POST"
   "/api/auth/sessions/revoke-others/": "POST"
-  "/api/authoring/chapters/": "GET" | "POST"
-  "/api/authoring/chapters/{chapter_id}/": "DELETE" | "PATCH"
-  "/api/authoring/command-forms/": "GET"
-  "/api/authoring/content-definitions/": "GET" | "POST"
-  "/api/authoring/content-definitions/{definition_id}/": "GET" | "PATCH"
-  "/api/authoring/content-definitions/{definition_id}/publish/": "POST"
-  "/api/authoring/content-definitions/{definition_id}/remix/": "POST"
-  "/api/authoring/content-definitions/{definition_id}/test-run/": "POST"
-  "/api/authoring/content-definitions/{definition_id}/validate/": "POST"
   "/api/challenge-runs/{run_id}/": "DELETE" | "GET"
   "/api/challenge-runs/{run_id}/files/": "DELETE" | "PATCH" | "POST" | "PUT"
   "/api/challenge-runs/{run_id}/retry/": "POST"
@@ -333,11 +289,8 @@ export const apiOperations = {
   admin_chapters_retrieve: { method: "GET", path: "/api/admin/chapters/", operationId: "admin_chapters_retrieve", tags: ["admin"] },
   admin_chapters_create: { method: "POST", path: "/api/admin/chapters/", operationId: "admin_chapters_create", tags: ["admin"] },
   admin_chapters_partial_update: { method: "PATCH", path: "/api/admin/chapters/{chapter_id}/", operationId: "admin_chapters_partial_update", tags: ["admin"] },
-  admin_content_retrieve: { method: "GET", path: "/api/admin/content/", operationId: "admin_content_retrieve", tags: ["admin"] },
   admin_economy_adjust_create: { method: "POST", path: "/api/admin/economy/adjust/", operationId: "admin_economy_adjust_create", tags: ["admin"] },
   admin_economy_transactions_retrieve: { method: "GET", path: "/api/admin/economy/transactions/", operationId: "admin_economy_transactions_retrieve", tags: ["admin"] },
-  admin_moderation_retrieve: { method: "GET", path: "/api/admin/moderation/", operationId: "admin_moderation_retrieve", tags: ["admin"] },
-  admin_moderation_unpublish_create: { method: "POST", path: "/api/admin/moderation/unpublish/", operationId: "admin_moderation_unpublish_create", tags: ["admin"] },
   admin_overview_retrieve: { method: "GET", path: "/api/admin/overview/", operationId: "admin_overview_retrieve", tags: ["admin"] },
   admin_settings_retrieve: { method: "GET", path: "/api/admin/settings/", operationId: "admin_settings_retrieve", tags: ["admin"] },
   admin_settings_create: { method: "POST", path: "/api/admin/settings/", operationId: "admin_settings_create", tags: ["admin"] },
@@ -372,19 +325,6 @@ export const apiOperations = {
   auth_register_create: { method: "POST", path: "/api/auth/register/", operationId: "auth_register_create", tags: ["auth"] },
   auth_sessions_revoke_all_create: { method: "POST", path: "/api/auth/sessions/revoke-all/", operationId: "auth_sessions_revoke_all_create", tags: ["auth"] },
   auth_sessions_revoke_others_create: { method: "POST", path: "/api/auth/sessions/revoke-others/", operationId: "auth_sessions_revoke_others_create", tags: ["auth"] },
-  authoring_chapters_retrieve: { method: "GET", path: "/api/authoring/chapters/", operationId: "authoring_chapters_retrieve", tags: ["authoring"] },
-  authoring_chapters_create: { method: "POST", path: "/api/authoring/chapters/", operationId: "authoring_chapters_create", tags: ["authoring"] },
-  authoring_chapters_destroy: { method: "DELETE", path: "/api/authoring/chapters/{chapter_id}/", operationId: "authoring_chapters_destroy", tags: ["authoring"] },
-  authoring_chapters_partial_update: { method: "PATCH", path: "/api/authoring/chapters/{chapter_id}/", operationId: "authoring_chapters_partial_update", tags: ["authoring"] },
-  authoring_command_forms_retrieve: { method: "GET", path: "/api/authoring/command-forms/", operationId: "authoring_command_forms_retrieve", tags: ["authoring"] },
-  authoring_content_definitions_retrieve: { method: "GET", path: "/api/authoring/content-definitions/", operationId: "authoring_content_definitions_retrieve", tags: ["authoring"] },
-  authoring_content_definitions_create: { method: "POST", path: "/api/authoring/content-definitions/", operationId: "authoring_content_definitions_create", tags: ["authoring"] },
-  authoring_content_definitions_retrieve_2: { method: "GET", path: "/api/authoring/content-definitions/{definition_id}/", operationId: "authoring_content_definitions_retrieve_2", tags: ["authoring"] },
-  authoring_content_definitions_partial_update: { method: "PATCH", path: "/api/authoring/content-definitions/{definition_id}/", operationId: "authoring_content_definitions_partial_update", tags: ["authoring"] },
-  authoring_content_definitions_publish_create: { method: "POST", path: "/api/authoring/content-definitions/{definition_id}/publish/", operationId: "authoring_content_definitions_publish_create", tags: ["authoring"] },
-  authoring_content_definitions_remix_create: { method: "POST", path: "/api/authoring/content-definitions/{definition_id}/remix/", operationId: "authoring_content_definitions_remix_create", tags: ["authoring"] },
-  authoring_content_definitions_test_run_create: { method: "POST", path: "/api/authoring/content-definitions/{definition_id}/test-run/", operationId: "authoring_content_definitions_test_run_create", tags: ["authoring"] },
-  authoring_content_definitions_validate_create: { method: "POST", path: "/api/authoring/content-definitions/{definition_id}/validate/", operationId: "authoring_content_definitions_validate_create", tags: ["authoring"] },
   challenge_runs_destroy: { method: "DELETE", path: "/api/challenge-runs/{run_id}/", operationId: "challenge_runs_destroy", tags: ["challenge-runs"] },
   challenge_runs_retrieve: { method: "GET", path: "/api/challenge-runs/{run_id}/", operationId: "challenge_runs_retrieve", tags: ["challenge-runs"] },
   challenge_runs_files_destroy: { method: "DELETE", path: "/api/challenge-runs/{run_id}/files/", operationId: "challenge_runs_files_destroy", tags: ["challenge-runs"] },
@@ -430,11 +370,8 @@ export type ApiRequestBodyByOperation = {
   admin_chapters_retrieve: null
   admin_chapters_create: ApiSchemas["AdminChapterCreateRequest"]
   admin_chapters_partial_update: ApiSchemas["PatchedAdminChapterUpdateRequest"]
-  admin_content_retrieve: null
   admin_economy_adjust_create: ApiSchemas["AdminEconomyAdjustRequest"]
   admin_economy_transactions_retrieve: null
-  admin_moderation_retrieve: null
-  admin_moderation_unpublish_create: ApiSchemas["AdminModerationUnpublishRequest"]
   admin_overview_retrieve: null
   admin_settings_retrieve: null
   admin_settings_create: ApiSchemas["AdminFeatureFlagUpdateRequest"]
@@ -469,19 +406,6 @@ export type ApiRequestBodyByOperation = {
   auth_register_create: ApiSchemas["Register"]
   auth_sessions_revoke_all_create: null
   auth_sessions_revoke_others_create: null
-  authoring_chapters_retrieve: null
-  authoring_chapters_create: { [key: string]: JsonValue }
-  authoring_chapters_destroy: null
-  authoring_chapters_partial_update: { [key: string]: JsonValue }
-  authoring_command_forms_retrieve: null
-  authoring_content_definitions_retrieve: null
-  authoring_content_definitions_create: ApiSchemas["ContentDefinitionCreateRequest"]
-  authoring_content_definitions_retrieve_2: null
-  authoring_content_definitions_partial_update: ApiSchemas["PatchedContentDefinitionUpdateRequest"]
-  authoring_content_definitions_publish_create: null
-  authoring_content_definitions_remix_create: null
-  authoring_content_definitions_test_run_create: null
-  authoring_content_definitions_validate_create: null
   challenge_runs_destroy: null
   challenge_runs_retrieve: null
   challenge_runs_files_destroy: null
@@ -524,11 +448,8 @@ export type ApiResponseBodyByOperation = {
   admin_chapters_retrieve: ApiSchemas["AdminChapterListResponse"]
   admin_chapters_create: ApiSchemas["AdminChapter"]
   admin_chapters_partial_update: ApiSchemas["AdminChapter"]
-  admin_content_retrieve: ApiSchemas["AdminContentListResponse"]
   admin_economy_adjust_create: ApiSchemas["AdminEconomyAdjustResponse"]
   admin_economy_transactions_retrieve: ApiSchemas["AdminTransactionListResponse"]
-  admin_moderation_retrieve: ApiSchemas["AdminModerationListResponse"]
-  admin_moderation_unpublish_create: ApiSchemas["AdminOkayResponse"]
   admin_overview_retrieve: ApiSchemas["AdminOverviewResponse"]
   admin_settings_retrieve: ApiSchemas["AdminSettingsResponse"]
   admin_settings_create: ApiSchemas["AdminFeatureFlag"]
@@ -563,19 +484,6 @@ export type ApiResponseBodyByOperation = {
   auth_register_create: ApiSchemas["RegisterResponse"]
   auth_sessions_revoke_all_create: null
   auth_sessions_revoke_others_create: ApiSchemas["DetailResponse"]
-  authoring_chapters_retrieve: { [key: string]: JsonValue }
-  authoring_chapters_create: { [key: string]: JsonValue }
-  authoring_chapters_destroy: null
-  authoring_chapters_partial_update: { [key: string]: JsonValue }
-  authoring_command_forms_retrieve: { [key: string]: JsonValue }
-  authoring_content_definitions_retrieve: ApiSchemas["ContentDefinitionListResponse"]
-  authoring_content_definitions_create: ApiSchemas["ContentDefinition"]
-  authoring_content_definitions_retrieve_2: ApiSchemas["ContentDefinition"]
-  authoring_content_definitions_partial_update: ApiSchemas["ContentDefinition"]
-  authoring_content_definitions_publish_create: ApiSchemas["ContentDefinition"]
-  authoring_content_definitions_remix_create: ApiSchemas["ContentDefinition"]
-  authoring_content_definitions_test_run_create: ApiSchemas["ContentTestRunResult"]
-  authoring_content_definitions_validate_create: ApiSchemas["ContentValidationResult"]
   challenge_runs_destroy: null
   challenge_runs_retrieve: ApiSchemas["ChallengeRunResponse"]
   challenge_runs_files_destroy: ApiSchemas["ChallengeRunResponse"]

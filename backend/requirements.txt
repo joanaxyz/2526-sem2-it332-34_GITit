@@ -63,7 +63,7 @@ psycopg-binary==3.3.4 ; implementation_name != 'pypy'
     # via psycopg
 psycopg-pool==3.3.3
     # via psycopg
-pyjwt==2.13.0
+pyjwt==2.15.1
     # via djangorestframework-simplejwt
 pyyaml==6.0.3
     # via drf-spectacular

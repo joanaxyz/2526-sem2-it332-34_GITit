@@ -84,7 +84,7 @@ CATALOG_RESPONSE_FIELD_SETS = {CATALOG_STORY_FIELDS, CATALOG_CHAPTER_FIELDS}
 def is_catalog_contract_symbol(name: str) -> bool:
     """Identify Story/Chapter catalog response-serializer symbols."""
 
-    if name.startswith(("Admin", "Authoring")) or name.endswith(
+    if name.startswith("Admin") or name.endswith(
         ("APIView", "View", "ViewSet", "Model", "Admin")
     ):
         return False

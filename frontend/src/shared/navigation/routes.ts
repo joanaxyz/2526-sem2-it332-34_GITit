@@ -11,9 +11,7 @@ export const ADMIN_ROUTES = {
   users: '/admin/users',
   economy: '/admin/economy',
   curriculum: '/admin/curriculum',
-  content: '/admin/content',
   analytics: '/admin/analytics',
-  moderation: '/admin/moderation',
   settings: '/admin/settings',
 } as const
 

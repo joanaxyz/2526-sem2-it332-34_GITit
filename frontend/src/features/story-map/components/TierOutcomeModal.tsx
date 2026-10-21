@@ -225,7 +225,11 @@ export function TierOutcomeModal({
         Play again
       </Button>
     ) : null
-  ) : run.status === 'completed' ? null : null
+  ) : run.status === 'completed' ? (
+    <Button type="button" onClick={onBackToMap}>
+      Continue
+    </Button>
+  ) : null
 
   return (
     <GameOutcomeModal
@@ -237,6 +241,7 @@ export function TierOutcomeModal({
       resultLabel={isFailed ? 'Game Over' : 'You Won'}
       stars={isTransfer ? undefined : run.stars}
       showStars={!isTransfer}
+      level={{ label: `Level ${run.tier.adventure_level_number}`, title: run.tier.adventure_level_title }}
       badges={badges}
       headline={headline}
       message={message}
