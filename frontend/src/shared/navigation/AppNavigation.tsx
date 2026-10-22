@@ -9,7 +9,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 
-import gitLogoImage from '@/assets/images/g34-icon.webp'
+import gitLogoImage from '@/assets/images/git-it-logo.webp'
 import { AudioControls } from '@/shared/audio/AudioControls'
 import { authApi } from '@/shared/auth/authApi'
 import { useRank } from '@/shared/progress/rank'
@@ -302,12 +302,7 @@ export function AppTopbar() {
   return (
     <header className="app-topbar" data-scrolled={scrolled ? 'true' : undefined}>
       <NavLink to="/home" aria-label="GIT it! home" className="app-brand">
-        <span className="app-brand-sigil">
-          <img src={gitLogoImage} alt="" />
-        </span>
-        <span className="app-brand-copy">
-          <strong>IT it!</strong>
-        </span>
+        <img className="app-brand-logo" src={gitLogoImage} alt="" width={900} height={305} />
       </NavLink>
 
       <CurrentUserPrimaryNav

@@ -1,7 +1,7 @@
 import { RefreshCcw, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 
-import gitLogoImage from '@/assets/images/g34-icon.webp'
+import gitLogoImage from '@/assets/images/git-it-logo.webp'
 import { AudioControls } from '@/shared/audio/AudioControls'
 
 /**
@@ -61,8 +61,7 @@ export function WorkspaceStatusHeader({
       </button>
 
       <a className="gameplay-header-brand" href="/home" aria-label="GIT it! home">
-        <img src={gitLogoImage} alt="" />
-        <span>IT it!</span>
+        <img src={gitLogoImage} alt="" width={900} height={305} />
       </a>
 
       <div className="gameplay-header-mission" aria-label={missionLabel}>

@@ -43,24 +43,15 @@
 }
 
 .gameplay-header-brand {
-  gap: 0.45rem;
-  min-width: 8.2rem;
-  color: hsl(var(--foreground));
-  /* Cinzel is scoped to the "GIT it!" wordmark only - --font-display stays
-     Chakra Petch for every other heading. Weight bumped from the old 700 to
-     800 to match the only two Cinzel weights loaded (600/800) and the same
-     "GIT it!" treatment used in the nav bar and auth screens. */
-  font-family: 'Cinzel', serif;
-  font-size: 1.32rem;
-  font-weight: 800;
-  line-height: 1;
+  flex: 0 0 auto;
+  padding-inline: 0.2rem 0.4rem;
 }
 
 .gameplay-header-brand img {
-  width: 2.15rem;
-  height: 2.15rem;
+  display: block;
+  width: 7rem;
+  height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 12px rgba(var(--theme-primary-rgb), 0.52));
 }
 
 .gameplay-header-button {
