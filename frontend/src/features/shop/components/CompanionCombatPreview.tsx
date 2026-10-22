@@ -1,4 +1,4 @@
-import { type CSSProperties, useMemo, useState } from 'react'
+import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 
 import { EmptyState } from '@/shared/components/EmptyState'
 import { companionSkills, type CompanionSkill } from '@/shared/cosmetics/companions/companionSkills'
@@ -86,7 +86,21 @@ export function CompanionSkillPreview({ companionSlug }: { companionSlug: string
   const skills = useMemo(() => companionSkills(companionSlug), [companionSlug])
   const [activeFamily, setActiveFamily] = useState(() => skills[0]?.family ?? '')
   const [playKey, setPlayKey] = useState(0)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const [stageSize, setStageSize] = useState(236)
   const activeSkill = skills.find((skill) => skill.family === activeFamily) ?? skills[0]
+
+  useEffect(() => {
+    const stage = stageRef.current
+    if (!stage || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(([entry]) => {
+      if (!entry) return
+      const { width, height } = entry.contentRect
+      if (width > 0 && height > 0) setStageSize(Math.max(1, Math.min(width, height) - 16))
+    })
+    observer.observe(stage)
+    return () => observer.disconnect()
+  }, [])
 
   if (!activeSkill) {
     return (
@@ -103,7 +117,7 @@ export function CompanionSkillPreview({ companionSlug }: { companionSlug: string
 
   const skillScale = Math.min(
     1.15,
-    236 / Math.max(activeSkill.animation.frameWidth, activeSkill.animation.frameHeight),
+    Math.min(236, stageSize) / Math.max(activeSkill.animation.frameWidth, activeSkill.animation.frameHeight),
   )
 
   return (
@@ -112,7 +126,7 @@ export function CompanionSkillPreview({ companionSlug }: { companionSlug: string
         <span>Skill FX</span>
         <small>Live cast</small>
       </header>
-      <div className="shop-skill-stage" style={{ '--skill-tint': activeSkill.tint } as CSSProperties}>
+      <div className="shop-skill-stage" ref={stageRef} style={{ '--skill-tint': activeSkill.tint } as CSSProperties}>
         <SpriteAnimator
           key={`${activeSkill.family}-${playKey}`}
           animation={activeSkill.animation}

@@ -91,40 +91,40 @@
       255
     ],
     "bbox": [
-      31,
-      92,
-      1242,
-      1230
+      39,
+      95,
+      1240,
+      1225
     ],
     "frameBBoxCenterRange": [
-      99.0,
-      153.0,
-      116.5,
-      168.0
+      100.5,
+      156.5,
+      112.0,
+      149.0
     ],
     "frameEnergyAnchorRange": [
-      124.3,
-      170.7,
-      117.33,
-      139.53
+      124.54,
+      172.81,
+      123.65,
+      148.71
     ],
     "projectileHandEnergyAnchorRange": [
-      121.0,
-      132.78,
-      125.68,
-      130.42
+      121.4,
+      133.33,
+      125.59,
+      130.06
     ],
     "projectileFlightNoseAnchorRange": [
       197,
       203,
-      120,
-      137
+      133,
+      133
     ],
     "projectileSettleEnergyAnchorRange": [
-      124.79,
-      131.57,
-      117.91,
-      132.11
+      124.64,
+      131.18,
+      123.47,
+      131.54
     ],
     "registration": {
       "targetAnchor": [
@@ -132,16 +132,16 @@
         133.12
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        113.603,
-        181,
-        84,
-        130.499
+        114.251,
+        178,
+        88,
+        130.06
       ],
       "appliedShiftRange": [
-        -22,
-        28,
+        -20,
+        31,
         -1,
-        39
+        45
       ],
       "emptyFrames": 0,
       "reliableFrames": 13,
@@ -237,19 +237,19 @@
     "frameBBoxCenterRange": [
       117.5,
       144.5,
-      115.0,
-      138.0
+      117.0,
+      128.5
     ],
     "frameEnergyAnchorRange": [
       119.62,
       137.99,
-      123.97,
+      122.97,
       133.16
     ],
     "frameRegistrationAnchorRange": [
       119.62,
       137.99,
-      123.97,
+      122.97,
       133.16
     ],
     "registration": {
@@ -341,28 +341,28 @@
       255
     ],
     "bbox": [
-      67,
-      60,
-      1243,
-      1263
+      68,
+      62,
+      1214,
+      1255
     ],
     "frameBBoxCenterRange": [
       116.5,
-      158.5,
-      117.0,
+      135.0,
+      147.0,
       201.0
     ],
     "frameEnergyAnchorRange": [
-      106.96,
-      139.85,
-      118.3,
-      212.02
+      115.86,
+      133.17,
+      163.26,
+      212.01
     ],
     "frameRegistrationAnchorRange": [
-      106.96,
-      139.85,
-      118.3,
-      212.02
+      115.86,
+      133.17,
+      163.26,
+      212.01
     ],
     "registration": {
       "targetAnchor": [
@@ -370,20 +370,20 @@
         220.16
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        68,
-        151,
-        41,
+        108,
+        150,
+        183,
         224
       ],
       "appliedShiftRange": [
         -20,
-        38,
-        -1,
-        78
+        13,
+        -3,
+        36
       ],
-      "emptyFrames": 0,
+      "emptyFrames": 1,
       "reliableFrames": 15,
-      "lowConfidenceFrames": 10,
+      "lowConfidenceFrames": 9,
       "method": "feet-planted base on ground line when bounds allow, core-x centred (bounds-clamped; authored scale preserved)"
     }
   },
@@ -479,40 +479,40 @@
       255
     ],
     "bbox": [
-      49,
-      80,
+      51,
+      81,
       1250,
-      1214
+      1213
     ],
     "frameBBoxCenterRange": [
       111.5,
-      157.0,
-      111.0,
-      164.0
+      155.5,
+      109.0,
+      130.5
     ],
     "frameEnergyAnchorRange": [
-      122.86,
-      171.1,
-      122.49,
-      135.57
+      123.08,
+      172.21,
+      122.54,
+      132.26
     ],
     "projectileHandEnergyAnchorRange": [
-      120.12,
-      134.54,
-      127.33,
-      128.24
+      120.23,
+      133.9,
+      127.25,
+      128.75
     ],
     "projectileFlightNoseAnchorRange": [
-      177,
-      205,
-      128,
-      138
+      193,
+      204,
+      133,
+      133
     ],
     "projectileSettleEnergyAnchorRange": [
-      123.79,
-      131.78,
-      124.41,
-      132.03
+      123.85,
+      132.39,
+      124.2,
+      131.64
     ],
     "registration": {
       "targetAnchor": [
@@ -520,15 +520,15 @@
         133.12
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        97.111,
-        183,
-        96.4,
-        152.252
+        97.219,
+        182,
+        96.194,
+        151.742
       ],
       "appliedShiftRange": [
         -1,
-        33,
-        -24,
+        49,
+        -23,
         28
       ],
       "emptyFrames": 0,
@@ -561,28 +561,28 @@
       255
     ],
     "bbox": [
-      35,
-      92,
-      1230,
-      1258
+      39,
+      99,
+      1226,
+      1257
     ],
     "frameBBoxCenterRange": [
-      110.0,
-      125.0,
-      141.5,
-      192.0
+      106.5,
+      125.5,
+      147.5,
+      195.5
     ],
     "frameEnergyAnchorRange": [
-      101.05,
-      123.85,
-      140.71,
-      210.76
+      101.0,
+      123.81,
+      167.88,
+      211.46
     ],
     "frameRegistrationAnchorRange": [
-      101.05,
-      123.85,
-      140.71,
-      210.76
+      101.0,
+      123.81,
+      167.88,
+      211.46
     ],
     "registration": {
       "targetAnchor": [
@@ -590,16 +590,16 @@
         220.16
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        105,
-        143,
+        106,
+        142,
         125,
-        189
+        186
       ],
       "appliedShiftRange": [
-        -22,
+        -21,
         6,
-        21,
-        76
+        37,
+        78
       ],
       "emptyFrames": 0,
       "reliableFrames": 14,
@@ -619,20 +619,20 @@
     "bbox": [
       60,
       43,
-      1237,
+      1238,
       1213
     ],
     "frameBBoxCenterRange": [
       101.0,
-      155.0,
+      156.0,
       105.5,
-      134.0
+      138.0
     ],
     "frameEnergyAnchorRange": [
       115.14,
-      169.37,
+      170.37,
       121.35,
-      137.91
+      141.79
     ],
     "projectileHandEnergyAnchorRange": [
       112.67,
@@ -641,10 +641,10 @@
       132.97
     ],
     "projectileFlightNoseAnchorRange": [
-      190,
+      191,
       206,
-      129,
-      135
+      133,
+      133
     ],
     "projectileSettleEnergyAnchorRange": [
       116.21,
@@ -667,7 +667,7 @@
         -24,
         43,
         -23,
-        14
+        18
       ],
       "emptyFrames": 0,
       "reliableFrames": 19,
@@ -707,19 +707,19 @@
     "frameBBoxCenterRange": [
       113.0,
       140.5,
-      151.0,
+      149.5,
       208.0
     ],
     "frameEnergyAnchorRange": [
       117.77,
       132.07,
-      138.86,
+      138.44,
       211.15
     ],
     "frameRegistrationAnchorRange": [
       117.77,
       132.07,
-      138.86,
+      138.44,
       211.15
     ],
     "registration": {
@@ -736,7 +736,7 @@
       "appliedShiftRange": [
         -6,
         12,
-        28,
+        32,
         84
       ],
       "emptyFrames": 0,
@@ -811,22 +811,22 @@
       255
     ],
     "bbox": [
-      65,
+      66,
       78,
       1234,
       1217
     ],
     "frameBBoxCenterRange": [
       110.0,
-      183.0,
-      111.5,
-      167.5
+      176.5,
+      104.0,
+      163.5
     ],
     "frameEnergyAnchorRange": [
       119.47,
-      184.41,
-      112.43,
-      137.29
+      184.62,
+      102.43,
+      147.9
     ],
     "projectileHandEnergyAnchorRange": [
       119.39,
@@ -837,14 +837,14 @@
     "projectileFlightNoseAnchorRange": [
       196,
       205,
-      115,
-      145
+      133,
+      133
     ],
     "projectileSettleEnergyAnchorRange": [
-      124.7,
-      130.54,
+      124.74,
+      131.38,
       125.79,
-      131.6
+      131.72
     ],
     "registration": {
       "targetAnchor": [
@@ -852,7 +852,7 @@
         133.12
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        107.387,
+        107.389,
         166,
         78,
         140.432
@@ -861,11 +861,11 @@
         -6,
         55,
         -11,
-        39
+        55
       ],
       "emptyFrames": 0,
-      "reliableFrames": 13,
-      "lowConfidenceFrames": 12,
+      "reliableFrames": 12,
+      "lowConfidenceFrames": 13,
       "method": "hand-center anchor until frame 9, projectile nose anchor through frame 18, center anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
       "projectileLaunchStartFrame": 10,
       "projectileSettleStartFrame": 19,
@@ -949,40 +949,40 @@
       255
     ],
     "bbox": [
-      49,
-      48,
-      1249,
-      1203
+      56,
+      52,
+      1248,
+      1200
     ],
     "frameBBoxCenterRange": [
-      117.5,
-      157.0,
-      98.0,
-      156.5
+      118.0,
+      159.5,
+      103.5,
+      130.0
     ],
     "frameEnergyAnchorRange": [
-      119.34,
-      167.53,
-      123.11,
-      147.36
+      119.73,
+      169.39,
+      124.17,
+      132.83
     ],
     "projectileHandEnergyAnchorRange": [
-      119.01,
-      139.51,
-      127.32,
-      146.98
+      118.97,
+      138.91,
+      126.53,
+      129.33
     ],
     "projectileFlightNoseAnchorRange": [
-      188,
+      189,
       215,
-      127,
-      138
+      133,
+      133
     ],
     "projectileSettleEnergyAnchorRange": [
-      119.04,
-      132.56,
-      124.85,
-      132.31
+      119.43,
+      132.66,
+      124.06,
+      131.65
     ],
     "registration": {
       "targetAnchor": [
@@ -990,15 +990,15 @@
         133.12
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        111.034,
-        209,
-        109.706,
-        176.534
+        111.434,
+        205,
+        109.433,
+        175.334
       ],
       "appliedShiftRange": [
-        -13,
-        27,
-        -48,
+        -12,
+        29,
+        -46,
         16
       ],
       "emptyFrames": 0,
@@ -1032,39 +1032,39 @@
     ],
     "bbox": [
       58,
-      106,
-      1261,
+      109,
+      1263,
       1205
     ],
     "frameBBoxCenterRange": [
       101.0,
-      177.5,
-      93.0,
-      178.0
+      181.5,
+      120.5,
+      171.0
     ],
     "frameEnergyAnchorRange": [
-      123.08,
-      187.89,
-      90.85,
-      155.83
+      123.04,
+      187.29,
+      120.22,
+      136.59
     ],
     "projectileHandEnergyAnchorRange": [
       120.17,
-      131.89,
-      113.61,
-      137.74
+      133.18,
+      120.43,
+      137.11
     ],
     "projectileFlightNoseAnchorRange": [
-      187,
-      209,
-      89,
-      160
+      192,
+      208,
+      133,
+      133
     ],
     "projectileSettleEnergyAnchorRange": [
-      123.86,
-      132.96,
-      127.09,
-      128.31
+      123.8,
+      132.95,
+      127.59,
+      128.43
     ],
     "registration": {
       "targetAnchor": [
@@ -1072,20 +1072,20 @@
         133.12
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        104.866,
+        104.806,
         177,
-        55,
-        200
+        49,
+        122.114
       ],
       "appliedShiftRange": [
         -27,
-        69,
-        -40,
-        53
+        71,
+        6,
+        84
       ],
       "emptyFrames": 0,
-      "reliableFrames": 23,
-      "lowConfidenceFrames": 2,
+      "reliableFrames": 25,
+      "lowConfidenceFrames": 0,
       "method": "hand-center anchor until frame 9, projectile nose anchor through frame 19, center anchor for impact/dissipate frames (bounds-clamped; authored scale preserved)",
       "projectileLaunchStartFrame": 10,
       "projectileSettleStartFrame": 20,
@@ -1232,18 +1232,18 @@
     ],
     "frameBBoxCenterRange": [
       104.5,
-      138.5,
-      131.5,
+      137.5,
+      137.5,
       203.5
     ],
     "frameEnergyAnchorRange": [
-      103.05,
+      102.8,
       134.76,
       162.45,
       212.22
     ],
     "frameRegistrationAnchorRange": [
-      103.05,
+      102.8,
       134.76,
       162.45,
       212.22
@@ -1262,7 +1262,7 @@
       "appliedShiftRange": [
         -24,
         18,
-        -5,
+        -4,
         34
       ],
       "emptyFrames": 0,
@@ -1281,45 +1281,45 @@
       255
     ],
     "bbox": [
-      26,
-      59,
-      1229,
-      1264
+      37,
+      74,
+      1223,
+      1261
     ],
     "frameBBoxCenterRange": [
-      77.5,
-      131.0,
-      136.5,
+      82.5,
+      124.5,
+      143.5,
       220.0
     ],
     "frameEnergyAnchorRange": [
-      79.87,
-      107.27,
-      167.82,
-      219.6
+      86.0,
+      110.61,
+      172.76,
+      219.23
     ],
     "frameRegistrationAnchorRange": [
-      79.87,
-      107.27,
-      167.82,
-      219.6
+      86.0,
+      110.61,
+      172.76,
+      219.23
     ],
     "registration": {
       "targetAnchor": [
-        97,
+        101,
         220.16
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        89,
+        92,
         135,
-        174,
-        217
+        169,
+        209
       ],
       "appliedShiftRange": [
-        -29,
-        4,
+        -25,
         5,
-        43
+        12,
+        48
       ],
       "emptyFrames": 0,
       "reliableFrames": 13,
@@ -1337,28 +1337,28 @@
       255
     ],
     "bbox": [
-      56,
-      63,
-      1219,
-      1218
+      58,
+      64,
+      1218,
+      1219
     ],
     "frameBBoxCenterRange": [
-      121.0,
+      121.5,
       135.0,
-      122.5,
-      155.5
+      122.0,
+      131.5
     ],
     "frameEnergyAnchorRange": [
-      123.85,
-      131.7,
-      116.58,
-      131.61
+      123.96,
+      132.13,
+      124.27,
+      132.07
     ],
     "frameRegistrationAnchorRange": [
-      123.85,
-      131.7,
-      116.58,
-      131.61
+      123.96,
+      132.13,
+      124.27,
+      132.07
     ],
     "registration": {
       "targetAnchor": [
@@ -1366,16 +1366,16 @@
         128.0
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        113.169,
-        135.439,
-        85.614,
-        130.339
+        112.891,
+        135.446,
+        83.219,
+        130.07
       ],
       "appliedShiftRange": [
         -6,
         13,
         0,
-        41
+        43
       ],
       "emptyFrames": 0,
       "reliableFrames": 17,
@@ -1449,25 +1449,25 @@
       255
     ],
     "bbox": [
-      47,
+      48,
       27,
-      1231,
+      1233,
       1202
     ],
     "frameBBoxCenterRange": [
       109.5,
-      143.5,
+      139.5,
       109.0,
       132.5
     ],
     "frameEnergyAnchorRange": [
-      119.3,
+      119.89,
       137.15,
       125.65,
       131.17
     ],
     "frameRegistrationAnchorRange": [
-      119.3,
+      119.89,
       137.15,
       125.65,
       131.17
@@ -1587,40 +1587,40 @@
       255
     ],
     "bbox": [
-      9,
-      88,
+      12,
+      89,
       1242,
-      1233
+      1232
     ],
     "frameBBoxCenterRange": [
       97.0,
-      133.0,
-      120.0,
-      149.5
+      134.5,
+      122.0,
+      134.5
     ],
     "frameEnergyAnchorRange": [
-      120.39,
-      173.2,
-      115.66,
-      133.91
+      119.76,
+      173.38,
+      115.53,
+      132.69
     ],
     "projectileHandEnergyAnchorRange": [
-      123.61,
-      132.12,
-      124.27,
-      130.22
+      123.05,
+      131.39,
+      124.3,
+      130.35
     ],
     "projectileFlightNoseAnchorRange": [
       194,
       204,
-      132,
-      134
+      133,
+      133
     ],
     "projectileSettleEnergyAnchorRange": [
-      120.47,
-      132.95,
-      121.63,
-      130.26
+      120.41,
+      133.34,
+      123.84,
+      130.14
     ],
     "registration": {
       "targetAnchor": [
@@ -1628,16 +1628,16 @@
         133.12
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        120.459,
-        211,
-        74.098,
-        134.926
+        120.399,
+        210,
+        74.831,
+        135.341
       ],
       "appliedShiftRange": [
-        -26,
-        16,
-        -6,
-        50
+        -25,
+        18,
+        -5,
+        49
       ],
       "emptyFrames": 0,
       "reliableFrames": 22,
@@ -1726,27 +1726,27 @@
     ],
     "bbox": [
       44,
-      56,
-      1238,
-      1243
+      58,
+      1236,
+      1244
     ],
     "frameBBoxCenterRange": [
-      119.0,
-      141.0,
-      123.5,
-      202.0
+      119.5,
+      139.0,
+      133.5,
+      203.0
     ],
     "frameEnergyAnchorRange": [
-      93.66,
-      140.54,
-      128.68,
-      200.93
+      93.45,
+      138.54,
+      129.23,
+      201.93
     ],
     "frameRegistrationAnchorRange": [
-      93.66,
-      140.54,
-      128.68,
-      200.93
+      93.45,
+      138.54,
+      129.23,
+      201.93
     ],
     "registration": {
       "targetAnchor": [
@@ -1754,16 +1754,16 @@
         220.16
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        114,
+        115,
         128,
-        180,
+        179,
         219
       ],
       "appliedShiftRange": [
-        -5,
-        4,
+        -6,
         3,
-        39
+        4,
+        40
       ],
       "emptyFrames": 0,
       "reliableFrames": 17,
@@ -1781,28 +1781,28 @@
       255
     ],
     "bbox": [
-      19,
-      40,
-      1243,
-      1238
+      26,
+      46,
+      1237,
+      1233
     ],
     "frameBBoxCenterRange": [
-      95.5,
-      134.0,
-      108.5,
-      158.0
+      98.5,
+      133.5,
+      109.5,
+      132.5
     ],
     "frameEnergyAnchorRange": [
-      119.6,
-      139.17,
-      123.56,
-      132.68
+      120.53,
+      137.87,
+      124.17,
+      132.53
     ],
     "frameRegistrationAnchorRange": [
-      119.6,
-      139.17,
-      123.56,
-      132.68
+      120.53,
+      137.87,
+      124.17,
+      132.53
     ],
     "registration": {
       "targetAnchor": [
@@ -1810,16 +1810,16 @@
         128.0
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        110.957,
-        165.149,
-        99.861,
-        150.686
+        112.238,
+        162.839,
+        101.442,
+        149.458
       ],
       "appliedShiftRange": [
-        -28,
-        11,
-        -20,
-        24
+        -26,
+        10,
+        -18,
+        23
       ],
       "emptyFrames": 0,
       "reliableFrames": 18,
@@ -1893,28 +1893,28 @@
       255
     ],
     "bbox": [
-      23,
-      117,
-      1222,
+      24,
+      119,
+      1220,
       1255
     ],
     "frameBBoxCenterRange": [
       85.0,
-      120.5,
-      151.0,
-      216.5
+      109.5,
+      153.5,
+      216.0
     ],
     "frameEnergyAnchorRange": [
-      82.38,
-      128.96,
-      148.18,
-      216.3
+      83.11,
+      127.85,
+      161.81,
+      215.79
     ],
     "frameRegistrationAnchorRange": [
-      82.38,
-      128.96,
-      148.18,
-      216.3
+      83.11,
+      127.85,
+      161.81,
+      215.79
     ],
     "registration": {
       "targetAnchor": [
@@ -1923,14 +1923,14 @@
       ],
       "detectedAnchorRangeBeforeRegistration": [
         98,
-        150,
+        149,
         138,
-        202
+        201
       ],
       "appliedShiftRange": [
         -17,
         -17,
-        18,
+        19,
         81
       ],
       "emptyFrames": 0,
@@ -1949,45 +1949,45 @@
       255
     ],
     "bbox": [
-      29,
-      76,
-      1237,
-      1257
+      34,
+      83,
+      1234,
+      1256
     ],
     "frameBBoxCenterRange": [
-      110.0,
-      127.5,
-      136.5,
+      108.5,
+      122.5,
+      141.5,
       208.0
     ],
     "frameEnergyAnchorRange": [
-      107.99,
-      117.84,
-      147.55,
-      211.34
+      109.4,
+      118.47,
+      151.01,
+      212.43
     ],
     "frameRegistrationAnchorRange": [
-      107.99,
-      117.84,
-      147.55,
-      211.34
+      109.4,
+      118.47,
+      151.01,
+      212.43
     ],
     "registration": {
       "targetAnchor": [
-        111,
+        112,
         220.16
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        102,
+        103,
         125,
-        164,
-        213
+        162,
+        210
       ],
       "appliedShiftRange": [
-        -8,
+        -7,
         5,
-        10,
-        55
+        13,
+        58
       ],
       "emptyFrames": 0,
       "reliableFrames": 16,
@@ -2014,7 +2014,7 @@
       97.0,
       146.5,
       114.0,
-      149.0
+      130.5
     ],
     "frameEnergyAnchorRange": [
       121.74,
@@ -2031,12 +2031,12 @@
     "projectileFlightNoseAnchorRange": [
       195,
       203,
-      132,
-      134
+      133,
+      133
     ],
     "projectileSettleEnergyAnchorRange": [
       121.97,
-      133.24,
+      133.29,
       124.64,
       129.31
     ],
@@ -2088,26 +2088,26 @@
     ],
     "bbox": [
       39,
-      97,
+      98,
       1245,
       1261
     ],
     "frameBBoxCenterRange": [
       123.5,
       139.0,
-      145.5,
+      147.0,
       197.0
     ],
     "frameEnergyAnchorRange": [
       125.01,
       133.31,
-      155.99,
+      155.88,
       203.69
     ],
     "frameRegistrationAnchorRange": [
       125.01,
       133.31,
-      155.99,
+      155.88,
       203.69
     ],
     "registration": {
@@ -2124,7 +2124,7 @@
       "appliedShiftRange": [
         -5,
         18,
-        27,
+        31,
         76
       ],
       "emptyFrames": 0,
@@ -2150,7 +2150,7 @@
     ],
     "frameBBoxCenterRange": [
       123.5,
-      139.0,
+      138.5,
       110.0,
       131.0
     ],
