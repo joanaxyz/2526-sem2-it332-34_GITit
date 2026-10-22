@@ -5,7 +5,7 @@ import type { DagAnimationController } from '@/shared/level/workspace/useDagAnim
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { stringList } from '@/shared/level/workspace/layout'
 import { queryKeys } from '@/shared/api/queryKeys'
-import { isExitCommand } from '@/shared/level-runtime/commands'
+import { isExitCommand, isGitCommand } from '@/shared/level-runtime/commands'
 import type { BattleDirector } from '@/shared/battle/hooks/useBattleDirector'
 import { battleEventsForSubmittedCommand } from '@/shared/level-runtime/commandBattle'
 import {
@@ -48,10 +48,14 @@ export function createTierWorkspaceCommandHandler({
     }
 
     clearToast()
-    dagAnimation.onCommandStart()
-    battleDirector.onAttackStart()
+    const animateCommand = isGitCommand(command)
+    if (animateCommand) {
+      dagAnimation.onCommandStart()
+      battleDirector.onAttackStart()
+    }
 
     const resolveTurn = (outcome: CommandSubmissionOutcome) => {
+      if (!animateCommand) return
       dagAnimation.onCommandResolved(outcome)
       battleDirector.onResolve(battleEventsForSubmittedCommand({
         command,
@@ -91,6 +95,7 @@ export function createTierWorkspaceCommandHandler({
         }
       },
       onError: () => {
+        if (!animateCommand) return
         dagAnimation.onCommandError()
         battleDirector.onError()
       },
