@@ -1,4 +1,4 @@
-import { Lock, Swords, X } from 'lucide-react'
+import { CheckCircle2, ListChecks, Lock, Swords, X } from 'lucide-react'
 import type { CSSProperties, RefObject } from 'react'
 
 import easyIconImage from '@/assets/images/easy_icon.png'
@@ -128,10 +128,8 @@ export function StoryLevelTierPanel({
           }
           onClick={onOpenDrill}
         >
-          <span className="story-level-drill-rune" aria-hidden="true">
-            <i />
-            <i />
-            <i />
+          <span className="story-level-drill-mark" aria-hidden="true">
+            {drill.cleared ? <CheckCircle2 /> : <ListChecks />}
           </span>
           <span className="story-level-drill-copy">
             <strong>Squire&rsquo;s Drill</strong>

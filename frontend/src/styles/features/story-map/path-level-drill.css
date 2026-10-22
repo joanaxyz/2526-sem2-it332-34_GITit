@@ -49,32 +49,27 @@
   background: rgba(var(--theme-primary-rgb), 0.13);
 }
 
-/* A notched rail in miniature: the same mark the drill's own progress
-   track is built from, so the entry point and the surface it opens still
-   share one shape. It was a vertical three-bar rune, which matched the
-   rail the drill used to carry; that rail is gone. */
-.story-level-drill-rune {
-  display: flex;
+/* Keep practice recognizable even when a tier owns the next-action accent.
+   A checkmark distinguishes a cleared drill without relying on colour. */
+.story-level-drill-mark {
+  display: grid;
   width: 1.75rem;
-  align-items: center;
-  gap: 0.12rem;
-  padding: 0 0.1rem;
+  height: 1.75rem;
+  place-items: center;
+  color: rgba(232, 246, 250, 0.72);
 }
 
-.story-level-drill-rune i {
-  height: 0.3rem;
-  flex: 1 1 0;
-  border-radius: var(--radius-pill);
-  background: rgba(232, 246, 250, 0.22);
+.story-level-drill-mark svg {
+  width: 1.25rem;
+  height: 1.25rem;
 }
 
-.story-level-drill-row[data-next] .story-level-drill-rune i {
-  background: rgb(var(--theme-primary-rgb));
-  box-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.45);
+.story-level-drill-row[data-next] .story-level-drill-mark {
+  color: rgb(var(--theme-primary-rgb));
 }
 
-.story-level-drill-row[data-cleared] .story-level-drill-rune i {
-  background: rgba(var(--theme-primary-rgb), 0.75);
+.story-level-drill-row[data-cleared] .story-level-drill-mark {
+  color: rgb(var(--theme-primary-rgb));
 }
 
 .story-level-drill-copy {
