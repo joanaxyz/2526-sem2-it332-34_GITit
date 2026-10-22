@@ -10,8 +10,8 @@ from common.serializers import (
 )
 from testing.runtime_factories import (
     api_client_for,
-    create_stage_readme_adventure_run,
     create_stage_readme_challenge_run,
+    create_stage_readme_tier_run,
 )
 
 
@@ -47,7 +47,7 @@ def test_workspace_file_contract_preserves_limits_defaults_and_whitespace():
 @pytest.mark.parametrize(
     ("factory", "route_prefix"),
     [
-        (create_stage_readme_adventure_run, "adventure-runs"),
+        (create_stage_readme_tier_run, "adventure-tier-runs"),
         (create_stage_readme_challenge_run, "challenge-runs"),
     ],
 )
@@ -114,7 +114,7 @@ def test_workspace_mutations_follow_the_same_real_http_contract(
 @pytest.mark.parametrize(
     ("factory", "route_prefix"),
     [
-        (create_stage_readme_adventure_run, "adventure-runs"),
+        (create_stage_readme_tier_run, "adventure-tier-runs"),
         (create_stage_readme_challenge_run, "challenge-runs"),
     ],
 )
@@ -139,7 +139,7 @@ def test_invalid_workspace_patch_is_rejected_before_run_mutation(
 @pytest.mark.parametrize(
     ("factory", "route_prefix"),
     [
-        (create_stage_readme_adventure_run, "adventure-runs"),
+        (create_stage_readme_tier_run, "adventure-tier-runs"),
         (create_stage_readme_challenge_run, "challenge-runs"),
     ],
 )

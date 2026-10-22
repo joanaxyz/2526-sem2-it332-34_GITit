@@ -2,7 +2,8 @@ import { useEffect, useState } from 'react'
 
 import type { CommandIntroduction } from '@/features/story-map/api/commandIntroductionsApi'
 
-const HISTORY_KEY_PREFIX = 'git-it-command-guides:'
+// v2 retires cached exact examples and prospective scenario values.
+const HISTORY_KEY_PREFIX = 'git-it-command-guides:v2:'
 
 function storage() {
   if (typeof window === 'undefined') return null
@@ -17,6 +18,7 @@ function isCommandGuide(value: unknown): value is CommandIntroduction {
   if (!value || typeof value !== 'object') return false
   const guide = value as Partial<CommandIntroduction>
   return typeof guide.teaching_key === 'string'
+    && typeof guide.help_token === 'string'
     && typeof guide.title === 'string'
     && Boolean(guide.command_form && typeof guide.command_form.usage_form === 'string')
 }

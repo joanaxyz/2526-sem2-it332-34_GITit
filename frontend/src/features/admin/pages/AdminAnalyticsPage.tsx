@@ -3,42 +3,39 @@ import { Activity, Command, RotateCcw } from 'lucide-react'
 
 import { adminApi } from '@/features/admin/api/adminApi'
 import { PageHeading, StatTile } from '@/features/admin/components/adminUi'
-import { type EvidenceKey, kpiEvidence } from '@/features/admin/utils/kpiEvidence'
+import { moduleTarget } from '@/features/admin/utils/kpiCatalogue'
+import { KPIS, type EvidenceKey, formatMetricValue, kpiEvidence, metricTargetStatus } from '@/features/performance/utils/performanceKpis'
 import type { PerformanceModule, RateMetric } from '@/features/performance/types'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
-// Diagnostic Runebound metrics are staff-only: they describe simulator and
-// retry behaviour, not learner outcomes, so they never appear in the player UI.
+// Admin presents the same server metrics across all learners.
 type DiagnosticMetric = 'rta' | 'arc'
 
 function formatPercent(metric: RateMetric) {
-  return metric.value === null ? '--' : `${Math.round(metric.value)}%`
+  return formatMetricValue(metric.value === null ? null : Math.round(metric.value), true, '--')
 }
 
 function formatScalar(metric: RateMetric) {
-  return metric.value === null ? '--' : metric.value.toFixed(2)
+  return formatMetricValue(metric.value, false, '--')
 }
 
 type RateMetricLike = { value: number | null; numerator: number; denominator: number }
 
-const ALL_KPI_META = [
-  { key: 'scr',  label: 'SCR',  full: 'Scenario Completion Rate',   target: 80,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '1–4' },
-  { key: 'car',  label: 'CAR',  full: 'Command Accuracy Rate',       target: 70,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '1–4' },
-  { key: 'hlcr', label: 'HLCR', full: 'Hard-Level Completion Rate',  target: 70,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '1–3 (≥65% M4)' },
-  { key: 'arc',  label: 'ARC',  full: 'Average Retry Count',         target: 2,   higherIsBetter: false, unit: '',   format: 'decimal', modules: '1–3 (≤3 M4)' },
-  { key: 'rta',  label: 'RTA',  full: 'Retry Transfer Accuracy',     target: 65,  higherIsBetter: true,  unit: '%',  format: 'percent', modules: '3–4' },
-] as const satisfies readonly { key: EvidenceKey; [field: string]: unknown }[]
+const ALL_KPI_META = KPIS.map((kpi) => ({
+  key: kpi.key, label: kpi.abbr, full: 'longName' in kpi ? kpi.longName : kpi.name, target: kpi.target,
+  higherIsBetter: kpi.up, unit: kpi.pct ? '%' : '', format: kpi.pct ? 'percent' : 'decimal',
+  modules: kpi.key === 'rta' ? '3–4' : kpi.key === 'hlcr' ? '1–3 (≥65% M4)' : kpi.key === 'arc' ? '1–3 (≤3 M4)' : '1–4',
+}))
 
 function fmtRate(value: number | null, format: string): string {
-  if (value === null) return '--'
-  return format === 'percent' ? `${value}%` : value.toFixed(2)
+  return formatMetricValue(value, format === 'percent', '--')
 }
 
-function kpiStatus(value: number | null, target: number, higherIsBetter: boolean): 'met' | 'missed' | 'empty' {
-  if (value === null) return 'empty'
-  return (higherIsBetter ? value >= target : value <= target) ? 'met' : 'missed'
+function kpiStatus(rate: RateMetric, target: number, higherIsBetter: boolean): 'met' | 'missed' | 'empty' {
+  const status = metricTargetStatus(rate, target, higherIsBetter)
+  return status === 'none' ? 'empty' : status === 'miss' ? 'missed' : 'met'
 }
 
 function StatusCell({ rate, target, higherIsBetter, format, evidenceKey }: {
@@ -49,7 +46,7 @@ function StatusCell({ rate, target, higherIsBetter, format, evidenceKey }: {
   evidenceKey: EvidenceKey
 }) {
   if (!rate) return <td className="px-3 py-2 text-center text-muted-foreground text-xs">--</td>
-  const status = kpiStatus(rate.value, target, higherIsBetter)
+  const status = kpiStatus(rate, target, higherIsBetter)
   const color = status === 'met' ? 'text-green-400 font-bold' : status === 'missed' ? 'text-red-400 font-bold' : 'text-muted-foreground'
   const bg = status === 'met' ? 'bg-green-400/10' : status === 'missed' ? 'bg-red-400/10' : ''
   return (
@@ -65,7 +62,7 @@ function StatusCell({ rate, target, higherIsBetter, format, evidenceKey }: {
 function KpiSummaryTable({ diagnostics }: {
   diagnostics: { kpis: { scr: RateMetricLike; car: RateMetricLike; hlcr: RateMetricLike; rta: RateMetricLike; arc: RateMetricLike }; modules: PerformanceModule[] }
 }) {
-  // Overall SCR shares the per-module source (Runebound tier runs, Modules 1–4,
+  // Overall SCR shares the per-module source (Arcane Spire tier runs, Modules 1–4,
   // replays excluded) instead of the all-story run totals.
   const overallByKey: Record<string, RateMetricLike> = {
     scr: diagnostics.kpis.scr,
@@ -105,13 +102,13 @@ function KpiSummaryTable({ diagnostics }: {
                 <StatusCell rate={overall} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} evidenceKey={meta.key} />
                 {diagnostics.modules.map((mod) => {
                   const modRate = meta.key === 'scr' ? mod.scr
-                    : meta.key === 'car' ? undefined
+                    : meta.key === 'car' ? mod.car
                     : meta.key === 'hlcr' ? mod.hlcr
                     : meta.key === 'arc' ? mod.arc
                     : meta.key === 'rta' ? mod.rta
                     : undefined
                   return (
-                    <StatusCell key={mod.number} rate={modRate} target={meta.target} higherIsBetter={meta.higherIsBetter} format={meta.format} evidenceKey={meta.key} />
+                    <StatusCell key={mod.number} rate={modRate} target={moduleTarget(meta.key, mod.number)} higherIsBetter={meta.higherIsBetter} format={meta.format} evidenceKey={meta.key} />
                   )
                 })}
               </tr>
@@ -120,9 +117,9 @@ function KpiSummaryTable({ diagnostics }: {
         </tbody>
       </table>
       <p className="mt-2 text-xs text-muted-foreground px-3 pb-2">
-        Green = target met · Red = target missed · (n) = each formula's denominator: started sessions (SCR),
-        submitted commands (CAR), hard sessions (HLCR), completed sessions (ARC), eligible retries (RTA); hover a
-        value for its full count · -- = no data
+        Green = target met · Red = target missed · (n) = contributing learners for cohort means.
+        Individual records count required tiers (SCR/HLCR), assessments (CAR), mastered tiers (ARC),
+        or transfer checkpoints (RTA). Hover a value for evidence · -- = no data
       </p>
     </div>
   )
@@ -182,7 +179,7 @@ export function AdminAnalyticsPage() {
     <div className="admin-analytics-page">
       <PageHeading
         title="Progress & Analytics"
-        description="How learners move through the curriculum and where the Runebound experience needs attention."
+        description="How learners move through the curriculum and where the Arcane Spire experience needs attention."
       />
 
       <section className="admin-summary-grid" aria-label="Learning summary">
@@ -205,7 +202,7 @@ export function AdminAnalyticsPage() {
           <div>
             <span className="admin-eyebrow">
               <Activity aria-hidden="true" />
-              Runebound diagnostics
+              Arcane Spire diagnostics
             </span>
             <h2 id="runebound-diagnostics-title">Technical signals across all learners</h2>
           </div>
@@ -216,11 +213,11 @@ export function AdminAnalyticsPage() {
           <article>
             <header className="admin-diagnostic-head">
               <Command aria-hidden="true" />
-              <span>Command processability</span>
+              <span>Command efficiency</span>
             </header>
             <strong className="admin-diagnostic-value">{formatPercent(diagnostics.kpis.car)}</strong>
-            <p>Submitted commands the simulator could process.</p>
-            <small>{kpiEvidence('car', diagnostics.kpis.car)} - aggregate only</small>
+            <p>Assessed command use relative to a validated solution.</p>
+            <small>{kpiEvidence('car', diagnostics.kpis.car)}</small>
           </article>
 
           <article>
@@ -229,7 +226,7 @@ export function AdminAnalyticsPage() {
               <span>Retry transfer accuracy</span>
             </header>
             <strong className="admin-diagnostic-value">{formatPercent(diagnostics.kpis.rta)}</strong>
-            <p>First retries after a failure, on a structurally changed variant, that complete (Modules 3-4).</p>
+            <p>First attempts on reserved unseen transfer checkpoints (Modules 3-4).</p>
             <small>{kpiEvidence('rta', diagnostics.kpis.rta)}</small>
             <ModuleRows modules={diagnostics.modules} metric="rta" />
           </article>
@@ -240,7 +237,7 @@ export function AdminAnalyticsPage() {
               <span>Average retries</span>
             </header>
             <strong className="admin-diagnostic-value">{formatScalar(diagnostics.kpis.arc)}</strong>
-            <p>Retries accumulated per completed session.</p>
+            <p>Unsuccessful attempts before mastery per mastered tier.</p>
             <small>{kpiEvidence('arc', diagnostics.kpis.arc)} - relative scale</small>
             <ModuleRows modules={diagnostics.modules} metric="arc" scalar />
           </article>
@@ -252,7 +249,7 @@ export function AdminAnalyticsPage() {
           <div>
             <h2 id="kpi-summary-title">KPI Summary — All Learners</h2>
           </div>
-          <p className="admin-section-note">Runebound Turret · Modules 1–4</p>
+          <p className="admin-section-note">Arcane Spire · Modules 1–4</p>
         </header>
         <KpiSummaryTable diagnostics={diagnostics} />
       </section>

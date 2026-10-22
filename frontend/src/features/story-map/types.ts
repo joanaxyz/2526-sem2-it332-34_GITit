@@ -12,8 +12,10 @@ export type AdventureLevelTierAccess = {
   id: number
   difficulty: 'easy' | 'medium' | 'hard'
   locked: boolean
-  wave_progress: { completed: number; total: number }
+  scenario_progress: { completed: number; total: number }
   completion: LevelCompletionSummary | null
+  /** First-clear GitCoins for this tier; `claimed` once it has been paid. */
+  reward: { coins: number; claimed: boolean }
 }
 
 /** Squire's Drill state for one level, as the chapter overview reports it. */
@@ -24,6 +26,17 @@ type AdventureLevelDrillAccess = {
   best_accuracy: number
 }
 
+export type AdventureKnowledgeItem = {
+  id: string
+  kind: 'command' | 'option' | 'argument'
+  command: string
+  title: string
+  token?: string
+  syntax: string
+  text: string
+  when_to_use: string
+}
+
 type AdventureSummary = {
   item_type: 'adventure'
   id: number
@@ -31,14 +44,18 @@ type AdventureSummary = {
   title: string
   description: string
   command: string
+  /** Authored tips for this level; visible before the learner masters them. */
+  knowledge?: AdventureKnowledgeItem[]
   locked: boolean
   lock_reason: string
   completion: LevelCompletionSummary | null
+  /** First-clear timestamp, including passed runs without a completion row. */
+  passed_at?: string | null
   // Stable across re-runs: true once the level has ever been passed. Drives
   // the challenge gate and progress so a post-pass replay can't relock anything.
   is_passed: boolean
   // Per-difficulty tiers for levels ported from the old Module 1-4 scenario
-  // system. Empty for every existing arcane-spire level (single-wave flow) -
+  // system. Empty for every existing arcane-spire level (single-scenario flow) -
   // StoryAdventurePath falls back to the plain Play pill in that case.
   tiers: AdventureLevelTierAccess[]
   // Optional on the type as well as at runtime: a client can outlive the

@@ -1,0 +1,170 @@
+/* stat scoreboard: one tonal plaque, hairline-split cells */
+.game-outcome-stat-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 0;
+  width: min(100%, 38rem);
+  margin-top: 1.75rem;
+  padding: 0.875rem 0.25rem;
+  border: 1px solid hsl(var(--foreground) / 0.08);
+  border-radius: 0.875rem;
+  background: hsl(var(--card) / 0.78);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 30px rgba(0, 0, 0, 0.4);
+  text-shadow: none;
+}
+
+.game-outcome-stat-tile {
+  --stat-accent: hsl(var(--primary));
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.25rem 1rem;
+  text-align: center;
+  animation: game-outcome-stat-fade-up 360ms ease-out both;
+}
+.game-outcome-stat-tile + .game-outcome-stat-tile { border-left: 1px solid hsl(var(--foreground) / 0.08); }
+
+.game-outcome-stat-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+.game-outcome-stat-icon { flex-shrink: 0; width: 1.125rem; height: 1.125rem; object-fit: contain; }
+
+.game-outcome-stat-chip {
+  flex-shrink: 0;
+  display: grid;
+  width: 1.375rem;
+  height: 1.375rem;
+  place-items: center;
+  border-radius: 0.375rem;
+  color: var(--stat-accent);
+  background: color-mix(in srgb, var(--stat-accent) 14%, transparent);
+}
+
+.game-outcome-stat-label {
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: hsl(var(--muted-foreground));
+}
+
+.game-outcome-stat-tile-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+}
+
+.game-outcome-stat-number-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.3rem;
+  margin-top: 0.625rem;
+}
+
+.game-outcome-stat-value {
+  font-family: var(--font-mono);
+  font-size: clamp(1.5rem, 3vw, 1.875rem);
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -0.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--stat-accent);
+  text-shadow: 0 0 18px color-mix(in srgb, var(--stat-accent) 35%, transparent);
+}
+
+.game-outcome-stat-denom {
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: hsl(var(--muted-foreground));
+}
+
+/* target-met chip: gold, like the stars it earns */
+.game-outcome-stat-target-chip {
+  align-self: center;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-left: 0.25rem;
+  padding: 0.15rem 0.45rem;
+  border: 1px solid hsl(var(--warning) / 0.35);
+  border-radius: 999px;
+  background: hsl(var(--warning) / 0.1);
+  color: hsl(var(--warning));
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* bar slot: always reserves height so captions align; drawn only with a denominator */
+.game-outcome-stat-bar-track {
+  width: min(100%, 8.5rem);
+  height: 3px;
+  border-radius: 999px;
+  background: hsl(var(--foreground) / 0.1);
+  margin-top: 0.625rem;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+.game-outcome-stat-bar-track.is-empty { background: transparent; }
+
+.game-outcome-stat-bar-fill {
+  width: 100%;
+  height: 100%;
+  border-radius: 999px;
+  background: var(--stat-accent);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--stat-accent) 70%, transparent);
+  transform-origin: left;
+  transition: transform 700ms var(--ease-out);
+}
+
+.game-outcome-stat-caption { margin-top: 0.5rem; font-size: 0.75rem; line-height: 1.4; color: hsl(var(--muted-foreground)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .game-outcome-stat-bar-fill { transition: none; }
+}
+
+@media (max-width: 720px) {
+  .game-outcome-stat-tile { padding-inline: 0.75rem; }
+}
+
+@media (max-width: 480px) {
+  .game-outcome-stat-grid {
+    grid-template-columns: 1fr;
+    padding: 0.25rem 0.75rem;
+  }
+
+  .game-outcome-stat-tile {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.75rem 0;
+    text-align: left;
+  }
+
+  .game-outcome-stat-header { justify-content: flex-start; }
+
+  .game-outcome-stat-tile-main { align-items: flex-end; min-width: 0; }
+
+  .game-outcome-stat-tile + .game-outcome-stat-tile {
+    border-left: 0;
+    border-top: 1px solid hsl(var(--foreground) / 0.08);
+  }
+
+  .game-outcome-stat-number-row { margin-top: 0; justify-content: flex-end; }
+  .game-outcome-stat-bar-track { margin-top: 0.375rem; width: 6rem; }
+  .game-outcome-stat-bar-track.is-empty { display: none; }
+  .game-outcome-stat-caption { margin-top: 0.25rem; text-align: right; }
+}

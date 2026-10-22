@@ -61,13 +61,13 @@ export type BattleBlock = {
 export type StageLanding = { x: number; y: number; width: number; height: number }
 
 /**
- * Authored battle-stage backdrop for a content definition. The backdrop always
- * pans with the battle camera (the asset itself knows whether it's a still image
- * or a spritesheet). Null/absent -> the seeded global hall backdrop. `landing`
- * is the optional platform the fighters stand on, authored in the level editor.
+ * Battle-stage backdrop for a chapter. The backdrop always pans with the battle
+ * camera (the asset itself knows whether it's a still image or a spritesheet).
+ * Null/absent -> the seeded global hall backdrop. `landing` is the optional
+ * platform the fighters stand on.
  */
 export type BattleStage = {
-  /** Optional chapter/content parallax slug. The active frontend theme resolves it to an asset. */
+  /** Optional chapter parallax slug. The active frontend theme resolves it to an asset. */
   parallax?: { slug: string } | null
   landing: StageLanding | null
 }

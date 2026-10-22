@@ -1,20 +1,18 @@
 import pytest
 from django.db import IntegrityError, transaction
 
-from adventures.models import AdventureRun, AdventureWave
-from authoring.compiler import ContentRuntimeCompiler
-from authoring.models import ContentDefinition, ContentKind, PublishedContentRuntime
+from adventures.models import AdventureLevelTierRun, AdventureLevelTierScenario
 from challenges.models import ChallengeRun, ChallengeTrial
 from practice.models import CommandStep
 from progress.models import (
-    AdventureLevelCompletion,
+    AdventureLevelTierCompletion,
     ChallengeTrialCompletion,
     CoinTransaction,
     StreakRecord,
 )
 from testing.runtime_factories import (
-    create_stage_readme_adventure_run,
     create_stage_readme_challenge_run,
+    create_stage_readme_tier_run,
 )
 
 pytestmark = pytest.mark.django_db
@@ -26,16 +24,16 @@ def _assert_constraint_rejects(update) -> None:
 
 
 def test_adventure_budget_and_star_constraints(django_user_model):
-    fixture = create_stage_readme_adventure_run(django_user_model)
+    fixture = create_stage_readme_tier_run(django_user_model)
 
     _assert_constraint_rejects(
-        lambda: AdventureWave.objects.filter(pk=fixture.wave.pk).update(
+        lambda: AdventureLevelTierScenario.objects.filter(pk=fixture.scenario.pk).update(
             min_counted_commands=4,
             max_counted_commands=3,
         )
     )
     _assert_constraint_rejects(
-        lambda: AdventureRun.objects.filter(pk=fixture.run.pk).update(stars=4)
+        lambda: AdventureLevelTierRun.objects.filter(pk=fixture.run.pk).update(stars=4)
     )
 
 
@@ -59,14 +57,14 @@ def test_challenge_budget_and_star_constraints(django_user_model):
 
 
 def test_completion_stars_are_bounded(django_user_model):
-    adventure = create_stage_readme_adventure_run(django_user_model)
+    adventure = create_stage_readme_tier_run(django_user_model)
     challenge = create_stage_readme_challenge_run(django_user_model)
 
     _assert_constraint_rejects(
-        lambda: AdventureLevelCompletion.objects.create(
+        lambda: AdventureLevelTierCompletion.objects.create(
             player=adventure.player,
-            adventure_level=adventure.level,
-            adventure_run=adventure.run,
+            tier=adventure.tier,
+            tier_run=adventure.run,
             stars=4,
         )
     )
@@ -127,68 +125,3 @@ def test_progress_and_command_step_counters_are_consistent(django_user_model):
             counted_total_after=0,
         )
     )
-
-
-def test_system_content_slugs_are_unique_per_kind():
-    ContentDefinition.objects.create(
-        owner=None,
-        kind=ContentKind.LESSON,
-        slug="system-lesson",
-        title="System lesson",
-    )
-
-    _assert_constraint_rejects(
-        lambda: ContentDefinition.objects.create(
-            owner=None,
-            kind=ContentKind.LESSON,
-            slug="system-lesson",
-            title="Duplicate system lesson",
-        )
-    )
-
-
-def test_unknown_content_visibility_is_rejected():
-    _assert_constraint_rejects(
-        lambda: ContentDefinition.objects.create(
-            owner=None,
-            kind=ContentKind.LESSON,
-            slug="unknown-visibility",
-            title="Unknown visibility",
-            visibility="store",
-        )
-    )
-
-
-def test_published_runtime_requires_exactly_one_target(django_user_model):
-    owner = django_user_model.objects.create_user(username="runtime-constraint-author")
-    content = ContentDefinition.objects.create(
-        owner=owner,
-        kind=ContentKind.LESSON,
-        slug="runtime-constraint",
-        title="Runtime constraint",
-        definition={"pages": []},
-    )
-    runtime = ContentRuntimeCompiler().compile(content=content)
-
-    _assert_constraint_rejects(
-        lambda: PublishedContentRuntime.objects.filter(pk=runtime.pk).update(lesson=None)
-    )
-
-
-def test_compiler_can_replace_a_constrained_runtime(django_user_model):
-    owner = django_user_model.objects.create_user(username="runtime-recompile-author")
-    content = ContentDefinition.objects.create(
-        owner=owner,
-        kind=ContentKind.LESSON,
-        slug="runtime-recompile",
-        title="Runtime recompile",
-        definition={"pages": [{"title": "First"}]},
-    )
-    first = ContentRuntimeCompiler().compile(content=content)
-    content.definition = {"pages": [{"title": "Second"}]}
-    content.save(update_fields=["definition"])
-
-    second = ContentRuntimeCompiler().compile(content=content)
-
-    assert second.pk != first.pk
-    assert second.lesson.pages == [{"title": "Second"}]

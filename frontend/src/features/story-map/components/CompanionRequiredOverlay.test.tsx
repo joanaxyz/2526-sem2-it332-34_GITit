@@ -41,7 +41,7 @@ describe('CompanionRequiredOverlay', () => {
 
   it('spotlights the Shop and takes the learner there from the primary action', async () => {
     render(
-      <MemoryRouter initialEntries={['/stories/git-it-legacy']}>
+      <MemoryRouter initialEntries={['/stories/arcane-spire']}>
         <a href="/shop" data-companion-shop-target="desktop">Shop</a>
         <CompanionRequiredOverlay open onDismiss={vi.fn()} />
         <Routes>

@@ -1,5 +1,5 @@
-import { useEffect } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
@@ -14,10 +14,14 @@ import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 
 type TierStartMode = 'start' | 'replay' | 'retry'
 
-const loadingCopy: Record<TierStartMode, { label: string; description: string }> = {
+const loadingCopy: Record<TierStartMode | 'continue', { label: string; description: string }> = {
   start: {
     label: 'Starting adventure',
     description: 'Preparing the repository, terminal, and adventure workspace.',
+  },
+  continue: {
+    label: 'Starting next scenario',
+    description: 'Preparing a fresh variant of this adventure.',
   },
   replay: {
     label: 'Starting replay',
@@ -36,6 +40,14 @@ export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
   const queryClient = useQueryClient()
   const { companionSlug } = usePlayerLoadout()
   const targetId = Number(mode === 'retry' ? runId : tierId)
+  // Continuing after a partial clear passes the run just played, so
+  // TierVariantSelectionService rotates away from its variant.
+  const [searchParams] = useSearchParams()
+  const transfer = searchParams.get('transfer') === '1'
+  const priorRunValue = Number(searchParams.get('prior_run_id') ?? Number.NaN)
+  const priorRunId = mode === 'start' && Number.isInteger(priorRunValue) && priorRunValue > 0
+    ? priorRunValue
+    : null
 
   const start = useMutation({
     mutationFn: async (): Promise<TierRun> => {
@@ -43,6 +55,8 @@ export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
         throw new Error(mode === 'retry' ? 'Missing adventure tier run.' : 'Missing adventure tier.')
       }
       if (mode === 'retry') return tierRunsApi.retryRun(targetId)
+      if (transfer) return tierRunsApi.startRun(targetId, { transfer: true })
+      if (priorRunId !== null) return tierRunsApi.startRun(targetId, { prior_run_id: priorRunId })
       return tierRunsApi.startRun(targetId, { replay: mode === 'replay' })
     },
     onSuccess: async (run) => {
@@ -55,11 +69,14 @@ export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
     },
   })
 
+  // A second start discards the first run server-side, so StrictMode's
+  // remount must not fire the request again.
+  const requested = useRef(false)
   useEffect(() => {
-    if (start.isIdle) {
-      void loadTierRunPage().catch(() => undefined)
-      start.mutate()
-    }
+    if (requested.current) return
+    requested.current = true
+    void loadTierRunPage().catch(() => undefined)
+    start.mutate()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -71,6 +88,8 @@ export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
     )
   }
 
-  const copy = loadingCopy[mode]
+  const copy = transfer
+    ? { label: 'Starting transfer checkpoint', description: 'Your first attempt on this unfamiliar scenario is recorded.' }
+    : loadingCopy[priorRunId === null ? mode : 'continue']
   return <LoadingScreen description={copy.description} label={copy.label} />
 }

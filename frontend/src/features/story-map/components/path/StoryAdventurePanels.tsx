@@ -1,4 +1,4 @@
-import { Lock, Swords, X } from 'lucide-react'
+import { CheckCircle2, ListChecks, Lock, Swords, X } from 'lucide-react'
 import type { CSSProperties, RefObject } from 'react'
 
 import easyIconImage from '@/assets/images/easy_icon.png'
@@ -16,6 +16,7 @@ import {
   difficultyLabel,
 } from '@/features/story-map/utils/challengeUi'
 import { StarRating } from '@/shared/level/components/StarRating'
+import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 
 const DIFFICULTY_ORDER = ['easy', 'medium', 'hard'] as const
 
@@ -42,7 +43,7 @@ const TIER_ACTION_LABELS: Record<Exclude<LevelTierRowStatus, 'locked'>, string> 
 function tierRowStatus(tier: AdventureLevelTierAccess | undefined): LevelTierRowStatus {
   if (!tier || tier.locked) return 'locked'
   if (tier.completion) return 'cleared'
-  return tier.wave_progress.completed > 0 ? 'in_progress' : 'not_started'
+  return tier.scenario_progress.completed > 0 ? 'in_progress' : 'not_started'
 }
 
 /** The level callout: a level node's title, brief, and one row per difficulty
@@ -55,8 +56,6 @@ export function StoryLevelTierPanel({
   panelRef,
   placement,
   style,
-  pendingTierId,
-  isStarting,
   onClose,
   onStartTier,
   onOpenDrill,
@@ -66,8 +65,6 @@ export function StoryLevelTierPanel({
   panelRef: RefObject<HTMLElement | null>
   placement: 'docked' | 'inline'
   style?: CSSProperties
-  pendingTierId?: number
-  isStarting: boolean
   onClose: () => void
   onStartTier: (tierId: number, replay: boolean) => void
   onOpenDrill: () => void
@@ -127,14 +124,12 @@ export function StoryLevelTierPanel({
           aria-label={
             drill.cleared
               ? `Squire's Drill for ${level.title}: cleared, best ${drill.best_accuracy} percent. Drill again.`
-              : `Squire's Drill for ${level.title}: rehearse this level's commands.`
+              : `Squire's Drill for ${level.title}: start rehearsing this level's commands.`
           }
           onClick={onOpenDrill}
         >
-          <span className="story-level-drill-rune" aria-hidden="true">
-            <i />
-            <i />
-            <i />
+          <span className="story-level-drill-mark" aria-hidden="true">
+            {drill.cleared ? <CheckCircle2 /> : <ListChecks />}
           </span>
           <span className="story-level-drill-copy">
             <strong>Squire&rsquo;s Drill</strong>
@@ -149,7 +144,7 @@ export function StoryLevelTierPanel({
             </span>
           </span>
           <span className="story-level-tier-row-action">
-            {drill.cleared ? 'Again' : 'Drill'}
+            {drill.cleared ? 'Again' : 'Start'}
           </span>
         </button>
       ) : null}
@@ -157,14 +152,9 @@ export function StoryLevelTierPanel({
       <ul className="story-level-tier-rows">
         {rows.map(({ difficulty, tier, status }, index) => {
           const tierLabel = DIFFICULTY_TIER_LABELS[difficulty]
-          const progress = tier?.wave_progress ?? { completed: 0, total: 0 }
+          const progress = tier?.scenario_progress ?? { completed: 0, total: 0 }
           const isLocked = status === 'locked'
-          const isStartingThisTier = isStarting && pendingTierId === tier?.id
-          const actionLabel = isLocked
-            ? 'Locked'
-            : isStartingThisTier
-              ? 'Starting…'
-              : TIER_ACTION_LABELS[status]
+          const actionLabel = isLocked ? 'Locked' : TIER_ACTION_LABELS[status]
 
           return (
             <li key={`${level.id}-${difficulty}`}>
@@ -174,7 +164,7 @@ export function StoryLevelTierPanel({
                 data-status={status}
                 data-next={(!drillIsNextMove && difficulty === nextDifficulty) || undefined}
                 style={{ '--row-index': index } as CSSProperties}
-                disabled={isLocked || !tier || isStarting}
+                disabled={isLocked || !tier}
                 aria-label={`${level.title}, ${tierLabel} tier: ${actionLabel}`}
                 title={isLocked ? 'Clear the previous difficulty to unlock this tier.' : undefined}
                 onClick={() => {
@@ -197,9 +187,17 @@ export function StoryLevelTierPanel({
                     )}
                     {progress.total > 0
                       ? isLocked
-                        ? `${progress.total} ${progress.total === 1 ? 'wave' : 'waves'}`
+                        ? `${progress.total} ${progress.total === 1 ? 'scenario' : 'scenarios'}`
                         : `${progress.completed}/${progress.total}`
                       : null}
+                    {tier && !tier.reward.claimed && tier.reward.coins > 0 ? (
+                      <span
+                        className="story-level-tier-row-reward"
+                        aria-label={`${tier.reward.coins} GitCoins on first clear`}
+                      >
+                        <GitCoinIcon className="size-3" />+{tier.reward.coins}
+                      </span>
+                    ) : null}
                   </span>
                 </span>
                 {isLocked ? (
@@ -285,6 +283,8 @@ export function StoryTrialsPanel({
                     disabled={isLocked || loading}
                     style={{ '--trial-rgb': accent } as CSSProperties}
                     aria-label={`${challenge.title}: ${difficulty} challenge trial`}
+                    aria-description={loading ? 'Loading' : isLocked ? 'Locked' : undefined}
+                    aria-busy={loading || undefined}
                     onClick={() => {
                       if (!trial || !action) return
                       onOpenTrial(trial, action)
@@ -292,15 +292,19 @@ export function StoryTrialsPanel({
                   >
                     <span className="story-trial-medallion">
                       <img src={DIFFICULTY_ICONS[difficulty]} alt="" />
-                      {status === 'locked' || status === 'loading' ? (
-                        <Lock className="story-trial-lock" aria-hidden="true" />
-                      ) : null}
                     </span>
                     <span className="story-trial-copy">
                       <strong>{trial ? difficultyLabel(trial) : difficulty}</strong>
                       <StarRating stars={stars} size="sm" label={`${difficulty} stars`} />
-                      <span>{trial ? actionLabel(action, trial.status) : 'Locked'}</span>
+                      {status !== 'locked' ? (
+                        <span className="story-trial-action">
+                          {loading ? 'Loading…' : trial ? actionLabel(action, trial.status) : null}
+                        </span>
+                      ) : null}
                     </span>
+                    {status === 'locked' ? (
+                      <Lock className="story-trial-lock" aria-hidden="true" />
+                    ) : null}
                   </button>
                 )
               })}

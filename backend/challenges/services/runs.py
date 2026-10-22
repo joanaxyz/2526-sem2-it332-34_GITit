@@ -4,12 +4,12 @@ from challenges.models import ChallengeRun, ChallengeTrial
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
+    SESSION_STATUS_COMPLETED,
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Conflict, Locked
 from common.runtime import discard_started_run
 from progress.models import (
-    AdventureLevelCompletion,
     ChallengeLevelCompletion,
     ChallengeTrialCompletion,
 )
@@ -21,7 +21,6 @@ RUN_HYDRATE_SELECT_RELATED = (
     "challenge_trial__challenge_level",
     "challenge_trial__challenge_level__chapter",
     "challenge_trial__challenge_level__chapter__story",
-    "challenge_trial__challenge_level__source_content_definition",
     "selected_variant",
     "selected_variant__trial",
     "prior_run",
@@ -104,6 +103,10 @@ class ChallengeRunService:
             raise Locked("This challenge trial has no published variants.")
 
         retry_index = prior_run.retry_index + 1 if prior_run else 0
+        # Playing again after a clear starts a fresh scoring attempt. Failed
+        # replays still extend their retry chain for star grading.
+        if is_replay and prior_run and prior_run.status == SESSION_STATUS_COMPLETED:
+            retry_index = 0
         prior_reference = prior_run
         if prior_run and prior_run.status == SESSION_STATUS_STARTED:
             self.discard(run=prior_run)
@@ -137,9 +140,14 @@ class ChallengeRunService:
         return queryset.first()
 
     def _ensure_unlocked(self, *, player, trial: ChallengeTrial) -> None:
+        from curriculum.selectors.adventure_access import chapter_tiers_cleared
+
         self._ensure_previous_challenge_level_complete(player=player, trial=trial)
+        if chapter_tiers_cleared(player=player, chapter_id=trial.chapter.id) is False:
+            raise Locked(
+                "Clear every tier of every level in this chapter to open its Challenge Gate."
+            )
         if trial.difficulty == DIFFICULTY_EASY:
-            self._ensure_adventure_complete(player=player, chapter=trial.chapter)
             return
         previous = DIFFICULTY_EASY if trial.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
         previous_trial = ChallengeTrial.objects.filter(
@@ -173,28 +181,6 @@ class ChallengeRunService:
             ).exists()
         ):
             raise Locked("Complete the previous challenge level first.")
-
-    def _ensure_adventure_complete(self, *, player, chapter) -> None:
-        from adventures.models import AdventureLevel
-
-        required_level_ids = set(
-            AdventureLevel.objects.filter(
-                chapter=chapter,
-                is_published=True,
-                is_required=True,
-            ).values_list("id", flat=True)
-        )
-        if not required_level_ids:
-            return
-        completed_level_ids = set(
-            AdventureLevelCompletion.objects.filter(
-                player=player,
-                adventure_level_id__in=required_level_ids,
-            ).values_list("adventure_level_id", flat=True)
-        )
-        if required_level_ids <= completed_level_ids:
-            return
-        raise Locked("Complete this chapter's required Adventure levels to unlock its challenges.")
 
     def _replay_variant(self, *, player, trial: ChallengeTrial):
         completion = (

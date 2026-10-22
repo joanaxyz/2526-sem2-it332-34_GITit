@@ -1,0 +1,149 @@
+button.story-skill-reward {
+  grid-template-columns: minmax(0, 1fr);
+  gap: 0.25rem;
+  padding: 0.3rem 0;
+  border: 1px solid transparent;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+button.story-skill-reward .story-reward-chest {
+  width: min(100%, 4.1rem);
+}
+
+button.story-skill-reward .story-skill-reward-amount {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  overflow: visible;
+}
+
+button.story-skill-reward:disabled {
+  cursor: default;
+}
+
+button.story-skill-reward:enabled:hover,
+button.story-skill-reward:focus-visible {
+  border-color: rgba(var(--theme-primary-rgb), 0.6);
+  background: rgba(var(--theme-primary-rgb), 0.08);
+  outline: 2px solid rgba(var(--theme-primary-rgb), 0.5);
+  outline-offset: 2px;
+}
+
+.story-reward-status {
+  color: rgba(219, 234, 254, 0.7);
+  font-size: var(--text-2xs);
+}
+
+.story-skill-reward[data-claimed='true'] .story-reward-status {
+  color: hsl(var(--primary));
+}
+
+.story-reward-feedback {
+  margin-top: 0.75rem;
+  color: hsl(var(--destructive));
+  font-size: 0.75rem;
+}
+
+.story-reward-reveal-backdrop {
+  cursor: pointer;
+}
+
+.story-reward-reveal-backdrop:focus {
+  outline: none;
+}
+
+.story-reward-reveal-shell.app-modal-card {
+  width: min(100%, 36rem);
+  max-height: none;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.story-reward-reveal-content.app-modal-content {
+  padding: 1.5rem 0;
+  overflow: visible;
+}
+
+.story-reward-reveal {
+  display: grid;
+  justify-items: center;
+  gap: 0;
+  color: hsl(var(--foreground));
+  text-align: center;
+  animation: story-reward-reveal-in 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.story-reward-reveal p,
+.story-reward-reveal h3 {
+  margin: 0;
+}
+
+.story-reward-reveal-milestone {
+  color: hsl(var(--foreground) / 0.8);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.story-reward-reveal img {
+  display: block;
+  width: clamp(12rem, 29vw, 17rem);
+  max-width: 100%;
+  height: min(17rem, 34svh);
+  margin: 1rem 0 0.5rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 22px hsl(var(--warning) / 0.2));
+  user-select: none;
+}
+
+.story-reward-reveal-title {
+  color: hsl(var(--warning));
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4.4vw, 2.7rem);
+  font-weight: 700;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+}
+
+.story-reward-reveal-title span {
+  font-family: var(--font-mono);
+}
+
+.story-reward-reveal .story-reward-reveal-status {
+  max-width: 29rem;
+  margin-top: 0.875rem;
+  color: hsl(var(--foreground) / 0.86);
+  font-size: var(--text-sm);
+  line-height: 1.6;
+  text-wrap: balance;
+}
+
+.story-reward-reveal .story-reward-reveal-hint {
+  margin-top: 2.5rem;
+  color: hsl(var(--foreground) / 0.65);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+@keyframes story-reward-reveal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .story-reward-reveal,
+  .story-reward-reveal-backdrop {
+    animation: none;
+  }
+}

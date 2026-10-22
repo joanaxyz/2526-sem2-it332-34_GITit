@@ -1,59 +1,35 @@
-import { Gem, Map, RefreshCcw, RotateCcw, Sparkles, WandSparkles, XCircle } from 'lucide-react'
+import { Gem, Map, RefreshCcw, Repeat2, RotateCcw, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, WandSparkles, XCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
 
-import bugIconImage from '@/assets/images/battle-outcome/bug.png'
-import skullIconImage from '@/assets/images/battle-outcome/skull.png'
-import terminalIconImage from '@/assets/images/battle-outcome/terminal.png'
-import warnIconImage from '@/assets/images/battle-outcome/warn.png'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { GameOutcomeModal } from '@/shared/level/components/game-outcome/GameOutcomeModal'
 import { Badge } from '@/shared/components/Badge'
-import { Button } from '@/shared/components/Button'
 import { playGameOverSound, playVictorySound } from '@/shared/audio/battleAudio'
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
-
-function difficultyLabel(run: TierRun) {
-  if (!run.difficulty) return 'Adventure'
-  return run.difficulty.charAt(0).toUpperCase() + run.difficulty.slice(1)
-}
+import { difficultyLabel, tierOutcomeState } from '@/features/story-map/components/tierOutcome'
 
 /** Mirrors ChallengeOutcomeModal. Tiers have no sibling-level navigator - a
- * tier's only lateral move is next_difficulty (easy -> medium -> hard),
- * already surfaced via the "Next" action below. */
+ * tier's only lateral move is next_difficulty (easy -> medium -> hard), which
+ * tierOutcomeNextStep offers once the modal is dismissed. */
 export function TierOutcomeModal({
   open,
   run,
   onClose,
   onBackToMap,
-  onNextLevel,
   onRetry,
-  onContinue,
-  isStartingNextLevel = false,
-  isRetrying = false,
-  isContinuing = false,
-  nextDifficultyLabel,
 }: {
   open: boolean
   run: TierRun
   onClose: () => void
   onBackToMap: () => void
-  onNextLevel?: () => void
   onRetry?: () => void
-  /** Starts a fresh run on the same tier after a partial clear (progress not
-   * yet at required_successful_attempts) - passes prior_run_id so
-   * TierVariantSelectionService rotates to a different variant. */
-  onContinue?: () => void
-  isStartingNextLevel?: boolean
-  isRetrying?: boolean
-  isContinuing?: boolean
-  nextDifficultyLabel?: string | null
 }) {
-  const isFailed = run.status === 'failed'
-  const isReplay = run.replay
-  const isNavigating = isStartingNextLevel || isRetrying || isContinuing
-  const canAdvance = !isReplay && run.status === 'completed' && Boolean(run.next_difficulty)
-  const isPartialClear = !isReplay && run.status === 'completed' && !canAdvance && !run.progress.cleared
+  const { isFailed, isReplay, isTransfer, canAdvance, isPartialClear } = tierOutcomeState(run)
+  // A cleared scenario that is not the tier's last names itself and the next scenario.
+  const nextScenario = run.progress.next_scenario
+  const rewardHint =
+    run.reward.coins > 0 && !run.reward.claimed ? ` Clear it to earn ${run.reward.coins} GitCoins.` : ''
 
   useEffect(() => {
     if (!open) return
@@ -64,7 +40,9 @@ export function TierOutcomeModal({
     }
   }, [isFailed, open])
 
-  const headline = isReplay
+  const headline = isTransfer
+    ? isFailed ? 'Transfer checkpoint not cleared' : 'Transfer checkpoint cleared'
+    : isReplay
     ? isFailed
       ? 'Replay ended'
       : 'Replay complete'
@@ -77,10 +55,12 @@ export function TierOutcomeModal({
           : 'Level cleared'
 
   const hitActionLimit = isFailed && run.counts.max_reached
-  const message = isReplay
+  const message = isTransfer
+    ? 'Your first transfer result is recorded. You can continue free practice; later runs cannot change this checkpoint result.'
+    : isReplay
     ? isFailed
       ? "This free-play run ended before reaching the target state. It doesn't affect your saved progress. Play again whenever you like."
-      : "Free play complete. This run is just a replay and doesn't change your saved progress."
+      : "Nice run. Free play doesn't touch your saved progress, so replay as often as you like."
     : isFailed
       ? hitActionLimit
         ? run.failure_reason ??
@@ -88,25 +68,25 @@ export function TierOutcomeModal({
         : 'This attempt ended before the repository reached the target state. Start a fresh variant and try again.'
       : canAdvance
         ? 'Level cleared. The next difficulty is ready.'
-        : isPartialClear
-          ? `Nice work. ${run.progress.completed} of ${run.progress.total} clears done for this difficulty - continue with a new scenario to finish it.`
+        : isPartialClear && nextScenario
+          ? `Scenario ${run.scenario.index ?? nextScenario.index - 1} of ${run.scenario.total} cleared — next: ${nextScenario.title}.${rewardHint}`
           : 'Level cleared.'
   const Icon = isFailed ? XCircle : Sparkles
   const targetActionsMet =
-    !isFailed &&
+    !isTransfer && !isFailed &&
     run.counts.counted_action_total > 0 &&
     run.counts.counted_action_total <= run.counts.minimum_counted_commands
 
-  // Bar fills as actions approach the target; green when at/under target, amber otherwise.
-  const actionsAccent = targetActionsMet ? 'hsl(142 70% 55%)' : '#f59e0b'
+  // Hitting the target lights the stat gold, matching the star and wordmark art.
+  const actionsAccent = targetActionsMet ? 'hsl(var(--warning))' : 'hsl(var(--primary))'
 
   const stats = [
     {
       label: 'Actions',
       numerator: run.counts.counted_action_total,
-      denominator: run.counts.minimum_counted_commands,
+      denominator: isTransfer ? run.counts.maximum_counted_commands : run.counts.minimum_counted_commands,
       helper: `Max allowed: ${run.counts.maximum_counted_commands}`,
-      iconSrc: terminalIconImage,
+      icon: SquareTerminal,
       accentColor: actionsAccent,
       targetMet: targetActionsMet,
     },
@@ -114,14 +94,14 @@ export function TierOutcomeModal({
       label: 'Diagnostics',
       numerator: run.counts.non_counted_diagnostic_total,
       helper: 'Free inspections used',
-      iconSrc: bugIconImage,
+      icon: ScanSearch,
       accentColor: 'hsl(var(--primary))',
     },
     {
       label: 'Attempts',
       numerator: run.counts.total_attempts,
       helper: isReplay ? 'Free-play attempt' : 'Saved attempt count',
-      iconSrc: skullIconImage,
+      icon: Repeat2,
       accentColor: 'hsl(var(--primary))',
     },
   ]
@@ -129,12 +109,16 @@ export function TierOutcomeModal({
   const badges = (
     <>
       <Badge
-        variant={isFailed ? 'destructive' : 'default'}
+        variant={isFailed ? 'secondary' : 'default'}
         className="game-outcome-badge"
         style={{ animationDelay: '60ms' } as CSSProperties}
       >
-        {isFailed ? <img className="game-outcome-badge-icon" src={warnIconImage} alt="" aria-hidden="true" /> : null}
-        {difficultyLabel(run)} {isFailed ? 'failed' : 'complete'}
+        {isFailed ? <TriangleAlert className="size-3.5" aria-hidden="true" /> : null}
+        {isTransfer
+          ? 'Transfer checkpoint'
+          : isPartialClear && nextScenario
+            ? `${difficultyLabel(run)} scenario ${run.scenario.index ?? nextScenario.index - 1} of ${run.scenario.total}`
+            : `${difficultyLabel(run)} ${isFailed ? 'failed' : 'complete'}`}
       </Badge>
       {isReplay ? (
         <Badge
@@ -169,11 +153,10 @@ export function TierOutcomeModal({
 
   const headerActions = (
     <>
-      {onRetry ? (
+      {onRetry && !isTransfer ? (
         <button
           type="button"
           className="game-outcome-header-btn"
-          disabled={isNavigating}
           onClick={onRetry}
           aria-label={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
           title={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
@@ -184,7 +167,6 @@ export function TierOutcomeModal({
       <button
         type="button"
         className="game-outcome-header-btn"
-        disabled={isNavigating}
         onClick={onBackToMap}
         aria-label="Back to Map"
         title="Back to Map"
@@ -194,52 +176,21 @@ export function TierOutcomeModal({
     </>
   )
 
-  const actions = canAdvance ? (
-    onNextLevel && nextDifficultyLabel ? (
-      <Button type="button" disabled={isNavigating} onClick={onNextLevel}>
-        {isStartingNextLevel ? 'Opening next level…' : 'Continue'}
-      </Button>
-    ) : (
-      <Button type="button" variant="secondary" disabled={isNavigating} onClick={onClose}>
-        Stay in workspace
-      </Button>
-    )
-  ) : isPartialClear ? (
-    onContinue ? (
-      <Button type="button" disabled={isNavigating} onClick={onContinue}>
-        {isContinuing ? 'Starting next scenario…' : 'Continue'}
-      </Button>
-    ) : null
-  ) : isFailed ? (
-    onRetry ? (
-      <Button type="button" disabled={isNavigating} onClick={onRetry}>
-        <RefreshCcw data-icon="inline-start" />
-        {isRetrying ? 'Starting fresh variant…' : 'Try again'}
-      </Button>
-    ) : null
-  ) : isReplay ? (
-    onRetry ? (
-      <Button type="button" disabled={isNavigating} onClick={onRetry}>
-        <RefreshCcw data-icon="inline-start" />
-        {isRetrying ? 'Starting…' : 'Play again'}
-      </Button>
-    ) : null
-  ) : run.status === 'completed' ? null : null
-
   return (
     <GameOutcomeModal
       open={open}
       onClose={onClose}
-      title={isFailed ? 'Level failed' : 'Level complete'}
+      title={isTransfer ? 'Transfer result recorded' : isFailed ? 'Level failed' : isPartialClear ? 'Scenario complete' : 'Level complete'}
       tone={isFailed ? 'failure' : 'success'}
       icon={Icon}
       resultLabel={isFailed ? 'Game Over' : 'You Won'}
-      stars={run.stars}
+      stars={isTransfer ? undefined : run.stars}
+      showStars={!isTransfer}
+      level={{ label: `Level ${run.tier.adventure_level_number}`, title: run.tier.adventure_level_title }}
       badges={badges}
       headline={headline}
       message={message}
       stats={stats}
-      actions={actions}
       headerActions={headerActions}
     />
   )

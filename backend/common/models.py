@@ -2,18 +2,19 @@ from django.db import models
 
 
 class VariantBase(models.Model):
-    """Shared shape for authored problem variants (adventure waves, challenge
+    """Shared shape for authored problem variants (adventure scenarios, challenge
     trials): one authored case with an initial/target state pair and an
     evaluation spec. Concrete subclasses add only their parent FK.
 
     Scaffolding is not authored here - it is a constant ladder keyed by tier
     difficulty in ``practice.services.scaffolding``."""
 
-    # Variant slugs are rendered from authored case identifiers. Keep both
-    # fields on the same explicit bound so bulk seeding cannot succeed on
-    # SQLite and then fail against PostgreSQL's enforced varchar length.
+    # Variant slugs are rendered from authored case identifiers. Keep explicit
+    # bounds so bulk seeding cannot succeed on SQLite and then fail against
+    # PostgreSQL's enforced varchar lengths. Labels follow the curriculum-wide
+    # 180-character authoring bound.
     slug = models.SlugField(max_length=160)
-    label = models.CharField(max_length=80)
+    label = models.CharField(max_length=180)
     initial_state = models.JSONField(default=dict)
     evaluation_spec = models.JSONField(default=dict, blank=True)
     target_state = models.JSONField(default=dict, blank=True)

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-import gitLogoImage from '@/assets/images/GIT_logo.webp'
+import gitLogoImage from '@/assets/images/git-it-logo-arcane.webp'
 import { cn } from '@/shared/utils/cn'
 
 type BrandMarkProps = {
@@ -15,8 +15,7 @@ export function BrandMark({ size = 'lg', className }: BrandMarkProps) {
       aria-label="GIT it! home"
       className={cn('auth-brand', size === 'sm' && 'auth-brand--sm', className)}
     >
-      <img src={gitLogoImage} alt="" />
-      <span>GIT it!</span>
+      <img src={gitLogoImage} alt="" width={900} height={305} />
     </Link>
   )
 }

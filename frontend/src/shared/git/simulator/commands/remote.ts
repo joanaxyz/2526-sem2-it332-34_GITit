@@ -126,6 +126,8 @@ export function gitPush(state: MutableRepositoryState, parsed: ParsedGitCommand)
     const remoteKey = `${remote}/${branch}`
     if (!(remoteKey in (state.remote_branches ?? {}))) throw new SimulatorCommandError(`error: unable to delete '${branch}': remote ref does not exist`, 1)
     delete state.remote_branches?.[remoteKey]
+    // The server no longer has the branch: a later fetch must not bring it back.
+    if (state.remote_updates) delete state.remote_updates[remoteKey]
     for (const [local, upstream] of Object.entries(state.upstream_tracking ?? {})) {
       if (upstream === remoteKey) delete state.upstream_tracking?.[local]
     }
@@ -136,8 +138,11 @@ export function gitPush(state: MutableRepositoryState, parsed: ParsedGitCommand)
   if (!branch) throw new SimulatorCommandError('fatal: You are not currently on a branch.')
   const commitId = state.branches?.[branch]
   const remoteKey = `${remote}/${branch}`
+  rejectUnsafePush(state, parsed, { remote, branch, remoteKey, commitId: commitId ?? null })
   state.remote_branches ??= {}
   state.remote_branches[remoteKey] = commitId ?? null
+  // The server now holds the pushed tip: a later fetch must not roll it back.
+  if (state.remote_updates && remoteKey in state.remote_updates) state.remote_updates[remoteKey] = commitId ?? null
   state.remotes ??= {}
   state.remotes[remote] ??= `https://example.test/${remote}.git`
   if (hasOption(parsed, '-u') || hasOption(parsed, '--set-upstream')) {
@@ -146,4 +151,38 @@ export function gitPush(state: MutableRepositoryState, parsed: ParsedGitCommand)
   }
   setOperationMetadata(state, { last_push_remote: remote, last_push_branch: branch, last_push_remote_branch: remoteKey, last_push_commit: commitId ?? null, force_with_lease: hasOption(parsed, '--force-with-lease'), force_push_with_lease: hasOption(parsed, '--force-with-lease') })
   return { command: 'push', stdout: `To ${state.remotes[remote]}\n * [new branch] ${branch} -> ${branch}` }
+}
+
+/**
+ * Like Git, refuse a push that would drop commits the server has: a plain push
+ * must contain the server's tip, and a lease push fails once the server moved
+ * after the last fetch. `--force` overwrites unconditionally.
+ */
+function rejectUnsafePush(
+  state: MutableRepositoryState,
+  parsed: ParsedGitCommand,
+  { remote, branch, remoteKey, commitId }: { remote: string; branch: string; remoteKey: string; commitId: string | null },
+) {
+  const url = state.remotes?.[remote] ?? `https://example.test/${remote}.git`
+  const fetched = state.remote_branches?.[remoteKey] ?? null
+  const server = state.remote_updates && remoteKey in state.remote_updates ? state.remote_updates[remoteKey] ?? null : fetched
+  if (hasOption(parsed, '--force') || hasOption(parsed, '-f')) return
+  if (hasOption(parsed, '--force-with-lease')) {
+    if (server !== fetched) {
+      throw new SimulatorCommandError(`To ${url}
+ ! [rejected]        ${branch} -> ${branch} (stale info)
+error: failed to push some refs to '${url}'`, 1)
+    }
+    return
+  }
+  if (server && commitId !== server && !isAncestor(state, server, commitId)) {
+    throw new SimulatorCommandError(
+      `To ${url}
+ ! [rejected]        ${branch} -> ${branch} (non-fast-forward)
+error: failed to push some refs to '${url}'
+hint: Updates were rejected because the remote contains work that you do not have locally.
+hint: Integrate the remote changes (e.g. 'git pull ...') before pushing again.`,
+      1,
+    )
+  }
 }

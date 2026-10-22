@@ -93,6 +93,7 @@ export function invalidateTierProgressQueries(queryClient: QueryClient) {
   void queryClient.invalidateQueries({ queryKey: queryKeys.statsSummary })
   void queryClient.invalidateQueries({ queryKey: queryKeys.performanceSummary })
   void queryClient.invalidateQueries({ queryKey: queryKeyRoots.chapterOverview })
+  void queryClient.invalidateQueries({ queryKey: queryKeyRoots.chapterChests })
   void queryClient.invalidateQueries({ queryKey: queryKeys.learnedSkills })
   void queryClient.invalidateQueries({ queryKey: queryKeys.wallet })
 }

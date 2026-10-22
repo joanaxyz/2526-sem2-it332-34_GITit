@@ -1,7 +1,7 @@
 """Project-wide pytest fixtures that keep each test hermetic.
 
 The suite runs in one process and several tests seed official data (via
-``seed_curriculum`` / ``seed_all``). Shared side effects leaked between tests
+``seed_curriculum`` or ``seed_all``). Shared side effects leaked between tests
 and made the suite order-dependent / flaky:
 
 **Caches.** The asset *descriptor* cache keys only on asset kind and lives in the

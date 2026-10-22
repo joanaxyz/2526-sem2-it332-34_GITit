@@ -1,0 +1,9 @@
+.world-mascot { position: fixed; inset: 0; pointer-events: none; z-index: var(--z-mascot); }
+.world-mascot-actor {
+  position: absolute; left: 0; top: 0; width: 64px; height: 80px; padding: 0; border: 0;
+  background: transparent; transform: translate(-50%, -100%); pointer-events: auto;
+  cursor: pointer; will-change: transform;
+}
+.world-mascot-art { position: absolute; width: 144px; height: 144px; left: 50%; bottom: -28px; margin-left: -72px; pointer-events: none; transform-origin: 50% calc(100% - 28px); }
+.world-mascot-actor:focus-visible { outline: 2px solid hsl(var(--primary)); border-radius: 50%; }
+@media (prefers-reduced-motion: reduce) { .world-mascot-actor { transition: none; } }

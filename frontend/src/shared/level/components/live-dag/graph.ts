@@ -39,8 +39,9 @@ export function snapshotDelta(prev: RepositorySnapshot, next: RepositorySnapshot
     prev.head.name !== next.head.name ||
     previousHeadTarget !== nextHeadTarget
   const headTarget = headChanged ? nextHeadTarget : null
-  if (!commits.size && !refsByCommit.size && !headTarget) return NO_DELTA
-  return { commits, refsByCommit, headTarget }
+  const repositoryInitialized = prev.repository_initialized === false && next.repository_initialized !== false
+  if (!commits.size && !refsByCommit.size && !headTarget && !repositoryInitialized) return NO_DELTA
+  return { commits, refsByCommit, headTarget, repositoryInitialized }
 }
 
 function resolvedHeadTarget(snapshot: RepositorySnapshot) {
@@ -137,9 +138,9 @@ export function buildGraph(
         id: `${parent}-${commit.id}`,
         source: parent,
         target: commit.id,
-        type: 'smoothstep',
+        type: 'commitLink',
         className: 'dag-ley-edge',
-        style: { stroke: 'rgba(var(--theme-primary-rgb), 0.72)', strokeWidth: 1.5 },
+        style: { strokeWidth: 2 },
       })
       graph.setEdge(parent, commit.id)
     }

@@ -1,18 +1,39 @@
-.repository-diagram-content { display: flex; flex-direction: column; min-height: 0; }
+.repository-diagram-content { position: relative; display: flex; flex-direction: column; min-height: 0; }
 .repository-history-canvas { flex: 1 1 auto; min-height: 10rem; }
+/* Repository details float over the diagram's top-left corner as a small pill
+   that opens into an overlay, so they never push or resize the canvas. */
 .repository-diagram-details {
-  flex: 0 1 auto;
-  max-height: 48%;
+  position: absolute;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: var(--z-raised);
+  max-width: calc(100% - 1rem);
+  max-height: calc(100% - 1rem);
   overflow: auto;
-  border-bottom: 1px solid hsl(var(--border));
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.22);
+  border-radius: var(--radius-sm);
+  background: var(--surface-overlay);
   color: hsl(var(--muted-foreground));
   font-size: 0.75rem;
 }
-.repository-diagram-details > summary {
-  padding: 0.5rem 0.8rem;
-  cursor: pointer;
-  font-weight: 500;
+.repository-diagram-details[open] {
+  width: min(22rem, calc(100% - 1rem));
+  box-shadow: var(--glow-interactive);
 }
+.repository-diagram-details > summary {
+  position: sticky;
+  top: 0;
+  padding: 0.3rem 0.6rem;
+  background: var(--surface-overlay);
+  cursor: pointer;
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.repository-diagram-details[open] > summary { border-bottom: 1px solid hsl(var(--border)); }
 .repository-diagram-details > summary:hover {
   color: hsl(var(--foreground));
   background: hsl(var(--muted) / 0.3);

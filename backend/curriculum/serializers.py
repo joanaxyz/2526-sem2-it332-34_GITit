@@ -30,6 +30,21 @@ class ChapterChestRewardSerializer(serializers.Serializer):
     coins = serializers.IntegerField()
 
 
+class ChapterChestStateSerializer(ChapterChestRewardSerializer):
+    unlocked = serializers.BooleanField()
+    claimed = serializers.BooleanField()
+
+
+class ChapterChestRewardsSerializer(serializers.Serializer):
+    results = ChapterChestStateSerializer(many=True)
+    balance = serializers.IntegerField()
+    coins_awarded = serializers.IntegerField()
+
+
+class ChapterChestOpenSerializer(serializers.Serializer):
+    threshold = serializers.IntegerField(min_value=1, max_value=100)
+
+
 class StorySerializer(serializers.Serializer):
     id = serializers.IntegerField(read_only=True)
     slug = serializers.CharField(read_only=True)

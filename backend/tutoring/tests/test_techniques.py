@@ -21,6 +21,14 @@ def keys(command, state=None):
         ("git merge origin/main", ["remote-branch"]),
         ("git rebase @{u}", ["upstream"]),
         ("git restore --source=HEAD~1 app.py", ["relative-commit"]),
+        ("git switch -c hotfix/critical c1", ["start-point"]),
+        ("git switch -c feature/workspace main", ["start-point"]),
+        ("git checkout -b review origin/review", ["remote-branch", "start-point"]),
+        ("git branch release/1.0 c2", ["start-point"]),
+        ("git init -b main invoice-tracker", ["target-folder"]),
+        ("git init --initial-branch trunk services/billing-api", ["target-folder"]),
+        ("git clone git@github.com:open-dev/oss-toolkit.git", ["ssh-url"]),
+        ("git clone --depth 1 ssh://example.test/team/rules.git rules", ["ssh-url"]),
     ],
 )
 def test_detectors_read_the_command_shape(command, expected):
@@ -35,6 +43,12 @@ def test_detectors_read_the_command_shape(command, expected):
         "git switch -c feature/login",  # a slash in a branch name is not a remote
         "git diff main...feature",  # symmetric difference is not a range
         "git add -u src",  # -u takes no value, so src stays a single path
+        "git branch feature/payments-tests",  # one name starts at HEAD
+        "git branch -d fix/readme-typo fix/footer",  # deleting is not a start point
+        "git init",
+        "git init .",  # the current folder is not a named folder
+        "git init --initial-branch trunk",  # the option's value is not a folder
+        "git clone --branch starter https://example.test/tools/cli-tool.git",
     ],
 )
 def test_ordinary_commands_have_no_technique(command):
@@ -42,7 +56,9 @@ def test_ordinary_commands_have_no_technique(command):
 
 
 def test_remote_branch_uses_the_repository_remotes():
-    assert keys("git merge team/main", {"remotes": {"team": "https://example.test"}}) == ["remote-branch"]
+    assert keys("git merge team/main", {"remotes": {"team": "https://example.test"}}) == [
+        "remote-branch"
+    ]
     assert keys("git merge team/main") == []
 
 

@@ -7,50 +7,120 @@ This guide explains how to author curriculum content that teaches Git through sc
 | Type | Purpose | Shape | Completion |
 |---|---|---|---|
 | Lesson | Explain a concept briefly before practice | Chapter book pages | Read/progress state |
-| Adventure | Teach command mastery through guided scenarios | Levels → waves → variants | Wave objectives + verified state |
+| Adventure | Teach command mastery through guided scenarios | Levels → easy/medium/hard tiers → ordered scenarios → variants | Every scenario of the tier cleared, verified by state |
 | Challenge | Assess transfer on new scenarios | Easy/medium/hard trials → variants | Whole-state evaluation |
 
 ## Authoring Principles
 
-1. **Introduce, then compose.** First exposure to a command may be a small single-command wave. After that, prefer multi-command workflows.
+1. **Introduce, then compose.** First exposure to a command may be a small single-command scenario. After that, prefer multi-command workflows.
 2. **Repeat commands in new scenarios.** Mastery comes from revisiting command forms in different repository states, not from repeating the same story.
 3. **Never repeat scenarios.** Commands repeat; narrative setup and initial repository state should not.
 4. **Challenges must change repository state.** A challenge trial should visibly change commits, branches, refs, or HEAD.
 5. **Author the ideal scenario.** If the simulator lacks a needed behavior, improve the simulator and verifier rather than weakening the curriculum.
-6. **Variants must test the same skill.** Two variants may use different file names/story details, but they should share the same learning goal and objective shape.
+6. **Variants are the same problem.** A retry must not hand the learner a different task. At Easy, variants change only names, paths, messages and story: the same steps, options, kinds of argument and starting repository. Medium may also change counts and option values (two files or three, `--depth 1` or `2`). Hard may also change the starting repository (distractors, which candidate is right). A variant never adds a step, an option or a kind of argument its siblings lack, such as an SSH address, a target folder, a start point or a folder pathspec. A case that differs becomes its own scenario or stays unplaced.
+7. **Grade the repository, not the route.** Every requirement describes the resulting state: commits, branches, refs, files, config, remotes, stash, reflog. Do not require typed commands or check how an operation ran; an equivalent Git route must pass. A task that ends where it started (re-running `git init`, a stash round trip) needs evidence in state, such as the reflog entry a branch switch leaves, or it cannot be graded. The objective checklist promises only what the requirements check.
+8. **Start plain, then bring it back.** A level's first Easy scenario uses the plainest form of its command (`git init` before `git init -b`). Each scenario adds one new thing, so the guide shows one lesson at a time. Whatever Easy introduces comes back, unguided, later in Easy; whatever Medium introduces comes back in Medium or Hard.
 
 ## Adventure Authoring
 
-Adventure scenario specs live under
-`backend/curriculum/seed_data/source/adventure_level_specs/`. Foundational
-level and wave groupings live in the blueprint ledgers under
-`backend/curriculum/seed_data/source/blueprint/`; advanced drill groupings live
-in the private owner map in `backend/curriculum/seed_data/adventures.py`.
+`MODULE_LEVELS` in `backend/curriculum/management/commands/seed_curriculum.py`
+defines each module level and holds the repository fixtures of the team's
+scenarios. The levels and the commands each one teaches are fixed by the team;
+scenarios, variants, and the difficulty a command form appears at may change.
 
-A wave should define:
+**Placement** lives in the scenario plan,
+`backend/curriculum/seed_data/source/scenario_plan/module_N.py`. For each level and
+tier it lists 2–3 scenarios in play order (Easy up to 4). Each scenario has a stable slug (learners'
+progress names it), a title the learner sees, a role, and its variant IDs. The
+first variant is the one a first-time learner gets, and a retry rotates within
+the same scenario. A run plays the learner's next uncleared scenario, one solve clears
+it, and the tier completes when every scenario is cleared. Every level must be in
+the plan; the seed refuses a level without one.
 
-- stable usage key
-- stable slug
-- learner-facing title/story/task
-- two variants
+Each scenario has one role:
+
+| Role | Use |
+|---|---|
+| debut | First use of a form or technique. Easy, or Medium for a level's advanced form. |
+| practice | The same forms in a different repository. Nothing new. |
+| compose | Two or more of the level's own forms in one scenario. |
+| spiral | The level's command plus forms from earlier levels, as a real workflow. |
+| transfer | Hard: unfamiliar state or distractors, known forms only. |
+
+The scenario grammar (`curriculum/tests/test_scenario_plan_invariants.py` checks all of
+it with the real guide resolver):
+
+1. Nothing debuts at Hard, and diagnostics (`status`, `log`, `show`, `reflog`,
+   `diff`) never debut.
+2. Whatever a scenario debuts, every variant of it uses, so a retry never skips the
+   guide's lesson. Keep a scenario's variants on the same skill.
+3. A debuted form comes back at a harder tier or a later level. Core workflow
+   forms (add, commit, amend, restore, switch, branch, stash, push, fetch,
+   pull, merge) come back in two later scenarios, one in a later level. Setup
+   forms (`init`, `clone`) are exempt.
+4. Every scenario is placed exactly once, in its own level, and no two variants
+   share both a starting repository and a target.
+5. A learner who never fails finishes Modules 1–4 in about 5.5 hours (the suite
+   fails above 335 minutes). It counts 1 min per scenario, 0.4 min per typed command, 1 min
+   per file edit, and 0.5 min per first-time guide. Re-measure before adding
+   scenarios.
+
+A scenario's command forms are the level forms every one of its variants' answer
+keys uses, and a level's forms come from its non-spiral scenarios. A clear credits
+the forms the learner actually typed toward mastery. A scenario placed in an
+easier tier than it was written for gets that tier's command limit.
+
+Scenarios come from two banks:
+
+- `seed_data/scenario_bank.json`, the main bank, compiled from the revised
+  Markdown scenario document with
+  `python scripts/curriculum/import_revised_scenarios.py <document.md>`.
+- `seed_data/scenario_bank_extension.json`, the extension bank, compiled from
+  `seed_data/source/extension_scenarios.md` with the same script and `--extension`.
+  Each extension scenario's repository fixture, evaluation rules, and answer
+  key live in `seed_data/source/scenario_fixtures/` under the same ID. The
+  importer rejects an ID or number that collides with the main bank.
+
+Each scenario should define:
+
+- a stable case ID
+- a learner-facing title, story, and task
+- an initial repository state
 - solution commands (git, plus terminal shell commands such as `mkdir`, `cd`, `touch`, or `echo "x" > file` when the task is about files; replay keeps the working directory between them)
-- objective checks, when the wave is guided
-- prerequisites, when order matters
+- state requirements the evaluator verifies
+- a counted-command budget when the tier default does not fit
 
-A level groups waves through exactly one of those owners. The public
-`ADVENTURE_WAVE_PLANS` mapping is their validated composition output, not a
-second authoring surface.
+A new scenario also needs its place in the scenario plan. Then run, from `backend/`:
+
+1. `python ../scripts/curriculum/import_revised_scenarios.py --extension curriculum/seed_data/source/extension_scenarios.md`
+2. `python manage.py generate_targets`
+3. `python -m pytest curriculum/tests/test_scenario_plan_invariants.py curriculum/tests/test_scenario_bank_content.py -q`
+
+The content suite checks every scenario and gate answer key against its own
+evaluation, and that the starting state does not already pass. The target state
+must rule out wrong routes or accept their equivalents. For example, an amend
+scenario must not pass a new commit (`branch_tip_replaces_commit`).
 
 ## Challenge Authoring
 
-Challenge data lives in `backend/curriculum/seed_data/challenges.py`.
+Each module ends in a Challenge Gate: a workflow that tests what the module
+taught. `seed_data/source/challenge_gates.py` composes each gate's title,
+narrative, and the two scenarios behind each of its Easy, Medium, and Hard
+trials. Gate scenarios are extension scenarios numbered `N.G.k` in
+`seed_data/source/extension_scenarios.md`. The gate opens once every required level
+of the module has cleared all three of its tiers; inside the gate, Medium opens
+after the Easy trial and Hard after Medium. A gate is the module's capstone, so
+even its Easy trial is played by someone who has finished every Hard tier.
 
-Each challenge should have:
+Each trial should have:
 
-- easy, medium, and hard trials
-- two variants per trial
-- a new scenario not copied from adventures
-- a repository-state transition that changes the DAG or refs
+- two variants, shaped like an Easy scenario's variants (the same steps)
+- a new scenario, never the steps of an adventure scenario on a new story
+- a workflow of at least three counted commands that spans two or more of the
+  module's levels, in the order a real task needs them
+- at least one change the Live diagram draws: a new or rewritten commit, a
+  merge, a branch tip that moves, or a ref that appears or disappears. A new
+  label on an existing commit is not enough on its own
 - evaluation specs that verify final state instead of command text alone
 
 ## Scaffolding
@@ -77,16 +147,13 @@ diagram fades first, then feedback.
 | medium | yes | no | yes |
 | hard | yes | no | no |
 
-Guided adventure runs walk waves instead of difficulty tiers, so they sit
-outside both ladders: live DAG plus the objective checklist, nothing that fades.
-
 The Expected State panel needs both the ladder flag and a populated
 `target_state`, so a variant with an empty target silently loses its diagram.
 Targets come from `python manage.py generate_targets` - never by hand.
 
 ## Objective Checks
 
-Guided adventure objectives should be:
+Where a scenario defines objective checks, they should be:
 
 - **Modular** — one visible checklist row per meaningful step.
 - **Variant-safe** — do not hard-code a file/branch/commit that differs between variants.
@@ -105,6 +172,40 @@ The learner must never have to guess an arbitrary literal that evaluation requir
 - Evaluated messages supplied through `git commit -m` are synchronized into copy details by the seed helpers. The authored prose must still make their role understandable.
 
 The curriculum invariant suite audits this contract across every adventure and challenge variant.
+
+### Brief formatting
+
+Formatting belongs to the authored prose. The briefing renders the section fields above;
+it does not guess which words to emphasize or where sentences should become paragraphs.
+
+- Separate story paragraphs with a blank line (`\n\n` in seed JSON, an empty line in
+  Markdown). Break a long story where the scene turns: before the dialogue, or before
+  "You are on …" hands over to the task.
+- Wrap anything the learner types or reads back from Git in backticks: paths, folder names,
+  branch, remote and tag names, commit labels (`` `c3` ``), `` `HEAD` ``, stash refs, URLs,
+  `git` commands, and the exact message a task asks for (`` with the message `Fix login` ``).
+  Keep ordinary words plain where they are not refs ("the main reason", "partial staging").
+- Use `**strong**` sparingly for the one constraint a learner must not miss, usually a
+  task's "Do not …" or "Leave … uncommitted" sentence.
+- Use `__underline__` for a single contrast word or clause that flips the instruction:
+  "Stage `__only__` the fix", "rather than at the current `main` tip".
+- Use `*emphasis*` for tone in the story: a stressed word, a client's list of requests,
+  a document title.
+- These conventions apply to `story`, `starting_point`, `real_world_context`, `task`,
+  and `expected_result`. Labels, titles, objective checks, and exact copy details stay plain text.
+- Only these four marks are rendered. Marks nest inside strong, underline and emphasis;
+  code spans stay literal. HTML, links, and other Markdown remain text.
+
+For example, a task can read:
+
+```text
+Create a repository in a new `ci-configs` folder, with `main` as its first branch.
+**Leave every other file in the workspace where it is.**
+```
+
+The normalizer preserves these markers without a schema change. Apply edits to the
+authored scenario bank or `source/extension_scenarios.md` (then recompile it), then run
+`seed_curriculum` to update variant content. Reload the workspace to fetch the updated brief.
 
 ## Generated Targets
 
@@ -151,5 +252,5 @@ Before merging content changes:
 ```bash
 python scripts/check_seed_targets.py
 python scripts/check_generated_targets_current.py
-cd backend && python -m pytest curriculum/tests/test_objective_soundness.py curriculum/tests/test_seed_curriculum_idempotency.py -q
+cd backend && python -m pytest curriculum/tests/test_curriculum_chapter_books.py curriculum/tests/test_curriculum_seed_idempotency.py curriculum/tests/test_star_target_reachability.py curriculum/tests/test_solution_replay_guard.py challenges/tests/test_module_challenge_gates.py -q
 ```

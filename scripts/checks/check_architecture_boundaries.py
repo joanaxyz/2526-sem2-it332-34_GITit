@@ -61,17 +61,6 @@ SHARED_FEATURE_IMPORT = re.compile(r"@/features/")
 PAGE_IMPORT = re.compile(r"@/features/[^'\"]+/pages/")
 FRONTEND_PATH_REFERENCE = re.compile(r"frontend/(?:src|public|scripts)")
 
-CONTENT_EDITOR_PAGE = "frontend/src/features/authoring/pages/ContentEditorPage.tsx"
-CONTENT_EDITOR_HOOK = "frontend/src/features/authoring/hooks/useContentEditorController.ts"
-CONTENT_EDITOR_DRAFT_SUPPORT = "frontend/src/features/authoring/hooks/contentEditorDraftState.ts"
-CONTENT_EDITOR_COMPONENT_DIR = "frontend/src/features/authoring/components/content-editor"
-CONTENT_EDITOR_LINE_LIMITS = {
-    "page": 150,
-    "hook": 300,
-    "support": 120,
-    "component": 180,
-}
-
 HOME_HUB_VIEW = "frontend/src/features/home/components/HomeHubView.tsx"
 HOME_PROFILE_WORKSPACE = "frontend/src/features/home/components/home-hub/HomeProfileWorkspace.tsx"
 HOME_PROFILE_PANEL = "frontend/src/features/home/components/home-hub/HomeProfilePanel.tsx"
@@ -90,10 +79,8 @@ HOME_HUB_LINE_LIMITS = {
 }
 
 # Home Overview is one composition over a pure model and one owner per band. The
-# composition picks the active view; each owner renders exactly one named model
-# slice and never sees a raw summary. Progress is one plaque of two bands
-# (standing, then the record behind it) because the two used to be separate
-# categories restating each other's numbers.
+# composition picks the active view. Progress/skills render pure model slices;
+# results owns the on-demand performance query and delegates ready rendering.
 HOME_STATS_DIR = "frontend/src/features/home/components/home-stats"
 HOME_STATS_VIEW = "frontend/src/features/home/components/HomeStatsView.tsx"
 HOME_STATS_MODEL = f"{HOME_STATS_DIR}/homeStatsModel.ts"
@@ -115,7 +102,7 @@ HOME_OVERVIEW_PANELS = {
 HOME_OVERVIEW_PANEL_PROPS = {
     "progress": ("progress", "activityWindow", "onSelectActivityWindow"),
     "skills": ("skills",),
-    "results": ("results",),
+    "results": (),
     "gallery": ("achievements",),
 }
 HOME_STATS_LINE_LIMITS = {
@@ -188,6 +175,7 @@ BACKEND_RUNTIME_EXCLUDED_PARTS = {
 DISPLACED_BACKEND_PATHS = {
     "backend/adventures/services/workspace_files.py",
     "backend/adminconsole/views.py",
+    "backend/authoring",
     "backend/challenges/services/workspace_files.py",
     "backend/curriculum/selectors/core.py",
     "backend/progress/chests.py",
@@ -469,204 +457,6 @@ def check_adminconsole_selectors_are_http_free() -> list[str]:
         violations.extend(
             adminconsole_selector_source_violations(
                 source=path.read_text(encoding="utf-8"),
-                path_label=rel(path),
-            )
-        )
-    return violations
-
-
-def content_editor_source_violations(
-    *,
-    source: str,
-    path_label: str,
-    role: str,
-) -> list[str]:
-    """Enforce the route-controller-rendering ownership cutover."""
-
-    violations: list[str] = []
-    line_count = len(source.splitlines())
-    limit = CONTENT_EDITOR_LINE_LIMITS[role]
-    if line_count > limit:
-        violations.append(
-            f"{path_label}: content editor {role} has {line_count} lines; limit is {limit}"
-        )
-
-    modules = ts_module_specifiers(source)
-    page_forbidden_modules = (
-        "@tanstack/react-query",
-        "frontend/src/features/admin/api",
-        "frontend/src/features/authoring/api",
-        "frontend/src/features/authoring/hooks/useUnsavedChangesGuard",
-        "frontend/src/features/authoring/utils/authoringModel",
-        "frontend/src/shared/api/queryKeys",
-        "frontend/src/shared/auth/useAuth",
-        "react-router-dom",
-        "sonner",
-    )
-    component_forbidden_modules = (
-        "@tanstack/react-query",
-        "frontend/src/features/admin/api",
-        "frontend/src/features/authoring/api",
-        "frontend/src/features/authoring/hooks/useContentEditorController",
-        "frontend/src/features/authoring/pages/ContentEditorPage",
-        "frontend/src/shared/api/queryKeys",
-        "frontend/src/shared/auth/useAuth",
-        "sonner",
-    )
-    hook_forbidden_modules = (
-        "frontend/src/features/authoring/components",
-        "frontend/src/features/authoring/pages",
-    )
-    support_forbidden_modules = (
-        "@tanstack/react-query",
-        "frontend/src/features/admin",
-        "frontend/src/features/authoring/api",
-        "frontend/src/features/authoring/components",
-        "frontend/src/features/authoring/hooks",
-        "frontend/src/features/authoring/pages",
-        "frontend/src/shared/api/queryKeys",
-        "frontend/src/shared/auth/useAuth",
-        "react",
-        "react-router-dom",
-        "sonner",
-    )
-    forbidden_modules = {
-        "page": page_forbidden_modules,
-        "component": component_forbidden_modules,
-        "hook": hook_forbidden_modules,
-        "support": support_forbidden_modules,
-    }[role]
-    for module in modules:
-        canonical_module = canonical_ts_module_reference(
-            module=module,
-            path_label=path_label,
-        )
-        if any(
-            ts_module_matches_boundary(canonical_module, boundary) for boundary in forbidden_modules
-        ):
-            violations.append(f"{path_label}: content editor {role} must not import {module}")
-
-    if role == "page":
-        displaced_markers = (
-            "DraftState",
-            "buildInput",
-            "formFromContent",
-            "formToDefinition",
-            "sameForm",
-            "useMutation",
-            "useNavigate",
-            "useParams",
-            "useQuery",
-            "useSearchParams",
-        )
-        for marker in displaced_markers:
-            if re.search(rf"\b{re.escape(marker)}\b", source):
-                violations.append(
-                    f"{path_label}: displaced workflow marker {marker} must stay in the controller"
-                )
-        if len(re.findall(r"\buseContentEditorController\s*\(", source)) != 1:
-            violations.append(
-                f"{path_label}: page must invoke useContentEditorController exactly once"
-            )
-        if re.search(
-            r"\b(?:const|let|var)\s+[A-Za-z_$][\w$]*\s*=\s*useContentEditorController\s*\(",
-            source,
-        ):
-            violations.append(
-                f"{path_label}: destructure useContentEditorController at the call site"
-            )
-        if re.search(r"\bcontroller\s*=|\{\s*\.\.\.\s*[\w$]*controller\b", source, re.I):
-            violations.append(
-                f"{path_label}: controller objects must not be forwarded to rendering components"
-            )
-        for match in re.finditer(
-            r"<(ContentEditorHeader|ContentDestinationSection|ContentMetadataSection)\b(?P<props>.*?)/?>",
-            source,
-            re.S,
-        ):
-            if re.search(r"\b(?:form|setForm)\s*=", match.group("props")):
-                violations.append(
-                    f"{path_label}: {match.group(1)} must not receive form or setForm"
-                )
-
-    if role == "component" and not path_label.endswith("ContentEditorDiagnostics.tsx"):
-        if re.search(r"\bform\s*:", source) or re.search(r"\bsetForm\b", source):
-            violations.append(
-                f"{path_label}: only ContentEditorDiagnostics may receive the full form"
-            )
-    return violations
-
-
-def content_editor_css_violations(*, source: str, path_label: str) -> list[str]:
-    """Keep destination layout owned by editor-shell rather than battle-stage CSS."""
-
-    violations: list[str] = []
-    row = re.search(r"\.author-destination-row\s*\{(?P<body>[^}]*)\}", source, re.S)
-    input_rule = re.search(
-        r"\.author-destination-row\s*>\s*\.author-input\s*\{(?P<body>[^}]*)\}",
-        source,
-        re.S,
-    )
-    for property_name in ("display", "align-items", "gap", "flex-wrap"):
-        if not row or not re.search(rf"\b{property_name}\s*:", row.group("body")):
-            violations.append(f"{path_label}: .author-destination-row must own {property_name}")
-    if not input_rule or not re.search(r"\bflex\s*:", input_rule.group("body")):
-        violations.append(f"{path_label}: destination input must own flexible sizing")
-    return violations
-
-
-def admin_authoring_import_violations(*, source: str, path_label: str) -> list[str]:
-    """Keep the existing authoring-to-admin API edge from becoming a cycle."""
-
-    return [
-        f"{path_label}: admin feature must not import authoring feature module {module}"
-        for module in ts_module_specifiers(source)
-        if ts_module_matches_boundary(
-            canonical_ts_module_reference(module=module, path_label=path_label),
-            "frontend/src/features/authoring",
-        )
-    ]
-
-
-def check_content_editor_workflow_ownership() -> list[str]:
-    violations: list[str] = []
-    targets = [
-        (ROOT / CONTENT_EDITOR_PAGE, "page"),
-        (ROOT / CONTENT_EDITOR_HOOK, "hook"),
-        (ROOT / CONTENT_EDITOR_DRAFT_SUPPORT, "support"),
-    ]
-    component_dir = ROOT / CONTENT_EDITOR_COMPONENT_DIR
-    targets.extend((path, "component") for path in iter_files(component_dir, TS_SUFFIXES))
-    for path, role in targets:
-        if not path.exists():
-            violations.append(f"{rel(path)}: required content editor {role} is missing")
-            continue
-        violations.extend(
-            content_editor_source_violations(
-                source=path.read_text(encoding="utf-8"),
-                path_label=rel(path),
-                role=role,
-            )
-        )
-
-    destination = component_dir / "ContentDestinationSection.tsx"
-    if destination.exists() and "author-destination-row" not in destination.read_text(
-        encoding="utf-8"
-    ):
-        violations.append(
-            f"{rel(destination)}: destination must use the editor-shell-owned row selector"
-        )
-    css = ROOT / "frontend/src/styles/features/authoring/editor-shell.css"
-    violations.extend(
-        content_editor_css_violations(
-            source=css.read_text(encoding="utf-8"),
-            path_label=rel(css),
-        )
-    )
-    for path in iter_files(FRONTEND_SRC / "features" / "admin", TS_SUFFIXES):
-        violations.extend(
-            admin_authoring_import_violations(
-                source=path.read_text(encoding="utf-8", errors="ignore"),
                 path_label=rel(path),
             )
         )
@@ -1223,6 +1013,11 @@ def home_overview_source_violations(
             achievement_ledger,
             "frontend/src/features/stats/types",
         )
+    elif role == "results":
+        required_imports = (
+            "frontend/src/features/performance/hooks/useModulePerformance",
+            "frontend/src/features/performance/components/LearnerPerformanceInstrument",
+        )
     elif role == "gallery":
         required_imports = (achievement_ledger,)
     elif role in panel_roles:
@@ -1251,6 +1046,9 @@ def home_overview_source_violations(
         )
     elif role == "model":
         forbidden_markers = (
+            "HomeResultsModel",
+            "accuracyReady",
+            "home.kpis",
             "Link",
             "document",
             "home-overview-",
@@ -1327,7 +1125,9 @@ def home_overview_source_violations(
         for panel_role, (_, component, prop) in HOME_OVERVIEW_PANELS.items():
             prop_names, tag_body = jsx_component_props(source, component)
             expected = HOME_OVERVIEW_PANEL_PROPS[panel_role]
-            if sorted(prop_names) != sorted(expected) or f"{prop}={{model.{prop}}}" not in tag_body:
+            if sorted(prop_names) != sorted(expected) or (
+                expected and f"{prop}={{model.{prop}}}" not in tag_body
+            ):
                 violations.append(
                     f"{path_label}: {component} must receive {sorted(expected)}, with {prop} "
                     f"from the matching model slice"
@@ -1338,7 +1138,6 @@ def home_overview_source_violations(
             "HomeStatsModel",
             "HomeProgressModel",
             "HomeSkillsModel",
-            "HomeResultsModel",
         ):
             if not re.search(rf"\bexport\s+type\s+{exported_type}\b", source):
                 violations.append(f"{path_label}: model must export {exported_type}")
@@ -1388,9 +1187,9 @@ def home_overview_source_violations(
             "home-overview-mastery-orb",
         ),
         "results": (
-            "home-overview-kpi-row",
-            "home-overview-modules",
+            "LearnerPerformanceInstrument",
             "useModulePerformance",
+            "performance.refetch",
         ),
         "gallery": (
             "useState",
@@ -1402,6 +1201,11 @@ def home_overview_source_violations(
     for marker in owned_markers:
         if marker not in source:
             violations.append(f"{path_label}: Home Overview {role} must own {marker}")
+    if role == "results":
+        if len(re.findall(r"\buseModulePerformance\s*\(", source)) != 1:
+            violations.append(f"{path_label}: results must own one performance query")
+        if "HomeResultsModel" in source or "model.results" in source:
+            violations.append(f"{path_label}: mixed-scope results model is displaced")
     return violations
 
 
@@ -1652,6 +1456,62 @@ def check_home_overview_ownership() -> list[str]:
         violations.append(
             f"{achievement_utility}: displaced latestAchievement helper must stay deleted"
         )
+    performance_paths = (
+        FRONTEND_SRC / "features/home",
+        FRONTEND_SRC / "features/performance",
+        FRONTEND_SRC / "features/admin",
+    )
+    performance_sources = {
+        rel(path): path.read_text(encoding="utf-8")
+        for directory in performance_paths
+        for path in iter_files(directory, TS_SUFFIXES)
+        if ".test." not in path.name
+    }
+    violations.extend(performance_semantic_violations(performance_sources))
+    return violations
+
+
+def performance_semantic_violations(sources: dict[str, str]) -> list[str]:
+    """Keep KPI definitions shared and the learner record's request singular."""
+    violations: list[str] = []
+    owner = "frontend/src/features/performance/utils/performanceKpis.ts"
+    displaced = (
+        "frontend/src/features/admin/utils/kpiEvidence.ts",
+        "frontend/src/features/performance/utils/moduleColumns.ts",
+    )
+    for path in displaced:
+        if path in sources:
+            violations.append(f"{path}: displaced KPI owner must stay deleted")
+    if owner not in sources:
+        violations.append(f"{owner}: shared KPI definitions are required")
+    for path, source in sources.items():
+        if "home-overview-kpi-row" in source or "home-overview-module-charts" in source:
+            violations.append(f"{path}: mixed-scope KPI rendering is displaced")
+        learner = "/features/home/" in path or "/features/performance/" in path
+        if learner:
+            for module in ts_module_specifiers(source):
+                canonical = canonical_ts_module_reference(module=module, path_label=path)
+                if ts_module_matches_boundary(canonical, "frontend/src/features/admin"):
+                    violations.append(f"{path}: learner KPIs must not import Admin semantics")
+            if path != HOME_RESULTS_PANEL and not path.endswith("/hooks/useModulePerformance.ts"):
+                if re.search(r"\buseModulePerformance\s*\(", source):
+                    violations.append(f"{path}: only HomeResultsPanel owns the performance query")
+        if path != owner and "/preview/" not in path:
+            if re.search(r"\bformula\s*:\s*['\"]", source):
+                violations.append(f"{path}: display formulas belong to performanceKpis")
+            if path.endswith(
+                (
+                    "LearnerKpiPanel.tsx",
+                    "AdminAnalyticsPage.tsx",
+                    "LearnerPerformanceInstrument.tsx",
+                )
+            ):
+                if re.search(r"\btarget\s*:\s*\d", source):
+                    violations.append(f"{path}: overall targets belong to performanceKpis")
+        if path.endswith("/LearnerPerformanceInstrument.tsx"):
+            for module in ts_module_specifiers(source):
+                if "/api/" in module or "/hooks/" in module or module == "@tanstack/react-query":
+                    violations.append(f"{path}: ready instrument must not own API or query state")
     return violations
 
 
@@ -1801,36 +1661,32 @@ def check_backend_service_packages() -> list[str]:
     return violations
 
 
-def check_curriculum_seed_public_modules_are_thin() -> list[str]:
-    violations: list[str] = []
-    seed_data = BACKEND / "curriculum" / "seed_data"
-    expected_partitions = {
-        "adventure_levels": seed_data / "source" / "adventure_level_specs",
-        "challenges": seed_data / "source" / "challenge_specs",
-        "blueprint_overlay": seed_data / "source" / "blueprint",
-    }
-    for module_name, partition_dir in expected_partitions.items():
-        public_module = seed_data / f"{module_name}.py"
-        source_module = seed_data / "source" / f"{module_name}.py"
-        if not public_module.exists() or not source_module.exists():
-            violations.append(
-                f"backend/curriculum/seed_data/{module_name}.py: expected thin public wrapper plus source/{module_name}.py compatibility module"
-            )
-            continue
-        for module_path, label in (
-            (public_module, "public"),
-            (source_module, "source compatibility"),
-        ):
-            line_count = len(module_path.read_text(encoding="utf-8", errors="ignore").splitlines())
-            if line_count > 50:
-                violations.append(
-                    f"{rel(module_path)}: {label} seed-data module has {line_count} lines; keep authored data in partitioned source packages"
-                )
-        if not partition_dir.exists() or not (partition_dir / "__init__.py").exists():
-            violations.append(
-                f"{rel(partition_dir)}: expected partitioned authored seed-data package for {module_name}"
-            )
-    return violations
+# The retired multi-story curriculum and its old adventure runtime were
+# removed. The live
+# curriculum is seeded by `seed_curriculum` onto difficulty tiers only.
+RETIRED_CURRICULUM_PATHS = (
+    "curriculum/management/commands/seed_curriculum_fixture.py",
+    "curriculum/management/commands/seed_curriculum_writer.py",
+    "curriculum/management/commands/seed_curriculum_structure.py",
+    "curriculum/seed_data/adventure_levels.py",
+    "curriculum/seed_data/challenges.py",
+    "curriculum/seed_data/chapters.py",
+    "curriculum/seed_data/lessons.py",
+    "curriculum/seed_data/stories.py",
+    "curriculum/seed_data/source/adventure_level_specs",
+    "curriculum/seed_data/source/challenge_specs",
+    "curriculum/seed_data/source/blueprint",
+    "adventures/services/runs.py",
+    "adventures/payloads.py",
+)
+
+
+def check_retired_curriculum_stays_removed() -> list[str]:
+    return [
+        f"backend/{path}: the retired curriculum seed and old adventure runtime must not return"
+        for path in RETIRED_CURRICULUM_PATHS
+        if (BACKEND / path).exists()
+    ]
 
 
 def main() -> int:
@@ -1841,7 +1697,6 @@ def main() -> int:
         *check_frontend_feature_shape(),
         *check_frontend_feature_roots_are_thin(),
         *check_frontend_production_files_are_reviewable(),
-        *check_content_editor_workflow_ownership(),
         *check_home_hub_profile_ownership(),
         *check_home_overview_ownership(),
         *check_stats_summary_contract_ownership(),
@@ -1854,7 +1709,7 @@ def main() -> int:
         *check_backend_layer_package_inits_are_thin(),
         *check_backend_common_shape(),
         *check_backend_service_packages(),
-        *check_curriculum_seed_public_modules_are_thin(),
+        *check_retired_curriculum_stays_removed(),
         *check_adminconsole_http_read_ownership(),
         *check_adminconsole_selectors_are_http_free(),
         *check_backend_runtime_import_cycles(),
@@ -1874,7 +1729,7 @@ def main() -> int:
             "gameplay mutation request contracts must stay shared, generated, and one-way; "
             "gameplay success response contracts must stay domain-owned, exact, generated, and one-way; "
             "Home Overview workflow ownership must stay one-way; "
-            "content editor and Home Hub workflow ownership must stay one-way; displaced architecture paths "
+            "Home Hub workflow ownership must stay one-way; displaced architecture paths "
             "must stay deleted.",
             file=sys.stderr,
         )

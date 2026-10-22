@@ -214,28 +214,9 @@ class CommitHistoryVerificationMixin:
                 raise BadRequest(
                     "execution.next_state does not match the submitted git rebase --continue command."
                 )
-            remaining = [
-                str(item)
-                for item in ((previous_state.get("rebase_state") or {}).get("remaining") or [])
-            ]
-            if not remaining:
-                expected = copy.deepcopy(previous_state)
-                self._set_operation_metadata(
-                    expected,
-                    {
-                        "last_rebase_new_head": self.normalizer.head_commit_id(expected),
-                        "last_rebase_replayed_commits": copy.deepcopy(
-                            (expected.get("rebase_state") or {}).get("applied") or []
-                        ),
-                    },
-                )
-                expected.pop("rebase_state", None)
-                expected = self.tools.normalize_state(expected)
-                self._require_equivalent_expected(expected, next_state, "git rebase --continue")
-                return
-            raise BadRequest(
-                "execution.next_state does not match the submitted git rebase --continue command."
-            )
+            expected = self._continued_rebase(previous_state)
+            self._require_equivalent_expected(expected, next_state, "git rebase --continue")
+            return
 
         args = self._pathspecs(parts, value_options={"--onto"})
         onto = self._option_value(parts, "--onto")
@@ -345,7 +326,9 @@ class CommitHistoryVerificationMixin:
         self._require_equivalent_expected(expected, next_state, "git revert")
 
     def _verify_cherry_pick(self, *, command: str, previous_state: dict, next_state: dict) -> None:
+        """Mirror the browser engine's cherry-pick (commands/commits.ts)."""
         parts = parse_git_command(command) or []
+        label = "git cherry-pick"
         if "--abort" in parts:
             expected = copy.deepcopy(previous_state)
             original = expected.get("cherry_pick_original_head")
@@ -354,25 +337,42 @@ class CommitHistoryVerificationMixin:
             expected["staging"] = {}
             expected["working_tree"] = {}
             expected["conflicts"] = []
-            expected.pop("cherry_pick_in_progress", None)
-            expected.pop("cherry_pick_original_head", None)
+            for key in (
+                "conflict_details",
+                "cherry_pick_in_progress",
+                "cherry_pick_original_head",
+                "cherry_pick_source",
+                "cherry_pick_message",
+            ):
+                expected.pop(key, None)
             self._set_operation_metadata(expected, {"last_cherry_pick_aborted": True})
             expected = self.tools.normalize_state(expected)
             self._require_equivalent_expected(expected, next_state, "git cherry-pick --abort")
             return
+        if "--continue" in parts:
+            self._verify_cherry_pick_continue(previous_state=previous_state, next_state=next_state)
+            return
+        if previous_state.get("conflicts"):
+            raise BadRequest(f"execution.next_state does not match the submitted {label} command.")
         args = self._pathspecs(parts)
         source_id = self._resolve_revision(previous_state, args[0] if args else None)
         source = self.normalizer.commit_by_id(previous_state, source_id)
         if not source:
-            raise BadRequest(
-                "execution.next_state does not match the submitted git cherry-pick command."
-            )
+            raise BadRequest(f"execution.next_state does not match the submitted {label} command.")
         head_id = self.normalizer.head_commit_id(previous_state)
         head_tree = self.normalizer.head_tree(previous_state)
-        next_tree = self.normalizer.apply_changes(head_tree, source.get("changes") or {})
-        changes = self.normalizer.diff_trees(head_tree, next_tree)
+        message = self._cherry_pick_message(source, source_id, parts)
         expected = copy.deepcopy(previous_state)
-        if "--no-commit" in parts or "-n" in parts:
+
+        conflict_paths = self._cherry_pick_conflict_paths(previous_state, source, head_tree)
+        if conflict_paths:
+            conflicts = set(conflict_paths)
+            non_conflicting = {
+                path: change
+                for path, change in (source.get("changes") or {}).items()
+                if path not in conflicts
+            }
+            staged_tree = self.normalizer.apply_changes(head_tree, non_conflicting)
             expected["staging"] = {
                 path: "deleted"
                 if change.get("after") is None
@@ -380,7 +380,67 @@ class CommitHistoryVerificationMixin:
                     "status": change.get("change_type"),
                     "content": copy.deepcopy(change.get("after")),
                 }
-                for path, change in changes.items()
+                for path, change in self.normalizer.diff_trees(head_tree, staged_tree).items()
+            }
+            parent_tree = self._tree_for_commit(
+                previous_state, (source.get("parents") or [None])[0]
+            )
+            expected.setdefault("working_tree", {})
+            expected.setdefault("conflict_details", {})
+            for conflict_path in conflict_paths:
+                ours = head_tree.get(conflict_path)
+                theirs = (source.get("tree") or {}).get(conflict_path)
+                expected["conflict_details"][conflict_path] = {
+                    "base": copy.deepcopy(parent_tree.get(conflict_path)),
+                    "ours": copy.deepcopy(ours),
+                    "theirs": copy.deepcopy(theirs),
+                }
+                expected["working_tree"][conflict_path] = {
+                    "status": "conflicted",
+                    "content": (
+                        f"<<<<<<< HEAD\n{ours if ours is not None else ''}\n=======\n"
+                        f"{theirs if theirs is not None else ''}\n>>>>>>> {source_id}\n"
+                    ),
+                }
+            expected["conflicts"] = sorted(conflicts)
+            expected["cherry_pick_in_progress"] = True
+            expected["cherry_pick_original_head"] = head_id
+            expected["cherry_pick_source"] = source_id
+            expected["cherry_pick_message"] = message
+            self._set_operation_metadata(
+                expected,
+                {
+                    "last_cherry_pick_source": source_id,
+                    "last_cherry_pick_conflicted": True,
+                    "last_cherry_pick_conflict_paths": sorted(conflicts),
+                },
+            )
+            expected = self.tools.normalize_state(expected)
+            self._require_equivalent_expected(expected, next_state, label)
+            return
+
+        next_tree = self.normalizer.apply_changes(head_tree, source.get("changes") or {})
+        changes = self.normalizer.diff_trees(head_tree, next_tree)
+        if "--no-commit" in parts or "-n" in parts:
+            # The pick lands on top of what is already staged.
+            index_tree = self.normalizer.apply_changes(
+                head_tree,
+                self.normalizer.changes_from_entries(
+                    head_tree, copy.deepcopy(previous_state.get("staging") or {})
+                ),
+            )
+            staged = self.normalizer.diff_trees(
+                head_tree,
+                self.normalizer.apply_changes(index_tree, source.get("changes") or {}),
+            )
+            expected["staging"] = {
+                path: "deleted"
+                if change.get("after") is None
+                else {
+                    "status": change.get("change_type"),
+                    "content": copy.deepcopy(change.get("after")),
+                }
+                for path, change in staged.items()
             }
             expected["cherry_pick_in_progress"] = True
             expected["cherry_pick_original_head"] = head_id
@@ -399,7 +459,7 @@ class CommitHistoryVerificationMixin:
                 self._commit_payload(
                     state=previous_state,
                     commit_id=commit_id,
-                    message=source.get("message") or f"cherry-pick {source_id}",
+                    message=message,
                     parents=[head_id] if head_id else [],
                     tree=next_tree,
                     changes=changes,
@@ -415,7 +475,164 @@ class CommitHistoryVerificationMixin:
                 },
             )
         expected = self.tools.normalize_state(expected)
-        self._require_equivalent_expected(expected, next_state, "git cherry-pick")
+        self._require_equivalent_expected(expected, next_state, label)
+
+    def _verify_cherry_pick_continue(self, *, previous_state: dict, next_state: dict) -> None:
+        label = "git cherry-pick --continue"
+        if not previous_state.get("cherry_pick_in_progress") or previous_state.get("conflicts"):
+            raise BadRequest(f"execution.next_state does not match the submitted {label} command.")
+        source_id = str(
+            previous_state.get("cherry_pick_source")
+            or (previous_state.get("operation_metadata") or {}).get("last_cherry_pick_source")
+            or ""
+        )
+        source = self.normalizer.commit_by_id(previous_state, source_id)
+        if not source:
+            raise BadRequest(f"execution.next_state does not match the submitted {label} command.")
+        head_id = self.normalizer.head_commit_id(previous_state)
+        head_tree = self.normalizer.head_tree(previous_state)
+        staged = self.normalizer.changes_from_entries(
+            head_tree, copy.deepcopy(previous_state.get("staging") or {})
+        )
+        if not staged:
+            raise BadRequest(f"execution.next_state does not match the submitted {label} command.")
+        tree = self.normalizer.apply_changes(head_tree, staged)
+        commit_id = self._next_commit_id(previous_state)
+        expected = copy.deepcopy(previous_state)
+        expected.setdefault("commits", []).append(
+            self._commit_payload(
+                state=previous_state,
+                commit_id=commit_id,
+                message=str(
+                    previous_state.get("cherry_pick_message")
+                    or source.get("message")
+                    or f"cherry-pick {source_id}"
+                ),
+                parents=[head_id] if head_id else [],
+                tree=tree,
+                changes=self.normalizer.diff_trees(head_tree, tree),
+            )
+        )
+        self._set_head_commit(expected, commit_id)
+        expected["staging"] = {}
+        expected["working_tree"] = {}
+        for key in (
+            "cherry_pick_in_progress",
+            "cherry_pick_original_head",
+            "cherry_pick_source",
+            "cherry_pick_message",
+        ):
+            expected.pop(key, None)
+        self._set_operation_metadata(
+            expected,
+            {
+                "last_cherry_pick_source": source_id,
+                "last_cherry_pick_created_commit": commit_id,
+                "last_cherry_pick_no_commit": False,
+            },
+        )
+        expected = self.tools.normalize_state(expected)
+        self._require_equivalent_expected(expected, next_state, label)
+
+    def _cherry_pick_conflict_paths(self, state: dict, source: dict, head_tree: dict) -> list[str]:
+        forced = {str(path) for path in (state.get("cherry_pick_conflict_files") or [])}
+        parent_tree = self._tree_for_commit(state, (source.get("parents") or [None])[0])
+        paths = []
+        for conflict_path, change in (source.get("changes") or {}).items():
+            before = parent_tree.get(conflict_path)
+            after = change.get("after")
+            current = head_tree.get(conflict_path)
+            if conflict_path in forced or (current != before and current != after):
+                paths.append(conflict_path)
+        return paths
+
+    @staticmethod
+    def _cherry_pick_message(source: dict, source_id: str | None, parts: list[str]) -> str:
+        message = source.get("message") or f"cherry-pick {source_id}"
+        if "-x" in parts:
+            return f"{message}\n\n(cherry picked from commit {source_id})"
+        return message
+
+    def _continued_rebase(self, previous_state: dict) -> dict:
+        """Mirror the browser engine's ``continueRebase`` (commands/merge.ts):
+        commit the resolved stop, replay the remaining commits, end the rebase."""
+        label = "git rebase --continue"
+        expected = copy.deepcopy(previous_state)
+        rebase_state = expected.get("rebase_state") or {}
+        branch = rebase_state.get("branch") if isinstance(rebase_state.get("branch"), str) else None
+        if (
+            branch
+            and branch in (expected.get("branches") or {})
+            and self._head_branch(expected) != branch
+        ):
+            expected["head"] = {
+                "type": "branch",
+                "name": branch,
+                "target": (expected.get("branches") or {}).get(branch),
+            }
+        applied = [str(item) for item in (rebase_state.get("applied") or [])]
+        current_source = rebase_state.get("current_source")
+        if isinstance(current_source, str) and current_source:
+            source = self.normalizer.commit_by_id(expected, current_source)
+            if not source:
+                raise BadRequest(
+                    f"execution.next_state does not match the submitted {label} command."
+                )
+            parent = self.normalizer.head_commit_id(expected)
+            base = self._tree_for_commit(expected, parent)
+            staged = self.normalizer.changes_from_entries(
+                base, copy.deepcopy(expected.get("staging") or {})
+            )
+            if not staged:
+                raise BadRequest(
+                    f"execution.next_state does not match the submitted {label} command."
+                )
+            tree = self.normalizer.apply_changes(base, staged)
+            commit_id = self._next_commit_id(expected)
+            expected.setdefault("commits", []).append(
+                self._commit_payload(
+                    state=expected,
+                    commit_id=commit_id,
+                    message=source.get("message") or f"rebase {current_source}",
+                    parents=[parent] if parent else [],
+                    tree=tree,
+                    changes=self.normalizer.diff_trees(base, tree),
+                )
+            )
+            self._set_head_commit(expected, commit_id)
+            applied.append(commit_id)
+            expected["staging"] = {}
+        for source_id in [str(item) for item in (rebase_state.get("remaining") or [])]:
+            source = self.normalizer.commit_by_id(expected, source_id)
+            if not source:
+                raise BadRequest(
+                    f"execution.next_state does not match the submitted {label} command."
+                )
+            parent = self.normalizer.head_commit_id(expected)
+            base = self._tree_for_commit(expected, parent)
+            tree = self.normalizer.apply_changes(base, source.get("changes") or {})
+            commit_id = self._next_commit_id(expected)
+            expected.setdefault("commits", []).append(
+                self._commit_payload(
+                    state=expected,
+                    commit_id=commit_id,
+                    message=source.get("message") or f"rebase {source_id}",
+                    parents=[parent] if parent else [],
+                    tree=tree,
+                    changes=self.normalizer.diff_trees(base, tree),
+                )
+            )
+            self._set_head_commit(expected, commit_id)
+            applied.append(commit_id)
+        expected.pop("rebase_state", None)
+        self._set_operation_metadata(
+            expected,
+            {
+                "last_rebase_new_head": self.normalizer.head_commit_id(expected),
+                "last_rebase_replayed_commits": applied,
+            },
+        )
+        return self.tools.normalize_state(expected)
 
     def _replay_linear_commits(
         self, state: dict, branch_tip: str | None, stop_at: str | None, new_base: str | None

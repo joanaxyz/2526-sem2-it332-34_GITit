@@ -1,6 +1,6 @@
 import type { RepositoryValue } from '@/shared/level/types'
 import { hasOption, optionValues } from '@/shared/git/simulator/parser'
-import { applyChanges, changeType, clone, commitById, commitPayload, diffTrees, headBranch, headCommit, isRecord, nextCommitId, setHeadCommit, setOperationMetadata, treeForCommit } from '@/shared/git/simulator/state'
+import { applyChanges, changesFromEntries, changeType, clone, commitById, commitPayload, diffTrees, entryStatus, headBranch, headCommit, isRecord, nextCommitId, setHeadCommit, setOperationMetadata, treeForCommit } from '@/shared/git/simulator/state'
 import { createCommit } from '@/shared/git/simulator/commands/commits'
 import { commonAncestor, commitsSince, isAncestor, resolveRef } from '@/shared/git/simulator/commands/refs'
 import { SimulatorCommandError, type CommandOutcome, type MutableRepositoryState, type ParsedGitCommand } from '@/shared/git/simulator/types'
@@ -44,14 +44,22 @@ function squashMerge(state: MutableRepositoryState, branch: string): CommandOutc
   if (currentId === targetId) return { command: 'merge', stdout: 'Already up to date.' }
   const currentTree = treeForCommit(state, currentId)
   const targetTree = treeForCommit(state, targetId)
+  // Like any merge, a squash combines both sides from their common ancestor:
+  // work only the current branch has must survive.
+  const baseTree = treeForCommit(state, commonAncestor(state, currentId, targetId))
+  const conflicts = [...overlappingConflicts(baseTree, currentTree, targetTree)].sort()
+  if (conflicts.length) {
+    throw new SimulatorCommandError(`error: squash merge of ${branch} conflicts in ${conflicts.join(', ')}; merge it without --squash to resolve the conflict`)
+  }
+  const mergedTree = threeWayTree(baseTree, currentTree, targetTree, new Set())
   state.staging ??= {}
-  for (const [path, value] of Object.entries(targetTree)) {
+  for (const [path, value] of Object.entries(mergedTree)) {
     if (JSON.stringify(value) !== JSON.stringify(currentTree[path])) {
       state.staging[path] = { status: changeType(currentTree[path] ?? null, value), content: clone(value ?? null) }
     }
   }
   for (const path of Object.keys(currentTree)) {
-    if (!(path in targetTree)) state.staging[path] = 'deleted'
+    if (!(path in mergedTree)) state.staging[path] = 'deleted'
   }
   setOperationMetadata(state, { last_merge_branch: branch, last_merge_target: targetId, squash_merge_staged: true })
   return { command: 'merge', stdout: 'Squash commit -- not updating HEAD\nAutomatic merge went well; stopped before committing as requested' }
@@ -71,11 +79,22 @@ export function mergeBranch(state: MutableRepositoryState, branch: string, noFf:
   const baseTree = treeForCommit(state, baseId)
   const conflictPaths = new Set(authoredConflictPaths(state))
   for (const path of overlappingConflicts(baseTree, currentTree, targetTree)) conflictPaths.add(path)
+  const mergedTree = threeWayTree(baseTree, currentTree, targetTree, conflictPaths)
+  const incomingPaths = Object.keys(diffTrees(currentTree, mergedTree))
 
+  // Like Git, never let a merge overwrite uncommitted work on a path it touches.
+  const local = locallyChangedPaths(state)
+  const blocked = [...new Set([...incomingPaths, ...conflictPaths])].filter((path) => local.has(path)).sort()
+  if (blocked.length) {
+    throw new SimulatorCommandError(
+      `error: Your local changes to the following files would be overwritten by merge:\n\t${blocked.join('\n\t')}\nPlease commit your changes or stash them before you merge.\nAborting`,
+    )
+  }
+
+  // Only incoming changes are staged; files only this branch changed stay as committed.
   const stagedPaths: string[] = []
-  for (const path of [...new Set([...Object.keys(currentTree), ...Object.keys(targetTree)])].sort()) {
-    if (conflictPaths.has(path) || JSON.stringify(currentTree[path]) === JSON.stringify(targetTree[path])) continue
-    const after = targetTree[path] ?? null
+  for (const path of incomingPaths) {
+    const after = mergedTree[path] ?? null
     state.staging ??= {}
     state.staging[path] = after === null ? 'deleted' : { status: changeType(currentTree[path] ?? null, after), content: clone(after) }
     stagedPaths.push(path)
@@ -118,9 +137,9 @@ export function mergeBranch(state: MutableRepositoryState, branch: string, noFf:
   }
 
   const commitId = nextCommitId(state)
-  const changes = diffTrees(currentTree, targetTree)
+  const changes = diffTrees(currentTree, mergedTree)
   state.commits ??= []
-  state.commits.push(commitPayload({ state, commitId, message: `Merge branch '${branch}'`, parents: [currentId, targetId].filter(Boolean) as string[], tree: targetTree, changes }))
+  state.commits.push(commitPayload({ state, commitId, message: `Merge branch '${branch}'`, parents: [currentId, targetId].filter(Boolean) as string[], tree: mergedTree, changes }))
   state.staging = {}
   setHeadCommit(state, commitId)
   setOperationMetadata(state, {
@@ -152,6 +171,36 @@ function authoredConflictPaths(state: MutableRepositoryState) {
   return [...new Set(paths.map(String))].sort()
 }
 
+/** Three-way merge result for every non-conflicting path: take whichever side changed it. */
+function threeWayTree(
+  baseTree: Record<string, RepositoryValue>,
+  currentTree: Record<string, RepositoryValue>,
+  targetTree: Record<string, RepositoryValue>,
+  conflictPaths: Set<string>,
+) {
+  const merged: Record<string, RepositoryValue> = {}
+  for (const path of new Set([...Object.keys(baseTree), ...Object.keys(currentTree), ...Object.keys(targetTree)])) {
+    const base = baseTree[path] ?? null
+    const ours = currentTree[path] ?? null
+    const theirs = targetTree[path] ?? null
+    let result: RepositoryValue
+    if (conflictPaths.has(path)) result = ours
+    else if (JSON.stringify(ours) === JSON.stringify(base)) result = theirs
+    else result = ours
+    if (result !== null) merged[path] = clone(result)
+  }
+  return merged
+}
+
+/** Paths with uncommitted work: anything staged, or a tracked working-tree change. */
+function locallyChangedPaths(state: MutableRepositoryState) {
+  const paths = new Set(Object.keys(state.staging ?? {}))
+  for (const [path, entry] of Object.entries(state.working_tree ?? {})) {
+    if (entryStatus(entry) !== 'untracked' && entryStatus(entry) !== 'ignored') paths.add(path)
+  }
+  return paths
+}
+
 function overlappingConflicts(baseTree: Record<string, RepositoryValue>, currentTree: Record<string, RepositoryValue>, targetTree: Record<string, RepositoryValue>) {
   const conflicts = new Set<string>()
   for (const path of new Set([...Object.keys(baseTree), ...Object.keys(currentTree), ...Object.keys(targetTree)])) {
@@ -177,7 +226,7 @@ export function gitMergetool(state: MutableRepositoryState, parsed: ParsedGitCom
   })
   return {
     command: 'mergetool',
-    stdout: `Opened ${configuredTool} for ${selected.join(', ')}.\nResolve the file in the workspace editor, save it, then run git add for the resolved path.`,
+    stdout: `Opened ${configuredTool} for ${selected.join(', ')}.\nResolve the file in the workspace editor and save it to stage the result.`,
   }
 }
 
@@ -192,14 +241,7 @@ export function gitRebase(state: MutableRepositoryState, parsed: ParsedGitComman
     return { command: 'rebase', stdout: '' }
   }
   if (hasOption(parsed, '--continue')) {
-    if (!isRecord(state.rebase_state)) throw new SimulatorCommandError('fatal: No rebase in progress?')
-    if (state.conflicts?.length) throw new SimulatorCommandError('You must edit all merge conflicts and then mark them as resolved using git add')
-    const remaining = Array.isArray(state.rebase_state.remaining) ? state.rebase_state.remaining.map(String) : []
-    if (!remaining.length) {
-      setOperationMetadata(state, { last_rebase_new_head: headCommit(state), last_rebase_replayed_commits: clone((state.rebase_state.applied as RepositoryValue[]) ?? []) })
-      delete state.rebase_state
-      return { command: 'rebase', stdout: 'Successfully rebased and updated current branch.' }
-    }
+    return continueRebase(state)
   }
   const ontoValues = optionValues(parsed, '--onto')
   const hasOnto = ontoValues.length > 0
@@ -251,4 +293,86 @@ export function gitRebase(state: MutableRepositoryState, parsed: ParsedGitComman
     last_rebase_replayed_commits: applied,
   })
   return { command: 'rebase', stdout: `Successfully rebased and updated ${currentBranch}.` }
+}
+
+function continueRebase(state: MutableRepositoryState): CommandOutcome {
+  if (!isRecord(state.rebase_state)) {
+    throw new SimulatorCommandError('fatal: No rebase in progress?')
+  }
+  if (state.conflicts?.length) {
+    throw new SimulatorCommandError(
+      'You must edit all merge conflicts and then mark them as resolved using git add',
+    )
+  }
+
+  const rebaseState = state.rebase_state
+  const branch = typeof rebaseState.branch === 'string' ? rebaseState.branch : headBranch(state)
+  if (branch && branch in (state.branches ?? {}) && headBranch(state) !== branch) {
+    state.head = { type: 'branch', name: branch, target: state.branches?.[branch] ?? null }
+  }
+  const applied = Array.isArray(rebaseState.applied)
+    ? rebaseState.applied.map(String)
+    : []
+  const currentSourceId = typeof rebaseState.current_source === 'string'
+    ? rebaseState.current_source
+    : null
+
+  if (currentSourceId) {
+    const source = commitById(state, currentSourceId)
+    if (!source) throw new SimulatorCommandError(`fatal: bad revision '${currentSourceId}'`)
+    const parent = headCommit(state)
+    const base = treeForCommit(state, parent)
+    const stagedChanges = changesFromEntries(base, clone(state.staging ?? {}))
+    if (!Object.keys(stagedChanges).length) {
+      throw new SimulatorCommandError('No changes - did you forget to use git add?', 1)
+    }
+    const tree = applyChanges(base, stagedChanges)
+    const commitId = nextCommitId(state)
+    state.commits ??= []
+    state.commits.push(
+      commitPayload({
+        state,
+        commitId,
+        message: source.message ?? `rebase ${currentSourceId}`,
+        parents: [parent].filter(Boolean) as string[],
+        tree,
+        changes: diffTrees(base, tree),
+      }),
+    )
+    setHeadCommit(state, commitId)
+    applied.push(commitId)
+    state.staging = {}
+  }
+
+  const remaining = Array.isArray(rebaseState.remaining)
+    ? rebaseState.remaining.map(String)
+    : []
+  for (const sourceId of remaining) {
+    const source = commitById(state, sourceId)
+    if (!source) throw new SimulatorCommandError(`fatal: bad revision '${sourceId}'`)
+    const parent = headCommit(state)
+    const base = treeForCommit(state, parent)
+    const tree = applyChanges(base, source.changes ?? {})
+    const commitId = nextCommitId(state)
+    state.commits ??= []
+    state.commits.push(
+      commitPayload({
+        state,
+        commitId,
+        message: source.message ?? `rebase ${sourceId}`,
+        parents: [parent].filter(Boolean) as string[],
+        tree,
+        changes: diffTrees(base, tree),
+      }),
+    )
+    setHeadCommit(state, commitId)
+    applied.push(commitId)
+  }
+
+  delete state.rebase_state
+  setOperationMetadata(state, {
+    last_rebase_new_head: headCommit(state),
+    last_rebase_replayed_commits: applied,
+  })
+  return { command: 'rebase', stdout: 'Successfully rebased and updated current branch.' }
 }

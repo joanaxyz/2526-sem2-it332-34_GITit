@@ -141,6 +141,20 @@ describe('executeGitCommand', () => {
     expect(result.next_state.working_tree).toEqual(state.working_tree)
   })
 
+  it.each([
+    ['git init --initial-branch=trunk', 'git init --initial-branch=trunk'],
+    ['git  log   --max-count=3 --oneline', 'git log --max-count=3 --oneline'],
+    ['git ci -m "first draft"', "git commit -m 'first draft'"],
+    ['git commit --message="first draft"', "git commit '--message=first draft'"],
+    ['git st', 'git status'],
+  ])('reports %s in the backend normalize_command form', (command, normalized) => {
+    // The backend rejects a submission whose normalized_command differs from its
+    // own normalization, so `--option=value` must stay joined here.
+    const result = executeGitCommand(baseState({ repository_initialized: false }), command)
+
+    expect(result.normalized_command).toBe(normalized)
+  })
+
   it('rejects non-git commands without changing state', () => {
     const state = baseState()
     const result = executeGitCommand(state, 'python cleanup.py')

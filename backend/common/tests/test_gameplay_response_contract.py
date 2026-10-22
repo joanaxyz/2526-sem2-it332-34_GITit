@@ -1,10 +1,11 @@
 from __future__ import annotations
 
-from adventures.models import AdventureRun, AdventureWave, AdventureWaveVariant
+from adventures.models import AdventureLevel, AdventureLevelTierRun
 from adventures.openapi import (
-    AdventureCommandResponseSerializer,
-    AdventureRunResponseSerializer,
+    AdventureLevelTierCommandResponseSerializer,
+    AdventureLevelTierRunResponseSerializer,
 )
+from adventures.tier_payloads import tier_run_payload
 from challenges.models import ChallengeRun
 from challenges.openapi import (
     ChallengeCommandResponseSerializer,
@@ -12,7 +13,6 @@ from challenges.openapi import (
 )
 from practice.models import CommandStep
 from progress.models import (
-    AdventureLevelCompletion,
     ChallengeLevelCompletion,
     ChallengeTrialCompletion,
     CoinTransaction,
@@ -22,45 +22,10 @@ from shop.models import Entitlement
 from testing.frontend_execution import diagnostic_payload, frontend_execution_payload
 from testing.runtime_factories import (
     api_client_for,
-    create_stage_readme_adventure_run,
     create_stage_readme_challenge_run,
+    create_stage_readme_tier_run,
 )
 
-ADVENTURE_RUN_KEYS = {
-    "battle_stage",
-    "chapter_id",
-    "completed_at",
-    "current_attempt",
-    "current_level_index",
-    "current_wave",
-    "id",
-    "is_passed",
-    "library_opened",
-    "mastery",
-    "next_level",
-    "passed",
-    "progress",
-    "replay",
-    "results",
-    "selected_level",
-    "stars",
-    "status",
-    "story",
-    "total_levels",
-    "total_waves",
-}
-ADVENTURE_COMMAND_KEYS = {
-    "command_classification",
-    "command_outcome",
-    "exit_code",
-    "run",
-    "solved",
-    "stderr",
-    "stdout",
-    "step",
-    "terminal_output",
-}
-ADVENTURE_STEP_KEYS = {"command_text", "id", "result_category", "terminal_output"}
 CHALLENGE_RUN_KEYS = {
     "challenge",
     "chapter",
@@ -150,24 +115,6 @@ def _wallet_balance(player) -> int:
     return balance if balance is not None else 0
 
 
-def _adventure_state(fixture) -> dict:
-    fixture.run.refresh_from_db()
-    return {
-        "status": fixture.run.status,
-        "command_count": fixture.run.command_count,
-        "counted_command_count": fixture.run.counted_command_count,
-        "current_wave_id": fixture.run.current_wave_id,
-        "repository_state": fixture.run.repository_state,
-        "step_count": CommandStep.objects.filter(attempt=fixture.run).count(),
-        "level_completion_count": AdventureLevelCompletion.objects.filter(
-            adventure_run=fixture.run
-        ).count(),
-        "coin_transaction_count": CoinTransaction.objects.filter(player=fixture.player).count(),
-        "wallet_balance": _wallet_balance(fixture.player),
-        "run_wave_statuses": list(fixture.run.run_waves.values_list("status", flat=True)),
-    }
-
-
 def _challenge_state(fixture) -> dict:
     fixture.run.refresh_from_db()
     return {
@@ -189,13 +136,7 @@ def _challenge_state(fixture) -> dict:
     }
 
 
-def _assert_adventure_command_shape(payload: dict, run_keys: set[str]) -> None:
-    assert set(payload) == ADVENTURE_COMMAND_KEYS
-    assert set(payload["run"]) == run_keys
-    assert set(payload["step"]) == ADVENTURE_STEP_KEYS
-
-
-def _submit_adventure_command(fixture, *, diagnostic: bool = False):
+def _submit_tier_command(fixture, *, diagnostic: bool = False):
     command = "git status" if diagnostic else "git add README.md"
     execution = (
         diagnostic_payload(command, fixture.states.initial, output="status clean")
@@ -204,10 +145,38 @@ def _submit_adventure_command(fixture, *, diagnostic: bool = False):
     )
     execution["client_run_revision"] = 0
     return api_client_for(fixture.user).post(
-        f"/api/adventure-runs/{fixture.run.id}/submit-command/",
+        f"/api/adventure-tier-runs/{fixture.run.id}/submit-command/",
         {"command": command, "execution": execution},
         format="json",
     )
+
+
+def test_result_level_number_matches_published_chapter_order(db, django_user_model):
+    fixture = create_stage_readme_tier_run(django_user_model, username="result-level-number")
+    fixture.level.sort_order = 5
+    fixture.level.save(update_fields=["sort_order"])
+    for slug, sort_order, published in (
+        ("earlier", 1, True),
+        ("draft", 2, False),
+        ("later-tie", 5, True),
+        ("later", 8, True),
+    ):
+        AdventureLevel.objects.create(
+            chapter=fixture.chapter,
+            slug=slug,
+            title=slug,
+            sort_order=sort_order,
+            is_published=published,
+        )
+    # Later IDs at the same sort order follow this level on the map.
+    fixture.chapter.adventure_levels.filter(slug="earlier").update(sort_order=5)
+
+    tier = tier_run_payload(fixture.run)["tier"]
+    assert tier["adventure_level_number"] == 1
+    assert tier["adventure_level_title"] == fixture.level.title
+
+    fixture.chapter.adventure_levels.filter(slug="earlier").update(sort_order=1)
+    assert tier_run_payload(fixture.run)["tier"]["adventure_level_number"] == 2
 
 
 def _submit_challenge_command(fixture, *, diagnostic: bool = False):
@@ -225,162 +194,69 @@ def _submit_challenge_command(fixture, *, diagnostic: bool = False):
     )
 
 
-def test_adventure_full_success_endpoints_match_the_domain_schema(db, django_user_model):
-    fixture = create_stage_readme_adventure_run(
-        django_user_model,
-        username="adventure-response-full",
-    )
+def test_adventure_tier_full_success_endpoints_match_the_domain_schema(db, django_user_model):
+    fixture = create_stage_readme_tier_run(django_user_model, username="tier-response-full")
     _grant_gameplay_access(fixture)
     fixture.run.delete()
     client = api_client_for(fixture.user)
 
-    start = client.post(f"/api/adventure-levels/{fixture.level.id}/runs/", format="json")
+    start = client.post(
+        f"/api/adventure-level-tiers/{fixture.tier.id}/runs/",
+        {"source_entry_point": "level_page"},
+        format="json",
+    )
     assert start.status_code == 201
     run_id = start.json()["id"]
-    detail = client.get(f"/api/adventure-runs/{run_id}/")
+    detail = client.get(f"/api/adventure-tier-runs/{run_id}/")
     workspace = client.post(
-        f"/api/adventure-runs/{run_id}/files/",
+        f"/api/adventure-tier-runs/{run_id}/files/",
         {"path": "NOTES.md", "content": "response contract"},
         format="json",
     )
 
     for response in (start, detail, workspace):
-        assert set(response.json()) == ADVENTURE_RUN_KEYS
-        assert response.json()["passed"] == response.json()["is_passed"]
-        _assert_valid(AdventureRunResponseSerializer, response.json())
-    assert "NOTES.md" in AdventureRun.objects.get(id=run_id).repository_state["working_tree"]
+        _assert_valid(AdventureLevelTierRunResponseSerializer, response.json())
+        assert response.json()["scenario"] == {"index": 1, "total": 1, "title": "Stage README"}
+        assert response.json()["reward"] == {"coins": 25, "claimed": False}
+        # The outcome modal names the level as the story map numbers it.
+        assert response.json()["tier"]["adventure_level_number"] == 1
+    run = AdventureLevelTierRun.objects.get(id=run_id)
+    assert "NOTES.md" in run.repository_state["working_tree"]
 
 
-def test_adventure_command_response_validates_partial_and_full_branches(db, django_user_model):
-    partial = create_stage_readme_adventure_run(
-        django_user_model,
-        username="adventure-response-partial",
-    )
-    assert _adventure_state(partial) == {
-        "status": "started",
-        "command_count": 0,
-        "counted_command_count": 0,
-        "current_wave_id": partial.wave.id,
-        "repository_state": partial.states.initial,
-        "step_count": 0,
-        "level_completion_count": 0,
-        "coin_transaction_count": 0,
-        "wallet_balance": 0,
-        "run_wave_statuses": ["started"],
-    }
-    partial_response = _submit_adventure_command(partial, diagnostic=True)
-    partial_payload = partial_response.json()
+def test_adventure_tier_command_response_validates_started_and_terminal_updates(
+    db, django_user_model
+):
+    started = create_stage_readme_tier_run(django_user_model, username="tier-response-started")
+    started_response = _submit_tier_command(started, diagnostic=True)
+    started_payload = started_response.json()
 
-    assert partial_response.status_code == 200
-    _assert_adventure_command_shape(partial_payload, {"partial", "id", "status", "current_attempt"})
-    assert partial_payload["run"]["partial"] is True
-    assert isinstance(partial_payload["run"]["current_attempt"], dict)
-    _assert_valid(AdventureCommandResponseSerializer, partial_payload)
-    assert _adventure_state(partial) == {
-        "status": "started",
-        "command_count": 1,
-        "counted_command_count": 0,
-        "current_wave_id": partial.wave.id,
-        "repository_state": partial.states.initial,
-        "step_count": 1,
-        "level_completion_count": 0,
-        "coin_transaction_count": 0,
-        "wallet_balance": 0,
-        "run_wave_statuses": ["started"],
-    }
+    assert started_response.status_code == 200
+    _assert_valid(AdventureLevelTierCommandResponseSerializer, started_payload)
+    assert started_payload["run"]["status"] == "started"
+    assert "progress" not in started_payload["run"]
+    assert CommandStep.objects.filter(adventure_tier_run=started.run).count() == 1
 
-    transition = create_stage_readme_adventure_run(
-        django_user_model,
-        username="adventure-response-transition",
-    )
-    next_wave = AdventureWave.objects.create(
-        level=transition.level,
-        slug="response-contract-second-wave",
-        title="Second Wave",
-        sort_order=1,
-        min_counted_commands=1,
-        max_counted_commands=3,
-        is_published=True,
-    )
-    AdventureWaveVariant.objects.create(
-        wave=next_wave,
-        slug="response-contract-second-variant",
-        label="Second Variant",
-        initial_state=transition.states.initial,
-        target_state=transition.states.target,
-        evaluation_spec={"completion_policy": {"mode": "state_hash"}},
-        solution_commands=["git add README.md"],
-        semantic_key="response-contract-second-wave",
-        is_published=True,
-    )
-    assert _adventure_state(transition) == {
-        "status": "started",
-        "command_count": 0,
-        "counted_command_count": 0,
-        "current_wave_id": transition.wave.id,
-        "repository_state": transition.states.initial,
-        "step_count": 0,
-        "level_completion_count": 0,
-        "coin_transaction_count": 0,
-        "wallet_balance": 0,
-        "run_wave_statuses": ["started"],
-    }
-    transition_response = _submit_adventure_command(transition)
-    transition_payload = transition_response.json()
-
-    assert transition_response.status_code == 200
-    _assert_adventure_command_shape(transition_payload, ADVENTURE_RUN_KEYS)
-    assert "partial" not in transition_payload["run"]
-    _assert_valid(AdventureCommandResponseSerializer, transition_payload)
-    assert _adventure_state(transition) == {
-        "status": "started",
-        "command_count": 0,
-        "counted_command_count": 0,
-        "current_wave_id": next_wave.id,
-        "repository_state": transition.states.initial,
-        "step_count": 1,
-        "level_completion_count": 0,
-        "coin_transaction_count": 0,
-        "wallet_balance": 0,
-        "run_wave_statuses": ["completed", "started"],
-    }
-
-    terminal = create_stage_readme_adventure_run(
-        django_user_model,
-        username="adventure-response-terminal",
-        reward_coins=7,
-    )
-    assert _adventure_state(terminal) == {
-        "status": "started",
-        "command_count": 0,
-        "counted_command_count": 0,
-        "current_wave_id": terminal.wave.id,
-        "repository_state": terminal.states.initial,
-        "step_count": 0,
-        "level_completion_count": 0,
-        "coin_transaction_count": 0,
-        "wallet_balance": 0,
-        "run_wave_statuses": ["started"],
-    }
-    terminal_response = _submit_adventure_command(terminal)
+    terminal = create_stage_readme_tier_run(django_user_model, username="tier-response-terminal")
+    terminal_response = _submit_tier_command(terminal)
     terminal_payload = terminal_response.json()
 
     assert terminal_response.status_code == 200
-    _assert_adventure_command_shape(terminal_payload, ADVENTURE_RUN_KEYS)
-    assert "partial" not in terminal_payload["run"]
-    _assert_valid(AdventureCommandResponseSerializer, terminal_payload)
-    assert _adventure_state(terminal) == {
-        "status": "completed",
-        "command_count": 1,
-        "counted_command_count": 1,
-        "current_wave_id": terminal.wave.id,
-        "repository_state": terminal.states.target,
-        "step_count": 1,
-        "level_completion_count": 1,
-        "coin_transaction_count": 5,
-        "wallet_balance": 342,
-        "run_wave_statuses": ["completed"],
+    _assert_valid(AdventureLevelTierCommandResponseSerializer, terminal_payload)
+    assert terminal_payload["run"]["status"] == "completed"
+    assert terminal_payload["run"]["progress"] == {
+        "completed": 1,
+        "total": 1,
+        "cleared": True,
+        "next_scenario": None,
     }
+    assert terminal_payload["run"]["rewards"]["coins_awarded"] == 25
+    assert (
+        CoinTransaction.objects.filter(
+            player=terminal.player, award_key=f"adventure-level-reward:{terminal.level.id}"
+        ).count()
+        == 1
+    )
 
 
 def test_challenge_full_success_endpoints_match_the_domain_schema(db, django_user_model):

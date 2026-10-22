@@ -125,7 +125,7 @@ def test_snapshot_round_trip_normalizes_identical_to_raw_state():
 
     tools = RepositoryStateSimulator()
     snapshotter = RepositorySnapshotService()
-    # Same minimal shape spec_helpers.repo() persists for seeded variants.
+    # The minimal repository shape seeded variants persist.
     raw = {
         "repository_initialized": True,
         "commits": [

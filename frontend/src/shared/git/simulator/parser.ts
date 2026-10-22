@@ -36,11 +36,15 @@ export class GitCommandParser {
     const originalSubcommand = argv[1] ?? ''
     const subcommand = originalSubcommand ? COMMAND_ALIASES[originalSubcommand] ?? originalSubcommand : ''
     const { options, args, pathspecs, message, normalizedTail } = parseTail(subcommand, argv.slice(2))
-    const normalizedArgv = ['git', ...(subcommand ? [subcommand] : []), ...normalizedTail]
+    // The backend checks each submission against its own normalize_command
+    // (simulator/services/core.py): the typed tokens with the subcommand alias
+    // resolved, quoting only tokens that contain whitespace. Mirror it exactly;
+    // `normalizedTail` splits `--option=value` and must not leak into this text.
+    const contractArgv = ['git', ...(subcommand ? [subcommand] : []), ...argv.slice(2)]
 
     return {
       rawText,
-      normalizedText: shellJoin(normalizedArgv),
+      normalizedText: contractArgv.map((part) => (/\s/.test(part) ? quote(part) : part)).join(' '),
       argv: subcommand ? ['git', subcommand, ...normalizedTail] : ['git'],
       subcommand,
       originalSubcommand,

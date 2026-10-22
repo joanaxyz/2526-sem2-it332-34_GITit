@@ -9,7 +9,6 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('authoring', '0001_initial'),
         ('curriculum', '0001_initial'),
         ('players', '0001_initial'),
     ]
@@ -27,7 +26,6 @@ class Migration(migrations.Migration):
                 ('sort_order', models.PositiveIntegerField(default=0)),
                 ('chapter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='challenge_levels', to='curriculum.chapter')),
                 ('command_forms', models.ManyToManyField(blank=True, related_name='challenge_levels', to='curriculum.commandform')),
-                ('source_content_definition', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='runtime_challenge_levels', to='authoring.contentdefinition')),
             ],
             options={
                 'ordering': ['chapter__sort_order', 'sort_order', 'id'],

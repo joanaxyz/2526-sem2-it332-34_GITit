@@ -115,6 +115,14 @@ class ClientTransitionVerifier(
         "cherry-pick": "_verify_cherry_pick",
     }
 
+    # Commands that may stop part-way (a conflict) with a non-zero exit code
+    # while still changing the index and worktree.
+    STOPPING_HANDLERS = {
+        "merge": "_verify_merge",
+        "pull": "_verify_pull",
+        "cherry-pick": "_verify_cherry_pick",
+    }
+
     def __init__(self) -> None:
         self.tools = RepositoryStateSimulator()
         self.normalizer = self.tools.normalizer
@@ -131,20 +139,16 @@ class ClientTransitionVerifier(
         # Failed commands should not mutate persisted state. The browser can still
         # display stdout/stderr instantly, but the DB state remains authoritative.
         if exit_code != 0:
-            # Some Git operations, most notably a merge that stops on conflicts,
-            # intentionally mutate the index/worktree while returning a non-zero
+            # Some Git operations, most notably a merge or cherry-pick that stops
+            # on conflicts, intentionally mutate the index/worktree while returning a non-zero
             # code. Verify those exact transitions instead of blanket-rejecting
             # them; keep every other failed command immutable.
-            if command_family in {"merge", "pull"}:
+            stopping_handler = self.STOPPING_HANDLERS.get(command_family)
+            if stopping_handler is not None:
                 try:
-                    if command_family == "merge":
-                        self._verify_merge(
-                            command=command, previous_state=previous_state, next_state=next_state
-                        )
-                    else:
-                        self._verify_pull(
-                            command=command, previous_state=previous_state, next_state=next_state
-                        )
+                    getattr(self, stopping_handler)(
+                        command=command, previous_state=previous_state, next_state=next_state
+                    )
                     return
                 except BadRequest:
                     # A merge/pull can stop with conflicts and mutate state, or

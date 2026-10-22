@@ -77,22 +77,6 @@ class AdminUserActionService:
 
 
 @transaction.atomic
-def unpublish_moderation_content(*, actor, content):
-    before = {"visibility": content.visibility, "status": content.status}
-    content.visibility = "private"
-    content.status = "draft"
-    content.save(update_fields=["visibility", "status", "updated_at"])
-    record_admin_action(
-        actor=actor,
-        action="moderation.unpublish",
-        target=content,
-        before=before,
-        after={"visibility": content.visibility, "status": content.status},
-    )
-    return content
-
-
-@transaction.atomic
 def update_feature_flag(*, actor, key: str, enabled: bool):
     from adminconsole.flags import SUPPORTED_FLAGS
     from adminconsole.models import FeatureFlag

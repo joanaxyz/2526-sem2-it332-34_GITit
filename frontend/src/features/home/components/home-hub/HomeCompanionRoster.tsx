@@ -101,7 +101,6 @@ export function HomeCompanionRoster() {
                     ? 'Equipping'
                     : 'Equip companion'}
               </button>
-              <small>{selected.active ? 'Joins your next Adventure or Challenge.' : `Send ${selected.label} into your next run instead.`}</small>
             </div>
           ) : null}
 

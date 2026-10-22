@@ -1,14 +1,13 @@
 from types import SimpleNamespace
 
 from django.core.management import call_command
-from django.utils import timezone
 from rest_framework.test import APIClient
 
 from challenges.models import ChallengeLevel, ChallengeRun
 from challenges.services.history import CommandHistoryCache
 from curriculum.selectors import challenge_levels_access_payload
 from players.services import get_or_create_player
-from progress.models import AdventureLevelCompletion, ChallengeTrialCompletion
+from progress.models import AdventureLevelTierCompletion, ChallengeTrialCompletion
 from shop.models import Entitlement
 
 
@@ -30,7 +29,8 @@ def test_challenge_history_cache_key_changes_when_database_id_is_reused():
 
 
 def unlock_chapter_for(user, chapter):
-    from adventures.models import AdventureLevel, AdventureRun
+    """Clear every tier in the chapter, which opens all of its gate trials."""
+    from adventures.models import AdventureLevelTier
 
     player = get_or_create_player(user)
     if chapter.story_id:
@@ -39,22 +39,13 @@ def unlock_chapter_for(user, chapter):
             kind="story",
             slug=chapter.story.slug,
         )
-    for level in AdventureLevel.objects.filter(
-        chapter=chapter, is_published=True, is_required=True
+    for tier in AdventureLevelTier.objects.filter(
+        adventure_level__chapter=chapter,
+        adventure_level__is_published=True,
+        adventure_level__is_required=True,
+        is_published=True,
     ):
-        wave = level.waves.filter(is_published=True).order_by("sort_order", "id").first()
-        run = AdventureRun.objects.create(
-            player=player,
-            level=level,
-            current_wave=wave,
-            selected_variant=wave.variants.filter(is_published=True).first(),
-            passed_at=timezone.now(),
-        )
-        AdventureLevelCompletion.objects.get_or_create(
-            player=player,
-            adventure_level=level,
-            defaults={"adventure_run": run},
-        )
+        AdventureLevelTierCompletion.objects.get_or_create(player=player, tier=tier)
 
 
 def first_challenge_level():
@@ -68,7 +59,7 @@ def first_challenge_level():
 
 
 def test_challenge_summary_shape_has_levels_with_three_trials(db):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     level = first_challenge_level()
 
     assert level is not None
@@ -78,7 +69,7 @@ def test_challenge_summary_shape_has_levels_with_three_trials(db):
 
 
 def test_challenge_trial_launch_uses_trial_owned_variant(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     user = make_user(django_user_model)
     level = first_challenge_level()
     trial = level.trials.get(difficulty="easy")
@@ -100,7 +91,7 @@ def test_challenge_trial_launch_uses_trial_owned_variant(db, django_user_model):
 
 
 def test_challenge_retry_rotates_within_same_trial(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     user = make_user(django_user_model, "retry")
     level = first_challenge_level()
     trial = level.trials.get(difficulty="easy")
@@ -128,7 +119,7 @@ def test_challenge_retry_rotates_within_same_trial(db, django_user_model):
 
 
 def test_discarding_active_challenge_deletes_run(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     user = make_user(django_user_model, "discard-challenge")
     level = first_challenge_level()
     trial = level.trials.get(difficulty="easy")
@@ -149,7 +140,7 @@ def test_discarding_active_challenge_deletes_run(db, django_user_model):
 
 
 def test_starting_challenge_discards_stale_active_run(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     user = make_user(django_user_model, "stale-challenge")
     level = first_challenge_level()
     trial = level.trials.get(difficulty="easy")
@@ -176,7 +167,7 @@ def test_starting_challenge_discards_stale_active_run(db, django_user_model):
 
 
 def test_retrying_active_challenge_discards_prior_run(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     user = make_user(django_user_model, "retry-active")
     level = first_challenge_level()
     trial = level.trials.get(difficulty="easy")
@@ -199,7 +190,7 @@ def test_retrying_active_challenge_discards_prior_run(db, django_user_model):
 
 
 def test_active_challenge_run_is_not_exposed_as_resumable_session(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     user = make_user(django_user_model, "active-hidden")
     level = first_challenge_level()
     trial = level.trials.get(difficulty="easy")
@@ -226,7 +217,7 @@ def test_active_challenge_run_is_not_exposed_as_resumable_session(db, django_use
 
 
 def test_medium_unlocks_after_easy_trial_completion(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     user = make_user(django_user_model, "medium")
     level = first_challenge_level()
     easy = level.trials.get(difficulty="easy")

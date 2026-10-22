@@ -7,8 +7,10 @@ import {
   DESKTOP_CARD_WIDTH,
   HEADER_CLEARANCE,
   layoutFor,
+  layoutForPanes,
   prefersReducedMotion,
   VIEWPORT_GAP,
+  type WorkspaceTourPaneLayout,
 } from './gameplayWorkspaceTourLayout'
 import type {
   CollapseVector,
@@ -61,6 +63,7 @@ export function GameplayWorkspaceTour({
   showSkip = true,
   skipIconOnly = false,
   showProgress = true,
+  showSpeaker = true,
   showActions = true,
   focusCard = true,
   finishDisabled = false,
@@ -68,10 +71,12 @@ export function GameplayWorkspaceTour({
   reveal,
   aside,
   asideWidth = 336,
+  paneLayout,
   paneLabels = { main: 'main card', aside: 'side card' },
   steps,
   refreshKey,
   collapseTarget,
+  closeOnOutsideClick,
   transformable = false,
   transformPreferenceKey,
   onClose,
@@ -83,6 +88,7 @@ export function GameplayWorkspaceTour({
   /** Render the skip control as a bare close icon; `skipLabel` becomes its accessible name. */
   skipIconOnly?: boolean
   showProgress?: boolean
+  showSpeaker?: boolean
   /** Hide the footer for cards that update themselves instead of being stepped through. */
   showActions?: boolean
   /** Move focus into the card when it opens. Off for cards that sit beside an active input. */
@@ -94,12 +100,19 @@ export function GameplayWorkspaceTour({
   /** A second card shown beside the main one on wide screens. */
   aside?: ReactNode
   asideWidth?: number
+  /** Initial sizes and top alignment for a pair of cards; manual transforms take priority. */
+  paneLayout?: WorkspaceTourPaneLayout
   /** Names of the two cards for their resize controls, e.g. "command card". */
   paneLabels?: Record<WorkspaceTourPane, string>
   steps: readonly WorkspaceTourStep[]
   refreshKey?: string | number
   /** Animate the guide card into this control before closing. */
   collapseTarget?: string
+  /**
+   * Put the card away when the learner clicks outside it, as Escape does. Clicks
+   * on its target and in the `except` regions (a companion window) are inside.
+   */
+  closeOnOutsideClick?: { except?: readonly string[] }
   /** Let the learner move and resize guide cards while keeping them in the viewport. */
   transformable?: boolean
   /** Persist transformable card positions and sizes in the browser under this preference key. */
@@ -130,6 +143,8 @@ export function GameplayWorkspaceTour({
 
   const close = useCallback((reason: WorkspaceTourCloseReason) => {
     if (collapseVector) return
+    // A click elsewhere moves the learner on: focus stays where they clicked.
+    if (reason === 'outside') previousFocusRef.current = null
     const destination = collapseTarget
       ? document.querySelector<HTMLElement>(collapseTarget)
       : null
@@ -254,7 +269,9 @@ export function GameplayWorkspaceTour({
           top: box.top, right: box.right, bottom: box.bottom, left: box.left, width: box.width, height: box.height,
         }))
       setLayout({
-        ...layoutFor(rect, activeStep.placement ?? 'bottom', cardHeight, width),
+        ...(aside && paneLayout
+          ? layoutForPanes(rect, paneLayout)
+          : layoutFor(rect, activeStep.placement ?? 'bottom', cardHeight, width)),
         reveals,
         ...(mainPane ? { mainSize: { width: mainPane.width, height: mainPane.height } } : {}),
       })
@@ -290,7 +307,7 @@ export function GameplayWorkspaceTour({
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
     }
-  }, [activeStep, activeTarget, aside, asideWidth, cardElement, reveal])
+  }, [activeStep, activeTarget, aside, asideWidth, cardElement, paneLayout, reveal])
 
   useEffect(() => {
     if (!focusCard || !activeStep || !layoutReady) return
@@ -299,9 +316,24 @@ export function GameplayWorkspaceTour({
   }, [activeStep, cardElement, focusCard, layoutReady])
 
   useEffect(() => {
+    if (!closeOnOutsideClick || !cardElement) return
+    const { except = [] } = closeOnOutsideClick
+    const closeOutside = (event: PointerEvent) => {
+      const pressed = event.target
+      if (!(pressed instanceof Element)) return
+      if (cardElement.contains(pressed) || activeTarget?.contains(pressed)) return
+      if (except.some((selector) => pressed.closest(selector))) return
+      close('outside')
+    }
+    document.addEventListener('pointerdown', closeOutside)
+    return () => document.removeEventListener('pointerdown', closeOutside)
+  }, [activeTarget, cardElement, close, closeOnOutsideClick])
+
+  const dismissible = showSkip || Boolean(closeOnOutsideClick)
+  useEffect(() => {
     const handleKeyDown = (event: KeyboardEvent) => {
       if (availableSteps.length === 0) return
-      if (event.key === 'Escape' && showSkip) {
+      if (event.key === 'Escape' && dismissible) {
         event.preventDefault()
         close('skip')
         return
@@ -319,7 +351,7 @@ export function GameplayWorkspaceTour({
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [availableSteps.length, close, showSkip])
+  }, [availableSteps.length, close, dismissible])
 
   if (!activeStep || !layout || typeof document === 'undefined') return null
 
@@ -332,6 +364,7 @@ export function GameplayWorkspaceTour({
       showSkip={showSkip}
       skipIconOnly={skipIconOnly}
       showProgress={showProgress}
+      showSpeaker={showSpeaker}
       showActions={showActions}
       finishDisabled={finishDisabled}
       cardClassName={cardClassName}

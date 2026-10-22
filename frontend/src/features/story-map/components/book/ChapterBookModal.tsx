@@ -111,7 +111,7 @@ function railKicker(book: ChapterBook) {
   return labels.join(' / ')
 }
 
-export function ChapterBookReader({ book, title, onClose }: { book: ChapterBook; title: string; onClose: () => void }) {
+function ChapterBookReader({ book, title, onClose }: { book: ChapterBook; title: string; onClose: () => void }) {
   const entries = useMemo(() => navEntriesForBook(book), [book])
   const [requestedActiveIndex, setRequestedActiveIndex] = useState(0)
   // {entryIndex, pageId | 'top', nonce}: the pending scroll target. 'top' is

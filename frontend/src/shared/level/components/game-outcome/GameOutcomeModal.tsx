@@ -1,16 +1,16 @@
 import type { ComponentType, ReactNode } from 'react'
-import { X } from 'lucide-react'
 
 import titlesImage from '@/assets/images/battle-outcome/titles.webp'
 import { Modal } from '@/shared/components/Modal'
 import { cn } from '@/shared/utils/cn'
 import { useLazyImage } from '@/shared/utils/useLazyImage'
+import { normalizeStarScore } from '@/shared/level/utils/starScore'
 
 import { GameOutcomeConfetti } from './GameOutcomeConfetti'
 import { GameOutcomeStatTile } from './GameOutcomeStatTile'
 
-// A single outcome shows exactly one star-arc image (the loss art, or one of
-// three win tiers), so each is imported lazily instead of bundling all four
+// A single outcome shows exactly one star image (the loss art, or one of
+// three win tiers), so each is imported lazily instead of bundling every variant
 // upfront. `titlesImage` above is shown on every outcome, so it stays a
 // normal static import.
 const STAR_ART_LOADERS: Record<string, () => Promise<{ default: string }>> = {
@@ -26,7 +26,7 @@ export type GameOutcomeStat = {
   denominator?: number
   suffix?: string
   helper: string
-  /** Per-tile accent color; falls back to the tone's primary/destructive. */
+  /** Per-tile accent color; falls back to the tone's accent (neon blue / window amber). */
   accentColor?: string
   /** Shows a "Target met" chip in the tile header. */
   targetMet?: boolean
@@ -38,6 +38,8 @@ export type GameOutcomeStat = {
 /**
  * Shared game result overlay for challenge and adventure run endings. Feature
  * wrappers own outcome state and copy; this component owns the visual chrome.
+ * A click anywhere dismisses it; the run's next step then waits on the
+ * workspace's OutcomeNextStepMascot.
  */
 export function GameOutcomeModal({
   open,
@@ -47,13 +49,14 @@ export function GameOutcomeModal({
   icon: Icon,
   resultLabel,
   stars,
+  showStars = true,
+  level,
   badges,
   headline,
   message,
   note,
   stats,
   children,
-  actions,
   headerActions,
   className,
 }: {
@@ -66,62 +69,52 @@ export function GameOutcomeModal({
   resultLabel?: string
   /** Stars earned, shown as the hero crest when provided. */
   stars?: number
+  /** Assessments record a first outcome without awarding a star grade. */
+  showStars?: boolean
+  /** Names the level the outcome belongs to, e.g. "Level 3" and its title. */
+  level?: { label: string; title: string }
   badges?: ReactNode
   headline: string
   message: ReactNode
   /** Optional emphasised aside under the message. */
   note?: ReactNode
   stats?: GameOutcomeStat[]
-  /** Surface-specific section rendered between the stats and the actions. */
+  /** Surface-specific section rendered under the stats. */
   children?: ReactNode
-  actions?: ReactNode
-  /** Icon-button actions rendered in the top-right header cluster (alongside the close button). */
+  /** Icon-button actions rendered in the top-right header cluster. */
   headerActions?: ReactNode
   className?: string
 }) {
   const isFailed = tone === 'failure'
-  const earnedStars = Number.isFinite(stars) ? Math.max(0, Math.min(3, Math.floor(stars ?? 0))) : null
+  const earnedStars = Number.isFinite(stars) ? normalizeStarScore(stars) : null
   const displayLabel = resultLabel ?? (isFailed ? 'Game Over' : 'You Won')
-  // Failure always shows the shattered arc; wins need at least one earned star
-  // (the arc art has no zero-star variant, so starless wins keep the icon crest).
-  const starArtKey = isFailed ? 'lose' : earnedStars && earnedStars > 0 ? `win-${earnedStars}` : null
+  // Graded failures show unlit stars; assessments keep the icon crest.
+  const starArtKey = !showStars ? null : isFailed ? 'lose' : earnedStars && earnedStars > 0 ? `win-${earnedStars}` : null
   const starArt = useLazyImage(starArtKey, STAR_ART_LOADERS)
-  const defaultAccent = isFailed ? 'hsl(var(--destructive))' : 'hsl(var(--primary))'
+  const defaultAccent = isFailed ? 'hsl(var(--warning))' : 'hsl(var(--primary))'
 
   return (
     <Modal
       open={open}
       title={title}
-      className={cn('game-outcome-shell w-full max-w-5xl overflow-hidden', className)}
+      className={cn('game-outcome-shell', className)}
       overlayClassName="game-outcome-backdrop"
       contentClassName="p-0"
       hideHeader
+      dismissOnClick
       onClose={onClose}
     >
       <div className={cn('game-outcome relative overflow-hidden', isFailed ? 'is-failure' : 'is-success')}>
-        <div className="game-outcome-header-actions">
-          {headerActions ? (
-            <>
-              {headerActions}
-              <span className="game-outcome-header-divider" aria-hidden="true" />
-            </>
-          ) : null}
-          <button
-            type="button"
-            className="game-outcome-header-btn"
-            onClick={onClose}
-            aria-label="Close modal"
-          >
-            <X className="size-3.5" />
-          </button>
-        </div>
+        {headerActions ? <div className="game-outcome-header-actions">{headerActions}</div> : null}
         {!isFailed ? <GameOutcomeConfetti /> : null}
 
         <div className="game-outcome-hero relative text-center">
           {starArt ? (
             <img
-              className={cn('game-outcome-star-art', !isFailed && 'game-outcome-sparkle-glow')}
+              className={cn('game-outcome-star-art', isFailed ? 'is-lost' : 'game-outcome-sparkle-glow')}
               src={starArt}
+              width={1774}
+              height={887}
               alt={isFailed ? 'No stars earned' : `${earnedStars} of 3 stars earned`}
             />
           ) : (
@@ -134,19 +127,27 @@ export function GameOutcomeModal({
             className={cn(
               'game-outcome-title-art game-outcome-headline',
               isFailed && 'is-lost',
-              starArt && 'has-star-arc',
             )}
             role="img"
             aria-label={displayLabel}
             style={{ backgroundImage: `url(${titlesImage})` }}
           />
-          <h3 className="game-outcome-subline mx-auto mt-2 max-w-xl text-balance text-base font-extrabold sm:text-lg">
-            {headline}
+          <h3 className="game-outcome-subline">
+            <span className="game-outcome-subline-rule" aria-hidden="true" />
+            <span className="text-balance">{headline}</span>
+            <span className="game-outcome-subline-rule is-end" aria-hidden="true" />
           </h3>
 
-          <p className="game-outcome-message mx-auto mt-2 max-w-xl text-sm leading-6">{message}</p>
-          {note ? <p className="mx-auto mt-2 max-w-xl text-xs font-medium leading-5 text-warning">{note}</p> : null}
-          {badges ? <div className="mt-3 flex flex-wrap justify-center gap-2">{badges}</div> : null}
+          {level ? (
+            <p className="game-outcome-level">
+              <span className="game-outcome-level-label">{level.label}</span>
+              <span className="game-outcome-level-title">{level.title}</span>
+            </p>
+          ) : null}
+
+          {badges ? <div className="game-outcome-badges">{badges}</div> : null}
+          <p className="game-outcome-message">{message}</p>
+          {note ? <p className="game-outcome-note">{note}</p> : null}
 
           {stats && stats.length ? (
             <div className="game-outcome-stat-grid">
@@ -163,7 +164,9 @@ export function GameOutcomeModal({
 
           {children}
 
-          {actions ? <div className="game-outcome-actions">{actions}</div> : null}
+          <p className="game-outcome-hint">
+            Click anywhere to continue<span className="sr-only">, or press Enter, Space, or Escape.</span>
+          </p>
         </div>
       </div>
     </Modal>

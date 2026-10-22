@@ -8,16 +8,28 @@ import { writePreference } from '@/shared/utils/persistentState'
 import { cn } from '@/shared/utils/cn'
 
 import { CommitActivationContext } from './live-dag/activation'
+import { CommitLinkEdge } from './live-dag/edges'
 import { RepositoryStateMap } from './live-dag/RepositoryStateMap'
 import { MAX_DAG_ZOOM, MIN_DAG_ZOOM, NO_DELTA, VARIANT_COLORS } from './live-dag/constants'
 import { FitViewOnTopologyChange } from './live-dag/FitViewOnTopologyChange'
 import { buildGraph, layoutPositionsCache, normalizeSnapshot, rememberLayoutPositions, snapshotDelta } from './live-dag/graph'
 import { CommitDetailsPanel, CommitNode, EmptyRepositoryNode, RepositoryDetails } from './live-dag/nodes'
-import type { CommitNodeData, DagActivity, DagLayoutDirection, DagVariant, EnteringDelta } from './live-dag/types'
+import type {
+  CommitNodeData,
+  DagActivity,
+  DagLayoutDirection,
+  DagVariant,
+  EmptyRepositoryNodeData,
+  EnteringDelta,
+} from './live-dag/types'
 
 const commitNodeTypes = {
   commit: memo(CommitNode),
   emptyRepository: memo(EmptyRepositoryNode),
+}
+
+const commitEdgeTypes = {
+  commitLink: memo(CommitLinkEdge),
 }
 
 function handleReactFlowError(code: string, message: string) {
@@ -34,11 +46,11 @@ export function LiveDagPanel({
   fitViewPadding = 0.08,
   zoomStorageKey,
   animateChanges = false,
-  pauseChangeAnimations = false,
   activity = 'idle',
   layoutDirection = 'vertical',
   showHeader = true,
   refitKey,
+  preserveViewportOnResize = false,
 }: {
   title?: string
   snapshot: RepositorySnapshot
@@ -54,8 +66,6 @@ export function LiveDagPanel({
   /** Animate per-command deltas: new commits pop in, new edges draw in, moved
    *  ref pills slide up. Off for static diagrams (Target DAG). */
   animateChanges?: boolean
-  /** Keep newly rendered graph deltas at their first frame until a command resolves. */
-  pauseChangeAnimations?: boolean
   /** Concise state signal used by puzzle-style DAG consumers. */
   activity?: DagActivity
   /** Controls whether commits flow top-to-bottom or left-to-right. */
@@ -64,6 +74,8 @@ export function LiveDagPanel({
   showHeader?: boolean
   /** Changing this re-runs the fit, e.g. when a hidden-but-mounted view becomes visible again. */
   refitKey?: string | number
+  /** Keep the current zoom and pan when the canvas dimensions change. */
+  preserveViewportOnResize?: boolean
 }) {
   return (
     <RepositoryStateDiagram
@@ -75,11 +87,11 @@ export function LiveDagPanel({
       fitViewPadding={fitViewPadding}
       zoomStorageKey={zoomStorageKey}
       animateChanges={animateChanges}
-      pauseChangeAnimations={pauseChangeAnimations}
       activity={activity}
       layoutDirection={layoutDirection}
       showHeader={showHeader}
       refitKey={refitKey}
+      preserveViewportOnResize={preserveViewportOnResize}
     />
   )
 }
@@ -94,11 +106,11 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   variant = 'cyan',
   zoomStorageKey,
   animateChanges = false,
-  pauseChangeAnimations = false,
   activity = 'idle',
   layoutDirection = 'vertical',
   showHeader = true,
   refitKey,
+  preserveViewportOnResize = false,
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -109,11 +121,11 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   variant?: DagVariant
   zoomStorageKey?: string
   animateChanges?: boolean
-  pauseChangeAnimations?: boolean
   activity?: DagActivity
   layoutDirection?: DagLayoutDirection
   showHeader?: boolean
   refitKey?: string | number
+  preserveViewportOnResize?: boolean
 }) {
   const colors = VARIANT_COLORS[variant]
   const normalizedSnapshot = useMemo(() => normalizeSnapshot(snapshot), [snapshot])
@@ -122,7 +134,9 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
 
   // Per-command enter animations: diff the snapshot against the previous one
   // (in an effect, so render never touches refs), hold the delta long enough
-  // for the CSS animations to finish, then clear.
+  // for the CSS animations to finish, then clear. A delta plays as soon as the
+  // optimistic state renders; the server's matching state arrives mid-animation
+  // with no delta of its own and must not cut it short.
   const [entering, setEntering] = useState<EnteringDelta>(NO_DELTA)
   const previousSnapshotRef = useRef<RepositorySnapshot | null>(null)
   useLayoutEffect(() => {
@@ -130,19 +144,19 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
     previousSnapshotRef.current = normalizedSnapshot
     if (!animateChanges || !previous || previous === normalizedSnapshot) return
     const delta = snapshotDelta(previous, normalizedSnapshot)
-    if (delta === NO_DELTA) {
-      setEntering(NO_DELTA)
-      return
-    }
-    setEntering(delta)
+    if (delta !== NO_DELTA) setEntering(delta)
   }, [animateChanges, normalizedSnapshot])
 
   useEffect(() => {
-    const hasDelta = entering.commits.size > 0 || entering.refsByCommit.size > 0 || Boolean(entering.headTarget)
-    if (!hasDelta || pauseChangeAnimations) return
-    const timer = window.setTimeout(() => setEntering(NO_DELTA), 760)
+    const hasDelta =
+      entering.commits.size > 0 ||
+      entering.refsByCommit.size > 0 ||
+      Boolean(entering.headTarget) ||
+      entering.repositoryInitialized
+    if (!hasDelta) return
+    const timer = window.setTimeout(() => setEntering(NO_DELTA), 1100)
     return () => window.clearTimeout(timer)
-  }, [entering, pauseChangeAnimations])
+  }, [entering])
 
   const { nodes, edges } = useMemo(() => {
     const cached = layoutPositionsCache.get(layoutCacheKey)
@@ -171,6 +185,10 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
   const diagramNodes = useMemo(
     () =>
       nodes.map((node) => {
+        if (node.type === 'emptyRepository') {
+          if (!entering.repositoryInitialized) return node
+          return { ...node, data: { ...(node.data as EmptyRepositoryNodeData), isInitializing: true } }
+        }
         if (node.type !== 'commit') return node
         const commitId = node.id
         return {
@@ -189,7 +207,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
     () =>
       entering.commits.size
         ? edges.map((edge) =>
-            entering.commits.has(edge.target) ? { ...edge, className: 'dag-edge-enter' } : edge,
+            entering.commits.has(edge.target) ? { ...edge, className: cn(edge.className, 'dag-edge-enter') } : edge,
           )
         : edges,
     [edges, entering],
@@ -209,8 +227,6 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
     <Card
       className={cn(
         'live-dag-panel min-h-0 overflow-hidden shadow-none',
-        pauseChangeAnimations && 'is-change-paused',
-        activity === 'processing' && 'is-processing',
         className,
       )}
       style={showHeader ? { borderTop: `1.5px solid ${colors.border}` } : undefined}
@@ -225,7 +241,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
       )}
       <CardContent className={cn('p-0 repository-diagram-content', contentClassName)}>
         <details className="repository-diagram-details app-scrollbar">
-          <summary>Repository details</summary>
+          <summary>Details</summary>
           <RepositoryStateMap snapshot={normalizedSnapshot} />
           {showRepositoryDetails ? <RepositoryDetails snapshot={normalizedSnapshot} /> : null}
         </details>
@@ -245,6 +261,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
               nodesDraggable={false}
               nodesConnectable={false}
               nodeTypes={nodeTypes}
+              edgeTypes={commitEdgeTypes}
               panOnScroll
               minZoom={MIN_DAG_ZOOM}
               maxZoom={MAX_DAG_ZOOM}
@@ -261,10 +278,10 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
                   : undefined
               }
             >
-              <Background gap={18} color="hsl(var(--foreground) / 0.05)" />
+              <Background gap={20} size={1} color="hsl(var(--foreground) / 0.07)" />
               <Controls
                 className="dag-controls"
-                position="bottom-right"
+                position="top-right"
                 showInteractive={false}
                 aria-label={`${title} view controls`}
               />
@@ -273,6 +290,7 @@ const RepositoryStateDiagramBody = memo(function RepositoryStateDiagramBody({
                 topologySignature={layoutSignature}
                 fitViewPadding={fitViewPadding}
                 zoomStorageKey={zoomStorageKey}
+                preserveViewportOnResize={preserveViewportOnResize}
               />
             </ReactFlow>
           </CommitActivationContext.Provider>
@@ -293,11 +311,11 @@ function RepositoryStateDiagram({
   variant = 'cyan',
   zoomStorageKey,
   animateChanges = false,
-  pauseChangeAnimations = false,
   activity = 'idle',
   layoutDirection = 'vertical',
   showHeader = true,
   refitKey,
+  preserveViewportOnResize = false,
 }: {
   title: string
   snapshot: RepositorySnapshot
@@ -308,11 +326,11 @@ function RepositoryStateDiagram({
   variant?: DagVariant
   zoomStorageKey?: string
   animateChanges?: boolean
-  pauseChangeAnimations?: boolean
   activity?: DagActivity
   layoutDirection?: DagLayoutDirection
   showHeader?: boolean
   refitKey?: string | number
+  preserveViewportOnResize?: boolean
 }) {
   return (
     <ReactFlowProvider>
@@ -326,11 +344,11 @@ function RepositoryStateDiagram({
         variant={variant}
         zoomStorageKey={zoomStorageKey}
         animateChanges={animateChanges}
-        pauseChangeAnimations={pauseChangeAnimations}
         activity={activity}
         layoutDirection={layoutDirection}
         showHeader={showHeader}
         refitKey={refitKey}
+        preserveViewportOnResize={preserveViewportOnResize}
       />
     </ReactFlowProvider>
   )

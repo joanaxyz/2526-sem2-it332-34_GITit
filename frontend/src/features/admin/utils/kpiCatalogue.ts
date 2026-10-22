@@ -1,94 +1,7 @@
-import type { PerformanceModule } from '@/features/performance/types'
+import { KPIS, type KpiKey } from '@/features/performance/utils/performanceKpis'
 
-/* KPI and objective catalogues for the admin KPI Overview: the evaluation
- * KPIs (targets, formulas) and the official Specific Objectives per module. */
-
-// ─── types ───────────────────────────────────────────────────────────────────
-export type Rate = { value: number | null; numerator: number; denominator: number }
-export type Status = 'met' | 'miss' | 'none'
-
-// ─── KPI catalogue ────────────────────────────────────────────────────────────
-export const KPIS = [
-  {
-    key: 'scr',
-    abbr: 'SCR',
-    name: 'Scenario Completion Rate',
-    target: 80,
-    up: true,
-    pct: true,
-    formula: 'Completed sessions ÷ Started sessions × 100',
-    why: 'Measures how many learners finish a scenario without dropping out. Below 80% means scenarios are too confusing, too long, or the feedback isn\'t helping recovery.',
-  },
-  {
-    key: 'car',
-    abbr: 'CAR',
-    name: 'Command Accuracy Rate',
-    target: 70,
-    up: true,
-    pct: true,
-    formula: 'Processable commands ÷ Total submitted commands × 100',
-    why: 'Tracks how well learners type commands the simulator can understand. Low CAR means learners are guessing — field guide lessons need more worked examples.',
-  },
-  {
-    key: 'hlcr',
-    abbr: 'HLCR',
-    name: 'Hard-Level Completion Rate',
-    target: 70,
-    up: true,
-    pct: true,
-    formula: 'Hard-difficulty tiers completed ÷ Hard-difficulty tiers started × 100',
-    why: 'Hard tiers test whether learners can apply skills independently, not just in guided scenarios. Below 70% means the jump from normal to hard is too steep.',
-  },
-  {
-    key: 'arc',
-    abbr: 'ARC',
-    name: 'Avg Retry Count',
-    target: 2,
-    up: false,
-    pct: false,
-    formula: 'Total retry indices across completed sessions ÷ Completed sessions',
-    why: 'How many times on average a learner retries before succeeding. ≤2 is healthy. Above 3, learners are stuck in a loop — the failure feedback isn\'t actionable.',
-  },
-  {
-    key: 'rta',
-    abbr: 'RTA',
-    name: 'Retry Transfer Accuracy',
-    target: 65,
-    up: true,
-    pct: true,
-    formula: 'Successful first-attempt completions on changed-variant retry sessions ÷ all changed-variant retry sessions × 100',
-    why: 'Measures skill transfer: after a failure, does the learner complete the first retry when the scenario is structurally changed (a different starting repository or target)? Modules 3–4 only.',
-    tooltip: 'RTA measures skill transfer to structurally changed scenarios in Modules 3–4: the first retry after a failure counts only when its starting repository or target state differs from the failed attempt.',
-  },
-] as const
-
-export type KpiKey = (typeof KPIS)[number]['key']
-
-/** The old RTR measure, shown next to the evaluation KPIs for context. It has
- * no target, so it never counts toward "targets met". */
-export const SUPPLEMENTARY_KPI = {
-  key: 'retry_success_rate',
-  abbr: 'RSR',
-  name: 'Retry Success Rate (supplementary)',
-  pct: true,
-  tooltip:
-    'Share of retry sessions that eventually ended in completion, any variant, any attempt. ' +
-    'Supplementary indicator only; RTA is the evaluation KPI for SO 3.5, SO 4.5 and RQ4.',
-} as const
-
-/** Any card on the Overall row: an evaluation KPI (with a target) or the
- * supplementary indicator (without one). */
-export type CardKpi = (typeof KPIS)[number] | typeof SUPPLEMENTARY_KPI
-
-export const EMPTY_RATE: Rate = { value: null, numerator: 0, denominator: 0 }
-
-export function getModuleRate(mod: PerformanceModule, key: KpiKey): Rate {
-  if (key === 'scr') return mod.scr
-  if (key === 'hlcr') return mod.hlcr
-  if (key === 'arc') return mod.arc
-  if (key === 'rta') return mod.rta
-  return EMPTY_RATE
-}
+export { KPIS, SUPPLEMENTARY_KPI, EMPTY_RATE, getModuleRate } from '@/features/performance/utils/performanceKpis'
+export type { Rate, Status, CardKpi } from '@/features/performance/utils/performanceKpis'
 
 // ─── full capstone objectives structure ───────────────────────────────────────
 // Official Specific Objectives (Proposal, SO 1.1 – SO 4.5). Each General
@@ -99,9 +12,9 @@ export type SoMetric = { kpi: KpiKey; target: number; up: boolean }
 export type SpecificObjective = { id: string; title: string; metrics: readonly SoMetric[] }
 export type ModuleObjectives = { num: number; title: string; go: string; sos: readonly SpecificObjective[] }
 
-export const GO_SCR_TARGET = 80
+export const GO_SCR_TARGET = KPIS.find((kpi) => kpi.key === 'scr')!.target
 
-const car  = (): SoMetric => ({ kpi: 'car',  target: 70, up: true })
+const car  = (): SoMetric => ({ kpi: 'car', target: KPIS.find((kpi) => kpi.key === 'car')!.target, up: true })
 const hlcr = (target: number): SoMetric => ({ kpi: 'hlcr', target, up: true })
 const arc  = (target: number): SoMetric => ({ kpi: 'arc',  target, up: false })
 const rta  = (target: number): SoMetric => ({ kpi: 'rta',  target, up: true })
@@ -165,3 +78,10 @@ export const MODULES: readonly ModuleObjectives[] = [
     ],
   },
 ]
+
+/** Reuse the approved SO targets when a module table grades a KPI. */
+export function moduleTarget(key: KpiKey, number: number): number {
+  const metric = MODULES.find((module) => module.num === number)?.sos
+    .flatMap((objective) => objective.metrics).find((item) => item.kpi === key)
+  return metric?.target ?? KPIS.find((kpi) => kpi.key === key)!.target
+}

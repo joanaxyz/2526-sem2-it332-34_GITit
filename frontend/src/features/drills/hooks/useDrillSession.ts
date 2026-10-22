@@ -82,6 +82,7 @@ export function useDrillSession(plan: DrillPlan) {
   const [answer, setAnswer] = useState<DrillAnswer | null>(null)
   const [verdict, setVerdict] = useState<DrillVerdict | null>(null)
   const [round, setRound] = useState(0)
+  const [fell, setFell] = useState(false)
   const reportedRef = useRef(false)
 
   const cardsByKey = useMemo(
@@ -90,7 +91,11 @@ export function useDrillSession(plan: DrillPlan) {
   )
   const ask = currentAsk(queue)
   const card = ask?.kind === 'card' ? (cardsByKey[ask.cardKey] ?? null) : null
-  const finished = isFinished(queue)
+  // Misses are already checkpointed, so lives survive leaving and resuming.
+  // Keep the fallen checkpoint visible until View results commits its answer.
+  const gameOver = queue.answered - queue.correct >= 3 || (fell && !verdict)
+  const lives = fell ? 0 : Math.max(0, 3 - (queue.answered - queue.correct) - (verdict && !verdict.correct ? 1 : 0))
+  const finished = isFinished(queue) || gameOver
 
   // Derived rather than written inside `advance`, so the map survives a
   // restored checkpoint and a StrictMode double-render alike: it only ever
@@ -157,10 +162,10 @@ export function useDrillSession(plan: DrillPlan) {
       // Only a session where every card topped its ladder counts as a
       // clear; running out of attempts still records the attempt and the
       // weak spots, but must not mark the level drilled.
-      completed: allMastered(queue),
+      completed: !gameOver && allMastered(queue),
       shaky_form_keys: shakyKeys(queue),
     })
-  }, [finished, queue, report])
+  }, [finished, gameOver, queue, report])
 
   // Checkpoint after every answer rather than on a timer: the queue only
   // moves when a question is answered, and a save that lands one question
@@ -168,7 +173,7 @@ export function useDrillSession(plan: DrillPlan) {
   // Fire-and-forget - a failed checkpoint must never interrupt the drill.
   const checkpoint = useCallback(
     (next: DrillQueueState) => {
-      if (isFinished(next)) return
+      if (fell || isFinished(next) || next.answered - next.correct >= 3) return
       saveRun.mutate({
         cards: next.cards as unknown as Record<string, Record<string, never>>,
         queue: next.queue,
@@ -177,17 +182,36 @@ export function useDrillSession(plan: DrillPlan) {
         correct: next.correct,
       })
     },
-    [saveRun],
+    [fell, saveRun],
   )
 
   const check = useCallback(() => {
-    if (!ask || verdict) return
+    if (!ask || verdict || finished) return
     setVerdict(
       ask.kind === 'sequence'
         ? gradeSequence(plan.sequence?.steps ?? [], answer)
         : gradeCard(cardsByKey[ask.cardKey], ask.rung, answer),
     )
-  }, [answer, ask, cardsByKey, plan.sequence, verdict])
+  }, [answer, ask, cardsByKey, finished, plan.sequence, verdict])
+
+  // Collisions commit and grade the same value in one event, avoiding a
+  // stale React selection when a projectile hits between renders.
+  const collide = useCallback((value: string) => {
+    if (ask?.kind !== 'card' || verdict || finished) return
+    const picked: DrillAnswer = { kind: 'choice', value }
+    setAnswer(picked)
+    setVerdict(gradeCard(cardsByKey[ask.cardKey], ask.rung, picked))
+  }, [ask, cardsByKey, finished, verdict])
+
+  const resolveCheckpoint = useCallback((picked: DrillAnswer | null, didFall: boolean) => {
+    if (!ask || verdict || finished) return
+    const result = ask.kind === 'sequence'
+      ? gradeSequence(plan.sequence?.steps ?? [], picked)
+      : gradeCard(cardsByKey[ask.cardKey], ask.rung, picked)
+    setAnswer(picked)
+    setFell(didFall)
+    setVerdict({ ...result, correct: !didFall && result.correct })
+  }, [ask, cardsByKey, finished, plan.sequence, verdict])
 
   const advance = useCallback(() => {
     if (!verdict) return
@@ -213,6 +237,7 @@ export function useDrillSession(plan: DrillPlan) {
     setAnswer(null)
     setVerdict(null)
     setRound(0)
+    setFell(false)
   }, [discard, plan.cards, plan.sequence, report])
 
   const rail: DrillRailSegment[] = useMemo(() => {
@@ -264,9 +289,14 @@ export function useDrillSession(plan: DrillPlan) {
     setAnswer,
     verdict,
     check,
+    collide,
+    resolveCheckpoint,
     advance,
     restart,
     finished,
+    lives,
+    gameOver,
+    fell,
     rail,
     round,
     accuracy: accuracy(queue),

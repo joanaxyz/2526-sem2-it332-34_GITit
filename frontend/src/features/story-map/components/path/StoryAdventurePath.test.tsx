@@ -24,13 +24,18 @@ function renderPath(ui: ReactElement) {
 }
 
 const mocks = vi.hoisted(() => ({
-  openAdventureLevel: vi.fn(),
+  navigate: vi.fn(),
   openChallengeArtifact: vi.fn(),
   onCompanionRequired: vi.fn(),
 }))
 
 vi.mock('@/features/story-map/hooks/useStoryArtifactNavigation', () => ({
   useStoryArtifactNavigation: () => mocks,
+}))
+
+vi.mock('react-router-dom', async (importOriginal) => ({
+  ...(await importOriginal<typeof import('react-router-dom')>()),
+  useNavigate: () => mocks.navigate,
 }))
 
 const chapter: LearningChapter = {
@@ -211,8 +216,9 @@ function tier(
     id,
     difficulty,
     locked: false,
-    wave_progress: { completed: 0, total: 2 },
+    scenario_progress: { completed: 0, total: 2 },
     completion: null,
+    reward: { coins: 25, claimed: false },
     ...overrides,
   }
 }
@@ -226,10 +232,10 @@ const tieredLevel: AdventureLevelSummary = {
   completion: null,
   tiers: [
     tier(31, 'easy', {
-      wave_progress: { completed: 1, total: 1 },
+      scenario_progress: { completed: 1, total: 1 },
       completion: { stars: 3, counted_action_total: 1, completed_at: '2026-08-25T00:00:00Z' },
     }),
-    tier(32, 'medium', { wave_progress: { completed: 1, total: 2 } }),
+    tier(32, 'medium', { scenario_progress: { completed: 1, total: 2 } }),
     tier(33, 'hard', { locked: true }),
   ],
 }
@@ -258,6 +264,14 @@ describe('StoryAdventurePath level callout', () => {
     return { ...result, node }
   }
 
+  it('awards a map star only for a completed difficulty', () => {
+    openCallout()
+
+    // Easy is complete; Medium has one of two clears and still earns no star.
+    expect(screen.getByRole('img', { name: 'Stage and Commit: 1 of 3' })).toBeInTheDocument()
+    expect(screen.queryByRole('img', { name: 'Stage and Commit: 1.5 of 3' })).not.toBeInTheDocument()
+  })
+
   it('marks exactly one tier as the next action and locks the rest', () => {
     openCallout()
 
@@ -277,7 +291,7 @@ describe('StoryAdventurePath level callout', () => {
     expect(cleared).not.toHaveAttribute('data-next')
     expect(next).toHaveAttribute('data-next', 'true')
     expect(locked).toBeDisabled()
-    expect(within(locked).getByText('2 waves')).toBeInTheDocument()
+    expect(within(locked).getByText('2 scenarios')).toBeInTheDocument()
   })
 
   it('docks the callout clear of the path instead of over the nodes', () => {
@@ -323,52 +337,17 @@ describe('StoryAdventurePath level callout', () => {
     }))
 
     expect(mocks.onCompanionRequired).toHaveBeenCalledOnce()
-  })
-})
-
-describe('StoryAdventurePath companion gate', () => {
-  afterEach(() => {
-    cleanup()
-    vi.clearAllMocks()
+    expect(mocks.navigate).not.toHaveBeenCalled()
   })
 
-  it('keeps the learner on the map when a level is started without a companion', () => {
-    renderPath(
-      <StoryAdventurePath
-        chapter={chapter}
-        levels={[adventure]}
-        challenges={[challenge]}
-        challengesLocked={false}
-        loading={false}
-        hasCompanion={false}
-        onCompanionRequired={mocks.onCompanionRequired}
-      />,
-    )
+  it('starts the tier run once a companion is equipped', () => {
+    openCallout()
 
-    fireEvent.click(screen.getByRole('button', { name: /^Level 1: Initialize a Repository\./ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Play Initialize a Repository' }))
+    fireEvent.click(screen.getByRole('button', {
+      name: 'Stage and Commit, Medium tier: Continue',
+    }))
 
-    expect(mocks.onCompanionRequired).toHaveBeenCalledOnce()
-    expect(mocks.openAdventureLevel).not.toHaveBeenCalled()
-  })
-
-  it('opens the level normally once a companion is equipped', () => {
-    renderPath(
-      <StoryAdventurePath
-        chapter={chapter}
-        levels={[adventure]}
-        challenges={[challenge]}
-        challengesLocked={false}
-        loading={false}
-        hasCompanion
-        onCompanionRequired={mocks.onCompanionRequired}
-      />,
-    )
-
-    fireEvent.click(screen.getByRole('button', { name: /^Level 1: Initialize a Repository\./ }))
-    fireEvent.click(screen.getByRole('button', { name: 'Play Initialize a Repository' }))
-
-    expect(mocks.openAdventureLevel).toHaveBeenCalledWith(adventure)
+    expect(mocks.navigate).toHaveBeenCalledWith('/adventure-level-tiers/32/runs')
     expect(mocks.onCompanionRequired).not.toHaveBeenCalled()
   })
 })

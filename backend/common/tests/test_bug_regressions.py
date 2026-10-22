@@ -2,20 +2,18 @@ import pytest
 from django.contrib.auth import get_user_model
 from django.core.management import call_command
 from django.db import IntegrityError, transaction
-from rest_framework.exceptions import ValidationError
 from rest_framework_simplejwt.exceptions import TokenError
 
 from accounts.services import TokenService
-from adventures.models import AdventureLevel, AdventureRun
-from authoring.models import STATUS_PUBLISHED, ContentDefinition
-from authoring.services import ContentDefinitionService
+from adventures.models import AdventureLevelTier, AdventureLevelTierRun
 from challenges.models import ChallengeLevel, ChallengeRun
 from challenges.services import ChallengeCommandProcessingService, ChallengeRunService
 from common.api import api_exception_handler
 from common.constants import SESSION_STATUS_COMPLETED
 from common.serializers import CommandSubmitSerializer
 from players.services import get_or_create_player
-from progress.models import AdventureLevelCompletion, ChallengeTrialCompletion
+from progress.models import AdventureLevelTierCompletion, ChallengeTrialCompletion
+from simulator.services import normalize_command
 
 
 def _user(username: str):
@@ -58,6 +56,22 @@ def test_command_execution_serializer_rejects_loose_boolean_and_exit_code():
     assert "execution" in loose_exit.errors
 
 
+@pytest.mark.parametrize(
+    ("command", "normalized"),
+    [
+        ("git init --initial-branch=trunk", "git init --initial-branch=trunk"),
+        ("git  log   --max-count=3 --oneline", "git log --max-count=3 --oneline"),
+        ('git ci -m "first draft"', "git commit -m 'first draft'"),
+        ('git commit --message="first draft"', "git commit '--message=first draft'"),
+        ("git st", "git status"),
+    ],
+)
+def test_normalize_command_keeps_the_contract_the_browser_simulator_mirrors(command, normalized):
+    # The browser simulator's tests pin the same table; a mismatch makes the
+    # submission integrity check reject an authored solution.
+    assert normalize_command(command) == normalized
+
+
 def test_global_api_handler_translates_model_misses_to_404():
     response = api_exception_handler(get_user_model().DoesNotExist(), {})
 
@@ -66,79 +80,51 @@ def test_global_api_handler_translates_model_misses_to_404():
 
 
 @pytest.mark.django_db
-def test_published_content_cannot_hide_definition_edit_behind_visibility():
-    user = _user("publisher")
-    content = ContentDefinition.objects.create(
-        owner=user,
-        kind="lesson",
-        slug="published-lesson",
-        title="Published lesson",
-        visibility="private",
-        status=STATUS_PUBLISHED,
-        definition={"pages": [{"title": "Original", "blocks": []}]},
-    )
-
-    with pytest.raises(ValidationError):
-        ContentDefinitionService().update(
-            user=user,
-            content=content,
-            data={
-                "visibility": "public",
-                "definition": {"pages": [{"title": "Changed", "blocks": []}]},
-            },
-        )
-
-    content.refresh_from_db()
-    assert content.visibility == "private"
-    assert content.definition["pages"][0]["title"] == "Original"
-
-
-@pytest.mark.django_db
 def test_active_run_constraints_and_completion_history_survive_deletion():
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     player = get_or_create_player(_user("run-safety"))
-    level = AdventureLevel.objects.filter(is_published=True).order_by("id").first()
-    assert level is not None
-    wave = level.waves.filter(is_published=True).order_by("sort_order", "id").first()
-    assert wave is not None
-    variant = wave.variants.filter(is_published=True).first()
+    tier = AdventureLevelTier.objects.filter(is_published=True).order_by("id").first()
+    assert tier is not None
+    scenario = tier.scenarios.filter(is_published=True).order_by("sort_order", "id").first()
+    assert scenario is not None
+    variant = scenario.variants.filter(is_published=True).first()
     assert variant is not None
-    run = AdventureRun.objects.create(
+    run = AdventureLevelTierRun.objects.create(
         player=player,
-        level=level,
-        current_wave=wave,
+        tier=tier,
+        current_scenario=scenario,
         selected_variant=variant,
         repository_state=variant.initial_state,
     )
 
     with pytest.raises(IntegrityError):
         with transaction.atomic():
-            AdventureRun.objects.create(
+            AdventureLevelTierRun.objects.create(
                 player=player,
-                level=level,
-                current_wave=wave,
+                tier=tier,
+                current_scenario=scenario,
                 selected_variant=variant,
                 repository_state=variant.initial_state,
             )
 
     run.status = SESSION_STATUS_COMPLETED
     run.save(update_fields=["status"])
-    completion = AdventureLevelCompletion.objects.create(
+    completion = AdventureLevelTierCompletion.objects.create(
         player=player,
-        adventure_level=level,
-        adventure_run=run,
+        tier=tier,
+        tier_run=run,
         stars=3,
     )
     run.delete()
 
     completion.refresh_from_db()
-    assert completion.adventure_run_id is None
+    assert completion.tier_run_id is None
     assert completion.stars == 3
 
 
 @pytest.mark.django_db
 def test_completed_challenge_launch_is_server_derived_replay_and_cannot_lower_best_score():
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     player = get_or_create_player(_user("replay-safety"))
     level = (
         ChallengeLevel.objects.filter(

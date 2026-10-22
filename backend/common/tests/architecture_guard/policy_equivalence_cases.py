@@ -65,11 +65,11 @@ POLICY_EQUIVALENCE_CASES = {
                     "export type { WorkspaceFileInput } "
                     "from '@/shared/level/workspaceFileTypes'\n"
                 ),
-                f"{_FRONTEND}/src/features/adventures/api/adventuresApi.ts": (
+                f"{_FRONTEND}/src/features/challenges/api/challengeRunsApi.ts": (
                     "import type { ApiRequestBody } "
                     "from '@/shared/api/generated/apiTypes'\n"
                     "const body = value as "
-                    "ApiRequestBody<'adventure_runs_files_create'>\n"
+                    "ApiRequestBody<'challenge_runs_files_create'>\n"
                 ),
             }
         ],
@@ -106,8 +106,6 @@ PRE_CUTOVER_EXPECTED_VIOLATIONS = {
         "HomeOverviewResponseSerializer is not allowed",
     ],
     "gameplay": [
-        f"{_FRONTEND}/src/features/challenges/api/challengeRunsApi.ts: required gameplay "
-        "contract owner is missing",
         f"{_FRONTEND}/src/shared/level-runtime/runMutationInputs.ts: required gameplay "
         "contract owner is missing",
         f"{_FRONTEND}/src/shared/level/types.ts: required gameplay contract owner is missing",
@@ -123,17 +121,17 @@ PRE_CUTOVER_EXPECTED_VIOLATIONS = {
         f"{_FRONTEND}/src/shared/level/types.ts",
         f"{_FRONTEND}/src/features/example/shadows.ts: gameplay contract type re-export "
         "facades are forbidden",
-        f"{_FRONTEND}/src/features/adventures/api/adventuresApi.ts: gameplay API bodies must "
+        f"{_FRONTEND}/src/features/challenges/api/challengeRunsApi.ts: gameplay API bodies must "
         "use the shared generated adapter",
-        f"{_FRONTEND}/src/features/adventures/api/adventuresApi.ts: gameplay API must import "
+        f"{_FRONTEND}/src/features/challenges/api/challengeRunsApi.ts: gameplay API must import "
         "the exact shared body adapters",
-        f"{_FRONTEND}/src/features/adventures/api/adventuresApi.ts: submitCommand body must "
+        f"{_FRONTEND}/src/features/challenges/api/challengeRunsApi.ts: submitCommand body must "
         "delegate to commandSubmitBody",
-        f"{_FRONTEND}/src/features/adventures/api/adventuresApi.ts: createFile body must "
+        f"{_FRONTEND}/src/features/challenges/api/challengeRunsApi.ts: createFile body must "
         "delegate to workspaceFileBody",
-        f"{_FRONTEND}/src/features/adventures/api/adventuresApi.ts: writeFile body must "
+        f"{_FRONTEND}/src/features/challenges/api/challengeRunsApi.ts: writeFile body must "
         "delegate to workspaceFileBody",
-        f"{_FRONTEND}/src/features/adventures/api/adventuresApi.ts: renameFile body must "
+        f"{_FRONTEND}/src/features/challenges/api/challengeRunsApi.ts: renameFile body must "
         "delegate to workspaceFileRenameBody",
     ],
 }

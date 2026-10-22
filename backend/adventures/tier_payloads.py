@@ -5,7 +5,11 @@ snapshots, visualization) - serializers hold input validation only.
 Payload shapes are part of the frontend contract - change them deliberately.
 """
 
+from django.db.models import Q
+
 from adventures.models import AdventureLevelTier, AdventureLevelTierRun
+from adventures.rewards import claimed_tier_reward_keys, tier_reward_payload
+from adventures.tier_scenarios import published_scenarios, scenario_progress
 from common.constants import DIFFICULTIES, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
 from practice.services.context import ScenarioContextNormalizer
 from practice.services.scaffolding import ScaffoldingService
@@ -31,7 +35,9 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
     visualizer = RepositoryVisualizationService()
     context = _scenario_context(run)
     repository_state = snapshotter.snapshot(run.repository_state, already_normalized=True)
-    supports = ScaffoldingService().supports_for_tier(run.tier.difficulty)
+    supports = ScaffoldingService().supports_for_tier(
+        "hard" if run.is_transfer else run.tier.difficulty
+    )
     expected_target = run.selected_variant.target_state
     target_state = run.selected_variant.target_state if supports["expected_state"] else None
     visualization = visualizer.snapshot(
@@ -67,8 +73,9 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
     steps = list(run.steps.order_by("id")) if include_steps else []
     return {
         "id": run.id,
-        "tutor": tutor_payload(run),
+        "tutor": None if run.is_transfer else tutor_payload(run),
         "replay": run.is_replay,
+        "transfer": run.is_transfer,
         "stars": run.stars,
         "status": run.status,
         "failure_reason": run.failure_reason or None,
@@ -83,6 +90,7 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
             "label": run.selected_variant.label,
             "changed_variant": run.changed_variant,
         },
+        "scenario": scenario_payload(run),
         "progress": progress_payload(run),
         "policy": {
             "min_counted_commands": run.min_counted_commands,
@@ -108,6 +116,10 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
         ],
         "next_difficulty": next_difficulty_payload(run),
         "completion": completion_payload(run),
+        "reward": tier_reward_payload(
+            run.tier,
+            claimed_keys=claimed_tier_reward_keys(player=run.player, tiers=[run.tier]),
+        ),
     }
 
 
@@ -117,10 +129,13 @@ def command_run_payload(
     repository_state: dict,
     visualization: dict,
     rewards: dict | None = None,
+    tutor_context: dict | None = None,
 ) -> dict:
+    """``tutor_context`` carries what the submission already read for the tutor."""
+
     payload = {
         "id": run.id,
-        "tutor": tutor_payload(run),
+        "tutor": None if run.is_transfer else tutor_payload(run, **(tutor_context or {})),
         "replay": run.is_replay,
         "stars": run.stars,
         "status": run.status,
@@ -143,24 +158,58 @@ def command_run_payload(
 
 
 def progress_payload(run: AdventureLevelTierRun) -> dict:
-    """Successful-clears progress toward the tier's required threshold -
-    the "0/1", "0/2" style counter, sourced from AdventureLevelTierProgress
-    (persists across runs) rather than anything on this run row."""
+    """The tier's scenario counter - "1/2" and the next scenario to play - sourced
+    from AdventureLevelTierProgress (persists across runs), counted over the
+    tier's published scenarios."""
     from adventures.models import AdventureLevelTierProgress
 
-    required = run.current_wave.required_successful_attempts if run.current_wave_id else 0
-    progress = AdventureLevelTierProgress.objects.filter(
-        player_id=run.player_id, tier_id=run.tier_id
-    ).first()
-    completed = progress.successful_clears if progress else 0
+    if run.is_transfer:
+        return {
+            "completed": int(run.status == SESSION_STATUS_COMPLETED),
+            "total": 1,
+            "cleared": run.status == SESSION_STATUS_COMPLETED,
+            "next_scenario": None,
+        }
+    # A solve already holds the row it just counted.
+    progress = getattr(run, "_prefetched_progress", None)
+    if progress is None:
+        progress = AdventureLevelTierProgress.objects.filter(
+            player_id=run.player_id, tier_id=run.tier_id
+        ).first()
+    prefetch_run_payload_context(run)
+    return scenario_progress(
+        _run_scenarios(run), progress, tier_completed=run._prefetched_completion is not None
+    )
+
+
+def scenario_payload(run: AdventureLevelTierRun) -> dict:
+    """Which of the tier's scenarios this run plays, for the workspace header."""
+    scenarios = _run_scenarios(run)
+    index = next(
+        (
+            number
+            for number, scenario in enumerate(scenarios, start=1)
+            if scenario.id == run.current_scenario_id
+        ),
+        None,
+    )
     return {
-        "completed": completed,
-        "total": required,
-        "cleared": completed >= required and required > 0,
+        "index": index,
+        "total": len(scenarios),
+        "title": run.current_scenario.title if run.current_scenario_id else "",
     }
 
 
+def _run_scenarios(run: AdventureLevelTierRun) -> list:
+    scenarios = getattr(run, "_published_scenarios", None)
+    if scenarios is None:
+        scenarios = run._published_scenarios = published_scenarios(run.tier)
+    return scenarios
+
+
 def completion_payload(run: AdventureLevelTierRun) -> dict | None:
+    if run.is_transfer:
+        return None
     completion = getattr(run, "_prefetched_completion", None)
     if completion is None and not getattr(run, "_payload_context_loaded", False):
         completion = AdventureLevelTierCompletion.objects.filter(
@@ -190,7 +239,12 @@ def run_counts_payload(run: AdventureLevelTierRun) -> dict:
 
 
 def next_difficulty_payload(run: AdventureLevelTierRun) -> dict | None:
-    if run.is_replay or run.status != SESSION_STATUS_COMPLETED or not run.tier_id:
+    if (
+        run.is_transfer
+        or run.is_replay
+        or run.status != SESSION_STATUS_COMPLETED
+        or not run.tier_id
+    ):
         return None
     if not progress_payload(run)["cleared"]:
         return None
@@ -210,13 +264,13 @@ def next_difficulty_payload(run: AdventureLevelTierRun) -> dict | None:
 
 def _scenario_context(run: AdventureLevelTierRun) -> dict:
     variant = run.selected_variant
-    wave = run.current_wave
+    scenario = run.current_scenario
     raw = (variant.scenario_context if variant else None) or {
         "schema_version": 3,
-        "story": wave.story if wave else "",
-        "task": wave.task if wave else "",
+        "story": scenario.story if scenario else "",
+        "task": scenario.task if scenario else "",
     }
-    fallback_story = wave.story if wave else ""
+    fallback_story = scenario.story if scenario else ""
     return ScenarioContextNormalizer().normalize(raw, fallback_story=fallback_story)
 
 
@@ -228,4 +282,14 @@ def _tier_payload(run: AdventureLevelTierRun) -> dict:
         "adventure_level_id": adventure_level.id,
         "adventure_level_slug": adventure_level.slug,
         "adventure_level_title": adventure_level.title,
+        "adventure_level_number": _level_number(adventure_level),
     }
+
+
+def _level_number(adventure_level) -> int:
+    """The level's place in its chapter, as the story map numbers it."""
+    earlier = adventure_level.chapter.adventure_levels.filter(is_published=True).filter(
+        Q(sort_order__lt=adventure_level.sort_order)
+        | Q(sort_order=adventure_level.sort_order, id__lt=adventure_level.id)
+    )
+    return earlier.count() + 1

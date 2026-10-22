@@ -99,7 +99,7 @@ export function gitRevert(state: MutableRepositoryState, parsed: ParsedGitComman
   if (state.conflicts?.length) throw new SimulatorCommandError('error: revert is not possible because you have unmerged files.')
   const sourceId = resolveRevision(state, parsed.args[0])
   const source = commitById(state, sourceId)
-  if (!source) throw new SimulatorCommandError(`fatal: bad revision '${parsed.args[0]}'`)
+  if (!sourceId || !source) throw new SimulatorCommandError(`fatal: bad revision '${parsed.args[0]}'`)
   const headId = headCommit(state)
   const head = headTree(state)
   const revertedChanges: Record<string, { change_type: string; before: RepositoryValue; after: RepositoryValue }> = {}
@@ -129,22 +129,91 @@ export function gitCherryPick(state: MutableRepositoryState, parsed: ParsedGitCo
     state.staging = {}
     state.working_tree = {}
     state.conflicts = []
+    delete state.conflict_details
     delete state.cherry_pick_in_progress
     delete state.cherry_pick_original_head
+    delete state.cherry_pick_source
+    delete state.cherry_pick_message
     setOperationMetadata(state, { last_cherry_pick_aborted: true })
     return { command: 'cherry-pick', stdout: '' }
   }
+  if (hasOption(parsed, '--continue')) return continueCherryPick(state)
   if (state.conflicts?.length) throw new SimulatorCommandError('error: cherry-pick is not possible because you have unmerged files.')
   const sourceId = resolveRevision(state, parsed.args[0])
+  if (!sourceId) throw new SimulatorCommandError(`fatal: bad revision '${parsed.args[0]}'`)
   const source = commitById(state, sourceId)
   if (!source) throw new SimulatorCommandError(`fatal: bad revision '${parsed.args[0]}'`)
   const headId = headCommit(state)
   const head = headTree(state)
+  const forcedConflicts = new Set(
+    Array.isArray(state.cherry_pick_conflict_files)
+      ? state.cherry_pick_conflict_files.map(String)
+      : [],
+  )
+  const sourceParentTree = treeForCommit(state, source.parents?.[0] ?? null)
+  const conflictPaths = Object.entries(source.changes ?? {})
+    .filter(([path, change]) => {
+      const before = sourceParentTree[path] ?? null
+      const after = change.after ?? null
+      const current = head[path] ?? null
+      return forcedConflicts.has(path)
+        || (JSON.stringify(current) !== JSON.stringify(before)
+          && JSON.stringify(current) !== JSON.stringify(after))
+    })
+    .map(([path]) => path)
+  if (conflictPaths.length) {
+    const conflicts = new Set(conflictPaths)
+    const nonConflictingChanges = Object.fromEntries(
+      Object.entries(source.changes ?? {}).filter(([path]) => !conflicts.has(path)),
+    )
+    const stagedTree = applyChanges(head, nonConflictingChanges)
+    state.staging = Object.fromEntries(
+      Object.entries(diffTrees(head, stagedTree)).map(([path, change]) => [
+        path,
+        change.after === null
+          ? 'deleted'
+          : { status: change.change_type, content: clone(change.after) },
+      ]),
+    )
+    state.working_tree ??= {}
+    state.conflict_details ??= {}
+    for (const path of conflictPaths) {
+      const before = sourceParentTree[path] ?? null
+      const ours = head[path] ?? null
+      const theirs = source.tree?.[path] ?? null
+      state.conflict_details[path] = { base: clone(before), ours: clone(ours), theirs: clone(theirs) }
+      state.working_tree[path] = {
+        status: 'conflicted',
+        content: `<<<<<<< HEAD\n${ours ?? ''}\n=======\n${theirs ?? ''}\n>>>>>>> ${sourceId}\n`,
+      }
+    }
+    state.conflicts = [...conflicts].sort()
+    state.cherry_pick_in_progress = true
+    state.cherry_pick_original_head = headId
+    state.cherry_pick_source = sourceId
+    // Git prepares the commit message (with any -x note) when it stops, and
+    // --continue commits with it.
+    state.cherry_pick_message = cherryPickMessage(source.message ?? `cherry-pick ${sourceId}`, sourceId, parsed)
+    setOperationMetadata(state, {
+      last_cherry_pick_source: sourceId,
+      last_cherry_pick_conflicted: true,
+      last_cherry_pick_conflict_paths: state.conflicts,
+    })
+    return {
+      command: 'cherry-pick',
+      exitCode: 1,
+      stdout: `Auto-merging ${conflictPaths.join(', ')}\nCONFLICT (content): Merge conflict in ${conflictPaths.join(', ')}\nerror: could not apply ${sourceId}`,
+    }
+  }
   const nextTree = applyChanges(head, source.changes ?? {})
   const changes = diffTrees(head, nextTree)
   if (hasOption(parsed, '--no-commit') || hasOption(parsed, '-n')) {
+    // Like Git, a --no-commit pick lands on top of whatever is already staged,
+    // so several picks can be committed together.
+    const index = applyChanges(head, changesFromEntries(head, clone(state.staging ?? {})))
+    const staged = diffTrees(head, applyChanges(index, source.changes ?? {}))
     state.staging = Object.fromEntries(
-      Object.entries(changes).map(([path, change]) => [path, change.after === null ? 'deleted' : { status: change.change_type, content: clone(change.after) }]),
+      Object.entries(staged).map(([path, change]) => [path, change.after === null ? 'deleted' : { status: change.change_type, content: clone(change.after) }]),
     )
     setOperationMetadata(state, { cherry_pick_in_progress: true, cherry_pick_original_head: headId, last_cherry_pick_source: sourceId, last_cherry_pick_no_commit: true })
     state.cherry_pick_in_progress = true
@@ -152,11 +221,63 @@ export function gitCherryPick(state: MutableRepositoryState, parsed: ParsedGitCo
     return { command: 'cherry-pick', stdout: '' }
   }
   const commitId = nextCommitId(state)
+  const message = cherryPickMessage(source.message ?? `cherry-pick ${sourceId}`, sourceId, parsed)
   state.commits ??= []
-  state.commits.push(commitPayload({ state, commitId, message: source.message ?? `cherry-pick ${sourceId}`, parents: [headId].filter(Boolean) as string[], tree: nextTree, changes }))
+  state.commits.push(commitPayload({ state, commitId, message, parents: [headId].filter(Boolean) as string[], tree: nextTree, changes }))
   setHeadCommit(state, commitId)
   setOperationMetadata(state, { last_cherry_pick_source: sourceId, last_cherry_pick_created_commit: commitId, last_cherry_pick_no_commit: false })
-  return { command: 'cherry-pick', stdout: `[${headBranch(state) ?? 'HEAD'} ${commitId}] ${source.message ?? 'cherry-pick'}` }
+  return { command: 'cherry-pick', stdout: `[${headBranch(state) ?? 'HEAD'} ${commitId}] ${message}` }
+}
+
+function continueCherryPick(state: MutableRepositoryState): CommandOutcome {
+  if (!state.cherry_pick_in_progress) {
+    throw new SimulatorCommandError('error: no cherry-pick or revert in progress')
+  }
+  if (state.conflicts?.length) {
+    throw new SimulatorCommandError('error: cherry-pick is not possible because you have unmerged files.')
+  }
+  const sourceId = String(state.cherry_pick_source ?? state.operation_metadata?.last_cherry_pick_source ?? '')
+  const source = commitById(state, sourceId)
+  if (!source) throw new SimulatorCommandError('fatal: cherry-pick source commit is unavailable')
+  const headId = headCommit(state)
+  const head = headTree(state)
+  const stagedChanges = changesFromEntries(head, clone(state.staging ?? {}))
+  if (!Object.keys(stagedChanges).length) {
+    throw new SimulatorCommandError('nothing to commit, working tree clean', 1)
+  }
+  const tree = applyChanges(head, stagedChanges)
+  const commitId = nextCommitId(state)
+  const message = String(state.cherry_pick_message ?? source.message ?? `cherry-pick ${sourceId}`)
+  state.commits ??= []
+  state.commits.push(
+    commitPayload({
+      state,
+      commitId,
+      message,
+      parents: [headId].filter(Boolean) as string[],
+      tree,
+      changes: diffTrees(head, tree),
+    }),
+  )
+  setHeadCommit(state, commitId)
+  state.staging = {}
+  state.working_tree = {}
+  delete state.cherry_pick_in_progress
+  delete state.cherry_pick_original_head
+  delete state.cherry_pick_source
+  delete state.cherry_pick_message
+  setOperationMetadata(state, {
+    last_cherry_pick_source: sourceId,
+    last_cherry_pick_created_commit: commitId,
+    last_cherry_pick_no_commit: false,
+  })
+  return { command: 'cherry-pick', stdout: `[${headBranch(state) ?? 'HEAD'} ${commitId}] ${message}` }
+}
+
+function cherryPickMessage(message: string, sourceId: string, parsed: ParsedGitCommand) {
+  return hasOption(parsed, '-x')
+    ? `${message}\n\n(cherry picked from commit ${sourceId})`
+    : message
 }
 
 export function gitTag(state: MutableRepositoryState, parsed: ParsedGitCommand): CommandOutcome {

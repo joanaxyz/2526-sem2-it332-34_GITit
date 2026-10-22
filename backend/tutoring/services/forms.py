@@ -2,8 +2,9 @@ from __future__ import annotations
 
 import re
 import shlex
-from collections.abc import Iterable
+from collections.abc import Callable, Iterable
 from dataclasses import dataclass
+from functools import lru_cache
 
 from curriculum.models import CommandForm
 from simulator.services import normalize_command
@@ -36,10 +37,21 @@ _OPTION_ALIASES = {
 }
 
 # Families whose first operand is a subcommand word, not a value.
-_SUBCOMMAND_FAMILIES = frozenset({
-    "stash", "remote", "worktree", "submodule", "bisect", "sparse-checkout", "notes",
-    "reflog", "lfs", "maintenance", "rerere",
-})
+_SUBCOMMAND_FAMILIES = frozenset(
+    {
+        "stash",
+        "remote",
+        "worktree",
+        "submodule",
+        "bisect",
+        "sparse-checkout",
+        "notes",
+        "reflog",
+        "lfs",
+        "maintenance",
+        "rerere",
+    }
+)
 
 # Learners who completed the first introductions before teaching keys became
 # syntax-based keep those completions.
@@ -103,23 +115,35 @@ def guide_for_form(form: CommandForm) -> FormGuide | None:
     )
 
 
-def resolve_form(command: str, preferred: Iterable[CommandForm] = ()) -> FormGuide | None:
+def catalog_forms(family: str) -> list[CommandForm]:
+    """Published forms whose syntax starts with ``git <family>``."""
+
+    return list(
+        CommandForm.objects.filter(
+            is_published=True, usage_form__startswith=f"git {family}"
+        ).select_related("command_skill")
+    )
+
+
+def resolve_form(
+    command: str,
+    preferred: Iterable[CommandForm] = (),
+    catalog: Callable[[str], Iterable[CommandForm]] = catalog_forms,
+) -> FormGuide | None:
     """The authored form a concrete command is an instance of.
 
-    Forms attached to the current wave win over the wider catalog, and a more
+    Forms attached to the current scenario win over the wider catalog, and a more
     specific syntax (``git add .``) wins over a generic one (``git add <file>``).
     Commands with no authored form still get a syntax shape derived from the
-    command itself, so any seeded solution can be taught.
+    command itself, so any seeded solution can be taught. ``catalog`` looks up
+    the wider catalog for a family, so callers can share one read.
     """
 
     family = command_family(command)
     if family is None:
         return None
     preferred = [form for form in preferred if command_family(form.usage_form) == family]
-    catalog = CommandForm.objects.filter(
-        is_published=True, usage_form__startswith=f"git {family}"
-    ).select_related("command_skill")
-    for pool in (preferred, catalog):
+    for pool in (preferred, catalog(family)):
         matches = [form for form in pool if command_matches_form(command, form.usage_form)]
         if matches:
             best = max(matches, key=lambda form: (form.is_playable, _specificity(form.usage_form)))
@@ -132,6 +156,43 @@ def resolve_form(command: str, preferred: Iterable[CommandForm] = ()) -> FormGui
         label=f"git {family}",
         summary="",
     )
+
+
+def forms_used_by(
+    commands: Iterable[str],
+    preferred: Iterable[CommandForm] = (),
+    catalog: Callable[[str], Iterable[CommandForm]] | None = None,
+) -> list[CommandForm]:
+    """Published forms the commands are instances of, in first-use order.
+
+    Each command resolves to its most specific authored form, exactly as the
+    guides do; every published row with that syntax counts, so a later
+    module's reuse credits the module that taught the form. Commands with no
+    authored form credit nothing. This is matching, not the stricter
+    ``FormGuide.used_by``: one path still practises ``git restore <path>...``
+    (the one-or-more guide does not read mastery, so it still fires).
+    """
+
+    families: dict[str, list[CommandForm]] = {}
+
+    def cached_catalog(family: str) -> list[CommandForm]:
+        if family not in families:
+            families[family] = list((catalog or catalog_forms)(family))
+        return families[family]
+
+    preferred = list(preferred)
+    used: list[CommandForm] = []
+    seen: set[int] = set()
+    for command in commands:
+        guide = resolve_form(command, preferred=preferred, catalog=cached_catalog)
+        if guide is None:
+            continue
+        rows = [*preferred, *cached_catalog(guide.family)]
+        for form in rows:
+            if form.id not in seen and " ".join(form.usage_form.split()) == guide.usage_form:
+                seen.add(form.id)
+                used.append(form)
+    return used
 
 
 def command_family(command: str) -> str | None:
@@ -164,7 +225,9 @@ def command_uses_form(command: str, usage_form: str) -> bool:
     if not command_matches_form(command, usage_form):
         return False
     if _VARIADIC_PLACEHOLDER.search(usage_form):
-        single = _VARIADIC_PLACEHOLDER.sub(lambda match: match.group(0).replace("...", ""), usage_form)
+        single = _VARIADIC_PLACEHOLDER.sub(
+            lambda match: match.group(0).replace("...", ""), usage_form
+        )
         return not command_matches_form(command, single)
     return True
 
@@ -195,7 +258,9 @@ def same_shape(left: str, right: str) -> bool:
 
 def _specificity(usage_form: str) -> tuple[int, int, int]:
     tokens = _canonical_tokens(usage_form, pattern=True)
-    literal = sum(1 for value, optional in tokens if not optional and not _PLACEHOLDER.search(value))
+    literal = sum(
+        1 for value, optional in tokens if not optional and not _PLACEHOLDER.search(value)
+    )
     optional = sum(1 for _, is_optional in tokens if is_optional)
     variadic = sum(1 for value, _ in tokens if _VARIADIC_PLACEHOLDER.fullmatch(value))
     return literal, -optional, -variadic
@@ -205,7 +270,12 @@ def _command_shape(command: str) -> str:
     tokens = _tokens(normalize_command(command))
     shape = tokens[:2]
     rest = tokens[2:]
-    if len(tokens) > 1 and tokens[1] in _SUBCOMMAND_FAMILIES and rest and not rest[0].startswith("-"):
+    if (
+        len(tokens) > 1
+        and tokens[1] in _SUBCOMMAND_FAMILIES
+        and rest
+        and not rest[0].startswith("-")
+    ):
         shape.append(rest.pop(0))
     for token in rest:
         if token.startswith("-") and token != "--":
@@ -220,11 +290,18 @@ def _command_shape(command: str) -> str:
 
 
 def _tokens(command: str) -> list[str]:
+    return list(_split(str(command).strip()))
+
+
+# Planning matches the same few commands against every catalog form of a
+# family, so the same strings are split many times per command submission.
+@lru_cache(maxsize=4096)
+def _split(command: str) -> tuple[str, ...]:
     # Brackets in usage forms mark optional operands; shlex leaves them intact.
     try:
-        return shlex.split(str(command).strip())
+        return tuple(shlex.split(command))
     except ValueError:
-        return str(command).strip().split()
+        return tuple(command.split())
 
 
 def _canonical_tokens(command: str, *, pattern: bool = False) -> list[tuple[str, bool]]:
@@ -250,6 +327,10 @@ def _canonical_tokens(command: str, *, pattern: bool = False) -> list[tuple[str,
 def _token_matches(actual: str, pattern: str) -> bool:
     if not _PLACEHOLDER.search(pattern):
         return actual == pattern
+    if actual.startswith("-") and _PLACEHOLDER.match(pattern):
+        # An operand placeholder never swallows an option: `git rebase --abort`
+        # is its own form, not `git rebase <upstream>`.
+        return False
     pieces = []
     cursor = 0
     for match in _PLACEHOLDER.finditer(pattern):

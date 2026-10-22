@@ -1,5 +1,5 @@
 from drf_spectacular.utils import extend_schema
-from rest_framework.exceptions import NotFound, PermissionDenied
+from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -44,15 +44,9 @@ def _assert_drillable(player, level: AdventureLevel) -> None:
     would leak content the story has not handed them, so the chapter,
     adventure, and previous-level gates all still apply.
     """
-    from shop.access import can_launch
-
     locked, reason = chapter_locked(player=player, chapter=level.chapter)
     if locked:
         raise Locked(reason or "Clear the previous chapter to unlock this drill.")
-    if level.source_content_definition_id and not can_launch(
-        player.user, level.source_content_definition
-    ):
-        raise PermissionDenied("You do not have access to this level.")
     locked, reason = adventure_locked(player=player, adventure=level)
     if locked:
         raise Locked(reason or "Complete the previous adventure to unlock this drill.")

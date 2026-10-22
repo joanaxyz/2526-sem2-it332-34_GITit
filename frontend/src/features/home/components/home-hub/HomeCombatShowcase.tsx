@@ -2,10 +2,12 @@ import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { BookOpen } from 'lucide-react'
 
 import heroShowcasePedestalImage from '@/assets/images/hero_showcase_pedestal.png'
+import { HomeAttackTarget } from '@/features/home/components/home-hub/HomeAttackTarget'
 import { HomeCombatCompanionStatus } from '@/features/home/components/home-hub/HomeCompanionStatus'
 import type { CompanionPresentation } from '@/features/home/components/home-hub/companionPresentation'
 import type { LearnedSkill } from '@/features/skills/types'
 import { effectForSkill, effectPlacementForSkill } from '@/shared/battle/effects/effectRegistry'
+import { isMotionReduced } from '@/shared/battle/hooks/battleMotion'
 import { companionBattleFromDef, companionFromDef } from '@/shared/cosmetics/companionRuntime'
 import { GitCommandIcon, gitCommandFamily } from '@/shared/git/commandCatalog/commandIcons'
 import { animationDuration } from '@/shared/sprites/animationTiming'
@@ -71,6 +73,7 @@ export function HomeCombatShowcase({
   const fxRef = useRef<HTMLDivElement | null>(null)
   const attackerRef = useRef<HTMLDivElement | null>(null)
   const attackTargetRef = useRef<HTMLDivElement | null>(null)
+  const targetBodyRef = useRef<HTMLDivElement | null>(null)
   const playTokenRef = useRef(0)
   const settleTimerRef = useRef<number | null>(null)
   const effectTimerRef = useRef<number | null>(null)
@@ -114,15 +117,25 @@ export function HomeCombatShowcase({
     settleTimerRef.current = window.setTimeout(settle, animationDuration(companionBattle.attack, 1600))
   }
 
-  function anchor(node: Element | null, dx = 0, dy = 0) {
+  function flinchTarget() {
+    const body = targetBodyRef.current
+    if (!body || typeof body.animate !== 'function') return
+    const flash = ['brightness(1)', 'brightness(2.1)', 'brightness(1.45)', 'brightness(1.1)', 'brightness(1)']
+    const shake = isMotionReduced()
+      ? ['none', 'none', 'none', 'none', 'none']
+      : ['none', 'translateX(6px) scale(0.93)', 'translateX(-4px) scale(1.03)', 'translateX(2px)', 'none']
+    body.animate(
+      flash.map((filter, index) => ({ filter, transform: shake[index] })),
+      { duration: 440, easing: 'ease-out' },
+    )
+  }
+
+  function anchor(node: Element | null, xFrac = 0.5, yFrac = 0.5) {
     const layer = fxRef.current
     if (!layer || !node) return { x: 0, y: 0 }
     const layerBox = layer.getBoundingClientRect()
     const box = node.getBoundingClientRect()
-    return {
-      x: box.left + box.width / 2 - layerBox.left + dx,
-      y: box.top + box.height / 2 - layerBox.top + dy,
-    }
+    return { x: box.left + box.width * xFrac - layerBox.left, y: box.top + box.height * yFrac - layerBox.top }
   }
 
   function attackWithSkill(skill: LearnedSkill) {
@@ -132,22 +145,23 @@ export function HomeCombatShowcase({
     const layer = fxRef.current
     if (!layer) return
 
-    const attackerBox = attackerRef.current?.getBoundingClientRect()
-    const from = anchor(
-      attackerRef.current,
-      attackerBox ? attackerBox.width * 0.2 : 30,
-      attackerBox ? -attackerBox.height * 0.08 : -16,
-    )
     const skillFamily = gitCommandFamily(skill.base_command)
     const { playback, anchor: impactAnchor } = effectPlacementForSkill(skillFamily, companionSlug)
+    // Ground runs leave from the feet, everything else from the casting hand.
+    const from = playback === 'ground' ? anchor(attackerRef.current, 0.82, 0.99) : anchor(attackerRef.current, 0.7, 0.42)
     const bodyImpact = anchor(attackTargetRef.current)
     const groundImpact = homeGroundPoint(layer, bodyImpact)
     const feetPlanted = playback === 'ground' || impactAnchor === 'feet'
     const to = playback === 'projectile' ? bodyImpact : feetPlanted ? groundImpact : bodyImpact
     const impactTo = playback === 'projectile' && impactAnchor === 'feet' ? groundImpact : undefined
+    // The crystal floats, so a spell planted on the floor beneath it must rise
+    // past its top. A scale-1 riser stands ~125px; aim ~20% past the crystal.
+    const crystalTop = anchor(targetBodyRef.current, 0.5, 0).y
+    const reach = groundImpact.y - crystalTop
+    const sizeScale = reach > 0 ? Math.min(2.2, Math.max(1.2, reach / 105)) : 1.6
     effectTimerRef.current = window.setTimeout(() => {
       effectTimerRef.current = null
-      void effectForSkill(skillFamily, companionSlug)({ layer, from, to, impactTo })
+      void effectForSkill(skillFamily, companionSlug)({ layer, from, to, impactTo, sizeScale, onImpact: flinchTarget })
     }, 120)
   }
 
@@ -167,6 +181,8 @@ export function HomeCombatShowcase({
                 animation={companionRuntime.sprites.idle}
                 scale={companionRuntime.metrics.scale}
                 anchorToPixelBounds
+                layoutAnimation={companionRuntime.sprites.idle}
+                pixelAnchorAnimation={companionRuntime.sprites.idle}
                 pixelAnchorFallback={{ bottomOffset: companionRuntime.metrics.footOffset }}
                 pixelated
                 aria-label={`${companion.definition.label} ${activeMove.toLowerCase()} animation`}
@@ -175,7 +191,7 @@ export function HomeCombatShowcase({
               <img src={companionAvatar} alt="" />
             )}
           </div>
-          <div className="home-attack-anchor" ref={attackTargetRef} aria-hidden="true" />
+          <HomeAttackTarget bodyRef={targetBodyRef} anchorRef={attackTargetRef} />
           <div className="home-sprite-fx" ref={fxRef} aria-hidden="true" />
         </div>
       </section>

@@ -64,6 +64,17 @@ class RuntimeStepResponseSerializer(serializers.Serializer):
     result_category = serializers.CharField(allow_blank=True)
 
 
+class CommandKnowledgeResponseSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    kind = serializers.ChoiceField(choices=("command", "option", "argument"))
+    command = serializers.CharField()
+    title = serializers.CharField()
+    token = serializers.CharField(allow_blank=True)
+    syntax = serializers.CharField()
+    text = serializers.CharField()
+    when_to_use = serializers.CharField(allow_blank=True)
+
+
 class LearnedSkillResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     slug = serializers.CharField()
@@ -73,6 +84,8 @@ class LearnedSkillResponseSerializer(serializers.Serializer):
     chapter_id = serializers.IntegerField(required=False, allow_null=True)
     chapter_number = serializers.IntegerField()
     chapter_title = serializers.CharField(allow_blank=True)
+    learned_at = serializers.DateTimeField()
+    knowledge = CommandKnowledgeResponseSerializer(many=True, required=False)
 
 
 class LearnedSkillsResponseSerializer(serializers.Serializer):

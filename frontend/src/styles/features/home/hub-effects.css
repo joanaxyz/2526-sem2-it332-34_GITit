@@ -8,13 +8,82 @@
   contain: strict;
 }
 
-/* Invisible impact point the skill flames fly toward. */
+/* The practice crystal the spellbook fires at. It hovers over its own ground
+   glow, so ground-planted spells bloom on the floor beneath it. Sized from the
+   sprite scale so the pair stays in proportion at every breakpoint. */
+.home-attack-target {
+  --home-target-size: calc(5rem * var(--home-sprite-scale));
+  position: absolute;
+  z-index: 2;
+  bottom: var(--home-sprite-ground-bottom);
+  left: var(--home-target-x);
+  display: grid;
+  justify-items: center;
+  row-gap: calc(3.4rem * var(--home-sprite-scale));
+  width: var(--home-target-size);
+  color: rgb(var(--theme-primary-rgb));
+  transform: translate(-50%, 0.35rem);
+  pointer-events: none;
+}
+
+.home-attack-target-float {
+  animation: home-target-bob 3.4s ease-in-out infinite;
+}
+
+.home-attack-target-body {
+  position: relative;
+  width: var(--home-target-size);
+  aspect-ratio: 1;
+}
+
+.home-attack-target-art {
+  display: block;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+  filter: drop-shadow(0 0 10px rgba(var(--theme-primary-rgb), 0.55));
+}
+
+.home-attack-target-ring {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: home-target-spin 22s linear infinite;
+}
+
+.home-attack-target-ring--inner {
+  animation-duration: 14s;
+  animation-direction: reverse;
+}
+
+.home-attack-target-shadow {
+  width: 70%;
+  height: 0.7rem;
+  border-radius: 50%;
+  background: radial-gradient(closest-side, rgba(var(--theme-primary-rgb), 0.45), transparent);
+  animation: home-target-shadow 3.4s ease-in-out infinite;
+}
+
+/* Invisible impact point at the crystal's heart; skill flames fly toward it. */
 .home-attack-anchor {
   position: absolute;
-  top: 40%;
-  right: 15%;
+  top: 50%;
+  left: 50%;
   width: 1px;
   height: 1px;
+}
+
+@keyframes home-target-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-0.6rem); }
+}
+
+@keyframes home-target-shadow {
+  0%, 100% { opacity: 1; transform: scaleX(1); }
+  50% { opacity: 0.6; transform: scaleX(0.82); }
+}
+
+@keyframes home-target-spin {
+  to { transform: rotate(360deg); }
 }
 
 

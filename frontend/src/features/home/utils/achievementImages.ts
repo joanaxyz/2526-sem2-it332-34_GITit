@@ -19,7 +19,6 @@ import streakSparkImage from '@/assets/images/achievements/streak-spark.png'
 import weeklongFlameImage from '@/assets/images/achievements/weeklong-flame.png'
 
 export const ACHIEVEMENT_IMAGES = {
-  'arcane-spire-master': arcaneSpireMasterImage,
   'boss-reaper': bossReaperImage,
   'boss-slayer': bossSlayerImage,
   'coin-hoarder': coinHoarderImage,
@@ -35,6 +34,7 @@ export const ACHIEVEMENT_IMAGES = {
   'sharpshooter': sharpshooterImage,
   'star-collector': starCollectorImage,
   'story-climber': storyClimberImage,
+  'arcane-spire-master': arcaneSpireMasterImage,
   'story-sentinel': storySentinelImage,
   'streak-spark': streakSparkImage,
   'weeklong-flame': weeklongFlameImage,

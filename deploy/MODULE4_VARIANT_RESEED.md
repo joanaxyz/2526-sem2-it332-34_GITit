@@ -9,10 +9,10 @@ duplicates (`re1`–`re5`, `rm1`–`rm5`, `rh1`–`rh5`, `be1`–`be5`, `bm1`–
 - **Retired rows stay in the database.** Run records reference them, so past
   runs and replays still resolve to the content that was played. In-progress
   runs on a retired variant can be finished normally.
-- **Target states come from `backend/tier_targets.json`.** `seed_legacy_modules`
-  now writes each variant's `target_state` from that file. Before this change a
-  re-seed blanked every tier target state and needed a manual
-  `backfill_tier_target_states --import`. That manual step is no longer needed.
+- **Target states come from committed generated output.** `seed_curriculum`
+  reads `curriculum/seed_data/generated/generated_targets.py` and its matching
+  solution trajectories. Regenerate them with `python manage.py generate_targets`
+  when solutions change; no manual target-state backfill is needed.
 
 The `git-it-app` service is on Render's free plan, which has no pre-deploy
 commands, one-off jobs, or shell. Seeding therefore runs through
@@ -85,8 +85,8 @@ with `is_published = true` and `blank_target = false`.
 ```sql
 select l.slug as level, t.difficulty, v.slug as variant, v.is_published,
        v.target_state = '{}'::jsonb as blank_target
-from adventures_adventureleveltierwavevariant v
-join adventures_adventureleveltierwave w on w.id = v.wave_id
+from adventures_adventureleveltierscenariovariant v
+join adventures_adventureleveltierscenario w on w.id = v.scenario_id
 join adventures_adventureleveltier t on t.id = w.tier_id
 join adventures_adventurelevel l on l.id = t.adventure_level_id
 where v.slug ~ '^(re|rm|rh|be|bm|bh)[678]$'
@@ -98,7 +98,7 @@ order by l.slug, t.difficulty, v.slug;
 
 ```sql
 select v.slug, v.is_published
-from adventures_adventureleveltierwavevariant v
+from adventures_adventureleveltierscenariovariant v
 where v.slug ~ '^(re|rm|rh|be|bm|bh)[1-5]$'
 order by v.slug;
 ```
@@ -107,13 +107,13 @@ order by v.slug;
 
 ```sql
 select count(*)
-from adventures_adventureleveltierwavevariant v
-join adventures_adventureleveltierwave w on w.id = v.wave_id
+from adventures_adventureleveltierscenariovariant v
+join adventures_adventureleveltierscenario w on w.id = v.scenario_id
 join adventures_adventureleveltier t on t.id = w.tier_id
 join adventures_adventurelevel l on l.id = t.adventure_level_id
 join curriculum_chapter c on c.id = l.chapter_id
 join curriculum_story s on s.id = c.story_id
-where s.slug = 'git-it-legacy' and v.target_state = '{}'::jsonb;
+where s.slug = 'arcane-spire' and v.target_state = '{}'::jsonb;
 ```
 
 **4. In the app.** As a learner who has not played Module 4, open
@@ -130,7 +130,7 @@ leave `…6`–`…8` published, because the reverted seed does not know about t
 Restore the previous published set directly instead:
 
 ```sql
-update adventures_adventureleveltierwavevariant
+update adventures_adventureleveltierscenariovariant
 set is_published = (slug ~ '^(re|rm|rh|be|bm|bh)[1-5]$')
 where slug ~ '^(re|rm|rh|be|bm|bh)[1-8]$';
 ```
@@ -147,7 +147,7 @@ On a first attempt you get the `…6` variant. To reach `…7` and `…8`, fail 
 press **Retry**, or clear the tier and press **Continue** on easy tiers, which
 need two clears. `re6` and `be6` keep the MVP repository; every medium and hard
 tier is a new exercise (see "Tier changes" below). The variant key is the `case_id`, visible in Django admin
-under *Adventure level tier wave variants*.
+under *Adventure level tier scenario variants*.
 
 | Variant | Level / tier | Repository to expect | Correct | Wrong (must not complete) |
 |---|---|---|---|---|

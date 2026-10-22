@@ -18,6 +18,11 @@ export type EffectContext = {
    *  Projectile travel stays at its authored scale; only its landing burst uses
    *  this value. Defaults to 1. */
   sizeScale?: number
+  /** Fires once when the effect makes contact: a bolt lands, a ground run
+   *  arrives, a burst blooms on the target. Always fires by the time the effect
+   *  resolves (immediately under reduced motion), so the target's hurt reaction
+   *  can start on the hit instead of after the dissipate frames. */
+  onImpact?: () => void
 }
 
 export type BattleEffect = (ctx: EffectContext) => Promise<void>

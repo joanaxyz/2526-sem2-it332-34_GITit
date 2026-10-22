@@ -1,17 +1,14 @@
-import { RefreshCcw, X } from 'lucide-react'
-
-import gitLogoImage from '@/assets/images/GIT_logo.webp'
 import type { CommandIntroduction } from '@/features/story-map/api/commandIntroductionsApi'
 import { CommandGuideLauncher } from '@/features/story-map/components/CommandGuideLauncher'
-import { AudioControls } from '@/shared/audio/AudioControls'
-import { WorkspaceHeaderAccount } from '@/shared/level/components/WorkspaceHeaderAccount'
+import { TierStatsBar } from '@/features/story-map/components/tier-workspace/TierStatsBar'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
+import type { RepoGraphTrigger } from '@/shared/level/workspace/types'
+import { WorkspaceStatusHeader } from '@/shared/level/workspace/WorkspaceStatusHeader'
 
-/** Mirrors ChallengeStatusHeader for the adventure-tier run lifecycle. */
+/** The adventure tier's command bar: its stats, the command guide, and run controls. */
 export function TierStatusHeader({
   run,
   isExiting = false,
-  isRetrying = false,
   onExit,
   onRetry,
   onStartOver,
@@ -20,10 +17,10 @@ export function TierStatusHeader({
   currentCommandGuideKey,
   commandGuideOpen = false,
   onSelectCommandGuide,
+  repoGraph,
 }: {
   run: TierRun
   isExiting?: boolean
-  isRetrying?: boolean
   onExit?: () => void
   onRetry?: () => void
   onStartOver?: () => void
@@ -32,86 +29,31 @@ export function TierStatusHeader({
   currentCommandGuideKey?: string | null
   commandGuideOpen?: boolean
   onSelectCommandGuide?: (teachingKey: string) => void
+  repoGraph?: RepoGraphTrigger
 }) {
-  const exitLabel = run.status === 'started' ? 'Exit' : 'Back'
-  const canRetry = !run.replay && run.status === 'failed' && !!onRetry
-  const canStartOver = !run.replay && run.status === 'started' && !!onStartOver
-  const canReplay = run.replay && !!onReplay
-  const replayLabel = run.status === 'started' ? 'Start over' : 'Play again'
-  const replayIsStartOver = replayLabel === 'Start over'
-  const replayActionLabel = isRetrying ? 'Starting' : replayLabel
-  const startOverLabel = isRetrying ? 'Starting over' : 'Start over'
+  const scored = !run.transfer && !run.replay
 
   return (
-    <header className="gameplay-workspace-header" aria-label="Adventure command bar">
-      <button
-        type="button"
-        className="gameplay-header-close"
-        disabled={isExiting}
-        title={exitLabel}
-        aria-label={isExiting ? 'Exiting' : exitLabel}
-        onClick={onExit}
-      >
-        <X aria-hidden="true" />
-      </button>
-
-      <a className="gameplay-header-brand" href="/home" aria-label="GIT it! home">
-        <img src={gitLogoImage} alt="" />
-        <span>GIT it!</span>
-      </a>
-
-      <div className="gameplay-header-mission" aria-label="Current adventure">
-        <span>Adventure · {run.difficulty ?? 'Level'}</span>
-        <strong>{run.tier.adventure_level_title}</strong>
-      </div>
-
-      <span className="gameplay-header-spacer" aria-hidden="true" />
-
-      <AudioControls
-        className="gameplay-header-audio-controls"
-        buttonClassName="gameplay-header-button gameplay-header-icon-button gameplay-header-audio"
-      />
-
-      <CommandGuideLauncher
-        guides={commandGuides}
-        currentGuideKey={currentCommandGuideKey}
-        guideOpen={commandGuideOpen}
-        onSelectGuide={onSelectCommandGuide ?? (() => undefined)}
-      />
-
-      {canRetry ? (
-        <button type="button" className="gameplay-header-button" disabled={isRetrying} onClick={onRetry}>
-          <RefreshCcw aria-hidden="true" />
-          {isRetrying ? 'Starting retry' : 'Retry'}
-        </button>
+    <WorkspaceStatusHeader
+      label="Adventure command bar"
+      missionLabel="Current adventure"
+      title={run.tier.adventure_level_title}
+      note={run.transfer ? 'Transfer checkpoint · first attempt recorded' : null}
+      stats={<TierStatsBar run={run} repoGraph={repoGraph} />}
+      guide={!run.transfer ? (
+        <CommandGuideLauncher
+          guides={commandGuides}
+          currentGuideKey={currentCommandGuideKey}
+          guideOpen={commandGuideOpen}
+          onSelectGuide={onSelectCommandGuide ?? (() => undefined)}
+        />
       ) : null}
-      {canStartOver ? (
-        <button
-          type="button"
-          className="gameplay-header-button gameplay-header-icon-button"
-          disabled={isRetrying}
-          title={startOverLabel}
-          aria-label={startOverLabel}
-          onClick={onStartOver}
-        >
-          <RefreshCcw aria-hidden="true" />
-        </button>
-      ) : null}
-      {canReplay ? (
-        <button
-          type="button"
-          className={`gameplay-header-button${replayIsStartOver ? ' gameplay-header-icon-button' : ''}`}
-          disabled={isRetrying}
-          title={replayActionLabel}
-          aria-label={replayActionLabel}
-          onClick={onReplay}
-        >
-          <RefreshCcw aria-hidden="true" />
-          {replayIsStartOver ? null : replayActionLabel}
-        </button>
-      ) : null}
-
-      <WorkspaceHeaderAccount />
-    </header>
+      status={run.status}
+      isExiting={isExiting}
+      onExit={onExit}
+      onRetry={scored && run.status === 'failed' ? onRetry : undefined}
+      onStartOver={scored && run.status === 'started' ? onStartOver : undefined}
+      onReplay={run.replay ? onReplay : undefined}
+    />
   )
 }

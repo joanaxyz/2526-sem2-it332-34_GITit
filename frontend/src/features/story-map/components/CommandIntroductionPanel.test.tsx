@@ -15,10 +15,11 @@ vi.mock('@/features/story-map/api/commandIntroductionsApi', () => ({
 
 const tutor: CommandIntroduction = {
   context_id: 'snapshot-1', teaching_key: 'form:git switch -c <branch>',
+  help_token: 'guide-help-token',
   run_revision: 0, phase: 'introduction', title: 'Create and switch',
   needs: [
-    { kind: 'branch', text: 'Branch feature is created.', action: 'create', subjects: ['feature'] },
-    { kind: 'head', text: 'HEAD moves to feature.', action: 'move', subjects: ['feature'] },
+    { kind: 'branch', text: 'A branch pointer changes.', action: 'create', subjects: ['<branch>'] },
+    { kind: 'head', text: 'HEAD changes where you are working.', action: 'move', subjects: ['<branch>'] },
   ],
   changes: [],
   anatomy: [
@@ -31,7 +32,7 @@ const tutor: CommandIntroduction = {
     { key: 'commands', title: 'Commands', text: 'You type a command in the terminal and press Enter.' },
     { key: 'branch', title: 'Branch', text: 'A name that points at a commit.' },
   ],
-  verdict: null, explanation: null, example_command: null, completion_token: null,
+  verdict: null, explanation: null, completion_token: null,
   command_form: {
     teaching_key: 'form:git switch -c <branch>', usage_form: 'git switch -c <branch>',
     label: 'Create and switch', summary: 'Creates a branch and moves HEAD onto it.',
@@ -39,7 +40,7 @@ const tutor: CommandIntroduction = {
 }
 const feedback: CommandIntroduction = {
   ...tutor, phase: 'feedback', verdict: 'incorrect',
-  explanation: "That wasn't the command this step needs.", example_command: 'git switch -c feature',
+  explanation: "Review the syntax and placeholder meanings, then try your own values.",
   completion_token: 'feedback-token',
 }
 
@@ -71,6 +72,7 @@ function setup(lesson = tutor, replay = false) {
 }
 
 beforeEach(() => {
+  localStorage.clear()
   useAuthStore.getState().setSession('learner-token', {
     id: 1, username: 'learner', email: 'learner@example.com', is_staff: false,
   })
@@ -91,24 +93,31 @@ describe('terminal-led command introduction', () => {
     expect(screen.getByText('Command guide')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-tour-spotlight')).toBeInTheDocument()
     expect(screen.getByRole('dialog', { name: 'Create and switch' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Create and switch' }).querySelector('img')).toBeNull()
     expect(screen.getByRole('button', { name: 'Move command guide' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Resize command guide' })).toBeInTheDocument()
     expect(screen.getAllByRole('textbox')).toHaveLength(1)
+    // Its chat starts as a launcher, so nothing covers the card.
+    expect(screen.queryByRole('dialog', { name: 'Ask Git-It' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ask Git-It' })).toBeInTheDocument()
     expect(screen.getByText(tutor.command_form.summary)).toBeInTheDocument()
     // Absolute beginners: what a command is, and what each part means.
     expect(screen.getByText(/You type a command in the terminal/)).toBeInTheDocument()
     const parts = within(screen.getByLabelText('What each part means'))
     expect(parts.getByText('create the branch first, then switch to it')).toBeInTheDocument()
-    // The concrete solution command is only revealed after a miss.
+    // A miss never reveals the concrete solution command either.
     expect(screen.queryByText('git switch -c feature')).not.toBeInTheDocument()
-    // Nothing to click through: the guide stays while the learner types. On a
-    // narrow screen the change sits in its own tab of the same card.
-    expect(screen.getByRole('button', { name: 'Hide command guide' })).toBeInTheDocument()
+    // Nothing to click through: the guide stays while the learner types, with a
+    // single close button (the chat starts collapsed). On a narrow screen the
+    // change sits in its own tab of the same card.
+    expect(screen.getAllByRole('button', { name: /close/i })).toEqual([
+      screen.getByRole('button', { name: 'Close command guide' }),
+    ])
     expect(screen.queryByRole('button', { name: 'Got it' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('tab', { name: 'What changes' }))
-    const needs = within(screen.getByRole('region', { name: 'Your repository needs' }))
+    const needs = within(screen.getByRole('region', { name: 'What this command does' }))
     expect(needs.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
-      'Branch feature is created.', 'HEAD moves to feature.',
+      'A branch pointer changes.', 'HEAD changes where you are working.',
     ])
     expect(within(screen.getByRole('region', { name: 'Words to know' })).getByText('Branch')).toBeInTheDocument()
     await waitFor(() => expect(document.activeElement).toHaveAttribute('data-command-input'))
@@ -126,13 +135,19 @@ describe('terminal-led command introduction', () => {
   })
 
   it('explains the command after a terminal mistake and persists acknowledgment to bootstrap', async () => {
-    const { client, run } = setup(feedback)
-    expect(await screen.findByText('git switch -c feature')).toBeInTheDocument()
+    const { client, run, onDismiss } = setup(feedback)
+    expect(await screen.findByText('Syntax: git switch -c <branch>')).toBeInTheDocument()
+    expect(screen.queryByText('git switch -c feature')).not.toBeInTheDocument()
     expect(screen.getByTestId('workspace-tour-spotlight')).toHaveStyle({ top: '151px' })
-    expect(screen.queryByRole('button', { name: 'Hide command guide' })).not.toBeInTheDocument()
-    expect(screen.getByRole('status')).toHaveTextContent("That wasn't the command this step needs.")
+    // Feedback waits for "Got it": no close button, and neither a click outside
+    // nor Escape puts it away.
+    expect(screen.queryByRole('button', { name: 'Close command guide' })).not.toBeInTheDocument()
+    fireEvent.pointerDown(document.body)
+    fireEvent.keyDown(window, { key: 'Escape' })
+    expect(onDismiss).not.toHaveBeenCalled()
+    expect(screen.getByRole('status')).toHaveTextContent('Review the syntax and placeholder meanings')
     fireEvent.click(screen.getByRole('tab', { name: 'What changes' }))
-    expect(screen.getByRole('region', { name: 'It will' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'What this command does' })).toBeInTheDocument()
     expect(commandIntroductionsApi.complete).not.toHaveBeenCalled()
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }))
     await waitFor(() => expect(commandIntroductionsApi.complete).toHaveBeenCalledWith(1, 'feedback-token'))
@@ -140,16 +155,40 @@ describe('terminal-led command introduction', () => {
     expect(client.getQueryData(queryKeys.adventureTierRun(1))).toEqual({ ...run, tutor: null })
   })
 
-  it('does not mark a hidden introduction completed', async () => {
+  it('stays open for clicks in its chat launcher, chat window and terminal, and collapses on a click elsewhere', async () => {
     const { onDismiss } = setup()
-    fireEvent.click(await screen.findByRole('button', { name: 'Hide command guide' }))
+    await screen.findByText('Syntax: git switch -c <branch>')
+    const chatLauncher = screen.getByRole('button', { name: 'Ask Git-It' })
+    fireEvent.pointerDown(chatLauncher)
+    fireEvent.click(chatLauncher)
+    fireEvent.pointerDown(screen.getByRole('textbox', { name: 'Ask Git-It a question' }))
+    fireEvent.pointerDown(document.querySelector('[data-command-input]')!)
+    fireEvent.pointerDown(screen.getByRole('dialog', { name: 'Create and switch' }))
+    expect(onDismiss).not.toHaveBeenCalled()
+    fireEvent.pointerDown(document.body)
+    expect(onDismiss).toHaveBeenCalledOnce()
+    // Hiding an introduction is not completing it.
+    expect(commandIntroductionsApi.complete).not.toHaveBeenCalled()
+  })
+
+  it('closes from its close button without completing the guide', async () => {
+    const { onDismiss } = setup()
+    fireEvent.click(await screen.findByRole('button', { name: 'Close command guide' }))
     expect(onDismiss).toHaveBeenCalledOnce()
     expect(commandIntroductionsApi.complete).not.toHaveBeenCalled()
   })
 
+  it('collapses on Escape and hands focus back to the terminal', async () => {
+    const { onDismiss } = setup()
+    await screen.findByText('Syntax: git switch -c <branch>')
+    fireEvent.keyDown(document.querySelector('[data-command-input]')!, { key: 'Escape' })
+    expect(onDismiss).toHaveBeenCalledOnce()
+    await waitFor(() => expect(document.activeElement).toHaveAttribute('data-command-input'))
+  })
+
   it('reopens a saved guide as read-only reference', async () => {
     const { onDismiss } = setup(feedback, true)
-    expect(await screen.findByText('git switch -c feature')).toBeInTheDocument()
+    expect(await screen.findByText('Syntax: git switch -c <branch>')).toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Got it' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Close command guide' }))
     expect(onDismiss).toHaveBeenCalledOnce()
