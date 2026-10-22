@@ -276,7 +276,7 @@
         "left": 0.1289,
         "top": 0.2188,
         "right": 0.8203,
-        "bottom": 1.0
+        "bottom": 0.9531
       }
     },
     "rm": {
@@ -827,14 +827,14 @@
       ],
       "rawSrc": "/cosmetics/companion/black/effects/skill-lightning-25/_raw/remote_front.png",
       "placeAnchor": {
-        "x": 0.4863,
+        "x": 0.4902,
         "y": 0.8828
       },
       "placeBounds": {
-        "left": 0.1016,
-        "top": 0.1289,
-        "right": 0.8594,
-        "bottom": 1.0
+        "left": 0.1133,
+        "top": 0.1836,
+        "right": 0.8516,
+        "bottom": 0.9375
       }
     },
     "fetch": {

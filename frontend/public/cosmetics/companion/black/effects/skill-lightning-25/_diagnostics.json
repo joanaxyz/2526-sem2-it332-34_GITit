@@ -570,7 +570,7 @@
       106.5,
       125.5,
       147.5,
-      195.5
+      191.5
     ],
     "frameEnergyAnchorRange": [
       101.0,
@@ -592,14 +592,14 @@
       "detectedAnchorRangeBeforeRegistration": [
         106,
         142,
-        125,
+        122,
         186
       ],
       "appliedShiftRange": [
         -21,
         6,
         37,
-        78
+        91
       ],
       "emptyFrames": 0,
       "reliableFrames": 14,
@@ -818,9 +818,9 @@
     ],
     "frameBBoxCenterRange": [
       110.0,
-      176.5,
+      169.5,
       104.0,
-      163.5
+      148.0
     ],
     "frameEnergyAnchorRange": [
       119.47,
@@ -842,7 +842,7 @@
     ],
     "projectileSettleEnergyAnchorRange": [
       124.74,
-      131.38,
+      131.44,
       125.79,
       131.72
     ],
@@ -854,14 +854,14 @@
       "detectedAnchorRangeBeforeRegistration": [
         107.389,
         166,
-        78,
+        77,
         140.432
       ],
       "appliedShiftRange": [
         -6,
         55,
         -11,
-        55
+        56
       ],
       "emptyFrames": 0,
       "reliableFrames": 12,
@@ -1725,28 +1725,28 @@
       255
     ],
     "bbox": [
-      44,
-      58,
-      1236,
+      46,
+      61,
+      1235,
       1244
     ],
     "frameBBoxCenterRange": [
-      119.5,
-      139.0,
-      133.5,
-      203.0
+      120.0,
+      140.0,
+      134.5,
+      203.5
     ],
     "frameEnergyAnchorRange": [
-      93.45,
-      138.54,
-      129.23,
-      201.93
+      95.09,
+      139.54,
+      140.97,
+      202.45
     ],
     "frameRegistrationAnchorRange": [
-      93.45,
-      138.54,
-      129.23,
-      201.93
+      95.09,
+      139.54,
+      140.97,
+      202.45
     ],
     "registration": {
       "targetAnchor": [
@@ -1756,14 +1756,14 @@
       "detectedAnchorRangeBeforeRegistration": [
         115,
         128,
-        179,
-        219
+        178,
+        217
       ],
       "appliedShiftRange": [
-        -6,
+        -5,
         3,
-        4,
-        40
+        6,
+        41
       ],
       "emptyFrames": 0,
       "reliableFrames": 17,

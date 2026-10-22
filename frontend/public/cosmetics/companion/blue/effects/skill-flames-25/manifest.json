@@ -300,14 +300,14 @@
       "impactStartFrame": 16,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/rm.png",
       "placeAnchor": {
-        "x": 0.541,
-        "y": 0.4902
+        "x": 0.5371,
+        "y": 0.4863
       },
       "placeBounds": {
-        "left": 0.0547,
-        "top": 0.1836,
-        "right": 0.9414,
-        "bottom": 0.7852
+        "left": 0.1602,
+        "top": 0.1914,
+        "right": 0.9297,
+        "bottom": 0.7773
       }
     },
     "check-ignore": {
@@ -478,13 +478,13 @@
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/merge.png",
       "placeAnchor": {
         "x": 0.502,
-        "y": 0.4844
+        "y": 0.4863
       },
       "placeBounds": {
-        "left": 0.0039,
-        "top": 0.1328,
-        "right": 0.8828,
-        "bottom": 1.0
+        "left": 0.125,
+        "top": 0.125,
+        "right": 0.8516,
+        "bottom": 0.8203
       }
     },
     "merge-base": {

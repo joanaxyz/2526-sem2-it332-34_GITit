@@ -70,6 +70,42 @@ EDGE_CLEAR_PX = 2
 # those reclaimed pixels inside the cell before registration shifts run.
 FIT_MARGIN_PX = 12
 
+# Audited exceptions to the generated sheets' nominal grid. Dragon mouth
+# flashes sit between columns, and Clone's final row has tighter spacing than
+# its flight rows. Keep their detached art with its own animation frame.
+ROW_LOCAL_GUTTER_SHEETS = {("blue", "rm"), ("white", "rm"), ("white", "clone")}
+ROW_COLUMN_EDGE_OVERRIDES = {
+    ("white", "clone", 4): (0.0, 0.2, 0.375, 0.55, 0.715, 1.0),
+}
+# Clone's tighter final-row spacing also needs corrected cell origins. Keep
+# the same source-cell width so the retained poses are not stretched to fit.
+FRAME_SOURCE_X_CENTERS = {
+    ("white", "clone", 22): 585,
+    ("white", "clone", 23): 790,
+    ("white", "clone", 24): 990,
+}
+
+# Source-pixel rectangles audited against the retained 1254px masters. Reassign
+# detached tips that extend into the previous row; None removes confirmed noise
+# or the excluded extra pose. These are local repairs, not an edge-particle filter.
+# Frame indices are zero-based. Remote's two depth passes receive the same fix.
+SOURCE_OWNERSHIP_REPAIRS = {
+    # The generated final row has a sixth pose. Retain the first five only.
+    ("white", "clone"): (((1070, 967, 1254, 1254), None),),
+    ("blue", "merge"): (
+        ((362, 978, 374, 996), 21),
+        ((0, 1250, 4, 1254), None),
+    ),
+    ("black", "commit"): (((152, 171, 164, 188), None),),
+    ("black", "branch"): (
+        ((0, 920, 251, 970), 20),
+        ((251, 920, 502, 970), 21),
+        ((502, 920, 752, 970), 22),
+    ),
+    ("black", "remote_back"): (((115, 988, 132, 1010), 20),),
+    ("black", "remote_front"): (((115, 988, 132, 1010), 20),),
+}
+
 # Alpha threshold used for finding the actual effect body.
 ALPHA_THRESHOLD = 12
 
@@ -1197,6 +1233,21 @@ def content_axis_edges(alpha, axis: int, count: int) -> list[int]:
     return edges
 
 
+def repair_source_ownership(owner_map, alpha, companion: str, name: str) -> None:
+    """Apply the retained-master audit without deleting neighboring valid VFX."""
+    height, width = alpha.shape
+    for (x0, y0, x1, y1), owner in SOURCE_OWNERSHIP_REPAIRS.get((companion, name), ()):
+        left, right = round(x0 * width / 1254), round(x1 * width / 1254)
+        top, bottom = round(y0 * height / 1254), round(y1 * height / 1254)
+        region_alpha = alpha[top:bottom, left:right]
+        region_owners = owner_map[top:bottom, left:right]
+        if owner is None:
+            region_alpha[:] = 0
+            region_owners[:] = -1
+        else:
+            region_owners[region_alpha > 0] = owner
+
+
 def owned_frame_sources(raw_path: Path) -> list[OwnedFrameSource]:
     """Key a whole sheet and assign visible components back to their source frame.
 
@@ -1213,7 +1264,7 @@ def owned_frame_sources(raw_path: Path) -> list[OwnedFrameSource]:
     keyed = clear_detected_bright_grid_lines(remove_keyed_background(Image.open(raw_path))).convert(
         "RGBA"
     )
-    arr = np.asarray(keyed)
+    arr = np.array(keyed)
     alpha = arr[..., 3]
     component_mask = alpha > max(1, ALPHA_THRESHOLD // 3)
     cell_boxes = frame_cell_boxes(keyed.width, keyed.height)
@@ -1226,6 +1277,15 @@ def owned_frame_sources(raw_path: Path) -> list[OwnedFrameSource]:
     owner_map = np.full(component_mask.shape, -1, dtype=np.int16)
     x_edges = np.array(content_axis_edges(alpha, axis=1, count=GRID_COLUMNS))
     y_edges = np.array(content_axis_edges(alpha, axis=0, count=GRID_ROWS))
+    row_x_edges = []
+    for row, (y0, y1) in enumerate(zip(y_edges, y_edges[1:], strict=False)):
+        edges = x_edges
+        if (COMPANION_SLUG, raw_path.stem) in ROW_LOCAL_GUTTER_SHEETS:
+            edges = np.array(content_axis_edges(alpha[y0:y1], axis=1, count=GRID_COLUMNS))
+        override = ROW_COLUMN_EDGE_OVERRIDES.get((COMPANION_SLUG, raw_path.stem, row))
+        if override:
+            edges = np.array([round(value * keyed.width) for value in override])
+        row_x_edges.append(edges)
 
     for label, region_slice in enumerate(slices, start=1):
         if region_slice is None:
@@ -1239,8 +1299,11 @@ def owned_frame_sources(raw_path: Path) -> list[OwnedFrameSource]:
         gy = ys + region_slice[0].start
         gx = xs + region_slice[1].start
         weights = alpha[gy, gx].astype(np.float64)
-        cols = np.searchsorted(x_edges, gx, side="right") - 1
         rows = np.searchsorted(y_edges, gy, side="right") - 1
+        cols = np.empty_like(rows)
+        for row, edges in enumerate(row_x_edges):
+            in_row = rows == row
+            cols[in_row] = np.searchsorted(edges, gx[in_row], side="right") - 1
         valid = (0 <= cols) & (cols < GRID_COLUMNS) & (0 <= rows) & (rows < GRID_ROWS)
         if not valid.any():
             continue
@@ -1274,9 +1337,15 @@ def owned_frame_sources(raw_path: Path) -> list[OwnedFrameSource]:
             # keep it whole so its sparks are not sliced at the grid boundary.
             owner_map[gy, gx] = owner
 
+    repair_source_ownership(owner_map, alpha, COMPANION_SLUG, raw_path.stem)
     sources: list[OwnedFrameSource] = []
     alpha_present = alpha > 0
     for index, cell_box in enumerate(cell_boxes):
+        center_x = FRAME_SOURCE_X_CENTERS.get((COMPANION_SLUG, raw_path.stem, index))
+        if center_x is not None:
+            cell_width = cell_box[2] - cell_box[0]
+            left = round(center_x * keyed.width / 1254 - cell_width / 2)
+            cell_box = (left, cell_box[1], left + cell_width, cell_box[3])
         frame_mask = owner_map == index
         if not frame_mask.any():
             sources.append(OwnedFrameSource(None, None, cell_box))
@@ -1285,7 +1354,9 @@ def owned_frame_sources(raw_path: Path) -> list[OwnedFrameSource]:
         # Pull in the feathered edge pixels attached to the owned component, but
         # only where the keyed sheet still has alpha.
         copy_mask = (
-            ndimage.binary_dilation(frame_mask, structure=structure, iterations=1) & alpha_present
+            ndimage.binary_dilation(frame_mask, structure=structure, iterations=1)
+            & alpha_present
+            & ((owner_map == index) | (owner_map < 0))
         )
         ys, xs = np.nonzero(copy_mask)
         x0 = int(xs.min())
