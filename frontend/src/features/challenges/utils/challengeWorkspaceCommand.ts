@@ -10,7 +10,7 @@ import {
   predictLocalOutcome,
   type CommandSubmissionOutcome,
 } from '@/shared/level-runtime/commandOutcome'
-import { isExitCommand } from '@/shared/level-runtime/commands'
+import { isExitCommand, isGitCommand } from '@/shared/level-runtime/commands'
 import { stringList } from '@/shared/level/workspace/layout'
 import type { DagAnimationController } from '@/shared/level/workspace/useDagAnimation'
 
@@ -48,10 +48,14 @@ export function createChallengeWorkspaceCommandHandler({
     }
 
     clearToast()
-    dagAnimation.onCommandStart()
-    battleDirector.onAttackStart()
+    const animateCommand = isGitCommand(command)
+    if (animateCommand) {
+      dagAnimation.onCommandStart()
+      battleDirector.onAttackStart()
+    }
 
     const resolveTurn = (outcome: CommandSubmissionOutcome) => {
+      if (!animateCommand) return
       dagAnimation.onCommandResolved(outcome)
       battleDirector.onResolve(battleEventsForSubmittedCommand({
         command,
@@ -90,6 +94,7 @@ export function createChallengeWorkspaceCommandHandler({
         }
       },
       onError: () => {
+        if (!animateCommand) return
         dagAnimation.onCommandError()
         battleDirector.onError()
       },
