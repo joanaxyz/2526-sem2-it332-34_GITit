@@ -7,12 +7,6 @@ import type { TutorContext } from './tutorApi'
 import { useTutorChat, type TutorMessage } from './useTutorChat'
 import './tutor.css'
 
-const STARTER_TOPICS = [
-  { id: 'repository', title: 'Repository' },
-  { id: 'staging', title: 'Staging area' },
-  { id: 'placeholders', title: 'Placeholders' },
-]
-
 export function TutorChatPanel({ context }: { context: TutorContext }) {
   const generation = useAuthStore((state) => state.sessionGeneration)
   const scope = `${generation}:${context.surface}:${context.run_id ?? ''}:${context.teaching_key ?? ''}`
@@ -43,9 +37,6 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
     setDraft('')
   }
 
-  const lastReply = chat.messages.findLast((entry) => entry.role === 'assistant')
-  const topics = lastReply?.role === 'assistant' ? lastReply.reply.suggested_topics.slice(0, 4) : STARTER_TOPICS
-
   return (
     <div className="tutor-chat">
       {chat.messages.length ? (
@@ -74,14 +65,6 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
             </div>
           )}
         {chat.pending ? <p className="tutor-chat__pending" role="status" data-tutor-selectable><span aria-hidden="true" />Thinking…</p> : null}
-      </div>
-
-      <div className="tutor-chat__topics" aria-label="Topics to explore">
-        {topics.map((topic) => (
-          <button key={topic.id} type="button" disabled={chat.pending} onClick={() => void chat.send(`Explain ${topic.title}`)}>
-            {topic.title}
-          </button>
-        ))}
       </div>
 
       {chat.error ? <p className="tutor-chat__error" role="alert" data-tutor-selectable>{chat.error}</p> : null}

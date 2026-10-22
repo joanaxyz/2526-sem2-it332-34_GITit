@@ -160,11 +160,11 @@ describe('shared tutoring surfaces', () => {
     fireEvent.pointerUp(frame, { pointerId: 2 })
     expect(box()).toEqual({ ...moved, width: moved.width - 40 })
 
-    // Text selection, typing and topic buttons keep their native pointer behavior.
+    // Text selection, typing and the send button keep their native pointer behavior.
     for (const target of [
       screen.getByText('Ask what a command means, why it works, or which idea feels unclear.'),
       screen.getByRole('textbox'),
-      screen.getByRole('button', { name: 'Repository' }),
+      screen.getByRole('button', { name: 'Send question' }),
     ]) {
       fireEvent.pointerDown(target, { button: 0, pointerId: 3, clientX: moved.left + 100, clientY: moved.top + 200 })
       fireEvent.pointerMove(frame, { pointerId: 3, clientX: moved.left + 10, clientY: moved.top + 300 })
