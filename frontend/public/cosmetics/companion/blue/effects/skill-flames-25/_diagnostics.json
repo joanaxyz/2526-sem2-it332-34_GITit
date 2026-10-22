@@ -617,40 +617,40 @@
       255
     ],
     "bbox": [
-      48,
-      79,
+      51,
+      80,
       1278,
-      1249
+      1245
     ],
     "frameBBoxCenterRange": [
-      109.5,
-      156.5,
       119.0,
-      146.5
+      162.0,
+      120.0,
+      145.5
     ],
     "frameEnergyAnchorRange": [
-      112.35,
-      166.24,
-      125.6,
-      146.07
+      116.39,
+      158.65,
+      125.07,
+      145.56
     ],
     "projectileHandEnergyAnchorRange": [
-      117.59,
-      139.7,
-      125.52,
-      130.71
+      118.6,
+      140.42,
+      125.98,
+      131.43
     ],
     "projectileFlightNoseAnchorRange": [
-      194,
-      205,
-      130,
-      135
+      193,
+      203,
+      133,
+      133
     ],
     "projectileSettleEnergyAnchorRange": [
-      113.69,
-      139.56,
-      126.18,
-      130.45
+      117.68,
+      139.88,
+      125.11,
+      130.33
     ],
     "registration": {
       "targetAnchor": [
@@ -658,16 +658,16 @@
         133.12
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        73.686,
-        187,
-        97,
-        147.422
+        75.683,
+        186,
+        104,
+        146.427
       ],
       "appliedShiftRange": [
         -4,
-        40,
-        -17,
-        33
+        42,
+        -16,
+        29
       ],
       "emptyFrames": 0,
       "reliableFrames": 21,
@@ -1031,28 +1031,28 @@
       255
     ],
     "bbox": [
-      3,
-      81,
-      1255,
-      1278
+      47,
+      85,
+      1252,
+      1232
     ],
     "frameBBoxCenterRange": [
-      90.5,
-      155.0,
-      114.5,
-      162.5
+      93.5,
+      159.0,
+      115.5,
+      139.5
     ],
     "frameEnergyAnchorRange": [
-      113.46,
-      170.79,
-      120.41,
-      142.1
+      114.63,
+      173.37,
+      120.86,
+      142.31
     ],
     "projectileHandEnergyAnchorRange": [
-      117.52,
-      134.24,
-      123.29,
-      130.77
+      118.26,
+      134.42,
+      123.86,
+      130.1
     ],
     "projectileFlightNoseAnchorRange": [
       191,
@@ -1061,10 +1061,10 @@
       133
     ],
     "projectileSettleEnergyAnchorRange": [
-      114.26,
-      134.31,
-      124.13,
-      130.99
+      115.38,
+      133.05,
+      125.53,
+      131.11
     ],
     "registration": {
       "targetAnchor": [
@@ -1072,16 +1072,16 @@
         133.12
       ],
       "detectedAnchorRangeBeforeRegistration": [
-        98.257,
-        201,
-        101.559,
-        147.556
+        100.375,
+        195,
+        103.688,
+        146.333
       ],
       "appliedShiftRange": [
-        -27,
-        33,
-        -18,
-        23
+        -24,
+        36,
+        -17,
+        22
       ],
       "emptyFrames": 0,
       "reliableFrames": 17,

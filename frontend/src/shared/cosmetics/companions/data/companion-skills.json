@@ -269,14 +269,14 @@
       },
       "impactStartFrame": 16,
       "placeAnchor": {
-        "x": 0.541,
-        "y": 0.4902
+        "x": 0.5371,
+        "y": 0.4863
       },
       "placeBounds": {
-        "left": 0.0547,
-        "top": 0.1836,
-        "right": 0.9414,
-        "bottom": 0.7852
+        "left": 0.1602,
+        "top": 0.1914,
+        "right": 0.9297,
+        "bottom": 0.7773
       }
     },
     {
@@ -490,13 +490,13 @@
       "impactStartFrame": 20,
       "placeAnchor": {
         "x": 0.502,
-        "y": 0.4844
+        "y": 0.4863
       },
       "placeBounds": {
-        "left": 0.0039,
-        "top": 0.1328,
-        "right": 0.8828,
-        "bottom": 1
+        "left": 0.125,
+        "top": 0.125,
+        "right": 0.8516,
+        "bottom": 0.8203
       }
     },
     {
@@ -983,14 +983,14 @@
       },
       "impactStartFrame": 15,
       "placeAnchor": {
-        "x": 0.5049,
-        "y": 0.4902
+        "x": 0.4902,
+        "y": 0.4873
       },
       "placeBounds": {
-        "left": 0.1719,
-        "top": 0.1953,
-        "right": 0.9844,
-        "bottom": 0.7773
+        "left": 0.2148,
+        "top": 0.1758,
+        "right": 0.7969,
+        "bottom": 0.7812
       }
     },
     {
@@ -1204,14 +1204,14 @@
       },
       "impactStartFrame": 16,
       "placeAnchor": {
-        "x": 0.5215,
-        "y": 0.4941
+        "x": 0.5195,
+        "y": 0.4922
       },
       "placeBounds": {
-        "left": 0.1484,
+        "left": 0.1445,
         "top": 0.1914,
-        "right": 0.8516,
-        "bottom": 0.8281
+        "right": 0.8477,
+        "bottom": 0.8203
       }
     },
     {
@@ -2118,7 +2118,7 @@
         "left": 0.1289,
         "top": 0.2188,
         "right": 0.8203,
-        "bottom": 1
+        "bottom": 0.9531
       }
     },
     {
@@ -2650,14 +2650,14 @@
         "fps": 18
       },
       "placeAnchor": {
-        "x": 0.4863,
+        "x": 0.4902,
         "y": 0.8828
       },
       "placeBounds": {
-        "left": 0.1016,
-        "top": 0.1289,
-        "right": 0.8594,
-        "bottom": 1
+        "left": 0.1133,
+        "top": 0.1836,
+        "right": 0.8516,
+        "bottom": 0.9375
       },
       "layers": [
         {

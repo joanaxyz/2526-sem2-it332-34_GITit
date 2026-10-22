@@ -62,14 +62,14 @@
       "impactStartFrame": 15,
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/clone.png",
       "placeAnchor": {
-        "x": 0.5049,
-        "y": 0.4902
+        "x": 0.4902,
+        "y": 0.4873
       },
       "placeBounds": {
-        "left": 0.1719,
-        "top": 0.1953,
-        "right": 0.9844,
-        "bottom": 0.7773
+        "left": 0.2148,
+        "top": 0.1758,
+        "right": 0.7969,
+        "bottom": 0.7812
       }
     },
     "merge": {
@@ -329,14 +329,14 @@
       "impactStartFrame": 16,
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/rm.png",
       "placeAnchor": {
-        "x": 0.5215,
-        "y": 0.4941
+        "x": 0.5195,
+        "y": 0.4922
       },
       "placeBounds": {
-        "left": 0.1484,
+        "left": 0.1445,
         "top": 0.1914,
-        "right": 0.8516,
-        "bottom": 0.8281
+        "right": 0.8477,
+        "bottom": 0.8203
       }
     },
     "check-ignore": {
