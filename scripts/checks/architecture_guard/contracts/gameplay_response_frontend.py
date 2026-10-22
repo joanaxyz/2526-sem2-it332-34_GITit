@@ -21,18 +21,21 @@ from scripts.checks.architecture_guard.typescript_analysis import (
     ts_type_aliases,
 )
 
-GAMEPLAY_ADVENTURE_TYPES = "frontend/src/features/adventures/types.ts"
-
-
 GAMEPLAY_CHALLENGE_TYPES = "frontend/src/features/challenges/types.ts"
 
 
 GAMEPLAY_CHALLENGE_ENTRY_API = "frontend/src/features/challenges/api/challengesApi.ts"
 
 
-GAMEPLAY_RESPONSE_FRONTEND_APIS = (
-    "frontend/src/features/adventures/api/adventuresApi.ts",
-    "frontend/src/features/challenges/api/challengeRunsApi.ts",
+GAMEPLAY_CHALLENGE_RUNS_API = "frontend/src/features/challenges/api/challengeRunsApi.ts"
+
+
+GAMEPLAY_RESPONSE_FRONTEND_APIS = (GAMEPLAY_CHALLENGE_RUNS_API,)
+
+# Every run step response (challenge and adventure tier) extends these fields.
+TERMINAL_STEP_ALIAS = (
+    "exporttypeTerminalStep=Pick<ApiSchemas['ChallengeRunStepResponse'],"
+    "'id'|'command_text'|'terminal_output'|'result_category'>"
 )
 
 
@@ -277,7 +280,6 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
     violations: list[str] = []
     required_paths = {
         GAMEPLAY_RESPONSE_SHARED_COMMAND_TYPES,
-        GAMEPLAY_ADVENTURE_TYPES,
         GAMEPLAY_CHALLENGE_TYPES,
         *GAMEPLAY_RESPONSE_FRONTEND_APIS,
         GAMEPLAY_CHALLENGE_ENTRY_API,
@@ -287,41 +289,14 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
 
     terminal_source = strip_ts_comments(sources.get(GAMEPLAY_RESPONSE_SHARED_COMMAND_TYPES, ""))
     terminal_alias = _typescript_alias_source(terminal_source, "TerminalStep")
-    if "exporttypeTerminalStep=ApiSchemas['RuntimeStepResponse']" not in normalized_ts_type(
-        terminal_alias
-    ):
+    if TERMINAL_STEP_ALIAS not in normalized_ts_type(terminal_alias):
         violations.append(
-            f"{GAMEPLAY_RESPONSE_SHARED_COMMAND_TYPES}: TerminalStep must derive exactly from RuntimeStepResponse"
+            f"{GAMEPLAY_RESPONSE_SHARED_COMMAND_TYPES}: TerminalStep must pick exactly the "
+            "shared run step fields from ChallengeRunStepResponse"
         )
 
-    adventure_source = strip_ts_comments(sources.get(GAMEPLAY_ADVENTURE_TYPES, ""))
     challenge_source = strip_ts_comments(sources.get(GAMEPLAY_CHALLENGE_TYPES, ""))
     expected_omits = {
-        (GAMEPLAY_ADVENTURE_TYPES, "AdventureRun"): (
-            "AdventureRunWire",
-            {
-                "selected_level",
-                "next_level",
-                "story",
-                "battle_stage",
-                "mastery",
-                "current_attempt",
-                "results",
-                "progress",
-            },
-        ),
-        (GAMEPLAY_ADVENTURE_TYPES, "AdventureLevelLibraryResponse"): (
-            "ApiSchemas['AdventureLevelLibraryResponse']",
-            {"book", "run"},
-        ),
-        (GAMEPLAY_ADVENTURE_TYPES, "AdventureRunPatch"): (
-            "RequireAdventureRunStatus<ApiSchemas['AdventureRunPatchResponse']>",
-            {"current_attempt"},
-        ),
-        (GAMEPLAY_ADVENTURE_TYPES, "AdventureCommandResponse"): (
-            "ApiSchemas['AdventureCommandResponse']",
-            {"run", "step", "command_outcome"},
-        ),
         (GAMEPLAY_CHALLENGE_TYPES, "ChallengeRunStepResponse"): (
             "ApiSchemas['ChallengeRunStepResponse']",
             {"visualization_snapshot"},
@@ -374,15 +349,10 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
         ),
     }
     type_sources = {
-        GAMEPLAY_ADVENTURE_TYPES: adventure_source,
         GAMEPLAY_CHALLENGE_TYPES: challenge_source,
     }
     response_type_owners = {
         "TerminalStep": GAMEPLAY_RESPONSE_SHARED_COMMAND_TYPES,
-        "AdventureRun": GAMEPLAY_ADVENTURE_TYPES,
-        "AdventureRunPatch": GAMEPLAY_ADVENTURE_TYPES,
-        "AdventureCommandResponse": GAMEPLAY_ADVENTURE_TYPES,
-        "AdventureLevelLibraryResponse": GAMEPLAY_ADVENTURE_TYPES,
         "ChallengeRunResponse": GAMEPLAY_CHALLENGE_TYPES,
         "ChallengeRunStepResponse": GAMEPLAY_CHALLENGE_TYPES,
         "ChallengeRun": GAMEPLAY_CHALLENGE_TYPES,
@@ -447,13 +417,6 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
                 f"{path_label}: {alias_name} overlay fields must equal its exact refinement allowlist"
             )
 
-    adventure_wire = normalized_ts_type(
-        _typescript_alias_source(adventure_source, "AdventureRunWire")
-    )
-    if "RequireAdventureRunStatus<ApiSchemas['AdventureRunResponse']>" not in adventure_wire:
-        violations.append(
-            f"{GAMEPLAY_ADVENTURE_TYPES}: AdventureRunWire must derive from AdventureRunResponse"
-        )
     optimistic = normalized_ts_type(
         _typescript_alias_source(challenge_source, "ChallengeOptimisticStep")
     )
@@ -475,9 +438,6 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
         )
     for path_label, source in type_sources.items():
         for alias_name in (
-            "AdventureRun",
-            "AdventureRunPatch",
-            "AdventureCommandResponse",
             "ChallengeRunResponse",
             "ChallengeRunStepResponse",
             "ChallengeCommandResponse",
@@ -488,10 +448,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
                 violations.append(
                     f"{path_label}: {alias_name} must not widen the generated wire contract"
                 )
-    for path_label, alias_name in (
-        (GAMEPLAY_ADVENTURE_TYPES, "AdventureRunRefinementKeys"),
-        (GAMEPLAY_CHALLENGE_TYPES, "ChallengeRunRefinementKeys"),
-    ):
+    for path_label, alias_name in ((GAMEPLAY_CHALLENGE_TYPES, "ChallengeRunRefinementKeys"),):
         declaration = _typescript_alias_source(type_sources[path_label], alias_name)
         if re.search(r"\b(?:Partial|Record)\s*<|\bkeyof\b", declaration):
             violations.append(
@@ -499,17 +456,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
             )
 
     expected_api_responses = {
-        GAMEPLAY_RESPONSE_FRONTEND_APIS[0]: {
-            "adventure_levels_runs_create": "AdventureRun",
-            "adventure_runs_retrieve": "AdventureRun",
-            "adventure_runs_level_library_create": "AdventureLevelLibraryResponse",
-            "adventure_runs_submit_command_create": "AdventureCommandResponse",
-            "adventure_runs_files_create": "AdventureRun",
-            "adventure_runs_files_partial_update": "AdventureRun",
-            "adventure_runs_files_update": "AdventureRun",
-            "adventure_runs_files_destroy": "AdventureRun",
-        },
-        GAMEPLAY_RESPONSE_FRONTEND_APIS[1]: {
+        GAMEPLAY_CHALLENGE_RUNS_API: {
             "challenge_runs_retrieve": "ChallengeRunResponse",
             "challenge_runs_submit_command_create": "ChallengeCommandResponse",
             "challenge_runs_files_create": "ChallengeRunResponse",
@@ -532,7 +479,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
                     f"{path_label}: {operation} must use exact response type {response_type}"
                 )
         if path_label in {
-            GAMEPLAY_RESPONSE_FRONTEND_APIS[1],
+            GAMEPLAY_CHALLENGE_RUNS_API,
             GAMEPLAY_CHALLENGE_ENTRY_API,
         } and re.search(
             r"apiOperationRequest\s*<\s*['\"](?:challenge_runs_retrieve|challenge_runs_files_(?:create|partial_update|update|destroy)|challenge_trials_runs_create|challenge_runs_retry_create)['\"]\s*,\s*ChallengeRun\s*>",
@@ -543,8 +490,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
             )
         if re.search(
             r"\bas\s+(?:Promise\s*<\s*)?"
-            r"(?:AdventureRun|AdventureCommandResponse|AdventureLevelLibraryResponse|"
-            r"ChallengeRun|ChallengeRunResponse|ChallengeCommandResponse)\b",
+            r"(?:ChallengeRun|ChallengeRunResponse|ChallengeCommandResponse)\b",
             source,
         ):
             violations.append(
@@ -553,7 +499,6 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
         if re.search(r"\.then\s*\(", source):
             violations.append(f"{path_label}: gameplay response adapters are forbidden")
     expected_generated_destroy_calls = {
-        GAMEPLAY_RESPONSE_FRONTEND_APIS[0]: "adventure_runs_destroy",
         GAMEPLAY_CHALLENGE_ENTRY_API: "challenge_runs_destroy",
     }
     for path_label, operation in expected_generated_destroy_calls.items():
@@ -561,24 +506,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
         if f"apiOperationRequest('{operation}'" not in normalized:
             violations.append(f"{path_label}: {operation} must use the generated response directly")
     expected_direct_methods = {
-        GAMEPLAY_RESPONSE_FRONTEND_APIS[0]: {
-            "startRun": ("adventure_levels_runs_create", "AdventureRun"),
-            "getRun": ("adventure_runs_retrieve", "AdventureRun"),
-            "openLevelLibrary": (
-                "adventure_runs_level_library_create",
-                "AdventureLevelLibraryResponse",
-            ),
-            "submitCommand": (
-                "adventure_runs_submit_command_create",
-                "AdventureCommandResponse",
-            ),
-            "createFile": ("adventure_runs_files_create", "AdventureRun"),
-            "writeFile": ("adventure_runs_files_partial_update", "AdventureRun"),
-            "renameFile": ("adventure_runs_files_update", "AdventureRun"),
-            "deleteFile": ("adventure_runs_files_destroy", "AdventureRun"),
-            "discardRun": ("adventure_runs_destroy", None),
-        },
-        GAMEPLAY_RESPONSE_FRONTEND_APIS[1]: {
+        GAMEPLAY_CHALLENGE_RUNS_API: {
             "getRun": ("challenge_runs_retrieve", "ChallengeRunResponse"),
             "submitCommand": (
                 "challenge_runs_submit_command_create",
@@ -605,8 +533,7 @@ def gameplay_response_frontend_violations(sources: dict[str, str]) -> list[str]:
         },
     }
     expected_api_objects = {
-        GAMEPLAY_RESPONSE_FRONTEND_APIS[0]: "adventuresApi",
-        GAMEPLAY_RESPONSE_FRONTEND_APIS[1]: "challengeRunsApi",
+        GAMEPLAY_CHALLENGE_RUNS_API: "challengeRunsApi",
         GAMEPLAY_CHALLENGE_ENTRY_API: "challengesApi",
     }
     for path_label, methods in expected_direct_methods.items():

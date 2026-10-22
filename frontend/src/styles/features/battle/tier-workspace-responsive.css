@@ -1,8 +1,8 @@
-/* Tier workspace breakpoints (story-map tier runs only, tier-* scoped).
+/* Gameplay workspace breakpoints (adventure tiers and Challenge Gate trials, tier-* scoped).
 
    >= 1100px  three columns (tier-workspace.css).
    700-1099px two columns; the repository graph is a slide-over drawer opened
-              from the stats bar (useTierRepoDrawer matches the same range).
+              from the stats bar (useRepoGraphDrawer matches the same range).
    < 700px    one column: stats, game, terminal, objectives, repository
               graph, project files, contextual feedback.
 
@@ -78,6 +78,36 @@
   inset: 0;
   z-index: var(--z-modal-backdrop);
   background: rgba(0, 0, 0, 0.6);
+}
+
+@media (max-width: 1280px) {
+  .gameplay-workspace-screen.tier-workspace-screen {
+    grid-template-rows: auto minmax(0, 1fr);
+  }
+
+  .tier-workspace-screen .gameplay-workspace-header {
+    flex-wrap: wrap;
+  }
+
+  .tier-workspace-screen .gameplay-header-spacer {
+    display: none;
+  }
+
+  .tier-workspace-screen .tier-stats-bar {
+    order: 1;
+    flex: 0 0 100%;
+    justify-content: flex-start;
+    border-top: 1px solid hsl(var(--border) / 0.45);
+    margin-inline: -0.6rem;
+    padding: var(--space-1) var(--space-2);
+    background: rgba(var(--theme-primary-rgb), 0.03);
+  }
+
+  .tier-workspace-screen .tier-stats {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+    gap: var(--space-1) var(--space-3);
+  }
 }
 
 @media (min-width: 700px) and (max-width: 1099.98px) {
@@ -207,16 +237,11 @@
 
 @media (max-width: 600px) {
   .gameplay-workspace-screen.tier-workspace-screen {
-    grid-template-rows: 3.35rem auto minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr);
   }
 
-  .tier-stats-bar {
-    padding: var(--space-1) var(--space-2);
-  }
-
-  .tier-stats {
-    justify-content: flex-start;
-    gap: var(--space-1) var(--space-3);
+  .tier-workspace-screen .tier-stats-bar {
+    margin-inline: -0.38rem;
   }
 }
 

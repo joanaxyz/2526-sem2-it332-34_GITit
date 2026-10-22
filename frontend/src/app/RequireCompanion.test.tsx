@@ -35,10 +35,10 @@ describe('RequireCompanion', () => {
     })
 
     render(
-      <MemoryRouter initialEntries={['/adventure-levels/42']}>
+      <MemoryRouter initialEntries={['/adventure-level-tiers/42/runs']}>
         <Routes>
           <Route
-            path="/adventure-levels/:levelId"
+            path="/adventure-level-tiers/:tierId/runs"
             element={<RequireCompanion><div>Level</div></RequireCompanion>}
           />
           <Route path="/stories/:storySlug" element={<Destination />} />
@@ -47,7 +47,7 @@ describe('RequireCompanion', () => {
     )
 
     await waitFor(() => {
-      expect(screen.getByText('/stories/git-it-legacy?companion-required=1')).toBeInTheDocument()
+      expect(screen.getByText('/stories/arcane-spire?companion-required=1')).toBeInTheDocument()
     })
   })
 

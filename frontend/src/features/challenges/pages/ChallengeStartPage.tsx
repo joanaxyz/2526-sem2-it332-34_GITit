@@ -3,10 +3,13 @@ import { useNavigate, useParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { challengesApi } from '@/features/challenges/api/challengesApi'
+import { challengeRunAssetManifest } from '@/features/challenges/hooks/useChallengeRunAssets'
 import { syncChallengeRunInCache } from '@/features/challenges/utils/challengeRunCache'
 import type { ChallengeRun } from '@/features/challenges/types'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
+import { warmBattleAssets } from '@/shared/battle/battleAssets'
+import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 
 type ChallengeStartMode = 'start' | 'replay' | 'retry'
 
@@ -29,6 +32,7 @@ export function ChallengeStartPage({ mode = 'start' }: { mode?: ChallengeStartMo
   const { trialId, runId } = useParams<{ trialId?: string; runId?: string }>()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
+  const { companionSlug } = usePlayerLoadout()
   const targetId = Number(mode === 'retry' ? runId : trialId)
 
   const start = useMutation({
@@ -39,8 +43,10 @@ export function ChallengeStartPage({ mode = 'start' }: { mode?: ChallengeStartMo
       if (mode === 'retry') return challengesApi.retryChallengeRun(targetId)
       return challengesApi.startChallengeRun(targetId, { replay: mode === 'replay' })
     },
-    onSuccess: (run) => {
+    onSuccess: async (run) => {
       syncChallengeRunInCache(queryClient, run)
+      // The trial plays on the battle stage; decode its art before it opens.
+      await warmBattleAssets(challengeRunAssetManifest(run, companionSlug)).catch(() => undefined)
       navigate(`/challenge-runs/${run.id}`, { replace: true })
     },
   })

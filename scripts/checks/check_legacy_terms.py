@@ -3,7 +3,7 @@
 
 The current product vocabulary is story / story world / level map / lesson / adventure / challenge.
 Removed tower-map/tome/fake-theme product concepts are allowed only in explicit
-legacy route redirects. Natural narrative uses of words such as "tower" remain
+route-removal tests. Natural narrative uses of words such as "tower" remain
 valid inside story content and must not be confused with the deprecated UI model.
 """
 
@@ -29,7 +29,6 @@ ROOT_MARKDOWN_FILES = [
     ROOT / "DESIGN.md",
     ROOT / "PRODUCT.md",
     ROOT / "CONTENT_AUTHORING_GUIDE.md",
-    ROOT / "CURRICULUM_AUTHORING_PLAN.md",
 ]
 
 TEXT_SUFFIXES = {
@@ -48,10 +47,9 @@ TEXT_SUFFIXES = {
 }
 
 ALLOWLIST = {
-    # The only active source file allowed to spell deprecated URL vocabulary.
-    "frontend/src/shared/navigation/legacyRoutes.ts",
-    # The matching test proves old bookmarks still redirect while product code uses current names.
-    "frontend/src/shared/navigation/legacyRoutes.test.ts",
+    # These tests prove obsolete aliases have no route registration or map chrome.
+    "frontend/src/app/router.test.tsx",
+    "frontend/src/shared/navigation/routes.test.ts",
     "scripts/check_legacy_terms.py",
     "scripts/check_css_architecture.py",
     "scripts/check_documentation_current.py",

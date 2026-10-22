@@ -1,10 +1,8 @@
 import {
   BarChart3,
-  BookText,
   Coins,
   Layers,
   Settings,
-  ShieldAlert,
   Users,
   type LucideIcon,
 } from 'lucide-react'
@@ -50,25 +48,11 @@ export const ADMIN_SECTIONS: readonly AdminSection[] = [
     load: async () => (await import('../pages/AdminCurriculumPage')).AdminCurriculumPage,
   },
   {
-    path: ADMIN_ROUTES.content,
-    label: 'Content',
-    icon: BookText,
-    hidden: true,
-    load: async () => (await import('../pages/AdminContentPage')).AdminContentPage,
-  },
-  {
     path: ADMIN_ROUTES.analytics,
     label: 'Analytics',
     icon: BarChart3,
     hidden: true,
     load: async () => (await import('../pages/AdminAnalyticsPage')).AdminAnalyticsPage,
-  },
-  {
-    path: ADMIN_ROUTES.moderation,
-    label: 'Moderation',
-    icon: ShieldAlert,
-    hidden: true,
-    load: async () => (await import('../pages/AdminModerationPage')).AdminModerationPage,
   },
   {
     path: ADMIN_ROUTES.settings,

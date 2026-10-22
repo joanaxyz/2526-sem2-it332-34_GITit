@@ -9,7 +9,7 @@ import {
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { NavLink, useNavigate } from 'react-router-dom'
 
-import gitLogoImage from '@/assets/images/GIT_logo.webp'
+import gitLogoImage from '@/assets/images/git-it-logo-arcane.webp'
 import { AudioControls } from '@/shared/audio/AudioControls'
 import { authApi } from '@/shared/auth/authApi'
 import { useRank } from '@/shared/progress/rank'
@@ -295,20 +295,14 @@ function AppAccountCluster({ user }: { user: User | null }) {
   )
 }
 
-export function AppTopbar({ className }: { className?: string }) {
+export function AppTopbar() {
   const user = useAuthStore((state) => state.user)
   const scrolled = useScrolledPast()
 
   return (
-    <header className={cn('app-topbar', className)} data-scrolled={scrolled ? 'true' : undefined}>
+    <header className="app-topbar" data-scrolled={scrolled ? 'true' : undefined}>
       <NavLink to="/home" aria-label="GIT it! home" className="app-brand">
-        <span className="app-brand-sigil">
-          <img src={gitLogoImage} alt="" />
-        </span>
-        <span className="app-brand-copy">
-          <strong>GIT it!</strong>
-          <small>Level up your Git</small>
-        </span>
+        <img className="app-brand-logo" src={gitLogoImage} alt="" width={900} height={305} />
       </NavLink>
 
       <CurrentUserPrimaryNav

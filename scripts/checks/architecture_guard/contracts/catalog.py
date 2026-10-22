@@ -84,9 +84,7 @@ CATALOG_RESPONSE_FIELD_SETS = {CATALOG_STORY_FIELDS, CATALOG_CHAPTER_FIELDS}
 def is_catalog_contract_symbol(name: str) -> bool:
     """Identify Story/Chapter catalog response-serializer symbols."""
 
-    if name.startswith(("Admin", "Authoring")) or name.endswith(
-        ("APIView", "View", "ViewSet", "Model", "Admin")
-    ):
+    if name.startswith("Admin") or name.endswith(("APIView", "View", "ViewSet", "Model", "Admin")):
         return False
     normalized = name.lower()
     if "orientation" in normalized:
@@ -155,6 +153,9 @@ def python_catalog_contract_symbols(
         "ChapterStorySerializer",
         "ChapterLevelCompletionSerializer",
         "ChapterChestRewardSerializer",
+        "ChapterChestStateSerializer",
+        "ChapterChestRewardsSerializer",
+        "ChapterChestOpenSerializer",
     }
     known_contracts = set(canonical_serializers)
     for node in tree.body:
@@ -412,6 +413,18 @@ def catalog_contract_source_violations(
         "ChapterChestRewardSerializer": {
             "threshold": "serializers.IntegerField()",
             "coins": "serializers.IntegerField()",
+        },
+        "ChapterChestStateSerializer": {
+            "unlocked": "serializers.BooleanField()",
+            "claimed": "serializers.BooleanField()",
+        },
+        "ChapterChestRewardsSerializer": {
+            "results": "ChapterChestStateSerializer(many=True)",
+            "balance": "serializers.IntegerField()",
+            "coins_awarded": "serializers.IntegerField()",
+        },
+        "ChapterChestOpenSerializer": {
+            "threshold": "serializers.IntegerField(max_value=100,min_value=1)",
         },
         "StorySerializer": {
             "id": "serializers.IntegerField(read_only=True)",

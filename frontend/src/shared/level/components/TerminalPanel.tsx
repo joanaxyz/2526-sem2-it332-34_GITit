@@ -1,9 +1,11 @@
+import { ClipboardPaste } from 'lucide-react'
 import { useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 
 import type { TerminalLine } from '@/shared/level/types'
 import { cn } from '@/shared/utils/cn'
 import { CommandInput } from './CommandInput'
+import type { CommandInputHandle } from './CommandInput'
 
 /** How close (px) to the end of the scrollback still counts as "at the bottom". */
 const BOTTOM_THRESHOLD = 8
@@ -28,7 +30,6 @@ export function TerminalPanel({
   title = 'Terminal',
   headerAction,
   className,
-  dockInput = false,
 }: {
   lines: TerminalLine[]
   prompt: string
@@ -42,26 +43,20 @@ export function TerminalPanel({
   /** An optional control on the right of the title bar. */
   headerAction?: ReactNode
   className?: string
-  /**
-   * Pin the input row to the bottom of the panel, below a bottom-anchored
-   * history that only follows new output while the reader is at its end.
-   * Off by default: the prompt is then the last line of the scrollback stream.
-   */
-  dockInput?: boolean
 }) {
   const panelRef = useRef<HTMLElement>(null)
   const outputRef = useRef<HTMLDivElement>(null)
+  const commandInputRef = useRef<CommandInputHandle>(null)
   const followOutput = useRef(true)
   const visibleLines = useMemo(() => linesAfterClear(lines), [lines])
 
   useEffect(() => {
     const container = outputRef.current
     if (!container) return
-    // The docked history leaves the reader where they are while they read
-    // earlier output; it resumes following once they scroll back down.
-    if (dockInput && !followOutput.current) return
+    // Leave the reader in place while they read earlier output.
+    if (!followOutput.current) return
     container.scrollTop = container.scrollHeight
-  }, [dockInput, visibleLines])
+  }, [visibleLines])
 
   function trackFollow() {
     const container = outputRef.current
@@ -93,12 +88,16 @@ export function TerminalPanel({
   ))
   const input = (
     <CommandInput
+      ref={commandInputRef}
       prompt={prompt}
       cwd={cwd}
       disabled={disabled}
       runDisabled={runDisabled}
       processing={processing}
-      onSubmit={onCommand}
+      onSubmit={(command) => {
+        followOutput.current = true
+        onCommand(command)
+      }}
     />
   )
 
@@ -106,42 +105,38 @@ export function TerminalPanel({
     <section
       ref={panelRef}
       aria-label={title}
-      className={cn('terminal-panel', dockInput && 'terminal-panel--docked', className)}
+      className={cn('terminal-panel', className)}
     >
       <div className="terminal-titlebar workspace-panel-header">
         <span className="panel-eyebrow">{title}</span>
-        {headerAction}
+        <div className="terminal-actions">
+          {headerAction}
+          <button
+            type="button"
+            className="terminal-paste"
+            aria-label="Paste from clipboard"
+            title="Paste from clipboard"
+            disabled={disabled}
+            onClick={() => void commandInputRef.current?.paste()}
+          >
+            <ClipboardPaste aria-hidden="true" />
+            <span>Paste</span>
+          </button>
+        </div>
       </div>
 
-      {dockInput ? (
-        <>
-          <div
-            className="terminal-output terminal-output--docked app-scrollbar"
-            ref={outputRef}
-            role="log"
-            aria-live="polite"
-            aria-relevant="additions text"
-            onClick={focusPrompt}
-            onScroll={trackFollow}
-          >
-            <div className="terminal-history">{renderedLines}</div>
-          </div>
-          <div className="terminal-input-dock">{input}</div>
-        </>
-      ) : (
-        /* The prompt is the last line of the stream, not a separate bar. */
-        <div
-          className="terminal-output app-scrollbar"
-          ref={outputRef}
-          role="log"
-          aria-live="polite"
-          aria-relevant="additions text"
-          onClick={focusPrompt}
-        >
-          {renderedLines}
-          {input}
-        </div>
-      )}
+      <div
+        className="terminal-output app-scrollbar"
+        ref={outputRef}
+        role="log"
+        aria-live="polite"
+        aria-relevant="additions text"
+        onClick={focusPrompt}
+        onScroll={trackFollow}
+      >
+        {renderedLines}
+        {input}
+      </div>
     </section>
   )
 }

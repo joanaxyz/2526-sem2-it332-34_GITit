@@ -5,6 +5,7 @@ import {
 
 import { ChapterOverview } from '@/features/story-map/components/ChapterOverview'
 import { StoryAdventurePath } from '@/features/story-map/components/path/StoryAdventurePath'
+import { WorldMascot } from '@/shared/mascot/WorldMascot'
 import { GamePanel } from '@/shared/components/GamePanel'
 import type {
   AdventureLevelSummary,
@@ -17,7 +18,7 @@ import { AppTopbar } from '@/shared/navigation/AppNavigation'
 import { GitCommandIcon } from '@/shared/git/commandCatalog/commandIcons'
 import { DEFAULT_STORY_WORLD_SLUG, getStoryWorld } from '@/shared/story-worlds/registry'
 
-// Fixed, runtime-computed schedule - mirrors progress.chests.CHEST_SCHEDULE.
+// Fixed runtime schedule, matching curriculum.services.chests.CHEST_SCHEDULE.
 const PREVIEW_CHEST_SCHEDULE = [
   { threshold: 25, coins: 25 },
   { threshold: 50, coins: 60 },
@@ -113,10 +114,11 @@ function previewTiers(levelIndex: number): AdventureLevelTierAccess[] {
       id: levelIndex * 10 + tierIndex + 1,
       difficulty,
       locked: !cleared && !inProgress && !(levelIndex === 4 && tierIndex === 1),
-      wave_progress: { completed: cleared ? total : inProgress ? 1 : 0, total },
+      scenario_progress: { completed: cleared ? total : inProgress ? 1 : 0, total },
       completion: cleared
         ? { stars: 3 - tierIndex, counted_action_total: 1, completed_at: '2026-08-25T00:00:00Z' }
         : null,
+      reward: { coins: [25, 35, 50][tierIndex], claimed: cleared },
     }
   })
 }
@@ -214,10 +216,11 @@ export function Component() {
       <AppTopbar />
       <main className="app-main app-main--story-map">
         <div className="story-page-shell">
+          <WorldMascot surface="track" />
           <div className="story-map-backdrop" style={storyMapStyle} aria-hidden="true" />
           <div className="story-map-layout">
             <aside className="story-map-left" aria-label="Chapter tools">
-              <ChapterOverview chapter={activeChapter} />
+              <ChapterOverview chapter={activeChapter} preview />
             </aside>
 
             <section className="story-map-stage" aria-label="Preview story map">

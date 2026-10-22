@@ -1,7 +1,7 @@
 """Regenerate ``curriculum/seed_data/generated/generated_targets.py``.
 
 The git command engine lives in the frontend now, so target repository states are
-no longer derived in Python. This command collects every seed variant's
+no longer derived in Python. This command collects every module tier, scenario and Challenge Gate case's
 ``initial_state`` + ``solution_commands`` (+ mid-sequence workspace file edits),
 replays each through the real browser engine via a small Vite-driven Node script
 (``frontend/scripts/generate-targets.mjs``), verifies that every command is
@@ -18,21 +18,15 @@ Run after changing any variant's initial state or solution:
 from __future__ import annotations
 
 import json
-import subprocess
-import tempfile
 from pathlib import Path
 
 from django.core.management.base import BaseCommand, CommandError
 
-from curriculum.management.commands.seed_legacy_modules import LEGACY_MODULE_LEVELS
-from curriculum.seed_data.adventure_levels import ADVENTURE_LEVELS
-from curriculum.seed_data.challenges import CHALLENGES
+from curriculum.management.commands.seed_curriculum import MODULE_LEVELS
+from curriculum.seed_data.source.scenario_fixtures import extension_cases
+from curriculum.services.solution_replay import replay_solutions, verify_backend_transitions
 from simulator.trajectory import build_solution_trajectory
 
-# generate_targets.py -> commands -> management -> curriculum -> backend -> repo
-REPO_ROOT = Path(__file__).resolve().parents[4]
-FRONTEND_DIR = REPO_ROOT / "frontend"
-GENERATOR_SCRIPT = FRONTEND_DIR / "scripts" / "generate-targets.mjs"
 GENERATED_DIR = Path(__file__).resolve().parents[2] / "seed_data" / "generated"
 TARGETS_FILE = GENERATED_DIR / "generated_targets.py"
 TRAJECTORIES_FILE = GENERATED_DIR / "generated_trajectories.py"
@@ -76,6 +70,12 @@ class Command(BaseCommand):
         missing = sorted(set(cases) - set(targets))
         if missing:
             raise CommandError(f"Generator returned no target for: {', '.join(missing[:10])}")
+        rejected = verify_backend_transitions(replays)
+        if rejected:
+            raise CommandError(
+                "The backend would reject these authored routes, so learners could not "
+                "solve them:\n" + "\n".join(rejected[:20])
+            )
         trajectories = {
             case_id: build_solution_trajectory(replay) for case_id, replay in replays.items()
         }
@@ -95,7 +95,9 @@ class Command(BaseCommand):
                     raise CommandError(
                         f"generated/{path.name} is stale - run `python manage.py generate_targets`."
                     )
-            self.stdout.write(self.style.SUCCESS("Generated targets and trajectories are up to date."))
+            self.stdout.write(
+                self.style.SUCCESS("Generated targets and trajectories are up to date.")
+            )
             return
 
         for path, rendered, summary in outputs:
@@ -119,23 +121,9 @@ class Command(BaseCommand):
                 "max_counted_commands": max_counted_commands,
             }
 
-        for spec in ADVENTURE_LEVELS:
-            for variant in spec.get("variants", []):
-                add(
-                    variant,
-                    max_counted_commands=spec.get("max_counted_commands") or 0,
-                )
-        for challenge in CHALLENGES:
-            for level in challenge.get("levels", []):
-                for variant in level.get("variants", []):
-                    add(
-                        variant,
-                        max_counted_commands=level.get("max_counted_commands") or 0,
-                    )
-        # Legacy module tiers author their cases inline (no *_template suffix)
-        # rather than through the variant-spec helpers, so normalize the two
-        # key names the collector reads.
-        for level in LEGACY_MODULE_LEVELS:
+        # Module tiers author their cases inline (no *_template suffix), so
+        # normalize the key names the collector reads.
+        for level in MODULE_LEVELS:
             for tier in level.get("tiers", {}).values():
                 for case in tier.get("cases", []):
                     add(
@@ -150,30 +138,22 @@ class Command(BaseCommand):
                         },
                         max_counted_commands=tier.get("max_counted_commands") or 0,
                     )
+        # Planned and Challenge Gate scenarios (source/scenario_fixtures/) are live
+        # cases too; their budget is the authored maximum.
+        for case_id, case in extension_cases().items():
+            add(
+                {
+                    "case_id": case_id,
+                    "initial_state_template": case["initial_state"],
+                    "solution_commands_template": case["solution_commands"],
+                    "solution_workspace_files_template": case["solution_workspace_files"],
+                },
+                max_counted_commands=case["max_counted_commands"],
+            )
         return cases
 
     def _run_generator(self, cases: dict[str, dict]) -> tuple[dict[str, dict], dict[str, dict]]:
-        if not GENERATOR_SCRIPT.exists():
-            raise CommandError(f"Generator script not found: {GENERATOR_SCRIPT}")
-        with tempfile.TemporaryDirectory() as tmp:
-            input_path = Path(tmp) / "cases.json"
-            output_path = Path(tmp) / "targets.json"
-            input_path.write_text(json.dumps(cases), encoding="utf-8")
-            try:
-                result = subprocess.run(
-                    ["node", str(GENERATOR_SCRIPT), str(input_path), str(output_path)],
-                    cwd=FRONTEND_DIR,
-                    capture_output=True,
-                    text=True,
-                )
-            except FileNotFoundError as exc:
-                raise CommandError(
-                    "`node` was not found on PATH - install Node to run the generator."
-                ) from exc
-            if result.returncode != 0:
-                raise CommandError(f"Target generator failed:\n{result.stderr or result.stdout}")
-            output = json.loads(output_path.read_text(encoding="utf-8"))
-            return output["targets"], output["replays"]
+        return replay_solutions(cases)
 
     def _render(self, data: dict[str, dict], header: str) -> str:
         body = json.dumps(data, indent=2, sort_keys=True, ensure_ascii=False)

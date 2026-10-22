@@ -31,6 +31,8 @@ export type EmptyRepositoryNodeData = {
   initialized: boolean
   branchName: string
   variant: DagVariant
+  /** `git init` just ran: the hollow orb bursts into the HEAD orb. */
+  isInitializing?: boolean
 }
 
 export type EnteringDelta = {
@@ -38,6 +40,8 @@ export type EnteringDelta = {
   refsByCommit: ReadonlyMap<string, string[]>
   /** Commit that HEAD newly points to, including checkout at unchanged topology. */
   headTarget: string | null
+  /** The repository went from an ordinary folder to initialized. */
+  repositoryInitialized: boolean
 }
 
 export type DagActivity = 'idle' | 'processing' | 'updated' | 'unchanged' | 'solved' | 'error'

@@ -67,6 +67,7 @@ export type RepositorySnapshot = {
   config?: Record<string, RepositoryValue>
   remote_fixtures?: RepositoryValue
   remote_updates?: Record<string, string | null>
+  repository_root?: string | null
   merge_abort_state?: RepositorySnapshot
   merge_parent?: string | null
   merge_conflicts?: RepositoryValue
@@ -76,6 +77,9 @@ export type RepositorySnapshot = {
   merge_conflict_files?: string[]
   cherry_pick_in_progress?: boolean
   cherry_pick_original_head?: string | null
+  cherry_pick_source?: string | null
+  cherry_pick_message?: string | null
+  cherry_pick_conflict_files?: string[]
   rebase_state?: RepositoryValue
   project_tree?: Record<string, RepositoryValue>
   visible_tree?: Record<string, RepositoryValue>
@@ -87,14 +91,15 @@ type CopyDetail = {
 }
 
 // Strict schema_version 3 story: the backend normalizer whitelists exactly
-// these keys, so the frontend never has to guess. The adventure objective
-// checklist is NOT part of this shape - it arrives as a separate top-level
-// `objective_checks` payload field.
+// these learner-facing keys, so the frontend never has to guess.
 export type LevelScenarioContext = {
   schema_version?: number
   story?: string
+  starting_point?: string
   real_world_context?: string
   task?: string
+  objective_checks?: string[]
+  expected_result?: string
   details?: CopyDetail[]
 }
 
@@ -106,7 +111,11 @@ export type RepositoryVisualization = {
 // The minimal shape the shared terminal needs to render a command + its output.
 // Both ChallengeStepLog and the adventure step payload satisfy this, so terminal
 // line derivation (and the optimistic pending/error placeholders) are shared.
-export type TerminalStep = ApiSchemas['RuntimeStepResponse']
+// Every run step response (challenge and adventure tier) extends these fields.
+export type TerminalStep = Pick<
+  ApiSchemas['ChallengeRunStepResponse'],
+  'id' | 'command_text' | 'terminal_output' | 'result_category'
+>
 
 export type RepositoryCommandState = RepositorySnapshot & Record<string, RepositoryValue>
 

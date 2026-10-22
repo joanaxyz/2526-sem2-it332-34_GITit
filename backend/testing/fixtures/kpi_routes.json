@@ -1,0 +1,673 @@
+{
+  "generated_by": "python -m testing.regenerate_kpi_routes (real browser Git engine)",
+  "cases": {
+    "practice": {
+      "initial_state": {
+        "repository_initialized": false,
+        "commits": [],
+        "branches": {},
+        "head": {
+          "type": "branch",
+          "name": "main"
+        },
+        "staging": {},
+        "working_tree": {
+          "note.txt": {
+            "status": "untracked",
+            "content": "hello"
+          }
+        },
+        "conflicts": []
+      },
+      "solution_commands": [
+        "git init",
+        "git add .",
+        "git commit -m \"First\""
+      ],
+      "max_counted_commands": 8
+    },
+    "transfer": {
+      "initial_state": {
+        "repository_initialized": false,
+        "commits": [],
+        "branches": {},
+        "head": {
+          "type": "branch",
+          "name": "main"
+        },
+        "staging": {},
+        "working_tree": {
+          "note.txt": {
+            "status": "untracked",
+            "content": "hello"
+          },
+          "extra.txt": {
+            "status": "untracked",
+            "content": "hello"
+          }
+        },
+        "conflicts": []
+      },
+      "solution_commands": [
+        "git init",
+        "git add .",
+        "git commit -m \"First\""
+      ],
+      "max_counted_commands": 8
+    }
+  },
+  "targets": {
+    "practice": {
+      "repository_initialized": true,
+      "commits": [
+        {
+          "id": "c0",
+          "message": "First",
+          "parents": [],
+          "tree": {
+            "note.txt": "hello"
+          },
+          "changes": {
+            "note.txt": {
+              "change_type": "added",
+              "before": null,
+              "after": "hello"
+            }
+          },
+          "files": {
+            "note.txt": "added"
+          },
+          "author": "GIT it",
+          "order": 0,
+          "is_merge": false
+        }
+      ],
+      "branches": {
+        "main": "c0"
+      },
+      "head": {
+        "type": "branch",
+        "name": "main",
+        "target": "c0"
+      },
+      "staging": {},
+      "working_tree": {},
+      "conflicts": [],
+      "conflict_details": {},
+      "remotes": {},
+      "remote_branches": {},
+      "upstream_tracking": {},
+      "tags": {},
+      "remote_tags": {},
+      "stash_stack": [],
+      "reflog": [
+        {
+          "ref": "HEAD@{0}",
+          "target": "c0",
+          "message": "move HEAD"
+        }
+      ],
+      "partial_hunks": {},
+      "replaced_commits": {},
+      "operation_metadata": {
+        "last_init_branch": "main",
+        "last_init_initial_branch": "main",
+        "last_init_directory": null,
+        "last_init_current_directory": true,
+        "last_init_quiet": false,
+        "last_init_reinitialized": false,
+        "repository_reinitialized": false
+      },
+      "repository_root": ".",
+      "last_init_branch": "main",
+      "last_init_initial_branch": "main",
+      "last_init_directory": null,
+      "last_init_current_directory": true,
+      "last_init_quiet": false,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    },
+    "transfer": {
+      "repository_initialized": true,
+      "commits": [
+        {
+          "id": "c0",
+          "message": "First",
+          "parents": [],
+          "tree": {
+            "extra.txt": "hello",
+            "note.txt": "hello"
+          },
+          "changes": {
+            "extra.txt": {
+              "change_type": "added",
+              "before": null,
+              "after": "hello"
+            },
+            "note.txt": {
+              "change_type": "added",
+              "before": null,
+              "after": "hello"
+            }
+          },
+          "files": {
+            "extra.txt": "added",
+            "note.txt": "added"
+          },
+          "author": "GIT it",
+          "order": 0,
+          "is_merge": false
+        }
+      ],
+      "branches": {
+        "main": "c0"
+      },
+      "head": {
+        "type": "branch",
+        "name": "main",
+        "target": "c0"
+      },
+      "staging": {},
+      "working_tree": {},
+      "conflicts": [],
+      "conflict_details": {},
+      "remotes": {},
+      "remote_branches": {},
+      "upstream_tracking": {},
+      "tags": {},
+      "remote_tags": {},
+      "stash_stack": [],
+      "reflog": [
+        {
+          "ref": "HEAD@{0}",
+          "target": "c0",
+          "message": "move HEAD"
+        }
+      ],
+      "partial_hunks": {},
+      "replaced_commits": {},
+      "operation_metadata": {
+        "last_init_branch": "main",
+        "last_init_initial_branch": "main",
+        "last_init_directory": null,
+        "last_init_current_directory": true,
+        "last_init_quiet": false,
+        "last_init_reinitialized": false,
+        "repository_reinitialized": false
+      },
+      "repository_root": ".",
+      "last_init_branch": "main",
+      "last_init_initial_branch": "main",
+      "last_init_directory": null,
+      "last_init_current_directory": true,
+      "last_init_quiet": false,
+      "last_init_reinitialized": false,
+      "repository_reinitialized": false
+    }
+  },
+  "replays": {
+    "practice": {
+      "steps": [
+        {
+          "command": "git init",
+          "diagnostic": false,
+          "before_edits": null,
+          "ready": {
+            "repository_initialized": false,
+            "commits": [],
+            "branches": {},
+            "head": {
+              "type": "branch",
+              "name": "main",
+              "target": null
+            },
+            "staging": {},
+            "working_tree": {
+              "note.txt": {
+                "status": "untracked",
+                "content": "hello"
+              }
+            },
+            "conflicts": [],
+            "conflict_details": {},
+            "remotes": {},
+            "remote_branches": {},
+            "upstream_tracking": {},
+            "tags": {},
+            "remote_tags": {},
+            "stash_stack": [],
+            "reflog": [],
+            "partial_hunks": {},
+            "replaced_commits": {},
+            "operation_metadata": {}
+          },
+          "normalized_command": "git init",
+          "command_family": "init",
+          "exit_code": 0
+        },
+        {
+          "command": "git add .",
+          "diagnostic": false,
+          "before_edits": null,
+          "ready": {
+            "repository_initialized": true,
+            "commits": [],
+            "branches": {
+              "main": null
+            },
+            "head": {
+              "type": "branch",
+              "name": "main",
+              "target": null
+            },
+            "staging": {},
+            "working_tree": {
+              "note.txt": {
+                "status": "untracked",
+                "content": "hello"
+              }
+            },
+            "conflicts": [],
+            "conflict_details": {},
+            "remotes": {},
+            "remote_branches": {},
+            "upstream_tracking": {},
+            "tags": {},
+            "remote_tags": {},
+            "stash_stack": [],
+            "reflog": [],
+            "partial_hunks": {},
+            "replaced_commits": {},
+            "operation_metadata": {
+              "last_init_branch": "main",
+              "last_init_initial_branch": "main",
+              "last_init_directory": null,
+              "last_init_current_directory": true,
+              "last_init_quiet": false,
+              "last_init_reinitialized": false,
+              "repository_reinitialized": false
+            },
+            "repository_root": ".",
+            "last_init_branch": "main",
+            "last_init_initial_branch": "main",
+            "last_init_directory": null,
+            "last_init_current_directory": true,
+            "last_init_quiet": false,
+            "last_init_reinitialized": false,
+            "repository_reinitialized": false
+          },
+          "normalized_command": "git add .",
+          "command_family": "add",
+          "exit_code": 0
+        },
+        {
+          "command": "git commit -m \"First\"",
+          "diagnostic": false,
+          "before_edits": null,
+          "ready": {
+            "repository_initialized": true,
+            "commits": [],
+            "branches": {
+              "main": null
+            },
+            "head": {
+              "type": "branch",
+              "name": "main",
+              "target": null
+            },
+            "staging": {
+              "note.txt": {
+                "status": "untracked",
+                "content": "hello"
+              }
+            },
+            "working_tree": {},
+            "conflicts": [],
+            "conflict_details": {},
+            "remotes": {},
+            "remote_branches": {},
+            "upstream_tracking": {},
+            "tags": {},
+            "remote_tags": {},
+            "stash_stack": [],
+            "reflog": [],
+            "partial_hunks": {},
+            "replaced_commits": {},
+            "operation_metadata": {
+              "last_init_branch": "main",
+              "last_init_initial_branch": "main",
+              "last_init_directory": null,
+              "last_init_current_directory": true,
+              "last_init_quiet": false,
+              "last_init_reinitialized": false,
+              "repository_reinitialized": false
+            },
+            "repository_root": ".",
+            "last_init_branch": "main",
+            "last_init_initial_branch": "main",
+            "last_init_directory": null,
+            "last_init_current_directory": true,
+            "last_init_quiet": false,
+            "last_init_reinitialized": false,
+            "repository_reinitialized": false
+          },
+          "normalized_command": "git commit -m First",
+          "command_family": "commit",
+          "exit_code": 0
+        }
+      ],
+      "final": {
+        "repository_initialized": true,
+        "commits": [
+          {
+            "id": "c0",
+            "message": "First",
+            "parents": [],
+            "tree": {
+              "note.txt": "hello"
+            },
+            "changes": {
+              "note.txt": {
+                "change_type": "added",
+                "before": null,
+                "after": "hello"
+              }
+            },
+            "files": {
+              "note.txt": "added"
+            },
+            "author": "GIT it",
+            "order": 0,
+            "is_merge": false
+          }
+        ],
+        "branches": {
+          "main": "c0"
+        },
+        "head": {
+          "type": "branch",
+          "name": "main",
+          "target": "c0"
+        },
+        "staging": {},
+        "working_tree": {},
+        "conflicts": [],
+        "conflict_details": {},
+        "remotes": {},
+        "remote_branches": {},
+        "upstream_tracking": {},
+        "tags": {},
+        "remote_tags": {},
+        "stash_stack": [],
+        "reflog": [
+          {
+            "ref": "HEAD@{0}",
+            "target": "c0",
+            "message": "move HEAD"
+          }
+        ],
+        "partial_hunks": {},
+        "replaced_commits": {},
+        "operation_metadata": {
+          "last_init_branch": "main",
+          "last_init_initial_branch": "main",
+          "last_init_directory": null,
+          "last_init_current_directory": true,
+          "last_init_quiet": false,
+          "last_init_reinitialized": false,
+          "repository_reinitialized": false
+        },
+        "repository_root": ".",
+        "last_init_branch": "main",
+        "last_init_initial_branch": "main",
+        "last_init_directory": null,
+        "last_init_current_directory": true,
+        "last_init_quiet": false,
+        "last_init_reinitialized": false,
+        "repository_reinitialized": false
+      },
+      "final_before_edits": null
+    },
+    "transfer": {
+      "steps": [
+        {
+          "command": "git init",
+          "diagnostic": false,
+          "before_edits": null,
+          "ready": {
+            "repository_initialized": false,
+            "commits": [],
+            "branches": {},
+            "head": {
+              "type": "branch",
+              "name": "main",
+              "target": null
+            },
+            "staging": {},
+            "working_tree": {
+              "note.txt": {
+                "status": "untracked",
+                "content": "hello"
+              },
+              "extra.txt": {
+                "status": "untracked",
+                "content": "hello"
+              }
+            },
+            "conflicts": [],
+            "conflict_details": {},
+            "remotes": {},
+            "remote_branches": {},
+            "upstream_tracking": {},
+            "tags": {},
+            "remote_tags": {},
+            "stash_stack": [],
+            "reflog": [],
+            "partial_hunks": {},
+            "replaced_commits": {},
+            "operation_metadata": {}
+          },
+          "normalized_command": "git init",
+          "command_family": "init",
+          "exit_code": 0
+        },
+        {
+          "command": "git add .",
+          "diagnostic": false,
+          "before_edits": null,
+          "ready": {
+            "repository_initialized": true,
+            "commits": [],
+            "branches": {
+              "main": null
+            },
+            "head": {
+              "type": "branch",
+              "name": "main",
+              "target": null
+            },
+            "staging": {},
+            "working_tree": {
+              "note.txt": {
+                "status": "untracked",
+                "content": "hello"
+              },
+              "extra.txt": {
+                "status": "untracked",
+                "content": "hello"
+              }
+            },
+            "conflicts": [],
+            "conflict_details": {},
+            "remotes": {},
+            "remote_branches": {},
+            "upstream_tracking": {},
+            "tags": {},
+            "remote_tags": {},
+            "stash_stack": [],
+            "reflog": [],
+            "partial_hunks": {},
+            "replaced_commits": {},
+            "operation_metadata": {
+              "last_init_branch": "main",
+              "last_init_initial_branch": "main",
+              "last_init_directory": null,
+              "last_init_current_directory": true,
+              "last_init_quiet": false,
+              "last_init_reinitialized": false,
+              "repository_reinitialized": false
+            },
+            "repository_root": ".",
+            "last_init_branch": "main",
+            "last_init_initial_branch": "main",
+            "last_init_directory": null,
+            "last_init_current_directory": true,
+            "last_init_quiet": false,
+            "last_init_reinitialized": false,
+            "repository_reinitialized": false
+          },
+          "normalized_command": "git add .",
+          "command_family": "add",
+          "exit_code": 0
+        },
+        {
+          "command": "git commit -m \"First\"",
+          "diagnostic": false,
+          "before_edits": null,
+          "ready": {
+            "repository_initialized": true,
+            "commits": [],
+            "branches": {
+              "main": null
+            },
+            "head": {
+              "type": "branch",
+              "name": "main",
+              "target": null
+            },
+            "staging": {
+              "extra.txt": {
+                "status": "untracked",
+                "content": "hello"
+              },
+              "note.txt": {
+                "status": "untracked",
+                "content": "hello"
+              }
+            },
+            "working_tree": {},
+            "conflicts": [],
+            "conflict_details": {},
+            "remotes": {},
+            "remote_branches": {},
+            "upstream_tracking": {},
+            "tags": {},
+            "remote_tags": {},
+            "stash_stack": [],
+            "reflog": [],
+            "partial_hunks": {},
+            "replaced_commits": {},
+            "operation_metadata": {
+              "last_init_branch": "main",
+              "last_init_initial_branch": "main",
+              "last_init_directory": null,
+              "last_init_current_directory": true,
+              "last_init_quiet": false,
+              "last_init_reinitialized": false,
+              "repository_reinitialized": false
+            },
+            "repository_root": ".",
+            "last_init_branch": "main",
+            "last_init_initial_branch": "main",
+            "last_init_directory": null,
+            "last_init_current_directory": true,
+            "last_init_quiet": false,
+            "last_init_reinitialized": false,
+            "repository_reinitialized": false
+          },
+          "normalized_command": "git commit -m First",
+          "command_family": "commit",
+          "exit_code": 0
+        }
+      ],
+      "final": {
+        "repository_initialized": true,
+        "commits": [
+          {
+            "id": "c0",
+            "message": "First",
+            "parents": [],
+            "tree": {
+              "extra.txt": "hello",
+              "note.txt": "hello"
+            },
+            "changes": {
+              "extra.txt": {
+                "change_type": "added",
+                "before": null,
+                "after": "hello"
+              },
+              "note.txt": {
+                "change_type": "added",
+                "before": null,
+                "after": "hello"
+              }
+            },
+            "files": {
+              "extra.txt": "added",
+              "note.txt": "added"
+            },
+            "author": "GIT it",
+            "order": 0,
+            "is_merge": false
+          }
+        ],
+        "branches": {
+          "main": "c0"
+        },
+        "head": {
+          "type": "branch",
+          "name": "main",
+          "target": "c0"
+        },
+        "staging": {},
+        "working_tree": {},
+        "conflicts": [],
+        "conflict_details": {},
+        "remotes": {},
+        "remote_branches": {},
+        "upstream_tracking": {},
+        "tags": {},
+        "remote_tags": {},
+        "stash_stack": [],
+        "reflog": [
+          {
+            "ref": "HEAD@{0}",
+            "target": "c0",
+            "message": "move HEAD"
+          }
+        ],
+        "partial_hunks": {},
+        "replaced_commits": {},
+        "operation_metadata": {
+          "last_init_branch": "main",
+          "last_init_initial_branch": "main",
+          "last_init_directory": null,
+          "last_init_current_directory": true,
+          "last_init_quiet": false,
+          "last_init_reinitialized": false,
+          "repository_reinitialized": false
+        },
+        "repository_root": ".",
+        "last_init_branch": "main",
+        "last_init_initial_branch": "main",
+        "last_init_directory": null,
+        "last_init_current_directory": true,
+        "last_init_quiet": false,
+        "last_init_reinitialized": false,
+        "repository_reinitialized": false
+      },
+      "final_before_edits": null
+    }
+  }
+}

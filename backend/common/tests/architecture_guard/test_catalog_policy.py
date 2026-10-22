@@ -61,6 +61,29 @@ def test_catalog_contract_guard_rejects_loose_backend_and_frontend_overrides():
     assert any("stories_list must not pass a custom response generic" in row for row in violations)
 
 
+def test_chest_reward_contracts_keep_exact_fields_and_one_owner():
+    source = (ROOT / CATALOG_BACKEND_SERIALIZERS).read_text(encoding="utf-8")
+    violations = catalog_contract_source_violations(
+        serializers_source=source.replace(
+            "claimed = serializers.BooleanField()", "claimed = serializers.CharField()"
+        ),
+        story_types_source=(ROOT / CATALOG_FRONTEND_TYPES).read_text(encoding="utf-8"),
+        story_api_source=(ROOT / CATALOG_FRONTEND_API).read_text(encoding="utf-8"),
+    )
+    assert any(
+        "ChapterChestStateSerializer field signatures must be exact" in row for row in violations
+    )
+    aliases = catalog_secondary_backend_contract_violations(
+        {
+            "backend/example/rewards.py": (
+                "from curriculum.serializers import ChapterChestStateSerializer as Base\n"
+                "class RewardCopy(Base):\n    pass\n"
+            )
+        }
+    )
+    assert any("RewardCopy" in row for row in aliases)
+
+
 def test_catalog_contract_guard_rejects_secondary_contract_owners():
     backend = catalog_secondary_backend_contract_violations(
         {

@@ -8,6 +8,19 @@ def get_or_create_player(user) -> Player:
     cached = getattr(user, "_cached_player", None)
     if cached is not None:
         return cached
-    player, _created = Player.objects.get_or_create(user=user)
+    player = _joined_player(user)
+    if player is None:
+        player, _created = Player.objects.get_or_create(user=user)
     user._cached_player = player
     return player
+
+
+def _joined_player(user) -> Player | None:
+    """The player authentication already loaded with the user, if it did."""
+    descriptor = getattr(type(user), "player", None)
+    if descriptor is None or not descriptor.is_cached(user):
+        return None
+    try:
+        return user.player
+    except Player.DoesNotExist:
+        return None

@@ -11,7 +11,10 @@ from common.constants import (
 from curriculum.models import CommandForm
 
 from .access_helpers import _completion_payload, _latest_attempt_payload, _ordered_trials
-from .adventure_access import _adventure_passed
+from .adventure_access import _adventure_passed, chapter_tiers_cleared
+
+# Distinguishes "not computed by the caller" from None ("no tiers in chapter").
+_UNSET = object()
 
 
 @dataclass(frozen=True)
@@ -24,6 +27,9 @@ class ChallengeAccessContext:
     level_completions: set[int] = field(default_factory=set)
     latest_runs: dict[int, ChallengeRun] = field(default_factory=dict)
     adventure_passed: bool = False
+    # Tier chapters only: every tier of every required level is complete, which
+    # opens the chapter's gate. None for chapters without tiers.
+    tiers_cleared: bool | None = None
 
 
 def _build_challenge_access(
@@ -32,6 +38,7 @@ def _build_challenge_access(
     chapter_id: int,
     challenges: list[ChallengeLevel],
     adventure_passed: bool | None = None,
+    tiers_cleared: bool | None | object = _UNSET,
 ) -> ChallengeAccessContext:
     from progress.models import ChallengeLevelCompletion, ChallengeTrialCompletion
 
@@ -39,11 +46,17 @@ def _build_challenge_access(
         return ChallengeAccessContext()
     if adventure_passed is None:
         adventure_passed = _adventure_passed(player=player, chapter_id=chapter_id)
+    if tiers_cleared is _UNSET:
+        # Callers that already hold the chapter's tiers pass the result in.
+        tiers_cleared = chapter_tiers_cleared(player=player, chapter_id=chapter_id)
     challenge_levels = list(challenges)
     challenge_level_ids = [level.id for level in challenge_levels]
     trial_ids = [trial.id for level in challenge_levels for trial in level.trials.all()]
     if not trial_ids:
-        return ChallengeAccessContext(adventure_passed=adventure_passed)
+        return ChallengeAccessContext(
+            adventure_passed=adventure_passed,
+            tiers_cleared=tiers_cleared,
+        )
 
     completions = {
         completion.challenge_trial_id: completion
@@ -88,6 +101,7 @@ def _build_challenge_access(
         level_completions=level_completions,
         latest_runs=latest_runs,
         adventure_passed=adventure_passed,
+        tiers_cleared=tiers_cleared,
     )
 
 
@@ -287,4 +301,5 @@ def _challenge_level_unlocked(
     access: ChallengeAccessContext,
     sibling_levels: list[ChallengeLevel],
 ) -> bool:
-    return True
+    """A gate opens once its chapter's adventures are finished, every tier."""
+    return access.tiers_cleared is not False

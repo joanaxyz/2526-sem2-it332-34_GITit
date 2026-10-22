@@ -271,6 +271,14 @@
   color: hsl(var(--muted-foreground) / 0.86);
 }
 
+/* First-clear GitCoins, shown until the tier has paid them. */
+.story-level-tier-row-reward {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  color: hsl(var(--warning));
+}
+
 /* Right column: consistently answers "what can I do here?" - an action, or
    a lock. Never a bare progress count with no verb attached. */
 .story-level-tier-row-action {

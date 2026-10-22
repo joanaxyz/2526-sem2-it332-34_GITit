@@ -1,6 +1,6 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
-import { isImageWarm, warmImage, warmImages, warmSprite, withBudget } from './preload'
+import { getWarmedImage, isImageWarm, warmImage, warmImages, warmSprite, withBudget } from './preload'
 import type { SpriteAnimation } from './types'
 import { isSpritePixelAnchorWarm } from './usePixelBounds'
 
@@ -52,10 +52,12 @@ describe('warmImage', () => {
 
     expect(FakeImage.requests).toEqual(['/a-once.png'])
     expect(isImageWarm('/a-once.png')).toBe(true)
+    expect(getWarmedImage('/a-once.png')?.src).toBe('/a-once.png')
   })
 
   it('reports a src cold until it has actually been decoded', async () => {
     expect(isImageWarm('/b-cold.png')).toBe(false)
+    expect(getWarmedImage('/b-cold.png')).toBeNull()
 
     await warmImage('/b-cold.png')
 
@@ -66,6 +68,7 @@ describe('warmImage', () => {
     await expect(warmImage('/c-missing.png')).resolves.toBeUndefined()
 
     expect(isImageWarm('/c-missing.png')).toBe(true)
+    expect(getWarmedImage('/c-missing.png')).toBeNull()
   })
 
   it('ignores an empty src', async () => {

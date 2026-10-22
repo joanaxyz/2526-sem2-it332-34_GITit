@@ -73,6 +73,16 @@
       "rows": 1,
       "frameCount": 1
     },
+    "avatar": {
+      "src": "/cosmetics/companion/black/avatar.png",
+      "fps": 1,
+      "loops": false,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 1,
+      "rows": 1,
+      "frameCount": 1
+    },
     "attack": {
       "src": "/cosmetics/companion/black/attack.png",
       "fps": 24,

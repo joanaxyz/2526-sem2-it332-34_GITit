@@ -124,9 +124,8 @@ worksheet.
 
 The system runs at **two intensities, one vocabulary: immersion outside, clarity inside.**
 Atmospheric surfaces — home hub, level map, quest selection — carry the world: living sky,
-depth, aurora glow, weighty motion. The practice workspace (terminal, DAG) and the
-authoring tools invert the ratio: a faint atmospheric wash behind ruthlessly legible
-controls. Both modes share the same palette, type system, and single accent; only their
+depth, aurora glow, weighty motion. The practice workspace (terminal, DAG) inverts the
+ratio: a faint atmospheric wash behind ruthlessly legible controls. Both modes share the same palette, type system, and single accent; only their
 density and motion change.
 
 This system explicitly rejects the **flat SaaS dashboard** (rows of identical stat
@@ -247,10 +246,7 @@ so glow never competes with the art.
 
 ### Navigation
 - **Hub chrome (atmospheric):** a floating, centered "launcher blade" (HOME · TRACKS · SHOP) with the brand badge and wallet/profile loose in the corners (Halo-style), over the living sky. Atmospheric pages only.
-- **Workspace chrome:** focused tools (the level editor) use their own solid command bar (`ite-cmdbar`) — a docked, opaque blade with identity, history, and apply/publish. Dense, scrolling surfaces must NOT sit under the floating hub blade.
-
-### Signature: The Editor Inspector
-A right rail of **hairline-split sections** (`ite-section`, no inner panels): a mono eyebrow + title per section, a 2-col numeric transform grid (X/Y/W/H/Rotation/Z) in mono, and the draft model (`Apply edits (N)` / Discard / Undo-Redo) in the command bar. This is the reference pattern for any structured editing surface — content authoring should adopt the same hairline sections and numeric+drag controls rather than boxed cards.
+- **Workspace chrome:** focused tools use their own solid, docked chrome. Dense, scrolling surfaces must NOT sit under the floating hub blade.
 
 ## 6. Do's and Don'ts
 

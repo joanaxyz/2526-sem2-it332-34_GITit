@@ -16,11 +16,6 @@
   max-height: min(36rem, calc(100svh - 2rem), var(--workspace-tour-room, 100svh));
 }
 
-/* Room for the card's own move grip beside its title. */
-.command-intro.is-transformable .command-intro__aside-title {
-  padding-right: 2.4rem;
-}
-
 .command-intro .workspace-tour__message {
   min-height: 0;
   flex: 1 1 auto;
@@ -28,12 +23,24 @@
   overscroll-behavior: contain;
 }
 
-.command-intro.is-transformable .workspace-tour__message {
-  padding-bottom: 1.4rem;
-}
+/* Touch shows a move grip beside the change card's title and a resize
+   button in each card's corner; leave them room. A mouse uses the card. */
+@media not all and (hover: hover) and (pointer: fine) {
+  .command-intro.is-transformable .command-intro__aside-title {
+    padding-right: 2.4rem;
+  }
 
-.command-intro.is-transformable .workspace-tour__actions {
-  padding-right: 2.45rem;
+  .command-intro.is-transformable .workspace-tour__message {
+    padding-bottom: 1.4rem;
+  }
+
+  .command-intro.is-transformable .workspace-tour__actions {
+    padding-right: 2.45rem;
+  }
+
+  .command-intro.is-transformable.has-aside .command-intro__aside {
+    padding-bottom: 2rem;
+  }
 }
 
 .command-intro .workspace-tour__header,
@@ -54,10 +61,6 @@
   color: #a8bdc9;
   font-size: var(--text-sm);
   line-height: 1.55;
-}
-
-.command-intro.is-transformable.has-aside .command-intro__aside {
-  padding-bottom: 2rem;
 }
 
 .command-intro__aside-title {

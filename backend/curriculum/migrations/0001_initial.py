@@ -9,7 +9,6 @@ class Migration(migrations.Migration):
     initial = True
 
     dependencies = [
-        ('authoring', '0001_initial'),
     ]
 
     operations = [
@@ -41,7 +40,6 @@ class Migration(migrations.Migration):
                 ('command_preview', models.JSONField(blank=True, default=dict)),
                 ('is_published', models.BooleanField(default=True)),
                 ('sort_order', models.PositiveIntegerField(default=0)),
-                ('source_content_definition', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='runtime_command_skills', to='authoring.contentdefinition')),
             ],
             options={
                 'ordering': ['sort_order', 'base_command'],
@@ -96,7 +94,6 @@ class Migration(migrations.Migration):
                 ('is_published', models.BooleanField(default=True)),
                 ('sort_order', models.PositiveIntegerField(default=0)),
                 ('chapter', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='lessons', to='curriculum.chapter')),
-                ('source_content_definition', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='runtime_lessons', to='authoring.contentdefinition')),
             ],
             options={
                 'ordering': ['chapter__sort_order', 'sort_order', 'id'],

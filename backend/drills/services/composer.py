@@ -118,46 +118,45 @@ def _prefix_keys(key: str) -> list[str]:
     return [" ".join(tokens[:size]) for size in range(len(tokens), 1, -1)]
 
 
-def _level_waves(level: AdventureLevel) -> list:
-    """Published waves, tier order first, then the plain-wave flow.
+def _level_scenarios(level: AdventureLevel) -> list:
+    """Published tier scenarios, in tier order then scenario order.
 
-    Filtered in Python on purpose: both the solution scan and the finale
-    picker need this same tree, and querysets built with ``.filter()``
-    ignore any prefetch the caller set up. Reading ``.all()`` lets the
-    seeder prefetch the whole catalog's waves in a couple of queries
-    instead of a handful per level.
+    Uses whatever the caller prefetched (``tiers__scenarios__variants``), so the
+    seeder reads the whole catalog's scenarios in a couple of queries.
     """
     tiers = sorted(
         (tier for tier in level.tiers.all() if tier.is_published),
         key=lambda tier: _TIER_ORDER.get(tier.difficulty, 99),
     )
-    waves = [wave for tier in tiers for wave in tier.waves.all() if wave.is_published]
-    waves += sorted(
-        (wave for wave in level.waves.all() if wave.is_published),
-        key=lambda wave: (wave.sort_order, wave.id),
-    )
-    return waves
+    return [
+        scenario
+        for tier in tiers
+        for scenario in sorted(
+            tier.scenarios.all(), key=lambda scenario: (scenario.sort_order, scenario.id)
+        )
+        if scenario.is_published
+    ]
 
 
-def _published_variants(wave) -> list:
-    return [variant for variant in wave.variants.all() if variant.is_published]
+def _published_variants(scenario) -> list:
+    return [variant for variant in scenario.variants.all() if variant.is_published]
 
 
-def _solution_commands(waves: list) -> list[str]:
+def _solution_commands(scenarios: list) -> list[str]:
     """Every authored solution command for the level, in the order taught."""
     commands: list[str] = []
-    for wave in waves:
-        for variant in _published_variants(wave):
+    for scenario in scenarios:
+        for variant in _published_variants(scenario):
             commands.extend(str(step) for step in variant.solution_commands if str(step).strip())
     return commands
 
 
 def _forms_from_solutions(
-    level: AdventureLevel, catalog: DrillCatalog, waves: list | None = None
+    level: AdventureLevel, catalog: DrillCatalog, scenarios: list | None = None
 ) -> list[CommandForm]:
     """Recover a level's taught forms from what its solutions actually type.
 
-    The seeders attach ``command_forms`` to a level and its waves, but that
+    The seeders attach ``command_forms`` to a level and its scenarios, but that
     wiring is data, and a database seeded before it existed has levels whose
     solutions are full of Git yet whose form list is empty. Rather than
     showing an empty drill on exactly the levels that need one, resolve each
@@ -166,7 +165,7 @@ def _forms_from_solutions(
     the published catalog. Same derivation the legacy seeder does at write
     time, done at read time so the drill cannot be out of step with it.
     """
-    commands = _solution_commands(waves if waves is not None else _level_waves(level))
+    commands = _solution_commands(scenarios if scenarios is not None else _level_scenarios(level))
     if not commands:
         return []
     wanted: list[str] = []
@@ -204,27 +203,24 @@ def _forms_from_solutions(
 def level_command_forms(
     level: AdventureLevel,
     catalog: DrillCatalog | None = None,
-    waves: list | None = None,
+    scenarios: list | None = None,
 ) -> list[CommandForm]:
     """Every published form the level teaches, whichever tree holds it.
 
-    A level attaches forms directly, and its waves (single-difficulty flow)
-    or tier waves (Easy/Medium/Hard flow) attach them again. Reading all
-    three keeps the drill correct for both content shapes without asking
-    the caller which one this level uses; when none of them is wired, the
-    authored solutions are the fallback source of truth.
+    A level attaches forms directly, and its tier scenarios attach them again.
+    When neither is wired, the authored solutions are the fallback source of
+    truth.
     """
     attached = list(
         CommandForm.objects.filter(
             Q(adventure_levels=level)
-            | Q(adventure_waves__level=level)
-            | Q(adventure_level_tier_waves__tier__adventure_level=level),
+            | Q(adventure_level_tier_scenarios__tier__adventure_level=level),
             is_published=True,
         )
         .select_related("command_skill")
         .distinct()
     )
-    return attached or _forms_from_solutions(level, catalog or DrillCatalog.load(), waves)
+    return attached or _forms_from_solutions(level, catalog or DrillCatalog.load(), scenarios)
 
 
 def _distractor_pool(forms: list[CommandForm], catalog: DrillCatalog) -> list[CommandForm]:
@@ -394,7 +390,7 @@ def _card(form: CommandForm, pool: list[CommandForm], level_form_ids: set[int]) 
     }
 
 
-def _sequence(level: AdventureLevel, waves: list) -> dict | None:
+def _sequence(level: AdventureLevel, scenarios: list) -> dict | None:
     """One authored solution, as the "order the moves" finale.
 
     Deliberately taken from the Easy tier when there is one: Easy is already
@@ -402,9 +398,9 @@ def _sequence(level: AdventureLevel, waves: list) -> dict | None:
     exists to provide, not a leaked answer - Medium and Hard draw different
     variants.
     """
-    for wave in waves:
+    for scenario in scenarios:
         candidates = []
-        for variant in _published_variants(wave):
+        for variant in _published_variants(scenario):
             steps = [str(step).strip() for step in variant.solution_commands if str(step).strip()]
             if not MIN_SEQUENCE_STEPS <= len(steps) <= MAX_SEQUENCE_STEPS:
                 continue
@@ -421,8 +417,8 @@ def _sequence(level: AdventureLevel, waves: list) -> dict | None:
         # and the least likely to carry incidental diagnostic steps.
         _, _, variant, steps = min(candidates, key=lambda item: (item[0], item[1]))
         return {
-            "label": variant.label or wave.title or level.title,
-            "task": wave.task,
+            "label": variant.label or scenario.title or level.title,
+            "task": scenario.task,
             "steps": steps,
         }
     return None
@@ -436,13 +432,13 @@ def compose_level_drill(level: AdventureLevel, catalog: DrillCatalog | None = No
     demand otherwise so single-level callers stay simple.
     """
     catalog = catalog or DrillCatalog.load()
-    # The wave tree answers two questions - which commands the solutions
+    # The scenario tree answers two questions - which commands the solutions
     # type, and which run makes the ordering finale - so it is walked once.
-    waves = _level_waves(level)
-    forms = level_command_forms(level, catalog, waves)
+    scenarios = _level_scenarios(level)
+    forms = level_command_forms(level, catalog, scenarios)
     pool = _distractor_pool(forms, catalog)
     level_form_ids = {form.id for form in forms}
     return {
         "cards": [_card(form, pool, level_form_ids) for form in forms],
-        "sequence": _sequence(level, waves),
+        "sequence": _sequence(level, scenarios),
     }

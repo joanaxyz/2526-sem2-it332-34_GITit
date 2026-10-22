@@ -1,4 +1,5 @@
 import type { SpriteAnimation } from '@/shared/sprites/types'
+import { DEFAULT_SKILL_COMPANION } from '@/shared/cosmetics/skillPortrait'
 
 import skillIndex from './data/companion-skills.json'
 
@@ -77,6 +78,18 @@ function toSkill(raw: RawSkill): CompanionSkill {
 export function companionSkills(slug: string | null | undefined): CompanionSkill[] {
   const list = (slug && INDEX[slug]) || []
   return list.filter((raw) => raw.showcase !== false).map(toSkill)
+}
+
+/** Resolve shipped art for a command, including the hidden fallback spell. */
+export function companionSkillForCommand(slug: string | null | undefined, command: string): CompanionSkill {
+  const owner = slug?.trim().toLowerCase() || DEFAULT_SKILL_COMPANION
+  const list = INDEX[owner] ?? INDEX[DEFAULT_SKILL_COMPANION]
+  const family = command.split(',')[0]?.trim().toLowerCase().replace(/^git\s+/, '').split(/\s+/)[0]
+  const raw = list.find((skill) => skill.family === family)
+    ?? list.find((skill) => skill.family === 'default')
+    ?? INDEX[DEFAULT_SKILL_COMPANION].find((skill) => skill.family === 'default')
+  if (!raw) throw new Error('The companion skill index is missing its default spell.')
+  return toSkill(raw)
 }
 
 /** Pixel placement geometry keyed by command family. This includes hidden

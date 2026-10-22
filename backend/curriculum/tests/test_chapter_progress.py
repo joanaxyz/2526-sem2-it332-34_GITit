@@ -4,11 +4,7 @@ from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
 from curriculum.models import Chapter, Story
 from curriculum.selectors import chapter_completion_count_map, chapter_completion_denominator_map
 from players.services import get_or_create_player
-from progress.models import (
-    AdventureLevelCompletion,
-    AdventureLevelTierCompletion,
-    ChallengeTrialCompletion,
-)
+from progress.models import AdventureLevelTierCompletion, ChallengeTrialCompletion
 
 
 def test_chapter_progress_counts_adventure_levels_and_challenge_trials(db, django_user_model):
@@ -56,12 +52,18 @@ def test_chapter_progress_counts_adventure_levels_and_challenge_trials(db, djang
     )
 
     player = get_or_create_player(user)
-    AdventureLevelCompletion.objects.create(player=player, adventure_level=first_level)
-    easy_tier = AdventureLevelTier.objects.create(
+    for level in (first_level, second_level):
+        easy_tier = AdventureLevelTier.objects.create(
+            adventure_level=level,
+            difficulty=DIFFICULTY_EASY,
+        )
+        AdventureLevelTierCompletion.objects.create(player=player, tier=easy_tier)
+    # A level counts once its Easy tier is complete; harder tiers add nothing.
+    medium_tier = AdventureLevelTier.objects.create(
         adventure_level=second_level,
-        difficulty=DIFFICULTY_EASY,
+        difficulty=DIFFICULTY_MEDIUM,
     )
-    AdventureLevelTierCompletion.objects.create(player=player, tier=easy_tier)
+    AdventureLevelTierCompletion.objects.create(player=player, tier=medium_tier)
     ChallengeTrialCompletion.objects.create(player=player, challenge_trial=easy_trial)
 
     denominator = chapter_completion_denominator_map(chapter_ids=[chapter.id])

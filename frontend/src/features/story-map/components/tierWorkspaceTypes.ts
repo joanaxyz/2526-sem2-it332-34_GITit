@@ -8,15 +8,6 @@ import type { CommandSubmissionOutcome } from '@/shared/level-runtime/commandOut
 
 export type TierDifficulty = 'easy' | 'medium' | 'hard'
 
-/** One row of the Objectives card. `failed` is reserved for objectives a run can break. */
-export type TierObjectiveStatus = 'pending' | 'done' | 'failed'
-
-export type TierObjective = {
-  id: string
-  text: string
-  status: TierObjectiveStatus
-}
-
 type TierCompletionRewards = {
   first_level_clear: boolean
   coins_awarded: number
@@ -36,6 +27,8 @@ type TierRef = {
   adventure_level_id: number
   adventure_level_slug: string
   adventure_level_title: string
+  /** The level's place in its chapter, as the story map numbers it. */
+  adventure_level_number: number
 }
 
 type TierRunStepResponse = Omit<
@@ -87,6 +80,8 @@ export type TierRunResponse = Omit<
     completed: number
     total: number
     cleared: boolean
+    /** The next scenario to play in this tier, or null once every scenario is cleared. */
+    next_scenario: { index: number; slug: string; title: string } | null
   }
   policy: {
     min_counted_commands: number
@@ -121,9 +116,6 @@ export type TierRunResponse = Omit<
 export type TierRun = Omit<TierRunResponse, 'steps'> & {
   steps: TierStepLog[]
 }
-
-/** Mirrors RESULT_TARGET_MATCHED in common/constants.py - shared with challenges/types.ts. */
-export const TIER_RESULT_TARGET_MATCHED = 'TargetMatched'
 
 type TierCommandStep = Omit<
   ApiSchemas['AdventureLevelTierCommandStepResponse'],

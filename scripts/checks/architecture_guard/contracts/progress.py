@@ -89,8 +89,9 @@ def progress_summary_backend_contract_violations(
     expected_progress_fields = {
         "RateMetricSerializer": {
             "value": "serializers.FloatField(allow_null=True)",
-            "numerator": "serializers.IntegerField()",
+            "numerator": "serializers.FloatField()",
             "denominator": "serializers.IntegerField()",
+            "unit": "serializers.ChoiceField(choices=['participants'],required=False)",
         },
         "DashboardKpiSetSerializer": {
             "scr": "RateMetricSerializer()",
@@ -313,12 +314,15 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
 
     violations: list[str] = []
     schemas = schema.get("components", {}).get("schemas", {})
+    if schemas.get("UnitEnum", {}).get("enum") != ["participants"]:
+        violations.append(f"{STATS_GENERATED_OPENAPI}: cohort rate unit must be participants")
     nullable_number = {"type": "number", "format": "double", "nullable": True}
     expected_schema_properties = {
         "RateMetric": {
             "value": nullable_number,
-            "numerator": {"type": "integer"},
+            "numerator": {"type": "number", "format": "double"},
             "denominator": {"type": "integer"},
+            "unit": {"$ref": "#/components/schemas/UnitEnum"},
         },
         "StatsSkillAxis": {
             "key": {"type": "string"},
@@ -370,6 +374,9 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
     }
     for schema_name, expected_properties in expected_schema_properties.items():
         expected_fields = set(expected_properties)
+        expected_required = (
+            expected_fields - {"unit"} if schema_name == "RateMetric" else expected_fields
+        )
         component = schemas.get(schema_name)
         actual_properties = component.get("properties", {}) if isinstance(component, dict) else {}
         actual_fields = set(actual_properties)
@@ -380,7 +387,7 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
             not isinstance(component, dict)
             or component.get("type") != "object"
             or actual_fields != expected_fields
-            or required_fields != expected_fields
+            or required_fields != expected_required
         ):
             violations.append(
                 f"{STATS_GENERATED_OPENAPI}: {schema_name} properties/required must be exactly "

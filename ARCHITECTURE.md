@@ -1,6 +1,6 @@
 # Architecture Notes
 
-This file is the root-level architecture guide for GIT it!. Current architecture and contributor rules live in the root markdown files. `docs/goals/` is reserved for scoped implementation goals and their supporting artifacts; it is not a second architecture source of truth.
+This file is the root-level architecture guide for GIT it!. Current architecture and contributor rules live in the root markdown files. Keep temporary planning notes and supporting artifacts local and out of the source repository.
 
 ## Domain Glossary
 
@@ -9,9 +9,11 @@ Use these terms in product copy, code names, tests, and seed data:
 - `Story` — a learning path.
 - `Chapter` — a section inside a story.
 - `Lesson` — short conceptual reading attached to a chapter.
-- `Adventure` — guided practice made of ordered levels and waves.
-- `Wave` — one scenario inside an adventure level.
+- `Adventure` — guided practice made of ordered levels.
+- `Tier` — the Easy, Medium, or Hard difficulty of an adventure level, made of ordered scenarios.
+- `Scenario` — one stage of a tier; each run of it serves one of its variants.
 - `Challenge` — independent assessment practice.
+- `Challenge Gate` — a module's closing challenge: a workflow testing what the module taught.
 - `Trial` — an easy, medium, or hard scenario inside a challenge.
 - `Drill` — optional recall practice attached to an adventure level (Squire's Drill).
 - `Level map` — the visual chapter navigation surface.
@@ -19,7 +21,7 @@ Use these terms in product copy, code names, tests, and seed data:
 - `Companion` — a player-side battle/avatar cosmetic.
 - `GitCoin` — the reward currency.
 
-Deprecated labels from earlier refactors must not appear in active code or current documentation. Historical URL compatibility remains isolated in `frontend/src/shared/navigation/legacyRoutes.ts` and its test only.
+Deprecated labels from earlier refactors must not appear in active code or current documentation. Current URLs live in `frontend/src/shared/navigation/routes.ts`; obsolete aliases and their redirect handlers have been removed.
 
 ## Layer Ownership
 
@@ -76,8 +78,6 @@ Large visual surfaces should be decomposed into colocated subpackages instead of
 frontend/src/shared/level/components/live-dag/
 frontend/src/shared/level/components/project-structure/
 frontend/src/shared/battle/effects/skill-effects/
-frontend/src/features/authoring/components/levels-editor/
-frontend/src/features/authoring/utils/authoring-model/
 frontend/src/features/story-map/components/path/
 ```
 
@@ -117,10 +117,55 @@ component-name/                focused child views and pure helpers
 shared/battle/effects/...      playback cores split by DOM helpers, layer playback, companion playback, monster playback
 ```
 
-Human-authored curriculum data lives under `backend/curriculum/seed_data/source/` while the public `backend/curriculum/seed_data/*.py` modules remain thin compatibility re-exports. Generated artifacts remain under `backend/curriculum/seed_data/generated/` and must not be hand-edited. The largest scenario modules (`adventure_levels`, `challenges`, and `blueprint_overlay`) have been moved under `source/`; the next improvement is splitting those source files by chapter/module instead of leaving them as large source modules.
+`seed_curriculum` owns the module levels and their tiers (`MODULE_LEVELS`). Scenario content comes from the committed banks `backend/curriculum/seed_data/scenario_bank.json` and `scenario_bank_extension.json`; the extension bank's Markdown, repository fixtures, and the Challenge Gate composition live under `backend/curriculum/seed_data/source/`. Generated artifacts remain under `backend/curriculum/seed_data/generated/` and must not be hand-edited.
 
 
 ## Command Execution Boundary
+
+### Learning tutor boundary
+
+The `tutoring` backend app owns two independent tutors behind authenticated
+`POST /api/tutoring/chat/`. Both write free-text replies (Gemini, then Groq) from a
+system prompt and the conversation so far: the client sends both sides of recent
+turns, so follow-ups and clarifications refer to earlier answers.
+
+- **Home** is a general Git tutor. It is not tied to the command guide.
+- **Workspace** help belongs to the open command guide: it explains that guide's
+  usage form, and the run's public task is context.
+
+Scenario retrieval is the gate (RAG over public seed fields only). Every learner turn
+in the conversation is checked lexically and against the committed semantic index. A
+match, or an uncertain or unavailable lookup, switches Home into scenario protection:
+teach the ideas, use placeholders, never solve. A scenario pasted earlier keeps later
+turns protected. Workspace help is always protected. Protected replies pass the
+answer guard (`tutoring/services/answer_guard.py`): the matched scenarios' and the
+run's answer fields stay server-side and are never prompted. A reply that names a
+task value, writes it into a command, or covers the solution's command sequence is
+regenerated once with a stricter instruction, then replaced by a fixed teaching
+message. Validated replies are cached by prompt digest. Provider attempts use
+bounded time and cached rate-limit cooldowns over one pooled keep-alive client per
+process. An attempt still silent after a short hedge delay keeps running while the
+next model starts; the first usable reply wins and passes the same guard, and the
+outrun model sits out briefly. The committed semantic index is cached locally; see
+[index regeneration](backend/tutoring/data/README.md).
+
+Workspace chat requires an owned run and a server-signed safe guide context.
+Guide payloads generalize prospective changes and omit exact command examples;
+completion tokens contain a context digest instead of evaluation data. Internal
+lesson identity remains stable; literal-bearing outward IDs are opaque.
+Verified terminal feedback, command accounting and rewards retain their owners.
+
+`frontend/src/shared/tutoring/` owns reusable chat presentation (light Markdown:
+paragraphs, code, lists, inline marks) and bounded, sign-in-scoped in-memory
+conversations. Home replies made under scenario protection carry a short caption. HomeLayout composes the floating chat launcher
+across Dashboard, Modules and Shop. The command guide owns the lifetime of a
+separate chat window, rendered outside its card with a portal. Mascot portraits
+appear beside the chat card (in its header on mobile), in assistant message
+bubbles, and as the floating launchers, with accessible names and no visible labels.
+Chat opens by default with pointer/keyboard movement and resizing. Its launcher
+appears only when collapsed. Command guides omit the mascot and retain a separate
+command icon for reopening and history.
+The decorative mascot preference does not disable help controls.
 
 Frontend command simulation remains instant for user experience. Backend verification is authoritative for persisted progress, rewards, and completion state.
 
@@ -138,12 +183,18 @@ backend awards or rejects persisted progress
 
 This keeps command submission responsive while preventing forged reward-affecting state.
 
+Completion is graded on the resulting repository state, never on the commands typed. The transition check above keeps that state honest; the scenario's `state_requirements` then decide whether it is solved, so any Git route that reaches the same state passes. Published curriculum scenarios use no typed-command rules (`required_command`, `required_command_sequence`) and no records of how an operation ran (`operation_metadata_*`); `curriculum/tests/test_scenario_bank_content.py` enforces it. Where a wrong route would reach the right state only because the simulator is more lenient than Git, the simulator is fixed instead. For that reason both engines:
+
+- record where `init` or `clone` put the repository (`repository_root`);
+- reject a push that would drop the server's commits, and a lease push once the server moved after the last fetch;
+- write Git's `checkout: moving from X to Y` HEAD reflog entry on every switch.
+
 ### Workspace Terminal Shell
 
 The terminal also runs a small shell (`frontend/src/shared/git/simulator/shell/`): `pwd ls cd tree cat echo clear` are read-only diagnostics, and `touch mkdir rmdir rm mv cp` plus `echo`/`cat` with `>`/`>>` change the working copy. Shell commands never spend the command budget. File-changing ones are replayed by `backend/common/git/shell_commands.py` from the persisted state through the same `workspace_files` helpers as the Project Files endpoints; the backend's replay, not the browser's `next_state`, becomes the run state.
 
 - The working directory belongs to the terminal, not the repository: it is stored per run on the frontend (`level-runtime/terminalCwd.ts`) and sent as `execution.cwd`. It never enters `repository_state`, so `cd` cannot affect evaluation such as `repository_state_unchanged`.
-- Git reads pathspecs relative to that directory. `gitPathspecs.ts` and `backend/common/git/git_pathspecs.py` rewrite them to project-root paths before simulation and transition verification.
+- Git reads pathspecs relative to that directory. `gitPathspecs.ts` and `backend/common/git/git_pathspecs.py` rewrite them to project-root paths before simulation and transition verification, including the folder `git init` and `git clone` create a repository in.
 - Folders with no files live in the optional `directories` list of `repository_state` (omitted when empty). Git ignores them; the Project Files tree shows them, and it hides deleted files unless they are conflicted. A folder emptied by deleting its last file stays on disk.
 
 ## API Contract
@@ -178,35 +229,64 @@ python scripts/check_api_type_adoption.py
 
 ### Performance metrics
 
-The authenticated `GET /api/progress/performance/` endpoint is the source of truth for overall and per-module performance metrics. All attempt-based metrics exclude replay runs.
+`GET /api/progress/performance/` returns Arcane Spire Modules 1–4 mastery metrics.
+`MetricsService._performance_summary_for_runs()` is the response owner and delegates
+arithmetic to `progress/services/mastery_metrics.py`. Dashboard KPI fields use the
+same owner. Ordinary run/session totals and the Stats finish-rate diagnostic remain
+activity measures. Replay and transfer runs do not create practice mastery credit.
 
-Internal KPI keys stay abbreviated; every learner-facing surface uses the plain-language label instead.
+The five official KPIs, targets, formulas, Let definitions, reference-validation
+commands and fixed-cohort evaluation workflow are documented in
+[KPI_METHODOLOGY.md](KPI_METHODOLOGY.md). SCR/HLCR count unique required tiers;
+CAR assesses successful command efficiency against a validated reference; ARC
+counts unsuccessful attempts before mastery; RTA preserves the first result on
+reserved unseen transfer checkpoints in Modules 3–4. The supplementary Retry
+Success Rate counts concluded recovery retries after actual unsuccessful attempts.
+Its deprecated `rtr` response alias has no current UI consumer.
 
-| KPI | Learner-facing label | Formula | Empty-data behavior |
-| --- | --- | --- | --- |
-| `scr` Scenario Completion Rate | Levels finished | completed attempts / all attempts | `value: null` when there are no attempts |
-| `car` Command Accuracy Rate | Commands accepted | processable submitted commands / all submitted commands | `value: null` when there are no commands |
-| `hlcr` Hard-Level Completion Rate | Hard levels finished | completed hard attempts / all hard attempts | `value: null` when there are no hard attempts |
-| `rtr` Retry Transfer Rate | Retries that worked | completed retry attempts / all retry attempts | `value: null` when there are no retry attempts |
-| `arc` Average Retry Count | Retries per finish | sum of `retry_index` for completed attempts / completed attempts | `value: null` when there are no completed attempts |
+`KpiCheckpoint` preserves assessment evidence separately from mutable best-star
+completion pointers. Runs snapshot validated reference counts and content hashes.
+`KpiExposure` records every presentation, including discarded empty launches;
+legacy incomplete exposure histories cannot establish transfer novelty. Explicit
+transfer starts use the existing access-checked tier-start route, bypass practice
+reward/mastery mutation, and hide answer scaffolding.
 
-A retry attempt is a run with `prior_run` set. CAR treats `Invalid` and `Unprocessable` command results as inaccurate; every other submitted command is processable. The response always includes Modules 0–4, including modules with no attempts, so the frontend can show an honest “No attempts yet” state.
+Learner, Admin aggregate and Admin per-player reads share formulas. Admin excludes
+staff and averages participant scores; date filters select Manila-time starts,
+with assessment outcomes after the range end excluded. Formal studies have fixed
+assignments, requirements, references, module weights and cutoff, and freeze their
+report through `kpi_study`. They include unattempted assignments at cutoff and
+report unavailable evidence separately.
 
-There is no standalone Performance page. These metrics surface in **Home › Overview › Run results** (`/home?view=results`), under a `Main story` heading scoped to Modules 1–4; `/performance` redirects there. The view fetches the endpoint on demand through `features/performance/hooks/useModulePerformance`, so opening Home never waits on it. `features/performance` keeps the API wrapper, generated types, and that hook; the Admin analytics console reads the same contract types.
+`RateMetric.value` is authoritative. Mean CAR uses a fractional numerator of summed
+percentage points. Cohort rates carry `unit: participants`; sample metadata reports
+coverage. Null/no observations is distinct from measured zero. Module responses
+include CAR. Learner comparisons are descriptive; Admin retains approved objective
+overrides, including Module 4 HLCR ≥65% and ARC ≤3.
+
+`features/performance/utils/performanceKpis.ts` owns shared display-only labels,
+formulas, explanations, evidence units, targets and formatting. There is no
+standalone Performance route: Home Progress's `HomeResultsPanel()` fetches on
+demand and passes the ready response to `LearnerPerformanceInstrument`.
 
 ### Home Overview composition
 
-Overview shows one category at a time, chosen by a dropdown whose selection is mirrored in the `view` search parameter (`progress` is the default and is omitted from the URL).
+Home opens on Profile. The `view` search parameter selects `profile`, `progress`, or `skills`; saved `results` links resolve to Progress. `HomeHubView` owns that URL state and the category switcher.
 
 | Owner | Responsibility |
 | --- | --- |
-| `HomeStatsView.tsx` | Composition: builds the model once, owns the active-view state, renders the switcher and exactly one panel |
-| `home-stats/homeStatsModel.ts` | Pure model; one named slice per view (`progress`, `skills`, `results`, `achievements`) |
-| `home-stats/overviewViews.ts` | The category catalog: id, label, and the blurb shown beside the dropdown |
-| `home-stats/OverviewViewSwitcher.tsx` | The ARIA listbox dropdown |
-| `home-stats/Home{Progress,Skills,Results}Panel.tsx`, `HomeAchievementGallery.tsx` | One render owner per view, each taking only its own model slice |
+| `HomeStatsView.tsx` | Builds the pure model once and composes the active Progress or Skills bands |
+| `home-stats/homeStatsModel.ts` | Derives activity, active-curriculum context, skills, and achievements; no performance KPI model |
+| `home-hub/homeViews.ts` | Category catalog and legacy alias resolution |
+| `home-hub/HomeViewSwitcher.tsx` | Accessible category dropdown |
+| `home-stats/HomeProgressPanel.tsx` | Activity and active-curriculum finish-rate context; activity window control |
+| `home-stats/HomeResultsPanel.tsx` | No-prop query boundary for the performance instrument; recoverable loading/error states |
+| `performance/components/LearnerPerformanceInstrument.tsx` | Ready-data presentation; local measure selection, descriptive module comparison, native calculation disclosure |
+| `home-stats/HomeSkillsPanel.tsx` and `HomeAchievementGallery.tsx` | Skills display and achievement filtering from narrow model slices |
 
-`check_architecture_boundaries.py` enforces this shape: no view owner may see a raw `HomeSummary`/`StatsSummary`, reach back into the composition, or fetch its own summary data, and no file outside the composition may import a view owner.
+Activity Week/Month/Year affects only the activity request. KPI selection changes local presentation and issues no request. The instrument uses existing dark observatory tokens, meaningful goal traces, earned light, visible evidence, and reduced-motion transitions.
+
+`check_architecture_boundaries.py` enforces one-way composition, the no-prop results boundary, shared KPI semantics, no learner-to-Admin import, no mixed Home/Stats KPI fallback, and deletion of the old record tiles and four-chart module path.
 
 ## StoryWorld System
 
@@ -233,7 +313,7 @@ Ownership:
 - `backend/drills/services/composer.py` derives every question from
   authored curriculum data, and runs at **seed time only**. Nothing is
   hand-authored per level: cards come from the level's `CommandForm` rows
-  (`usage_form` / `label`), and the ordering finale from a wave variant's
+  (`usage_form` / `label`), and the ordering finale from a scenario variant's
   `solution_commands`. Pass a shared `DrillCatalog` when composing many
   levels so the published command list is read once per run.
 - Distractors are always other real command forms, siblings of the same
@@ -271,19 +351,26 @@ A fresh install must run `seed_drills` (or `seed_all`) before any drill
 appears. That is deliberate: content lives in rows, so an unseeded
 database honestly has none rather than synthesising it per request.
 
+## Adventure Tiers and Challenge Gates
+
+- Each `AdventureLevel` has Easy, Medium, and Hard `AdventureLevelTier`s. A tier holds ordered `AdventureLevelTierScenario`s, and each scenario holds ordered variants.
+- `seed_data/source/scenario_plan/` owns placement: each level's scenarios per tier, in play order, with their roles and variants. `seed_curriculum` upserts them by slug and unpublishes the scenarios and variants it no longer names; runs keep their rows.
+- An `AdventureLevelTierRun` is one attempt at one scenario. One solve clears a scenario; `AdventureLevelTierProgress.cleared_scenario_slugs` records the cleared scenarios, and the tier completes (`AdventureLevelTierCompletion`) once every published scenario is cleared. Starting a tier plays the next uncleared scenario, and a retry rotates variants within that scenario; replay cycles through the scenarios (`adventures/tier_scenarios.py`, `services/tier_runs.py`, `services/tier_variants.py`). A solve on a scenario that a reseed unpublished clears the learner's next uncleared scenario.
+- A tier's stars are the lowest of its scenarios' best stars. A run's star budget comes from its variant, falling back to the scenario's (`services/tier_budget.py`).
+- Each scenario clear credits mastery to the published forms the clearing run's commands used (`tutoring.services.forms.forms_used_by`), so a guide the learner has not earned keeps firing.
+- `adventures/rewards.py` owns the GitCoin ladder: Easy 25, Medium 35, Hard 50 once per tier, and 50/75/100 for Challenge Gate trials, all through idempotent wallet keys. The one-time cutover commands `award_missing_tier_rewards` and `map_partial_tier_progress` backfill rewards and partial progress (`deploy/CURRICULUM_SCENARIOS_RESEED.md`).
+- A level counts as passed on the map and in chapter progress once its Easy tier is complete. Chapter completion counts each published level once plus each published gate trial.
+- `seed_curriculum` seeds one Challenge Gate per module from `source/challenge_gates.py`: Easy, Medium, and Hard trials with two variants each. The gate opens once every required level of the module has completed all three tiers (`chapter_tiers_cleared`); inside it, Medium waits for the Easy trial and Hard for Medium. Challenge runs play in the same workspace as adventure tiers (`frontend/src/shared/level/workspace/`): battle stage, terminal, Live and Expected diagrams.
 ## Generated Curriculum Targets
 
 `backend/curriculum/seed_data/generated/generated_targets.py` is committed generated output. It exists so normal curriculum seeding can compare repository states without replaying every authored solution at runtime.
 
-`generated_trajectories.py` comes from the same replay. For every solution command it stores fingerprints of the repository in front of that command (`simulator/trajectory.py`), seeded onto each variant as `solution_trajectory`. Fingerprints describe repository meaning (trees, ancestry, refs, index, working tree, conflicts, stash, in-progress operations), not generated commit ids or `last_*` bookkeeping; an `exact` strength also covers file contents and commit messages, a `coarse` strength does not. Authored content gets the same field from the editor's browser replay (`solution_replay`).
+`generated_trajectories.py` comes from the same replay. For every solution command it stores fingerprints of the repository in front of that command (`simulator/trajectory.py`), seeded onto each variant as `solution_trajectory`. Fingerprints describe repository meaning (trees, ancestry, refs, index, working tree, conflicts, stash, in-progress operations), not generated commit ids or `last_*` bookkeeping; an `exact` strength also covers file contents and commit messages, a `coarse` strength does not.
 
 Rules:
 
-- Humans edit authored source modules under `backend/curriculum/seed_data/source/` when changing shared fixtures, routing, adventure levels, challenges, and blueprint overlays. Public modules such as `seed_data/adventure_levels.py`, `seed_data/challenges.py`, and `seed_data/blueprint_overlay.py` are compatibility wrappers only.
-- The large curriculum ledgers are partitioned by responsibility:
-  - `source/adventure_level_specs/` composes authored adventure waves by chapter plus blueprint-generated waves.
-  - `source/challenge_specs/` composes current blueprint challenges and legacy challenge batches.
-  - `source/blueprint/` stores blueprint adventure ledgers in smaller adventure-family modules.
+- Humans edit `MODULE_LEVELS` in `seed_curriculum`, the scenario Markdown compiled by `scripts/curriculum/import_revised_scenarios.py`, and the scenario plan, fixtures and gate composition under `backend/curriculum/seed_data/source/`.
+- `generate_targets` replays every module case and extension scenario, and fails unless the backend transition verifier accepts each replayed command (`solution_replay.verify_backend_transitions`), so a published answer key can always be submitted live.
 - Humans do not edit files under `backend/curriculum/seed_data/generated/` directly.
 - After changing a variant initial state, solution commands, or workspace-file edits, run `cd backend && python manage.py generate_targets`. It rewrites both generated targets and trajectories.
 - `scripts/check_seed_targets.py` is the cheap structural guard.
@@ -291,7 +378,7 @@ Rules:
 
 ## Command Introductions
 
-`backend/tutoring` shows a "Command guide" the first time a problem needs a command form or technique the player has not used. The planner locates the learner's repository on the variant's `solution_trajectory` (learner history resolves routes that revisit a state), takes the next non-diagnostic solution command, and resolves it to one command form: wave forms first, then the published catalog, else a shape derived from the command. Lesson identity is the form's syntax (`form:<usage>`), so the same syntax is one lesson across seeds. A form is not introduced when the player has completed its introduction, solved with it (`SkillMastery.solves`), or run it successfully in any run. Back-to-back path-only steps that one command can do together (`git add a` then `git add b`) are offered as that command (`git add a b`); interactive modes never merge. Once a command's form is known, an unseen technique in it gets the guide instead: `tutoring/services/techniques.py` holds a small detector list (several paths, `.`, path patterns, `--`, `HEAD~n`, `a..b`, remote-tracking branches, `@{upstream}`) keyed `technique:<name>`, recognised by command shape only. One-or-more forms (`<path>...`) are separate lessons and only count as used with several operands. For beginners each guide also carries a part-by-part reading of its syntax (`tutoring/services/anatomy.py`) and plain-language concepts chosen from what the move changes (`tutoring/services/concepts.py`), each shown until a guide that explained it is completed; change entries carry `action` and `subjects` so the client can draw a before/after diagram. Off-route repositories get no lesson. Tier runs expose the result as the nullable `tutor` payload; acknowledgement goes through `POST /api/adventure-tier-runs/{id}/introduction/complete/`.
+`backend/tutoring` shows a "Command guide" the first time a problem needs a command form or technique the player has not used. The planner locates the learner's repository on the variant's `solution_trajectory` (learner history resolves routes that revisit a state), takes the next non-diagnostic solution command, and resolves it to one command form: scenario forms first, then the published catalog, else a shape derived from the command. Lesson identity is the form's syntax (`form:<usage>`), so the same syntax is one lesson across seeds. A form is not introduced when the player has completed its introduction, solved with it (`SkillMastery.solves`), or run it successfully in any run. Back-to-back path-only steps that one command can do together (`git add a` then `git add b`) are offered as that command (`git add a b`); interactive modes never merge. Once a command's form is known, an unseen technique in it gets the guide instead: `tutoring/services/techniques.py` holds a small detector list (several paths, `.`, path patterns, `--`, `HEAD~n`, `a..b`, remote-tracking branches, `@{upstream}`) keyed `technique:<name>`, recognised by command shape only. One-or-more forms (`<path>...`) are separate lessons and only count as used with several operands. For beginners each guide also carries a part-by-part reading of its syntax (`tutoring/services/anatomy.py`) and plain-language concepts chosen from what the move changes (`tutoring/services/concepts.py`), each shown until a guide that explained it is completed; change entries carry `action` and `subjects` so the client can draw a before/after diagram. Off-route repositories get no lesson. Tier runs expose the result as the nullable `tutor` payload; acknowledgement goes through `POST /api/adventure-tier-runs/{id}/introduction/complete/`.
 
 ## Testing Strategy
 
@@ -311,7 +398,7 @@ Backend tests must cover:
 Frontend tests must cover:
 
 - generated-contract API wrapper behavior
-- route compatibility isolation
+- current route destinations and removal of obsolete aliases
 - shop theme/companion display separation
 - auth refresh race behavior
 - battle outcome behavior derived from `command_outcome`
@@ -319,7 +406,7 @@ Frontend tests must cover:
 
 ## Compatibility
 
-Compatibility exists only for old bookmarks and must stay isolated to the route layer. It must not leak into API contracts, CSS tokens, shop data, seed data, or feature implementation.
+Retired URL aliases have no router registrations or redirect handlers. Navigation uses the current route definitions directly. Historical database identifiers and migrations remain stable; they do not define alternate product routes or seed commands.
 
 ## CI Guards
 
@@ -375,6 +462,11 @@ second `core.py` export layer:
 Chapter completion reward policy and orchestration live in
 `backend/curriculum/services/chests.py`; the progress wallet remains the durable
 currency-ledger owner.
+`GET /api/chapters/{id}/chests/` reports eligibility from persisted completion
+and collection from credited wallet keys. `POST` to the same endpoint opens an
+earned milestone by threshold and recovers an unpaid reward through the same
+idempotent wallet key used by automatic completion payouts. The map displays
+closed, available, and opened chest assets from this server state.
 - `command_skills.py` for command-skill query and learned-spellbook rows.
 - `book.py` for Chapter Book payloads.
 - `challenge_queries.py` for challenge query shape.

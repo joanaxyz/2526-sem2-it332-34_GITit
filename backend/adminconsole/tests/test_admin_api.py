@@ -520,78 +520,15 @@ def test_staff_settings_toggle_feature_flag(django_user_model):
 
 
 @pytest.mark.django_db
-def test_staff_moderation_unpublishes_content(django_user_model):
-    from authoring.models import STATUS_PUBLISHED, ContentDefinition
-
-    staff = make_user(django_user_model, "admin", is_staff=True)
-    author = make_user(django_user_model, "author")
-    content = ContentDefinition.objects.create(
-        owner=author,
-        kind="challenge",
-        slug="shared-content",
-        title="Shared Content",
-        status=STATUS_PUBLISHED,
-        visibility="public",
-    )
-    client = APIClient()
-    client.force_authenticate(user=staff)
-
-    listed = client.get("/api/admin/moderation/").json()
-    assert any(c["id"] == content.id for c in listed["content"])
-
-    response = client.post(
-        "/api/admin/moderation/unpublish/",
-        {"kind": "content", "id": content.id},
-        format="json",
-    )
-    assert response.status_code == 200
-    content.refresh_from_db()
-    assert content.visibility == "private"
-    assert content.status == "draft"
-    log = AdminActionLog.objects.get(action="moderation.unpublish")
-    assert log.actor_id == staff.id
-    assert log.before == {"visibility": "public", "status": "published"}
-    assert log.after == {"visibility": "private", "status": "draft"}
-
-
-@pytest.mark.django_db
-def test_moderation_cannot_target_content_outside_the_queue(django_user_model):
-    from authoring.models import STATUS_PUBLISHED, ContentDefinition
-
-    staff = make_user(django_user_model, "admin", is_staff=True)
-    official = ContentDefinition.objects.create(
-        owner=staff,
-        kind="lesson",
-        slug="official-content",
-        title="Official Content",
-        status=STATUS_PUBLISHED,
-        visibility="public",
-    )
-    client = APIClient()
-    client.force_authenticate(user=staff)
-
-    response = client.post(
-        "/api/admin/moderation/unpublish/",
-        {"kind": "content", "id": official.id},
-        format="json",
-    )
-
-    assert response.status_code == 404
-    official.refresh_from_db()
-    assert official.status == STATUS_PUBLISHED
-    assert official.visibility == "public"
-    assert not AdminActionLog.objects.filter(action="moderation.unpublish").exists()
-
-
-@pytest.mark.django_db
 def test_staff_analytics_returns_shape(django_user_model):
     from django.utils import timezone
 
     from adventures.models import (
         AdventureLevel,
-        AdventureRun,
-        AdventureWave,
-        AdventureWaveVariant,
+        AdventureLevelTier,
+        AdventureLevelTierRun,
+        AdventureLevelTierScenario,
+        AdventureLevelTierScenarioVariant,
     )
     from challenges.models import (
         ChallengeLevel,
@@ -620,19 +557,22 @@ def test_staff_analytics_returns_shape(django_user_model):
         slug="analytics-adventure",
         title="Analytics Adventure",
     )
-    wave = AdventureWave.objects.create(level=level, slug="wave", title="Wave")
-    adventure_variant = AdventureWaveVariant.objects.create(
-        wave=wave,
+    tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
+    scenario = AdventureLevelTierScenario.objects.create(
+        tier=tier, slug="scenario", title="Scenario"
+    )
+    adventure_variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
         slug="main",
         label="Main",
     )
-    AdventureRun.objects.create(
+    AdventureLevelTierRun.objects.create(
         player=player,
-        level=level,
-        current_wave=wave,
+        tier=tier,
+        current_scenario=scenario,
         selected_variant=adventure_variant,
-        status=AdventureRun.Status.COMPLETED,
-        passed_at=timezone.now(),
+        status=AdventureLevelTierRun.Status.COMPLETED,
+        completed_at=timezone.now(),
     )
     challenge_level = ChallengeLevel.objects.create(
         chapter=chapter,
@@ -667,15 +607,11 @@ def test_staff_analytics_returns_shape(django_user_model):
         "per_story",
         "runebound_performance",
     }
-    assert body["runebound_performance"]["kpis"] == {
-        "scr": {"value": None, "numerator": 0, "denominator": 0},
-        "car": {"value": None, "numerator": 0, "denominator": 0},
-        "hlcr": {"value": None, "numerator": 0, "denominator": 0},
-        "rta": {"value": None, "numerator": 0, "denominator": 0},
-        "retry_success_rate": {"value": None, "numerator": 0, "denominator": 0},
-        "rtr": {"value": None, "numerator": 0, "denominator": 0},
-        "arc": {"value": None, "numerator": 0, "denominator": 0},
-    }
+    # Cohort rates are means of learner scores, so each carries its unit.
+    empty_mean = {"value": None, "numerator": 0, "denominator": 0, "unit": "participants"}
+    assert body["runebound_performance"]["kpis"] == dict.fromkeys(
+        ("scr", "car", "hlcr", "rta", "retry_success_rate", "rtr", "arc"), empty_mean
+    )
     assert body["runs"]["total"] == 2
     assert body["runs"]["passed"] == 2
     assert body["runs"]["adventure"]["total"] == 1

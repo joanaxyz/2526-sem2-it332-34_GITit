@@ -13,8 +13,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from adventures.services.tier_command_processing import AdventureLevelTierCommandProcessingService
 from common.git.repository_state import VariantTargetStateHashCache
@@ -31,12 +31,12 @@ def _tier_run(django_user_model) -> AdventureLevelTierRun:
     chapter = Chapter.objects.create(story=story, slug="cache-isolation", number=1, title="Cache")
     level = AdventureLevel.objects.create(chapter=chapter, slug="cache-isolation", title="Cache")
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    wave = AdventureLevelTierWave.objects.create(
+    scenario = AdventureLevelTierScenario.objects.create(
         tier=tier, slug="cache-isolation", max_counted_commands=8
     )
     states = stage_readme_states()
-    variant = AdventureLevelTierWaveVariant.objects.create(
-        wave=wave,
+    variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
         slug="cache-isolation",
         label="Cache isolation",
         initial_state=states.initial,
@@ -47,7 +47,7 @@ def _tier_run(django_user_model) -> AdventureLevelTierRun:
     return AdventureLevelTierRun.objects.create(
         player=get_or_create_player(user),
         tier=tier,
-        current_wave=wave,
+        current_scenario=scenario,
         selected_variant=variant,
         repository_state=states.initial,
         max_counted_commands=8,

@@ -8,6 +8,7 @@ from PIL import Image, ImageDraw
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
+import process_companion_spell_sheets as processor  # noqa: E402
 from process_companion_spell_sheets import (  # noqa: E402
     FRAME,
     FRAMES,
@@ -17,6 +18,7 @@ from process_companion_spell_sheets import (  # noqa: E402
     clamp_registration_shifts,
     clear_detected_bright_grid_lines,
     clear_frame_edges,
+    content_axis_edges,
     compute_prefit_scale,
     compute_registration_plan,
     measure_place_bounds,
@@ -110,6 +112,116 @@ def test_sheet_wide_connected_component_is_partitioned_by_source_cell(tmp_path: 
         source.source_bbox is None or source.source_bbox[2] - source.source_bbox[0] <= FRAME + 4
         for source in sources
     )
+
+
+@pytest.mark.parametrize("transpose", [False, True], ids=["rows", "columns"])
+def test_drifting_frames_keep_their_tips_when_a_glow_connects_the_row(
+    tmp_path: Path, transpose: bool
+) -> None:
+    sheet = Image.new("RGBA", (FRAME * 5, FRAME * 5), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(sheet)
+    for column in range(5):
+        x = column * FRAME
+        # The third row starts above its nominal y=512 boundary, as in White's
+        # Mergetool. A shared flare joins all five frames into one component.
+        draw.rectangle((x + 64, 490, x + 192, 650), fill=(80, 190, 255, 255))
+    draw.line((64, 560, FRAME * 5 - 64, 560), fill=(80, 190, 255, 255), width=3)
+    if transpose:
+        sheet = sheet.transpose(Image.Transpose.TRANSPOSE)
+    raw_path = tmp_path / "drifting.png"
+    sheet.save(raw_path)
+
+    sources = owned_frame_sources(raw_path)
+
+    for cell in range(5):
+        owner = cell * 5 + 2 if transpose else 10 + cell
+        previous = owner - (1 if transpose else 5)
+        assert sources[previous].image is None
+        bbox = sources[owner].source_bbox
+        assert bbox is not None
+        axis = 0 if transpose else 1
+        assert bbox[axis] <= 490
+        assert bbox[axis + 2] >= 651
+        # Keep the authored grid for normalization instead of resizing each
+        # frame to its newly detected, potentially unequal ownership cell.
+        assert sources[owner].cell_box[axis] == FRAME * 2
+
+
+def test_ownership_seams_stay_on_grid_without_a_clearer_gutter() -> None:
+    import numpy as np
+
+    alpha = np.full((FRAME * 5, FRAME * 5), 255, dtype=np.uint8)
+
+    assert content_axis_edges(alpha, axis=0, count=5) == list(range(0, FRAME * 5 + 1, FRAME))
+    assert content_axis_edges(alpha, axis=1, count=5) == list(range(0, FRAME * 5 + 1, FRAME))
+
+
+@pytest.mark.parametrize("companion", ["blue", "white"])
+def test_detached_dragon_mouth_flash_stays_in_its_own_frame(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch, companion: str
+) -> None:
+    monkeypatch.setattr(processor, "COMPANION_SLUG", companion)
+    monkeypatch.setattr(processor, "BACKGROUND_MODE", "chroma-key")
+    sheet = Image.new("RGBA", (1254, 1254), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(sheet)
+    draw.rectangle((70, 800, 226, 900), fill=(60, 160, 255, 255))
+    draw.polygon([(254, 829), (280, 855), (254, 881), (230, 855)], fill=(245, 245, 255, 255))
+    # Another row's art obscures the mouth flash's gutter in a sheet-wide
+    # projection. A row-local seam must keep all four spark tips with frame 16.
+    draw.rectangle((260, 50, 310, 200), fill=(60, 160, 255, 255))
+    raw_path = tmp_path / "rm.png"
+    sheet.save(raw_path)
+
+    sources = owned_frame_sources(raw_path)
+
+    source = sources[15]
+    assert source.image is not None and source.source_bbox is not None
+    for x, y in [(254, 831), (278, 855), (254, 879), (232, 855)]:
+        assert source.image.getpixel((x - source.source_bbox[0], y - source.source_bbox[1]))[3] > 200
+    assert sources[16].image is None
+
+
+def shipped_spell_frame(companion: str, name: str, index: int) -> Image.Image:
+    effect_set = str(processor.COMPANION_EFFECT_SETS[companion]["effectSet"])
+    path = processor.COMPANION_ROOT / companion / "effects" / effect_set / f"{name}.png"
+    col, row = index % 5, index // 5
+    with Image.open(path) as sheet:
+        return sheet.crop((col * FRAME, row * FRAME, (col + 1) * FRAME, (row + 1) * FRAME))
+
+
+@pytest.mark.parametrize(
+    ("companion", "name", "index", "region"),
+    [
+        ("blue", "rm", 16, (0, 0, 46, FRAME)),
+        ("blue", "merge", 16, (0, 205, FRAME, FRAME)),
+        ("blue", "merge", 20, (0, 245, 10, FRAME)),
+        ("black", "commit", 0, (0, 235, FRAME, FRAME)),
+        ("black", "branch", 15, (0, 200, FRAME, FRAME)),
+        ("black", "branch", 16, (0, 200, FRAME, FRAME)),
+        ("black", "branch", 17, (0, 200, FRAME, FRAME)),
+        ("black", "remote_front", 15, (0, 235, FRAME, FRAME)),
+        ("black", "remote_back", 15, (0, 240, FRAME, FRAME)),
+    ],
+)
+def test_shipped_spells_have_no_reported_neighbor_fragments(
+    companion: str, name: str, index: int, region: tuple[int, int, int, int]
+) -> None:
+    # These regions contained the reported side/bottom artifacts. Check the
+    # tracked runtime PNGs, so CI also catches a stale or faulty asset rebake.
+    alpha = shipped_spell_frame(companion, name, index).crop(region).getchannel("A")
+
+    assert alpha.point(lambda value: 255 if value > 12 else 0).getbbox() is None
+
+
+def test_white_clone_retains_five_centered_fade_poses_without_the_extra_sixth_pose() -> None:
+    for index in range(20, 25):
+        alpha = shipped_spell_frame("white", "clone", index).getchannel("A")
+        bbox = alpha.point(lambda value: 255 if value > 12 else 0).getbbox()
+
+        assert bbox is not None
+        left, _top, right, _bottom = bbox
+        assert abs((left + right) / 2 - FRAME / 2) <= 16
+        assert right - left < 200
 
 
 def test_generated_bright_grid_is_removed_without_deleting_effect_highlights() -> None:

@@ -26,6 +26,8 @@ FORBIDDEN_DIR_NAMES = {
     "dist",
     "build",
     "coverage",
+    ".db-backups",
+    "dogfood-output",
 }
 FORBIDDEN_SUFFIXES = {
     ".pyc",
@@ -35,6 +37,8 @@ FORBIDDEN_SUFFIXES = {
     ".sqlite3",
     ".sqlite3-shm",
     ".sqlite3-wal",
+    ".bak",
+    ".zip",
 }
 FORBIDDEN_TOP_LEVEL_DIRS = {
     "REFERENCE",

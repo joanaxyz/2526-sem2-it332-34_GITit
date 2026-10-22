@@ -196,6 +196,12 @@ def next_difficulty_payload(run: ChallengeRun) -> dict | None:
     ).first()
     if not next_trial:
         return None
+    # The next trial is offered only when the learner could open it now.
+    if not any(
+        trial["id"] == next_trial.id and trial["status"] != "locked"
+        for trial in sibling_levels_payload(run)
+    ):
+        return None
     return {"id": next_trial.id, "difficulty": next_trial.difficulty}
 
 

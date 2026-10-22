@@ -4,8 +4,10 @@ import App from './App'
 import { AppErrorBoundary } from '@/app/AppErrorBoundary'
 import { AppProviders } from '@/app/providers'
 import { initializePreferences } from '@/shared/preferences/preferences'
+import { initializeGuideMascotVisibility } from '@/shared/mascot/guideMascotVisibility'
 import '@/styles/globals.css'
 import '@/styles/features/game-outcome.css'
+import '@/styles/features/game-outcome-stats.css'
 import '@/styles/features/ambient.css'
 import '@/styles/features/companion-loader.css'
 import '@/styles/features/spinner.css'
@@ -18,14 +20,15 @@ import '@/styles/features/charts.css'
 import '@/styles/features/home.css'
 import '@/styles/features/battle.css'
 import '@/styles/features/battle/workspace-project-tree.css'
-import '@/styles/features/authoring.css'
 import '@/styles/features/shop.css'
 import '@/styles/features/auth.css'
 import '@/styles/features/settings.css'
 import '@/styles/features/onboarding.css'
 import '@/styles/features/admin.css'
+import '@/styles/cursors.css'
 
 initializePreferences()
+initializeGuideMascotVisibility()
 
 // The boot paint in index.html fades itself out via CSS the moment #root has
 // children, so the transition can only fire once React has actually rendered.

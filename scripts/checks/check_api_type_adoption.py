@@ -19,7 +19,6 @@ FRONTEND_SRC = ROOT / "frontend" / "src"
 ENFORCED_API_DIRS = [
     FRONTEND_SRC / "features" / "admin" / "api",
     FRONTEND_SRC / "features" / "adventures" / "api",
-    FRONTEND_SRC / "features" / "authoring" / "api",
     FRONTEND_SRC / "features" / "challenges" / "api",
     FRONTEND_SRC / "features" / "home" / "api",
     FRONTEND_SRC / "shared" / "shop" / "api",

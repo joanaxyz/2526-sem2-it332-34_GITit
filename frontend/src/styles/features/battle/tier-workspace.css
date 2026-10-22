@@ -2,9 +2,10 @@
    tier-* class so the adventure and challenge workspaces keep the shared
    gameplay-* layout untouched. */
 
-/* Command bar, run status strip, then the workspace. */
+/* The compact status rail lives in the command bar, leaving the workspace the
+   full height below it. */
 .gameplay-workspace-screen.tier-workspace-screen {
-  grid-template-rows: 3.65rem auto minmax(0, 1fr);
+  grid-template-rows: 3.65rem minmax(0, 1fr);
 }
 
 /* Centre column: battle stage over the terminal. The battle row size is the
@@ -15,19 +16,21 @@
 
 .tier-stats-bar {
   display: flex;
+  /* Its stats never wrap on wide screens, so it keeps its width and the
+     mission title shrinks instead of sitting under the strip. */
+  flex: 0 0 auto;
+  align-items: center;
   justify-content: flex-end;
   min-width: 0;
-  border-bottom: 1px solid hsl(var(--border) / 0.55);
-  padding: var(--space-2) var(--space-4);
-  background: rgba(var(--theme-primary-rgb), 0.03);
+  padding: 0;
 }
 
 .tier-stats {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: center;
   justify-content: flex-end;
-  gap: var(--space-2) var(--space-5);
+  gap: var(--space-2) var(--space-4);
   margin: 0;
 }
 
@@ -210,214 +213,119 @@
   margin-top: var(--space-4);
 }
 
-.tier-story-button {
+.tier-story-button.ui-button {
+  position: relative;
   flex: none;
-  width: 100%;
+  width: auto;
+  min-height: 2rem;
+  border-color: hsl(var(--primary) / 0.6);
+  padding-inline: var(--space-3);
+  background: hsl(var(--primary) / 0.12);
+  color: var(--text-primary);
+  box-shadow: 0 0 8px hsl(var(--primary) / 0.18);
+}
+
+.tier-story-button.ui-button:hover:not(:disabled) {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.22);
+  color: var(--text-primary);
+  box-shadow: 0 0 8px hsl(var(--primary) / 0.36);
+}
+
+.tier-story-button.ui-button:focus-visible {
+  border-color: hsl(var(--primary));
+  background: hsl(var(--primary) / 0.22);
+  box-shadow: var(--control-focus-ring);
+}
+
+.tier-story-button.ui-button:active:not(:disabled) {
+  background: hsl(var(--primary) / 0.3);
+}
+
+.tier-story-button__book {
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.tier-story-button__sparkles {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.tier-story-button .tier-story-button__sparkle {
+  position: absolute;
+  width: 0.5rem;
+  height: 0.5rem;
+  fill: currentColor;
+  color: hsl(var(--foreground));
+  opacity: 0.3;
+  animation: tier-story-sparkle 4.8s var(--ease-out) infinite;
+}
+
+.tier-story-button .tier-story-button__sparkle--one {
+  top: 1px;
+  right: 1.25rem;
+  animation-delay: -0.4s;
+}
+
+.tier-story-button .tier-story-button__sparkle--two {
+  right: 3px;
+  bottom: 2px;
+  width: 0.4rem;
+  height: 0.4rem;
+  color: rgb(var(--theme-primary-rgb));
+  animation-delay: -2s;
+}
+
+.tier-story-button .tier-story-button__sparkle--three {
+  top: 5px;
+  left: 2px;
+  width: 0.35rem;
+  height: 0.35rem;
+  color: rgb(var(--theme-primary-rgb));
+  animation-delay: -3.6s;
+}
+
+.tier-story-button.ui-button:disabled {
+  border-color: var(--border-subtle);
+  background: var(--control-bg);
+  color: var(--text-secondary);
+  box-shadow: none;
+}
+
+.tier-story-button:disabled .tier-story-button__sparkles {
+  display: none;
+}
+
+.tier-story-button:disabled .tier-story-button__book {
+  color: inherit;
+}
+
+@keyframes tier-story-sparkle {
+  0%, 50%, 100% {
+    opacity: 0.15;
+    transform: scale(0.55) rotate(-15deg);
+  }
+  16%, 24% {
+    opacity: 1;
+    transform: scale(1.15) rotate(0deg);
+  }
+  38% {
+    opacity: 0.3;
+    transform: scale(0.75) rotate(15deg);
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .tier-objective,
-  .tier-objective__box {
+  .tier-objective__box,
+  .tier-story-button.ui-button {
     transition: none;
   }
-}
 
-/* Right column, Easy and Medium (any run with an Expected State): Live DAG
-   and Expected State behind tabs in one frame. Panes stack in one grid cell;
-   the inactive one is hidden with opacity (never display:none) so React Flow
-   keeps its measured size, zoom and pan. */
-.tier-dag-tabs {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.3);
-  border-radius: var(--radius-md);
-  background: rgba(1, 8, 19, 0.92);
-  box-shadow: inset 0 1px 0 rgba(var(--theme-primary-rgb), 0.1);
-}
-
-.tier-dag-tablist.workspace-panel-header {
-  justify-content: flex-start;
-  border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.14);
-  padding-inline: var(--space-3);
-  background: rgba(var(--theme-primary-rgb), 0.03);
-}
-
-.tier-dag-toggle {
-  position: relative;
-  isolation: isolate;
-  display: inline-grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  padding: 2px;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.24);
-  border-radius: var(--radius-pill);
-  background: rgba(1, 8, 19, 0.72);
-  box-shadow: inset 0 1px 0 rgba(var(--theme-primary-rgb), 0.08);
-}
-
-.tier-dag-toggle::before {
-  position: absolute;
-  z-index: -1;
-  top: 2px;
-  bottom: 2px;
-  left: 2px;
-  width: calc(50% - 2px);
-  border: 1px solid var(--control-border);
-  border-radius: var(--radius-pill);
-  background: var(--control-bg-active);
-  box-shadow: 0 0 10px rgba(var(--theme-primary-rgb), 0.12);
-  content: '';
-  transform: translateX(0);
-  transition:
-    transform 200ms var(--ease-out),
-    border-color var(--motion-normal) var(--ease-out),
-    box-shadow var(--motion-normal) var(--ease-out);
-}
-
-.tier-dag-toggle[data-active='expected']::before {
-  transform: translateX(100%);
-}
-
-.tier-dag-tab {
-  position: relative;
-  border: 0;
-  border-radius: var(--radius-pill);
-  padding: var(--space-1) var(--space-3);
-  background: transparent;
-  color: hsl(var(--muted-foreground));
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  line-height: 1.2;
-  text-transform: uppercase;
-  cursor: pointer;
-  transition:
-    color var(--motion-normal) var(--ease-out),
-    background var(--motion-fast) var(--ease-out);
-}
-
-.tier-dag-tab[aria-selected='false']:hover {
-  color: hsl(var(--foreground));
-  background: var(--control-bg-hover);
-}
-
-.tier-dag-tab[aria-selected='true'] {
-  color: rgb(var(--theme-primary-rgb));
-}
-
-.tier-dag-tab:focus-visible {
-  outline: none;
-  box-shadow: var(--control-focus-ring);
-}
-
-.tier-dag-panes {
-  position: relative; /* anchors the node legend */
-  display: grid;
-  flex: 1 1 auto;
-  min-height: 0;
-}
-
-.tier-dag-pane {
-  position: relative;
-  z-index: var(--z-base);
-  grid-area: 1 / 1;
-  min-width: 0;
-  min-height: 0;
-  overflow: hidden;
-  opacity: 1;
-  transition: opacity 150ms var(--ease-out);
-}
-
-/* Hidden with opacity, not visibility: React Flow gives every node an inline
-   `visibility: visible`, which overrides an inherited `hidden` and let the
-   inactive graph paint through. The pane keeps its size (zoom and fit stay
-   valid); `inert` on the element takes it out of the tab order and the
-   accessibility tree. */
-.tier-dag-pane.is-inactive {
-  z-index: 0;
-  opacity: 0;
-  pointer-events: none;
-}
-
-/* The frame and tab bar belong to .tier-dag-tabs; embedded diagrams drop theirs. */
-.tier-dag-pane > .challenge-dag-stage,
-.tier-dag-pane > .live-dag-panel {
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-}
-
-.tier-dag-pane > .challenge-dag-stage::before {
-  top: 0;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .tier-dag-toggle::before,
-  .tier-dag-tab,
-  .tier-dag-pane {
-    transition: none;
+  .tier-story-button .tier-story-button__sparkle {
+    animation: none;
+    opacity: 0.7;
+    transform: none;
   }
-}
-
-/* Story modal: shared Modal chrome; only the briefing layout is tier-specific. */
-.tier-story-modal .tier-story-modal__body {
-  display: grid;
-  gap: var(--space-4);
-}
-
-.tier-story-modal__intro,
-.tier-story-modal__section p,
-.tier-story-modal__empty {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: var(--text-base);
-  line-height: 1.6;
-  overflow-wrap: anywhere;
-  white-space: pre-line;
-}
-
-.tier-story-modal__section {
-  display: grid;
-  gap: var(--space-2);
-  border: 1px solid hsl(var(--border) / 0.7);
-  border-radius: var(--radius-md);
-  padding: var(--space-3) var(--space-4);
-  background: var(--surface-raised);
-}
-
-.tier-story-modal__section--task {
-  border-color: var(--border-active);
-}
-
-.tier-story-modal__heading {
-  margin: 0;
-  color: rgb(var(--theme-primary-rgb));
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  font-weight: 600;
-  letter-spacing: 0.1em;
-  text-transform: uppercase;
-}
-
-.tier-story-modal__section--task p {
-  color: hsl(var(--foreground));
-}
-
-.tier-story-modal__actions {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.tier-story-modal__shortcut {
-  margin-left: var(--space-2);
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  opacity: 0.75;
 }

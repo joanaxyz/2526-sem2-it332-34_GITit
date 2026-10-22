@@ -30,6 +30,7 @@ from practice.services.scaffolding import FeedbackGenerationService, Scaffolding
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import ChallengeLevelCompletion, ChallengeTrialCompletion
 from progress.services import StreakService
+from progress.services.scored_completions import update_best_score
 from progress.wallet import WalletService
 from simulator.services import (
     RepositorySnapshotService,
@@ -263,12 +264,11 @@ class ChallengeCommandProcessingService:
         run.status = SESSION_STATUS_COMPLETED
         run.completed_at = timezone.now()
         run.ended_at = run.completed_at
-        first_try = run.retry_index == 0
         run.stars = compute_stars(
             solved=True,
             counted_commands=run.counted_action_total,
             budget=run.min_counted_commands,
-            first_try=first_try,
+            retry_count=run.retry_index,
         )
         chest_pending = False
         if not run.is_replay:
@@ -281,25 +281,8 @@ class ChallengeCommandProcessingService:
                     "counted_action_total": run.counted_action_total,
                 },
             )
-            if not created and (
-                run.stars > completion.stars
-                or (
-                    run.stars == completion.stars
-                    and run.counted_action_total < completion.counted_action_total
-                )
-            ):
-                completion.challenge_run = run
-                completion.stars = run.stars
-                completion.counted_action_total = run.counted_action_total
-                completion.completed_at = run.completed_at
-                completion.save(
-                    update_fields=[
-                        "challenge_run",
-                        "stars",
-                        "counted_action_total",
-                        "completed_at",
-                    ]
-                )
+            if not created:
+                update_best_score(completion, run=run, run_field="challenge_run")
             self._complete_challenge_level_if_ready(run=run)
             StreakService().record_completion(player=run.player, completed_at=run.completed_at)
             # Authored trial reward; the ledger award_key keeps it once-per-trial.
@@ -311,6 +294,13 @@ class ChallengeCommandProcessingService:
                     award_key=f"trial-reward:{run.challenge_trial_id}",
                 )
             chest_pending = True
+        else:
+            completion = (
+                ChallengeTrialCompletion.objects.select_for_update()
+                .filter(player=run.player, challenge_trial=run.challenge_trial)
+                .first()
+            )
+            update_best_score(completion, run=run, run_field="challenge_run")
         return {"status", "completed_at", "ended_at", "stars"}, chest_pending
 
     def _complete_challenge_level_if_ready(self, *, run: ChallengeRun) -> None:

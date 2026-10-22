@@ -53,7 +53,7 @@ COMMAND_KEY_PREFIXES: tuple[tuple[str, str], ...] = (
 # any variant of the command is used in an authored scenario.
 COMMAND_KEY_ALWAYS_INCLUDED_SECTION_IDS: dict[str, list[str]] = {
     "git-status": ["option-s-short", "option-porcelain", "option-sb", "option-ignored"],
-    "git-log": ["option-oneline", "option-graph", "option-all", "option-count"],
+    "git-log": ["option-oneline", "option-graph", "option-all", "option-count", "argument-number"],
     "git-diff": [
         "option-staged-cached",
         "option-head",
@@ -102,6 +102,28 @@ COMMAND_KEY_ALWAYS_INCLUDED_SECTION_IDS: dict[str, list[str]] = {
     "git-fetch": ["argument-remote", "option-prune"],
     "git-cherry-pick": ["option-no-commit", "option-abort", "argument-commit"],
     "git-ls-files": ["option-unmerged"],
+}
+
+
+# A Chapter Book argument page is canonical, but forms sometimes use a more
+# concrete placeholder than the page's generic token. Keep these aliases scoped
+# to the command key and page identity so a name can mean a key in one form and
+# a value in another.
+ARGUMENT_PLACEHOLDER_ALIASES: dict[tuple[str, str], frozenset[str]] = {
+    ("git-init", "argument-directory"): frozenset({"<folder>"}),
+    ("git-clone", "argument-directory"): frozenset({"<folder>"}),
+    ("git-clone", "argument-number"): frozenset({"<n>", "<count>"}),
+    ("git-log", "argument-number"): frozenset({"<n>", "<count>"}),
+    ("git-add", "argument-path"): frozenset({"<file>"}),
+    ("git-add-p", "argument-path"): frozenset({"<file>"}),
+    ("git-rm-cached", "argument-path"): frozenset({"<file>", "<directory>"}),
+    ("git-check-ignore", "argument-path"): frozenset({"<file>"}),
+    ("git-restore", "argument-path"): frozenset({"<file>"}),
+    ("git-restore-staged", "argument-path"): frozenset({"<file>"}),
+    ("git-checkout-conflict-side", "argument-path"): frozenset({"<file>"}),
+    ("git-diff", "argument-path"): frozenset({"<file>"}),
+    ("git-diff-staged", "argument-path"): frozenset({"<file>"}),
+    ("git-config", "argument-value"): frozenset({"<name>", "<email>", "<command>"}),
 }
 
 

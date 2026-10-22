@@ -19,7 +19,7 @@ import {
   type SpecificObjective,
   type Status,
 } from '@/features/admin/utils/kpiCatalogue'
-import { kpiEvidence } from '@/features/admin/utils/kpiEvidence'
+import { formatMetricValue, kpiEvidence, metricTargetStatus } from '@/features/performance/utils/performanceKpis'
 import { ALL_TIME } from '@/features/admin/utils/kpiRange'
 import type { PerformanceModule } from '@/features/performance/types'
 import { queryKeys } from '@/shared/api/queryKeys'
@@ -28,8 +28,7 @@ import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
 function status(r: Rate, target: number, up: boolean): Status {
-  if (r.value === null || r.denominator === 0) return 'none'
-  return (up ? r.value >= target : r.value <= target) ? 'met' : 'miss'
+  return metricTargetStatus(r, target, up)
 }
 
 // A multi-metric SO misses if any metric misses, is met only when every metric
@@ -54,8 +53,7 @@ function soStatus(so: SpecificObjective, data: SoData): Status {
 }
 
 function fmtRate(r: Rate, pct: boolean): string {
-  if (r.value === null) return '—'
-  return pct ? `${r.value}%` : r.value.toFixed(2)
+  return formatMetricValue(r.value, pct)
 }
 
 function barW(r: Rate, target: number, up: boolean): number {
@@ -304,7 +302,7 @@ export function AdminDashboardPage() {
   const diag     = data.runebound_performance
 
   // Overall SCR uses the same source and filters as the per-module SCR
-  // (Runebound tier runs, Modules 1–4, replays excluded), not data.runs,
+  // (Arcane Spire tier runs, Modules 1–4, replays excluded), not data.runs,
   // which spans every story and run type.
   const byKey: Record<string, Rate> = {
     scr:  diag.kpis.scr,
@@ -327,11 +325,11 @@ export function AdminDashboardPage() {
         <div className="dk-header-left">
           <p className="dk-eyebrow">
             <Activity aria-hidden="true" />
-            Runebound Turret · Modules 1–4 · replays and staff excluded
+            Arcane Spire · Modules 1–4 · replays and staff excluded
           </p>
           <h1 className="dk-title">KPI Overview</h1>
           <p className="dk-subtitle">
-            Live capstone objectives — all learner sessions aggregated.
+            Live practice objectives — equally weighted learner scores. Formal studies use frozen assignments.
           </p>
         </div>
 
@@ -343,9 +341,9 @@ export function AdminDashboardPage() {
             <span className="dk-stat-label">targets met</span>
           </div>
           <div className="dk-stat">
-            {/* Started sessions under the header's scope: SCR's denominator. */}
-            <span className="dk-stat-value">{diag.kpis.scr.denominator.toLocaleString()}</span>
-            <span className="dk-stat-label">sessions</span>
+            {/* Activity coverage stays separate from participant-mean KPI denominators. */}
+            <span className="dk-stat-value">{diag.samples.attempted_tiers.toLocaleString()}</span>
+            <span className="dk-stat-label">attempted tiers</span>
           </div>
           <div className="dk-stat">
             <span className="dk-stat-value">{data.active_learners_30d}</span>

@@ -2,14 +2,9 @@ from django.db import models
 
 MANAGEMENT_SOURCE_SEED = "seed"
 MANAGEMENT_SOURCE_ADMIN = "admin"
-MANAGEMENT_SOURCE_RUNTIME = "runtime"
-STORY_MANAGEMENT_SOURCE_CHOICES = (
+MANAGEMENT_SOURCE_CHOICES = (
     (MANAGEMENT_SOURCE_SEED, "Seed"),
     (MANAGEMENT_SOURCE_ADMIN, "Admin"),
-)
-CHAPTER_MANAGEMENT_SOURCE_CHOICES = (
-    *STORY_MANAGEMENT_SOURCE_CHOICES,
-    (MANAGEMENT_SOURCE_RUNTIME, "Runtime"),
 )
 
 
@@ -45,7 +40,7 @@ class Story(models.Model):
     )
     management_source = models.CharField(
         max_length=8,
-        choices=STORY_MANAGEMENT_SOURCE_CHOICES,
+        choices=MANAGEMENT_SOURCE_CHOICES,
         default=MANAGEMENT_SOURCE_SEED,
     )
 
@@ -85,7 +80,7 @@ class Chapter(models.Model):
     battle_stage = models.JSONField(default=dict, blank=True)
     management_source = models.CharField(
         max_length=8,
-        choices=CHAPTER_MANAGEMENT_SOURCE_CHOICES,
+        choices=MANAGEMENT_SOURCE_CHOICES,
         default=MANAGEMENT_SOURCE_SEED,
     )
 
@@ -117,13 +112,6 @@ class ChapterLesson(models.Model):
     pages = models.JSONField(default=list, blank=True)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
-    source_content_definition = models.ForeignKey(
-        "authoring.ContentDefinition",
-        null=True,
-        blank=True,
-        related_name="runtime_lessons",
-        on_delete=models.SET_NULL,
-    )
 
     class Meta:
         ordering = ["chapter__sort_order", "sort_order", "id"]
@@ -175,13 +163,6 @@ class CommandSkill(models.Model):
     command_preview = models.JSONField(default=dict, blank=True)
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
-    source_content_definition = models.ForeignKey(
-        "authoring.ContentDefinition",
-        null=True,
-        blank=True,
-        related_name="runtime_command_skills",
-        on_delete=models.SET_NULL,
-    )
 
     class Meta:
         ordering = ["sort_order", "base_command"]

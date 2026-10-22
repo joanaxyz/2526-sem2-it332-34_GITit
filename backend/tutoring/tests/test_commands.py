@@ -8,34 +8,41 @@ from tutoring.tests.conftest import initialized_state, solution_states, staged
 
 
 def submit(client, run, command, state, **kwargs):
-    response = client.post(f"/api/adventure-tier-runs/{run.id}/submit-command/", {
-        "command": command,
-        "execution": frontend_execution_payload(command, state, client_run_revision=run.total_attempts,
-                                                **kwargs),
-    }, format="json")
+    response = client.post(
+        f"/api/adventure-tier-runs/{run.id}/submit-command/",
+        {
+            "command": command,
+            "execution": frontend_execution_payload(
+                command, state, client_run_revision=run.total_attempts, **kwargs
+            ),
+        },
+        format="json",
+    )
     run.refresh_from_db()
     return response
 
 
 def complete(client, run, token):
-    return client.post(f"/api/adventure-tier-runs/{run.id}/introduction/complete/",
-                       {"token": token}, format="json")
+    return client.post(
+        f"/api/adventure-tier-runs/{run.id}/introduction/complete/", {"token": token}, format="json"
+    )
 
 
-def test_wrong_terminal_command_reveals_and_keeps_normal_penalty(client, teaching_run):
+def test_wrong_terminal_command_keeps_syntax_private_and_normal_penalty(client, teaching_run):
     before = deepcopy(teaching_run.repository_state)
     response = submit(client, teaching_run, "git start", before, processed=False, exit_code=129)
     assert response.status_code == 200, response.data
     tutor = response.data["run"]["tutor"]
     assert tutor["phase"] == "feedback"
     assert tutor["verdict"] == "incorrect"
-    assert tutor["example_command"] == "git init"
+    assert "example_command" not in tutor
+    assert tutor["command_form"]["usage_form"] == "git init"
     assert teaching_run.repository_state == before
     assert teaching_run.total_attempts == teaching_run.counted_action_total == 1
     assert teaching_run.steps.count() == 1
     assert not SkillMastery.objects.exists()
     assert not PlayerCommandIntroduction.objects.exists()
-    assert tutor_payload(teaching_run)["example_command"] == "git init"  # reload resumes
+    assert "example_command" not in tutor_payload(teaching_run)  # reload remains safe
     for _ in range(2):
         result = complete(client, teaching_run, tutor["completion_token"])
         assert result.status_code == 200, result.data
@@ -46,7 +53,9 @@ def test_wrong_terminal_command_reveals_and_keeps_normal_penalty(client, teachin
 
 
 def test_successful_init_explains_the_change_then_introduces_the_next_form(client, teaching_run):
-    response = submit(client, teaching_run, "git init", initialized_state(teaching_run.repository_state))
+    response = submit(
+        client, teaching_run, "git init", initialized_state(teaching_run.repository_state)
+    )
     assert response.status_code == 200, response.data
     tutor = response.data["run"]["tutor"]
     assert tutor["verdict"] == "correct"
@@ -74,8 +83,12 @@ def test_same_form_on_another_route_is_praised_without_claiming_the_route(client
     tutor = response.data["run"]["tutor"]
     assert tutor["verdict"] == "correct"
     assert tutor["explanation"].startswith("That worked.")
-    assert {"kind": "staging", "text": "app.py and draft.txt are staged.", "action": "add",
-            "subjects": ["app.py", "draft.txt"]} in tutor["changes"]
+    assert {
+        "kind": "staging",
+        "text": "app.py and draft.txt are staged.",
+        "action": "add",
+        "subjects": ["app.py", "draft.txt"],
+    } in tutor["changes"]
 
 
 def test_the_combined_command_completes_both_steps(client, teaching_run):
@@ -87,11 +100,20 @@ def test_the_combined_command_completes_both_steps(client, teaching_run):
     assert tutor["explanation"] == "That's the right command."
 
 
-def test_a_miss_reveals_the_combined_command(client, teaching_run):
+def test_a_miss_shows_placeholder_syntax_without_combined_answer(client, teaching_run):
     at_first_add(teaching_run)
-    response = submit(client, teaching_run, "git ad README.md", teaching_run.repository_state,
-                      processed=False, exit_code=1)
-    assert response.data["run"]["tutor"]["example_command"] == "git add README.md app.py"
+    response = submit(
+        client,
+        teaching_run,
+        "git ad README.md",
+        teaching_run.repository_state,
+        processed=False,
+        exit_code=1,
+    )
+    tutor = response.data["run"]["tutor"]
+    assert "example_command" not in tutor
+    assert tutor["command_form"]["usage_form"] == "git add <path>..."
+    assert "README.md" not in str(tutor["needs"])
 
 
 def test_one_file_at_a_time_is_left_alone(client, teaching_run):
@@ -104,25 +126,33 @@ def test_one_file_at_a_time_is_left_alone(client, teaching_run):
 
 
 def test_mutating_wrong_route_never_reveals_an_obsolete_example(client, teaching_run):
-    response = submit(client, teaching_run, "git init -b wrong",
-                      initialized_state(teaching_run.repository_state, branch="wrong"))
+    response = submit(
+        client,
+        teaching_run,
+        "git init -b wrong",
+        initialized_state(teaching_run.repository_state, branch="wrong"),
+    )
     assert response.status_code == 200, response.data
     assert response.data["run"]["tutor"] is None
     assert not PlayerCommandIntroduction.objects.exists()
 
 
 def test_looking_around_is_not_a_mistake(client, teaching_run):
-    response = submit(client, teaching_run, "git status", teaching_run.repository_state,
-                      diagnostic=True)
+    response = submit(
+        client, teaching_run, "git status", teaching_run.repository_state, diagnostic=True
+    )
     assert response.status_code == 200, response.data
     assert response.data["run"]["tutor"]["phase"] == "introduction"
 
 
 def test_next_terminal_command_preserves_unacknowledged_feedback(client, teaching_run):
-    response = submit(client, teaching_run, "git init", initialized_state(teaching_run.repository_state))
+    response = submit(
+        client, teaching_run, "git init", initialized_state(teaching_run.repository_state)
+    )
     old_token = response.data["run"]["tutor"]["completion_token"]
-    response = submit(client, teaching_run, "git status", teaching_run.repository_state,
-                      diagnostic=True)
+    response = submit(
+        client, teaching_run, "git status", teaching_run.repository_state, diagnostic=True
+    )
     assert response.status_code == 200, response.data
     tutor = response.data["run"]["tutor"]
     assert tutor["teaching_key"] == "git-init/current-directory"
@@ -134,9 +164,17 @@ def test_next_terminal_command_preserves_unacknowledged_feedback(client, teachin
 
 
 def test_terminal_correction_updates_pending_wrong_feedback(client, teaching_run):
-    submit(client, teaching_run, "git start", teaching_run.repository_state,
-           processed=False, exit_code=129)
-    response = submit(client, teaching_run, "git init", initialized_state(teaching_run.repository_state))
+    submit(
+        client,
+        teaching_run,
+        "git start",
+        teaching_run.repository_state,
+        processed=False,
+        exit_code=129,
+    )
+    response = submit(
+        client, teaching_run, "git init", initialized_state(teaching_run.repository_state)
+    )
     assert response.status_code == 200, response.data
     assert response.data["run"]["tutor"]["verdict"] == "correct"
     assert teaching_run.counted_action_total == 2
@@ -154,8 +192,14 @@ def test_forgery_is_rejected_before_command_accounting(client, teaching_run):
 
 
 def test_ack_rejects_other_player_and_file_changes(client, teaching_run, django_user_model):
-    response = submit(client, teaching_run, "git start", teaching_run.repository_state,
-                      processed=False, exit_code=129)
+    response = submit(
+        client,
+        teaching_run,
+        "git start",
+        teaching_run.repository_state,
+        processed=False,
+        exit_code=129,
+    )
     token = response.data["run"]["tutor"]["completion_token"]
     owner = teaching_run.player.user
     client.force_authenticate(django_user_model.objects.create_user(username="intruder"))
@@ -168,10 +212,14 @@ def test_ack_rejects_other_player_and_file_changes(client, teaching_run, django_
 
 def test_successful_final_command_keeps_feedback_available_before_outcome(client, teaching_run):
     variant = teaching_run.selected_variant
-    variant.evaluation_spec = {"state_requirements": {"repository_initialized": True},
-                               "completion_policy": {"mode": "rules"}}
+    variant.evaluation_spec = {
+        "state_requirements": {"repository_initialized": True},
+        "completion_policy": {"mode": "rules"},
+    }
     variant.save()
-    response = submit(client, teaching_run, "git init", initialized_state(teaching_run.repository_state))
+    response = submit(
+        client, teaching_run, "git init", initialized_state(teaching_run.repository_state)
+    )
     assert response.status_code == 200, response.data
     assert teaching_run.status == "completed"
     tutor = response.data["run"]["tutor"]

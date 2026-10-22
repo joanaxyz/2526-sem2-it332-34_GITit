@@ -68,7 +68,8 @@
     background var(--motion-normal) var(--ease-out),
     color var(--motion-normal) var(--ease-out),
     box-shadow var(--motion-normal) var(--ease-out),
-    opacity var(--motion-normal) var(--ease-out);
+    opacity var(--motion-normal) var(--ease-out),
+    transform var(--motion-fast) var(--ease-out);
 }
 
 .ui-button:hover,
@@ -79,8 +80,14 @@
   outline: none;
 }
 
+/* Press: the button sinks a pixel and its light dims inward. Each variant keeps
+   its own colour family rather than collapsing to one shared fill. */
 .ui-button:active:not(:disabled) {
+  border-color: var(--control-border-hover);
   background: var(--control-bg-active);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.32);
+  transform: translateY(1px) scale(0.985);
+  transition-duration: 60ms;
 }
 
 .ui-button:focus-visible {
@@ -116,6 +123,13 @@
   box-shadow: var(--control-focus-ring), 0 0 18px rgba(var(--theme-primary-rgb), 0.28);
 }
 
+.ui-button--default:active:not(:disabled) {
+  border-color: var(--control-primary-border);
+  background: var(--control-primary-bg-active);
+  color: var(--control-primary-text);
+  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.28), 0 0 8px rgba(var(--theme-primary-rgb), 0.18);
+}
+
 .ui-button--secondary {
   border-color: var(--panel-border);
   background: var(--surface-raised);
@@ -149,6 +163,11 @@
   border-color: hsl(var(--destructive) / 0.75);
   background: hsl(var(--destructive) / 0.14);
   color: hsl(var(--destructive));
+}
+
+.ui-button--destructive:active:not(:disabled) {
+  border-color: hsl(var(--destructive) / 0.75);
+  background: hsl(var(--destructive) / 0.2);
 }
 
 .ui-button svg,

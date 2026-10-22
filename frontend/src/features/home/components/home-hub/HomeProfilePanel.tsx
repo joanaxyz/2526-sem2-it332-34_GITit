@@ -86,7 +86,7 @@ export function HomeProfilePanel({
 
       <div className="home-rank-view" data-onboarding="profile-ladder">
         <header className="ref-panel-head">
-          Rank ladder <em>every tier, cleared and still locked</em>
+          Rank ladder
         </header>
         {/* The current tier's crest, rating and meter live in the crest above;
             this is only the ladder it sits on. */}

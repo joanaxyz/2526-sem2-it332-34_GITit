@@ -1,0 +1,34 @@
+.mascot-launcher { position: fixed; z-index: var(--z-sticky); width: 76px; height: 104px; }
+/* Hidden while what it opens is showing; its bounds stay for the closing animation. */
+.mascot-launcher[aria-hidden="true"] { visibility: hidden; pointer-events: none; }
+.mascot-launcher__button {
+  display: flex; width: 100%; height: 100%; flex-direction: column; align-items: center;
+  gap: 2px; border: 0; border-radius: 12px; padding: 2px; background: transparent;
+  color: hsl(var(--foreground)); cursor: grab; touch-action: none; user-select: none;
+}
+.mascot-launcher[data-dragging] .mascot-launcher__button { cursor: grabbing; }
+.mascot-launcher__button:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; }
+.mascot-launcher__portrait { display: block; width: 72px; height: 90px; object-fit: contain; pointer-events: none; animation: mascot-launcher-float 3.2s ease-in-out infinite; }
+.mascot-launcher[data-dragging] .mascot-launcher__portrait { animation-play-state: paused; }
+/* Git-It as the main call to action; sizes match FLOATING_LAUNCHER_SIZES in useFloatingPosition.ts. */
+.mascot-launcher[data-size="large"] { width: 128px; height: 180px; }
+.mascot-launcher[data-size="large"] .mascot-launcher__portrait { width: 124px; height: 155px; }
+.mascot-launcher[data-size="large"] .mascot-launcher__caption { padding: 3px 10px; font-size: var(--text-xs); }
+.mascot-launcher__caption { border-radius: 5px; padding: 2px 7px; background: #102133; color: #e8f6fa; font-size: var(--text-2xs); font-weight: 700; line-height: 1.2; white-space: nowrap; }
+.mascot-launcher__button:hover .mascot-launcher__caption { background: #173b58; }
+.mascot-launcher__button.is-tour-destination .mascot-launcher__caption { animation: mascot-launcher-arrive 350ms ease-out; }
+
+/* A small round count pinned to the portrait's shoulder. */
+.mascot-launcher__badge {
+  position: absolute; right: -3px; top: 8px; display: grid; place-items: center;
+  width: 27px; height: 27px; border: 1px solid #6383a4; border-radius: 50%;
+  background: #102133; color: #e8f6fa; font: 600 var(--text-xs) var(--font-mono); cursor: pointer;
+}
+.mascot-launcher__badge:hover { background: #173b58; }
+.mascot-launcher__badge:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; }
+
+@keyframes mascot-launcher-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes mascot-launcher-arrive { from { outline: 5px solid hsl(var(--primary) / 0.4); } to { outline: 0 solid transparent; } }
+@media (prefers-reduced-motion: reduce) {
+  .mascot-launcher__portrait, .mascot-launcher__button.is-tour-destination .mascot-launcher__caption { animation: none; }
+}

@@ -71,7 +71,7 @@ def test_stories_are_not_a_purchasable_kind(db, django_user_model):
 
     response = client.post(
         "/api/shop/catalog/purchase/",
-        {"kind": "story", "slug": "git-it-legacy"},
+        {"kind": "story", "slug": "arcane-spire"},
         format="json",
     )
 
@@ -86,7 +86,7 @@ def test_stories_cannot_be_equipped(db, django_user_model):
 
     response = client.post(
         "/api/player/loadout/companion/",
-        {"kind": "story", "slug": "git-it-legacy"},
+        {"kind": "story", "slug": "arcane-spire"},
         format="json",
     )
 

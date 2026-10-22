@@ -161,43 +161,6 @@
                 }
             }
         },
-        "/api/admin/content/": {
-            "get": {
-                "operationId": "admin_content_retrieve",
-                "description": "Official content definitions: staff-authored (or owner-less) adventures,\nchallenges, and lessons. Create/edit happens in the existing level editor.",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "kind",
-                        "schema": {
-                            "enum": [
-                                "adventure",
-                                "challenge",
-                                "lesson"
-                            ],
-                            "type": "string",
-                            "minLength": 1
-                        },
-                        "description": "* `adventure` - adventure\n* `challenge` - challenge\n* `lesson` - lesson"
-                    }
-                ],
-                "tags": [
-                    "admin"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdminContentListResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
         "/api/admin/economy/adjust/": {
             "post": {
                 "operationId": "admin_economy_adjust_create",
@@ -260,67 +223,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/AdminTransactionListResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/admin/moderation/": {
-            "get": {
-                "operationId": "admin_moderation_retrieve",
-                "description": "Shared player-generated content: public published content definitions.",
-                "tags": [
-                    "admin"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdminModerationListResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/admin/moderation/unpublish/": {
-            "post": {
-                "operationId": "admin_moderation_unpublish_create",
-                "tags": [
-                    "admin"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/AdminModerationUnpublishRequest"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/AdminModerationUnpublishRequest"
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/AdminModerationUnpublishRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdminOkayResponse"
                                 }
                             }
                         },
@@ -883,340 +785,6 @@
                 }
             }
         },
-        "/api/adventure-levels/{level_id}/runs/": {
-            "post": {
-                "operationId": "adventure_levels_runs_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "level_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-levels"
-                ],
-                "responses": {
-                    "201": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/adventure-runs/{run_id}/": {
-            "get": {
-                "operationId": "adventure_runs_retrieve",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            },
-            "delete": {
-                "operationId": "adventure_runs_destroy",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No response body"
-                    }
-                }
-            }
-        },
-        "/api/adventure-runs/{run_id}/files/": {
-            "post": {
-                "operationId": "adventure_runs_files_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFile"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFile"
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFile"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            },
-            "put": {
-                "operationId": "adventure_runs_files_update",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFileRename"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFileRename"
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFileRename"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            },
-            "patch": {
-                "operationId": "adventure_runs_files_partial_update",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/WorkspaceFile"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            },
-            "delete": {
-                "operationId": "adventure_runs_files_destroy",
-                "parameters": [
-                    {
-                        "in": "query",
-                        "name": "path",
-                        "schema": {
-                            "type": "string",
-                            "maxLength": 240
-                        },
-                        "required": true
-                    },
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/adventure-runs/{run_id}/level-library/": {
-            "post": {
-                "operationId": "adventure_runs_level_library_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureLevelLibraryResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/adventure-runs/{run_id}/submit-command/": {
-            "post": {
-                "operationId": "adventure_runs_submit_command_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "run_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventure-runs"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CommandSubmit"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CommandSubmit"
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/CommandSubmit"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureCommandResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
         "/api/adventure-tier-runs/{run_id}/": {
             "get": {
                 "operationId": "adventure_tier_runs_retrieve",
@@ -1571,36 +1139,6 @@
                 }
             }
         },
-        "/api/adventures/{adventure_slug}/runs/": {
-            "post": {
-                "operationId": "adventures_runs_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "adventure_slug",
-                        "schema": {
-                            "type": "string"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "adventures"
-                ],
-                "responses": {
-                    "201": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/AdventureRunResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
         "/api/auth/login/": {
             "post": {
                 "operationId": "auth_login_create",
@@ -1900,419 +1438,6 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/DetailResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/authoring/chapters/": {
-            "get": {
-                "operationId": "authoring_chapters_retrieve",
-                "tags": [
-                    "authoring"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {}
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            },
-            "post": {
-                "operationId": "authoring_chapters_create",
-                "tags": [
-                    "authoring"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "additionalProperties": {}
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "type": "object",
-                                "additionalProperties": {}
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "type": "object",
-                                "additionalProperties": {}
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {}
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/authoring/chapters/{chapter_id}/": {
-            "patch": {
-                "operationId": "authoring_chapters_partial_update",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "chapter_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "authoring"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "type": "object",
-                                "additionalProperties": {}
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "type": "object",
-                                "additionalProperties": {}
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "type": "object",
-                                "additionalProperties": {}
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {}
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            },
-            "delete": {
-                "operationId": "authoring_chapters_destroy",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "chapter_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "authoring"
-                ],
-                "responses": {
-                    "204": {
-                        "description": "No response body"
-                    }
-                }
-            }
-        },
-        "/api/authoring/command-forms/": {
-            "get": {
-                "operationId": "authoring_command_forms_retrieve",
-                "description": "Published command forms an author can attach to a level (introduce/reuse).",
-                "tags": [
-                    "authoring"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "type": "object",
-                                    "additionalProperties": {}
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/authoring/content-definitions/": {
-            "get": {
-                "operationId": "authoring_content_definitions_retrieve",
-                "tags": [
-                    "authoring"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ContentDefinitionListResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            },
-            "post": {
-                "operationId": "authoring_content_definitions_create",
-                "tags": [
-                    "authoring"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ContentDefinitionCreateRequest"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ContentDefinitionCreateRequest"
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/ContentDefinitionCreateRequest"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "201": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ContentDefinition"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/authoring/content-definitions/{definition_id}/": {
-            "get": {
-                "operationId": "authoring_content_definitions_retrieve_2",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "definition_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "authoring"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ContentDefinition"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            },
-            "patch": {
-                "operationId": "authoring_content_definitions_partial_update",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "definition_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "authoring"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/PatchedContentDefinitionUpdateRequest"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/PatchedContentDefinitionUpdateRequest"
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/PatchedContentDefinitionUpdateRequest"
-                            }
-                        }
-                    }
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ContentDefinition"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/authoring/content-definitions/{definition_id}/publish/": {
-            "post": {
-                "operationId": "authoring_content_definitions_publish_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "definition_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "authoring"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ContentDefinition"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/authoring/content-definitions/{definition_id}/remix/": {
-            "post": {
-                "operationId": "authoring_content_definitions_remix_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "definition_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "authoring"
-                ],
-                "responses": {
-                    "201": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ContentDefinition"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/authoring/content-definitions/{definition_id}/test-run/": {
-            "post": {
-                "operationId": "authoring_content_definitions_test_run_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "definition_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "authoring"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ContentTestRunResult"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
-        },
-        "/api/authoring/content-definitions/{definition_id}/validate/": {
-            "post": {
-                "operationId": "authoring_content_definitions_validate_create",
-                "parameters": [
-                    {
-                        "in": "path",
-                        "name": "definition_id",
-                        "schema": {
-                            "type": "integer"
-                        },
-                        "required": true
-                    }
-                ],
-                "tags": [
-                    "authoring"
-                ],
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/ContentValidationResult"
                                 }
                             }
                         },
@@ -2720,6 +1845,84 @@
                                 "schema": {
                                     "type": "object",
                                     "additionalProperties": {}
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
+        "/api/chapters/{chapter_id}/chests/": {
+            "get": {
+                "operationId": "chapters_chests_retrieve",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "chapters"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChapterChestRewards"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "post": {
+                "operationId": "chapters_chests_create",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "chapter_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "chapters"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChapterChestOpen"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChapterChestOpen"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ChapterChestOpen"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ChapterChestRewards"
                                 }
                             }
                         },
@@ -3498,6 +2701,46 @@
                     }
                 }
             }
+        },
+        "/api/tutoring/chat/": {
+            "post": {
+                "operationId": "tutor_chat",
+                "tags": [
+                    "tutoring"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorChatRequest"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorChatRequest"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TutorChatRequest"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TutorChatResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -3712,75 +2955,6 @@
                     "total"
                 ]
             },
-            "AdminContent": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "kind": {
-                        "$ref": "#/components/schemas/AdminContentKindEnum"
-                    },
-                    "slug": {
-                        "type": "string",
-                        "pattern": "^[-a-zA-Z0-9_]+$"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "status": {
-                        "type": "string"
-                    },
-                    "visibility": {
-                        "type": "string"
-                    },
-                    "official_chapter": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/AdminOfficialChapterBrief"
-                            }
-                        ],
-                        "nullable": true
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                },
-                "required": [
-                    "id",
-                    "kind",
-                    "official_chapter",
-                    "slug",
-                    "status",
-                    "title",
-                    "updated_at",
-                    "visibility"
-                ]
-            },
-            "AdminContentKindEnum": {
-                "enum": [
-                    "adventure",
-                    "challenge",
-                    "lesson"
-                ],
-                "type": "string",
-                "description": "* `adventure` - adventure\n* `challenge` - challenge\n* `lesson` - lesson"
-            },
-            "AdminContentListResponse": {
-                "type": "object",
-                "properties": {
-                    "results": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/AdminContent"
-                        }
-                    }
-                },
-                "required": [
-                    "results"
-                ]
-            },
             "AdminEconomyAdjustRequest": {
                 "type": "object",
                 "description": "Reject misspelled or stale fields instead of silently ignoring them.",
@@ -3883,99 +3057,6 @@
                     "end_date",
                     "start_date",
                     "timezone"
-                ]
-            },
-            "AdminModerationContent": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "kind": {
-                        "type": "string"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "owner": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                },
-                "required": [
-                    "id",
-                    "kind",
-                    "owner",
-                    "title",
-                    "updated_at"
-                ]
-            },
-            "AdminModerationListResponse": {
-                "type": "object",
-                "properties": {
-                    "content": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/AdminModerationContent"
-                        }
-                    }
-                },
-                "required": [
-                    "content"
-                ]
-            },
-            "AdminModerationUnpublishRequest": {
-                "type": "object",
-                "description": "Reject misspelled or stale fields instead of silently ignoring them.",
-                "properties": {
-                    "kind": {
-                        "$ref": "#/components/schemas/AdminModerationUnpublishRequestKindEnum"
-                    },
-                    "id": {
-                        "type": "integer",
-                        "minimum": 1
-                    }
-                },
-                "required": [
-                    "id",
-                    "kind"
-                ]
-            },
-            "AdminModerationUnpublishRequestKindEnum": {
-                "enum": [
-                    "content"
-                ],
-                "type": "string",
-                "description": "* `content` - content"
-            },
-            "AdminOfficialChapterBrief": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "title": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "id",
-                    "title"
-                ]
-            },
-            "AdminOkayResponse": {
-                "type": "object",
-                "properties": {
-                    "ok": {
-                        "type": "boolean"
-                    }
-                },
-                "required": [
-                    "ok"
                 ]
             },
             "AdminOverviewEconomy": {
@@ -4580,79 +3661,15 @@
                     "results"
                 ]
             },
-            "AdventureCommandResponse": {
-                "type": "object",
-                "properties": {
-                    "run": {
-                        "$ref": "#/components/schemas/AdventureCommandRunResponse"
-                    },
-                    "solved": {
-                        "type": "boolean"
-                    },
-                    "stdout": {
-                        "type": "string"
-                    },
-                    "stderr": {
-                        "type": "string"
-                    },
-                    "exit_code": {
-                        "type": "integer"
-                    },
-                    "terminal_output": {
-                        "type": "string"
-                    },
-                    "command_classification": {
-                        "type": "string"
-                    },
-                    "step": {
-                        "$ref": "#/components/schemas/RuntimeStepResponse"
-                    },
-                    "command_outcome": {
-                        "type": "object",
-                        "additionalProperties": {}
-                    }
-                },
-                "required": [
-                    "command_classification",
-                    "command_outcome",
-                    "exit_code",
-                    "run",
-                    "solved",
-                    "stderr",
-                    "stdout",
-                    "step",
-                    "terminal_output"
-                ]
-            },
-            "AdventureCommandRunResponse": {
-                "oneOf": [
-                    {
-                        "$ref": "#/components/schemas/AdventureRunResponse"
-                    },
-                    {
-                        "$ref": "#/components/schemas/AdventureRunPatchResponse"
-                    }
-                ]
-            },
-            "AdventureLevelLibraryResponse": {
-                "type": "object",
-                "properties": {
-                    "book": {
-                        "type": "object",
-                        "additionalProperties": {}
-                    },
-                    "run": {
-                        "$ref": "#/components/schemas/AdventureRunResponse"
-                    }
-                },
-                "required": [
-                    "book",
-                    "run"
-                ]
-            },
             "AdventureLevelTierCommandResponse": {
                 "type": "object",
                 "properties": {
+                    "learned_skills": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LearnedSkillResponse"
+                        }
+                    },
                     "run": {
                         "$ref": "#/components/schemas/AdventureLevelTierCommandRunResponse"
                     },
@@ -4815,6 +3832,22 @@
                     "visualization_snapshot"
                 ]
             },
+            "AdventureLevelTierRewardResponse": {
+                "type": "object",
+                "description": "The tier's first-clear GitCoin reward, shown before play.",
+                "properties": {
+                    "coins": {
+                        "type": "integer"
+                    },
+                    "claimed": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "claimed",
+                    "coins"
+                ]
+            },
             "AdventureLevelTierRunResponse": {
                 "type": "object",
                 "properties": {
@@ -4830,6 +3863,9 @@
                         "type": "integer"
                     },
                     "replay": {
+                        "type": "boolean"
+                    },
+                    "transfer": {
                         "type": "boolean"
                     },
                     "stars": {
@@ -4872,6 +3908,9 @@
                     "variant": {
                         "type": "object",
                         "additionalProperties": {}
+                    },
+                    "scenario": {
+                        "$ref": "#/components/schemas/AdventureLevelTierScenarioPositionResponse"
                     },
                     "progress": {
                         "type": "object",
@@ -4917,6 +3956,9 @@
                         "type": "object",
                         "additionalProperties": {},
                         "nullable": true
+                    },
+                    "reward": {
+                        "$ref": "#/components/schemas/AdventureLevelTierRewardResponse"
                     }
                 },
                 "required": [
@@ -4933,7 +3975,9 @@
                     "progress",
                     "replay",
                     "repository_state",
+                    "reward",
                     "scaffolding",
+                    "scenario",
                     "scenario_context",
                     "stars",
                     "status",
@@ -4961,6 +4005,10 @@
                         "nullable": true
                     },
                     "replay": {
+                        "type": "boolean",
+                        "default": false
+                    },
+                    "transfer": {
                         "type": "boolean",
                         "default": false
                     }
@@ -5007,138 +4055,25 @@
                     "visualization_snapshot"
                 ]
             },
-            "AdventureRunPatchResponse": {
+            "AdventureLevelTierScenarioPositionResponse": {
                 "type": "object",
+                "description": "Which of the tier's ordered scenarios the run plays.",
                 "properties": {
-                    "partial": {
-                        "$ref": "#/components/schemas/PartialEnum"
-                    },
-                    "id": {
-                        "type": "integer"
-                    },
-                    "status": {
-                        "$ref": "#/components/schemas/GameplayRunStatus"
-                    },
-                    "current_attempt": {
-                        "type": "object",
-                        "additionalProperties": {}
-                    }
-                },
-                "required": [
-                    "current_attempt",
-                    "id",
-                    "partial",
-                    "status"
-                ]
-            },
-            "AdventureRunResponse": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "status": {
-                        "$ref": "#/components/schemas/GameplayRunStatus"
-                    },
-                    "replay": {
-                        "type": "boolean"
-                    },
-                    "stars": {
-                        "type": "integer"
-                    },
-                    "library_opened": {
-                        "type": "boolean"
-                    },
-                    "is_passed": {
-                        "type": "boolean"
-                    },
-                    "selected_level": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "nullable": true
-                    },
-                    "next_level": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "nullable": true
-                    },
-                    "story": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "nullable": true
-                    },
-                    "chapter_id": {
+                    "index": {
                         "type": "integer",
                         "nullable": true
                     },
-                    "battle_stage": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "nullable": true
-                    },
-                    "current_level_index": {
+                    "total": {
                         "type": "integer"
                     },
-                    "total_levels": {
-                        "type": "integer"
-                    },
-                    "current_wave": {
-                        "type": "integer"
-                    },
-                    "total_waves": {
-                        "type": "integer"
-                    },
-                    "passed": {
-                        "type": "boolean"
-                    },
-                    "mastery": {
-                        "type": "object",
-                        "additionalProperties": {}
-                    },
-                    "completed_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "nullable": true
-                    },
-                    "current_attempt": {
-                        "type": "object",
-                        "additionalProperties": {},
-                        "nullable": true
-                    },
-                    "results": {
-                        "type": "array",
-                        "items": {
-                            "type": "object",
-                            "additionalProperties": {}
-                        }
-                    },
-                    "progress": {
-                        "type": "object",
-                        "additionalProperties": {}
+                    "title": {
+                        "type": "string"
                     }
                 },
                 "required": [
-                    "battle_stage",
-                    "chapter_id",
-                    "completed_at",
-                    "current_attempt",
-                    "current_level_index",
-                    "current_wave",
-                    "id",
-                    "is_passed",
-                    "library_opened",
-                    "mastery",
-                    "next_level",
-                    "passed",
-                    "progress",
-                    "replay",
-                    "results",
-                    "selected_level",
-                    "stars",
-                    "status",
-                    "story",
-                    "total_levels",
-                    "total_waves"
+                    "index",
+                    "title",
+                    "total"
                 ]
             },
             "ChallengeCommandResponse": {
@@ -5493,6 +4428,19 @@
                     "visualization_snapshot"
                 ]
             },
+            "ChapterChestOpen": {
+                "type": "object",
+                "properties": {
+                    "threshold": {
+                        "type": "integer",
+                        "maximum": 100,
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "threshold"
+                ]
+            },
             "ChapterChestReward": {
                 "type": "object",
                 "properties": {
@@ -5506,6 +4454,51 @@
                 "required": [
                     "coins",
                     "threshold"
+                ]
+            },
+            "ChapterChestRewards": {
+                "type": "object",
+                "properties": {
+                    "results": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ChapterChestState"
+                        }
+                    },
+                    "balance": {
+                        "type": "integer"
+                    },
+                    "coins_awarded": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "balance",
+                    "coins_awarded",
+                    "results"
+                ]
+            },
+            "ChapterChestState": {
+                "type": "object",
+                "properties": {
+                    "threshold": {
+                        "type": "integer"
+                    },
+                    "coins": {
+                        "type": "integer"
+                    },
+                    "unlocked": {
+                        "type": "boolean"
+                    },
+                    "claimed": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "claimed",
+                    "coins",
+                    "threshold",
+                    "unlocked"
                 ]
             },
             "ChapterLevelCompletion": {
@@ -5921,6 +4914,9 @@
                     "teaching_key": {
                         "type": "string"
                     },
+                    "help_token": {
+                        "type": "string"
+                    },
                     "run_revision": {
                         "type": "integer"
                     },
@@ -5957,10 +4953,6 @@
                         "type": "string",
                         "nullable": true
                     },
-                    "example_command": {
-                        "type": "string",
-                        "nullable": true
-                    },
                     "completion_token": {
                         "type": "string",
                         "nullable": true
@@ -5988,8 +4980,8 @@
                     "completion_token",
                     "concepts",
                     "context_id",
-                    "example_command",
                     "explanation",
+                    "help_token",
                     "needs",
                     "phase",
                     "run_revision",
@@ -5997,6 +4989,54 @@
                     "title",
                     "verdict"
                 ]
+            },
+            "CommandKnowledgeResponse": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/CommandKnowledgeResponseKindEnum"
+                    },
+                    "command": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "token": {
+                        "type": "string"
+                    },
+                    "syntax": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "when_to_use": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "command",
+                    "id",
+                    "kind",
+                    "syntax",
+                    "text",
+                    "title",
+                    "token",
+                    "when_to_use"
+                ]
+            },
+            "CommandKnowledgeResponseKindEnum": {
+                "enum": [
+                    "command",
+                    "option",
+                    "argument"
+                ],
+                "type": "string",
+                "description": "* `command` - command\n* `option` - option\n* `argument` - argument"
             },
             "CommandSubmit": {
                 "type": "object",
@@ -6032,308 +5072,6 @@
                     "key",
                     "text",
                     "title"
-                ]
-            },
-            "ContentDefinition": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "kind": {
-                        "$ref": "#/components/schemas/KindA5eEnum"
-                    },
-                    "owner_id": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "chapter_id": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "official_chapter_id": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "source_definition_id": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "visibility": {
-                        "$ref": "#/components/schemas/VisibilityEnum"
-                    },
-                    "status": {
-                        "$ref": "#/components/schemas/StatusEnum"
-                    },
-                    "slug": {
-                        "type": "string",
-                        "pattern": "^[-a-zA-Z0-9_]+$"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "summary": {
-                        "type": "string"
-                    },
-                    "tags": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "command_family": {
-                        "type": "string"
-                    },
-                    "difficulty": {
-                        "type": "string"
-                    },
-                    "validation_errors": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/ValidationErrorRow"
-                        }
-                    },
-                    "published_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "nullable": true
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "definition": {
-                        "type": "object",
-                        "additionalProperties": {}
-                    }
-                },
-                "required": [
-                    "chapter_id",
-                    "command_family",
-                    "created_at",
-                    "definition",
-                    "difficulty",
-                    "id",
-                    "kind",
-                    "official_chapter_id",
-                    "owner_id",
-                    "published_at",
-                    "slug",
-                    "source_definition_id",
-                    "status",
-                    "summary",
-                    "tags",
-                    "title",
-                    "updated_at",
-                    "validation_errors",
-                    "visibility"
-                ]
-            },
-            "ContentDefinitionCreateRequest": {
-                "type": "object",
-                "properties": {
-                    "kind": {
-                        "$ref": "#/components/schemas/KindA5eEnum"
-                    },
-                    "visibility": {
-                        "$ref": "#/components/schemas/VisibilityEnum"
-                    },
-                    "slug": {
-                        "type": "string",
-                        "pattern": "^[-a-zA-Z0-9_]+$"
-                    },
-                    "title": {
-                        "type": "string",
-                        "maxLength": 180
-                    },
-                    "summary": {
-                        "type": "string"
-                    },
-                    "tags": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "command_family": {
-                        "type": "string"
-                    },
-                    "difficulty": {
-                        "type": "string"
-                    },
-                    "chapter": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "nullable": true
-                    },
-                    "official_chapter": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "nullable": true
-                    },
-                    "definition": {
-                        "type": "object",
-                        "additionalProperties": {}
-                    }
-                },
-                "required": [
-                    "kind",
-                    "slug",
-                    "title"
-                ]
-            },
-            "ContentDefinitionListResponse": {
-                "type": "object",
-                "properties": {
-                    "results": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/ContentDefinitionSummary"
-                        }
-                    }
-                },
-                "required": [
-                    "results"
-                ]
-            },
-            "ContentDefinitionSummary": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "kind": {
-                        "$ref": "#/components/schemas/KindA5eEnum"
-                    },
-                    "owner_id": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "chapter_id": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "official_chapter_id": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "source_definition_id": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "visibility": {
-                        "$ref": "#/components/schemas/VisibilityEnum"
-                    },
-                    "status": {
-                        "$ref": "#/components/schemas/StatusEnum"
-                    },
-                    "slug": {
-                        "type": "string",
-                        "pattern": "^[-a-zA-Z0-9_]+$"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "summary": {
-                        "type": "string"
-                    },
-                    "tags": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "command_family": {
-                        "type": "string"
-                    },
-                    "difficulty": {
-                        "type": "string"
-                    },
-                    "validation_errors": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/ValidationErrorRow"
-                        }
-                    },
-                    "published_at": {
-                        "type": "string",
-                        "format": "date-time",
-                        "nullable": true
-                    },
-                    "created_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    },
-                    "updated_at": {
-                        "type": "string",
-                        "format": "date-time"
-                    }
-                },
-                "required": [
-                    "chapter_id",
-                    "command_family",
-                    "created_at",
-                    "difficulty",
-                    "id",
-                    "kind",
-                    "official_chapter_id",
-                    "owner_id",
-                    "published_at",
-                    "slug",
-                    "source_definition_id",
-                    "status",
-                    "summary",
-                    "tags",
-                    "title",
-                    "updated_at",
-                    "validation_errors",
-                    "visibility"
-                ]
-            },
-            "ContentTestRunResult": {
-                "type": "object",
-                "properties": {
-                    "kind": {
-                        "$ref": "#/components/schemas/KindA5eEnum"
-                    },
-                    "runtime_id": {
-                        "type": "integer",
-                        "nullable": true
-                    },
-                    "start_path": {
-                        "type": "string",
-                        "nullable": true
-                    },
-                    "pages": {
-                        "type": "array",
-                        "items": {}
-                    }
-                },
-                "required": [
-                    "kind",
-                    "runtime_id"
-                ]
-            },
-            "ContentValidationResult": {
-                "type": "object",
-                "properties": {
-                    "valid": {
-                        "type": "boolean"
-                    },
-                    "errors": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/ValidationErrorRow"
-                        }
-                    }
-                },
-                "required": [
-                    "errors",
-                    "valid"
                 ]
             },
             "DashboardCounts": {
@@ -6885,15 +5623,6 @@
                 "type": "string",
                 "description": "* `shop-purchases` - shop-purchases"
             },
-            "KindA5eEnum": {
-                "enum": [
-                    "adventure",
-                    "challenge",
-                    "lesson"
-                ],
-                "type": "string",
-                "description": "* `adventure` - Adventure\n* `challenge` - Challenge\n* `lesson` - ChapterLesson"
-            },
             "LearnedSkillResponse": {
                 "type": "object",
                 "properties": {
@@ -6921,6 +5650,16 @@
                     },
                     "chapter_title": {
                         "type": "string"
+                    },
+                    "learned_at": {
+                        "type": "string",
+                        "format": "date-time"
+                    },
+                    "knowledge": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CommandKnowledgeResponse"
+                        }
                     }
                 },
                 "required": [
@@ -6928,6 +5667,7 @@
                     "chapter_number",
                     "chapter_title",
                     "id",
+                    "learned_at",
                     "slug",
                     "summary",
                     "title"
@@ -7035,13 +5775,6 @@
                 ],
                 "type": "string",
                 "description": "* `welcome` - Welcome\n* `orientation` - Orientation\n* `stories` - Stories\n* `shop` - Shop\n* `purchase` - Purchase\n* `home` - Home\n* `equip` - Equip\n* `done` - Done"
-            },
-            "PartialEnum": {
-                "enum": [
-                    true
-                ],
-                "type": "boolean",
-                "description": "* `True` - True"
             },
             "PasswordChange": {
                 "type": "object",
@@ -7174,54 +5907,6 @@
                     }
                 }
             },
-            "PatchedContentDefinitionUpdateRequest": {
-                "type": "object",
-                "properties": {
-                    "kind": {
-                        "$ref": "#/components/schemas/KindA5eEnum"
-                    },
-                    "visibility": {
-                        "$ref": "#/components/schemas/VisibilityEnum"
-                    },
-                    "slug": {
-                        "type": "string",
-                        "pattern": "^[-a-zA-Z0-9_]+$"
-                    },
-                    "title": {
-                        "type": "string",
-                        "maxLength": 180
-                    },
-                    "summary": {
-                        "type": "string"
-                    },
-                    "tags": {
-                        "type": "array",
-                        "items": {
-                            "type": "string"
-                        }
-                    },
-                    "command_family": {
-                        "type": "string"
-                    },
-                    "difficulty": {
-                        "type": "string"
-                    },
-                    "chapter": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "nullable": true
-                    },
-                    "official_chapter": {
-                        "type": "integer",
-                        "minimum": 1,
-                        "nullable": true
-                    },
-                    "definition": {
-                        "type": "object",
-                        "additionalProperties": {}
-                    }
-                }
-            },
             "PatchedPlayerPreferences": {
                 "type": "object",
                 "properties": {
@@ -7251,7 +5936,7 @@
                                 "$ref": "#/components/schemas/RateMetric"
                             }
                         ],
-                        "description": "Retry Transfer Accuracy (Modules 3-4): first retries after a failure on a structurally changed variant that complete, over all such retries."
+                        "description": "Retry Transfer Accuracy (Modules 3-4): successful first attempts on reserved, unseen transfer checkpoints over concluded checkpoints. Formal studies include unattempted assignments."
                     },
                     "retry_success_rate": {
                         "allOf": [
@@ -7259,7 +5944,7 @@
                                 "$ref": "#/components/schemas/RateMetric"
                             }
                         ],
-                        "description": "Learner-facing share of runs with a prior run that complete."
+                        "description": "Concluded retries following actual unsuccessful attempts that succeed."
                     },
                     "rtr": {
                         "allOf": [
@@ -7294,6 +5979,9 @@
                     "scr": {
                         "$ref": "#/components/schemas/RateMetric"
                     },
+                    "car": {
+                        "$ref": "#/components/schemas/RateMetric"
+                    },
                     "hlcr": {
                         "$ref": "#/components/schemas/RateMetric"
                     },
@@ -7303,7 +5991,7 @@
                                 "$ref": "#/components/schemas/RateMetric"
                             }
                         ],
-                        "description": "Retry Transfer Accuracy (Modules 3-4): first retries after a failure on a structurally changed variant that complete, over all such retries."
+                        "description": "Retry Transfer Accuracy (Modules 3-4): successful first attempts on reserved, unseen transfer checkpoints over concluded checkpoints. Formal studies include unattempted assignments."
                     },
                     "retry_success_rate": {
                         "allOf": [
@@ -7311,7 +5999,7 @@
                                 "$ref": "#/components/schemas/RateMetric"
                             }
                         ],
-                        "description": "Learner-facing share of runs with a prior run that complete."
+                        "description": "Concluded retries following actual unsuccessful attempts that succeed."
                     },
                     "rtr": {
                         "allOf": [
@@ -7327,12 +6015,63 @@
                 },
                 "required": [
                     "arc",
+                    "car",
                     "hlcr",
                     "number",
                     "retry_success_rate",
                     "rta",
                     "scr",
                     "title"
+                ]
+            },
+            "PerformanceSamples": {
+                "type": "object",
+                "description": "Evidence coverage behind the KPI values; see KPI_METHODOLOGY.md.",
+                "properties": {
+                    "participants": {
+                        "type": "integer"
+                    },
+                    "attempted_tiers": {
+                        "type": "integer",
+                        "description": "Tiers with an outcome: mastered, a concluded run, or commands left idle 7+ days."
+                    },
+                    "in_progress_tiers": {
+                        "type": "integer",
+                        "description": "Opened tiers with no outcome yet; outside the SCR and HLCR denominators."
+                    },
+                    "mastered_tiers": {
+                        "type": "integer"
+                    },
+                    "mastery_missing": {
+                        "type": "integer"
+                    },
+                    "car_scored": {
+                        "type": "integer"
+                    },
+                    "car_missing": {
+                        "type": "integer"
+                    },
+                    "transfer_assigned": {
+                        "type": "integer"
+                    },
+                    "transfer_pending": {
+                        "type": "integer"
+                    },
+                    "transfer_missing": {
+                        "type": "integer"
+                    }
+                },
+                "required": [
+                    "attempted_tiers",
+                    "car_missing",
+                    "car_scored",
+                    "in_progress_tiers",
+                    "mastered_tiers",
+                    "mastery_missing",
+                    "participants",
+                    "transfer_assigned",
+                    "transfer_missing",
+                    "transfer_pending"
                 ]
             },
             "PerformanceSummaryResponse": {
@@ -7349,12 +6088,23 @@
                         "items": {
                             "$ref": "#/components/schemas/PerformanceModule"
                         }
+                    },
+                    "samples": {
+                        "$ref": "#/components/schemas/PerformanceSamples"
+                    },
+                    "transfers": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TransferCheckpoint"
+                        }
                     }
                 },
                 "required": [
                     "completed_sessions",
                     "kpis",
-                    "modules"
+                    "modules",
+                    "samples",
+                    "transfers"
                 ]
             },
             "PhaseEnum": {
@@ -7385,10 +6135,14 @@
                         "nullable": true
                     },
                     "numerator": {
-                        "type": "integer"
+                        "type": "number",
+                        "format": "double"
                     },
                     "denominator": {
                         "type": "integer"
+                    },
+                    "unit": {
+                        "$ref": "#/components/schemas/UnitEnum"
                     }
                 },
                 "required": [
@@ -7496,28 +6250,22 @@
                 "type": "string",
                 "description": "* `repository` - repository\n* `commit` - commit\n* `branch` - branch\n* `head` - head\n* `staging` - staging\n* `working_tree` - working_tree\n* `conflict` - conflict\n* `tag` - tag\n* `remote` - remote\n* `config` - config\n* `stash` - stash\n* `operation` - operation"
             },
-            "RuntimeStepResponse": {
-                "type": "object",
-                "properties": {
-                    "id": {
-                        "type": "integer"
-                    },
-                    "command_text": {
-                        "type": "string"
-                    },
-                    "terminal_output": {
-                        "type": "string"
-                    },
-                    "result_category": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "command_text",
-                    "id",
-                    "result_category",
-                    "terminal_output"
-                ]
+            "ResponseKindEnum": {
+                "enum": [
+                    "answer",
+                    "guarded",
+                    "unavailable"
+                ],
+                "type": "string",
+                "description": "* `answer` - answer\n* `guarded` - guarded\n* `unavailable` - unavailable"
+            },
+            "RoleEnum": {
+                "enum": [
+                    "user",
+                    "assistant"
+                ],
+                "type": "string",
+                "description": "* `user` - user\n* `assistant` - assistant"
             },
             "SessionResponse": {
                 "type": "object",
@@ -7815,16 +6563,6 @@
                     "levels_completed"
                 ]
             },
-            "StatusEnum": {
-                "enum": [
-                    "draft",
-                    "testable",
-                    "published",
-                    "archived"
-                ],
-                "type": "string",
-                "description": "* `draft` - Draft\n* `testable` - Testable\n* `published` - Published\n* `archived` - Archived"
-            },
             "Story": {
                 "type": "object",
                 "properties": {
@@ -7920,6 +6658,14 @@
                     "title"
                 ]
             },
+            "SurfaceEnum": {
+                "enum": [
+                    "home",
+                    "command_guide"
+                ],
+                "type": "string",
+                "description": "* `home` - home\n* `command_guide` - command_guide"
+            },
             "SyntaxPart": {
                 "type": "object",
                 "properties": {
@@ -7934,6 +6680,139 @@
                     "text",
                     "token"
                 ]
+            },
+            "TransferCheckpoint": {
+                "type": "object",
+                "properties": {
+                    "tier_id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "run_id": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "run_id",
+                    "tier_id",
+                    "title"
+                ]
+            },
+            "TutorChatContext": {
+                "type": "object",
+                "properties": {
+                    "surface": {
+                        "$ref": "#/components/schemas/SurfaceEnum"
+                    },
+                    "run_id": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "teaching_key": {
+                        "type": "string",
+                        "maxLength": 160
+                    },
+                    "usage_form": {
+                        "type": "string",
+                        "maxLength": 200
+                    },
+                    "guide_token": {
+                        "type": "string",
+                        "maxLength": 4000
+                    }
+                },
+                "required": [
+                    "surface"
+                ]
+            },
+            "TutorChatRequest": {
+                "type": "object",
+                "properties": {
+                    "message": {
+                        "type": "string",
+                        "maxLength": 4000
+                    },
+                    "context": {
+                        "$ref": "#/components/schemas/TutorChatContext"
+                    },
+                    "history": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TutorChatTurn"
+                        }
+                    }
+                },
+                "required": [
+                    "context",
+                    "message"
+                ]
+            },
+            "TutorChatResponse": {
+                "type": "object",
+                "properties": {
+                    "reply": {
+                        "type": "string"
+                    },
+                    "suggested_topics": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/TutorTopic"
+                        }
+                    },
+                    "response_kind": {
+                        "$ref": "#/components/schemas/ResponseKindEnum"
+                    },
+                    "scenario_related": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "reply",
+                    "response_kind",
+                    "scenario_related",
+                    "suggested_topics"
+                ]
+            },
+            "TutorChatTurn": {
+                "type": "object",
+                "properties": {
+                    "role": {
+                        "$ref": "#/components/schemas/RoleEnum"
+                    },
+                    "text": {
+                        "type": "string",
+                        "maxLength": 6000
+                    }
+                },
+                "required": [
+                    "role",
+                    "text"
+                ]
+            },
+            "TutorTopic": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string"
+                    },
+                    "title": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "id",
+                    "title"
+                ]
+            },
+            "UnitEnum": {
+                "enum": [
+                    "participants"
+                ],
+                "type": "string",
+                "description": "* `participants` - participants"
             },
             "User": {
                 "type": "object",
@@ -7959,21 +6838,6 @@
                     "username"
                 ]
             },
-            "ValidationErrorRow": {
-                "type": "object",
-                "properties": {
-                    "field": {
-                        "type": "string"
-                    },
-                    "message": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "field",
-                    "message"
-                ]
-            },
             "VerdictEnum": {
                 "enum": [
                     "correct",
@@ -7981,14 +6845,6 @@
                 ],
                 "type": "string",
                 "description": "* `correct` - correct\n* `incorrect` - incorrect"
-            },
-            "VisibilityEnum": {
-                "enum": [
-                    "private",
-                    "public"
-                ],
-                "type": "string",
-                "description": "* `private` - Private\n* `public` - Public"
             },
             "WalletSummary": {
                 "type": "object",
