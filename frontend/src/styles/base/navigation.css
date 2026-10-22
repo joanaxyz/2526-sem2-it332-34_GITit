@@ -85,7 +85,6 @@
   display: inline-flex;
   align-items: center;
   align-self: stretch;
-  gap: 0.66rem;
   width: fit-content;
   min-width: 13.5rem;
   padding: 0 1.1rem;
@@ -93,42 +92,13 @@
   color: var(--text-primary);
 }
 
-/* Let the emblem fill its slot without a second circular frame. */
-.app-brand-sigil {
-  position: relative;
-  display: grid;
+/* The supplied artwork includes both the emblem and its lettering. */
+.app-brand-logo {
+  display: block;
   flex: 0 0 auto;
-  width: 2.45rem;
-  height: 2.45rem;
-  place-items: center;
-}
-
-.app-brand-sigil img {
-  width: 100%;
-  height: 100%;
+  width: 9rem;
+  height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 10px rgba(var(--theme-primary-rgb), 0.45));
-}
-
-.app-brand:hover .app-brand-sigil img,
-.app-brand:focus-visible .app-brand-sigil img {
-  filter: drop-shadow(0 0 14px rgba(var(--theme-primary-rgb), 0.65));
-}
-
-.app-brand-copy {
-  display: block;
-  min-width: 0;
-}
-
-.app-brand strong {
-  display: block;
-  /* Cinzel is scoped to this wordmark only - --font-display stays Chakra
-     Petch for every other heading (settings, shop, story-map, etc.). */
-  font-family: 'Cinzel', serif;
-  font-size: 1.42rem;
-  font-weight: 800;
-  line-height: 0.98;
-  letter-spacing: -0.015em;
 }
 
 /* ---------- Nav blade ---------- */
