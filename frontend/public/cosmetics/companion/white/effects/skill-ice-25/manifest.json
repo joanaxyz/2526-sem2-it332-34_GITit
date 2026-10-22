@@ -63,13 +63,13 @@
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/clone.png",
       "placeAnchor": {
         "x": 0.5049,
-        "y": 0.4883
+        "y": 0.4902
       },
       "placeBounds": {
         "left": 0.1719,
         "top": 0.1953,
         "right": 0.9844,
-        "bottom": 1.0
+        "bottom": 0.7773
       }
     },
     "merge": {
@@ -150,14 +150,14 @@
       "generationSource": "white-imagegen-and-derived-raw",
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/config.png",
       "placeAnchor": {
-        "x": 0.5059,
-        "y": 0.5039
+        "x": 0.5039,
+        "y": 0.5
       },
       "placeBounds": {
-        "left": 0.1406,
-        "top": 0.1445,
-        "right": 0.8711,
-        "bottom": 1.0
+        "left": 0.1562,
+        "top": 0.1602,
+        "right": 0.8555,
+        "bottom": 0.8359
       }
     },
     "log": {
@@ -179,14 +179,14 @@
       "generationSource": "white-imagegen-and-derived-raw",
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/log.png",
       "placeAnchor": {
-        "x": 0.5059,
-        "y": 0.5039
+        "x": 0.5039,
+        "y": 0.5
       },
       "placeBounds": {
-        "left": 0.1406,
-        "top": 0.1445,
-        "right": 0.8711,
-        "bottom": 1.0
+        "left": 0.1562,
+        "top": 0.1602,
+        "right": 0.8555,
+        "bottom": 0.8359
       }
     },
     "show": {
@@ -209,13 +209,13 @@
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/show.png",
       "placeAnchor": {
         "x": 0.4961,
-        "y": 0.8828
+        "y": 0.8906
       },
       "placeBounds": {
         "left": 0.2148,
-        "top": 0.3242,
+        "top": 0.3594,
         "right": 0.7852,
-        "bottom": 1.0
+        "bottom": 0.918
       }
     },
     "diff": {
@@ -238,13 +238,13 @@
       "impactStartFrame": 20,
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/diff.png",
       "placeAnchor": {
-        "x": 0.543,
+        "x": 0.5215,
         "y": 0.4844
       },
       "placeBounds": {
         "left": 0.1875,
         "top": 0.1875,
-        "right": 0.9648,
+        "right": 0.9258,
         "bottom": 0.7305
       }
     },
@@ -271,13 +271,13 @@
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/add.png",
       "placeAnchor": {
         "x": 0.4951,
-        "y": 0.4551
+        "y": 0.4482
       },
       "placeBounds": {
         "left": 0.2266,
         "top": 0.1328,
         "right": 0.7734,
-        "bottom": 0.918
+        "bottom": 0.7578
       }
     },
     "commit": {
@@ -299,11 +299,11 @@
       "generationSource": "white-imagegen-and-derived-raw",
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/commit.png",
       "placeAnchor": {
-        "x": 0.5078,
+        "x": 0.5098,
         "y": 0.9219
       },
       "placeBounds": {
-        "left": 0.0664,
+        "left": 0.0781,
         "top": 0.1797,
         "right": 0.9531,
         "bottom": 1.0
@@ -329,14 +329,14 @@
       "impactStartFrame": 16,
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/rm.png",
       "placeAnchor": {
-        "x": 0.5234,
+        "x": 0.5215,
         "y": 0.4941
       },
       "placeBounds": {
-        "left": 0.1445,
+        "left": 0.1484,
         "top": 0.1914,
-        "right": 0.9219,
-        "bottom": 0.8242
+        "right": 0.8516,
+        "bottom": 0.8281
       }
     },
     "check-ignore": {
@@ -393,7 +393,7 @@
       "placeBounds": {
         "left": 0.0586,
         "top": 0.2266,
-        "right": 0.9414,
+        "right": 0.918,
         "bottom": 0.9492
       }
     },
@@ -417,14 +417,14 @@
       "impactStartFrame": 17,
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/branch.png",
       "placeAnchor": {
-        "x": 0.4688,
-        "y": 0.5156
+        "x": 0.4844,
+        "y": 0.4854
       },
       "placeBounds": {
-        "left": 0.0625,
-        "top": 0.1289,
-        "right": 0.8438,
-        "bottom": 1.0
+        "left": 0.125,
+        "top": 0.1797,
+        "right": 0.7969,
+        "bottom": 0.7617
       }
     },
     "switch": {
@@ -446,14 +446,14 @@
       "generationSource": "white-imagegen-and-derived-raw",
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/switch.png",
       "placeAnchor": {
-        "x": 0.4746,
-        "y": 0.8906
+        "x": 0.4727,
+        "y": 0.8828
       },
       "placeBounds": {
-        "left": 0.0391,
-        "top": 0.1484,
-        "right": 0.9258,
-        "bottom": 1.0
+        "left": 0.1016,
+        "top": 0.1875,
+        "right": 0.8672,
+        "bottom": 0.9219
       }
     },
     "checkout": {
@@ -476,14 +476,14 @@
       "impactStartFrame": 20,
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/checkout.png",
       "placeAnchor": {
-        "x": 0.5254,
-        "y": 0.4805
+        "x": 0.5273,
+        "y": 0.4668
       },
       "placeBounds": {
         "left": 0.2227,
-        "top": 0.168,
-        "right": 0.8398,
-        "bottom": 0.7539
+        "top": 0.1602,
+        "right": 0.8359,
+        "bottom": 0.7578
       }
     },
     "merge-base": {
@@ -535,13 +535,13 @@
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/checkout-conflict.png",
       "placeAnchor": {
         "x": 0.5098,
-        "y": 0.4961
+        "y": 0.4922
       },
       "placeBounds": {
         "left": 0.1484,
-        "top": 0.1406,
+        "top": 0.1445,
         "right": 0.875,
-        "bottom": 0.9727
+        "bottom": 0.8633
       }
     },
     "diff-conflict": {
@@ -563,13 +563,13 @@
       "generationSource": "white-imagegen-and-derived-raw",
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/diff-conflict.png",
       "placeAnchor": {
-        "x": 0.5098,
+        "x": 0.5039,
         "y": 0.9297
       },
       "placeBounds": {
-        "left": 0.0586,
-        "top": 0.1367,
-        "right": 0.9492,
+        "left": 0.0664,
+        "top": 0.1484,
+        "right": 0.8906,
         "bottom": 1.0
       }
     },
@@ -622,13 +622,13 @@
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/mergetool.png",
       "placeAnchor": {
         "x": 0.5,
-        "y": 0.5078
+        "y": 0.5059
       },
       "placeBounds": {
-        "left": 0.1758,
-        "top": 0.1289,
-        "right": 0.8867,
-        "bottom": 0.9688
+        "left": 0.1484,
+        "top": 0.1328,
+        "right": 0.9102,
+        "bottom": 0.9102
       }
     },
     "reset": {
@@ -650,13 +650,13 @@
       "generationSource": "white-imagegen-and-derived-raw",
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/reset.png",
       "placeAnchor": {
-        "x": 0.5156,
-        "y": 0.9023
+        "x": 0.5117,
+        "y": 0.9062
       },
       "placeBounds": {
-        "left": 0.0938,
-        "top": 0.1328,
-        "right": 0.875,
+        "left": 0.0977,
+        "top": 0.1484,
+        "right": 0.8672,
         "bottom": 1.0
       }
     },
@@ -685,7 +685,7 @@
       "placeBounds": {
         "left": 0.0586,
         "top": 0.0625,
-        "right": 0.9648,
+        "right": 0.9336,
         "bottom": 0.8945
       }
     },
@@ -739,14 +739,14 @@
       "impactStartFrame": 13,
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/stash.png",
       "placeAnchor": {
-        "x": 0.5088,
+        "x": 0.5107,
         "y": 0.9043
       },
       "placeBounds": {
         "left": 0.1914,
-        "top": 0.1953,
+        "top": 0.1992,
         "right": 0.7852,
-        "bottom": 1.0
+        "bottom": 0.9961
       }
     },
     "cherry-pick": {
@@ -797,14 +797,14 @@
       "generationSource": "white-imagegen-and-derived-raw",
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/remote.png",
       "placeAnchor": {
-        "x": 0.5039,
-        "y": 0.9062
+        "x": 0.502,
+        "y": 0.9023
       },
       "placeBounds": {
         "left": 0.1758,
         "top": 0.1836,
         "right": 0.8477,
-        "bottom": 1.0
+        "bottom": 0.9297
       }
     },
     "fetch": {
@@ -830,8 +830,8 @@
         "y": 0.4883
       },
       "placeBounds": {
-        "left": 0.0391,
-        "top": 0.1133,
+        "left": 0.043,
+        "top": 0.1172,
         "right": 0.9023,
         "bottom": 1.0
       }
@@ -855,13 +855,13 @@
       "generationSource": "white-imagegen-and-derived-raw",
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/pull.png",
       "placeAnchor": {
-        "x": 0.4766,
-        "y": 0.9336
+        "x": 0.4746,
+        "y": 0.9297
       },
       "placeBounds": {
-        "left": 0.0156,
-        "top": 0.0977,
-        "right": 0.9727,
+        "left": 0.0273,
+        "top": 0.1367,
+        "right": 0.8828,
         "bottom": 1.0
       }
     },
@@ -889,7 +889,7 @@
       },
       "placeBounds": {
         "left": 0.125,
-        "top": 0.1484,
+        "top": 0.2812,
         "right": 0.9961,
         "bottom": 0.9219
       }
@@ -913,13 +913,13 @@
       "generationSource": "white-imagegen-and-derived-raw",
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/rebase.png",
       "placeAnchor": {
-        "x": 0.4531,
+        "x": 0.4414,
         "y": 0.9141
       },
       "placeBounds": {
         "left": 0.0195,
         "top": 0.2305,
-        "right": 0.9102,
+        "right": 0.8516,
         "bottom": 1.0
       }
     },
@@ -943,14 +943,14 @@
       "impactStartFrame": 15,
       "rawSrc": "/cosmetics/companion/white/effects/skill-ice-25/_raw/default.png",
       "placeAnchor": {
-        "x": 0.5049,
-        "y": 0.5029
+        "x": 0.5039,
+        "y": 0.5
       },
       "placeBounds": {
-        "left": 0.0859,
-        "top": 0.1133,
-        "right": 0.9727,
-        "bottom": 1.0
+        "left": 0.1172,
+        "top": 0.1406,
+        "right": 0.9375,
+        "bottom": 0.9961
       }
     },
     "tag": {

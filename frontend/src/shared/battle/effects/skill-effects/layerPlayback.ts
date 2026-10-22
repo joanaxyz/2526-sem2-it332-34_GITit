@@ -130,17 +130,15 @@ export async function playProjectileLayer(spec: ProjectileLayerSpec): Promise<vo
   const noseTransform = placeAt(to, size, noseAnchor, orientation)
   const settleTransform = placeAt(impactTo, size, impactAnchor, orientation)
 
-  // Flight: fly frames 0..impactStart-1 from the hand onto the body target,
-  // landing the nose there; if the authored impact is ground-rooted, the final
-  // keyframe plants the upcoming burst on the floor without changing the flight
-  // trajectory.
+  // Keep every flight frame aimed at the body. Moving to the impact anchor
+  // here would bend the projectile toward the floor before the eruption starts.
   node.style.transformOrigin = '50% 50%'
   node.style.transform = launchTransform
   const flight = node.animate(
     [
       { transform: launchTransform, opacity: Math.min(0.96, opacity) },
       { transform: noseTransform, opacity, offset: 0.82 },
-      { transform: settleTransform, opacity },
+      { transform: noseTransform, opacity },
     ],
     { duration: flightMs, easing: 'cubic-bezier(0.2, 0.8, 0.25, 1)', fill: 'forwards' },
   )
@@ -284,13 +282,13 @@ export async function playChargeProjectileLayer(spec: ChargeProjectileLayerSpec)
   await Promise.all([animateFrameRange(node, sheetDef, 0, gatherEnd, gatherMs), finishAnimation(gather, gatherMs)])
   gather.cancel()
 
-  // Travel: fly onto the target.
+  // Travel: land and hold the nose on the body until the impact frames begin.
   spec.onLaunch?.()
   const travel = node.animate(
     [
       { transform: chargeTransform, opacity: 1 },
       { transform: noseTransform, opacity: 1, offset: 0.82 },
-      { transform: impactTransform, opacity: 1 },
+      { transform: noseTransform, opacity: 1 },
     ],
     { duration: travelMs, easing: 'cubic-bezier(0.18, 0.82, 0.24, 1)', fill: 'forwards' },
   )

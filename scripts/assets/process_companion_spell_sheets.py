@@ -1166,6 +1166,37 @@ def frame_cell_boxes(width: int, height: int) -> list[tuple[int, int, int, int]]
     return [(x0, y0, x1, y1) for y0, y1 in y_bounds for x0, x1 in x_bounds]
 
 
+def content_axis_edges(alpha, axis: int, count: int) -> list[int]:
+    """Find nearby gutters before splitting components shared by several frames.
+
+    Generated rows/columns can drift from the requested equal grid. Cutting a
+    connected glow at that grid then gives a crystal's tip to the previous
+    frame. Move ownership seams only when a nearby gutter cuts substantially
+    less visible art. Rendering still uses the original equal-sized cells, so
+    detecting a gutter cannot stretch frames or change their coordinate system.
+    """
+    import numpy as np
+
+    length = alpha.shape[axis]
+    edges = [round(index * length / count) for index in range(count + 1)]
+    projection = (alpha > ALPHA_THRESHOLD).sum(axis=1 - axis)
+    # Score a strip, rather than an isolated clear pixel inside the artwork.
+    coverage = np.convolve(projection, np.ones(3, dtype=np.int64), mode="same")
+    radius = max(1, round(length / count * 0.2))
+    for index in range(1, count):
+        nominal = edges[index]
+        if coverage[nominal] < 16:
+            continue
+        lo = max(1, nominal - radius)
+        hi = min(length - 1, nominal + radius) + 1
+        minimum = coverage[lo:hi].min()
+        if minimum * 5 > coverage[nominal]:
+            continue
+        candidates = np.flatnonzero(coverage[lo:hi] == minimum) + lo
+        edges[index] = int(candidates[np.argmin(abs(candidates - nominal))])
+    return edges
+
+
 def owned_frame_sources(raw_path: Path) -> list[OwnedFrameSource]:
     """Key a whole sheet and assign visible components back to their source frame.
 
@@ -1193,10 +1224,8 @@ def owned_frame_sources(raw_path: Path) -> list[OwnedFrameSource]:
     labels, _count = ndimage.label(component_mask, structure=structure)
     slices = ndimage.find_objects(labels)
     owner_map = np.full(component_mask.shape, -1, dtype=np.int16)
-    x_edges = np.array([cell_boxes[0][0], *[box[2] for box in cell_boxes[:GRID_COLUMNS]]])
-    y_edges = np.array(
-        [cell_boxes[row * GRID_COLUMNS][1] for row in range(GRID_ROWS)] + [cell_boxes[-1][3]]
-    )
+    x_edges = np.array(content_axis_edges(alpha, axis=1, count=GRID_COLUMNS))
+    y_edges = np.array(content_axis_edges(alpha, axis=0, count=GRID_ROWS))
 
     for label, region_slice in enumerate(slices, start=1):
         if region_slice is None:
@@ -1237,7 +1266,8 @@ def owned_frame_sources(raw_path: Path) -> list[OwnedFrameSource]:
             # makes compute_prefit_scale shrink every frame (occasionally to
             # ~10%). A component with no clear majority owner is the same case
             # even when it only joins two adjacent frames. Keep each visible
-            # pixel with its own source cell instead.
+            # pixel with its own source cell, using the detected gutters so a
+            # drifting row/column does not split the body at the nominal grid.
             owner_map[gy[valid], gx[valid]] = frame_ids
         else:
             # A compact component may genuinely spill over one adjacent cell;

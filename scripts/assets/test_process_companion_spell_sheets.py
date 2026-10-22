@@ -17,6 +17,7 @@ from process_companion_spell_sheets import (  # noqa: E402
     clamp_registration_shifts,
     clear_detected_bright_grid_lines,
     clear_frame_edges,
+    content_axis_edges,
     compute_prefit_scale,
     compute_registration_plan,
     measure_place_bounds,
@@ -110,6 +111,48 @@ def test_sheet_wide_connected_component_is_partitioned_by_source_cell(tmp_path: 
         source.source_bbox is None or source.source_bbox[2] - source.source_bbox[0] <= FRAME + 4
         for source in sources
     )
+
+
+@pytest.mark.parametrize("transpose", [False, True], ids=["rows", "columns"])
+def test_drifting_frames_keep_their_tips_when_a_glow_connects_the_row(
+    tmp_path: Path, transpose: bool
+) -> None:
+    sheet = Image.new("RGBA", (FRAME * 5, FRAME * 5), (0, 0, 0, 0))
+    draw = ImageDraw.Draw(sheet)
+    for column in range(5):
+        x = column * FRAME
+        # The third row starts above its nominal y=512 boundary, as in White's
+        # Mergetool. A shared flare joins all five frames into one component.
+        draw.rectangle((x + 64, 490, x + 192, 650), fill=(80, 190, 255, 255))
+    draw.line((64, 560, FRAME * 5 - 64, 560), fill=(80, 190, 255, 255), width=3)
+    if transpose:
+        sheet = sheet.transpose(Image.Transpose.TRANSPOSE)
+    raw_path = tmp_path / "drifting.png"
+    sheet.save(raw_path)
+
+    sources = owned_frame_sources(raw_path)
+
+    for cell in range(5):
+        owner = cell * 5 + 2 if transpose else 10 + cell
+        previous = owner - (1 if transpose else 5)
+        assert sources[previous].image is None
+        bbox = sources[owner].source_bbox
+        assert bbox is not None
+        axis = 0 if transpose else 1
+        assert bbox[axis] <= 490
+        assert bbox[axis + 2] >= 651
+        # Keep the authored grid for normalization instead of resizing each
+        # frame to its newly detected, potentially unequal ownership cell.
+        assert sources[owner].cell_box[axis] == FRAME * 2
+
+
+def test_ownership_seams_stay_on_grid_without_a_clearer_gutter() -> None:
+    import numpy as np
+
+    alpha = np.full((FRAME * 5, FRAME * 5), 255, dtype=np.uint8)
+
+    assert content_axis_edges(alpha, axis=0, count=5) == list(range(0, FRAME * 5 + 1, FRAME))
+    assert content_axis_edges(alpha, axis=1, count=5) == list(range(0, FRAME * 5 + 1, FRAME))
 
 
 def test_generated_bright_grid_is_removed_without_deleting_effect_highlights() -> None:
