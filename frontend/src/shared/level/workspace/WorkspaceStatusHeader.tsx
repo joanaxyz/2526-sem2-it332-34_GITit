@@ -1,7 +1,7 @@
 import { RefreshCcw, X } from 'lucide-react'
 import type { ReactNode } from 'react'
 
-import gitLogoImage from '@/assets/images/git-it-logo.webp'
+import gitLogoImage from '@/assets/images/git-it-logo-arcane.webp'
 import { AudioControls } from '@/shared/audio/AudioControls'
 
 /**
