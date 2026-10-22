@@ -134,12 +134,21 @@ turns, so follow-ups and clarifications refer to earlier answers.
   usage form, and the run's public task is context.
 
 Scenario retrieval is the gate (RAG over public seed fields only). Every learner turn
-in the conversation is checked lexically and against the committed semantic index. A
-match, or an uncertain or unavailable lookup, switches Home into scenario protection:
-teach the ideas, use placeholders, never solve. A scenario pasted earlier keeps later
-turns protected. Workspace help is always protected. Protected replies pass the
-answer guard (`tutoring/services/answer_guard.py`): the matched scenarios' and the
-run's answer fields stay server-side and are never prompted. A reply that names a
+in the conversation is checked lexically and against the committed semantic index.
+Lexical matching reads inline code as plain words, so a task copied from the rendered
+brief matches as well as its Markdown source. A pasted task is a match; close wording
+or a close semantic score is a match only when the turn also names something
+particular to that scenario (a multi-word name its brief marks as code and few briefs
+share, such as `research-log`), because general questions score as close. Home does
+not discuss a match: it replies with a fixed message that asking about scenarios is
+not allowed there, without calling a provider, and leaves that turn and its reply out
+of later turns so the next question stands alone. A close but unnamed, uncertain or
+unavailable lookup switches Home into scenario protection instead: teach the ideas,
+use placeholders, never solve or walk through the task; such a turn keeps later turns
+protected. Workspace help (the command guide's Ask Git-It) is never declined and
+always protected. Protected replies pass the answer guard
+(`tutoring/services/answer_guard.py`): the matched scenarios' and the run's answer
+fields stay server-side and are never prompted. A reply that names a
 task value, writes it into a command, or covers the solution's command sequence is
 regenerated once with a stricter instruction, then replaced by a fixed teaching
 message. Validated replies are cached by prompt digest. Provider attempts use
@@ -157,7 +166,7 @@ Verified terminal feedback, command accounting and rewards retain their owners.
 
 `frontend/src/shared/tutoring/` owns reusable chat presentation (light Markdown:
 paragraphs, code, lists, inline marks) and bounded, sign-in-scoped in-memory
-conversations. Home replies made under scenario protection carry a short caption. HomeLayout composes the floating chat launcher
+conversations. A Home reply declining a scenario carries a short caption. HomeLayout composes the floating chat launcher
 across Dashboard, Modules and Shop. The command guide owns the lifetime of a
 separate chat window, rendered outside its card with a portal. Mascot portraits
 appear beside the chat card (in its header on mobile), in assistant message

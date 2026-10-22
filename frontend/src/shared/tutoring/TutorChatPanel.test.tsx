@@ -205,20 +205,33 @@ describe('shared tutoring surfaces', () => {
     ])
   })
 
-  it('renders light Markdown and marks protected Home replies', async () => {
+  it('renders light Markdown', async () => {
     vi.mocked(tutorApi.chat).mockResolvedValue({
       ...reply,
       reply: 'Use **placeholders**:\n\n```\ngit switch -c <branch>\n```\n\n- one\n- two',
+      response_kind: 'guarded',
+    })
+    render(<HomeTutor />)
+    ask('Explain switching')
+    const answer = await screen.findByRole('article', { name: 'Git-It' })
+    expect(answer).not.toHaveTextContent('Scenario spotted')
+    expect(answer.querySelector('strong')).toHaveTextContent('placeholders')
+    expect(answer.querySelector('pre')).toHaveTextContent('git switch -c <branch>')
+    expect(answer.querySelectorAll('li')).toHaveLength(2)
+  })
+
+  it('marks a Home reply that declined a scenario', async () => {
+    vi.mocked(tutorApi.chat).mockResolvedValue({
+      ...reply,
+      reply: "Asking about GIT it! scenarios isn't allowed here, so I can't help with this one. Ask me another Git question instead.",
       scenario_related: true,
       response_kind: 'guarded',
     })
     render(<HomeTutor />)
     ask('Pasted scenario')
     const answer = await screen.findByRole('article', { name: 'Git-It' })
-    expect(answer).toHaveTextContent('Scenario spotted: explaining, not solving')
-    expect(answer.querySelector('strong')).toHaveTextContent('placeholders')
-    expect(answer.querySelector('pre')).toHaveTextContent('git switch -c <branch>')
-    expect(answer.querySelectorAll('li')).toHaveLength(2)
+    expect(answer).toHaveTextContent('Scenario spotted')
+    expect(answer).toHaveTextContent('Ask me another Git question instead.')
   })
 
   it('does not mark workspace replies, which are always protected', async () => {
