@@ -6,7 +6,7 @@
 .tutor-window[data-cursor] * { cursor: inherit; }
 .tutor-window__speaker { position: absolute; top: 8px; right: calc(100% + 12px); width: 54px; height: 68px; object-fit: contain; touch-action: none; user-select: none; }
 .tutor-window[data-speaker-hidden] .tutor-window__speaker { display: none; }
-.tutor-window[data-compact] :is(.tutor-chat__actions, .tutor-chat__topics) { display: none; }
+.tutor-window[data-compact] .tutor-chat__actions { display: none; }
 html[data-home-tutor-open] .world-mascot { visibility: hidden; }
 
 .tutor-window__panel { position: relative; height: 100%; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--border-subtle); border-radius: 16px; background: hsl(var(--card)); color: var(--text-primary); }
@@ -47,9 +47,6 @@ html[data-home-tutor-open] .world-mascot { visibility: hidden; }
 .tutor-chat__message li + li { margin-top: .25em; }
 .tutor-chat__code { margin: 0 0 1em; padding: .6rem .75rem; overflow-x: auto; border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--surface-raised); font: .8125rem/1.6 var(--font-mono, monospace); white-space: pre; }
 .tutor-chat__message p.tutor-chat__guarded { display: flex; align-items: center; gap: .35rem; margin-bottom: .5em; color: var(--text-secondary); font-size: .75rem; line-height: 1.4; }
-.tutor-chat__topics { display: flex; flex-shrink: 0; gap: .5rem; flex-wrap: wrap; }
-.tutor-chat__topics:empty { display: none; }
-.tutor-chat__topics button { min-height: 36px; padding: .35rem .75rem; border: 1px solid var(--border-subtle); border-radius: var(--radius-pill); background: transparent; color: var(--text-secondary); font: inherit; font-size: .75rem; cursor: pointer; }
 .tutor-chat__composer { display: flex; flex-shrink: 0; gap: .5rem; align-items: flex-end; min-height: 52px; padding: .4rem .625rem; border: 1px solid var(--border-subtle); border-radius: 12px; background: var(--surface-raised); transition: border-color 160ms var(--ease-out); cursor: text; }
 .tutor-chat__composer:focus-within { border-color: hsl(var(--primary) / .5); }
 .tutor-chat__composer textarea { min-width: 0; flex: 1; align-self: center; min-height: 26px; max-height: 160px; resize: none; border: 0; outline: none; padding: 0 .15rem; background: transparent; color: var(--text-primary); font: inherit; }
