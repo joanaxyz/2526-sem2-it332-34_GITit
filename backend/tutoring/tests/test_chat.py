@@ -1,5 +1,6 @@
 import json
 import math
+import re
 import threading
 import time
 from concurrent.futures import Future
@@ -13,7 +14,7 @@ from rest_framework.test import APIClient
 from tutoring.models import PendingCommandIntroduction
 from tutoring.payloads import tutor_payload
 from tutoring.services.answer_guard import guard_for_cases, guard_for_variant
-from tutoring.services.chat import GUARDED_FALLBACK, UNAVAILABLE, chat, conversation
+from tutoring.services.chat import DECLINED, GUARDED_FALLBACK, UNAVAILABLE, chat, conversation
 from tutoring.services.guide_privacy import safe_guide
 from tutoring.services.introductions import SALT, issue_help_token, issue_token
 from tutoring.services.provider_transport import ProviderError
@@ -25,12 +26,12 @@ from tutoring.services.scenario_recognition import (
     Recognition,
     documents,
     recognize,
-    recognize_conversation,
 )
 from tutoring.services.teaching import catalog, form_blocks, guide_key, safe_usage
 
 HOME = {"surface": "home"}
 NESTED_SERVICE = "scenario_bank_extension:init-hard-nested-service"
+RESEARCH_LOG = "scenario_bank:init-hard-research-log"
 STASH_SWITCH = "scenario_bank:v23m-to-main"
 
 
@@ -44,8 +45,23 @@ def offline_providers(settings):
     cache.clear()
 
 
-def unmatched(texts):
-    return Recognition(UNMATCHED)
+def recognized(recognition, only=None):
+    """A `recognize_all` stand-in: every turn, or just the turn `only`, is found so."""
+    return lambda texts: [
+        recognition if only in (None, text) else Recognition(UNMATCHED) for text in texts
+    ]
+
+
+unmatched = recognized(Recognition(UNMATCHED))
+
+
+def copied(markdown):
+    """Brief text the way a learner copies it from the page: the Markdown is gone."""
+    return re.sub(r"[`*]", "", markdown)
+
+
+def brief(case_id):
+    return next(row for row in documents() if row["id"] == case_id)
 
 
 # Recognition: retrieval over public scenario fields decides protection.
@@ -57,13 +73,15 @@ def test_every_seed_task_is_recognized_without_reading_solution_fields():
     assert len({row["id"] for row in rows}) == 399
     assert all(set(row) == {"id", "text", "task"} for row in rows)
     for row in rows:
-        found = recognize("Please solve this: " + row["task"])
-        assert found.status == MATCHED and row["id"] in found.case_ids
+        for task in (row["task"], copied(row["task"])):
+            found = recognize("Please solve this: " + task)
+            assert found.status == MATCHED and row["id"] in found.case_ids
 
 
-def test_semantic_recognition_catches_a_renamed_paraphrase_and_names_the_scenario():
+def test_semantic_recognition_matches_a_paraphrase_that_names_the_scenario():
     vector = [1.0] + [0.0] * 767
-    message = "Set up version tracking here, keep the timeline empty, and label the initial line comet-trail."
+    named = "Give services/billing-api its own version history, first line trunk."
+    renamed = "Set up version tracking here, keep the timeline empty, and label the initial line comet-trail."
     with (
         patch(
             "tutoring.services.scenario_recognition.load_index",
@@ -71,8 +89,10 @@ def test_semantic_recognition_catches_a_renamed_paraphrase_and_names_the_scenari
         ),
         patch("tutoring.services.scenario_recognition.embed", return_value=[vector]) as embed,
     ):
-        assert recognize(message) == Recognition(MATCHED, (NESTED_SERVICE,))
-    embed.assert_called_once_with([message], "RETRIEVAL_QUERY")
+        assert recognize(named) == Recognition(MATCHED, (NESTED_SERVICE,))
+        embed.assert_called_once_with([named], "RETRIEVAL_QUERY")
+        # General questions come this close too, so without a name it is only protected.
+        assert recognize(renamed) == Recognition(UNCERTAIN, (NESTED_SERVICE,))
 
 
 def test_general_questions_are_unmatched_when_retrieval_is_far():
@@ -87,8 +107,15 @@ def test_general_questions_are_unmatched_when_retrieval_is_far():
         assert recognize("What is the difference between merge and rebase?").status == UNMATCHED
 
 
-@pytest.mark.parametrize(("score", "status"), [(0.74, UNCERTAIN), (0.76, MATCHED)])
-def test_a_confident_match_starts_above_general_question_scores(score, status):
+@pytest.mark.parametrize(
+    ("score", "message", "status"),
+    [
+        (0.74, "How do I start history in services/billing-api?", UNCERTAIN),
+        (0.76, "How do I start history in services/billing-api?", MATCHED),
+        (0.76, "How do I undo my last commit?", UNCERTAIN),
+    ],
+)
+def test_a_match_needs_a_close_score_and_a_scenario_name(score, message, status):
     query = [score, math.sqrt(1 - score * score)] + [0.0] * 766
     with (
         patch(
@@ -97,7 +124,18 @@ def test_a_confident_match_starts_above_general_question_scores(score, status):
         ),
         patch("tutoring.services.scenario_recognition.embed", return_value=[query]),
     ):
-        assert recognize("How do I undo my last commit?").status == status
+        assert recognize(message).status == status
+
+
+def test_close_wording_is_a_match_only_when_it_names_the_scenario():
+    named = "How do I initialize only the research-log subfolder as a repository with main as its initial branch?"
+    unnamed = (
+        "How do I initialize only a subfolder as a Git repository with main as its initial branch?"
+    )
+    with patch("tutoring.services.scenario_recognition.embed", side_effect=AssertionError):
+        assert recognize(named) == Recognition(MATCHED, (RESEARCH_LOG,))
+        # Retrieval decides the rest; unavailable here, which stays protective.
+        assert recognize(unnamed).status == UNCERTAIN
 
 
 def test_limited_embeddings_stay_protective_and_retry_later():
@@ -116,11 +154,11 @@ def test_limited_embeddings_stay_protective_and_retry_later():
     assert embed.call_count == 2  # A failed lookup is not memoized.
 
 
-def test_a_scenario_pasted_earlier_keeps_later_turns_protected():
-    task = documents()[0]["task"]
+def test_a_scenario_copied_from_the_page_needs_no_embedding():
+    message = f"{copied(brief(RESEARCH_LOG)['text'])}\n\nhow do i solve this?"
     with patch("tutoring.services.scenario_recognition.embed", side_effect=AssertionError):
-        found = recognize_conversation([task, "ok so what do I type?"])
-    assert found.status == MATCHED and documents()[0]["id"] in found.case_ids
+        found = recognize(message)
+    assert found.status == MATCHED and RESEARCH_LOG in found.case_ids
 
 
 # Answer guard: answer fields are compared server-side, never prompted.
@@ -165,7 +203,7 @@ def test_home_answers_general_questions_in_its_own_words_with_follow_ups():
         {"role": "assistant", "text": "Use `git switch -c feature`."},
     ]
     with (
-        patch("tutoring.services.chat.recognize_conversation", side_effect=unmatched),
+        patch("tutoring.services.chat.recognize_all", side_effect=unmatched),
         patch("tutoring.services.chat.generate", side_effect=provider),
     ):
         reply = chat(None, "What does -c mean there?", HOME, history)
@@ -175,7 +213,55 @@ def test_home_answers_general_questions_in_its_own_words_with_follow_ups():
     assert [turn["role"] for turn in seen["turns"]] == ["user", "assistant", "user"]
 
 
-def test_home_protects_a_pasted_scenario_and_regenerates_a_leaky_draft():
+def test_home_declines_a_scenario_copied_from_the_page_without_a_provider():
+    message = f"{copied(brief(RESEARCH_LOG)['text'])}\n\nhow do i solve this?"
+    with patch("tutoring.services.chat.generate", side_effect=AssertionError):
+        reply = chat(None, message, HOME)
+    assert reply["reply"] == DECLINED
+    assert reply["response_kind"] == "guarded" and reply["scenario_related"] is True
+
+
+def test_a_declined_scenario_stays_out_of_the_next_question():
+    pasted = "Make services/billing-api a repo following convention"
+    history = [
+        {"role": "user", "text": pasted},
+        {"role": "assistant", "text": DECLINED},
+    ]
+    with (
+        patch(
+            "tutoring.services.chat.recognize_all",
+            side_effect=recognized(Recognition(MATCHED, (NESTED_SERVICE,)), only=pasted),
+        ),
+        patch(
+            "tutoring.services.chat.generate", return_value="A branch is a movable pointer."
+        ) as provider,
+    ):
+        reply = chat(None, "What is a branch?", HOME, history)
+    assert reply["response_kind"] == "answer" and reply["scenario_related"] is False
+    assert reply["reply"] == "A branch is a movable pointer."
+    assert provider.call_args.args[1] == [{"role": "user", "text": "What is a branch?"}]
+
+
+def test_a_possible_scenario_keeps_later_turns_protected():
+    earlier = "Make this place track revisions with a line called comet-trail"
+    history = [
+        {"role": "user", "text": earlier},
+        {"role": "assistant", "text": "Repositories record history."},
+    ]
+    with (
+        patch(
+            "tutoring.services.chat.recognize_all",
+            side_effect=recognized(Recognition(UNCERTAIN, (NESTED_SERVICE,)), only=earlier),
+        ),
+        patch("tutoring.services.chat.generate", return_value="Use your own names.") as provider,
+    ):
+        reply = chat(None, "ok so what do I type?", HOME, history)
+    assert reply["response_kind"] == "guarded" and reply["scenario_related"] is False
+    assert "SCENARIO PROTECTION" in provider.call_args.args[0]
+    assert provider.call_args.args[1][0] == {"role": "user", "text": earlier}
+
+
+def test_home_protects_a_possible_scenario_and_regenerates_a_leaky_draft():
     drafts = iter(
         [
             "Run `git init -b trunk services/billing-api`.",
@@ -191,13 +277,13 @@ def test_home_protects_a_pasted_scenario_and_regenerates_a_leaky_draft():
 
     with (
         patch(
-            "tutoring.services.chat.recognize_conversation",
-            return_value=Recognition(MATCHED, (NESTED_SERVICE,)),
+            "tutoring.services.chat.recognize_all",
+            side_effect=recognized(Recognition(UNCERTAIN, (NESTED_SERVICE,))),
         ),
         patch("tutoring.services.chat.generate", side_effect=provider),
     ):
         reply = chat(None, "Make services/billing-api a repo following convention", HOME)
-    assert reply["response_kind"] == "guarded" and reply["scenario_related"] is True
+    assert reply["response_kind"] == "guarded" and reply["scenario_related"] is False
     assert "trunk" not in reply["reply"] and "<branch>" in reply["reply"]
     assert "SCENARIO PROTECTION" in prompts[0]
     assert "previous draft" in prompts[1]
@@ -208,8 +294,8 @@ def test_home_protects_a_pasted_scenario_and_regenerates_a_leaky_draft():
 def test_a_reply_that_keeps_leaking_falls_back_to_teaching():
     with (
         patch(
-            "tutoring.services.chat.recognize_conversation",
-            return_value=Recognition(MATCHED, (NESTED_SERVICE,)),
+            "tutoring.services.chat.recognize_all",
+            side_effect=recognized(Recognition(UNCERTAIN, (NESTED_SERVICE,))),
         ),
         patch("tutoring.services.chat.generate", return_value="Just use trunk."),
     ):
@@ -220,8 +306,8 @@ def test_a_reply_that_keeps_leaking_falls_back_to_teaching():
 def test_uncertain_retrieval_still_answers_but_protected():
     with (
         patch(
-            "tutoring.services.chat.recognize_conversation",
-            return_value=Recognition(UNCERTAIN, ()),
+            "tutoring.services.chat.recognize_all",
+            side_effect=recognized(Recognition(UNCERTAIN, ())),
         ),
         patch(
             "tutoring.services.chat.generate", return_value="A branch is a movable pointer."
@@ -249,7 +335,7 @@ def test_conversation_alternates_and_ends_with_the_learner():
 
 def test_validated_replies_are_reused():
     with (
-        patch("tutoring.services.chat.recognize_conversation", side_effect=unmatched),
+        patch("tutoring.services.chat.recognize_all", side_effect=unmatched),
         patch("tutoring.services.chat.generate", return_value="Staging explained.") as provider,
     ):
         chat(None, "Explain staging", HOME)
@@ -400,22 +486,25 @@ def test_provider_requests_carry_system_turns_and_effort(provider_keys, settings
 # API and guide privacy.
 
 
-def test_home_api_protects_cross_tab_scenario(client):
+def test_home_api_declines_a_cross_tab_scenario(client):
     assert APIClient().post("/api/tutoring/chat/", {}, format="json").status_code == 401
     row = documents()[0]
-    with patch(
-        "tutoring.services.chat.generate", return_value="Run `git init -b main`."
-    ) as provider:
+    with patch("tutoring.services.chat.generate") as provider:
         result = client.post(
             "/api/tutoring/chat/", {"message": row["task"], "context": HOME}, format="json"
         )
     assert result.status_code == 200
     assert result.data["scenario_related"] and result.data["response_kind"] == "guarded"
-    assert result.data["reply"] == GUARDED_FALLBACK
-    assert provider.call_count == 2
+    assert result.data["reply"] == DECLINED
+    provider.assert_not_called()
 
 
-def test_workspace_help_is_always_protected_and_explains_the_guide(client, teaching_run):
+@pytest.mark.parametrize(
+    "found",
+    [Recognition(UNMATCHED), Recognition(MATCHED, (NESTED_SERVICE,))],
+    ids=["unmatched", "recognised-scenario"],
+)
+def test_workspace_help_is_always_protected_and_explains_the_guide(client, teaching_run, found):
     guide = tutor_payload(teaching_run)
     body = {
         "message": "What does the placeholder mean?",
@@ -429,7 +518,7 @@ def test_workspace_help_is_always_protected_and_explains_the_guide(client, teach
         },
     }
     with (
-        patch("tutoring.services.chat.recognize_conversation", side_effect=unmatched),
+        patch("tutoring.services.chat.recognize_all", side_effect=recognized(found)),
         patch(
             "tutoring.services.chat.generate",
             side_effect=["Stage README.md and app.py.", "Each path you name is staged."],
@@ -437,7 +526,8 @@ def test_workspace_help_is_always_protected_and_explains_the_guide(client, teach
     ):
         result = client.post("/api/tutoring/chat/", body, format="json")
     assert result.status_code == 200
-    assert result.data["response_kind"] == "guarded"
+    # The workspace is never declined: a scenario there gets protected help.
+    assert result.data["response_kind"] == "guarded" and result.data["scenario_related"]
     assert result.data["reply"] == "Each path you name is staged."
     system = provider.call_args_list[0].args[0]
     assert "command guide for `git init`" in system and "SCENARIO PROTECTION" in system

@@ -105,9 +105,9 @@ function Message({ entry, home }: { entry: TutorMessage; home: boolean }) {
   return (
     <article className={`tutor-chat__message tutor-chat__message--${entry.role}`} aria-label={fromGitIt ? 'Git-It' : 'You'}>
       <div className="tutor-chat__content" data-tutor-selectable>
-        {/* Home is where a scenario can arrive from another tab; the workspace is always one. */}
+        {/* Home declines a scenario that arrives from another tab; the workspace is always one. */}
         {fromGitIt && home && entry.reply.scenario_related ? (
-          <p className="tutor-chat__guarded"><ShieldCheck size={13} aria-hidden="true" />Scenario spotted: explaining, not solving</p>
+          <p className="tutor-chat__guarded"><ShieldCheck size={13} aria-hidden="true" />Scenario spotted</p>
         ) : null}
         {fromGitIt
           ? <TutorMarkdown text={entry.text} />
