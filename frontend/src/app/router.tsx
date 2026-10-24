@@ -13,6 +13,7 @@ import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage'
 import { HomePage } from '@/features/home/pages/HomePage'
+import { LandingPage } from '@/features/landing/pages/LandingPage'
 import { ChallengeStartPage } from '@/features/challenges/pages/ChallengeStartPage'
 import { TierStartPage } from '@/features/story-map/pages/TierStartPage'
 import { loadTierRunPage } from '@/features/story-map/pages/loadTierRunPage'
@@ -22,7 +23,6 @@ import {
   HOME_ROUTE,
   SHOP_ROUTE,
   STORY_DETAIL_ROUTE,
-  storyPath,
 } from '@/shared/navigation/routes'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
@@ -82,6 +82,8 @@ const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
 
 const appRoutes: RouteObject[] = [
   ...designPreviewRoutes,
+  // The public front door. It forwards a live session to the story map itself.
+  { path: '/', element: <LandingPage /> },
   {
     element: <AuthLayout />,
     children: [
@@ -98,7 +100,6 @@ const appRoutes: RouteObject[] = [
       </Protected>
     ),
     children: [
-      { path: '/', element: <Navigate replace to={storyPath()} /> },
       { path: HOME_ROUTE, element: <HomePage /> },
       // Browsing Home, the story map, and repository-only challenges does not require
       // a companion. Adventure play remains protected below.

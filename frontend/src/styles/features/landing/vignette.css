@@ -1,0 +1,227 @@
+/* ─── Scenario vignette: terminal over a live graph ─────────────────────── */
+
+.landing-vignette {
+  /* Typing takes this long; the graph waits for it before it redraws. */
+  --landing-type: 700ms;
+
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  background: linear-gradient(180deg, rgba(10, 22, 40, 0.9), #080c14 38%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.05), 0 12px 30px rgba(0, 0, 0, 0.4);
+}
+
+.landing-vignette::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto;
+  height: 1px;
+  background: var(--panel-lightbar);
+}
+
+.landing-vignette__bar {
+  display: flex;
+  min-height: var(--workspace-panel-header-height);
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+  padding: 0 var(--workspace-panel-header-inline);
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.landing-vignette__eyebrow {
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.landing-vignette__replay {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.2rem 0.45rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-tertiary);
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  cursor: pointer;
+  transition: color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out);
+}
+
+.landing-vignette__replay:hover {
+  color: hsl(var(--primary));
+  background: var(--control-bg-hover);
+}
+
+.landing-vignette__replay:focus-visible {
+  outline: none;
+  box-shadow: var(--control-focus-ring);
+}
+
+.landing-vignette__terminal {
+  display: grid;
+  align-content: start;
+  gap: var(--space-2);
+  min-height: 15.5rem;
+  padding: var(--space-4) var(--workspace-panel-header-inline);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.landing-vignette__terminal p {
+  margin: 0;
+}
+
+.landing-vignette__command {
+  color: var(--text-primary);
+  white-space: nowrap;
+}
+
+.landing-vignette__command > span[aria-hidden='true'],
+.landing-vignette__command--idle {
+  color: hsl(var(--primary));
+}
+
+.landing-vignette__typed {
+  display: inline-block;
+  max-width: calc(var(--chars) * 1ch);
+  overflow: hidden;
+  vertical-align: bottom;
+  animation: landing-type var(--landing-type) steps(var(--chars)) both;
+}
+
+.landing-vignette__output {
+  color: var(--text-tertiary);
+  animation: landing-fade 220ms var(--ease-out) var(--landing-type) both;
+}
+
+.landing-vignette__caret {
+  display: inline-block;
+  width: 0.55em;
+  height: 1.05em;
+  vertical-align: text-bottom;
+  background: hsl(var(--primary));
+  animation: landing-caret 1s steps(1) infinite;
+}
+
+.landing-vignette__cleared {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-2) !important;
+  color: hsl(var(--success));
+  font-weight: 700;
+  text-shadow: 0 0 12px rgba(var(--theme-primary-rgb), 0.35);
+  animation: landing-fade 320ms var(--ease-out) var(--landing-type) both;
+}
+
+.landing-vignette__graph {
+  padding: var(--space-3) var(--workspace-panel-header-inline) var(--space-4);
+  border-top: 1px solid var(--border-subtle);
+  background: radial-gradient(60% 80% at 60% 50%, rgba(var(--theme-glow-rgb), 0.06), transparent 70%);
+}
+
+.landing-vignette__head {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}
+
+.landing-vignette__head span {
+  color: var(--text-tertiary);
+}
+
+/* ─── The graph itself ──────────────────────────────────────────────────── */
+
+.landing-dag {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 12rem;
+  overflow: visible;
+}
+
+.landing-dag__lane {
+  fill: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  opacity: 0;
+  transition: opacity 300ms var(--ease-out) var(--landing-type);
+}
+
+.landing-dag__edge {
+  fill: none;
+  stroke: rgba(var(--theme-rail-rgb), 0.75);
+  stroke-width: 2.5;
+  stroke-linecap: round;
+  stroke-dasharray: 1;
+  stroke-dashoffset: 1;
+  transition: stroke-dashoffset 480ms var(--ease-out) var(--landing-type);
+}
+
+.landing-dag__node {
+  fill: #080c14;
+  stroke: hsl(var(--primary));
+  stroke-width: 2.5;
+  opacity: 0;
+  transform: scale(0.4);
+  transform-box: fill-box;
+  transform-origin: center;
+  transition:
+    opacity 260ms var(--ease-out) calc(var(--landing-type) + 240ms),
+    transform 360ms cubic-bezier(0.34, 1.56, 0.64, 1) calc(var(--landing-type) + 240ms);
+}
+
+.landing-dag__node--merge {
+  fill: rgba(var(--theme-primary-rgb), 0.28);
+}
+
+.landing-dag__node--merge.is-on {
+  filter: drop-shadow(0 0 6px rgba(var(--theme-primary-rgb), 0.6));
+}
+
+.landing-dag__lane.is-on,
+.landing-dag__node.is-on {
+  opacity: 1;
+}
+
+.landing-dag__node.is-on {
+  transform: scale(1);
+}
+
+.landing-dag__edge.is-on {
+  stroke-dashoffset: 0;
+}
+
+.landing-dag__head {
+  transition: transform 520ms var(--ease-out) var(--landing-type);
+}
+
+.landing-dag__head circle {
+  fill: none;
+  stroke: rgba(var(--theme-primary-rgb), 0.6);
+  stroke-width: 1.5;
+  stroke-dasharray: 3 3;
+}
+
+@keyframes landing-type {
+  from { max-width: 0; }
+}
+
+@keyframes landing-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes landing-caret {
+  50% { opacity: 0; }
+}
