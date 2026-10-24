@@ -4,6 +4,7 @@ import { HomeCompanionAnnouncement } from '@/features/home/components/home-hub/H
 import { HomeProfilePanel } from '@/features/home/components/home-hub/HomeProfilePanel'
 import { HomeKnowledgeMascot } from '@/features/home/components/home-hub/HomeKnowledgeMascot'
 import type { CompanionPresentation } from '@/features/home/components/home-hub/companionPresentation'
+import { useCompanionPreview } from '@/features/home/components/home-hub/useCompanionPreview'
 import type { HomeSummary } from '@/features/home/types'
 import { useLearnedSkills } from '@/features/skills/hooks/useLearnedSkills'
 import type { StatsSummary } from '@/features/stats/types'
@@ -24,6 +25,7 @@ export function HomeProfileWorkspace({
   companion,
 }: HomeProfileWorkspaceProps) {
   const { data: skills, isLoading: skillsLoading } = useLearnedSkills()
+  const { shownCompanion, previewCompanion } = useCompanionPreview(companion)
 
   return (
     <>
@@ -36,12 +38,12 @@ export function HomeProfileWorkspace({
           home={home}
           stats={stats}
           playerName={playerName}
-          companion={companion}
+          companion={shownCompanion}
         />
-        <HomeCompanionRoster />
+        <HomeCompanionRoster onSelect={previewCompanion} />
         <HomeCombatShowcase
-          key={companion.status === 'ready' ? companion.slug : companion.status}
-          companion={companion}
+          key={shownCompanion.status === 'ready' ? shownCompanion.slug : shownCompanion.status}
+          companion={shownCompanion}
           skills={skills}
           skillsLoading={skillsLoading}
         />
