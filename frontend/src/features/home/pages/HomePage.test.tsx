@@ -12,6 +12,7 @@ const mocks = vi.hoisted(() => ({
   homeSummary: vi.fn(),
   statsSummary: vi.fn(),
   statsActivity: vi.fn(),
+  assetsReady: true,
 }))
 
 vi.mock('@/features/home/api/homeApi', () => ({
@@ -23,6 +24,10 @@ vi.mock('@/features/stats/api/statsApi', () => ({
     summary: mocks.statsSummary,
     activity: mocks.statsActivity,
   },
+}))
+
+vi.mock('@/features/home/hooks/useHomeAssetGate', () => ({
+  useHomeAssetGate: () => mocks.assetsReady,
 }))
 
 vi.mock('@/shared/auth/useAuth', () => ({
@@ -53,6 +58,7 @@ function renderPage(entry = '/home') {
 
 describe('HomePage fetching', () => {
   beforeEach(() => {
+    mocks.assetsReady = true
     mocks.homeSummary.mockResolvedValue(richHomeFixture)
     mocks.statsSummary.mockResolvedValue(richStatsFixture)
     mocks.statsActivity.mockImplementation(async (window: 'week' | 'month' | 'year') => ({
@@ -89,5 +95,16 @@ describe('HomePage fetching', () => {
     expect(mocks.statsActivity).toHaveBeenCalledOnce()
     expect(mocks.statsActivity).toHaveBeenCalledWith('year')
     expect(screen.getByText('12 activity buckets')).toBeInTheDocument()
+  })
+
+  it('holds the loading screen until the companion, spellbook and art are ready', async () => {
+    mocks.assetsReady = false
+    renderPage()
+
+    await waitFor(() => expect(mocks.statsSummary).toHaveBeenCalled())
+    // The summary has resolved, yet Home stays behind the loader.
+    await new Promise((resolve) => setTimeout(resolve, 20))
+    expect(screen.getByRole('status', { name: 'Loading home' })).toBeInTheDocument()
+    expect(screen.queryByTestId('home-hub')).not.toBeInTheDocument()
   })
 })

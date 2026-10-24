@@ -4,6 +4,8 @@ import { useSearchParams } from 'react-router-dom'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { homeApi } from '@/features/home/api/homeApi'
 import { HomeHubView } from '@/features/home/components/HomeHubView'
+import { homeViewFromParam } from '@/features/home/components/home-hub/homeViews'
+import { useHomeAssetGate } from '@/features/home/hooks/useHomeAssetGate'
 import { statsApi } from '@/features/stats/api/statsApi'
 import {
   DEFAULT_ACTIVITY_WINDOW,
@@ -39,12 +41,16 @@ export function HomePage() {
     staleTime: 5 * 60 * 1000,
     placeholderData: keepPreviousData,
   })
+  const assetsReady = useHomeAssetGate({ view: homeViewFromParam(searchParams.get('view')) })
   const user = useAuthStore((state) => state.user)
 
-  if (home.isLoading || stats.isLoading) {
+  // Home opens whole: its own data first, then the companion, spellbook and
+  // the art they paint, so no panel fills in after the page is on screen.
+  const summaryLoaded = Boolean(home.data && stats.data)
+  if (home.isLoading || stats.isLoading || (summaryLoaded && !assetsReady)) {
     return (
       <LoadingScreen
-        description="Pulling your rank, stats, and achievements."
+        description="Pulling your rank, companion, spellbook, and stats."
         label="Loading home"
       />
     )
