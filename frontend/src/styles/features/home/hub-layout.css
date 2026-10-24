@@ -126,6 +126,10 @@
   object-fit: contain;
   object-position: bottom left;
   filter: drop-shadow(0 0 22px rgba(var(--theme-primary-rgb), 0.18));
+  /* The name and title overlap the portrait's foot; fading it out puts them on
+     the panel instead of on the companion's (often blue) robes. */
+  -webkit-mask-image: linear-gradient(to bottom, #000 calc(100% - 8rem), transparent);
+          mask-image: linear-gradient(to bottom, #000 calc(100% - 8rem), transparent);
 }
 
 .home-rank-badge {
@@ -199,12 +203,14 @@
   font-family: var(--font-display);
   font-size: 1.85rem;
   line-height: 1.05;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.85), 0 0 14px rgb(0 0 0 / 0.7);
 }
 
 .home-profile-name span {
-  color: rgb(var(--theme-primary-rgb));
+  color: color-mix(in srgb, rgb(var(--theme-primary-rgb)) 55%, #fff);
   font-size: 1rem;
   font-weight: 760;
+  text-shadow: 0 1px 2px rgb(0 0 0 / 0.85), 0 0 12px rgb(0 0 0 / 0.7);
 }
 
 /* The two counts under the crest were a card inside a card: one hairline rule

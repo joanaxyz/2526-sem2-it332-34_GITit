@@ -16,11 +16,16 @@ function companionAvatar(slug: string, fallback?: string) {
   return sprites?.avatar?.src ?? sprites?.portrait?.src ?? fallback
 }
 
+type HomeCompanionRosterProps = {
+  /** Called when a roster entry is picked, so the showcase can preview it. */
+  onSelect?: (slug: string) => void
+}
+
 /**
  * Picking who fights beside you. This lives in Profile because it answers the
  * same question as the rank badge above it: who am I playing as right now.
  */
-export function HomeCompanionRoster() {
+export function HomeCompanionRoster({ onSelect }: HomeCompanionRosterProps = {}) {
   const queryClient = useQueryClient()
   const catalog = useQuery(shopCatalogQueryOptions())
   const equip = useMutation({
@@ -35,7 +40,8 @@ export function HomeCompanionRoster() {
     .filter(hasLocalDefinition)
     .map(toDisplayItem)
     .filter((item) => item.owned)
-  const selected = owned.find((item) => item.slug === selectedSlug) ?? owned[0]
+  const selected =
+    owned.find((item) => item.slug === selectedSlug) ?? owned.find((item) => item.active) ?? owned[0]
 
   return (
     <section className="home-roster-panel" aria-label="Companion roster">
@@ -76,7 +82,10 @@ export function HomeCompanionRoster() {
                   aria-selected={companion.slug === selected?.slug}
                   className="home-roster-item"
                   data-active={companion.slug === selected?.slug}
-                  onClick={() => setSelectedSlug(companion.slug)}
+                  onClick={() => {
+                    setSelectedSlug(companion.slug)
+                    onSelect?.(companion.slug)
+                  }}
                 >
                   <span>{avatar ? <img src={avatar} alt="" loading="lazy" /> : null}</span>
                   <strong>{companion.label}</strong>
