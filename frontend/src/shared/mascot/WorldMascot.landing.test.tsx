@@ -72,6 +72,23 @@ describe('page-wide mascot landings', () => {
     expect(actor.style.transform).toContain('translate(608px, 250px)')
   })
 
+  it('perches on top of a clicked button and keeps its pose when the button is clicked again', () => {
+    reduced = false
+    boxes.spell = new DOMRect(600, 420, 96, 90)
+    const { actor } = setup()
+    const spell = document.createElement('button')
+    spell.dataset.box = 'spell'
+    spell.textContent = 'git commit'
+    document.querySelector('main')!.append(spell)
+    fireEvent.pointerUp(spell, { button: 0, clientX: 620, clientY: 490 })
+    advance(6000)
+    expect(actor).toHaveAttribute('data-pose', 'idle')
+    expect(actor.style.transform).toContain('translate(648px, 420px)')
+    fireEvent.pointerUp(spell, { button: 0, clientX: 680, clientY: 470 })
+    expect(actor).toHaveAttribute('data-pose', 'idle')
+    expect(actor.style.transform).toContain('translate(648px, 420px)')
+  })
+
   it('walks and runs along ledges, then takes off and lands on a different rail', () => {
     reduced = false
     const { actor } = setup()

@@ -131,10 +131,14 @@ export function WorldMascot({ surface, knowledge = [], contextKey = surface }: {
     function command(x: number, y: number, perch?: MascotPlatform | null) {
       const { bounds, top, bottom } = visibleBounds()
       const platform = perch ?? platformNear(mascotPlatforms(parent!, bounds), x, y)
-      destination = {
+      const next = {
         x: perch ? (perch.left + perch.right) / 2 : platform ? Math.max(platform.left + 18, Math.min(platform.right - 18, x)) : Math.max(40, Math.min(bounds.width - 40, x)),
         y: platform ? platform.y : Math.max(top, Math.min(bottom, y)),
       }
+      // Repeat clicks on the spot it already holds or is heading to keep the current animation.
+      const heading = grounded ?? landingOn
+      if (platform && heading?.element === platform.element && Math.abs(next.x - (phase === 'rest' ? point : destination).x) <= 2) return
+      destination = next
       const edge = platform?.element.getBoundingClientRect()
       landingOn = platform && edge ? { element: platform.element, ratio: (destination.x + bounds.left - edge.left) / edge.width } : null
       setFlip(destination.x < point.x)
@@ -155,7 +159,7 @@ export function WorldMascot({ surface, knowledge = [], contextKey = surface }: {
       const target = event.target
       if (event.button !== 0 || !(target instanceof Element) || target.closest('.world-mascot, input, textarea, select, [role="dialog"]') || !parent!.contains(target)) return
       const bounds = host!.getBoundingClientRect()
-      const perch = mascotPerch(mascotPlatforms(parent!, bounds), target)
+      const perch = mascotPerch(parent!, bounds, target)
       command(event.clientX - bounds.left, event.clientY - bounds.top, perch)
     }
     function activateNode(event: MouseEvent) {

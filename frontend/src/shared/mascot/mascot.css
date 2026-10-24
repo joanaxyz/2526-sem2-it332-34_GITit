@@ -1,4 +1,5 @@
 .world-mascot { position: fixed; inset: 0; pointer-events: none; z-index: var(--z-mascot); }
+:root[data-world-mascot-hidden] .world-mascot { visibility: hidden; }
 .world-mascot-actor {
   position: absolute; left: 0; top: 0; width: 64px; height: 80px; padding: 0; border: 0;
   background: transparent; transform: translate(-50%, -100%); pointer-events: auto;
