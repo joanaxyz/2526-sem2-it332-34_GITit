@@ -204,7 +204,7 @@ export function SettingsPage() {
               <label><span>New password</span><input type="password" autoComplete="new-password" {...passwordForm.register('password')} />{passwordForm.formState.errors.password ? <small>{passwordForm.formState.errors.password.message}</small> : null}</label>
               <label><span>Confirm new password</span><input type="password" autoComplete="new-password" {...passwordForm.register('password_confirm')} />{passwordForm.formState.errors.password_confirm ? <small>{passwordForm.formState.errors.password_confirm.message}</small> : null}</label>
               {passwordMutation.isError && passwordServerFields.length === 0 ? <p className="settings-error">{passwordMutation.error.message}</p> : null}
-              <button type="submit" className="settings-primary-action" disabled={passwordMutation.isPending}><Save aria-hidden="true" />{passwordMutation.isPending ? 'Updating' : 'Update password'}</button>
+              <button type="submit" className="settings-primary-action ui-drawn-plate" disabled={passwordMutation.isPending}><Save aria-hidden="true" />{passwordMutation.isPending ? 'Updating' : 'Update password'}</button>
             </form>
           </div>
         </section>

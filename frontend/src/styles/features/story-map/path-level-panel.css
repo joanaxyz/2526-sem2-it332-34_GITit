@@ -287,7 +287,7 @@
   justify-content: center;
   height: 1.7rem;
   padding: 0 0.7rem;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.34);
+  border: 1px solid transparent; /* drawn by .ui-drawn-outline / .ui-drawn-plate */
   border-radius: var(--radius-pill);
   background: transparent;
   color: rgba(232, 246, 250, 0.88);
@@ -298,23 +298,27 @@
     box-shadow var(--motion-fast) ease;
 }
 
+/* The next move's action carries .ui-drawn-plate; the row's hover lights it
+   through the plate properties since the span itself is rarely hovered. */
 .story-level-tier-row[data-next] .story-level-tier-row-action {
-  border-color: var(--control-primary-border);
-  background: var(--control-primary-bg);
+  border-color: transparent;
+  background: transparent;
   color: var(--control-primary-text);
-  box-shadow: var(--control-primary-shadow);
 }
 
 .story-level-tier-row:not(:disabled):hover .story-level-tier-row-action,
 .story-level-tier-row:focus-visible .story-level-tier-row-action {
-  border-color: rgba(var(--theme-primary-rgb), 0.68);
-  background: rgba(var(--theme-primary-rgb), 0.14);
+  --ui-outline-ink: rgba(var(--theme-primary-rgb), 0.9);
+  --ui-plate-boil: ui-plate-ink-boil;
 }
 
 .story-level-tier-row[data-next]:not(:disabled):hover .story-level-tier-row-action,
 .story-level-tier-row[data-next]:focus-visible .story-level-tier-row-action {
-  background: var(--control-primary-bg-hover);
-  box-shadow: 0 0 18px rgba(var(--theme-primary-rgb), 0.34);
+  --ui-plate-fill: var(--control-primary-bg-hover);
+  --ui-plate-glow: 0 0 14px rgba(var(--theme-primary-rgb), 0.42);
+  --ui-plate-boil: ui-plate-ink-boil;
+  border-color: transparent;
+  background: transparent;
 }
 
 .story-level-tier-row-lock {

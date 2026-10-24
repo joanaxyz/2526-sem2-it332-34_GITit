@@ -40,7 +40,7 @@ export function ForgotPasswordForm() {
         {form.formState.errors.email ? <small className="auth-error">{form.formState.errors.email.message}</small> : null}
       </label>
       {mutation.isError ? <p className="auth-error-box">{mutation.error.message}</p> : null}
-      <button type="submit" className="auth-submit" disabled={mutation.isPending}>
+      <button type="submit" className="auth-submit ui-drawn-plate" disabled={mutation.isPending}>
         {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <Mail aria-hidden="true" />}
         {mutation.isPending ? 'Sending reset link' : 'Send reset link'}
       </button>

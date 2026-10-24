@@ -153,7 +153,7 @@ export function LoginForm() {
         </div>
       ) : null}
 
-      <button type="submit" className="auth-submit" disabled={mutation.isPending || isLocked}>
+      <button type="submit" className="auth-submit ui-drawn-plate" disabled={mutation.isPending || isLocked}>
         {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <LogIn data-icon="inline-start" />}
         {mutation.isPending ? 'Signing in' : 'Sign in'}
       </button>
