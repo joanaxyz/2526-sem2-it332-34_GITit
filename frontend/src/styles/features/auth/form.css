@@ -177,6 +177,38 @@
   width: 100%;
 }
 
+.auth-code-input {
+  height: 3.5rem;
+  /* Letter-spacing trails the last digit; pad the left to keep the code centred. */
+  padding-left: calc(0.95rem + 0.45em);
+  font-family: var(--font-mono);
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: 0.45em;
+  text-align: center;
+}
+
+.auth-text-button {
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: rgb(var(--theme-primary-rgb));
+  cursor: pointer;
+  font: inherit;
+  font-weight: 780;
+  padding: 0;
+}
+
+.auth-text-button:disabled {
+  color: var(--text-secondary);
+  cursor: default;
+}
+
+.auth-text-button:focus-visible {
+  outline: none;
+  box-shadow: var(--control-focus-ring);
+}
+
 .auth-alt-link {
   margin: 0;
   color: var(--text-secondary);

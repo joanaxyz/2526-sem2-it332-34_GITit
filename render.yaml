@@ -171,11 +171,17 @@ services:
       - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
 
-      # Email is deliberately disabled for this disposable preview.
+      # Free web services block outbound SMTP ports, so password emails go
+      # through Brevo's HTTPS API. No domain is needed: verify one sender
+      # address in Brevo (Senders, Domains & Dedicated IPs > Senders) and
+      # set it as DEFAULT_FROM_EMAIL, e.g. GIT it! <your-sender@gmail.com>.
+      # Set both secrets in the Render dashboard; never commit the API key.
       - key: EMAIL_BACKEND
-        value: django.core.mail.backends.dummy.EmailBackend
+        value: anymail.backends.brevo.EmailBackend
+      - key: BREVO_API_KEY
+        sync: false
       - key: DEFAULT_FROM_EMAIL
-        value: GIT it! <no-reply@example.com>
+        sync: false
       - key: PASSWORD_RESET_TIMEOUT
         value: "3600"
       - key: API_VERSION

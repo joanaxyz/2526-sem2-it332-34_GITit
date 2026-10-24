@@ -10,6 +10,9 @@ from rest_framework_simplejwt.tokens import RefreshToken
 from accounts.serializers import (
     AccessTokenResponseSerializer,
     DetailResponseSerializer,
+    EmailVerificationConfirmSerializer,
+    EmailVerificationRequiredSerializer,
+    EmailVerificationResendSerializer,
     LoginSerializer,
     PasswordChangeSerializer,
     PasswordResetConfirmSerializer,
@@ -20,6 +23,7 @@ from accounts.serializers import (
     UserSerializer,
 )
 from accounts.services import (
+    EmailVerificationService,
     PasswordResetService,
     TokenBlacklistService,
     TokenService,
@@ -50,7 +54,10 @@ class RegisterAPIView(APIView):
 class LoginAPIView(APIView):
     permission_classes = [AllowAny, HasTrustedWebClientHeader]
 
-    @extend_schema(request=LoginSerializer, responses={200: SessionResponseSerializer})
+    @extend_schema(
+        request=LoginSerializer,
+        responses={200: SessionResponseSerializer, 403: EmailVerificationRequiredSerializer},
+    )
     def post(self, request):
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
@@ -93,6 +100,19 @@ class LoginAPIView(APIView):
                 status=status.HTTP_401_UNAUTHORIZED,
             )
         token_service.clear_failed_login(identifier=identifier, ip_address=ip_address)
+        verification = EmailVerificationService()
+        if verification.is_pending(user):
+            # The password was right, so naming the account's email is safe and
+            # lets the client open the code screen for it.
+            verification.send_if_no_live_code(user)
+            return Response(
+                {
+                    "detail": "Confirm your email to finish creating your account.",
+                    "code": "email_unverified",
+                    "email": user.email,
+                },
+                status=status.HTTP_403_FORBIDDEN,
+            )
         tokens = token_service.issue_for_user(user, request=request)
         response = Response({"access": tokens.access, "user": UserSerializer(user).data})
         set_refresh_cookie(response, tokens.refresh)
@@ -172,6 +192,54 @@ class PasswordResetConfirmAPIView(APIView):
             )
         service.reset(user=user, password=serializer.validated_data["password"])
         return Response({"detail": "Password reset successfully. You can now sign in."})
+
+
+class EmailVerificationConfirmAPIView(APIView):
+    permission_classes = [AllowAny, HasTrustedWebClientHeader]
+    throttle_scope = "auth_email_verification"
+
+    @extend_schema(
+        request=EmailVerificationConfirmSerializer,
+        responses={
+            200: SessionResponseSerializer,
+            400: OpenApiResponse(description="Incorrect, expired, or spent code"),
+        },
+    )
+    def post(self, request):
+        serializer = EmailVerificationConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        service = EmailVerificationService()
+        user = service.confirm(
+            email=serializer.validated_data["email"],
+            code=serializer.validated_data["code"],
+        )
+        if user is None:
+            return Response(
+                {"detail": service.invalid_code_message},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        # The code proves the inbox, so the player goes straight into the game
+        # instead of retyping the password they set a minute ago.
+        tokens = TokenService().issue_for_user(user, request=request)
+        response = Response({"access": tokens.access, "user": UserSerializer(user).data})
+        set_refresh_cookie(response, tokens.refresh)
+        return response
+
+
+class EmailVerificationResendAPIView(APIView):
+    permission_classes = [AllowAny, HasTrustedWebClientHeader]
+    throttle_scope = "auth_email_verification_resend"
+
+    @extend_schema(
+        request=EmailVerificationResendSerializer,
+        responses={200: DetailResponseSerializer},
+    )
+    def post(self, request):
+        serializer = EmailVerificationResendSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        service = EmailVerificationService()
+        service.resend(email=serializer.validated_data["email"])
+        return Response({"detail": service.resend_message})
 
 
 class PasswordChangeAPIView(APIView):

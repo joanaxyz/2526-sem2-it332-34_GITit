@@ -24,6 +24,14 @@ class Command(BaseCommand):
                     "SECURE_SSL_REDIRECT is enabled without trusted proxy headers. "
                     "This is correct only when Django terminates TLS directly."
                 )
+            if (
+                settings.EMAIL_BACKEND.startswith("anymail.backends.brevo.")
+                and not settings.ANYMAIL["BREVO_API_KEY"]
+            ):
+                warnings.append(
+                    "EMAIL_BACKEND is Brevo but BREVO_API_KEY is empty, so sign-up codes and "
+                    "password emails will fail to send and new accounts cannot be verified."
+                )
 
         for warning in warnings:
             self.stdout.write(self.style.WARNING(f"WARNING: {warning}"))

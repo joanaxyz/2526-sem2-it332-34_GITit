@@ -45,3 +45,29 @@ class SessionRecord(models.Model):
 
     def __str__(self) -> str:
         return f"{self.user_id}:{self.refresh_jti}"
+
+
+class EmailVerification(models.Model):
+    """Sign-up email confirmation by one-time code.
+
+    Only self-service registration creates a row. Accounts without one (staff
+    made in the admin, accounts from before verification shipped) count as
+    verified, so nobody existing is locked out.
+    """
+
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="email_verification",
+    )
+    verified_at = models.DateTimeField(null=True, blank=True)
+    # HMAC of the current code; the code itself is never stored.
+    code_hash = models.CharField(max_length=64, blank=True)
+    code_expires_at = models.DateTimeField(null=True, blank=True)
+    failed_attempts = models.PositiveSmallIntegerField(default=0)
+    last_sent_at = models.DateTimeField(null=True, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self) -> str:
+        state = "verified" if self.verified_at else "pending"
+        return f"EmailVerification(user={self.user_id}, {state})"

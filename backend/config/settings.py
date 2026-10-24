@@ -43,6 +43,7 @@ env = environ.Env(
     EMAIL_HOST_USER=(str, ""),
     EMAIL_HOST_PASSWORD=(str, ""),
     EMAIL_USE_TLS=(bool, True),
+    BREVO_API_KEY=(str, ""),
     DEFAULT_FROM_EMAIL=(str, "GIT it! <no-reply@example.com>"),
     PASSWORD_RESET_TIMEOUT=(int, 3600),
     JWT_ACCESS_TOKEN_LIFETIME_MINUTES=(int, 15),
@@ -365,6 +366,10 @@ REST_FRAMEWORK = {
         "auth_password_reset_confirm": env(
             "THROTTLE_AUTH_PASSWORD_RESET_CONFIRM", default="60/hour"
         ),
+        "auth_email_verification": env("THROTTLE_AUTH_EMAIL_VERIFICATION", default="120/hour"),
+        "auth_email_verification_resend": env(
+            "THROTTLE_AUTH_EMAIL_VERIFICATION_RESEND", default="60/hour"
+        ),
         "command_submit": env("THROTTLE_COMMAND_SUBMIT", default="120/min"),
         "tutor_chat": env("THROTTLE_TUTOR_CHAT", default="12/min"),
     },
@@ -425,6 +430,9 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "GIT it! API",
     "DESCRIPTION": "Student-facing Git scenario level API.",
     "VERSION": env("API_VERSION"),
+    "ENUM_NAME_OVERRIDES": {
+        "EmailVerificationRequiredCodeEnum": ["email_unverified"],
+    },
 }
 
 EMAIL_BACKEND = env("EMAIL_BACKEND")
@@ -433,10 +441,17 @@ EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = env("EMAIL_USE_TLS")
+# Render's free tier blocks outbound SMTP, so hosted deploys send through
+# Brevo's HTTPS API (EMAIL_BACKEND=anymail.backends.brevo.EmailBackend).
+# DEFAULT_FROM_EMAIL must be a sender address verified in Brevo.
+ANYMAIL = {"BREVO_API_KEY": env("BREVO_API_KEY").strip()}
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 PASSWORD_RESET_TIMEOUT = env("PASSWORD_RESET_TIMEOUT")
 
 FRONTEND_BASE_URL = env("FRONTEND_BASE_URL", default="http://localhost:5173").rstrip("/")
+# Where emails load their logo and guide portrait from. Inboxes cannot reach a
+# localhost dev server, so local setups point this at the deployed site.
+EMAIL_ASSET_BASE_URL = env("EMAIL_ASSET_BASE_URL", default=FRONTEND_BASE_URL).rstrip("/")
 
 if not DEBUG:
     if not FRONTEND_BASE_URL.startswith("https://"):

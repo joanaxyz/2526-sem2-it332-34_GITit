@@ -14,14 +14,20 @@ certifi==2026.10.19
     # via
     #   httpcore
     #   httpx
+    #   requests
+charset-normalizer==3.5.2
+    # via requests
 django==6.0.8
     # via
     #   -r requirements.in
+    #   django-anymail
     #   django-cors-headers
     #   django-redis
     #   djangorestframework
     #   djangorestframework-simplejwt
     #   drf-spectacular
+django-anymail==15.2
+    # via -r requirements.in
 django-cors-headers==4.9.0
     # via -r requirements.in
 django-environ==0.13.0
@@ -48,7 +54,9 @@ httpx==0.28.1
 idna==3.20
     # via
     #   anyio
+    #   django-anymail
     #   httpx
+    #   requests
 inflection==0.5.1
     # via drf-spectacular
 jsonschema==4.26.0
@@ -75,6 +83,8 @@ referencing==0.37.0
     # via
     #   jsonschema
     #   jsonschema-specifications
+requests==2.34.2
+    # via django-anymail
 rpds-py==2026.6.3
     # via
     #   jsonschema
@@ -93,5 +103,9 @@ tzdata==2026.2 ; sys_platform == 'win32'
     #   psycopg
 uritemplate==4.2.0
     # via drf-spectacular
+urllib3==2.8.0
+    # via
+    #   django-anymail
+    #   requests
 whitenoise==6.11.0
     # via -r requirements.in

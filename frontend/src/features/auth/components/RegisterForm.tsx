@@ -1,5 +1,5 @@
 import { zodResolver } from '@hookform/resolvers/zod'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation } from '@tanstack/react-query'
 import { Eye, EyeOff, Loader2, UserPlus } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
@@ -8,10 +8,9 @@ import { z } from 'zod'
 
 import { authApi, type RegisterPayload } from '@/shared/auth/authApi'
 import { presentAuthError } from '@/features/auth/api/authError'
+import { verifyEmailPath } from '@/features/auth/api/emailVerification'
 import { PasswordStrengthIndicator } from '@/features/auth/components/PasswordStrengthIndicator'
 import { useServerFieldErrors } from '@/shared/api/useServerFieldErrors'
-import { useAuthStore } from '@/shared/auth/useAuth'
-import { storyPath } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
 
 const usernamePattern = /^[A-Za-z0-9._-]{3,30}$/
@@ -41,8 +40,6 @@ type FormValues = z.infer<typeof schema>
 
 export function RegisterForm() {
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const setSession = useAuthStore((state) => state.setSession)
   const [showPassword, setShowPassword] = useState(false)
   const [showPasswordConfirm, setShowPasswordConfirm] = useState(false)
   const [lastSubmittedValues, setLastSubmittedValues] = useState<FormValues | null>(null)
@@ -53,27 +50,10 @@ export function RegisterForm() {
   })
   const passwordValue = useWatch({ control: form.control, name: 'password' }) ?? ''
   const mutation = useMutation({
-    // Register, then sign the new account straight in - bouncing a brand-new
-    // user to the login form to retype what they just entered loses them.
-    mutationFn: async (payload: RegisterPayload) => {
-      await authApi.register(payload)
-      try {
-        return await authApi.login({ identifier: payload.username, password: payload.password })
-      } catch {
-        // The account exists; a failed auto-login must not surface as a
-        // registration error (retrying would hit "username taken").
-        return null
-      }
-    },
-    onSuccess: (session) => {
-      if (!session) {
-        navigate('/login')
-        return
-      }
-      queryClient.clear()
-      setSession(session.access, session.user)
-      navigate(storyPath(), { replace: true })
-    },
+    mutationFn: (payload: RegisterPayload) => authApi.register(payload),
+    // The account stays locked until the emailed code is entered; confirming
+    // it on the next screen signs the player straight in.
+    onSuccess: (response) => navigate(verifyEmailPath(response.user.email), { replace: true }),
   })
   const errorPresentation = useMemo(
     () => (mutation.error ? presentAuthError(mutation.error) : null),

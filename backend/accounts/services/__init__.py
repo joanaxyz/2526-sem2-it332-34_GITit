@@ -9,6 +9,7 @@ from .core import (
     set_refresh_cookie,
 )
 from .passwords import PasswordResetService
+from .verification import EmailVerificationService
 
 __all__ = [
     "IssuedTokens",
@@ -16,6 +17,7 @@ __all__ = [
     "TokenBlacklistService",
     "TokenService",
     "PasswordResetService",
+    "EmailVerificationService",
     "set_refresh_cookie",
     "clear_refresh_cookie",
 ]

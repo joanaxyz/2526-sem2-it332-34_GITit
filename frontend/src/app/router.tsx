@@ -12,6 +12,7 @@ import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage'
+import { VerifyEmailPage } from '@/features/auth/pages/VerifyEmailPage'
 import { HomePage } from '@/features/home/pages/HomePage'
 import { LandingPage } from '@/features/landing/pages/LandingPage'
 import { ChallengeStartPage } from '@/features/challenges/pages/ChallengeStartPage'
@@ -89,6 +90,7 @@ const appRoutes: RouteObject[] = [
     children: [
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
+      { path: '/verify-email', element: <VerifyEmailPage /> },
       { path: '/forgot-password', element: <ForgotPasswordPage /> },
       { path: '/reset-password/:uid/:token', element: <ResetPasswordPage /> },
     ],

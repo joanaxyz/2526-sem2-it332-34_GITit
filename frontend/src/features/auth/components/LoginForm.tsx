@@ -8,6 +8,7 @@ import { z } from 'zod'
 
 import { authApi } from '@/shared/auth/authApi'
 import { presentAuthError } from '@/features/auth/api/authError'
+import { unverifiedEmailFrom, verifyEmailPath } from '@/features/auth/api/emailVerification'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { storyPath } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
@@ -46,6 +47,11 @@ export function LoginForm() {
       queryClient.clear()
       setSession(data.access, data.user)
       navigate(data.user.is_staff ? '/admin' : storyPath(), { replace: true })
+    },
+    onError: (error) => {
+      // Right password, but the sign-up code was never entered: finish that first.
+      const unverifiedEmail = unverifiedEmailFrom(error)
+      if (unverifiedEmail) navigate(verifyEmailPath(unverifiedEmail))
     },
   })
   const errorPresentation = useMemo(

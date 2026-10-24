@@ -4,6 +4,7 @@ djangorestframework_simplejwt==5.5.1
 django-cors-headers==4.9.0
 django-environ==0.13.0
 django-redis==6.0.0
+django-anymail[brevo]==15.2
 whitenoise==6.11.0
 redis==7.4.0
 httpx==0.28.1

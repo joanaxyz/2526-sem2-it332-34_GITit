@@ -51,6 +51,8 @@ REST_FRAMEWORK = {
         "auth_refresh": "10000/hour",
         "auth_password_reset": "10000/hour",
         "auth_password_reset_confirm": "10000/hour",
+        "auth_email_verification": "10000/hour",
+        "auth_email_verification_resend": "10000/hour",
         "command_submit": "10000/min",
         "tutor_chat": "10000/min",
     },

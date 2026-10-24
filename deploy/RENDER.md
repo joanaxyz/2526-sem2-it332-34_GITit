@@ -166,9 +166,33 @@ would still require external object storage.
 
 ## 7. Email behavior
 
-The Blueprint uses Django's dummy email backend. Registration and gameplay
-work, but password-reset emails are discarded. No SMTP or email-provider
-account is needed for this preview.
+Free web services block outbound SMTP ports (25, 465, 587), so the Blueprint
+sends sign-up verification codes and password-reset and password-changed
+emails through Brevo's HTTPS API with `django-anymail`. Brevo's free plan allows 300 emails a day and does not
+require owning a domain.
+
+1. Create a free Brevo account.
+2. Under **Senders, Domains & Dedicated IPs > Senders**, add and verify the
+   address the app sends from, such as a project Gmail account.
+3. Under **SMTP & API > API Keys**, create an API v3 key.
+4. Under **Security > Authorised IPs**, turn off IP blocking. Render free
+   services have no fixed outbound IP, and Brevo rejects API calls from
+   unapproved IPs while blocking is on.
+5. In the Render dashboard, set `BREVO_API_KEY` to the key and
+   `DEFAULT_FROM_EMAIL` to the verified sender, for example
+   `GIT it! <your-sender@gmail.com>`.
+
+Without a sending domain, Brevo cannot sign mail as the Gmail sender, so some
+inboxes file it as spam. Verifying a real domain in Brevo later fixes this, and
+needs only a new `DEFAULT_FROM_EMAIL`. If the key is missing, startup logs a
+warning and no email is delivered. Reset requests still return the generic
+success message, but new accounts cannot be verified: registration requires the
+emailed six-digit code before the first sign-in, so set up Brevo before opening
+sign-ups.
+
+The emails link their logo and guide portrait from the Vercel site
+(`/email/git-it-logo.png`, `/email/guide-mascot.png`), so they render once the
+frontend deploy that ships those files is live.
 
 ## Free-tier limitations
 
