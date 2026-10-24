@@ -6435,7 +6435,7 @@
                         "format": "double",
                         "nullable": true
                     },
-                    "boss_floors": {
+                    "hard_tier_clears": {
                         "$ref": "#/components/schemas/StatsScopedCount"
                     },
                     "comebacks": {
@@ -6459,12 +6459,12 @@
                 },
                 "required": [
                     "accuracy",
-                    "boss_floors",
                     "comebacks",
                     "commands_run",
                     "day_streak",
                     "finish_rate",
                     "gitcoins",
+                    "hard_tier_clears",
                     "levels_completed",
                     "longest_streak",
                     "perfect_clears"

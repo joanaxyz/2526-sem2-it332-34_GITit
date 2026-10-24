@@ -42,7 +42,7 @@ export function deriveAchievements(home: HomeSummary, stats: StatsSummary): Achi
   const chapter = highestChapterTouched(home)
   const accuracy = h.accuracy ?? 0
   const accuracyReady = h.commands_run >= 100
-  const bossFloors = h.boss_floors?.value ?? 0
+  const hardTierClears = h.hard_tier_clears?.value ?? 0
   const comebacks = h.comebacks?.value ?? 0
 
   const make = (
@@ -119,23 +119,23 @@ export function deriveAchievements(home: HomeSummary, stats: StatsSummary): Achi
     make('perfectionist', 'Perfect Committer', 'Earn 5 perfect clears', Star, GOLD, 20, h.perfect_clears, 5),
     make('star-collector', 'Star Collector', 'Earn 25 perfect clears', Star, GOLD, 25, home.perfect_clears, 25),
     make(
-      'boss-slayer',
+      'hard-tier-breaker',
       'Hard Tier Breaker',
       'Clear a Hard Arcane Spire tier',
       Swords,
       GOLD,
       15,
-      bossFloors,
+      hardTierClears,
       1,
     ),
     make(
-      'boss-reaper',
+      'hard-tier-hunter',
       'Hard Tier Hunter',
       'Clear 5 Hard Arcane Spire tiers',
       Swords,
       GOLD,
       30,
-      bossFloors,
+      hardTierClears,
       5,
     ),
     make('comeback-kid', 'Recovery Artist', 'Turn 3 retries into wins', Sparkles, GOLD, 15, comebacks, 3),

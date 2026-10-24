@@ -131,7 +131,7 @@ export type ApiSchemas = {
   "ShopResponse": { "active_companion": string | null; "items": Array<ApiSchemas["ShopItemResponse"]>; "purchases_enabled": boolean }
   "SourceEntryPointEnum": "level_page" | "retry"
   "StatsActivityResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "activity_window": ApiSchemas["ActivityWindowEnum"] }
-  "StatsHeadline": { "accuracy": number | null; "boss_floors": ApiSchemas["StatsScopedCount"]; "comebacks": ApiSchemas["StatsScopedCount"]; "commands_run": number; "day_streak": number; "finish_rate": ApiSchemas["RateMetric"]; "gitcoins": number; "levels_completed": number; "longest_streak": number; "perfect_clears": number }
+  "StatsHeadline": { "accuracy": number | null; "comebacks": ApiSchemas["StatsScopedCount"]; "commands_run": number; "day_streak": number; "finish_rate": ApiSchemas["RateMetric"]; "gitcoins": number; "hard_tier_clears": ApiSchemas["StatsScopedCount"]; "levels_completed": number; "longest_streak": number; "perfect_clears": number }
   "StatsScopedCount": { "scope": string; "value": number }
   "StatsSkillAxis": { "command": string; "hint": string; "key": string; "label": string; "value": number | null }
   "StatsSummaryResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "activity_window": ApiSchemas["ActivityWindowEnum"]; "headline": ApiSchemas["StatsHeadline"]; "skill_profile": Array<ApiSchemas["StatsSkillAxis"]> }

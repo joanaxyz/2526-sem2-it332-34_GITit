@@ -126,7 +126,7 @@ class StatsHeadlineSerializer(serializers.Serializer):
     levels_completed = serializers.IntegerField()
     finish_rate = RateMetricSerializer()
     accuracy = serializers.FloatField(allow_null=True)
-    boss_floors = StatsScopedCountSerializer()
+    hard_tier_clears = StatsScopedCountSerializer()
     comebacks = StatsScopedCountSerializer()
     perfect_clears = serializers.IntegerField()
     day_streak = serializers.IntegerField()

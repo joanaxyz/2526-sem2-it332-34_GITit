@@ -1,12 +1,12 @@
 import arcaneSpireMasterImage from '@/assets/images/achievements/arcane-spire-master.png'
-import bossReaperImage from '@/assets/images/achievements/boss-reaper.png'
-import bossSlayerImage from '@/assets/images/achievements/boss-slayer.png'
 import coinHoarderImage from '@/assets/images/achievements/coin-hoarder.png'
 import comebackKidImage from '@/assets/images/achievements/comeback-kid.png'
 import commandCadetImage from '@/assets/images/achievements/command-cadet.png'
 import commandCaptainImage from '@/assets/images/achievements/command-captain.png'
 import firstClearImage from '@/assets/images/achievements/first-clear.png'
 import fortnightBlazeImage from '@/assets/images/achievements/fortnight-blaze.png'
+import hardTierBreakerImage from '@/assets/images/achievements/hard-tier-breaker.png'
+import hardTierHunterImage from '@/assets/images/achievements/hard-tier-hunter.png'
 import levelAdeptImage from '@/assets/images/achievements/level-adept.png'
 import levelChampionImage from '@/assets/images/achievements/level-champion.png'
 import levelVeteranImage from '@/assets/images/achievements/level-veteran.png'
@@ -19,14 +19,14 @@ import streakSparkImage from '@/assets/images/achievements/streak-spark.png'
 import weeklongFlameImage from '@/assets/images/achievements/weeklong-flame.png'
 
 export const ACHIEVEMENT_IMAGES = {
-  'boss-reaper': bossReaperImage,
-  'boss-slayer': bossSlayerImage,
   'coin-hoarder': coinHoarderImage,
   'comeback-kid': comebackKidImage,
   'command-cadet': commandCadetImage,
   'command-captain': commandCaptainImage,
   'first-clear': firstClearImage,
   'fortnight-blaze': fortnightBlazeImage,
+  'hard-tier-breaker': hardTierBreakerImage,
+  'hard-tier-hunter': hardTierHunterImage,
   'level-adept': levelAdeptImage,
   'level-champion': levelChampionImage,
   'level-veteran': levelVeteranImage,
