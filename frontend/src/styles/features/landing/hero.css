@@ -1,0 +1,168 @@
+/* ─── Landing shell ─────────────────────────────────────────────────────── */
+
+.landing {
+  --landing-gutter: clamp(1rem, 6vw, 6rem);
+  /* Full-bleed bands pad to the same left edge as the centred 76rem sections. */
+  --landing-inline: max(var(--landing-gutter), calc((100% - 76rem) / 2 + var(--landing-gutter)));
+
+  position: relative;
+  min-height: 100vh;
+  overflow-x: clip;
+  color: var(--text-primary);
+  background: hsl(var(--background));
+}
+
+.landing-header {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: var(--z-sticky);
+  display: flex;
+  justify-content: flex-end;
+  padding: 1rem var(--landing-inline);
+}
+
+.landing-header__nav {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* The header floats over the bright top of the Spire, so the secondary
+   action needs its own dark plate to stay legible. */
+.landing-header__sign-in {
+  border-color: var(--control-border);
+  color: var(--text-primary);
+  background: rgba(4, 9, 20, 0.78);
+}
+
+.landing-header__sign-in:hover {
+  border-color: var(--control-border-hover);
+  color: var(--text-primary);
+  background: rgba(8, 20, 40, 0.9);
+}
+
+/* ─── Hero ──────────────────────────────────────────────────────────────── */
+
+.landing-hero {
+  position: relative;
+  display: grid;
+  min-height: 100svh;
+  align-items: center;
+  padding: 5rem var(--landing-inline) 4rem;
+  isolation: isolate;
+}
+
+/* The level-map art, mirrored so the Spire stands on the right and the open
+   sky on the left carries the copy. The shade lives on ::after so it is not
+   mirrored with the art. */
+.landing-hero__sky {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png') 28% center / cover no-repeat;
+  transform: scaleX(-1);
+}
+
+.landing-hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  background:
+    linear-gradient(90deg, rgba(4, 9, 20, 0.94) 0%, rgba(4, 9, 20, 0.78) 34%, rgba(4, 9, 20, 0.12) 68%, transparent 100%),
+    linear-gradient(180deg, transparent 62%, hsl(var(--background)) 100%);
+}
+
+.landing-hero__copy {
+  display: grid;
+  justify-items: start;
+  gap: var(--space-5);
+  max-width: 36rem;
+}
+
+.landing-hero__copy > * {
+  animation: fade-in-up 640ms var(--ease-out) both;
+}
+
+.landing-hero__copy > :nth-child(2) { animation-delay: 80ms; }
+.landing-hero__copy > :nth-child(3) { animation-delay: 160ms; }
+.landing-hero__copy > :nth-child(4) { animation-delay: 240ms; }
+.landing-hero__copy > :nth-child(5) { animation-delay: 320ms; }
+
+.landing-hero__logo {
+  display: block;
+  width: min(22rem, 72vw);
+  height: auto;
+  margin-bottom: calc(var(--space-2) * -1);
+}
+
+.landing-hero__title {
+  margin: 0;
+  max-width: 20ch;
+  font-family: var(--font-display);
+  font-size: clamp(1.9rem, 3.4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.landing-hero__lede {
+  margin: 0;
+  max-width: 34rem;
+  color: var(--text-secondary);
+  font-size: var(--text-md);
+  line-height: 1.6;
+}
+
+.landing-hero__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+.landing-hero__note {
+  margin: 0;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.04em;
+}
+
+/* ─── Shared section voice ──────────────────────────────────────────────── */
+
+.landing-section {
+  width: min(100%, 76rem);
+  margin: 0 auto;
+  padding: clamp(4rem, 10vw, 7.5rem) var(--landing-gutter);
+}
+
+.landing-eyebrow {
+  margin: 0 0 var(--space-3);
+  color: hsl(var(--primary));
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.landing-section__title {
+  margin: 0;
+  max-width: 22ch;
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.8vw, var(--text-3xl));
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.landing-section__lede {
+  margin: var(--space-4) 0 0;
+  max-width: 60ch;
+  color: var(--text-secondary);
+  font-size: var(--text-base);
+  line-height: 1.6;
+}
