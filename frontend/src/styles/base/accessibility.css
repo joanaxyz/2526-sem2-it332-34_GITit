@@ -50,6 +50,9 @@
   .app-topbar,
   .app-wallet strong,
   .ui-button,
+  .ui-button--default::after,
+  .ui-drawn-plate::after,
+  .ui-drawn-outline::after,
   .shop-carousel-story,
   .story-path-node-ring {
     transition-duration: 0.01ms !important;

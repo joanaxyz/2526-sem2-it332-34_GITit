@@ -186,7 +186,7 @@ export function RegisterForm() {
           ) : null}
         </div>
       ) : null}
-      <button type="submit" className="auth-submit" disabled={mutation.isPending}>
+      <button type="submit" className="auth-submit ui-drawn-plate" disabled={mutation.isPending}>
         {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <UserPlus data-icon="inline-start" />}
         {mutation.isPending ? 'Creating account' : 'Create account'}
       </button>

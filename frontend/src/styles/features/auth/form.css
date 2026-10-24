@@ -151,36 +151,21 @@
   text-decoration: underline;
 }
 
-.auth-submit,
-.auth-side-action {
+/* The fill, glow, hover, and focus ring come from .ui-drawn-plate. */
+.auth-submit {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 0.55rem;
   min-height: 3rem;
-  border: 1px solid var(--control-primary-border);
+  border: 1px solid transparent;
   border-radius: var(--control-radius);
-  background: var(--control-primary-bg);
-  color: var(--control-primary-text);
   cursor: pointer;
   font-family: var(--font-sans);
   font-size: var(--text-base);
   font-weight: 800;
   text-decoration: none;
-  box-shadow: var(--control-primary-shadow);
-  transition: background var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out), opacity var(--motion-normal) var(--ease-out);
-}
-
-.auth-submit:hover:not(:disabled),
-.auth-side-action:hover {
-  background: var(--control-primary-bg-hover);
-  box-shadow: 0 0 18px rgba(var(--theme-primary-rgb), 0.28);
-}
-
-.auth-submit:focus-visible,
-.auth-side-action:focus-visible {
-  outline: none;
-  box-shadow: var(--control-focus-ring), 0 0 18px rgba(var(--theme-primary-rgb), 0.28);
+  transition: filter var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out), opacity var(--motion-normal) var(--ease-out);
 }
 
 .auth-submit:disabled {

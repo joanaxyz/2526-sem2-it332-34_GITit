@@ -227,9 +227,16 @@ so glow never competes with the art.
 
 ### Buttons
 - **Shape:** Rounded (`--radius` 0.75rem; `sm` uses `--radius-sm` 0.45rem). Height 2.5rem default, 2rem small.
-- **Primary:** Ocean→Deep blue gradient (`#00B4D8`→`#0077B6`), white text; an ocean shadow that warms to a cyan glow on hover. The single "go forward" action.
+- **Primary:** the **drawn plate** — Ocean→Deep blue gradient (`#00B4D8`→`#0077B6`) inside a wobbly fill shape with an inked bottom lip, chalk line art (sketchy double outline, highlight hatching) over it, and a drop-shadow glow that follows the drawn edge and warms on hover. White text. The single "go forward" action. `Button` (default variant) draws it; feature CTAs that must keep their own markup opt in with `.ui-drawn-plate`.
 - **Secondary:** Solid Observatory Stone, ink text. **Outline:** 1px hairline on translucent Night Sky. **Ghost:** muted ink, hover fills. **Destructive:** Ember Red.
 - **Hover / Focus:** 150ms transitions; `focus-visible` shows a 2px cyan ring offset from the surface. Never ship a control without hover + focus-visible.
+
+### Drawn Plate (primary actions)
+- **Construction:** SVG masks in `src/assets/images/ui/button-primary-*.svg` — one wobbly fill shape and three jittered line-art frames — painted on `::before`/`::after` while the element itself stays transparent, so it works on `<button>`, `<Link>`, `asChild`, and inline spans. The masks stretch to the box, so keep plates button-shaped; never put one on a container.
+- **Boil:** on hover the line art flips between its three frames (~7 fps) like a redrawn animation cel. Reduced motion holds the first frame.
+- **Tuning:** `--ui-plate-fill`, `--ui-plate-lip`, `--ui-plate-glow`, and `--ui-plate-boil`. A row whose hover should light a nested plate sets these on the plate from the row's own hover state.
+- **Drawn outline:** `.ui-drawn-outline` is the same line art without the fill or glow (colour from `--ui-outline-ink`), for the quieter actions that sit beside a plate — the level-map tier/drill row pills.
+- **Scope:** primary actions and those row pills only. Everything else keeps its straight hairline.
 
 ### Chips
 - **Style:** Pill (`--radius-pill`), Observatory Stone background, Mist text, hairline border.

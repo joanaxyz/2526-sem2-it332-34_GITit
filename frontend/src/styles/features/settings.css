@@ -116,12 +116,12 @@
   transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out), box-shadow var(--motion-normal) var(--ease-out), opacity var(--motion-normal) var(--ease-out);
 }
 .settings-primary-action svg, .settings-session-actions button svg { width: 1rem; height: 1rem; flex: 0 0 auto; }
+/* Drawn by .ui-drawn-plate; only the shared settings-button chrome is cleared. */
 .settings-primary-action {
   justify-self: start;
-  border-color: var(--control-primary-border);
-  background: var(--control-primary-bg);
+  border-color: transparent;
+  background: transparent;
   color: var(--control-primary-text);
-  box-shadow: var(--control-primary-shadow);
 }
 .settings-primary-action:hover:not(:disabled), .settings-session-actions button:hover:not(:disabled),
 .settings-primary-action:focus-visible, .settings-session-actions button:focus-visible {
@@ -131,8 +131,8 @@
   outline: none;
 }
 .settings-primary-action:hover:not(:disabled), .settings-primary-action:focus-visible {
-  border-color: var(--control-primary-border);
-  background: var(--control-primary-bg-hover);
+  border-color: transparent;
+  background: transparent;
   color: var(--control-primary-text);
 }
 .settings-primary-action:focus-visible, .settings-session-actions button:focus-visible { box-shadow: var(--control-focus-ring); }

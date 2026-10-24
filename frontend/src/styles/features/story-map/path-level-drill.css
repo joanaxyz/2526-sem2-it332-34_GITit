@@ -103,22 +103,24 @@
    the recommended move it holds it, and StoryAdventurePanels suppresses
    the tier row's accent so the two never compete. */
 .story-level-drill-row[data-next] .story-level-tier-row-action {
-  border-color: var(--control-primary-border);
-  background: var(--control-primary-bg);
+  border-color: transparent;
+  background: transparent;
   color: var(--control-primary-text);
-  box-shadow: var(--control-primary-shadow);
 }
 
 .story-level-drill-row:hover .story-level-tier-row-action,
 .story-level-drill-row:focus-visible .story-level-tier-row-action {
-  border-color: rgba(var(--theme-primary-rgb), 0.68);
-  background: rgba(var(--theme-primary-rgb), 0.18);
+  --ui-outline-ink: rgba(var(--theme-primary-rgb), 0.9);
+  --ui-plate-boil: ui-plate-ink-boil;
 }
 
 .story-level-drill-row[data-next]:hover .story-level-tier-row-action,
 .story-level-drill-row[data-next]:focus-visible .story-level-tier-row-action {
-  background: var(--control-primary-bg-hover);
-  box-shadow: 0 0 18px rgba(var(--theme-primary-rgb), 0.34);
+  --ui-plate-fill: var(--control-primary-bg-hover);
+  --ui-plate-glow: 0 0 14px rgba(var(--theme-primary-rgb), 0.42);
+  --ui-plate-boil: ui-plate-ink-boil;
+  border-color: transparent;
+  background: transparent;
 }
 
 @media (prefers-reduced-motion: reduce) {

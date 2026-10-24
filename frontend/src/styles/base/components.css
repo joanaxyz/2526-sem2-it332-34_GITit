@@ -69,6 +69,7 @@
     color var(--motion-normal) var(--ease-out),
     box-shadow var(--motion-normal) var(--ease-out),
     opacity var(--motion-normal) var(--ease-out),
+    filter var(--motion-normal) var(--ease-out),
     transform var(--motion-fast) var(--ease-out);
 }
 
@@ -104,30 +105,133 @@
   cursor: progress;
 }
 
-.ui-button--default {
-  border-color: var(--control-primary-border);
-  background: var(--control-primary-bg);
+/* Drawn plate: the hand-drawn primary surface, shared by the default Button
+   variant and by feature primary CTAs that opt in with .ui-drawn-plate. The
+   element itself stays transparent so the drawing works on <button>, <Link>,
+   asChild, and inline spans alike: ::before paints the primary gradient (with
+   an inked bottom lip) through a wobbly fill mask, and ::after lays chalk line
+   art over it. The SVG masks stretch to the box; while --ui-plate-boil names
+   the boil animation the ink flips between three jittered frames. The glow is
+   a drop-shadow so it follows the drawn edge rather than the rectangle.
+   Features restyle a plate only through the --ui-plate-* properties, so a row
+   can light its nested plate from the row's own hover. */
+.ui-button--default,
+.ui-drawn-plate {
+  --ui-plate-fill: var(--control-primary-bg);
+  --ui-plate-lip: 0.28rem;
+  --ui-plate-glow: 0 0 9px rgba(var(--theme-primary-rgb), 0.24);
+  position: relative;
+  isolation: isolate;
+  border-color: transparent;
+  background: transparent;
   color: var(--control-primary-text);
-  box-shadow: var(--control-primary-shadow);
+  text-shadow: 0 1px 0 rgba(0, 52, 104, 0.55);
+  box-shadow: none;
+  filter: drop-shadow(var(--ui-plate-glow));
 }
 
-.ui-button--default:hover {
-  background: var(--control-primary-bg-hover);
-  color: var(--control-primary-text);
-  box-shadow: 0 0 18px rgba(var(--theme-primary-rgb), 0.28);
+.ui-button--default::before,
+.ui-button--default::after,
+.ui-drawn-plate::before,
+.ui-drawn-plate::after,
+.ui-drawn-outline::after {
+  position: absolute;
+  z-index: -1;
+  content: '';
+  pointer-events: none;
+  -webkit-mask-position: center;
+          mask-position: center;
+  -webkit-mask-repeat: no-repeat;
+          mask-repeat: no-repeat;
+  -webkit-mask-size: 100% 100%;
+          mask-size: 100% 100%;
 }
 
-.ui-button--default:focus-visible {
-  background: var(--control-primary-bg-hover);
-  color: var(--control-primary-text);
-  box-shadow: var(--control-focus-ring), 0 0 18px rgba(var(--theme-primary-rgb), 0.28);
+.ui-button--default::before,
+.ui-drawn-plate::before {
+  inset: -1px;
+  background:
+    linear-gradient(to top, rgba(0, 52, 104, 0.6) var(--ui-plate-lip), transparent var(--ui-plate-lip)),
+    var(--ui-plate-fill);
+  -webkit-mask-image: url('../../assets/images/ui/button-primary-fill.svg');
+          mask-image: url('../../assets/images/ui/button-primary-fill.svg');
 }
 
-.ui-button--default:active:not(:disabled) {
-  border-color: var(--control-primary-border);
-  background: var(--control-primary-bg-active);
+.ui-button--default::after,
+.ui-drawn-plate::after,
+.ui-drawn-outline::after {
+  inset: -2px -3px;
+  background: linear-gradient(180deg, hsl(var(--foreground) / 0.95), rgba(var(--theme-primary-soft-rgb), 0.8));
+  -webkit-mask-image: url('../../assets/images/ui/button-primary-ink-1.svg');
+          mask-image: url('../../assets/images/ui/button-primary-ink-1.svg');
+  animation: var(--ui-plate-boil, none) 0.42s steps(1, end) infinite;
+}
+
+.ui-button--default:hover,
+.ui-button--default:focus-visible,
+.ui-drawn-plate:hover:not(:disabled),
+.ui-drawn-plate:focus-visible {
+  --ui-plate-fill: var(--control-primary-bg-hover);
+  --ui-plate-glow: 0 0 14px rgba(var(--theme-primary-rgb), 0.42);
+  border-color: transparent;
+  background: transparent;
   color: var(--control-primary-text);
-  box-shadow: inset 0 2px 6px rgba(0, 0, 0, 0.28), 0 0 8px rgba(var(--theme-primary-rgb), 0.18);
+}
+
+.ui-button--default:focus-visible,
+.ui-drawn-plate:focus-visible {
+  outline: none;
+  box-shadow: var(--control-focus-ring);
+}
+
+.ui-button--default:hover:not(:disabled, [aria-busy='true']),
+.ui-drawn-plate:hover:not(:disabled, [aria-busy='true']) {
+  --ui-plate-boil: ui-plate-ink-boil;
+}
+
+.ui-button--default:active:not(:disabled),
+.ui-drawn-plate:active:not(:disabled) {
+  --ui-plate-fill: var(--control-primary-bg-active);
+  --ui-plate-lip: 0.1rem;
+  --ui-plate-glow: 0 0 6px rgba(var(--theme-primary-rgb), 0.2);
+  border-color: transparent;
+  background: transparent;
+  color: var(--control-primary-text);
+  box-shadow: none;
+}
+
+/* Drawn outline: the plate's line art without its fill or glow, for quieter
+   actions that sit beside a plate (the level-map row pills). The ink colour
+   is --ui-outline-ink; the element's own straight border is cleared. */
+.ui-drawn-outline {
+  --ui-outline-ink: rgba(var(--theme-primary-rgb), 0.55);
+  position: relative;
+  isolation: isolate;
+  border-color: transparent;
+}
+
+.ui-drawn-outline::after {
+  background: var(--ui-outline-ink);
+}
+
+.ui-drawn-outline:hover:not(:disabled) {
+  --ui-outline-ink: rgba(var(--theme-primary-rgb), 0.9);
+  --ui-plate-boil: ui-plate-ink-boil;
+}
+
+@keyframes ui-plate-ink-boil {
+  0% {
+    -webkit-mask-image: url('../../assets/images/ui/button-primary-ink-2.svg');
+            mask-image: url('../../assets/images/ui/button-primary-ink-2.svg');
+  }
+  33.333% {
+    -webkit-mask-image: url('../../assets/images/ui/button-primary-ink-3.svg');
+            mask-image: url('../../assets/images/ui/button-primary-ink-3.svg');
+  }
+  66.667% {
+    -webkit-mask-image: url('../../assets/images/ui/button-primary-ink-1.svg');
+            mask-image: url('../../assets/images/ui/button-primary-ink-1.svg');
+  }
 }
 
 .ui-button--secondary {

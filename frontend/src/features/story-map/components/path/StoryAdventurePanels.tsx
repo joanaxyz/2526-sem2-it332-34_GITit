@@ -143,7 +143,7 @@ export function StoryLevelTierPanel({
               )}
             </span>
           </span>
-          <span className="story-level-tier-row-action">
+          <span className={drillIsNextMove ? 'story-level-tier-row-action ui-drawn-plate' : 'story-level-tier-row-action ui-drawn-outline'}>
             {drill.cleared ? 'Again' : 'Start'}
           </span>
         </button>
@@ -155,6 +155,7 @@ export function StoryLevelTierPanel({
           const progress = tier?.scenario_progress ?? { completed: 0, total: 0 }
           const isLocked = status === 'locked'
           const actionLabel = isLocked ? 'Locked' : TIER_ACTION_LABELS[status]
+          const isNextMove = !drillIsNextMove && difficulty === nextDifficulty
 
           return (
             <li key={`${level.id}-${difficulty}`}>
@@ -162,7 +163,7 @@ export function StoryLevelTierPanel({
                 type="button"
                 className="story-level-tier-row"
                 data-status={status}
-                data-next={(!drillIsNextMove && difficulty === nextDifficulty) || undefined}
+                data-next={isNextMove || undefined}
                 style={{ '--row-index': index } as CSSProperties}
                 disabled={isLocked || !tier}
                 aria-label={`${level.title}, ${tierLabel} tier: ${actionLabel}`}
@@ -203,7 +204,9 @@ export function StoryLevelTierPanel({
                 {isLocked ? (
                   <Lock className="story-level-tier-row-lock" aria-hidden="true" />
                 ) : (
-                  <span className="story-level-tier-row-action">{actionLabel}</span>
+                  <span className={isNextMove ? 'story-level-tier-row-action ui-drawn-plate' : 'story-level-tier-row-action ui-drawn-outline'}>
+                    {actionLabel}
+                  </span>
                 )}
               </button>
             </li>
