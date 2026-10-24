@@ -1139,6 +1139,95 @@
                 }
             }
         },
+        "/api/auth/email-verification/confirm/": {
+            "post": {
+                "operationId": "auth_email_verification_confirm_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationConfirm"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationConfirm"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationConfirm"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/SessionResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "400": {
+                        "description": "Incorrect, expired, or spent code"
+                    }
+                }
+            }
+        },
+        "/api/auth/email-verification/resend/": {
+            "post": {
+                "operationId": "auth_email_verification_resend_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationResend"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationResend"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailVerificationResend"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "security": [
+                    {}
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/DetailResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/auth/login/": {
             "post": {
                 "operationId": "auth_login_create",
@@ -1174,6 +1263,16 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/SessionResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    },
+                    "403": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/EmailVerificationRequired"
                                 }
                             }
                         },
@@ -5577,6 +5676,63 @@
                     "label",
                     "steps",
                     "task"
+                ]
+            },
+            "EmailVerificationConfirm": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    },
+                    "code": {
+                        "type": "string",
+                        "maxLength": 16
+                    }
+                },
+                "required": [
+                    "code",
+                    "email"
+                ]
+            },
+            "EmailVerificationRequired": {
+                "type": "object",
+                "description": "403 from sign-in: right password, but the sign-up code was never entered.",
+                "properties": {
+                    "detail": {
+                        "type": "string"
+                    },
+                    "code": {
+                        "$ref": "#/components/schemas/EmailVerificationRequiredCodeEnum"
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                },
+                "required": [
+                    "code",
+                    "detail",
+                    "email"
+                ]
+            },
+            "EmailVerificationRequiredCodeEnum": {
+                "enum": [
+                    "email_unverified"
+                ],
+                "type": "string",
+                "description": "* `email_unverified` - email_unverified"
+            },
+            "EmailVerificationResend": {
+                "type": "object",
+                "properties": {
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                },
+                "required": [
+                    "email"
                 ]
             },
             "GameplayRunStatus": {

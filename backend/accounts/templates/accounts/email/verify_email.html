@@ -1,0 +1,17 @@
+{% extends "accounts/email/base.html" %}
+{% block title %}Confirm your GIT it! email{% endblock %}
+{% block preheader %}{{ code }} is your code. It expires in {{ expires_minutes }} minutes.{% endblock %}
+{% block guide_line %}One last seal before the Spire opens. Show me this inbox is yours and the climb begins.{% endblock %}
+{% block heading %}Confirm your email{% endblock %}
+{% block content %}
+<p style="margin:0 0 20px;font-size:15px;line-height:23px;color:#E8F6FA;">Hi {{ user.username }}, enter this code on the GIT it! sign-up screen:</p>
+<table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto;">
+  <tr>
+    <td align="center" bgcolor="#080C14" style="background-color:#080C14;border:1px solid #00A3FF;border-radius:12px;padding:16px 28px 16px 38px;font-family:'JetBrains Mono',Consolas,'Courier New',monospace;font-size:34px;line-height:40px;font-weight:800;letter-spacing:10px;color:#E8F6FA;">{{ code }}</td>
+  </tr>
+</table>
+<p style="margin:20px 0 0;font-size:14px;line-height:21px;color:#758F9F;text-align:center;">The code expires in {{ expires_minutes }} minutes. If it runs out, choose <strong style="color:#E8F6FA;">Send a new code</strong> on the sign-up screen.</p>
+{% endblock %}
+{% block footer %}
+<p style="margin:0;">Didn't create a GIT it! account? Ignore this email. Nobody can use the account without this code.</p>
+{% endblock %}

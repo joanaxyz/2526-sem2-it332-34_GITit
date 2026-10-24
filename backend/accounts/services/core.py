@@ -11,6 +11,7 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import AccountIdentity, AccountSecurity, SessionRecord
+from accounts.services.verification import EmailVerificationService
 from common.exceptions import Conflict
 from common.http import get_client_ip
 from players.models import PlayerPreferences
@@ -82,6 +83,8 @@ class UserService:
             reason="signup_grant",
             award_key=f"signup:{player.id}",
         )
+        # The account cannot sign in until the emailed code proves the inbox.
+        EmailVerificationService().start(user)
         return user
 
 

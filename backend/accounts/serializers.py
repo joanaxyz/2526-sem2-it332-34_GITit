@@ -83,6 +83,24 @@ class PasswordChangeSerializer(PasswordPairSerializer):
     current_password = serializers.CharField(write_only=True)
 
 
+class EmailVerificationResendSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value: str) -> str:
+        return get_user_model().objects.normalize_email(value).lower()
+
+
+class EmailVerificationConfirmSerializer(EmailVerificationResendSerializer):
+    code = serializers.CharField(max_length=16)
+
+    def validate_code(self, value: str) -> str:
+        # Codes get pasted as "123 456" or with a trailing space; keep the digits.
+        code = re.sub(r"\s+", "", value)
+        if not re.fullmatch(r"\d{6}", code):
+            raise serializers.ValidationError("Enter the 6-digit code from the email.")
+        return code
+
+
 class UserSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     username = serializers.CharField()
@@ -105,3 +123,11 @@ class AccessTokenResponseSerializer(serializers.Serializer):
 
 class DetailResponseSerializer(serializers.Serializer):
     detail = serializers.CharField()
+
+
+class EmailVerificationRequiredSerializer(serializers.Serializer):
+    """403 from sign-in: right password, but the sign-up code was never entered."""
+
+    detail = serializers.CharField()
+    code = serializers.ChoiceField(choices=["email_unverified"])
+    email = serializers.EmailField()

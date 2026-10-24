@@ -7,6 +7,8 @@ export type RegisterPayload = ApiRequestBody<'auth_register_create'>
 export type PasswordResetRequestPayload = ApiRequestBody<'auth_password_reset_request_create'>
 export type PasswordResetConfirmPayload = ApiRequestBody<'auth_password_reset_confirm_create'>
 export type PasswordChangePayload = ApiRequestBody<'auth_password_change_create'>
+export type EmailVerificationConfirmPayload = ApiRequestBody<'auth_email_verification_confirm_create'>
+export type EmailVerificationResendPayload = ApiRequestBody<'auth_email_verification_resend_create'>
 
 // Register and login run without a session, so their 401 is the API's answer
 // (wrong credentials), never an expired access token to refresh.
@@ -47,6 +49,20 @@ export const authApi = {
     return apiOperationRequest(
       'auth_password_reset_confirm_create',
       '/auth/password-reset/confirm/',
+      { body: payload, skipAuthRefresh: true },
+    )
+  },
+  confirmEmailVerification(payload: EmailVerificationConfirmPayload) {
+    return apiOperationRequest(
+      'auth_email_verification_confirm_create',
+      '/auth/email-verification/confirm/',
+      { body: payload, skipAuthRefresh: true },
+    )
+  },
+  resendEmailVerification(payload: EmailVerificationResendPayload) {
+    return apiOperationRequest(
+      'auth_email_verification_resend_create',
+      '/auth/email-verification/resend/',
       { body: payload, skipAuthRefresh: true },
     )
   },

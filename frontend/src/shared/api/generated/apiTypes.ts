@@ -91,6 +91,10 @@ export type ApiSchemas = {
   "DrillRunState": { "answered": number; "cards": { [key: string]: { [key: string]: JsonValue } }; "correct": number; "queue": Array<string>; "sequence_pending"?: boolean }
   "DrillRunStateResponse": { "resume": ApiSchemas["DrillResume"] | null }
   "DrillSequence": { "label": string; "steps": Array<string>; "task": string }
+  "EmailVerificationConfirm": { "code": string; "email": string }
+  "EmailVerificationRequired": { "code": ApiSchemas["EmailVerificationRequiredCodeEnum"]; "detail": string; "email": string }
+  "EmailVerificationRequiredCodeEnum": "email_unverified"
+  "EmailVerificationResend": { "email": string }
   "GameplayRunStatus": "started" | "completed" | "failed" | "abandoned"
   "IntroductionComplete": { "token": string }
   "IntroductionCompleteResponse": { "tutor": ApiSchemas["CommandIntroductionResponse"] | null }
@@ -178,6 +182,8 @@ export type ApiPath =
   | "/api/adventure-tier-runs/{run_id}/introduction/complete/"
   | "/api/adventure-tier-runs/{run_id}/retry/"
   | "/api/adventure-tier-runs/{run_id}/submit-command/"
+  | "/api/auth/email-verification/confirm/"
+  | "/api/auth/email-verification/resend/"
   | "/api/auth/login/"
   | "/api/auth/logout/"
   | "/api/auth/me/"
@@ -243,6 +249,8 @@ export type ApiMethodByPath = {
   "/api/adventure-tier-runs/{run_id}/introduction/complete/": "POST"
   "/api/adventure-tier-runs/{run_id}/retry/": "POST"
   "/api/adventure-tier-runs/{run_id}/submit-command/": "POST"
+  "/api/auth/email-verification/confirm/": "POST"
+  "/api/auth/email-verification/resend/": "POST"
   "/api/auth/login/": "POST"
   "/api/auth/logout/": "POST"
   "/api/auth/me/": "GET"
@@ -315,6 +323,8 @@ export const apiOperations = {
   command_introduction_complete: { method: "POST", path: "/api/adventure-tier-runs/{run_id}/introduction/complete/", operationId: "command_introduction_complete", tags: ["adventure-tier-runs"] },
   adventure_tier_runs_retry_create: { method: "POST", path: "/api/adventure-tier-runs/{run_id}/retry/", operationId: "adventure_tier_runs_retry_create", tags: ["adventure-tier-runs"] },
   adventure_tier_runs_submit_command_create: { method: "POST", path: "/api/adventure-tier-runs/{run_id}/submit-command/", operationId: "adventure_tier_runs_submit_command_create", tags: ["adventure-tier-runs"] },
+  auth_email_verification_confirm_create: { method: "POST", path: "/api/auth/email-verification/confirm/", operationId: "auth_email_verification_confirm_create", tags: ["auth"] },
+  auth_email_verification_resend_create: { method: "POST", path: "/api/auth/email-verification/resend/", operationId: "auth_email_verification_resend_create", tags: ["auth"] },
   auth_login_create: { method: "POST", path: "/api/auth/login/", operationId: "auth_login_create", tags: ["auth"] },
   auth_logout_create: { method: "POST", path: "/api/auth/logout/", operationId: "auth_logout_create", tags: ["auth"] },
   auth_me_retrieve: { method: "GET", path: "/api/auth/me/", operationId: "auth_me_retrieve", tags: ["auth"] },
@@ -396,6 +406,8 @@ export type ApiRequestBodyByOperation = {
   command_introduction_complete: ApiSchemas["IntroductionComplete"]
   adventure_tier_runs_retry_create: null
   adventure_tier_runs_submit_command_create: ApiSchemas["CommandSubmit"]
+  auth_email_verification_confirm_create: ApiSchemas["EmailVerificationConfirm"]
+  auth_email_verification_resend_create: ApiSchemas["EmailVerificationResend"]
   auth_login_create: ApiSchemas["Login"]
   auth_logout_create: null
   auth_me_retrieve: null
@@ -474,6 +486,8 @@ export type ApiResponseBodyByOperation = {
   command_introduction_complete: ApiSchemas["IntroductionCompleteResponse"]
   adventure_tier_runs_retry_create: ApiSchemas["AdventureLevelTierRunResponse"]
   adventure_tier_runs_submit_command_create: ApiSchemas["AdventureLevelTierCommandResponse"]
+  auth_email_verification_confirm_create: ApiSchemas["SessionResponse"]
+  auth_email_verification_resend_create: ApiSchemas["DetailResponse"]
   auth_login_create: ApiSchemas["SessionResponse"]
   auth_logout_create: null
   auth_me_retrieve: ApiSchemas["User"]

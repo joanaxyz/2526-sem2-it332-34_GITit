@@ -65,7 +65,8 @@ Before starting, prepare:
 - Redis 7 or newer. It is used for shared authentication revocation, caching,
   and throttling across workers and replicas.
 - TLS termination at the host proxy or platform load balancer.
-- SMTP credentials if password-reset email must work.
+- SMTP credentials, or an HTTPS email API key such as Brevo when the host
+  blocks SMTP, if password-reset email must work.
 
 For an initial 100-concurrent-user staging test, a reasonable starting point is
 4 vCPU and 8 GB RAM for the application host, with PostgreSQL and Redis managed
@@ -313,7 +314,7 @@ HTTPS domain:
 5. Start one challenge and submit a command.
 6. Open the shop and verify companion/story presentation.
 7. Sign out and sign back in.
-8. Request a password reset if SMTP is configured.
+8. Request a password reset if email delivery is configured.
 9. Confirm there are no unexpected `/cosmetics`, `/audio`, `/assets`, or API
    404/5xx responses in the browser network panel.
 

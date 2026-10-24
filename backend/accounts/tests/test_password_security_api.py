@@ -1,3 +1,4 @@
+import json
 import re
 from unittest import mock
 
@@ -171,7 +172,7 @@ def test_password_reset_request_keeps_generic_response_when_email_delivery_fails
 ):
     user = create_user(django_user_model, username="mailfailure", email="mailfailure@example.com")
     with mock.patch(
-        "accounts.services.passwords.EmailMultiAlternatives.send",
+        "django.core.mail.EmailMultiAlternatives.send",
         side_effect=RuntimeError("mail provider unavailable"),
     ):
         response = api_client.post(
@@ -184,3 +185,32 @@ def test_password_reset_request_keeps_generic_response_when_email_delivery_fails
     assert response.json() == {
         "detail": "If an account exists for that email, a reset link has been sent."
     }
+
+
+def test_password_reset_email_sends_through_brevo_http_api(
+    db, api_client, django_user_model, settings
+):
+    settings.EMAIL_BACKEND = "anymail.backends.brevo.EmailBackend"
+    settings.ANYMAIL = {"BREVO_API_KEY": "test-brevo-key"}
+    settings.DEFAULT_FROM_EMAIL = "GIT it! <gitit.sender@gmail.com>"
+    user = create_user(django_user_model, username="brevouser", email="brevo@example.com")
+    brevo_response = mock.Mock(status_code=201)
+    brevo_response.json.return_value = {"messageId": "<brevo-id@smtp-relay.mailin.fr>"}
+
+    with mock.patch("requests.Session.request", return_value=brevo_response) as brevo_request:
+        response = api_client.post(
+            "/api/auth/password-reset/request/",
+            {"email": user.email},
+            format="json",
+        )
+
+    assert response.status_code == status.HTTP_200_OK
+    brevo_request.assert_called_once()
+    call = brevo_request.call_args.kwargs
+    assert (call["method"], call["url"]) == ("POST", "https://api.brevo.com/v3/smtp/email")
+    assert call["headers"]["api-key"] == "test-brevo-key"
+    payload = json.loads(call["data"])
+    assert payload["sender"] == {"email": "gitit.sender@gmail.com", "name": "GIT it!"}
+    assert payload["to"] == [{"email": user.email}]
+    assert "/reset-password/" in payload["textContent"]
+    assert "/reset-password/" in payload["htmlContent"]

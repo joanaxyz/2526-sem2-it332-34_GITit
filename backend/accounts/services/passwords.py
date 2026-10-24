@@ -1,15 +1,11 @@
 from __future__ import annotations
 
-import logging
-
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.password_validation import validate_password
 from django.contrib.auth.tokens import default_token_generator
 from django.core.exceptions import ValidationError as DjangoValidationError
-from django.core.mail import EmailMultiAlternatives
 from django.db import transaction
-from django.template.loader import render_to_string
 from django.utils import timezone
 from django.utils.encoding import force_bytes, force_str
 from django.utils.http import urlsafe_base64_decode, urlsafe_base64_encode
@@ -17,8 +13,8 @@ from rest_framework import serializers
 
 from accounts.models import AccountSecurity
 from accounts.services.core import TokenBlacklistService
-
-logger = logging.getLogger(__name__)
+from accounts.services.mail import build_account_email, send_safely
+from accounts.services.verification import EmailVerificationService
 
 
 class PasswordResetService:
@@ -34,18 +30,16 @@ class PasswordResetService:
         uid = urlsafe_base64_encode(force_bytes(user.pk))
         token = default_token_generator.make_token(user)
         reset_url = f"{settings.FRONTEND_BASE_URL}/reset-password/{uid}/{token}"
-        context = {"user": user, "reset_url": reset_url}
-        subject = "Reset your GIT it! password"
-        text_body = render_to_string("accounts/email/password_reset.txt", context)
-        html_body = render_to_string("accounts/email/password_reset.html", context)
-        message = EmailMultiAlternatives(
-            subject=subject,
-            body=text_body,
-            from_email=settings.DEFAULT_FROM_EMAIL,
+        expires_minutes = settings.PASSWORD_RESET_TIMEOUT // 60
+        message = build_account_email(
+            subject="Reset your GIT it! password",
+            template="password_reset",
+            context={"user": user, "reset_url": reset_url, "expires_minutes": expires_minutes},
             to=[user.email],
         )
-        message.attach_alternative(html_body, "text/html")
-        self._send_safely(message, context="password reset")
+        # Password-reset request responses must not disclose whether an
+        # account exists by failing only for registered addresses.
+        send_safely(message, context="password reset")
 
     def resolve_user(self, *, uid: str, token: str):
         try:
@@ -66,6 +60,9 @@ class PasswordResetService:
         user.set_password(password)
         user.save(update_fields=["password"])
         self._invalidate_sessions(user)
+        # The reset link reached this inbox, which is all sign-up verification
+        # asks, so an account still awaiting its code can sign in afterwards.
+        EmailVerificationService.mark_verified(user)
         self._queue_password_changed_email(user)
 
     @transaction.atomic
@@ -84,28 +81,15 @@ class PasswordResetService:
         self._queue_password_changed_email(user)
 
     @staticmethod
-    def _send_safely(message: EmailMultiAlternatives, *, context: str) -> None:
-        try:
-            message.send(fail_silently=False)
-        except Exception:
-            # Password-reset request responses must not disclose whether an
-            # account exists by failing only for registered addresses.
-            logger.exception("Could not send %s email.", context)
-
-    def _queue_password_changed_email(self, user) -> None:
+    def _queue_password_changed_email(user) -> None:
         def send_notification() -> None:
-            context = {"user": user}
-            message = EmailMultiAlternatives(
+            message = build_account_email(
                 subject="Your GIT it! password was changed",
-                body=render_to_string("accounts/email/password_changed.txt", context),
-                from_email=settings.DEFAULT_FROM_EMAIL,
+                template="password_changed",
+                context={"user": user},
                 to=[user.email],
             )
-            message.attach_alternative(
-                render_to_string("accounts/email/password_changed.html", context),
-                "text/html",
-            )
-            self._send_safely(message, context="password changed")
+            send_safely(message, context="password changed")
 
         transaction.on_commit(send_notification)
 
