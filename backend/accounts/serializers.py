@@ -90,6 +90,10 @@ class EmailVerificationResendSerializer(serializers.Serializer):
         return get_user_model().objects.normalize_email(value).lower()
 
 
+class OAuthTicketExchangeSerializer(serializers.Serializer):
+    ticket = serializers.CharField(max_length=128)
+
+
 class EmailVerificationConfirmSerializer(EmailVerificationResendSerializer):
     code = serializers.CharField(max_length=16)
 

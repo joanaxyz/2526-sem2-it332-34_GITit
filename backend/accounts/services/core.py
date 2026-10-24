@@ -35,8 +35,14 @@ class UserService:
         *,
         username: str,
         email: str,
-        password: str,
+        password: str | None,
+        verify_email: bool = True,
     ):
+        """Create an account with its player, wallet grant, and onboarding.
+
+        OAuth sign-up passes no password (the account gets an unusable one) and
+        verify_email=False, because the provider already proved the inbox.
+        """
         User = get_user_model()
         normalized_username = username.strip()
         normalized_email = User.objects.normalize_email(email).lower()
@@ -83,8 +89,9 @@ class UserService:
             reason="signup_grant",
             award_key=f"signup:{player.id}",
         )
-        # The account cannot sign in until the emailed code proves the inbox.
-        EmailVerificationService().start(user)
+        if verify_email:
+            # The account cannot sign in until the emailed code proves the inbox.
+            EmailVerificationService().start(user)
         return user
 
 

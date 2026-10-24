@@ -188,6 +188,79 @@
   text-align: center;
 }
 
+.auth-oauth {
+  display: grid;
+  gap: 0.85rem;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--control-border);
+}
+
+.auth-oauth-buttons {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.6rem;
+}
+
+.auth-oauth-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  min-height: 2.75rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  background: var(--control-bg);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  font-size: 0.92rem;
+  font-weight: 750;
+  text-decoration: none;
+  transition: border-color 160ms ease, box-shadow 160ms ease;
+}
+
+.auth-oauth-button:hover {
+  border-color: var(--control-border-hover);
+}
+
+.auth-oauth-button:focus-visible {
+  outline: none;
+  box-shadow: var(--control-focus-ring);
+}
+
+.auth-oauth-button svg {
+  flex: none;
+  width: 1.15rem;
+  height: 1.15rem;
+}
+
+/* Marks stay within the palette: Starlight for GitHub, the one neon accent for Google. */
+.auth-oauth-button--github svg {
+  color: var(--text-primary);
+}
+
+.auth-oauth-button--google svg {
+  color: rgb(var(--theme-primary-rgb));
+}
+
 .auth-text-button {
   border: 0;
   border-radius: 4px;

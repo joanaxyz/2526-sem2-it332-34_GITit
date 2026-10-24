@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { authApi, type RegisterPayload } from '@/shared/auth/authApi'
 import { presentAuthError } from '@/features/auth/api/authError'
 import { verifyEmailPath } from '@/features/auth/api/emailVerification'
+import { OAuthButtons } from '@/features/auth/components/OAuthButtons'
 import { PasswordStrengthIndicator } from '@/features/auth/components/PasswordStrengthIndicator'
 import { useServerFieldErrors } from '@/shared/api/useServerFieldErrors'
 import { cn } from '@/shared/utils/cn'
@@ -170,6 +171,7 @@ export function RegisterForm() {
         {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <UserPlus data-icon="inline-start" />}
         {mutation.isPending ? 'Creating account' : 'Create account'}
       </button>
+      <OAuthButtons />
       <p className="auth-alt-link">
         Already registered?{' '}
         <Link to="/login">

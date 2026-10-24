@@ -194,6 +194,43 @@ The emails link their logo and guide portrait from the Vercel site
 (`/email/git-it-logo.png`, `/email/guide-mascot.png`), so they render once the
 frontend deploy that ships those files is live.
 
+## 8. GitHub and Google sign-in
+
+The sign-in and sign-up pages offer **GitHub** and **Google** next to the email
+form. A provider whose client id or secret is blank in Render sends players back
+with "That sign-in option isn't set up yet", so each one can be enabled on its
+own.
+
+The provider redirects back through the Vercel `/api` proxy, so the callback
+URLs use the Vercel origin:
+
+- GitHub: `https://<vercel-site>/api/auth/oauth/github/callback/`
+- Google: `https://<vercel-site>/api/auth/oauth/google/callback/`
+
+**GitHub.** Under **Settings > Developer settings > OAuth Apps > New OAuth App**,
+set the homepage URL to the Vercel site and add the GitHub callback above as a
+redirect URI. Add `http://localhost:8000/api/auth/oauth/github/callback/` as a
+second redirect URI for local development (an OAuth App takes up to ten; leave
+wildcard matching off). Generate a client secret, then set
+`GITHUB_OAUTH_CLIENT_ID` and `GITHUB_OAUTH_CLIENT_SECRET` in Render.
+
+**Google.** In Google Cloud Console, configure the OAuth consent screen
+(External; scopes `openid`, `email`, `profile`) and publish it, or only listed
+test users can sign in. Under **APIs & Services > Credentials**, create an OAuth
+client ID of type **Web application**, add the Google callback above as an
+authorized redirect URI (add the `localhost:8000` one too for local development),
+then set `GOOGLE_OAUTH_CLIENT_ID` and `GOOGLE_OAUTH_CLIENT_SECRET` in Render.
+
+Account rules: a provider account that was linked before signs straight in; a
+new one links to the existing account with the same verified email, or creates
+a verified account with a username taken from the provider profile. Staff
+accounts are never linked automatically and keep password sign-in. Accounts
+created this way have no password; "Forgot password?" does not apply to them.
+
+Locally, the browser calls Django directly, so set
+`OAUTH_CALLBACK_BASE_URL=http://localhost:8000/api` in `backend/.env`. In
+production it defaults to `FRONTEND_BASE_URL` + `/api`.
+
 ## Free-tier limitations
 
 - The app sleeps after 15 minutes without inbound traffic and can take about a

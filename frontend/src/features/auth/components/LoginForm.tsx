@@ -9,6 +9,7 @@ import { z } from 'zod'
 import { authApi } from '@/shared/auth/authApi'
 import { presentAuthError } from '@/features/auth/api/authError'
 import { unverifiedEmailFrom, verifyEmailPath } from '@/features/auth/api/emailVerification'
+import { OAuthButtons } from '@/features/auth/components/OAuthButtons'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { storyPath } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
@@ -163,6 +164,8 @@ export function LoginForm() {
         {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <LogIn data-icon="inline-start" />}
         {mutation.isPending ? 'Signing in' : 'Sign in'}
       </button>
+
+      <OAuthButtons />
 
       <p className="auth-alt-link">
         New to GIT it!?{' '}

@@ -182,6 +182,17 @@ services:
         sync: false
       - key: DEFAULT_FROM_EMAIL
         sync: false
+      # GitHub and Google sign-in. Providers call back through the Vercel /api
+      # proxy (FRONTEND_BASE_URL + /api/auth/oauth/<provider>/callback/); see
+      # deploy/RENDER.md. A provider with a blank id or secret is unavailable.
+      - key: GITHUB_OAUTH_CLIENT_ID
+        sync: false
+      - key: GITHUB_OAUTH_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_ID
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_SECRET
+        sync: false
       - key: PASSWORD_RESET_TIMEOUT
         value: "3600"
       - key: API_VERSION

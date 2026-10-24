@@ -105,6 +105,7 @@ export type ApiSchemas = {
   "Login": { "identifier": string; "password": string }
   "MotionModeEnum": "system" | "reduced" | "full"
   "NullEnum": null
+  "OAuthTicketExchange": { "ticket": string }
   "OnboardingPhaseEnum": "welcome" | "orientation" | "stories" | "shop" | "purchase" | "home" | "equip" | "done"
   "PasswordChange": { "current_password": string; "password": string; "password_confirm": string }
   "PasswordResetConfirm": { "password": string; "password_confirm": string; "token": string; "uid": string }
@@ -187,6 +188,7 @@ export type ApiPath =
   | "/api/auth/login/"
   | "/api/auth/logout/"
   | "/api/auth/me/"
+  | "/api/auth/oauth/exchange/"
   | "/api/auth/password-change/"
   | "/api/auth/password-reset/confirm/"
   | "/api/auth/password-reset/request/"
@@ -254,6 +256,7 @@ export type ApiMethodByPath = {
   "/api/auth/login/": "POST"
   "/api/auth/logout/": "POST"
   "/api/auth/me/": "GET"
+  "/api/auth/oauth/exchange/": "POST"
   "/api/auth/password-change/": "POST"
   "/api/auth/password-reset/confirm/": "POST"
   "/api/auth/password-reset/request/": "POST"
@@ -328,6 +331,7 @@ export const apiOperations = {
   auth_login_create: { method: "POST", path: "/api/auth/login/", operationId: "auth_login_create", tags: ["auth"] },
   auth_logout_create: { method: "POST", path: "/api/auth/logout/", operationId: "auth_logout_create", tags: ["auth"] },
   auth_me_retrieve: { method: "GET", path: "/api/auth/me/", operationId: "auth_me_retrieve", tags: ["auth"] },
+  auth_oauth_exchange_create: { method: "POST", path: "/api/auth/oauth/exchange/", operationId: "auth_oauth_exchange_create", tags: ["auth"] },
   auth_password_change_create: { method: "POST", path: "/api/auth/password-change/", operationId: "auth_password_change_create", tags: ["auth"] },
   auth_password_reset_confirm_create: { method: "POST", path: "/api/auth/password-reset/confirm/", operationId: "auth_password_reset_confirm_create", tags: ["auth"] },
   auth_password_reset_request_create: { method: "POST", path: "/api/auth/password-reset/request/", operationId: "auth_password_reset_request_create", tags: ["auth"] },
@@ -411,6 +415,7 @@ export type ApiRequestBodyByOperation = {
   auth_login_create: ApiSchemas["Login"]
   auth_logout_create: null
   auth_me_retrieve: null
+  auth_oauth_exchange_create: ApiSchemas["OAuthTicketExchange"]
   auth_password_change_create: ApiSchemas["PasswordChange"]
   auth_password_reset_confirm_create: ApiSchemas["PasswordResetConfirm"]
   auth_password_reset_request_create: ApiSchemas["PasswordResetRequest"]
@@ -491,6 +496,7 @@ export type ApiResponseBodyByOperation = {
   auth_login_create: ApiSchemas["SessionResponse"]
   auth_logout_create: null
   auth_me_retrieve: ApiSchemas["User"]
+  auth_oauth_exchange_create: ApiSchemas["SessionResponse"]
   auth_password_change_create: ApiSchemas["SessionResponse"]
   auth_password_reset_confirm_create: ApiSchemas["DetailResponse"]
   auth_password_reset_request_create: ApiSchemas["DetailResponse"]
