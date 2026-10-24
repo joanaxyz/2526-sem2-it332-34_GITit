@@ -3,18 +3,12 @@ import { CheckCircle2, ChevronRight, ShoppingBag } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { companionAvatarSrc } from '@/features/home/utils/homeAssets'
 import { queryKeys } from '@/shared/api/queryKeys'
-import { COMPANIONS } from '@/shared/cosmetics/companions/registry'
 import { SHOP_ROUTE } from '@/shared/navigation/routes'
 import { playerLoadoutApi } from '@/shared/player-loadout/playerLoadoutApi'
 import { shopCatalogQueryOptions } from '@/shared/shop/api/shopApi'
 import { hasLocalDefinition, toDisplayItem } from '@/shared/shop/model/shopPresentation'
-
-/** Square avatar art, falling back to portrait/idle for companions without one. */
-function companionAvatar(slug: string, fallback?: string) {
-  const sprites = COMPANIONS[slug]?.sprites
-  return sprites?.avatar?.src ?? sprites?.portrait?.src ?? fallback
-}
 
 type HomeCompanionRosterProps = {
   /** Called when a roster entry is picked, so the showcase can preview it. */
@@ -73,7 +67,7 @@ export function HomeCompanionRoster({ onSelect }: HomeCompanionRosterProps = {})
         <>
           <div className="home-roster-list" role="tablist" aria-label="Owned companions" data-onboarding="profile-roster">
             {owned.map((companion) => {
-              const avatar = companionAvatar(companion.slug, companion.art)
+              const avatar = companionAvatarSrc(companion.slug, companion.art)
               return (
                 <button
                   key={companion.slug}

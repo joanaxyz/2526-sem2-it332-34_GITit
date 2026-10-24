@@ -101,7 +101,8 @@ export function isSpritePixelAnchorWarm(
   return spriteAnchorCache.has(animationKey(animation, alphaThreshold))
 }
 
-function loadImagePixelBounds(src: string, alphaThreshold = DEFAULT_ALPHA_THRESHOLD): Promise<ImagePixelBounds | null> {
+/** Measure an image's visible pixels into the cache `useImagePixelBounds` reads on first render. */
+export function loadImagePixelBounds(src: string, alphaThreshold = DEFAULT_ALPHA_THRESHOLD): Promise<ImagePixelBounds | null> {
   const key = `${src}|${alphaThreshold}`
   if (imageBoundsCache.has(key)) return Promise.resolve(imageBoundsCache.get(key) ?? null)
 
