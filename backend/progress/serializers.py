@@ -90,12 +90,6 @@ class DashboardCountsSerializer(serializers.Serializer):
     abandoned = serializers.IntegerField()
 
 
-class DashboardStreakSerializer(serializers.Serializer):
-    current = serializers.IntegerField()
-    longest = serializers.IntegerField()
-    last_completed_on = serializers.DateField(allow_null=True)
-
-
 class DashboardRetryTrendSerializer(serializers.Serializer):
     level_title = serializers.CharField()
     attempts = serializers.IntegerField()
@@ -129,9 +123,10 @@ class StatsHeadlineSerializer(serializers.Serializer):
     hard_tier_clears = StatsScopedCountSerializer()
     comebacks = StatsScopedCountSerializer()
     perfect_clears = serializers.IntegerField()
-    day_streak = serializers.IntegerField()
-    longest_streak = serializers.IntegerField()
+    gate_trial_clears = serializers.IntegerField()
+    hard_gate_trial_clears = serializers.IntegerField()
     gitcoins = serializers.IntegerField()
+    gitcoins_earned = serializers.IntegerField()
     commands_run = serializers.IntegerField()
 
 
@@ -157,7 +152,6 @@ class DashboardSummaryResponseSerializer(serializers.Serializer):
     counts = DashboardCountsSerializer()
     completed_story_slug = serializers.CharField(allow_null=True)
     completed_stories = serializers.ListField(child=serializers.CharField())
-    streak = DashboardStreakSerializer()
     perfect_clears = serializers.IntegerField()
     mastery = serializers.FloatField()
     retry_trends = DashboardRetryTrendSerializer(many=True)

@@ -68,7 +68,7 @@ export function HomeProfilePanel({
           <strong>
             {playerName || (companion.status === 'ready' ? companion.definition.label : 'Adventurer')}
           </strong>
-          <span>{rank.title}</span>
+          <span>{rank.tier.name}</span>
         </div>
         <div className="home-profile-currencies" data-onboarding="profile-currencies">
           <div>
@@ -108,7 +108,7 @@ export function HomeProfilePanel({
         {/* Levels cleared and perfect clears are absent on purpose: the two
             counts above already state them. */}
         <div className="home-profile-stats">
-          <div><span>Day Streak</span><strong>{formatNumber(home.streak.current)}</strong></div>
+          <div><span>Gate Trials</span><strong>{formatNumber(stats.headline.gate_trial_clears)}</strong></div>
           <div><span>Commands Run</span><strong>{formatNumber(stats.headline.commands_run)}</strong></div>
         </div>
       </div>

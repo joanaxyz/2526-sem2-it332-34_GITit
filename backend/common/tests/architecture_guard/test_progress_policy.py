@@ -244,7 +244,7 @@ def test_dashboard_openapi_guard_rejects_loose_dynamic_and_array_shapes():
     summary["properties"]["retry_trends"] = {"type": "object"}
     summary["properties"]["completed_story_slug"] = {"type": "string"}
     summary["required"].remove("completed_story_slug")
-    schemas["DashboardStreak"]["properties"]["last_completed_on"] = {"type": "string"}
+    schemas["DashboardRetryTrend"]["properties"]["label"] = {"type": "integer"}
     schema["paths"]["/api/progress/dashboard/"]["get"]["responses"]["200"]["content"][
         "application/json"
     ]["schema"] = {"type": "object"}
@@ -253,7 +253,7 @@ def test_dashboard_openapi_guard_rejects_loose_dynamic_and_array_shapes():
     assert any(
         "DashboardSummaryResponse property schemas must be exact" in row for row in violations
     )
-    assert any("DashboardStreak property schemas must be exact" in row for row in violations)
+    assert any("DashboardRetryTrend property schemas must be exact" in row for row in violations)
     assert any("progress_dashboard_retrieve must return" in row for row in violations)
 
 

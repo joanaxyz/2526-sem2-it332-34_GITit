@@ -49,7 +49,7 @@ describe('buildHomeStatsModel', () => {
       finishRate: { value: 76, numerator: 43, denominator: 57 },
     })
     expect(model.achievements).toHaveLength(19)
-    expect(model.achievements.filter((achievement) => achievement.unlocked)).toHaveLength(16)
+    expect(model.achievements.filter((achievement) => achievement.unlocked)).toHaveLength(13)
   })
 
   it('plots nothing at all for an account with no trend', () => {

@@ -8,7 +8,6 @@ from progress.models import (
     AdventureLevelTierCompletion,
     ChallengeTrialCompletion,
     CoinTransaction,
-    StreakRecord,
 )
 from testing.runtime_factories import (
     create_stage_readme_challenge_run,
@@ -80,14 +79,6 @@ def test_completion_stars_are_bounded(django_user_model):
 
 def test_progress_and_command_step_counters_are_consistent(django_user_model):
     fixture = create_stage_readme_challenge_run(django_user_model)
-    StreakRecord.objects.get_or_create(player=fixture.player)
-
-    _assert_constraint_rejects(
-        lambda: StreakRecord.objects.filter(player=fixture.player).update(
-            current_streak=2,
-            longest_streak=1,
-        )
-    )
     _assert_constraint_rejects(
         lambda: CoinTransaction.objects.create(
             player=fixture.player,

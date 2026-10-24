@@ -16,7 +16,6 @@ from common.exceptions import Conflict
 from common.http import get_client_ip
 from players.models import PlayerPreferences
 from players.services import get_or_create_player
-from progress.models import StreakRecord
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +73,6 @@ class UserService:
         PlayerPreferences.objects.create(
             player=player, onboarding_phase=PlayerPreferences.ONBOARDING_START
         )
-        StreakRecord.objects.create(player=player)
         # The default Arcane Spire story is owned implicitly by
         # everyone — nothing to grant at signup. Companions are NOT free: the
         # new player owns none yet and must buy one in the Shop before they can

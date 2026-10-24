@@ -434,7 +434,7 @@ describe('HomeHubView contract', () => {
     const profile = profileRegion()
     // The ladder used to sit behind a tab; it is always on screen now, so a
     // companion failure can never be the reason a rank is not visible.
-    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
+    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
 
     mocks.usePlayerLoadout.mockReturnValue({
       companion: COMPANIONS.blue,
@@ -446,7 +446,7 @@ describe('HomeHubView contract', () => {
     })
     await act(async () => router.navigate('/home?view=profile&refresh=error', { replace: true }))
 
-    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
+    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
     expect(within(profile).getAllByRole('alert')[0]).toHaveTextContent('Companion unavailable')
   })
 
@@ -455,14 +455,14 @@ describe('HomeHubView contract', () => {
     const profile = profileRegion()
 
     fireEvent.click(within(profile).getByRole('button', { name: /attack with inspect history/i }))
-    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
+    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
 
     openView('Progress')
     expect(profileWorkspace()).toHaveAttribute('hidden')
     openView('Profile')
 
     expect(profileWorkspace()).not.toHaveAttribute('hidden')
-    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
+    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
     expect(within(profile).getByRole('button', { name: /attack with inspect history/i })).toHaveClass('is-selected')
   })
 
@@ -471,7 +471,9 @@ describe('HomeHubView contract', () => {
     const profile = profileRegion()
 
     expect(within(profile).getByText('Learner')).toBeInTheDocument()
-    expect(within(profile).getByText('Arcane Adept of the Fifth Chapter')).toBeInTheDocument()
+    // Levels and chapters are not gated, so the title is the bare rank name.
+    expect(within(profile).getByText('Learner').closest('.home-profile-name')).toHaveTextContent('Arcane Adept')
+    expect(within(profile).queryByText(/of the .* Chapter/)).not.toBeInTheDocument()
 
     // Each of these is stated once now that both halves render together: the
     // clear counts sit under the crest, the meter sits in it.
@@ -604,7 +606,7 @@ describe('HomeHubView contract', () => {
     })
     await act(async () => router.navigate('/home?view=profile&refresh=1', { replace: true }))
 
-    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
+    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
     expect(screen.getByLabelText(/white idle animation/i)).toBeInTheDocument()
   })
 })

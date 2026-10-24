@@ -1,6 +1,6 @@
 from datetime import date, datetime, time, timedelta
 
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
@@ -16,9 +16,23 @@ from common.constants import (
 from curriculum.models import Chapter, CommandForm, CommandSkill
 from curriculum.selectors import published_stories, stories_completed_map
 from practice.models import CommandStep
-from progress.models import AdventureLevelTierCompletion, Wallet
+from progress.models import (
+    AdventureLevelTierCompletion,
+    ChallengeTrialCompletion,
+    CoinTransaction,
+    Wallet,
+)
 from progress.objectives import SO_CAR_LEVELS
 from progress.services.kpi_range import ALL_TIME, KpiRange
+
+# Ledger reasons for GitCoins won by playing: tier clears, Challenge Gate
+# trials, and chapter chests.
+PLAY_REWARD_REASONS = (
+    "adventure_level_reward",
+    "adventure_tier_reward",
+    "challenge_trial_reward",
+    "chapter_chest",
+)
 
 # Trailing window (days) for the consistency axis.
 
@@ -182,7 +196,6 @@ class MetricsService:
             str(module["number"]): {key: module[key] for key in ("scr", "hlcr", "arc")}
             for module in performance["modules"]
         }
-        streak = self._runebound_streak(player=player)
         stories = list(published_stories().filter(slug=self.LEARNER_CURRICULUM_STORY_SLUG))
         completed_map = stories_completed_map(player=player, stories=stories)
         completed_stories = [story.slug for story in stories if completed_map.get(story.id, False)]
@@ -198,7 +211,6 @@ class MetricsService:
             },
             "completed_story_slug": completed_stories[0] if completed_stories else None,
             "completed_stories": completed_stories,
-            "streak": streak,
             "perfect_clears": perfect_stars,
             # Rank is expressed directly in terms of this (0-100): the same
             # "how deeply have you drilled what you've met" score as the Stats
@@ -249,7 +261,10 @@ class MetricsService:
         )
         started = run_counts["started"] or 0
         completed = run_counts["completed"] or 0
-        streak = self._runebound_streak(player=player)
+        gate_counts = self._runebound_gate_completions(player=player).aggregate(
+            total=Count("id"),
+            hard=Count("id", filter=Q(challenge_trial__difficulty=DIFFICULTY_HARD)),
+        )
         wallet = Wallet.objects.filter(player=player).only("balance").first()
 
         headline = {
@@ -259,9 +274,10 @@ class MetricsService:
             "hard_tier_clears": {"value": completion_counts["hard"] or 0, "scope": "runebound"},
             "comebacks": {"value": run_counts["comebacks"] or 0, "scope": "runebound"},
             "perfect_clears": completion_counts["perfect"] or 0,
-            "day_streak": streak["current"],
-            "longest_streak": streak["longest"],
+            "gate_trial_clears": gate_counts["total"] or 0,
+            "hard_gate_trial_clears": gate_counts["hard"] or 0,
             "gitcoins": wallet.balance if wallet else 0,
+            "gitcoins_earned": self._gitcoins_earned(player=player),
             "commands_run": total_steps,
         }
 
@@ -397,28 +413,21 @@ class MetricsService:
             )
         )
 
-    def _runebound_streak(self, *, player) -> dict:
-        """Derive streaks from Arcane Spire completions, not global legacy state."""
-        days = list(
-            self._runebound_completions(player=player)
-            .annotate(day=TruncDate("completed_at"))
-            .order_by("day")
-            .values_list("day", flat=True)
-            .distinct()
+    def _runebound_gate_completions(self, *, player):
+        return ChallengeTrialCompletion.objects.filter(
+            player=player,
+            challenge_trial__challenge_level__chapter__story__slug=(
+                self.LEARNER_CURRICULUM_STORY_SLUG
+            ),
         )
-        if not days:
-            return {"current": 0, "longest": 0, "last_completed_on": None}
 
-        longest = current = run = 1
-        for previous, day in zip(days, days[1:], strict=False):
-            run = run + 1 if day == previous + timedelta(days=1) else 1
-            longest = max(longest, run)
-        current = run
-        return {
-            "current": current,
-            "longest": longest,
-            "last_completed_on": days[-1],
-        }
+    def _gitcoins_earned(self, *, player) -> int:
+        """Lifetime GitCoins won through play. Unlike the wallet balance, shop
+        spending never lowers it, and signup or admin grants never raise it."""
+        earned = CoinTransaction.objects.filter(
+            player=player, reason__in=PLAY_REWARD_REASONS, amount__gt=0
+        ).aggregate(total=Sum("amount"))["total"]
+        return earned or 0
 
     def _active_days(self, *, player, since) -> set:
         completion_days = (

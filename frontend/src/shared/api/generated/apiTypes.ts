@@ -76,8 +76,7 @@ export type ApiSchemas = {
   "DashboardCounts": { "abandoned": number; "completed": number; "failed": number; "started": number }
   "DashboardKpiSet": { "arc": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"] }
   "DashboardRetryTrend": { "attempts": number; "label": string; "level_title": string; "retries": number }
-  "DashboardStreak": { "current": number; "last_completed_on": string | null; "longest": number }
-  "DashboardSummaryResponse": { "chapter_kpis": { [key: string]: ApiSchemas["DashboardKpiSet"] }; "completed_stories": Array<string>; "completed_story_slug": string | null; "counts": ApiSchemas["DashboardCounts"]; "kpis": ApiSchemas["DashboardKpiSet"]; "mastery": number; "perfect_clears": number; "retry_trends": Array<ApiSchemas["DashboardRetryTrend"]>; "streak": ApiSchemas["DashboardStreak"] }
+  "DashboardSummaryResponse": { "chapter_kpis": { [key: string]: ApiSchemas["DashboardKpiSet"] }; "completed_stories": Array<string>; "completed_story_slug": string | null; "counts": ApiSchemas["DashboardCounts"]; "kpis": ApiSchemas["DashboardKpiSet"]; "mastery": number; "perfect_clears": number; "retry_trends": Array<ApiSchemas["DashboardRetryTrend"]> }
   "DetailResponse": { "detail": string }
   "DifficultyEnum": "beginner" | "intermediate" | "advanced"
   "DrillBlank": { "answer": string; "index": number; "options": Array<ApiSchemas["DrillChoice"]> }
@@ -136,7 +135,7 @@ export type ApiSchemas = {
   "ShopResponse": { "active_companion": string | null; "items": Array<ApiSchemas["ShopItemResponse"]>; "purchases_enabled": boolean }
   "SourceEntryPointEnum": "level_page" | "retry"
   "StatsActivityResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "activity_window": ApiSchemas["ActivityWindowEnum"] }
-  "StatsHeadline": { "accuracy": number | null; "comebacks": ApiSchemas["StatsScopedCount"]; "commands_run": number; "day_streak": number; "finish_rate": ApiSchemas["RateMetric"]; "gitcoins": number; "hard_tier_clears": ApiSchemas["StatsScopedCount"]; "levels_completed": number; "longest_streak": number; "perfect_clears": number }
+  "StatsHeadline": { "accuracy": number | null; "comebacks": ApiSchemas["StatsScopedCount"]; "commands_run": number; "finish_rate": ApiSchemas["RateMetric"]; "gate_trial_clears": number; "gitcoins": number; "gitcoins_earned": number; "hard_gate_trial_clears": number; "hard_tier_clears": ApiSchemas["StatsScopedCount"]; "levels_completed": number; "perfect_clears": number }
   "StatsScopedCount": { "scope": string; "value": number }
   "StatsSkillAxis": { "command": string; "hint": string; "key": string; "label": string; "value": number | null }
   "StatsSummaryResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "activity_window": ApiSchemas["ActivityWindowEnum"]; "headline": ApiSchemas["StatsHeadline"]; "skill_profile": Array<ApiSchemas["StatsSkillAxis"]> }

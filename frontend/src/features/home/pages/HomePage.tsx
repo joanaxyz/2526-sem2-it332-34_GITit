@@ -44,7 +44,7 @@ export function HomePage() {
   if (home.isLoading || stats.isLoading) {
     return (
       <LoadingScreen
-        description="Pulling your rank, streak, stats, and achievements."
+        description="Pulling your rank, stats, and achievements."
         label="Loading home"
       />
     )
