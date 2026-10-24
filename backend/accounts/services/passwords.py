@@ -53,10 +53,7 @@ class PasswordResetService:
 
     @transaction.atomic
     def reset(self, *, user, password: str) -> None:
-        try:
-            validate_password(password, user=user)
-        except DjangoValidationError as exc:
-            raise serializers.ValidationError({"password": exc.messages}) from exc
+        self._validate_new_password(user, password)
         user.set_password(password)
         user.save(update_fields=["password"])
         self._invalidate_sessions(user)
@@ -71,14 +68,24 @@ class PasswordResetService:
             raise serializers.ValidationError(
                 {"current_password": "Current password is incorrect."}
             )
-        try:
-            validate_password(password, user=user)
-        except DjangoValidationError as exc:
-            raise serializers.ValidationError({"password": exc.messages}) from exc
+        self._validate_new_password(user, password)
         user.set_password(password)
         user.save(update_fields=["password"])
         self._invalidate_sessions(user)
         self._queue_password_changed_email(user)
+
+    @staticmethod
+    def _validate_new_password(user, password: str) -> None:
+        # Reusing the current password would sign out every session and send a
+        # "password changed" email while changing nothing.
+        if user.check_password(password):
+            raise serializers.ValidationError(
+                {"password": ["Choose a password different from your current one."]}
+            )
+        try:
+            validate_password(password, user=user)
+        except DjangoValidationError as exc:
+            raise serializers.ValidationError({"password": exc.messages}) from exc
 
     @staticmethod
     def _queue_password_changed_email(user) -> None:

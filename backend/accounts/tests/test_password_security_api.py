@@ -214,3 +214,66 @@ def test_password_reset_email_sends_through_brevo_http_api(
     assert payload["to"] == [{"email": user.email}]
     assert "/reset-password/" in payload["textContent"]
     assert "/reset-password/" in payload["htmlContent"]
+
+
+SAME_PASSWORD = "Choose a password different from your current one."
+
+
+def test_password_reset_rejects_the_current_password(db, api_client, django_user_model):
+    user = create_user(django_user_model, username="samereset", email="samereset@example.com")
+    old_tokens = TokenService().issue_for_user(user)
+    api_client.post("/api/auth/password-reset/request/", {"email": user.email}, format="json")
+    uid, token = reset_link_parts(mail.outbox[0].body)
+
+    response = api_client.post(
+        "/api/auth/password-reset/confirm/",
+        {
+            "uid": uid,
+            "token": token,
+            "password": "Password123!",
+            "password_confirm": "Password123!",
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["password"] == [SAME_PASSWORD]
+    # Nothing changed, so sessions stay alive and no "password changed" email goes out.
+    assert SessionRecord.objects.get(refresh_jti=old_tokens.refresh_jti).revoked_at is None
+    assert len(mail.outbox) == 1
+
+    # The rejected attempt does not spend the link; a different password still works.
+    retry = api_client.post(
+        "/api/auth/password-reset/confirm/",
+        {
+            "uid": uid,
+            "token": token,
+            "password": "NewPassword456!",
+            "password_confirm": "NewPassword456!",
+        },
+        format="json",
+    )
+    assert retry.status_code == status.HTTP_200_OK
+
+
+def test_password_change_rejects_the_current_password(db, api_client, django_user_model):
+    user = create_user(django_user_model, username="samechange", email="samechange@example.com")
+    tokens = TokenService().issue_for_user(user)
+    api_client.credentials(
+        HTTP_AUTHORIZATION=f"Bearer {tokens.access}",
+        HTTP_X_GIT_IT_CLIENT="web",
+    )
+
+    response = api_client.post(
+        "/api/auth/password-change/",
+        {
+            "current_password": "Password123!",
+            "password": "Password123!",
+            "password_confirm": "Password123!",
+        },
+        format="json",
+    )
+
+    assert response.status_code == status.HTTP_400_BAD_REQUEST
+    assert response.json()["password"] == [SAME_PASSWORD]
+    assert AccountSecurity.objects.get(user=user).auth_version == 1
