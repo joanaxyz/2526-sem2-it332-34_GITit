@@ -256,7 +256,7 @@ class MetricsService:
             "levels_completed": completion_counts["total"] or 0,
             "finish_rate": self._rate(completed, started),
             "accuracy": accuracy,
-            "boss_floors": {"value": completion_counts["hard"] or 0, "scope": "runebound"},
+            "hard_tier_clears": {"value": completion_counts["hard"] or 0, "scope": "runebound"},
             "comebacks": {"value": run_counts["comebacks"] or 0, "scope": "runebound"},
             "perfect_clears": completion_counts["perfect"] or 0,
             "day_streak": streak["current"],

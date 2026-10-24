@@ -17,7 +17,7 @@ HEADLINE_KEYS = {
     "levels_completed",
     "finish_rate",
     "accuracy",
-    "boss_floors",
+    "hard_tier_clears",
     "comebacks",
     "perfect_clears",
     "day_streak",
@@ -127,7 +127,7 @@ def test_authenticated_stats_summary_matches_documented_contract(db, django_user
     assert type(finish_rate["numerator"]) is int
     assert type(finish_rate["denominator"]) is int
     assert payload["headline"]["accuracy"] is None
-    for field_name in ("boss_floors", "comebacks"):
+    for field_name in ("hard_tier_clears", "comebacks"):
         scoped_count = payload["headline"][field_name]
         assert set(scoped_count) == {"value", "scope"}
         assert type(scoped_count["value"]) is int

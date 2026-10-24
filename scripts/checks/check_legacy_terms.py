@@ -71,6 +71,8 @@ FORBIDDEN_PATTERNS = [
     re.compile(r"obsidian-forge", re.IGNORECASE),
     re.compile(r"void-athenaeum", re.IGNORECASE),
     re.compile(r"the-convergence", re.IGNORECASE),
+    # There are no boss monsters; Hard-tier clears are "hard tier" everywhere.
+    re.compile(r"\bboss", re.IGNORECASE),
 ]
 
 
