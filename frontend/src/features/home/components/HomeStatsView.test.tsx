@@ -208,25 +208,25 @@ describe('HomeStatsView contract', () => {
     renderView('skills')
 
     const gallery = screen.getByRole('region', { name: 'Achievement gallery' })
-    expect(within(gallery).getByText('325')).toBeInTheDocument()
-    expect(within(gallery).getByText('/ 435 pts')).toBeInTheDocument()
-    expect(within(gallery).getByLabelText('325 of 435 achievement points earned')).toBeInTheDocument()
+    expect(within(gallery).getByText('240')).toBeInTheDocument()
+    expect(within(gallery).getByText('/ 455 pts')).toBeInTheDocument()
+    expect(within(gallery).getByLabelText('240 of 455 achievement points earned')).toBeInTheDocument()
 
-    const unlocked = within(gallery).getByRole('button', { name: 'Unlocked 16' })
-    const locked = within(gallery).getByRole('button', { name: 'Locked 3' })
+    const unlocked = within(gallery).getByRole('button', { name: 'Unlocked 13' })
+    const locked = within(gallery).getByRole('button', { name: 'Locked 6' })
     expect(within(gallery).getByRole('button', { name: 'All 19' })).toHaveAttribute('aria-pressed', 'true')
-    // The gallery used to stop at eight cards, so "16 unlocked" displayed seven.
+    // The gallery used to stop at eight cards, so a long unlocked list was cut short.
     expect(gallery.querySelectorAll('.home-overview-achievement-card')).toHaveLength(19)
-    expect(gallery.querySelectorAll('.home-overview-achievement-card.is-unlocked')).toHaveLength(16)
+    expect(gallery.querySelectorAll('.home-overview-achievement-card.is-unlocked')).toHaveLength(13)
 
     fireEvent.click(unlocked)
     expect(unlocked).toHaveAttribute('aria-pressed', 'true')
-    expect(gallery.querySelectorAll('.home-overview-achievement-card')).toHaveLength(16)
+    expect(gallery.querySelectorAll('.home-overview-achievement-card')).toHaveLength(13)
     expect(gallery.querySelectorAll('.home-overview-achievement-card.is-locked')).toHaveLength(0)
 
     fireEvent.click(locked)
     expect(locked).toHaveAttribute('aria-pressed', 'true')
-    expect(gallery.querySelectorAll('.home-overview-achievement-card')).toHaveLength(3)
+    expect(gallery.querySelectorAll('.home-overview-achievement-card')).toHaveLength(6)
   })
 
   it('uses one fetched response for the complete record and module selection', async () => {

@@ -19,11 +19,6 @@ const home: HomeSummary = {
   },
   completed_stories: [],
   completed_story_slug: null,
-  streak: {
-    current: 4,
-    longest: 4,
-    last_completed_on: '2026-07-12',
-  },
   perfect_clears: 2,
   mastery: 42,
   retry_trends: [],
@@ -40,9 +35,10 @@ const stats: StatsSummary = {
     hard_tier_clears: { value: 1, scope: 'all' },
     comebacks: { value: 1, scope: 'all' },
     perfect_clears: 2,
-    day_streak: 4,
-    longest_streak: 4,
+    gate_trial_clears: 1,
+    hard_gate_trial_clears: 0,
     gitcoins: 250,
+    gitcoins_earned: 1200,
     commands_run: 99,
   },
 }
@@ -57,20 +53,20 @@ describe('deriveAchievements', () => {
       'level-adept',
       'level-veteran',
       'level-champion',
-      'streak-spark',
-      'weeklong-flame',
-      'fortnight-blaze',
-      'perfectionist',
-      'star-collector',
       'hard-tier-breaker',
       'hard-tier-hunter',
+      'gate-breaker',
+      'gate-warden',
+      'perfectionist',
+      'star-collector',
+      'rank-glyph-weaver',
+      'rank-arcane-adept',
+      'rank-archon',
       'comeback-kid',
       'command-cadet',
       'command-captain',
-      'coin-hoarder',
       'sharpshooter',
-      'story-climber',
-      'story-sentinel',
+      'coin-hoarder',
       'arcane-spire-master',
     ])
     expect(achievements.every((achievement) => achievement.imageSrc.length > 0)).toBe(true)
@@ -84,6 +80,26 @@ describe('deriveAchievements', () => {
       target: 90,
       unlocked: false,
     })
+  })
+
+  it('tracks rank badges against the rank ladder thresholds', () => {
+    const byId = new Map(deriveAchievements(home, stats).map((achievement) => [achievement.id, achievement]))
+
+    expect(byId.get('rank-glyph-weaver')).toMatchObject({ current: 35, target: 35, unlocked: true })
+    expect(byId.get('rank-arcane-adept')).toMatchObject({ current: 42, target: 60, unlocked: false })
+  })
+
+  it('counts GitCoins earned from play, not the spendable balance', () => {
+    const vault = deriveAchievements(home, stats).find((achievement) => achievement.id === 'coin-hoarder')
+
+    expect(vault).toMatchObject({ current: 1000, target: 1000, unlocked: true })
+  })
+
+  it('unlocks the gate badges from Challenge Gate trial clears', () => {
+    const byId = new Map(deriveAchievements(home, stats).map((achievement) => [achievement.id, achievement]))
+
+    expect(byId.get('gate-breaker')?.unlocked).toBe(true)
+    expect(byId.get('gate-warden')).toMatchObject({ current: 0, target: 4, unlocked: false })
   })
 
   it('unlocks the curriculum badge only for Arcane Spire completion', () => {

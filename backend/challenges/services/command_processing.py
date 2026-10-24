@@ -29,7 +29,6 @@ from practice.models import CommandStep
 from practice.services.scaffolding import FeedbackGenerationService, ScaffoldingService
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import ChallengeLevelCompletion, ChallengeTrialCompletion
-from progress.services import StreakService
 from progress.services.scored_completions import update_best_score
 from progress.wallet import WalletService
 from simulator.services import (
@@ -284,7 +283,6 @@ class ChallengeCommandProcessingService:
             if not created:
                 update_best_score(completion, run=run, run_field="challenge_run")
             self._complete_challenge_level_if_ready(run=run)
-            StreakService().record_completion(player=run.player, completed_at=run.completed_at)
             # Authored trial reward; the ledger award_key keeps it once-per-trial.
             if run.challenge_trial.reward_coins:
                 WalletService().award(

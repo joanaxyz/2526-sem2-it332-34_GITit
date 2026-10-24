@@ -1,6 +1,3 @@
-from datetime import date
-
-from django.utils import timezone
 from rest_framework.test import APIClient
 
 from adventures.models import (
@@ -22,7 +19,6 @@ SUMMARY_KEYS = {
     "counts",
     "completed_story_slug",
     "completed_stories",
-    "streak",
     "perfect_clears",
     "mastery",
     "retry_trends",
@@ -30,7 +26,6 @@ SUMMARY_KEYS = {
 KPI_KEYS = {"scr", "arc", "hlcr"}
 RATE_KEYS = {"value", "numerator", "denominator"}
 COUNT_KEYS = {"started", "completed", "failed", "abandoned"}
-STREAK_KEYS = {"current", "longest", "last_completed_on"}
 RETRY_KEYS = {"level_title", "attempts", "retries", "label"}
 
 
@@ -59,13 +54,6 @@ def assert_dashboard_wire_shape(payload):
     assert payload["completed_story_slug"] is None or type(payload["completed_story_slug"]) is str
     assert type(payload["completed_stories"]) is list
     assert all(type(slug) is str for slug in payload["completed_stories"])
-
-    streak = payload["streak"]
-    assert set(streak) == STREAK_KEYS
-    assert type(streak["current"]) is int
-    assert type(streak["longest"]) is int
-    if streak["last_completed_on"] is not None:
-        assert date.fromisoformat(streak["last_completed_on"])
 
     assert type(payload["perfect_clears"]) is int
     assert type(payload["mastery"]) in {int, float}
@@ -101,11 +89,6 @@ def test_authenticated_empty_dashboard_matches_exact_documented_contract(db, dja
     }
     assert payload["completed_story_slug"] is None
     assert payload["completed_stories"] == []
-    assert payload["streak"] == {
-        "current": 0,
-        "longest": 0,
-        "last_completed_on": None,
-    }
     assert payload["retry_trends"] == []
 
     documented = DashboardSummaryResponseSerializer(data=payload)
@@ -187,11 +170,6 @@ def test_authenticated_dashboard_exposes_typed_runebound_chapter_and_retry_rows(
     }
     chapter_kpis = payload["chapter_kpis"][str(chapter.number)]
     assert chapter_kpis["scr"] == payload["kpis"]["scr"]
-    assert payload["streak"] == {
-        "current": 1,
-        "longest": 1,
-        "last_completed_on": timezone.localdate().isoformat(),
-    }
     assert payload["retry_trends"] == [
         {
             "level_title": "Runebound Branching",

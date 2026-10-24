@@ -104,11 +104,6 @@ def progress_summary_backend_contract_violations(
             "failed": "serializers.IntegerField()",
             "abandoned": "serializers.IntegerField()",
         },
-        "DashboardStreakSerializer": {
-            "current": "serializers.IntegerField()",
-            "longest": "serializers.IntegerField()",
-            "last_completed_on": "serializers.DateField(allow_null=True)",
-        },
         "DashboardRetryTrendSerializer": {
             "level_title": "serializers.CharField()",
             "attempts": "serializers.IntegerField()",
@@ -138,9 +133,10 @@ def progress_summary_backend_contract_violations(
             "hard_tier_clears": "StatsScopedCountSerializer()",
             "comebacks": "StatsScopedCountSerializer()",
             "perfect_clears": "serializers.IntegerField()",
-            "day_streak": "serializers.IntegerField()",
-            "longest_streak": "serializers.IntegerField()",
+            "gate_trial_clears": "serializers.IntegerField()",
+            "hard_gate_trial_clears": "serializers.IntegerField()",
             "gitcoins": "serializers.IntegerField()",
+            "gitcoins_earned": "serializers.IntegerField()",
             "commands_run": "serializers.IntegerField()",
         },
         "StatsSummaryResponseSerializer": {
@@ -161,7 +157,6 @@ def progress_summary_backend_contract_violations(
             "counts": "DashboardCountsSerializer()",
             "completed_story_slug": "serializers.CharField(allow_null=True)",
             "completed_stories": "serializers.ListField(child=serializers.CharField())",
-            "streak": "DashboardStreakSerializer()",
             "perfect_clears": "serializers.IntegerField()",
             "mastery": "serializers.FloatField()",
             "retry_trends": "DashboardRetryTrendSerializer(many=True)",
@@ -347,9 +342,10 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
             "hard_tier_clears": {"$ref": "#/components/schemas/StatsScopedCount"},
             "comebacks": {"$ref": "#/components/schemas/StatsScopedCount"},
             "perfect_clears": {"type": "integer"},
-            "day_streak": {"type": "integer"},
-            "longest_streak": {"type": "integer"},
+            "gate_trial_clears": {"type": "integer"},
+            "hard_gate_trial_clears": {"type": "integer"},
             "gitcoins": {"type": "integer"},
+            "gitcoins_earned": {"type": "integer"},
             "commands_run": {"type": "integer"},
         },
         "StatsSummaryResponse": {
@@ -613,15 +609,6 @@ def dashboard_openapi_contract_violations(schema: dict) -> list[str]:
             "retries": {"type": "integer"},
             "label": {"type": "string"},
         },
-        "DashboardStreak": {
-            "current": {"type": "integer"},
-            "longest": {"type": "integer"},
-            "last_completed_on": {
-                "type": "string",
-                "format": "date",
-                "nullable": True,
-            },
-        },
         "DashboardSummaryResponse": {
             "kpis": {"$ref": "#/components/schemas/DashboardKpiSet"},
             "chapter_kpis": {
@@ -634,7 +621,6 @@ def dashboard_openapi_contract_violations(schema: dict) -> list[str]:
                 "type": "array",
                 "items": {"type": "string"},
             },
-            "streak": {"$ref": "#/components/schemas/DashboardStreak"},
             "perfect_clears": {"type": "integer"},
             "mastery": {"type": "number", "format": "double"},
             "retry_trends": {

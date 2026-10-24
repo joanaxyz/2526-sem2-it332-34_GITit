@@ -5284,27 +5284,6 @@
                     "retries"
                 ]
             },
-            "DashboardStreak": {
-                "type": "object",
-                "properties": {
-                    "current": {
-                        "type": "integer"
-                    },
-                    "longest": {
-                        "type": "integer"
-                    },
-                    "last_completed_on": {
-                        "type": "string",
-                        "format": "date",
-                        "nullable": true
-                    }
-                },
-                "required": [
-                    "current",
-                    "last_completed_on",
-                    "longest"
-                ]
-            },
             "DashboardSummaryResponse": {
                 "type": "object",
                 "properties": {
@@ -5330,9 +5309,6 @@
                             "type": "string"
                         }
                     },
-                    "streak": {
-                        "$ref": "#/components/schemas/DashboardStreak"
-                    },
                     "perfect_clears": {
                         "type": "integer"
                     },
@@ -5355,8 +5331,7 @@
                     "kpis",
                     "mastery",
                     "perfect_clears",
-                    "retry_trends",
-                    "streak"
+                    "retry_trends"
                 ]
             },
             "DetailResponse": {
@@ -6658,13 +6633,16 @@
                     "perfect_clears": {
                         "type": "integer"
                     },
-                    "day_streak": {
+                    "gate_trial_clears": {
                         "type": "integer"
                     },
-                    "longest_streak": {
+                    "hard_gate_trial_clears": {
                         "type": "integer"
                     },
                     "gitcoins": {
+                        "type": "integer"
+                    },
+                    "gitcoins_earned": {
                         "type": "integer"
                     },
                     "commands_run": {
@@ -6675,12 +6653,13 @@
                     "accuracy",
                     "comebacks",
                     "commands_run",
-                    "day_streak",
                     "finish_rate",
+                    "gate_trial_clears",
                     "gitcoins",
+                    "gitcoins_earned",
+                    "hard_gate_trial_clears",
                     "hard_tier_clears",
                     "levels_completed",
-                    "longest_streak",
                     "perfect_clears"
                 ]
             },

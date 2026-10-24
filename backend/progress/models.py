@@ -1,24 +1,6 @@
 from django.db import models
 
 
-class StreakRecord(models.Model):
-    player = models.OneToOneField("players.Player", on_delete=models.CASCADE)
-    current_streak = models.PositiveIntegerField(default=0)
-    longest_streak = models.PositiveIntegerField(default=0)
-    last_completed_on = models.DateField(null=True, blank=True)
-
-    class Meta:
-        constraints = [
-            models.CheckConstraint(
-                condition=models.Q(longest_streak__gte=models.F("current_streak")),
-                name="streak_longest_gte_current",
-            ),
-        ]
-
-    def __str__(self) -> str:
-        return f"Streak({self.player_id}: {self.current_streak})"
-
-
 class Wallet(models.Model):
     player = models.OneToOneField("players.Player", on_delete=models.CASCADE, related_name="wallet")
     balance = models.PositiveIntegerField(default=0)
