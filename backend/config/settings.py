@@ -370,6 +370,7 @@ REST_FRAMEWORK = {
         "auth_email_verification_resend": env(
             "THROTTLE_AUTH_EMAIL_VERIFICATION_RESEND", default="60/hour"
         ),
+        "auth_oauth": env("THROTTLE_AUTH_OAUTH", default="120/hour"),
         "command_submit": env("THROTTLE_COMMAND_SUBMIT", default="120/min"),
         "tutor_chat": env("THROTTLE_TUTOR_CHAT", default="12/min"),
     },
@@ -452,6 +453,24 @@ FRONTEND_BASE_URL = env("FRONTEND_BASE_URL", default="http://localhost:5173").rs
 # Where emails load their logo and guide portrait from. Inboxes cannot reach a
 # localhost dev server, so local setups point this at the deployed site.
 EMAIL_ASSET_BASE_URL = env("EMAIL_ASSET_BASE_URL", default=FRONTEND_BASE_URL).rstrip("/")
+
+# GitHub and Google sign-in. A provider whose client id or secret is blank is
+# simply unavailable. Providers redirect back to
+# <OAUTH_CALLBACK_BASE_URL>/auth/oauth/<provider>/callback/, the API origin the
+# browser uses: the Vercel /api proxy in production, the Django port locally.
+OAUTH_CALLBACK_BASE_URL = env(
+    "OAUTH_CALLBACK_BASE_URL", default=f"{FRONTEND_BASE_URL}/api"
+).rstrip("/")
+OAUTH_PROVIDERS = {
+    "github": {
+        "client_id": env("GITHUB_OAUTH_CLIENT_ID", default="").strip(),
+        "client_secret": env("GITHUB_OAUTH_CLIENT_SECRET", default="").strip(),
+    },
+    "google": {
+        "client_id": env("GOOGLE_OAUTH_CLIENT_ID", default="").strip(),
+        "client_secret": env("GOOGLE_OAUTH_CLIENT_SECRET", default="").strip(),
+    },
+}
 
 if not DEBUG:
     if not FRONTEND_BASE_URL.startswith("https://"):

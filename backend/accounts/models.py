@@ -71,3 +71,33 @@ class EmailVerification(models.Model):
     def __str__(self) -> str:
         state = "verified" if self.verified_at else "pending"
         return f"EmailVerification(user={self.user_id}, {state})"
+
+
+class OAuthIdentity(models.Model):
+    """A GitHub or Google account linked to a GIT it! account."""
+
+    PROVIDER_GITHUB = "github"
+    PROVIDER_GOOGLE = "google"
+    PROVIDER_CHOICES = [(PROVIDER_GITHUB, "GitHub"), (PROVIDER_GOOGLE, "Google")]
+
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="oauth_identities",
+    )
+    provider = models.CharField(max_length=16, choices=PROVIDER_CHOICES)
+    # The provider's stable account id; emails can change, this cannot.
+    subject = models.CharField(max_length=255)
+    email = models.EmailField(blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    last_used_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=["provider", "subject"], name="unique_oauth_provider_subject"
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"{self.provider}:{self.subject} -> {self.user_id}"
