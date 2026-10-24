@@ -11,6 +11,7 @@ import { Button } from '@/shared/components/Button'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { LoadingState } from '@/shared/components/LoadingState'
 import { Modal } from '@/shared/components/Modal'
+import { useHideWorldMascot } from '@/shared/mascot/useGuideMascotVisibility'
 import { cn } from '@/shared/utils/cn'
 
 export function ChapterBookModal({
@@ -22,6 +23,7 @@ export function ChapterBookModal({
   chapterTitle: string
   onClose: () => void
 }) {
+  useHideWorldMascot()
   const bookQuery = useQuery({
     queryKey: queryKeys.chapterBook(chapterId),
     queryFn: () => storyMapApi.getChapterBook(chapterId),

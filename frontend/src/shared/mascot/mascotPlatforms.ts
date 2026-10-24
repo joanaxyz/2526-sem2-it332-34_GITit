@@ -15,11 +15,11 @@ export function mascotPlatforms(root: HTMLElement, host: DOMRect): MascotPlatfor
   })
 }
 
-export function mascotPlatform(element: HTMLElement, root: HTMLElement, host: DOMRect): MascotPlatform | null {
+export function mascotPlatform(element: HTMLElement, root: HTMLElement, host: DOMRect, perch = false): MascotPlatform | null {
   if (!element.isConnected || element.closest('.world-mascot, [hidden], [inert], [aria-hidden="true"], [role="dialog"]')) return null
   const rect = element.getBoundingClientRect()
   const style = getComputedStyle(element)
-  const explicit = element.matches('[data-mascot-platform]')
+  const explicit = perch || element.matches('[data-mascot-platform]')
   if (rect.width < (explicit ? 28 : 70) || rect.height < 20 || rect.top < 65 || rect.top > innerHeight - 35 || style.visibility === 'hidden' || style.display === 'none') return null
   const painted = parseFloat(style.borderTopWidth) > 0 ||
     !['transparent', 'rgba(0, 0, 0, 0)', ''].includes(style.backgroundColor) || style.backgroundImage !== 'none'
@@ -41,11 +41,12 @@ export function mascotPlatform(element: HTMLElement, root: HTMLElement, host: DO
   return { element, left, right, y }
 }
 
-/** Clicking any part of a node lands at the center of its ring. */
-export function mascotPerch(platforms: MascotPlatform[], target: Element): MascotPlatform | null {
-  const node = target.closest('[data-mascot-perch]')
-  const ring = node?.querySelector('[data-mascot-platform]') ?? node
-  return platforms.find((platform) => platform.element === ring) ?? null
+/** Clicking any part of a node or button lands at the center of its top, so the guide never covers it. */
+export function mascotPerch(root: HTMLElement, host: DOMRect, target: Element): MascotPlatform | null {
+  const node = target.closest<HTMLElement>('[data-mascot-perch], button:not(:disabled)')
+  if (!node || !root.contains(node)) return null
+  const ring = node.querySelector<HTMLElement>('[data-mascot-platform]') ?? node
+  return mascotPlatform(ring, root, host, true)
 }
 
 export function platformNear(platforms: MascotPlatform[], x: number, y: number): MascotPlatform | null {
