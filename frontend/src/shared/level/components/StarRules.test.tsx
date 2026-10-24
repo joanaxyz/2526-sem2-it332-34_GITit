@@ -46,6 +46,6 @@ describe('star rules reminder', () => {
 
     await screen.findByRole('dialog', { name: 'How to earn stars' })
     expect(screen.getByText(/your lowest scenario score becomes your level score/)).toBeInTheDocument()
-    expect(screen.getByText(/Opening the command guide takes away one star/)).toBeInTheDocument()
+    expect(screen.getByText(/Opening the command guide never costs a star/)).toBeInTheDocument()
   })
 })
