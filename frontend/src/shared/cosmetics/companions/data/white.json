@@ -73,6 +73,26 @@
       "rows": 1,
       "frameCount": 1
     },
+    "chatAvatar": {
+      "src": "/cosmetics/companion/white/chat-avatar.png",
+      "fps": 1,
+      "loops": false,
+      "frameWidth": 512,
+      "frameHeight": 512,
+      "columns": 1,
+      "rows": 1,
+      "frameCount": 1
+    },
+    "chatThinking": {
+      "src": "/cosmetics/companion/white/chat-thinking.png",
+      "fps": 5,
+      "loops": true,
+      "frameWidth": 256,
+      "frameHeight": 256,
+      "columns": 4,
+      "rows": 2,
+      "frameCount": 8
+    },
     "avatar": {
       "src": "/cosmetics/companion/white/avatar.png",
       "fps": 1,

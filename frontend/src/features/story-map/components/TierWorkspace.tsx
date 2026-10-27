@@ -40,6 +40,7 @@ import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { usePersistentState } from '@/shared/utils/persistentState'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
+import { GuideTutor } from '@/shared/tutoring/GuideTutor'
 import { SkillLearnedOverlay } from '@/shared/skill-learning/SkillLearnedOverlay'
 import { useSkillLearnedQueue } from '@/shared/skill-learning/useSkillLearnedQueue'
 
@@ -171,6 +172,8 @@ export function TierWorkspace() {
   const replayGuide = selectedGuideKey
     ? commandGuides.find((guide) => guide.teaching_key === selectedGuideKey) ?? null
     : null
+  // The AI chat belongs to the tutorial: it talks about the guide in view, else the run's latest.
+  const chatGuide = replayGuide ?? commandGuides.at(-1)
 
   const openCommandGuide = (teachingKey: string) => {
     if (run.tutor?.teaching_key === teachingKey && run.tutor.phase === 'introduction') {
@@ -290,6 +293,14 @@ export function TierWorkspace() {
           onDismissTip={(key) => setHiddenTips({ runId: run.id, keys: [...hiddenTipKeys, key] })}
           onReadGuide={openCommandGuide}
           onHideElsewhere={() => setHiddenElsewhereKey(run.guide_elsewhere?.guide.teaching_key ?? null)}
+        />
+      ) : null}
+      {run.status === 'started' && guideAllowed && !learnedSkills.pending && chatGuide ? (
+        <GuideTutor
+          runId={run.id}
+          teachingKey={chatGuide.teaching_key}
+          usageForm={chatGuide.command_form.usage_form}
+          guideToken={chatGuide.help_token}
         />
       ) : null}
       {introductionOpen && run.tutor ? (

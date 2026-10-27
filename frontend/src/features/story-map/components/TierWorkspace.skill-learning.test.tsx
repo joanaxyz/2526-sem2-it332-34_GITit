@@ -13,7 +13,7 @@ vi.mock('@/features/story-map/hooks/useTierRunAssets', () => ({ useTierRunAssets
 vi.mock('@/features/story-map/hooks/useTierCommandSubmission', () => ({ useTierCommandSubmission: () => ({ isPending: false, mutate: mocks.submit }) }))
 vi.mock('@/features/story-map/scaffolding/useTierScaffolding', () => ({ useTierScaffolding: () => ({ clearToast: vi.fn(), evaluateAndNotify: vi.fn() }) }))
 vi.mock('@/features/story-map/hooks/useLeaveAbandonedRun', () => ({ useLeaveAbandonedRun: vi.fn() }))
-vi.mock('@/features/story-map/hooks/useCommandGuideHistory', () => ({ useCommandGuideHistory: () => [] }))
+vi.mock('@/shared/tutoring/GuideTutor', () => ({ GuideTutor: ({ teachingKey }: { teachingKey: string }) => <div data-testid="guide-ai" data-teaching-key={teachingKey} /> }))
 vi.mock('@/shared/level/workspace/useWorkspaceAutoOpen', () => ({ useWorkspaceAutoOpen: () => ({ storyOpen: false, tourOpen: false, guideAllowed: true }) }))
 vi.mock('@/shared/level/workspace/useRepoGraphDrawer', () => ({ useRepoGraphDrawer: () => ({ drawerMode: false }) }))
 vi.mock('@/shared/level/workspace/workspaceStory', () => ({ workspaceStoryContent: () => ({}) }))
@@ -61,7 +61,7 @@ describe('TierWorkspace learned-skill events', () => {
   it.each(['introduction', 'outcome'] as const)('waits for battle resolution and gives the earned skill priority over the next %s', async (next) => {
     mocks.run = run
     mocks.submit.mockImplementation((_command, options) => {
-      const nextRun = { ...run, status: next === 'outcome' ? 'completed' : 'started', tutor: next === 'introduction' ? { phase: 'introduction', teaching_key: 'git-add', context_id: '2' } : null } as TierRun
+      const nextRun = { ...run, status: next === 'outcome' ? 'completed' : 'started', tutor: next === 'introduction' ? { phase: 'introduction', teaching_key: 'git-add', context_id: '2', command_form: { usage_form: 'git add <path>' }, help_token: 'signed' } : null } as TierRun
       mocks.run = nextRun
       options.onSuccess({ run: nextRun, command_family: 'init', command_outcome: { processed: true, command_family: 'init', solved: next === 'outcome' }, step: { command_classification: 'git' }, learned_skills: [skill] } as unknown as TierCommandResponse)
     })
@@ -83,5 +83,23 @@ describe('TierWorkspace learned-skill events', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Run git init' }))
     act(() => mocks.finishAnimation())
     expect(screen.queryByRole('dialog', { name: "You've learned a new skill" })).not.toBeInTheDocument()
+  })
+})
+
+describe('TierWorkspace guide chat', () => {
+  it('keeps the AI launcher apart from the guide, about the latest guide while it is collapsed', () => {
+    mocks.run = {
+      ...run,
+      command_guides: [{ teaching_key: 'git-init/current-directory', command_form: { usage_form: 'git init' }, help_token: 'signed' }],
+    } as unknown as TierRun
+    renderWorkspace()
+    expect(screen.queryByRole('dialog', { name: 'Next command introduction' })).not.toBeInTheDocument()
+    expect(screen.getByTestId('guide-ai')).toHaveAttribute('data-teaching-key', 'git-init/current-directory')
+  })
+
+  it('has no AI launcher when the run has no guide to talk about', () => {
+    mocks.run = run
+    renderWorkspace()
+    expect(screen.queryByTestId('guide-ai')).not.toBeInTheDocument()
   })
 })

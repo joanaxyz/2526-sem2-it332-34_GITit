@@ -1,12 +1,40 @@
-/* Fixed panel: viewport changes are responsive; learners cannot move or resize it. */
-.tutor-window { position: fixed; right: var(--space-5); bottom: var(--space-5); width: min(420px, calc(100vw - 2 * var(--space-5))); height: min(560px, calc(100dvh - var(--app-topbar-height) - 2 * var(--space-5))); z-index: var(--z-overlay); }
+/* The frame is the panel's box, placed and sized by useTutorWindowLayout; the
+   companion and its speech tail sit just outside its left edge. */
+.tutor-window { --tutor-avatar-size: 112px; --tutor-avatar-gap: 20px; --tutor-surface: hsl(214 46% 7%); position: fixed; z-index: var(--z-overlay); cursor: grab; }
 .tutor-window--workspace { z-index: var(--z-tutor); }
-.tutor-window__panel { position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; color: var(--text-primary); background: var(--panel-bg-raised); border: 1px solid rgba(var(--theme-spark-rgb), .48); border-radius: var(--radius-lg); box-shadow: var(--shadow-overlay), 0 0 30px rgba(var(--theme-primary-rgb), .14), var(--panel-inset); }
-.tutor-window__header { flex-shrink: 0; }
+.tutor-window[data-cursor] { user-select: none; }
+.tutor-window[data-cursor] * { cursor: inherit; }
+.tutor-window__panel { position: relative; display: flex; flex-direction: column; height: 100%; overflow: hidden; color: var(--text-primary); background: var(--tutor-surface); border: 1px solid rgba(var(--theme-primary-rgb), .48); border-radius: var(--radius-lg); }
+.tutor-window__avatar { position: absolute; top: 20px; right: calc(100% + var(--tutor-avatar-gap)); width: var(--tutor-avatar-size); height: var(--tutor-avatar-size); touch-action: none; user-select: none; }
+.tutor-window__tail { position: absolute; z-index: 1; left: -19px; top: calc(20px + var(--tutor-avatar-size) / 2 - 13px); width: 20px; height: 26px; background: rgba(var(--theme-primary-rgb), .48); clip-path: polygon(100% 0, 100% 100%, 0 50%); }
+.tutor-window[data-avatar-hidden] :is(.tutor-window__avatar, .tutor-window__tail) { display: none; }
+/* Keyboard move and resize controls show only while focused. */
+.tutor-window__key-control { display: grid; place-items: center; flex-shrink: 0; width: 2rem; height: 2rem; padding: 0; border: 0; border-radius: 50%; background: transparent; color: var(--text-tertiary); cursor: pointer; }
+.tutor-window__key-control svg { width: 1rem; height: 1rem; }
+.tutor-window__resize { position: absolute; right: 2px; bottom: 2px; }
+.tutor-window__key-control:not(:focus-visible) { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
+.tutor-window__tail::after { content: ''; position: absolute; inset: 1px -1px 1px 2px; background: var(--tutor-surface); clip-path: polygon(100% 0, 100% 100%, 0 50%); }
+.tutor-companion { position: relative; display: block; width: 100%; height: 100%; }
+.tutor-companion__idle { display: block; width: 100%; height: 100%; object-fit: contain; }
+.tutor-companion__thinking { position: absolute; inset: 0; background-repeat: no-repeat; background-size: 400% 200%; animation: tutor-companion-think 1.6s steps(1, end) infinite; }
+.tutor-companion[data-thinking] .tutor-companion__idle { visibility: hidden; }
+.tutor-companion--launcher { flex-shrink: 0; width: 76px; height: 76px; }
+/* The guide's chat launcher belongs with the guide: it stays above the guide's veil
+   wherever it is dragged, below the chat window it opens. */
+.mascot-launcher:has(> [data-mascot-launcher="guide-tutor"]) { z-index: var(--z-mascot); }
+@keyframes tutor-companion-think {
+  0%, 100% { background-position: 0 0; }
+  12.5% { background-position: 33.333333% 0; }
+  25% { background-position: 66.666667% 0; }
+  37.5% { background-position: 100% 0; }
+  50% { background-position: 0 100%; }
+  62.5% { background-position: 33.333333% 100%; }
+  75% { background-position: 66.666667% 100%; }
+  87.5% { background-position: 100% 100%; }
+}
 .tutor-chat { display: flex; flex: 1; flex-direction: column; min-height: 0; min-width: 0; font-family: var(--font-sans); }
 .tutor-chat [hidden] { display: none; }
-.tutor-chat__actions, .tutor-chat__composer, .tutor-chat__footer { flex-shrink: 0; }
-.tutor-chat__actions { flex-wrap: wrap; }
+.tutor-chat__bar, .tutor-chat__composer { flex-shrink: 0; }
 .tutor-chat__transcript, .tutor-chat__faqs { flex: 1; overscroll-behavior: contain; scrollbar-gutter: stable; }
 .tutor-chat__welcome { display: grid; gap: var(--space-3); }
 .tutor-chat__composer textarea { min-width: 0; width: 100%; }
@@ -20,45 +48,32 @@
   background: var(--panel-lightbar);
 }
 
-.tutor-window__header {
-  display: grid;
-  grid-template-columns: 2.5rem minmax(0, 1fr) auto;
+/* One bar: the window's title, the Chat/FAQS tabs, then new chat and close. */
+.tutor-chat__bar {
+  display: flex;
   gap: var(--space-2);
   align-items: center;
-  min-height: 4.25rem;
-  padding: var(--space-3);
+  min-height: 3.25rem;
+  padding: var(--space-2) var(--space-2) var(--space-2) var(--space-3);
   background: linear-gradient(90deg, rgba(var(--theme-primary-rgb), 0.1), transparent 70%);
   border-bottom: 1px solid var(--panel-border);
 }
 
-.tutor-window__portrait {
-  display: block;
-  width: 2.5rem;
-  height: 2.5rem;
-  overflow: hidden;
-  background: rgba(var(--theme-primary-rgb), 0.12);
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.28);
-  border-radius: 50%;
-  position: relative;
-}
-
-.tutor-window__portrait img {
-  position: absolute;
-  width: 175%;
-  max-width: none;
-  height: auto;
-  left: -37.5%;
-  top: -47%;
-}
-
-.tutor-chat__actions {
+.tutor-chat__tabs {
   display: flex;
-  gap: 0.4rem;
-  padding: 0.6rem var(--space-3);
-  border-bottom: 1px solid var(--panel-border);
+  flex-shrink: 0;
+  gap: 0.25rem;
 }
 
-.tutor-chat__actions button {
+.tutor-chat__bar-end {
+  display: flex;
+  flex-shrink: 0;
+  gap: 0.15rem;
+  align-items: center;
+  margin-left: auto;
+}
+
+.tutor-chat__tabs button {
   padding: 0.45rem 0.75rem;
   border: 1px solid transparent;
   border-radius: var(--radius-pill);
@@ -68,14 +83,13 @@
   cursor: pointer;
 }
 
-.tutor-chat__actions button[aria-pressed='true'] {
+.tutor-chat__tabs button[aria-pressed='true'] {
   color: rgb(var(--theme-spark-rgb));
   background: rgba(var(--theme-primary-rgb), 0.14);
   border-color: rgba(var(--theme-primary-rgb), 0.3);
 }
 
-.tutor-chat__actions button:disabled { opacity: 0.45; cursor: not-allowed; }
-.tutor-chat__actions button:focus-visible,
+.tutor-chat__tabs button:focus-visible,
 .tutor-chat__faq button:focus-visible { outline: 2px solid rgb(var(--theme-spark-rgb)); outline-offset: 2px; }
 
 .tutor-chat__faqs {
@@ -120,27 +134,16 @@
 .tutor-chat__transcript[hidden],
 .tutor-chat__composer[hidden] { display: none; }
 
-.tutor-window__heading {
+.tutor-window__title {
   min-width: 0;
-}
-
-.tutor-window__heading h2 {
-  margin: 0;
+  margin: 0 var(--space-1) 0 0;
   overflow: hidden;
   font: 700 var(--text-md)/1.15 var(--font-display);
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.tutor-window__subtitle {
-  margin: 0.35rem 0 0;
-  color: var(--text-secondary);
-  font: 500 var(--text-xs)/1.3 var(--font-sans);
-}
-
-.tutor-window__subtitle span { color: rgb(var(--theme-spark-rgb)); }
-
-.tutor-window__close {
+.tutor-chat__icon-button {
   display: grid;
   place-items: center;
   width: 2rem;
@@ -153,8 +156,8 @@
   cursor: pointer;
 }
 
-.tutor-window__close:hover,
-.tutor-window__close:focus-visible {
+.tutor-chat__icon-button:hover,
+.tutor-chat__icon-button:focus-visible {
   color: var(--text-primary);
   background: var(--control-bg-hover);
   border-color: var(--control-border);
@@ -182,25 +185,15 @@
   align-items: flex-end;
 }
 
-.tutor-chat__speaker {
-  padding-left: 0.1rem;
-  color: rgb(var(--theme-spark-rgb));
-  font: 700 0.68rem/1.2 var(--font-sans);
-}
-
 .tutor-chat__content {
   max-width: 100%;
   min-width: 0;
-  padding: 0.8rem 0.9rem;
   color: var(--text-primary);
   font-size: 0.875rem;
   font-weight: 400;
   line-height: 1.6;
   white-space: normal;
   overflow-wrap: anywhere;
-  background: rgba(16, 35, 61, 0.7);
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.13);
-  border-radius: 0.8rem 0.8rem 0.8rem 0.2rem;
 }
 
 .tutor-chat__fallback-label {
@@ -289,52 +282,19 @@
 
 .tutor-chat__message--user .tutor-chat__content {
   max-width: 88%;
+  padding: 0.6rem 0.85rem;
   white-space: pre-wrap;
-  color: var(--text-primary);
   background: linear-gradient(145deg, rgba(var(--theme-primary-rgb), 0.24), rgba(var(--theme-secondary-rgb), 0.16));
-  border-color: rgba(var(--theme-primary-rgb), 0.3);
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.3);
   border-radius: 0.8rem 0.8rem 0.2rem 0.8rem;
 }
-
-.tutor-chat__content[data-policy='redirected'],
-.tutor-chat__content[data-policy='fallback'] {
-  border-color: hsl(var(--warning) / 0.45);
-  background: hsl(var(--warning) / 0.07);
-}
-
-.tutor-chat__content[data-transient] {
-  color: hsl(var(--warning));
-}
-
-.tutor-chat__typing {
-  display: flex;
-  gap: 0.28rem;
-  align-items: center;
-  min-width: 3.2rem;
-  min-height: 2.25rem;
-  padding: 0.65rem 0.8rem;
-  background: rgba(16, 35, 61, 0.9);
-  border: 1px solid var(--panel-border);
-  border-radius: 0.8rem 0.8rem 0.8rem 0.2rem;
-}
-
-.tutor-chat__typing i {
-  width: 0.35rem;
-  height: 0.35rem;
-  background: rgb(var(--theme-spark-rgb));
-  border-radius: 50%;
-  animation: tutor-thinking 0.9s ease-in-out infinite alternate;
-}
-
-.tutor-chat__typing i:nth-child(2) { animation-delay: 150ms; }
-.tutor-chat__typing i:nth-child(3) { animation-delay: 300ms; }
 
 .tutor-chat__composer {
   display: grid;
   grid-template-columns: minmax(0, 1fr) 2.5rem;
   gap: var(--space-2);
   align-items: end;
-  margin: 0 var(--space-3);
+  margin: 0 var(--space-3) var(--space-3);
   padding: var(--space-2);
   background: var(--control-bg);
   border: 1px solid var(--control-border);
@@ -382,19 +342,12 @@
   opacity: 0.5;
 }
 
-.tutor-chat__footer {
-  margin: 0;
-  padding: 0.55rem var(--space-3) 0.7rem;
-  color: var(--text-tertiary);
-  font: 500 0.65rem/1.2 var(--font-sans);
-  text-align: center;
-}
-
 
 .tutor-chat__notice { margin: 0; color: var(--text-secondary); font-size: .8125rem; line-height: 1.5; }
 .tutor-chat__recovery { flex-shrink: 0; max-height: 42%; overflow-y: auto; padding: .65rem .75rem; border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--surface-raised); font-size: .8125rem; }
 .tutor-chat__recovery p { margin: 0; }
 .tutor-chat__recovery-actions { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .4rem; }
+.tutor-chat__reset { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; }
 .tutor-chat__recovery button, .tutor-chat__saved summary { cursor: pointer; }
 .tutor-chat__saved { margin-top: .5rem; }
 .tutor-chat__saved p { margin-top: .5rem; }
@@ -405,17 +358,14 @@
 .tutor-chat__faqs code { overflow-wrap: anywhere; }
 .tutor-chat__new-messages { align-self: center; display: inline-flex; align-items: center; gap: .35rem; padding: .35rem .6rem; border: 1px solid var(--border-subtle); border-radius: 6px; background: var(--surface-raised); color: var(--text-primary); font: inherit; cursor: pointer; }
 
-.tutor-chat__reset { display: inline-flex; align-items: center; gap: .4rem; cursor: pointer; }
 .tutor-chat__recovery { margin: .5rem var(--space-3); }
 .tutor-chat__recovery button { padding: .4rem .6rem; border: 1px solid var(--panel-border); border-radius: var(--radius-sm); background: var(--control-bg); color: var(--text-primary); font: inherit; }
 .tutor-chat button:disabled { opacity: .5; cursor: not-allowed; }
 .tutor-chat__code { max-width: 100%; overflow-x: auto; padding: .6rem; white-space: pre; border-radius: var(--radius-sm); background: rgba(0, 0, 0, .24); }
 .tutor-chat__guarded { display: flex; align-items: center; gap: .35rem; color: var(--text-secondary); font-size: .75rem; }
 .tutor-window button:focus-visible, .tutor-chat summary:focus-visible { outline: 2px solid rgb(var(--theme-spark-rgb)); outline-offset: 2px; }
-@keyframes tutor-thinking { from { opacity: .35; transform: translateY(0); } to { opacity: 1; transform: translateY(-.25rem); } }
 @media (max-width: 720px) {
-  .tutor-window { right: var(--space-2); left: var(--space-2); bottom: calc(5.25rem + env(safe-area-inset-bottom)); width: auto; height: min(560px, calc(100dvh - var(--app-topbar-height) - 5.25rem - env(safe-area-inset-bottom) - var(--space-2))); }
-  .tutor-window--workspace { bottom: calc(var(--space-2) + env(safe-area-inset-bottom)); height: min(560px, calc(100dvh - var(--app-topbar-height) - 2 * var(--space-2) - env(safe-area-inset-bottom))); }
+  .tutor-window { --tutor-avatar-size: 64px; --tutor-avatar-gap: 12px; }
 }
-@media (prefers-reduced-motion: reduce) { .tutor-window *, .tutor-chat * { scroll-behavior: auto; transition: none; animation: none; } }
-:root[data-motion='reduced'] .tutor-chat__typing i { animation: none; }
+@media (prefers-reduced-motion: reduce) { .tutor-window *, .tutor-chat * { scroll-behavior: auto; transition: none; animation: none; } .tutor-companion__thinking { animation: none; background-position: 0 0; } }
+:root[data-motion='reduced'] .tutor-companion__thinking { animation: none; background-position: 0 0; }

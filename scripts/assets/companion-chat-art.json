@@ -1,0 +1,64 @@
+{
+  "generator": "Built-in image_gen.imagegen",
+  "style": "Clean 2D anime chibi linework and cel shading, revised to be less rendered at the user's request.",
+  "packaging": "Alpha preserved. Avatars downsampled to 512px. Generated thinking sheets repacked into 256px square tiles with 10px padding, trimming the bottom 2.5% of each source cell to avoid inter-row bleed. Playback is row-major with an eight-frame 1.6-second loop. Sources remain in the image generator's output directory.",
+  "assets": [
+    {
+      "companion": "blue",
+      "avatar": {
+        "path": "frontend/public/cosmetics/companion/blue/chat-avatar.png",
+        "width": 512,
+        "height": 512,
+        "prompt": "Use case: stylized-concept. Asset type: 2D ANIME CHIBI companion portrait for a chatbot. The user explicitly wants LESS RENDERED, MORE ANIME. Image 1 is BLUE's original character identity. Image 2 is an over-rendered prior attempt: KEEP ONLY the character identity and chibi proportions; dramatically simplify its rendering. Draw a polished professional TV-anime / chibi manga character bust with confident thin dark-blue ink outlines, FLAT solid base colors and only ONE or TWO clean hard-edged cel shadow tones per material. No painterly detail, no texture, no airbrushing, no 3D rendering, no glossy gradient hair, no realistic lighting, no bloom. Large expressive simple cyan eyes, small mouth with friendly restrained smile, bright blue tousled hair and a single cowlick. Small navy/royal-blue mage cloak with simplified gold piping and a round blue jewel clasp. Oversized rounded head, tiny shoulders and upper torso, about 2.5-head chibi proportions. Upright head in a slight three-quarter view, both eyes visible. Entire hair silhouette and shoulders contained with generous transparent margins. Square centered cutout. True alpha transparent background, no circle, no badge, no text, no detached objects. Aim for clean charming high-quality hand-drawn anime sticker / visual novel chibi art."
+      },
+      "thinking": {
+        "path": "frontend/public/cosmetics/companion/blue/chat-thinking.png",
+        "width": 1024,
+        "height": 512,
+        "columns": 4,
+        "rows": 2,
+        "frameCount": 8,
+        "fps": 5,
+        "prompt": "Use case: stylized-concept. Asset type: production THINKING ANIMATION SPRITESHEET for Blue, the 2D anime chibi chatbot companion in the reference. Create exactly EIGHT frames in a strict FOUR COLUMNS by TWO ROWS grid, row-major playback, landscape image exactly 2:1 aspect (2048 x 1024 pixels, each cell 512 x 512). Absolutely no grid lines, no captions, no borders, TRUE alpha transparent background. Each cell contains the SAME head-and-shoulders chibi bust at the IDENTICAL scale, hair silhouette fully inside its cell with 8 percent padding, face center and shoulder baseline perfectly registered. Preserve reference identity, hairstyle, costume, accessories, palette and clean dark ink linework with flat colors and simple 2-tone anime cel shading. LESS RENDERED, MORE ANIME; no painting/3D/glossy gradients. Animated thinking expression: one small hand resting thoughtfully under the chin in EVERY frame; thoughtful closed mouth, eyes glancing slightly upward. Frame 1 neutral thoughtful eyes open; 2 eyes drift slightly up; 3 eyelids lower halfway; 4 eyes closed for one blink; 5 eyelids half open; 6 eyes open glancing up; 7 eyebrows subtly lift; 8 return to frame 1 pose. Only minute facial and eyebrow changes, no body movement or camera movement, no resizing or repositioning between cells. Loop smoothly 8 to 1. Head should remain large and readable at a displayed avatar size of 88px. No bubbles, question marks, detached effects, text or extra people. This is a technical spritesheet, each frame centered precisely on its uniform square tile."
+      }
+    },
+    {
+      "companion": "black",
+      "avatar": {
+        "path": "frontend/public/cosmetics/companion/black/chat-avatar.png",
+        "width": 512,
+        "height": 512,
+        "prompt": "Use case: stylized-concept. Asset type: 2D anime CHIBI companion bust avatar. The user wants LESS RENDERED, MORE ANIME. Reference 1 is the original character identity. Reference 2 is the finished BLUE anime chibi avatar: MATCH this series exactly in chibi proportions and style, but simplify shading further to confident clean ink linework, flat base colors, only one or two hard-edged cel shadow tones. Crisp professional TV-anime sticker art, large expressive eyes, tiny nose and mouth, oversized rounded head and tiny shoulders/upper torso, high-quality hand-drawn character appeal. No painterly texture, no realism, no glossy hair rendering, no soft airbrushed gradients, no 3D. Entire hair silhouette and shoulders fit within generous margins. Centered square cutout with TRUE alpha transparency. No circle, no badge, no background scene, no detached objects, no text or watermark. Draw ONLY BLACK: a cool approachable adult male chibi, long black hair tied into a small high half-bun with a red tie and loose long bangs, distinctive round red-tinted sunglasses with both lenses visible, warm fair skin, a small dark dangling earring, loose plain charcoal shirt. A restrained knowing smile, looking toward the viewer, head upright. Black hair uses two clean charcoal tones, minimal highlights; red lenses are flat translucent crimson."
+      },
+      "thinking": {
+        "path": "frontend/public/cosmetics/companion/black/chat-thinking.png",
+        "width": 1024,
+        "height": 512,
+        "columns": 4,
+        "rows": 2,
+        "frameCount": 8,
+        "fps": 5,
+        "prompt": "Use case: stylized-concept. Asset type: production THINKING ANIMATION SPRITESHEET for Black, the 2D anime chibi chatbot companion in the reference. Create exactly EIGHT frames in a strict FOUR COLUMNS by TWO ROWS grid, row-major playback, landscape image exactly 2:1 aspect (2048 x 1024 pixels, each cell 512 x 512). Absolutely no grid lines, no captions, no borders, TRUE alpha transparent background. Each cell contains the SAME head-and-shoulders chibi bust at the IDENTICAL scale, hair silhouette fully inside its cell with 8 percent padding, face center and shoulder baseline perfectly registered. Preserve reference identity, hairstyle, costume, accessories, palette and clean dark ink linework with flat colors and simple 2-tone anime cel shading. LESS RENDERED, MORE ANIME; no painting/3D/glossy gradients. Animated thinking expression: one small hand resting thoughtfully under the chin in EVERY frame; thoughtful closed mouth, eyes glancing slightly upward. Frame 1 neutral thoughtful eyes open; 2 eyes drift slightly up; 3 eyelids lower halfway; 4 eyes closed for one blink; 5 eyelids half open; 6 eyes open glancing up; 7 eyebrows subtly lift; 8 return to frame 1 pose. Only minute facial and eyebrow changes, no body movement or camera movement, no resizing or repositioning between cells. Loop smoothly 8 to 1. Head should remain large and readable at a displayed avatar size of 88px. No bubbles, question marks, detached effects, text or extra people. This is a technical spritesheet, each frame centered precisely on its uniform square tile."
+      }
+    },
+    {
+      "companion": "white",
+      "avatar": {
+        "path": "frontend/public/cosmetics/companion/white/chat-avatar.png",
+        "width": 512,
+        "height": 512,
+        "prompt": "Use case: stylized-concept. Asset type: 2D anime CHIBI companion bust avatar. The user wants LESS RENDERED, MORE ANIME. Reference 1 is the original character identity. Reference 2 is the finished BLUE anime chibi avatar: MATCH this series exactly in chibi proportions and style, but simplify shading further to confident clean ink linework, flat base colors, only one or two hard-edged cel shadow tones. Crisp professional TV-anime sticker art, large expressive eyes, tiny nose and mouth, oversized rounded head and tiny shoulders/upper torso, high-quality hand-drawn character appeal. No painterly texture, no realism, no glossy hair rendering, no soft airbrushed gradients, no 3D. Entire hair silhouette and shoulders fit within generous margins. Centered square cutout with TRUE alpha transparency. No circle, no badge, no background scene, no detached objects, no text or watermark. Draw ONLY WHITE: a composed female chibi with snowy silver-white long hair, side braids gathered into a low braided side bun, single small looped cowlick, pale blue-gray large eyes, cool fair skin, small ice-blue diamond earrings, dark navy winter mage cloak with a white fur collar and simple silver snowflake clasp with a blue jewel. Gentle confident expression with a small closed smile, head upright, both eyes visible. Simplify intricate costume into clear recognizable anime shapes, preserve winter identity."
+      },
+      "thinking": {
+        "path": "frontend/public/cosmetics/companion/white/chat-thinking.png",
+        "width": 1024,
+        "height": 512,
+        "columns": 4,
+        "rows": 2,
+        "frameCount": 8,
+        "fps": 5,
+        "prompt": "Use case: stylized-concept. Asset type: production THINKING ANIMATION SPRITESHEET for White, the 2D anime chibi chatbot companion in the reference. Create exactly EIGHT frames in a strict FOUR COLUMNS by TWO ROWS grid, row-major playback, landscape image exactly 2:1 aspect (2048 x 1024 pixels, each cell 512 x 512). Absolutely no grid lines, no captions, no borders, TRUE alpha transparent background. Each cell contains the SAME head-and-shoulders chibi bust at the IDENTICAL scale, hair silhouette fully inside its cell with 8 percent padding, face center and shoulder baseline perfectly registered. Preserve reference identity, hairstyle, costume, accessories, palette and clean dark ink linework with flat colors and simple 2-tone anime cel shading. LESS RENDERED, MORE ANIME; no painting/3D/glossy gradients. Animated thinking expression: one small hand resting thoughtfully under the chin in EVERY frame; thoughtful closed mouth, eyes glancing slightly upward. Frame 1 neutral thoughtful eyes open; 2 eyes drift slightly up; 3 eyelids lower halfway; 4 eyes closed for one blink; 5 eyelids half open; 6 eyes open glancing up; 7 eyebrows subtly lift; 8 return to frame 1 pose. Only minute facial and eyebrow changes, no body movement or camera movement, no resizing or repositioning between cells. Loop smoothly 8 to 1. Head should remain large and readable at a displayed avatar size of 88px. No bubbles, question marks, detached effects, text or extra people. This is a technical spritesheet, each frame centered precisely on its uniform square tile."
+      }
+    }
+  ]
+}

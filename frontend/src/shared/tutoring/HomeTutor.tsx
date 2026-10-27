@@ -1,7 +1,9 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { FloatingMascotLauncher } from '@/shared/mascot/FloatingMascotLauncher'
+import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { usePersistentState } from '@/shared/utils/persistentState'
+import { TutorCompanionPortrait } from './TutorCompanionPortrait'
 import { TutorWindow, type TutorWindowDismissal } from './TutorWindow'
 
 const HOME_CONTEXT = { surface: 'home' } as const
@@ -9,10 +11,11 @@ const HOME_CONTEXT = { surface: 'home' } as const
 const PHONE_WIDTH = 720
 
 /**
- * General help on Home, the map, and the shop: a chat window that collapses into Git-It.
+ * General help on Home, the map, and the shop, voiced by the equipped companion.
  * It remembers whether the learner left it open or closed.
  */
 export function HomeTutor() {
+  const { companion } = usePlayerLoadout()
   const [open, setOpen] = usePersistentState<boolean>(
     'tutor-window:home-open',
     window.innerWidth > PHONE_WIDTH,
@@ -38,14 +41,14 @@ export function HomeTutor() {
     <>
       <FloatingMascotLauncher
         name="home-tutor"
-        label="Ask Git-It"
-        caption="Ask Git-It"
-        movable={false}
+        label={`Ask ${companion.label}`}
+        caption={`Ask ${companion.label}`}
+        portrait={<TutorCompanionPortrait companion={companion} className="tutor-companion--launcher" />}
         open={open}
         buttonRef={launcher}
         onOpen={() => setOpen(true)}
       />
-      {open ? <TutorWindow context={HOME_CONTEXT} onDismiss={dismiss} /> : null}
+      {open ? <TutorWindow companion={companion} context={HOME_CONTEXT} onDismiss={dismiss} /> : null}
     </>
   )
 }

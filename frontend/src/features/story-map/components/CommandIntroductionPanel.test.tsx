@@ -8,6 +8,7 @@ import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes
 import { readTierRunBootstrap } from '@/features/story-map/utils/tierRunBootstrap'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { useAuthStore } from '@/shared/auth/useAuth'
+import { GuideTutor } from '@/shared/tutoring/GuideTutor'
 
 vi.mock('@/features/story-map/api/commandIntroductionsApi', () => ({
   commandIntroductionsApi: { complete: vi.fn() },
@@ -62,8 +63,10 @@ function setup(lesson = tutor, replay = false) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false }, mutations: { retry: false } } })
   client.setQueryData(queryKeys.adventureTierRun(run.id), run)
   const onDismiss = vi.fn()
+  // The workspace renders the guide's AI launcher beside the guide, apart from it.
   render(<QueryClientProvider client={client}>
     <CommandIntroductionPanel run={run} tutor={lesson} replay={replay} onDismiss={onDismiss} />
+    <GuideTutor runId={run.id} teachingKey={lesson.teaching_key} usageForm={lesson.command_form.usage_form} guideToken={lesson.help_token} />
   </QueryClientProvider>)
   return { client, run, onDismiss }
 }
@@ -90,13 +93,16 @@ describe('terminal-led command introduction', () => {
     expect(screen.getByText('Command guide')).toBeInTheDocument()
     expect(screen.getByTestId('workspace-tour-spotlight')).toBeInTheDocument()
     expect(screen.getByRole('dialog', { name: 'Create and switch' })).toBeInTheDocument()
-    expect(screen.getByRole('dialog', { name: 'Create and switch' }).querySelector('img')).toBeNull()
+    // Git-It speaks the guide from beside it; the card is its speech bubble.
+    const guide = screen.getByRole('dialog', { name: 'Create and switch' })
+    expect(within(guide).getByRole('img', { name: 'Learning guide' })).toBeInTheDocument()
+    expect(guide.querySelector('.mascot-message:not(.mascot-message--no-speaker) > .mascot-message__bubble')).not.toBeNull()
     expect(screen.getByRole('button', { name: 'Move command guide' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Resize command guide' })).toBeInTheDocument()
     expect(screen.getAllByRole('textbox')).toHaveLength(1)
     // Its chat starts as a launcher, so nothing covers the card.
-    expect(screen.queryByRole('dialog', { name: 'Ask Git-It' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Ask Git-It' })).toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Ask Blue' })).not.toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ask Blue' })).toBeInTheDocument()
     expect(screen.getByText(tutor.command_form.summary)).toBeInTheDocument()
     // Absolute beginners: what each part means. New words are tips, not guide content.
     const parts = within(screen.getByLabelText('What each part means'))
@@ -117,22 +123,6 @@ describe('terminal-led command introduction', () => {
     ])
     expect(screen.queryByRole('region', { name: 'Words to know' })).not.toBeInTheDocument()
     await waitFor(() => expect(document.activeElement).toHaveAttribute('data-command-input'))
-  })
-
-  it('keeps its "Ask Git-It" launcher out from under the veil', async () => {
-    const measure = Element.prototype.getBoundingClientRect
-    const spy = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
-      if (!this.matches('[data-mascot-launcher="guide-tutor"]')) return measure.call(this)
-      return { x: 900, y: 600, left: 900, top: 600, right: 976, bottom: 704, width: 76, height: 104, toJSON: () => ({}) } as DOMRect
-    })
-    try {
-      setup()
-      await screen.findByText('Syntax: git switch -c <branch>')
-      // The veil's cut-out: the launcher's box with the reveal padding around it.
-      await waitFor(() => expect(document.querySelector('.workspace-tour__veil mask rect[x="897"][y="597"]')).not.toBeNull())
-    } finally {
-      spy.mockRestore()
-    }
   })
 
   it('confirms a correct move with what changed, not colour alone', async () => {
@@ -170,10 +160,10 @@ describe('terminal-led command introduction', () => {
   it('stays open for clicks in its chat launcher, chat window and terminal, and collapses on a click elsewhere', async () => {
     const { onDismiss } = setup()
     await screen.findByText('Syntax: git switch -c <branch>')
-    const chatLauncher = screen.getByRole('button', { name: 'Ask Git-It' })
+    const chatLauncher = screen.getByRole('button', { name: 'Ask Blue' })
     fireEvent.pointerDown(chatLauncher)
     fireEvent.click(chatLauncher)
-    fireEvent.pointerDown(screen.getByRole('textbox', { name: 'Ask Git-It a question' }))
+    fireEvent.pointerDown(screen.getByRole('textbox', { name: 'Ask Blue a question' }))
     fireEvent.pointerDown(document.querySelector('[data-command-input]')!)
     fireEvent.pointerDown(screen.getByRole('dialog', { name: 'Create and switch' }))
     expect(onDismiss).not.toHaveBeenCalled()

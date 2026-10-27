@@ -10,7 +10,7 @@ import './mascot-launcher.css'
  * moves it. While that is open the launcher hides but keeps its place, so a
  * closing window can collapse back into it (`[data-mascot-launcher="<name>"]`).
  */
-export function FloatingMascotLauncher({ name, label, caption, size = 'default', movable = true, takeOverFrom, open = false, onOpen, onDragStart, buttonRef, children }: {
+export function FloatingMascotLauncher({ name, label, caption, size = 'default', takeOverFrom, open = false, onOpen, onDragStart, buttonRef, portrait, children }: {
   /** Identifies the launcher: its saved position and its collapse selector. */
   name: string
   /** The button's accessible name, e.g. "Open command guide". */
@@ -21,12 +21,12 @@ export function FloatingMascotLauncher({ name, label, caption, size = 'default',
   size?: keyof typeof FLOATING_LAUNCHER_SIZES
   /** Launchers this one replaces: it first appears where the latest of them was last seen. */
   takeOverFrom?: readonly string[]
-  /** Fixed placement for chat launchers; other guide launchers remain movable. */
-  movable?: boolean
   open?: boolean
   onOpen: () => void
   onDragStart?: () => void
   buttonRef?: Ref<HTMLButtonElement>
+  /** Optional character art for companion chat; other guides keep Git-It. */
+  portrait?: ReactNode
   /** Controls pinned to the launcher, beside its button. */
   children?: ReactNode
 }) {
@@ -40,19 +40,18 @@ export function FloatingMascotLauncher({ name, label, caption, size = 'default',
   )
 
   useEffect(() => {
-    if (movable && !open) rememberShownPosition(storageKey, position, box)
-  }, [box, movable, open, position, storageKey])
+    if (!open) rememberShownPosition(storageKey, position, box)
+  }, [box, open, position, storageKey])
   // Which half of the viewport it sits in, so pinned callouts open toward the middle.
   const side = position.x + box.width / 2 > window.innerWidth / 2 ? 'end' : 'start'
 
   return createPortal(
     <div
       className="mascot-launcher"
-      style={movable ? { left: position.x, top: position.y } : undefined}
-      data-fixed={!movable || undefined}
-      data-side={movable ? side : 'end'}
+      style={{ left: position.x, top: position.y }}
+      data-side={side}
       data-size={size === 'default' ? undefined : size}
-      data-dragging={(movable && dragging) || undefined}
+      data-dragging={dragging || undefined}
       aria-hidden={open || undefined}
       inert={open || undefined}
     >
@@ -63,13 +62,15 @@ export function FloatingMascotLauncher({ name, label, caption, size = 'default',
         data-mascot-launcher={name}
         aria-label={label}
         aria-expanded={open}
-        title={movable ? `${label} · Drag to move. Arrow keys move; Home resets.` : label}
-        {...(movable ? handlers : {})}
+        title={`${label} · Drag to move. Arrow keys move; Home resets.`}
+        {...handlers}
         onClick={() => {
-          if ((!movable || clicked()) && !open) onOpen()
+          if (clicked() && !open) onOpen()
         }}
       >
-        <MascotPortrait className="mascot-launcher__portrait" alt="" width={72} height={90} />
+        <span className="mascot-launcher__art">
+          {portrait ?? <MascotPortrait className="mascot-launcher__portrait" alt="" width={72} height={90} />}
+        </span>
         <span className="mascot-launcher__caption">{caption}</span>
       </button>
       {children}
