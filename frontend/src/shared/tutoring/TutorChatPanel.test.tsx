@@ -85,7 +85,7 @@ describe('shared tutoring surfaces', () => {
     ask('Explain branches')
     await screen.findByRole('region', { name: 'Chat recovery' })
     fireEvent.click(screen.getByRole('button', { name: 'Close Ask Git-It' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Ask Blue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ask Git-It' }))
     expect(screen.getByRole('textbox')).toHaveValue('Explain branches')
   })
 
@@ -108,7 +108,7 @@ describe('shared tutoring surfaces', () => {
     render(<HomeTutor />)
     ask('Explain branches')
     fireEvent.click(screen.getByRole('button', { name: 'Close Ask Git-It' }))
-    fireEvent.click(screen.getByRole('button', { name: 'Ask Blue' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ask Git-It' }))
     await act(async () => { resolve(reply) })
     expect(screen.getByRole('textbox')).toHaveValue('Explain branches')
     expect(screen.queryByRole('article')).not.toBeInTheDocument()
@@ -202,7 +202,7 @@ describe('shared tutoring surfaces', () => {
   it('opens Home help independently of guide and mascot appearance settings', async () => {
     setGuideMascotVisibility(false)
     render(<HomeTutor />)
-    expect(screen.queryByRole('button', { name: 'Ask Blue' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Ask Git-It' })).not.toBeInTheDocument()
     expect(screen.getByRole('dialog').parentElement?.querySelector('.tutor-window__speaker')).toHaveAttribute('src', '/mascot/portrait.png')
     expect(screen.getByRole('dialog').querySelector('img')).not.toBeInTheDocument()
     ask('Explain staging')
@@ -212,13 +212,13 @@ describe('shared tutoring surfaces', () => {
     expect(tutorApi.chat).toHaveBeenCalledWith({ message: 'Explain staging', context: { surface: 'home' }, history: [] }, expect.any(AbortSignal))
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    const trigger = screen.getByRole('button', { name: 'Ask Blue' })
-    expect(trigger).toHaveTextContent('Ask Blue')
-    expect(trigger.querySelector('[role="img"]')).toHaveAttribute('aria-label', 'Blue, Git learning assistant')
+    const trigger = screen.getByRole('button', { name: 'Ask Git-It' })
+    expect(trigger).toHaveTextContent('Ask Git-It')
+    expect(trigger.querySelector('img')).toHaveAttribute('src', '/mascot/portrait.png')
     expect(trigger).toHaveFocus()
     fireEvent.click(trigger)
     expect(screen.getByRole('dialog')).toBeInTheDocument()
-    expect(screen.queryByRole('button', { name: 'Ask Blue' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Ask Git-It' })).not.toBeInTheDocument()
   })
 
   it('opens workspace help in a separate chat window and cancels when its guide closes', async () => {
@@ -276,7 +276,7 @@ describe('shared tutoring surfaces', () => {
     elsewhere.focus()
     fireEvent.pointerDown(elsewhere)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Ask Blue' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ask Git-It' })).toBeInTheDocument()
     expect(elsewhere).toHaveFocus()
   })
 
@@ -284,11 +284,11 @@ describe('shared tutoring surfaces', () => {
     const view = render(<HomeTutor />)
     fireEvent.click(screen.getByRole('button', { name: 'Close Ask Git-It' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Ask Blue' })).toHaveFocus()
+    expect(screen.getByRole('button', { name: 'Ask Git-It' })).toHaveFocus()
     view.unmount()
     render(<HomeTutor />)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Ask Blue' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ask Git-It' })).toBeInTheDocument()
   })
 
   it('starts Home help as its launcher on a phone', () => {
@@ -296,7 +296,7 @@ describe('shared tutoring surfaces', () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 })
     render(<HomeTutor />)
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Ask Blue' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Ask Git-It' })).toBeInTheDocument()
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: width })
   })
 

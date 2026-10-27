@@ -176,7 +176,7 @@ appears only when collapsed. Command guides omit the mascot and retain a separat
 command icon for reopening and history.
 The decorative mascot preference does not disable help controls.
 
-General chat reuses the animated Blue sprite and the fixed "Ask Blue" launcher.
+General chat uses the mascot portrait and the "Ask Git-It" floating launcher.
 The separate roaming learning mascot continues offering earned Git tips while
 chat is open; the reader's own mascot-hiding preference remains respected.
 
