@@ -51,6 +51,27 @@ export const OFFLINE_FAQS = [
   },
 ] as const
 
-export function findOfflineFaq(message: string) {
-  return OFFLINE_FAQS.find((faq) => faq.keywords.test(message))
+function normalized(message: string) {
+  return message.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
+}
+
+export function findOfflineFaq(message: string, history: readonly { role: string; text: string }[] = []): (typeof OFFLINE_FAQS)[number] | undefined {
+  const exact = OFFLINE_FAQS.find((faq) => normalized(faq.question) === normalized(message))
+  if (exact) return exact
+  if (/\brebase\b|\brebasing\b/i.test(message) && /\bmerge\b|\bmerging\b/i.test(message)) {
+    return OFFLINE_FAQS.find((faq) => faq.id === 'rebase')
+  }
+  const ranked = OFFLINE_FAQS.map((faq) => ({
+    faq, score: [...message.matchAll(new RegExp(faq.keywords.source, 'gi'))].length,
+  })).filter(({ score }) => score > 0).sort((a, b) => b.score - a.score)
+  if (ranked.length && ranked[0].score > (ranked[1]?.score ?? 0)) return ranked[0].faq
+  if (/^(what do (?:you|u) mean|huh|idk|why|again|explain (?:it |that )?(?:again|simpler)|i (?:still )?(?:don.?t|do not) (?:get it|understand))/i.test(message.trim())) {
+    for (const turn of [...history].reverse()) {
+      if (turn.role === 'user') {
+        const found = findOfflineFaq(turn.text)
+        if (found) return found
+      }
+    }
+  }
+  return undefined
 }

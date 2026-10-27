@@ -146,10 +146,12 @@ export type ApiSchemas = {
   "SyntaxPart": { "text": string; "token": string }
   "TransferCheckpoint": { "run_id": number | null; "tier_id": number; "title": string }
   "TutorChatContext": { "guide_token"?: string; "run_id"?: number; "surface": ApiSchemas["SurfaceEnum"]; "teaching_key"?: string; "usage_form"?: string }
+  "TutorChatError": { "detail": string; "retry_after_seconds"?: number }
   "TutorChatRequest": { "context": ApiSchemas["TutorChatContext"]; "history"?: Array<ApiSchemas["TutorChatTurn"]>; "message": string }
-  "TutorChatResponse": { "reply": string; "response_kind": ApiSchemas["ResponseKindEnum"]; "scenario_related": boolean; "suggested_topics": Array<ApiSchemas["TutorTopic"]> }
+  "TutorChatResponse": { "reply": string; "response_kind": ApiSchemas["ResponseKindEnum"]; "retry_after_seconds"?: number; "scenario_related": boolean; "suggested_topics": Array<ApiSchemas["TutorTopic"]>; "unavailable_reason"?: ApiSchemas["UnavailableReasonEnum"] }
   "TutorChatTurn": { "role": ApiSchemas["RoleEnum"]; "text": string }
   "TutorTopic": { "id": string; "title": string }
+  "UnavailableReasonEnum": "rate_limited" | "timeout" | "unavailable"
   "UnitEnum": "participants"
   "User": { "email": string; "id": number; "is_staff": boolean; "username": string }
   "VerdictEnum": "correct" | "incorrect"

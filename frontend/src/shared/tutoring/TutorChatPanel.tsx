@@ -6,6 +6,7 @@ import { TutorMarkdown } from './TutorMarkdown'
 import type { TutorContext } from './tutorApi'
 import { useTutorChat, type TutorMessage } from './useTutorChat'
 import { findOfflineFaq, OFFLINE_FAQS } from './offlineFaqs'
+import { TutorRecoveryPanel } from './TutorRecoveryPanel'
 import './tutor.css'
 
 export function TutorChatPanel({ context }: { context: TutorContext }) {
@@ -17,9 +18,7 @@ export function TutorChatPanel({ context }: { context: TutorContext }) {
 function Conversation({ context, scope }: { context: TutorContext; scope: string }) {
   const chat = useTutorChat(context, scope)
   const { draft, setDraft } = chat
-  const [offline, setOffline] = useState(() => !navigator.onLine)
-  const [view, setView] = useState<'chat' | 'faq'>(() => navigator.onLine ? 'chat' : 'faq')
-  const [notice, setNotice] = useState('')
+  const [view, setView] = useState<'chat' | 'faq'>('chat')
   const [selectedFaq, setSelectedFaq] = useState<string | null>(null)
   const [newMessages, setNewMessages] = useState(false)
   const composerId = useId()
@@ -36,24 +35,6 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
   }, [chat.messages, chat.pending, view])
 
   useEffect(() => {
-    const update = () => {
-      setOffline(!navigator.onLine)
-      if (!navigator.onLine) {
-        setView('faq')
-        setNotice('You are offline. These saved explanations are available without AI.')
-      } else {
-        setNotice('Your connection is back. Return to Chat to send your saved question.')
-      }
-    }
-    window.addEventListener('online', update)
-    window.addEventListener('offline', update)
-    return () => {
-      window.removeEventListener('online', update)
-      window.removeEventListener('offline', update)
-    }
-  }, [])
-
-  useEffect(() => {
     if (view === 'chat') composer.current?.focus()
     else faqButton.current?.focus()
   }, [view])
@@ -66,43 +47,27 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
   }, [draft])
 
   async function submit() {
-    if (!draft.trim() || chat.pending) return
+    if (!draft.trim() || chat.pending || chat.cooldown.blocked) return
     const question = draft.trim()
-    if (!navigator.onLine) {
-      setSelectedFaq(findOfflineFaq(question)?.id ?? null)
-      setNotice('You are offline. Your question is saved; browse these explanations while you wait.')
-      setView('faq')
-      return
-    }
-    setNotice('')
     const result = await chat.send(question)
     if (result === 'sent') composer.current?.focus()
-    if (result === 'unavailable') {
-      setSelectedFaq(findOfflineFaq(question)?.id ?? null)
-      setNotice('AI help is unavailable. Your question is saved; browse these explanations or return to Chat to retry.')
-      setView('faq')
-    }
   }
 
   return (
     <div className="tutor-chat">
       <div className="tutor-chat__actions">
         <button type="button" className="tutor-chat__reset" aria-pressed={view === 'chat'} onClick={() => setView('chat')}>Chat</button>
-        <button ref={faqButton} type="button" className="tutor-chat__reset" aria-pressed={view === 'faq'} onClick={() => setView('faq')}>Offline FAQs</button>
+        <button ref={faqButton} type="button" className="tutor-chat__reset" aria-pressed={view === 'faq'} onClick={() => setView('faq')}>FAQS</button>
         {chat.messages.length || draft || chat.pending ? (
           <button type="button" className="tutor-chat__reset" aria-label="Start a new conversation" onClick={() => {
-            chat.clear(); following.current = true; setNewMessages(false); setNotice(''); setSelectedFaq(null)
-            setView(navigator.onLine ? 'chat' : 'faq'); composer.current?.focus()
+            chat.clear(); following.current = true; setNewMessages(false); setSelectedFaq(null)
+            setView('chat'); composer.current?.focus()
           }}>
             <SquarePen size={15} aria-hidden="true" />
             New chat
           </button>
         ) : null}
       </div>
-
-      {offline || notice ? <p className="tutor-chat__notice" role="status" data-tutor-selectable>
-        {notice || 'You are offline. These saved explanations are available without AI.'}
-      </p> : null}
 
       <div
         ref={transcript}
@@ -147,7 +112,10 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
         </details>)}
       </section>
 
-      {chat.error ? <p className="tutor-chat__error" role="alert" data-tutor-selectable>{chat.error}</p> : null}
+      {view === 'chat' ? <TutorRecoveryPanel recovery={chat.recovery} remaining={chat.cooldown.remaining}
+        pending={chat.pending} draft={draft} history={chat.messages} onRetry={() => { void submit() }} onFaqs={() => {
+          setSelectedFaq(findOfflineFaq(draft, chat.messages)?.id ?? null); setView('faq')
+        }} /> : null}
 
       <form
         className="tutor-chat__composer"
@@ -173,7 +141,7 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
             }
           }}
         />
-        <button type="submit" aria-label="Send question" disabled={chat.pending || !draft.trim()}>
+        <button type="submit" aria-label="Send question" disabled={chat.pending || chat.cooldown.blocked || chat.offline || !draft.trim()}>
           <ArrowUp size={19} aria-hidden="true" />
         </button>
       </form>
@@ -188,7 +156,7 @@ function Message({ entry, home }: { entry: TutorMessage; home: boolean }) {
       <div className="tutor-chat__content" data-tutor-selectable>
         {/* Home declines a scenario that arrives from another tab; the workspace is always one. */}
         {fromGitIt && home && entry.reply.scenario_related ? (
-          <p className="tutor-chat__guarded"><ShieldCheck size={13} aria-hidden="true" />Scenario spotted</p>
+          <p className="tutor-chat__guarded"><ShieldCheck size={13} aria-hidden="true" />Scenario guidance</p>
         ) : null}
         {fromGitIt
           ? <TutorMarkdown text={entry.text} />

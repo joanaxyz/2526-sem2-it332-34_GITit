@@ -48,7 +48,7 @@ def test_module_names_are_live_and_only_published_public_fields():
 
 
 def test_platform_facts_reach_the_existing_tutor_prompt_and_cache_key():
-    def recognize(texts):
+    def recognize(texts, **kwargs):
         return [Recognition(UNMATCHED) for _ in texts]
     with (
         patch("tutoring.services.chat.recognize_all", side_effect=recognize),
@@ -63,7 +63,7 @@ def test_platform_facts_reach_the_existing_tutor_prompt_and_cache_key():
 
 def test_recognized_scenarios_are_declined_before_platform_lookup():
     with (
-        patch("tutoring.services.chat.recognize_all", side_effect=lambda texts: [Recognition(MATCHED) for _ in texts]),
+        patch("tutoring.services.chat.recognize_all", side_effect=lambda texts, **kwargs: [Recognition(MATCHED) for _ in texts]),
         patch("tutoring.services.chat.platform_context", side_effect=AssertionError("Must not look up facts")),
         patch("tutoring.services.chat.generate", side_effect=AssertionError("Must not call AI")),
     ):
@@ -75,7 +75,7 @@ def test_published_module_changes_invalidate_cached_platform_answers():
     story = Story.objects.create(slug="changing", title="Public world")
     chapter = Chapter.objects.create(story=story, slug="changing", number=1, title="First title")
     with (
-        patch("tutoring.services.chat.recognize_all", side_effect=lambda texts: [Recognition(UNMATCHED) for _ in texts]),
+        patch("tutoring.services.chat.recognize_all", side_effect=lambda texts, **kwargs: [Recognition(UNMATCHED) for _ in texts]),
         patch("tutoring.services.chat.generate", return_value="Read the published module on the map.") as provider,
     ):
         chat(None, "Which modules are published?", {"surface": "home"})

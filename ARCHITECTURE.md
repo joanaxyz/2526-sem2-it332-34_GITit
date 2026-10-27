@@ -176,11 +176,15 @@ appears only when collapsed. Command guides omit the mascot and retain a separat
 command icon for reopening and history.
 The decorative mascot preference does not disable help controls.
 
-Both tutor surfaces offer bundled Offline FAQs with reviewed general Git explanations.
-Network failures and unavailable provider replies offer these saved explanations and
-retain the question for an explicit retry. Drafts survive closing the window within
+Both tutor surfaces offer bundled FAQS with reviewed general Git explanations.
+Network failures and unavailable provider replies show a recovery panel in Chat,
+with an explicit Retry and access to saved explanations. Rate-limit responses carry
+an optional reason and retry interval; the countdown is shared across tutor windows
+within a sign-in session and never automatically sends a question. Drafts survive closing the window within
 the sign-in session; only completed exchanges enter conversation history. New replies
 follow the transcript only when the learner is near its bottom.
+Recognition, generation and a guarded rewrite share a 30-second backend budget;
+the browser cancels stalled chat requests after 40 seconds and ignores late replies.
 
 `tutoring/services/platform_knowledge.py` supplies reviewed public platform facts and
 live published chapter names, including for recent-topic follow-ups. It does not read

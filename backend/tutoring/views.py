@@ -1,3 +1,5 @@
+import math
+
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
@@ -6,7 +8,11 @@ from rest_framework.views import APIView
 
 from adventures.models import AdventureLevelTierRun
 from players.services import get_or_create_player
-from tutoring.openapi import IntroductionCompleteResponseSerializer, TutorChatResponseSerializer
+from tutoring.openapi import (
+    IntroductionCompleteResponseSerializer,
+    TutorChatErrorSerializer,
+    TutorChatResponseSerializer,
+)
 from tutoring.payloads import tutor_payload
 from tutoring.serializers import IntroductionCompleteSerializer, TutorChatRequestSerializer
 from tutoring.services.chat import chat
@@ -44,10 +50,19 @@ class IntroductionCompleteAPIView(APIView):
 class TutorChatAPIView(APIView):
     throttle_scope = "tutor_chat"
 
+    def handle_exception(self, exc):
+        response = super().handle_exception(exc)
+        if response.status_code == 429:
+            response.data = {
+                "detail": "Git-It needs a short break. Your question is still here.",
+                "retry_after_seconds": max(1, min(86400, math.ceil(getattr(exc, "wait", None) or 60))),
+            }
+        return response
+
     @extend_schema(
         operation_id="tutor_chat",
         request=TutorChatRequestSerializer,
-        responses={200: TutorChatResponseSerializer},
+        responses={200: TutorChatResponseSerializer, 429: TutorChatErrorSerializer},
     )
     def post(self, request):
         serializer = TutorChatRequestSerializer(data=request.data)

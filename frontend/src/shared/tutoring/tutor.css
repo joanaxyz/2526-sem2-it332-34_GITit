@@ -32,6 +32,12 @@ html[data-home-tutor-open] .world-mascot { visibility: hidden; }
 .tutor-chat [hidden] { display: none; }
 .tutor-chat__reset[aria-pressed="true"] { background: hsl(var(--primary) / .12); color: var(--text-primary); }
 .tutor-chat__notice { margin: 0; color: var(--text-secondary); font-size: .8125rem; line-height: 1.5; }
+.tutor-chat__recovery { flex-shrink: 0; max-height: 42%; overflow-y: auto; padding: .65rem .75rem; border: 1px solid var(--border-subtle); border-radius: 8px; background: var(--surface-raised); font-size: .8125rem; }
+.tutor-chat__recovery p { margin: 0; }
+.tutor-chat__recovery-actions { display: flex; flex-wrap: wrap; gap: .35rem; margin-top: .4rem; }
+.tutor-chat__recovery button, .tutor-chat__saved summary { cursor: pointer; }
+.tutor-chat__saved { margin-top: .5rem; }
+.tutor-chat__saved p { margin-top: .5rem; }
 .tutor-chat__faqs { flex: 1; min-height: 48px; overflow-y: auto; overscroll-behavior: contain; }
 .tutor-chat__faqs details { padding-block: .75rem; border-bottom: 1px solid var(--border-subtle); }
 .tutor-chat__faqs summary { color: var(--text-primary); cursor: pointer; }

@@ -34,7 +34,7 @@ function ask(text: string) {
 describe('shared tutoring surfaces', () => {
   it('browses saved explanations manually without calling AI', () => {
     render(<HomeTutor />)
-    fireEvent.click(screen.getByRole('button', { name: 'Offline FAQs' }))
+    fireEvent.click(screen.getByRole('button', { name: 'FAQS' }))
     expect(screen.getByRole('region', { name: 'Saved Git explanations' })).toBeVisible()
     expect(screen.getByText('What is a branch?')).toBeVisible()
     expect(tutorApi.chat).not.toHaveBeenCalled()
@@ -42,25 +42,24 @@ describe('shared tutoring surfaces', () => {
     expect(screen.getByRole('textbox')).toHaveFocus()
   })
 
-  it('starts offline with saved explanations and never submits while offline', () => {
+  it('stays in Chat offline and offers FAQs without submitting', () => {
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
     render(<HomeTutor />)
+    expect(screen.getByRole('region', { name: 'Chat recovery' })).toBeVisible()
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Explain staging' } })
+    expect(screen.getByRole('button', { name: 'Send question' })).toBeDisabled()
+    fireEvent.click(screen.getByRole('button', { name: 'Browse FAQS' }))
     expect(screen.getByRole('region', { name: 'Saved Git explanations' })).toBeVisible()
     fireEvent.click(screen.getByRole('button', { name: 'Chat' }))
-    ask('Explain staging')
-    expect(screen.getByRole('region', { name: 'Saved Git explanations' })).toBeVisible()
-    expect(tutorApi.chat).not.toHaveBeenCalled()
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
     fireEvent(window, new Event('online'))
-    expect(screen.getByText(/Your connection is back/)).toBeVisible()
-    expect(tutorApi.chat).not.toHaveBeenCalled()
-    fireEvent.click(screen.getByRole('button', { name: 'Chat' }))
     expect(screen.getByRole('textbox')).toHaveValue('Explain staging')
+    expect(screen.getByRole('button', { name: 'Send question' })).toBeEnabled()
+    expect(tutorApi.chat).not.toHaveBeenCalled()
   })
 
   it.each([
     ['network failure', new Error('network')],
-    ['rate limiting', new ApiError('busy', 429, {})],
     ['server failure', new ApiError('unavailable', 503, {})],
     ['provider unavailable', null],
   ])('retains the draft and excludes %s from retry history', async (_label, failure) => {
@@ -68,7 +67,7 @@ describe('shared tutoring surfaces', () => {
     else vi.mocked(tutorApi.chat).mockResolvedValueOnce({ ...reply, response_kind: 'unavailable', reply: 'AI is unavailable.' })
     render(<HomeTutor />)
     ask('Explain staging')
-    expect(await screen.findByRole('region', { name: 'Saved Git explanations' })).toBeVisible()
+    expect(await screen.findByRole('region', { name: 'Chat recovery' })).toBeVisible()
     fireEvent.click(screen.getByRole('button', { name: 'Chat' }))
     expect(screen.getByRole('textbox')).toHaveValue('Explain staging')
     expect(screen.queryByRole('article')).not.toBeInTheDocument()
@@ -84,22 +83,21 @@ describe('shared tutoring surfaces', () => {
     vi.mocked(tutorApi.chat).mockRejectedValueOnce(new Error('network'))
     render(<HomeTutor />)
     ask('Explain branches')
-    await screen.findByRole('region', { name: 'Saved Git explanations' })
+    await screen.findByRole('region', { name: 'Chat recovery' })
     fireEvent.click(screen.getByRole('button', { name: 'Close Ask Git-It' }))
     fireEvent.click(screen.getByRole('button', { name: 'Ask Git-It' }))
     expect(screen.getByRole('textbox')).toHaveValue('Explain branches')
   })
 
-  it('offers FAQs when the connection drops and retains the draft on reconnection', () => {
+  it('keeps Chat and the draft when the connection drops and returns', () => {
     render(<HomeTutor />)
     fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Explain staging' } })
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
     fireEvent(window, new Event('offline'))
-    expect(screen.getByRole('region', { name: 'Saved Git explanations' })).toBeVisible()
-    expect(screen.getByRole('button', { name: 'Offline FAQs' })).toHaveFocus()
+    expect(screen.getByRole('region', { name: 'Chat recovery' })).toBeVisible()
+    expect(screen.getByRole('textbox')).toHaveFocus()
     Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
     fireEvent(window, new Event('online'))
-    fireEvent.click(screen.getByRole('button', { name: 'Chat' }))
     expect(screen.getByRole('textbox')).toHaveValue('Explain staging')
     expect(tutorApi.chat).not.toHaveBeenCalled()
   })
@@ -128,10 +126,10 @@ describe('shared tutoring surfaces', () => {
   })
 
   it('keeps validation errors in Chat with the original question', async () => {
-    vi.mocked(tutorApi.chat).mockRejectedValueOnce(new ApiError('invalid guide', 400, {}))
+    vi.mocked(tutorApi.chat).mockRejectedValueOnce(new ApiError('invalid guide', 400, { context: ['invalid guide'] }))
     renderGuideTutor()
     ask('Explain this guide')
-    expect(await screen.findByRole('alert')).toHaveTextContent('Reopen the guide')
+    expect(await screen.findByRole('region', { name: 'Chat recovery' })).toHaveTextContent('Reopen it')
     expect(screen.getByRole('textbox')).toHaveValue('Explain this guide')
     expect(screen.queryByRole('region', { name: 'Saved Git explanations' })).not.toBeInTheDocument()
   })
@@ -385,7 +383,7 @@ describe('shared tutoring surfaces', () => {
     render(<HomeTutor />)
     ask('Explain switching')
     const answer = await screen.findByRole('article', { name: 'Git-It' })
-    expect(answer).not.toHaveTextContent('Scenario spotted')
+    expect(answer).not.toHaveTextContent('Scenario guidance')
     expect(answer.querySelector('strong')).toHaveTextContent('placeholders')
     expect(answer.querySelector('pre')).toHaveTextContent('git switch -c <branch>')
     expect(answer.querySelectorAll('li')).toHaveLength(2)
@@ -394,22 +392,22 @@ describe('shared tutoring surfaces', () => {
   it('marks a Home reply that declined a scenario', async () => {
     vi.mocked(tutorApi.chat).mockResolvedValue({
       ...reply,
-      reply: "Asking about GIT it! scenarios isn't allowed here, so I can't help with this one. Ask me another Git question instead.",
+      reply: "I can help you understand Git, but I can’t solve a scenario here. Ask about the concept, or open the command guide for help understanding its syntax.",
       scenario_related: true,
       response_kind: 'guarded',
     })
     render(<HomeTutor />)
     ask('Pasted scenario')
     const answer = await screen.findByRole('article', { name: 'Git-It' })
-    expect(answer).toHaveTextContent('Scenario spotted')
-    expect(answer).toHaveTextContent('Ask me another Git question instead.')
+    expect(answer).toHaveTextContent('Scenario guidance')
+    expect(answer).toHaveTextContent('Ask about the concept')
   })
 
   it('does not mark workspace replies, which are always protected', async () => {
     vi.mocked(tutorApi.chat).mockResolvedValue({ ...reply, scenario_related: true, response_kind: 'guarded' })
     renderGuideTutor()
     ask('Explain this')
-    expect(await screen.findByRole('article', { name: 'Git-It' })).not.toHaveTextContent('Scenario spotted')
+    expect(await screen.findByRole('article', { name: 'Git-It' })).not.toHaveTextContent('Scenario guidance')
   })
 
   it('discards delayed responses and clears conversation across account changes', async () => {
