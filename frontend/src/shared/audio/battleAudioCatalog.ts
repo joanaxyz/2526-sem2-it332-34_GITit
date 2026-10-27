@@ -72,6 +72,12 @@ export const BACKGROUND_VOLUMES: Record<BattleBackgroundKind, number> = {
   inside: 0.68,
 }
 
+export const STAR_REWARD_VOLUMES = [0.18, 0.36, 0.38, 0.42] as const
+
+export function starRewardSrc(stars: number): string {
+  return `${AUDIO_ROOT}/rewards/star-${stars}-soft.wav`
+}
+
 export function skillSrc(element: BattleSkillElement, phase: BattleSkillSoundPhase): string {
   return `${AUDIO_ROOT}/skills/${element}/${phase}.wav`
 }

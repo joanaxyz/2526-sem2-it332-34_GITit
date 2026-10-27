@@ -1,0 +1,97 @@
+/* The original 1774 x 887 grade image is a three-cell sprite atlas. The
+   top 80% holds the stars; the bottom 20% holds the separate diamond line. */
+.game-outcome-star-source,
+.game-outcome-star-sprites {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.game-outcome-star-source { object-fit: contain; }
+.game-outcome-star-sprites { visibility: hidden; }
+.game-outcome-star-art.is-ready .game-outcome-star-source { opacity: 0; }
+.game-outcome-star-art.is-ready .game-outcome-star-sprites { visibility: visible; }
+
+.game-outcome-star-cell {
+  --star-delay: calc(var(--outcome-star-delay) + var(--star-index) * var(--outcome-star-stagger));
+  position: absolute;
+  top: 0;
+  left: calc(var(--star-index) * 100% / 3);
+  width: calc(100% / 3);
+  height: 80%;
+}
+.game-outcome-star-face {
+  position: absolute;
+  inset: 0;
+  background-image: var(--outcome-star-image);
+  background-repeat: no-repeat;
+  background-size: 300% 125%;
+  background-position: calc(var(--star-index) * 50%) top;
+  transform-origin: 50% 56%;
+}
+.game-outcome-star-cell.is-earned .game-outcome-star-rest {
+  filter: grayscale(1) brightness(0.65);
+}
+.game-outcome-star-art.is-ready .is-earned .game-outcome-star-rest {
+  animation: game-outcome-star-rest-out 240ms ease-out var(--star-delay) both;
+}
+.game-outcome-star-art.is-ready .game-outcome-star-award {
+  animation: game-outcome-star-award-in 440ms steps(12, end) var(--star-delay) both;
+}
+.game-outcome-star-glint {
+  position: absolute;
+  top: 29%;
+  right: 17%;
+  width: 10%;
+  aspect-ratio: 1;
+  background: hsl(var(--foreground));
+  clip-path: polygon(50% 0, 61% 39%, 100% 50%, 61% 61%, 50% 100%, 39% 61%, 0 50%, 39% 39%);
+  opacity: 0;
+}
+.game-outcome-star-art.is-ready .game-outcome-star-glint {
+  animation: game-outcome-star-glint 360ms ease-out calc(var(--star-delay) + 180ms) both;
+}
+.game-outcome-star-ornament {
+  position: absolute;
+  inset: auto 0 0;
+  height: 20%;
+  background: var(--outcome-star-image) center bottom / 100% 500% no-repeat;
+}
+.game-outcome-star-art.is-ready .game-outcome-star-ornament {
+  animation: game-outcome-star-ornament-in 320ms cubic-bezier(0.16, 1, 0.3, 1)
+    calc(var(--outcome-star-delay) + var(--outcome-star-count) * var(--outcome-star-stagger)) both;
+}
+.game-outcome-star-art.is-empty.is-ready .game-outcome-star-cell {
+  animation: game-outcome-star-unlit-in 320ms cubic-bezier(0.16, 1, 0.3, 1)
+    calc(var(--star-index) * 70ms) both;
+}
+
+@keyframes game-outcome-star-rest-out {
+  from { opacity: 1; }
+  to { opacity: 0; }
+}
+@keyframes game-outcome-star-award-in {
+  0% { opacity: 0; transform: translateY(-12%) scale(0.64) rotate(-9deg); }
+  35% { opacity: 1; }
+  100% { opacity: 1; transform: none; }
+}
+@keyframes game-outcome-star-glint {
+  0% { opacity: 0; transform: scale(0.3) rotate(-30deg); }
+  35% { opacity: 0.95; }
+  100% { opacity: 0; transform: scale(1.25) rotate(30deg); }
+}
+@keyframes game-outcome-star-ornament-in {
+  from { opacity: 0.45; transform: scaleX(0.75); }
+  to { opacity: 1; transform: scaleX(1); }
+}
+@keyframes game-outcome-star-unlit-in {
+  from { opacity: 0.5; transform: translateY(-4%); }
+  to { opacity: 1; transform: none; }
+}
+
+/* Show the exact, fully earned grade immediately when motion is reduced. */
+@media (prefers-reduced-motion: reduce) {
+  .game-outcome-star-art.is-ready .game-outcome-star-source { opacity: 1; }
+  .game-outcome-star-sprites { display: none; }
+  .game-outcome-star-art * { animation: none !important; }
+}

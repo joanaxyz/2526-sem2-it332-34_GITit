@@ -5,6 +5,7 @@ import { ChallengeOutcomeModal } from '@/features/challenges/components/Challeng
 import type { ChallengeRun } from '@/features/challenges/types'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
+import { normalizeStarScore } from '@/shared/level/utils/starScore'
 
 type PreviewMode = 'challenge-win' | 'challenge-loss'
 
@@ -67,19 +68,21 @@ const challengeRun = {
 function OutcomePreviewPage() {
   const [searchParams] = useSearchParams()
   const [mode, setMode] = useState<PreviewMode>(() => previewMode(searchParams.get('mode')))
+  const [replay, setReplay] = useState(0)
   const isLoss = mode.endsWith('loss')
+  const stars = isLoss ? 0 : normalizeStarScore(Number(searchParams.get('stars') ?? 3))
 
   const activeChallengeRun = {
     ...challengeRun,
     status: isLoss ? 'failed' : 'completed',
-    stars: isLoss ? 0 : 3,
+    stars,
     counts: {
       ...challengeRun.counts,
       counted_action_total: isLoss ? 5 : 2,
       remaining_counted_commands: isLoss ? 0 : 3,
       max_reached: isLoss,
     },
-    mastery_progress: { cleared: !isLoss, stars: isLoss ? 0 : 3 },
+    mastery_progress: { cleared: !isLoss, stars },
     next_difficulty: isLoss ? null : challengeRun.next_difficulty,
   } as ChallengeRun
 
@@ -134,11 +137,12 @@ function OutcomePreviewPage() {
       </main>
 
       <ChallengeOutcomeModal
+        key={`${mode}-${stars}-${replay}`}
         open
         run={activeChallengeRun}
         onClose={() => undefined}
         onBackToMap={() => setMode('challenge-win')}
-        onRetry={() => setMode('challenge-win')}
+        onRetry={() => setReplay(value => value + 1)}
       />
     </div>
   )

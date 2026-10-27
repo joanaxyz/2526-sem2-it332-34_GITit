@@ -196,11 +196,12 @@
 }
 
 .game-outcome-star-art {
+  position: relative;
   display: block;
   width: min(22rem, 76vw);
-  height: auto;
+  aspect-ratio: 2 / 1;
   margin-inline: auto;
-  object-fit: contain;
+  pointer-events: none;
   filter: drop-shadow(0 14px 34px rgba(0, 0, 0, 0.5));
 }
 
@@ -217,8 +218,6 @@
   background-position: center bottom;
   filter: grayscale(1) brightness(1.12) contrast(1.05) drop-shadow(0 10px 26px rgba(0, 0, 0, 0.55));
 }
-.game-outcome-star-art.is-lost { filter: grayscale(1) brightness(0.95) drop-shadow(0 14px 34px rgba(0, 0, 0, 0.5)); }
-
 .game-outcome-headline {
   animation: game-outcome-headline-enter 480ms cubic-bezier(0.16, 1, 0.3, 1) 80ms both;
 }

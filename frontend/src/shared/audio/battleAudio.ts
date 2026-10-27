@@ -1,6 +1,12 @@
 import { buttonSoundForEventTarget } from '@/shared/audio/battleButtonSounds'
 import { audioClockNow, canUseAudio, fadeOut, loadAudio, tryPlay } from '@/shared/audio/battleAudioDom'
 import {
+  MUSIC_ENABLED_STORAGE_KEY,
+  SOUND_EFFECTS_ENABLED_STORAGE_KEY,
+  persistAudioChannelPreference,
+  readAudioChannelPreference,
+} from '@/shared/audio/battleAudioPreferences'
+import {
   BACKGROUND_VOLUMES,
   BUTTON_CLICK_VARIANTS,
   BUTTON_SOUND_VOLUMES,
@@ -11,6 +17,7 @@ import {
   SKILL_ELEMENTS,
   SKILL_PHASES,
   SKILL_VOLUMES,
+  STAR_REWARD_VOLUMES,
   SYSTEM_SOUNDS,
   backgroundSrc,
   buttonSrc,
@@ -18,6 +25,7 @@ import {
   companionSrc,
   monsterHurtSrc,
   skillSrc,
+  starRewardSrc,
   systemSrc,
 } from '@/shared/audio/battleAudioCatalog'
 import type {
@@ -33,10 +41,6 @@ export type {
   BattleSkillElement,
   BattleSkillSoundPhase,
 } from '@/shared/audio/battleAudioCatalog'
-
-const LEGACY_AUDIO_ENABLED_STORAGE_KEY = 'gitit:battle-audio-enabled'
-const SOUND_EFFECTS_ENABLED_STORAGE_KEY = 'gitit:battle-sound-effects-enabled'
-const MUSIC_ENABLED_STORAGE_KEY = 'gitit:battle-music-enabled'
 
 type AudioPreferenceListener = (enabled: boolean) => void
 
@@ -78,6 +82,7 @@ function preloadBattleAudio(): void {
   for (const sound of SYSTEM_SOUNDS) {
     loadAudio(systemSrc(sound))
   }
+  for (const grade of [0, 1, 2, 3]) loadAudio(starRewardSrc(grade))
 }
 
 export function isBattleSoundEnabled(): boolean {
@@ -185,6 +190,21 @@ export function playGameOverSound(): void {
   playOneShot(systemSrc('game-over'), 0.5)
 }
 
+/** Warm the cues while the matching star artwork is loading. */
+export function preloadStarRewardSounds(stars: number): void {
+  if (!canUseAudio() || !battleSoundEffectsEnabled) return
+  if (!Number.isInteger(stars) || stars < 0 || stars > 3) return
+  for (let grade = stars === 0 ? 0 : 1; grade <= stars; grade += 1) {
+    loadAudio(starRewardSrc(grade))
+  }
+}
+
+/** Returns a disposer so an outcome can stop its cues when dismissed. */
+export function playStarRewardSound(stars: number): () => void {
+  if (!Number.isInteger(stars) || stars < 0 || stars > 3 || isDocumentHidden()) return () => undefined
+  return playOneShot(starRewardSrc(stars), STAR_REWARD_VOLUMES[stars])
+}
+
 export function playWaveTransitionSound(): void {
   playOneShot(systemSrc('wave-transition'), 0.44)
 }
@@ -247,28 +267,8 @@ function nextButtonClickVariant(): ButtonSound {
   return sound
 }
 
-function readAudioChannelPreference(storageKey: string): boolean {
-  try {
-    if (typeof window === 'undefined' || !window.localStorage) return true
-    const saved = window.localStorage.getItem(storageKey)
-    if (saved) return saved !== 'off'
-    return window.localStorage.getItem(LEGACY_AUDIO_ENABLED_STORAGE_KEY) !== 'off'
-  } catch {
-    return true
-  }
-}
-
-function persistAudioChannelPreference(storageKey: string, enabled: boolean): void {
-  try {
-    if (typeof window === 'undefined' || !window.localStorage) return
-    window.localStorage.setItem(storageKey, enabled ? 'on' : 'off')
-  } catch {
-    // Storage can be unavailable in private or embedded contexts; audio still works.
-  }
-}
-
-function playOneShot(src: string, volume: number): void {
-  if (!canUseAudio() || !battleSoundEffectsEnabled) return
+function playOneShot(src: string, volume: number): () => void {
+  if (!canUseAudio() || !battleSoundEffectsEnabled) return () => undefined
   const base = loadAudio(src)
   const audio = base.cloneNode(true) as HTMLAudioElement
   audio.volume = volume
@@ -282,8 +282,17 @@ function playOneShot(src: string, volume: number): void {
     },
     { once: true },
   )
-  tryPlay(audio)
+  tryPlay(audio, () => {
+    activeOneShots.delete(audio)
+    audio.remove()
+  })
   resumeActiveBackground()
+  return () => {
+    if (!activeOneShots.delete(audio)) return
+    audio.pause()
+    audio.currentTime = 0
+    audio.remove()
+  }
 }
 
 function playLoopFor(src: string, volume: number, durationMs: number): void {
