@@ -119,6 +119,22 @@ describe('terminal-led command introduction', () => {
     await waitFor(() => expect(document.activeElement).toHaveAttribute('data-command-input'))
   })
 
+  it('keeps its "Ask Git-It" launcher out from under the veil', async () => {
+    const measure = Element.prototype.getBoundingClientRect
+    const spy = vi.spyOn(Element.prototype, 'getBoundingClientRect').mockImplementation(function (this: Element) {
+      if (!this.matches('[data-mascot-launcher="guide-tutor"]')) return measure.call(this)
+      return { x: 900, y: 600, left: 900, top: 600, right: 976, bottom: 704, width: 76, height: 104, toJSON: () => ({}) } as DOMRect
+    })
+    try {
+      setup()
+      await screen.findByText('Syntax: git switch -c <branch>')
+      // The veil's cut-out: the launcher's box with the reveal padding around it.
+      await waitFor(() => expect(document.querySelector('.workspace-tour__veil mask rect[x="897"][y="597"]')).not.toBeNull())
+    } finally {
+      spy.mockRestore()
+    }
+  })
+
   it('confirms a correct move with what changed, not colour alone', async () => {
     setup({
       ...tutor, phase: 'feedback', verdict: 'correct', explanation: "That's the right command.",

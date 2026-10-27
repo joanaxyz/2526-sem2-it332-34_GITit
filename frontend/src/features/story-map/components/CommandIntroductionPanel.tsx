@@ -24,11 +24,13 @@ const DEFAULT_PANE_LAYOUT = {
   gap: 52,
   top: 24,
 }
-// The scenario, project files and tips stay readable while a guide is open.
+// The scenario, project files, tips and the guide's own "Ask Git-It" launcher
+// stay readable while a guide is open; everything else sits under its veil.
 const CONTEXT_REGIONS = [
   '[data-tour-target="level-story"]',
   '[data-tour-target="project-files"]',
   '[data-tour-target="workspace-tips"]',
+  '[data-mascot-launcher="guide-tutor"]',
 ]
 const FEEDBACK_REGIONS = [...CONTEXT_REGIONS, '[data-tour-target="terminal"]']
 // The guide's chat window, its launcher and the terminal belong with the guide: clicks there keep it open.
