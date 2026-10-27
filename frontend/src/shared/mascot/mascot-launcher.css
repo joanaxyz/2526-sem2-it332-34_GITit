@@ -32,3 +32,8 @@
 @media (prefers-reduced-motion: reduce) {
   .mascot-launcher__portrait, .mascot-launcher__button.is-tour-destination .mascot-launcher__caption { animation: none; }
 }
+
+/* Chat uses the original fixed corner launcher. */
+.mascot-launcher[data-fixed] { right: var(--space-5); bottom: var(--space-5); }
+.mascot-launcher[data-fixed] .mascot-launcher__button { cursor: pointer; touch-action: auto; }
+@media (max-width: 720px) { .mascot-launcher[data-fixed] { right: var(--space-3); bottom: calc(5.25rem + env(safe-area-inset-bottom)); } }
