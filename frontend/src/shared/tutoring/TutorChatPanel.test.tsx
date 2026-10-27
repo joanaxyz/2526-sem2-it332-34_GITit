@@ -84,7 +84,7 @@ describe('shared tutoring surfaces', () => {
     render(<HomeTutor />)
     ask('Explain branches')
     await screen.findByRole('region', { name: 'Chat recovery' })
-    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Git-It' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Blue' }))
     fireEvent.click(screen.getByRole('button', { name: 'Ask Git-It' }))
     expect(screen.getByRole('textbox')).toHaveValue('Explain branches')
   })
@@ -107,7 +107,7 @@ describe('shared tutoring surfaces', () => {
     vi.mocked(tutorApi.chat).mockImplementationOnce(() => new Promise((done) => { resolve = done }))
     render(<HomeTutor />)
     ask('Explain branches')
-    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Git-It' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Blue' }))
     fireEvent.click(screen.getByRole('button', { name: 'Ask Git-It' }))
     await act(async () => { resolve(reply) })
     expect(screen.getByRole('textbox')).toHaveValue('Explain branches')
@@ -203,12 +203,12 @@ describe('shared tutoring surfaces', () => {
     setGuideMascotVisibility(false)
     render(<HomeTutor />)
     expect(screen.queryByRole('button', { name: 'Ask Git-It' })).not.toBeInTheDocument()
-    expect(screen.getByRole('dialog').parentElement?.querySelector('.tutor-window__speaker')).toHaveAttribute('src', '/mascot/portrait.png')
-    expect(screen.getByRole('dialog').querySelector('img')).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog').parentElement?.querySelector('.tutor-window__portrait img')).toHaveAttribute('src', '/mascot/portrait.png')
+    expect(screen.getByRole('dialog').querySelector('.tutor-window__portrait img')).toBeInTheDocument()
     ask('Explain staging')
     expect(await screen.findByText(reply.reply)).toBeInTheDocument()
     expect(screen.getByRole('article', { name: 'Git-It' })).toHaveTextContent(reply.reply)
-    expect(screen.getByRole('dialog').querySelector('img')).not.toBeInTheDocument()
+    expect(screen.getByRole('dialog').querySelector('.tutor-window__portrait img')).toBeInTheDocument()
     expect(tutorApi.chat).toHaveBeenCalledWith({ message: 'Explain staging', context: { surface: 'home' }, history: [] }, expect.any(AbortSignal))
     fireEvent.keyDown(document, { key: 'Escape' })
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
@@ -229,8 +229,8 @@ describe('shared tutoring surfaces', () => {
     })
     const view = render(<section aria-label="Guide container"><GuideTutor runId={17} teachingKey="form:git add <path>" usageForm="git add <path>" guideToken="signed-guide" /></section>)
     fireEvent.click(screen.getByRole('button', { name: 'Ask Git-It' }))
-    const window = screen.getByRole('dialog', { name: 'Ask Git-It' })
-    expect(window.querySelector('img')).not.toBeInTheDocument()
+    const window = screen.getByRole('dialog', { name: 'Ask Blue' })
+    expect(window.querySelector('.tutor-window__portrait img')).toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Guide container' })).not.toContainElement(window)
     expect(screen.getByRole('textbox')).toHaveFocus()
     ask('Explain this placeholder')
@@ -242,13 +242,13 @@ describe('shared tutoring surfaces', () => {
 
   it('starts workspace help as a launcher so it never covers the guide, and remembers it open', () => {
     const view = render(<GuideTutor runId={17} teachingKey="command:add" usageForm="git add <path>" guideToken="signed-guide" />)
-    expect(screen.queryByRole('dialog', { name: 'Ask Git-It' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Ask Blue' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Ask Git-It' }))
-    expect(screen.getByRole('dialog', { name: 'Ask Git-It' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Ask Blue' })).toBeInTheDocument()
     view.unmount()
     // The next guide opens with the chat as the learner left it.
     render(<GuideTutor runId={17} teachingKey="command:status" usageForm="git status" guideToken="signed-guide" />)
-    expect(screen.getByRole('dialog', { name: 'Ask Git-It' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Ask Blue' })).toBeInTheDocument()
   })
 
   it('keeps workspace help open while the learner works elsewhere; Escape or close puts only the chat away', () => {
@@ -256,15 +256,15 @@ describe('shared tutoring surfaces', () => {
     window.addEventListener('keydown', guideEscape)
     renderGuideTutor()
     fireEvent.pointerDown(document.body)
-    expect(screen.getByRole('dialog', { name: 'Ask Git-It' })).toBeInTheDocument()
+    expect(screen.getByRole('dialog', { name: 'Ask Blue' })).toBeInTheDocument()
     fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Escape' })
-    expect(screen.queryByRole('dialog', { name: 'Ask Git-It' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Ask Blue' })).not.toBeInTheDocument()
     expect(guideEscape).not.toHaveBeenCalled()
     const launcher = screen.getByRole('button', { name: 'Ask Git-It' })
     expect(launcher).toHaveFocus()
     fireEvent.click(launcher)
-    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Git-It' }))
-    expect(screen.queryByRole('dialog', { name: 'Ask Git-It' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Blue' }))
+    expect(screen.queryByRole('dialog', { name: 'Ask Blue' })).not.toBeInTheDocument()
     window.removeEventListener('keydown', guideEscape)
   })
 
@@ -282,7 +282,7 @@ describe('shared tutoring surfaces', () => {
 
   it('closes Home help from a visible close button and stays closed on the next page', () => {
     const view = render(<HomeTutor />)
-    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Git-It' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Blue' }))
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ask Git-It' })).toHaveFocus()
     view.unmount()
@@ -300,66 +300,40 @@ describe('shared tutoring surfaces', () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: width })
   })
 
-  it.each([
-    { name: 'header', selector: '.tutor-window__heading', x: 120, y: 30 },
-    { name: 'body', selector: '.tutor-chat__transcript', x: 120, y: 200 },
-    { name: 'side mascot', selector: '.tutor-window__speaker', x: -40, y: 40 },
-  ])('moves from its $name and resizes from its edges', ({ selector, x, y }) => {
+  it('keeps the panel fixed during pointer gestures and exposes no movement controls', () => {
     render(<HomeTutor />)
+    expect(screen.queryByRole('button', { name: 'Move AI chat window' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Resize AI chat window' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Blue' }))
+    const launcher = screen.getByRole('button', { name: 'Ask Git-It' })
+    expect(launcher).toHaveAttribute('title', 'Ask Git-It')
+    expect(launcher.parentElement).toHaveAttribute('data-fixed')
+    fireEvent.click(launcher)
     const frame = screen.getByRole('dialog').parentElement!
-    const box = () => {
-      const [left, top, width, height] = ['left', 'top', 'width', 'height'].map((side) => Number.parseFloat(frame.style.getPropertyValue(side)))
-      return { left, top, width, height }
-    }
-    frame.getBoundingClientRect = () => {
-      const { left, top, width, height } = box()
-      return DOMRect.fromRect({ x: left, y: top, width, height })
-    }
-    const start = box()
-    const handle = frame.querySelector(selector)!
-    fireEvent.pointerDown(handle, { button: 0, pointerId: 1, clientX: start.left + x, clientY: start.top + y })
-    fireEvent.pointerMove(frame, { pointerId: 1, clientX: start.left + x - 50, clientY: start.top + y + 20 })
+    const before = frame.getAttribute('style')
+    fireEvent.pointerDown(frame.querySelector('.tutor-window__header')!, { button: 0, pointerId: 1, clientX: 500, clientY: 200 })
+    fireEvent.pointerMove(frame, { pointerId: 1, clientX: 100, clientY: 400 })
     fireEvent.pointerUp(frame, { pointerId: 1 })
-    expect(box()).toEqual({ ...start, left: start.left - 50, top: start.top + 20 })
-
-    const moved = box()
-    const rightEdge = moved.left + moved.width - 2
-    fireEvent.pointerDown(frame, { button: 0, pointerId: 2, clientX: rightEdge, clientY: moved.top + 200 })
-    fireEvent.pointerMove(frame, { pointerId: 2, clientX: rightEdge - 40, clientY: moved.top + 200 })
-    fireEvent.pointerUp(frame, { pointerId: 2 })
-    expect(box()).toEqual({ ...moved, width: moved.width - 40 })
-
-    // Text selection, typing and the send button keep their native pointer behavior.
-    for (const target of [
-      screen.getByText('Ask what a command means, why it works, or which idea feels unclear.'),
-      screen.getByRole('textbox'),
-      screen.getByRole('button', { name: 'Send question' }),
-    ]) {
-      fireEvent.pointerDown(target, { button: 0, pointerId: 3, clientX: moved.left + 100, clientY: moved.top + 200 })
-      fireEvent.pointerMove(frame, { pointerId: 3, clientX: moved.left + 10, clientY: moved.top + 300 })
-      fireEvent.pointerUp(frame, { pointerId: 3 })
-      expect(box()).toEqual({ ...moved, width: moved.width - 40 })
-    }
+    expect(frame.getAttribute('style')).toBe(before)
+    expect(screen.getByText(/Concept guidance only/)).toBeVisible()
   })
 
-  it('moves and resizes with keyboard controls and stays within a resized viewport', () => {
+  it('sends a suggested question using the current tutor history', async () => {
     render(<HomeTutor />)
-    const frame = screen.getByRole('dialog').parentElement!
-    const startX = Number.parseFloat(frame.style.left)
-    const startWidth = Number.parseFloat(frame.style.width)
-    fireEvent.keyDown(screen.getByRole('button', { name: 'Move AI chat window' }), { key: 'ArrowLeft' })
-    expect(Number.parseFloat(frame.style.left)).toBe(startX - 10)
-    fireEvent.keyDown(screen.getByRole('button', { name: 'Resize AI chat window' }), { key: 'ArrowRight' })
-    expect(Number.parseFloat(frame.style.width)).toBe(startWidth + 10)
-    const width = window.innerWidth
-    const height = window.innerHeight
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 390 })
-    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 844 })
-    fireEvent(window, new Event('resize'))
-    expect(Number.parseFloat(frame.style.left) + Number.parseFloat(frame.style.width)).toBeLessThanOrEqual(378)
-    expect(Number.parseFloat(frame.style.top) + Number.parseFloat(frame.style.height)).toBeLessThanOrEqual(756)
-    Object.defineProperty(window, 'innerWidth', { configurable: true, value: width })
-    Object.defineProperty(window, 'innerHeight', { configurable: true, value: height })
+    fireEvent.click(screen.getByRole('button', { name: 'How does staging work?' }))
+    await screen.findByText(reply.reply)
+    expect(tutorApi.chat).toHaveBeenCalledWith(expect.objectContaining({ message: 'How does staging work?', history: [] }), expect.anything())
+  })
+
+  it('retains a suggested question for retry when the provider fails', async () => {
+    vi.mocked(tutorApi.chat).mockRejectedValueOnce(new Error('network'))
+    render(<HomeTutor />)
+    fireEvent.click(screen.getByRole('button', { name: 'How does staging work?' }))
+    await screen.findByRole('region', { name: 'Chat recovery' })
+    expect(screen.getByRole('textbox')).toHaveValue('How does staging work?')
+    fireEvent.click(screen.getByRole('button', { name: 'Retry question' }))
+    await screen.findByText(reply.reply)
+    expect(vi.mocked(tutorApi.chat).mock.calls[1][0].history).toEqual([])
   })
 
   it('sends both sides of the conversation so follow-ups can refer to the last answer', async () => {

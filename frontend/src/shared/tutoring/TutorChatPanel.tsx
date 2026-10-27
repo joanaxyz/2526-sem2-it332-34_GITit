@@ -1,4 +1,4 @@
-import { ArrowDown, ArrowUp, ShieldCheck, SquarePen } from 'lucide-react'
+import { ArrowDown, Send, ShieldCheck, SquarePen } from 'lucide-react'
 import { useEffect, useId, useRef, useState } from 'react'
 
 import { useAuthStore } from '@/shared/auth/useAuth'
@@ -43,7 +43,7 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
     const element = composer.current
     if (!element) return
     element.style.height = 'auto'
-    element.style.height = `${Math.min(element.scrollHeight, 160)}px`
+    element.style.height = `${Math.min(element.scrollHeight, 96)}px`
   }, [draft])
 
   async function submit() {
@@ -87,13 +87,24 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
         {chat.messages.length
           ? chat.messages.map((entry, index) => <Message key={index} entry={entry} home={context.surface === 'home'} />)
           : (
-            <div className="tutor-chat__empty" data-tutor-selectable>
-              <h3>What would you like to understand?</h3>
-              <p>Ask what a command means, why it works, or which idea feels unclear.</p>
-              <p>Questions about GIT it! are welcome too.</p>
+            <div className="tutor-chat__welcome" data-tutor-selectable>
+              <div className="tutor-chat__message tutor-chat__message--assistant">
+                <span className="tutor-chat__speaker">Blue</span>
+                <div className="tutor-chat__content"><p>Hi, I’m Blue. Ask me about Git concepts or how GIT it! works. I’ll help you reason through the ideas without giving scenario answers.</p></div>
+              </div>
+              <div className="tutor-chat__starters" aria-label="Suggested Git questions">
+                <span className="tutor-chat__starters-title">Try asking</span>
+                {['What is HEAD in Git?', 'How does staging work?', 'What happens during a merge conflict?'].map((question) => (
+                  <button key={question} type="button" disabled={chat.pending || chat.cooldown.blocked || chat.offline} onClick={() => { setDraft(question); void chat.send(question) }}>{question}</button>
+                ))}
+              </div>
             </div>
           )}
-        {chat.pending ? <p className="tutor-chat__pending" role="status" data-tutor-selectable><span aria-hidden="true" />Thinking…</p> : null}
+        {chat.pending ? <div className="tutor-chat__message tutor-chat__message--assistant" role="status">
+          <span className="tutor-chat__speaker">Blue</span>
+          <span className="sr-only">Thinking...</span>
+          <div className="tutor-chat__typing" aria-hidden="true"><i /><i /><i /></div>
+        </div> : null}
       </div>
 
       {view === 'chat' && newMessages ? <button type="button" className="tutor-chat__new-messages" onClick={() => {
@@ -142,9 +153,10 @@ function Conversation({ context, scope }: { context: TutorContext; scope: string
           }}
         />
         <button type="submit" aria-label="Send question" disabled={chat.pending || chat.cooldown.blocked || chat.offline || !draft.trim()}>
-          <ArrowUp size={19} aria-hidden="true" />
+          <Send size={17} aria-hidden="true" />
         </button>
       </form>
+      <p className="tutor-chat__footer">Concept guidance only <span aria-hidden="true">·</span> No scenario answers</p>
     </div>
   )
 }
@@ -153,6 +165,7 @@ function Message({ entry, home }: { entry: TutorMessage; home: boolean }) {
   const fromGitIt = entry.role === 'assistant'
   return (
     <article className={`tutor-chat__message tutor-chat__message--${entry.role}`} aria-label={fromGitIt ? 'Git-It' : 'You'}>
+      {fromGitIt ? <span className="tutor-chat__speaker">Blue</span> : null}
       <div className="tutor-chat__content" data-tutor-selectable>
         {/* Home declines a scenario that arrives from another tab; the workspace is always one. */}
         {fromGitIt && home && entry.reply.scenario_related ? (

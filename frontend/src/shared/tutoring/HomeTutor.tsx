@@ -40,6 +40,7 @@ export function HomeTutor() {
         name="home-tutor"
         label="Ask Git-It"
         caption="Ask Git-It"
+        movable={false}
         open={open}
         buttonRef={launcher}
         onOpen={() => setOpen(true)}

@@ -34,6 +34,7 @@ export function GuideTutor({ runId, teachingKey, usageForm, guideToken }: { runI
         name="guide-tutor"
         label="Ask Git-It"
         caption="Ask Git-It"
+        movable={false}
         open={open}
         buttonRef={launcher}
         onOpen={() => setOpen(true)}

@@ -168,12 +168,11 @@ Verified terminal feedback, command accounting and rewards retain their owners.
 paragraphs, code, lists, inline marks) and bounded, sign-in-scoped in-memory
 conversations. A Home reply declining a scenario carries a short caption. HomeLayout composes the floating chat launcher
 across Dashboard, Modules and Shop. The command guide owns the lifetime of a
-separate chat window, rendered outside its card with a portal. Mascot portraits
-appear beside the chat card (in its header on mobile), in assistant message
-bubbles, and as the floating launchers, with accessible names and no visible labels.
-Chat opens by default with pointer/keyboard movement and resizing. Its launcher
-appears only when collapsed. Command guides omit the mascot and retain a separate
-command icon for reopening and history.
+separate fixed chat window, rendered outside its card with a portal. Both surfaces
+use the earlier Ask Blue header portrait, message bubbles, suggested questions,
+composer and footer. The panel has responsive viewport bounds and normal transcript
+scrolling, without dragging, manual resizing or stored geometry. The external
+portrait launcher retains the visible "Ask Git-It" label and appears when collapsed.
 The decorative mascot preference does not disable help controls.
 
 General chat uses the mascot portrait and the "Ask Git-It" floating launcher.
