@@ -25,7 +25,7 @@ export function useCommandIntroduction(run: TierRun, tutor: CommandIntroduction)
         const response = await commandIntroductionsApi.complete(run.id, tutor.completion_token)
         if (!isCurrent()) return false
         const current = queryClient.getQueryData<TierRun>(key)
-        if (current) updateTierRunCache(queryClient, { ...current, tutor: response.tutor })
+        if (current) updateTierRunCache(queryClient, { ...current, ...response })
         return true
       } catch (cause) {
         setError(cause instanceof Error ? cause.message : 'Could not save this introduction. Try again.')

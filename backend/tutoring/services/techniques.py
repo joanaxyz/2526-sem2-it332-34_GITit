@@ -1,10 +1,10 @@
-"""Techniques: ways of using a command that deserve their own introduction.
+"""Techniques: ways of using a command that deserve their own tip.
 
 A command form says *which* command to type (`git add <file>`). A technique is
 how its operands are written: several paths at once, `.` for the current
 folder, `HEAD~2`, `main..feature`... Detectors read only the shape of a
 command, never a particular level, so any seeded or authored solution that
-uses a technique triggers its guide.
+uses a technique triggers its tip.
 """
 
 from __future__ import annotations
@@ -14,7 +14,7 @@ import shlex
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from tutoring.services.forms import FormGuide, command_family
+from tutoring.services.forms import command_family
 
 # Families whose operands are all paths, so consecutive calls can be merged
 # into one command and several operands mean "several files".
@@ -119,16 +119,6 @@ class Technique:
     @property
     def teaching_key(self) -> str:
         return f"technique:{self.key}"
-
-    def guide(self, family: str) -> FormGuide:
-        return FormGuide(
-            teaching_key=self.teaching_key,
-            family=family,
-            usage_form=self.syntax(family),
-            label=self.title,
-            summary=self.summary,
-            technique=self.key,
-        )
 
 
 def parse_command(command: str) -> ParsedCommand | None:

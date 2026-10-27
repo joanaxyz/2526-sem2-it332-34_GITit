@@ -13,7 +13,6 @@ import { COMMAND_GUIDE_LAYOUT_KEY } from '@/shared/level/workspaceKeys'
 import { GuideTutor } from '@/shared/tutoring/GuideTutor'
 
 type RepositoryChange = CommandIntroduction['needs'][number]
-type Concept = CommandIntroduction['concepts'][number]
 type Tab = 'command' | 'change'
 
 // Room for the command card and the "What changes" card side by side, with
@@ -25,8 +24,12 @@ const DEFAULT_PANE_LAYOUT = {
   gap: 52,
   top: 24,
 }
-// The scenario and project files stay readable while a guide is open.
-const CONTEXT_REGIONS = ['[data-tour-target="level-story"]', '[data-tour-target="project-files"]']
+// The scenario, project files and tips stay readable while a guide is open.
+const CONTEXT_REGIONS = [
+  '[data-tour-target="level-story"]',
+  '[data-tour-target="project-files"]',
+  '[data-tour-target="workspace-tips"]',
+]
 const FEEDBACK_REGIONS = [...CONTEXT_REGIONS, '[data-tour-target="terminal"]']
 // The guide's chat window, its launcher and the terminal belong with the guide: clicks there keep it open.
 const CLOSE_ON_OUTSIDE_CLICK = {
@@ -34,19 +37,18 @@ const CLOSE_ON_OUTSIDE_CLICK = {
 }
 
 /**
- * "Command guide": introduces the one new command form, or technique, the
- * repository needs next.
+ * "Command guide": introduces the command form the repository needs next, in
+ * the scenario that teaches it.
  *
- * It explains the command part by part, shows what it will change as a
- * diagram, and defines new words the first times they come up. Wide screens
+ * It explains the command part by part and shows what it will change as a
+ * diagram; new words and techniques are tips beside it. Wide screens
  * show the guide as one frame holding the explanation and the change as their
  * own cards, each resized on its own; narrower screens use tabs in one card.
  *
  * Before a command its only button is close (×): it stays beside the terminal
  * while the learner types and turns into feedback once the command runs. Close,
  * Escape, or a click outside collapses it into the mascot launcher, which
- * brings it back. After a command, "Got it" records the guide (and its new
- * words) as done.
+ * brings it back. After a command, "Got it" records the guide as done.
  * Its "Ask Git-It" chat starts as a launcher beside it, so it never covers the
  * card, and closes with it.
  */
@@ -64,8 +66,6 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
   const dismissible = replay || introduction
   const missed = tutor.verdict === 'incorrect'
   const form = tutor.command_form
-  const primer = tutor.concepts.find((concept) => concept.key === 'commands')
-  const words = tutor.concepts.filter((concept) => concept.key !== 'commands')
   const focusTerminal = () => {
     requestAnimationFrame(() => document.querySelector<HTMLInputElement>('[data-command-input]')?.focus())
   }
@@ -75,12 +75,11 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
 
   const error = lesson.error ? <p className="command-intro__error" role="alert">{lesson.error}</p> : null
   const changeTitle = 'What changes'
-  const hasChange = (introduction || missed) && (tutor.needs.length > 0 || words.length > 0)
+  const hasChange = (introduction || missed) && tutor.needs.length > 0
   const change = hasChange ? (
     <>
       <RepositoryChangeDiagram changes={tutor.needs} repository={undefined} />
       <ChangeList label="What this command does" changes={tutor.needs} />
-      <Words concepts={words} />
     </>
   ) : null
 
@@ -88,7 +87,6 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
   if (introduction) {
     command = (
       <>
-        {primer ? <Primer concept={primer} /> : null}
         <CommandSyntax usage={form.usage_form} />
         <Anatomy parts={tutor.anatomy} />
         {form.summary && !sameWords(form.summary, tutor.title) ? (
@@ -235,14 +233,6 @@ function GuideTabs({ tab, onTab, tabs }: {
   )
 }
 
-function Primer({ concept }: { concept: Concept }) {
-  return (
-    <p className="command-intro__primer">
-      <strong>{concept.title}.</strong> {concept.text}
-    </p>
-  )
-}
-
 /** The command read part by part: git, the command, then each option and slot. */
 function Anatomy({ parts }: { parts: CommandIntroduction['anatomy'] }) {
   if (parts.length === 0) return null
@@ -255,23 +245,6 @@ function Anatomy({ parts }: { parts: CommandIntroduction['anatomy'] }) {
         </div>
       ))}
     </dl>
-  )
-}
-
-function Words({ concepts }: { concepts: readonly Concept[] }) {
-  if (concepts.length === 0) return null
-  return (
-    <section className="command-intro__section" aria-label="Words to know">
-      <h3 className="command-intro__label">Words to know</h3>
-      <dl className="command-intro__words">
-        {concepts.map((concept) => (
-          <div key={concept.key}>
-            <dt>{concept.title}</dt>
-            <dd>{concept.text}</dd>
-          </div>
-        ))}
-      </dl>
-    </section>
   )
 }
 

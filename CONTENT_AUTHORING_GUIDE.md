@@ -215,7 +215,7 @@ Generated targets live in:
 backend/curriculum/seed_data/generated/generated_targets.py
 ```
 
-`generated_trajectories.py` sits next to it: fingerprints of the repository in front of each solution command. The command-introduction tutor uses them to find the next move a learner needs, so a solution's command order is also its teaching order. Diagnostic commands (status, log, show) in a solution are never introduced.
+`generated_trajectories.py` sits next to it: fingerprints of the repository in front of each solution command. The command-introduction tutor uses them to find the next move a learner needs, so a solution's command order is also its teaching order. Diagnostic commands (status, log, show) in a solution are never introduced. A form's command guide opens only in the first scenario, in play order, whose solution teaches it; `seed_curriculum` records that home, so moving a scenario moves the guides it debuts. Techniques and new words are tips, shown wherever they first come up.
 
 Do not edit generated targets or trajectories directly. After changing initial state, solution commands, or workspace edits, run:
 

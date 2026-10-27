@@ -1,7 +1,7 @@
 """A cleared scenario credits only the command forms the learner actually typed.
 
 Crediting every form attached to a level used to mark unused forms as
-practised, which silently suppressed their command guides in later levels.
+practised.
 """
 
 from copy import deepcopy
@@ -22,8 +22,6 @@ from curriculum.models import Chapter, CommandForm, CommandSkill, Story
 from players.services import get_or_create_player
 from practice.models import CommandStep
 from testing.frontend_execution import frontend_execution_payload
-from tutoring.services.forms import resolve_form
-from tutoring.services.planner import PlannerReads, lesson_is_known
 
 INITIAL = {
     "repository_initialized": False,
@@ -109,7 +107,7 @@ def _initialized(state: dict) -> dict:
 
 
 def test_a_cleared_scenario_credits_only_the_forms_the_learner_typed(db, django_user_model):
-    user, player, tier, _, forms = _init_level("credit-used", django_user_model)
+    user, player, tier, _, _ = _init_level("credit-used", django_user_model)
     run = AdventureLevelTierRunService().start_run(
         player=player, tier=tier, source_entry_point="level_page"
     )
@@ -133,12 +131,6 @@ def test_a_cleared_scenario_credits_only_the_forms_the_learner_typed(db, django_
     assert set(
         SkillMastery.objects.filter(player=player).values_list("command_form__slug", flat=True)
     ) == {"current"}
-
-    # The forms the learner never typed still get their guide later.
-    reads = PlannerReads(player.id)
-    branch_guide = resolve_form("git init -b trunk", preferred=[forms["initial-branch"]])
-    assert branch_guide is not None
-    assert not lesson_is_known(reads, branch_guide)
 
 
 def test_a_scenario_clear_credits_only_the_clearing_runs_processed_commands(db, django_user_model):

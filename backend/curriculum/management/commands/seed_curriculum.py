@@ -44,6 +44,7 @@ from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN, Scen
 from curriculum.seed_data.source.scenario_plan.types import SPIRAL
 from curriculum.seed_data.spec_helpers import required_commit_message_details
 from tutoring.services.forms import catalog_forms, forms_used_by
+from tutoring.services.homes import assign_guide_homes
 
 STORY_SLUG = "arcane-spire"
 
@@ -13033,10 +13034,12 @@ class Command(BaseCommand):
         ):
             self._seed_adventure_levels(chapter, level_specs)
         self._seed_challenge_gates(chapters)
+        # Every scenario is placed, so each command form's guide can find its home.
+        homes = assign_guide_homes()
         self.stdout.write(
             self.style.SUCCESS(
                 "Seeded Story, Chapters, Module 0 orientation lessons, Module 1-4 levels "
-                "and their Challenge Gates."
+                f"and their Challenge Gates; {homes} command guides have a home scenario."
             )
         )
 

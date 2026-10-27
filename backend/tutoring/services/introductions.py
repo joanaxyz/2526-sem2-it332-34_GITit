@@ -6,7 +6,6 @@ from django.core import signing
 from common.exceptions import BadRequest, Conflict
 from simulator.services import RepositoryStateSimulator
 from tutoring.models import PendingCommandIntroduction, PlayerCommandIntroduction
-from tutoring.services.concepts import concept_key
 from tutoring.services.teaching import guide_key
 
 SALT = "tutoring.command-introduction.v2"
@@ -95,14 +94,5 @@ def complete_introduction(run, token):
         ).exists()
     ):
         raise BadRequest("There is no command introduction to complete.")
-    pending = PendingCommandIntroduction.objects.filter(run=run, teaching_key=key).first()
-    concepts = (pending.payload.get("concepts") if pending else None) or []
-    # A completed guide also retires the beginner concepts it explained.
-    for teaching_key in [
-        key,
-        *(concept_key(str(item.get("key"))) for item in concepts if item.get("key")),
-    ]:
-        PlayerCommandIntroduction.objects.get_or_create(
-            player_id=run.player_id, teaching_key=teaching_key
-        )
+    PlayerCommandIntroduction.objects.get_or_create(player_id=run.player_id, teaching_key=key)
     PendingCommandIntroduction.objects.filter(run=run, teaching_key=key).delete()

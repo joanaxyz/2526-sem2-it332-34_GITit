@@ -1050,7 +1050,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/IntroductionCompleteResponse"
+                                    "$ref": "#/components/schemas/TeachingResponse"
                                 }
                             }
                         },
@@ -2896,6 +2896,46 @@
                     }
                 }
             }
+        },
+        "/api/tutoring/tips/dismiss/": {
+            "post": {
+                "operationId": "tutoring_tip_dismiss",
+                "tags": [
+                    "tutoring"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TipDismiss"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TipDismiss"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/TipDismiss"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TipDismissResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -3867,6 +3907,7 @@
             },
             "AdventureLevelTierCommandRunResponse": {
                 "type": "object",
+                "description": "What a tier run teaches; see ``tutoring.payloads.teaching_payload``.",
                 "properties": {
                     "tutor": {
                         "allOf": [
@@ -3875,6 +3916,26 @@
                             }
                         ],
                         "nullable": true
+                    },
+                    "command_guides": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CommandIntroductionResponse"
+                        }
+                    },
+                    "guide_elsewhere": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/GuideElsewhere"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "tips": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Tip"
+                        }
                     },
                     "id": {
                         "type": "integer"
@@ -3930,14 +3991,17 @@
                     }
                 },
                 "required": [
+                    "command_guides",
                     "completed_at",
                     "counts",
                     "failure_reason",
+                    "guide_elsewhere",
                     "id",
                     "replay",
                     "repository_state",
                     "stars",
                     "status",
+                    "tips",
                     "tutor",
                     "visualization"
                 ]
@@ -4005,6 +4069,7 @@
             },
             "AdventureLevelTierRunResponse": {
                 "type": "object",
+                "description": "What a tier run teaches; see ``tutoring.payloads.teaching_payload``.",
                 "properties": {
                     "tutor": {
                         "allOf": [
@@ -4013,6 +4078,26 @@
                             }
                         ],
                         "nullable": true
+                    },
+                    "command_guides": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CommandIntroductionResponse"
+                        }
+                    },
+                    "guide_elsewhere": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/GuideElsewhere"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "tips": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Tip"
+                        }
                     },
                     "id": {
                         "type": "integer"
@@ -4118,12 +4203,14 @@
                 },
                 "required": [
                     "chapter",
+                    "command_guides",
                     "completed_at",
                     "completion",
                     "counts",
                     "difficulty",
                     "expected_state",
                     "failure_reason",
+                    "guide_elsewhere",
                     "id",
                     "next_difficulty",
                     "policy",
@@ -4139,6 +4226,7 @@
                     "steps",
                     "story",
                     "tier",
+                    "tips",
                     "tutor",
                     "variant",
                     "visualization"
@@ -5120,12 +5208,6 @@
                         "items": {
                             "$ref": "#/components/schemas/SyntaxPart"
                         }
-                    },
-                    "concepts": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/Concept"
-                        }
                     }
                 },
                 "required": [
@@ -5133,7 +5215,6 @@
                     "changes",
                     "command_form",
                     "completion_token",
-                    "concepts",
                     "context_id",
                     "explanation",
                     "help_token",
@@ -5208,25 +5289,6 @@
                 "required": [
                     "command",
                     "execution"
-                ]
-            },
-            "Concept": {
-                "type": "object",
-                "properties": {
-                    "key": {
-                        "type": "string"
-                    },
-                    "title": {
-                        "type": "string"
-                    },
-                    "text": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "key",
-                    "text",
-                    "title"
                 ]
             },
             "DashboardCounts": {
@@ -5775,6 +5837,46 @@
                     "abandoned"
                 ]
             },
+            "GuideElsewhere": {
+                "type": "object",
+                "description": "The next move's command, whose guide opens in another scenario.",
+                "properties": {
+                    "guide": {
+                        "$ref": "#/components/schemas/CommandIntroductionResponse"
+                    },
+                    "home": {
+                        "$ref": "#/components/schemas/GuideHome"
+                    }
+                },
+                "required": [
+                    "guide",
+                    "home"
+                ]
+            },
+            "GuideHome": {
+                "type": "object",
+                "description": "The scenario whose command guide teaches a form.",
+                "properties": {
+                    "chapter_number": {
+                        "type": "integer"
+                    },
+                    "level_title": {
+                        "type": "string"
+                    },
+                    "difficulty": {
+                        "type": "string"
+                    },
+                    "scenario_title": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "chapter_number",
+                    "difficulty",
+                    "level_title",
+                    "scenario_title"
+                ]
+            },
             "IntroductionComplete": {
                 "type": "object",
                 "properties": {
@@ -5785,22 +5887,6 @@
                 },
                 "required": [
                     "token"
-                ]
-            },
-            "IntroductionCompleteResponse": {
-                "type": "object",
-                "properties": {
-                    "tutor": {
-                        "allOf": [
-                            {
-                                "$ref": "#/components/schemas/CommandIntroductionResponse"
-                            }
-                        ],
-                        "nullable": true
-                    }
-                },
-                "required": [
-                    "tutor"
                 ]
             },
             "KeyEnum": {
@@ -6883,6 +6969,105 @@
                     "text",
                     "token"
                 ]
+            },
+            "TeachingResponse": {
+                "type": "object",
+                "description": "What a tier run teaches; see ``tutoring.payloads.teaching_payload``.",
+                "properties": {
+                    "tutor": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CommandIntroductionResponse"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "command_guides": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/CommandIntroductionResponse"
+                        }
+                    },
+                    "guide_elsewhere": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/GuideElsewhere"
+                            }
+                        ],
+                        "nullable": true
+                    },
+                    "tips": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/Tip"
+                        }
+                    }
+                },
+                "required": [
+                    "command_guides",
+                    "guide_elsewhere",
+                    "tips",
+                    "tutor"
+                ]
+            },
+            "Tip": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    },
+                    "kind": {
+                        "$ref": "#/components/schemas/TipKindEnum"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "text": {
+                        "type": "string"
+                    },
+                    "syntax": {
+                        "type": "string",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "key",
+                    "kind",
+                    "syntax",
+                    "text",
+                    "title"
+                ]
+            },
+            "TipDismiss": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string",
+                        "maxLength": 160
+                    }
+                },
+                "required": [
+                    "key"
+                ]
+            },
+            "TipDismissResponse": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "key"
+                ]
+            },
+            "TipKindEnum": {
+                "enum": [
+                    "concept",
+                    "technique"
+                ],
+                "type": "string",
+                "description": "* `concept` - concept\n* `technique` - technique"
             },
             "TransferCheckpoint": {
                 "type": "object",

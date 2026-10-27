@@ -7,10 +7,12 @@ import { TierStatusHeader } from '@/features/story-map/components/TierStatusHead
 import { TierOutcomeModal } from '@/features/story-map/components/TierOutcomeModal'
 import { tierOutcomeNextStep } from '@/features/story-map/components/tierOutcome'
 import { CommandIntroductionPanel } from '@/features/story-map/components/CommandIntroductionPanel'
+import { WorkspaceTips } from '@/features/story-map/components/WorkspaceTips'
 import { useTierCommandSubmission } from '@/features/story-map/hooks/useTierCommandSubmission'
-import { useCommandGuideHistory } from '@/features/story-map/hooks/useCommandGuideHistory'
+import { useDismissTip } from '@/features/story-map/hooks/useDismissTip'
 import { useTierWorkspaceMutations } from '@/features/story-map/hooks/useTierWorkspaceMutations'
 import { createTierWorkspaceCommandHandler } from '@/features/story-map/utils/tierWorkspaceCommand'
+import { readableGuides } from '@/features/story-map/utils/commandGuides'
 import { useLeaveAbandonedRun } from '@/features/story-map/hooks/useLeaveAbandonedRun'
 import { useTierRun } from '@/features/story-map/hooks/useTierRun'
 import { useTierRunAssets } from '@/features/story-map/hooks/useTierRunAssets'
@@ -43,7 +45,7 @@ import { SkillLearnedOverlay } from '@/shared/skill-learning/SkillLearnedOverlay
 import { useSkillLearnedQueue } from '@/shared/skill-learning/useSkillLearnedQueue'
 
 /** The adventure-tier run lifecycle around the shared gameplay workspace
- * (shared/level/workspace): command guides, learned skills and scenario flow.
+ * (shared/level/workspace): command guides, tips, learned skills and scenario flow.
  * ChallengeWorkspace wraps the same workspace for Challenge Gate trials. */
 export function TierWorkspace() {
   const params = useParams()
@@ -75,7 +77,9 @@ export function TierWorkspace() {
   // A hidden guide stays hidden for its lesson (across commands) until reopened.
   const [hiddenGuideKey, setHiddenGuideKey] = useState<string | null>(null)
   const [selectedGuideKey, setSelectedGuideKey] = useState<string | null>(null)
-  const commandGuides = useCommandGuideHistory(runId, run?.tutor)
+  // A hidden "taught elsewhere" note stays hidden for its command.
+  const [hiddenElsewhereKey, setHiddenElsewhereKey] = useState<string | null>(null)
+  const dismissTip = useDismissTip(runId)
   const user = useAuthStore((state) => state.user)
   const autoOpen = useWorkspaceAutoOpen({
     userId: user?.id,
@@ -155,6 +159,8 @@ export function TierWorkspace() {
   const { storyOpen, tourOpen, guideAllowed } = autoOpen
   const scene = tierScene(run)
   const story = workspaceStoryContent(run, scene.title)
+  const commandGuides = readableGuides(run)
+  const elsewhere = run.guide_elsewhere?.guide.teaching_key !== hiddenElsewhereKey ? run.guide_elsewhere : null
   const guideHidden = run.tutor?.phase === 'introduction' && run.tutor.teaching_key === hiddenGuideKey
   const introductionOpen = Boolean(run.tutor && guideAllowed
     && !learnedSkills.pending
@@ -275,6 +281,15 @@ export function TierWorkspace() {
         onCloseEditor={() => setWorkspaceEditorPath(null)}
         onWriteFile={(input) => writeFileMutation.mutateAsync(input)}
       />
+      {run.status === 'started' && guideAllowed && !learnedSkills.pending ? (
+        <WorkspaceTips
+          tips={run.tips}
+          elsewhere={elsewhere}
+          onDismissTip={dismissTip}
+          onReadGuide={openCommandGuide}
+          onHideElsewhere={() => setHiddenElsewhereKey(run.guide_elsewhere?.guide.teaching_key ?? null)}
+        />
+      ) : null}
       {introductionOpen && run.tutor ? (
         <CommandIntroductionPanel key={`${run.id}:${run.tutor.context_id}`} run={run} tutor={run.tutor}
           onDismiss={() => setHiddenGuideKey(run.tutor?.teaching_key ?? null)} />

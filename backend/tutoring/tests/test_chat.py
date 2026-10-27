@@ -12,7 +12,7 @@ from django.core.cache import cache
 from rest_framework.test import APIClient
 
 from tutoring.models import PendingCommandIntroduction
-from tutoring.payloads import tutor_payload
+from tutoring.payloads import teaching_payload
 from tutoring.services.answer_guard import guard_for_cases, guard_for_variant
 from tutoring.services.chat import DECLINED, GUARDED_FALLBACK, UNAVAILABLE, chat, conversation
 from tutoring.services.guide_privacy import safe_guide
@@ -505,7 +505,7 @@ def test_home_api_declines_a_cross_tab_scenario(client):
     ids=["unmatched", "recognised-scenario"],
 )
 def test_workspace_help_is_always_protected_and_explains_the_guide(client, teaching_run, found):
-    guide = tutor_payload(teaching_run)
+    guide = teaching_payload(teaching_run)["tutor"]
     body = {
         "message": "What does the placeholder mean?",
         "history": [{"role": "user", "text": "hi"}, {"role": "assistant", "text": "Hello!"}],
@@ -534,7 +534,7 @@ def test_workspace_help_is_always_protected_and_explains_the_guide(client, teach
 
 
 def test_replay_validates_ownership_but_does_not_require_completed_guide(client, teaching_run):
-    guide = tutor_payload(teaching_run)
+    guide = teaching_payload(teaching_run)["tutor"]
     body = {
         "message": "Explain the placeholders",
         "context": {
@@ -634,7 +634,7 @@ def test_completion_token_contains_only_identifiers_and_context_digest(teaching_
 def test_legacy_pending_feedback_is_sanitized_on_read(teaching_run):
     from tutoring.services.introductions import context_hash
 
-    first = tutor_payload(teaching_run)
+    first = teaching_payload(teaching_run)["tutor"]
     PendingCommandIntroduction.objects.create(
         run=teaching_run,
         teaching_key=first["teaching_key"],
@@ -642,7 +642,7 @@ def test_legacy_pending_feedback_is_sanitized_on_read(teaching_run):
         context_hash=context_hash(teaching_run),
         payload={**first, "example_command": "git init -b secret-branch"},
     )
-    assert "example_command" not in tutor_payload(teaching_run)
+    assert "example_command" not in teaching_payload(teaching_run)["tutor"]
 
 
 def test_open_guide_only_retrieves_its_exact_syntax():

@@ -40,12 +40,6 @@ class SyntaxPartSerializer(serializers.Serializer):
     text = serializers.CharField()
 
 
-class ConceptSerializer(serializers.Serializer):
-    key = serializers.CharField()
-    title = serializers.CharField()
-    text = serializers.CharField()
-
-
 class CommandIntroductionResponseSerializer(serializers.Serializer):
     context_id = serializers.CharField()
     teaching_key = serializers.CharField()
@@ -60,11 +54,43 @@ class CommandIntroductionResponseSerializer(serializers.Serializer):
     completion_token = serializers.CharField(allow_null=True)
     command_form = CommandIntroductionFormSerializer()
     anatomy = SyntaxPartSerializer(many=True)
-    concepts = ConceptSerializer(many=True)
 
 
-class IntroductionCompleteResponseSerializer(serializers.Serializer):
+class GuideHomeSerializer(serializers.Serializer):
+    """The scenario whose command guide teaches a form."""
+
+    chapter_number = serializers.IntegerField()
+    level_title = serializers.CharField()
+    difficulty = serializers.CharField()
+    scenario_title = serializers.CharField(allow_blank=True)
+
+
+class GuideElsewhereSerializer(serializers.Serializer):
+    """The next move's command, whose guide opens in another scenario."""
+
+    guide = CommandIntroductionResponseSerializer()
+    home = GuideHomeSerializer()
+
+
+class TipSerializer(serializers.Serializer):
+    key = serializers.CharField()
+    kind = serializers.ChoiceField(choices=["concept", "technique"])
+    title = serializers.CharField()
+    text = serializers.CharField()
+    syntax = serializers.CharField(allow_null=True)
+
+
+class TeachingResponseSerializer(serializers.Serializer):
+    """What a tier run teaches; see ``tutoring.payloads.teaching_payload``."""
+
     tutor = CommandIntroductionResponseSerializer(allow_null=True)
+    command_guides = CommandIntroductionResponseSerializer(many=True)
+    guide_elsewhere = GuideElsewhereSerializer(allow_null=True)
+    tips = TipSerializer(many=True)
+
+
+class TipDismissResponseSerializer(serializers.Serializer):
+    key = serializers.CharField()
 
 
 class TutorTopicSerializer(serializers.Serializer):

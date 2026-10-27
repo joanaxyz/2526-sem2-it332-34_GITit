@@ -1,8 +1,19 @@
 from rest_framework import serializers
 
+from tutoring.services.tips import TIP_KEYS
+
 
 class IntroductionCompleteSerializer(serializers.Serializer):
     token = serializers.CharField(max_length=16000)
+
+
+class TipDismissSerializer(serializers.Serializer):
+    key = serializers.CharField(max_length=160)
+
+    def validate_key(self, value):
+        if value not in TIP_KEYS:
+            raise serializers.ValidationError("There is no such tip.")
+        return value
 
 
 class TutorChatContextSerializer(serializers.Serializer):

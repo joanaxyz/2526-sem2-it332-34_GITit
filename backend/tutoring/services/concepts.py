@@ -1,14 +1,13 @@
-"""Plain-language ideas behind a guide, for learners meeting Git for the first time.
+"""Plain-language ideas behind a move, for learners meeting Git for the first time.
 
 Concepts are chosen from what the next move changes in the repository, never
-from a particular level, and each is shown until the learner has completed one
-guide that explained it. The first guide a learner ever sees also explains
-what a command is.
+from a particular level, and are shown as tips (``tips.py``) until dismissed.
+What a command is comes first of all.
 """
 
 from __future__ import annotations
 
-from collections.abc import Iterable
+from collections.abc import Collection, Iterable
 
 # (title, text). Short, concrete, no Git jargon inside the definitions.
 CONCEPTS: dict[str, tuple[str, str]] = {
@@ -86,24 +85,21 @@ def concept_key(key: str) -> str:
     return f"concept:{key}"
 
 
-def concepts_for(changes: Iterable[dict], seen: set[str], *, first_guide: bool) -> list[dict]:
-    """Unseen concepts for a guide, most basic first, at most ``MAX_CONCEPTS``."""
+def concepts_for(changes: Iterable[dict], seen: Collection[str]) -> list[str]:
+    """Keys of the unseen concepts a move touches, most basic first, at most
+    ``MAX_CONCEPTS``."""
 
-    keys = ["commands"] if first_guide else []
+    keys = ["commands"]
     changes = list(changes)
     creates_repository = any(change.get("kind") == "repository" for change in changes)
     for change in changes:
         key = _BY_CHANGE_KIND.get(str(change.get("kind")))
         if creates_repository and key in {"branch", "head"}:
-            continue  # init's first branch is a detail; branches get their own guide later
+            continue  # init's first branch is a detail; branches get their own tip later
 
         if key and key not in keys:
             keys.append(key)
         # Staging only makes sense next to the files it takes changes from.
         if key == "staging-area" and "working-tree" not in keys:
             keys.insert(keys.index(key), "working-tree")
-    fresh = [key for key in keys if concept_key(key) not in seen]
-    return [
-        {"key": key, "title": CONCEPTS[key][0], "text": CONCEPTS[key][1]}
-        for key in fresh[:MAX_CONCEPTS]
-    ]
+    return [key for key in keys if concept_key(key) not in seen][:MAX_CONCEPTS]

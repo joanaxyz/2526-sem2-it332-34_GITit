@@ -46,7 +46,7 @@ vi.mock('@/shared/level/workspace/WorkspaceStoryModal', () => ({ WorkspaceStoryM
 vi.mock('@/shared/level/workspace/ExitConfirmModal', () => ({ ExitConfirmModal: () => null }))
 vi.mock('@/shared/level/workspace/StartOverConfirmModal', () => ({ StartOverConfirmModal: () => null }))
 
-const run = { id: 1, status: 'started', tier: { id: 1, adventure_level_id: 1, difficulty: 'easy' }, scaffolding: {}, repository_state: {}, replay: false, tutor: null } as unknown as TierRun
+const run = { id: 1, status: 'started', tier: { id: 1, adventure_level_id: 1, difficulty: 'easy' }, scaffolding: {}, repository_state: {}, replay: false, tutor: null, command_guides: [], guide_elsewhere: null, tips: [] } as unknown as TierRun
 const skill = { id: 7, slug: 'git-init', title: 'Create a repository', base_command: 'git init', summary: '', chapter_number: 1, chapter_title: 'Foundations' }
 
 function renderWorkspace() {

@@ -11,7 +11,7 @@ from common.openapi import (
     LearnedSkillResponseSerializer,
     RuntimeStepResponseSerializer,
 )
-from tutoring.openapi import CommandIntroductionResponseSerializer
+from tutoring.openapi import TeachingResponseSerializer
 
 # ---------------------------------------------------------------------------
 # AdventureLevelTierRun response shapes - mirror challenges/openapi.py, since
@@ -30,8 +30,7 @@ class AdventureLevelTierCommandStepResponseSerializer(AdventureLevelTierRunStepR
     evaluation_result = serializers.CharField()
 
 
-class AdventureLevelTierCommandRunResponseSerializer(serializers.Serializer):
-    tutor = CommandIntroductionResponseSerializer(allow_null=True)
+class AdventureLevelTierCommandRunResponseSerializer(TeachingResponseSerializer):
     id = serializers.IntegerField()
     replay = serializers.BooleanField()
     stars = serializers.IntegerField()
@@ -62,8 +61,7 @@ class AdventureLevelTierScenarioPositionResponseSerializer(serializers.Serialize
     title = serializers.CharField(allow_blank=True)
 
 
-class AdventureLevelTierRunResponseSerializer(serializers.Serializer):
-    tutor = CommandIntroductionResponseSerializer(allow_null=True)
+class AdventureLevelTierRunResponseSerializer(TeachingResponseSerializer):
     id = serializers.IntegerField()
     replay = serializers.BooleanField()
     transfer = serializers.BooleanField(required=False)

@@ -1,7 +1,6 @@
 """One outward projection for both new and legacy command-guide payloads."""
 
 from tutoring.services.anatomy import anatomy
-from tutoring.services.concepts import CONCEPTS
 from tutoring.services.teaching import catalog, guide_key, safe_usage
 
 _EFFECTS = {
@@ -42,11 +41,6 @@ def safe_guide(payload):
     usage = safe_usage(form.get("usage_form", ""))
     family = usage.split()[1]
     overview = catalog().get(f"command:{family}")
-    concepts = [
-        {"key": item["key"], "title": CONCEPTS[item["key"]][0], "text": CONCEPTS[item["key"]][1]}
-        for item in payload.get("concepts", [])
-        if item.get("key") in CONCEPTS
-    ]
     completed_explanation = payload.get("explanation")
     if completed_explanation not in {
         "That's the right command.",
@@ -63,7 +57,6 @@ def safe_guide(payload):
         },
         "needs": prospective_changes(payload.get("needs", [])),
         "anatomy": anatomy(usage),
-        "concepts": concepts,
         # These describe verified actions already performed, never prospective answers.
         "changes": payload.get("changes", []),
         "verdict": payload.get("verdict"),

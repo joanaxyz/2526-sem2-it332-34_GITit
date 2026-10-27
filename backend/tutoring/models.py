@@ -3,7 +3,11 @@ from django.utils import timezone
 
 
 class PlayerCommandIntroduction(models.Model):
-    """A completed introduction, independent of problem variants and mastery."""
+    """A finished lesson: a completed command guide, or a dismissed tip.
+
+    Keys are namespaced (``form:``/``guide:`` for guides, ``concept:`` and
+    ``technique:`` for tips), independent of problem variants and mastery.
+    """
 
     player = models.ForeignKey("players.Player", on_delete=models.CASCADE)
     teaching_key = models.CharField(max_length=160)
@@ -25,3 +29,16 @@ class PendingCommandIntroduction(models.Model):
     revision = models.PositiveIntegerField()
     context_hash = models.CharField(max_length=64)
     payload = models.JSONField(default=dict)
+
+
+class CommandGuideHome(models.Model):
+    """The one scenario where a command form's guide opens: the first, in play
+    order, whose solution teaches the form. Derived by the curriculum seed
+    (``tutoring.services.homes``); never edited by hand."""
+
+    teaching_key = models.CharField(max_length=160, unique=True)
+    scenario = models.ForeignKey(
+        "adventures.AdventureLevelTierScenario",
+        related_name="guide_homes",
+        on_delete=models.CASCADE,
+    )

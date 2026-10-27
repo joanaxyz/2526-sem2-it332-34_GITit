@@ -16,6 +16,7 @@ from evaluation.compiler import CompiledEvaluationSpecCache
 from players.services import get_or_create_player
 from simulator.services import RepositoryStateSimulator
 from simulator.trajectory import build_solution_trajectory
+from tutoring.services.homes import assign_guide_homes
 
 SOLUTION = ["git init", "git add README.md", "git add app.py", "git commit -m 'Save work'"]
 
@@ -158,6 +159,8 @@ def teaching_run(db, django_user_model):
             "completion_policy": {"mode": "rules"},
         },
     )
+    # Its forms' guides open here, as the seed would place them.
+    assign_guide_homes()
     return AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,

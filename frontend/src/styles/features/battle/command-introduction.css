@@ -110,17 +110,7 @@
   outline-offset: 2px;
 }
 
-/* --- beginners: what a command is, what each part means, new words --- */
-
-.workspace-tour__body p.command-intro__primer {
-  padding: 0.6rem 0.7rem;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.22);
-  border-radius: var(--radius-sm);
-  background: rgba(var(--theme-primary-rgb), 0.06);
-  color: #c9dbe4;
-}
-
-.command-intro__primer strong { color: hsl(var(--foreground)); }
+/* --- beginners: what each part of the command means --- */
 
 .command-intro__anatomy {
   display: grid;
@@ -148,25 +138,6 @@
   color: #b3c6d1;
   font-size: var(--text-xs);
   line-height: 1.45;
-}
-
-.command-intro__words {
-  display: grid;
-  margin: 0;
-  gap: 0.55rem;
-}
-
-.command-intro__words dt {
-  color: hsl(var(--foreground));
-  font-size: var(--text-sm);
-  font-weight: 700;
-}
-
-.command-intro__words dd {
-  margin: 0.1rem 0 0;
-  color: #b3c6d1;
-  font-size: var(--text-sm);
-  line-height: 1.5;
 }
 
 /* --- syntax: a strip of the terminal the learner is about to type into --- */

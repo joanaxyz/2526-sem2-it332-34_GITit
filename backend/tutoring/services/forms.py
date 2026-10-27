@@ -64,26 +64,18 @@ _LEGACY_KEYS = {
 
 @dataclass(frozen=True)
 class FormGuide:
-    """One lesson: a command form, or a technique (see ``techniques.py``).
-
-    Forms are identified by their syntax rather than a seed slug. A technique
-    lesson carries its technique key and is recognised by that detector.
-    """
+    """One command guide's lesson: a command form, identified by its syntax
+    rather than a seed slug."""
 
     teaching_key: str
     family: str
     usage_form: str
     label: str
     summary: str
-    technique: str | None = None
 
-    def used_by(self, command: str, state: dict | None = None) -> bool:
-        """Whether an executed command actually exercised this lesson."""
+    def used_by(self, command: str) -> bool:
+        """Whether an executed command actually exercised this form."""
 
-        if self.technique is not None:
-            from tutoring.services.techniques import technique_used
-
-            return technique_used(self.technique, command, state)
         return command_uses_form(command, self.usage_form)
 
     def payload(self) -> dict:
@@ -100,6 +92,13 @@ def teaching_key_for_usage(usage_form: str) -> str:
 
     usage = " ".join(str(usage_form).split())
     return _LEGACY_KEYS.get(usage, f"form:{usage}")[:160]
+
+
+def usage_for_teaching_key(teaching_key: str) -> str:
+    """The syntax a form's teaching key names."""
+
+    legacy = {key: usage for usage, key in _LEGACY_KEYS.items()}
+    return legacy.get(teaching_key, teaching_key.removeprefix("form:"))
 
 
 def guide_for_form(form: CommandForm) -> FormGuide | None:

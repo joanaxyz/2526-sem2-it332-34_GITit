@@ -492,12 +492,12 @@ def next_solution_step(
         return None
     steps = trajectory["steps"]
     for index in range(position, len(steps)):
-        if _is_move(steps[index]):
+        if is_move(steps[index]):
             return {**steps[index], "index": index}
     return None
 
 
-def _is_move(step: dict) -> bool:
+def is_move(step: dict) -> bool:
     return not step.get("diagnostic") and str(step.get("command") or "").startswith("git ")
 
 
@@ -512,7 +512,7 @@ def _route_position(steps: list[dict], matches: list[int], history: Iterable[str
     executed = Counter(_command_key(command) for command in history)
     earliest = min(matches)
     for index in sorted(matches, reverse=True):
-        needed = Counter(_command_key(step["command"]) for step in steps[:index] if _is_move(step))
+        needed = Counter(_command_key(step["command"]) for step in steps[:index] if is_move(step))
         if all(executed[key] >= count for key, count in needed.items()):
             return index
     return earliest

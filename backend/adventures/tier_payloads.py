@@ -16,7 +16,7 @@ from practice.services.scaffolding import ScaffoldingService
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import AdventureLevelTierCompletion
 from simulator.services import RepositorySnapshotService
-from tutoring.payloads import tutor_payload
+from tutoring.payloads import teaching_payload
 
 
 def prefetch_run_payload_context(run: AdventureLevelTierRun) -> None:
@@ -73,7 +73,7 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
     steps = list(run.steps.order_by("id")) if include_steps else []
     return {
         "id": run.id,
-        "tutor": None if run.is_transfer else tutor_payload(run),
+        **teaching_payload(run),
         "replay": run.is_replay,
         "transfer": run.is_transfer,
         "stars": run.stars,
@@ -135,7 +135,7 @@ def command_run_payload(
 
     payload = {
         "id": run.id,
-        "tutor": None if run.is_transfer else tutor_payload(run, **(tutor_context or {})),
+        **teaching_payload(run, **(tutor_context or {})),
         "replay": run.is_replay,
         "stars": run.stars,
         "status": run.status,

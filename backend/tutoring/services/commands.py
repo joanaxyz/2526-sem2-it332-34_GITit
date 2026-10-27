@@ -34,7 +34,7 @@ def used_introduced_form(candidate, execution) -> bool:
         candidate is not None
         and result.processed
         and not result.exit_code
-        and candidate.form.used_by(result.normalized_command, execution.previous_state)
+        and candidate.form.used_by(result.normalized_command)
     )
 
 
@@ -105,7 +105,6 @@ def introduction_copy(candidate) -> dict:
             "needs": [dict(change) for change in candidate.step_effect if isinstance(change, dict)],
             "command_form": form.payload(),
             "anatomy": anatomy(form.usage_form),
-            "concepts": [dict(concept) for concept in candidate.concepts],
         }
     )
 

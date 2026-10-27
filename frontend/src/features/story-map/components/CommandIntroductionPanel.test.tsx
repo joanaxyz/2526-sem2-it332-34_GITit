@@ -28,16 +28,13 @@ const tutor: CommandIntroduction = {
     { token: '-c', text: 'create the branch first, then switch to it' },
     { token: '<branch>', text: 'you fill this in: the branch name' },
   ],
-  concepts: [
-    { key: 'commands', title: 'Commands', text: 'You type a command in the terminal and press Enter.' },
-    { key: 'branch', title: 'Branch', text: 'A name that points at a commit.' },
-  ],
   verdict: null, explanation: null, completion_token: null,
   command_form: {
     teaching_key: 'form:git switch -c <branch>', usage_form: 'git switch -c <branch>',
     label: 'Create and switch', summary: 'Creates a branch and moves HEAD onto it.',
   },
 }
+const nothingToTeach = { tutor: null, command_guides: [], guide_elsewhere: null, tips: [] }
 const feedback: CommandIntroduction = {
   ...tutor, phase: 'feedback', verdict: 'incorrect',
   explanation: "Review the syntax and placeholder meanings, then try your own values.",
@@ -76,7 +73,7 @@ beforeEach(() => {
   useAuthStore.getState().setSession('learner-token', {
     id: 1, username: 'learner', email: 'learner@example.com', is_staff: false,
   })
-  vi.mocked(commandIntroductionsApi.complete).mockResolvedValue({ tutor: null })
+  vi.mocked(commandIntroductionsApi.complete).mockResolvedValue(nothingToTeach)
 })
 afterEach(() => {
   cleanup()
@@ -101,8 +98,7 @@ describe('terminal-led command introduction', () => {
     expect(screen.queryByRole('dialog', { name: 'Ask Git-It' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Ask Git-It' })).toBeInTheDocument()
     expect(screen.getByText(tutor.command_form.summary)).toBeInTheDocument()
-    // Absolute beginners: what a command is, and what each part means.
-    expect(screen.getByText(/You type a command in the terminal/)).toBeInTheDocument()
+    // Absolute beginners: what each part means. New words are tips, not guide content.
     const parts = within(screen.getByLabelText('What each part means'))
     expect(parts.getByText('create the branch first, then switch to it')).toBeInTheDocument()
     // A miss never reveals the concrete solution command either.
@@ -119,7 +115,7 @@ describe('terminal-led command introduction', () => {
     expect(needs.getAllByRole('listitem').map((item) => item.textContent)).toEqual([
       'A branch pointer changes.', 'HEAD changes where you are working.',
     ])
-    expect(within(screen.getByRole('region', { name: 'Words to know' })).getByText('Branch')).toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Words to know' })).not.toBeInTheDocument()
     await waitFor(() => expect(document.activeElement).toHaveAttribute('data-command-input'))
   })
 
@@ -152,7 +148,7 @@ describe('terminal-led command introduction', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Got it' }))
     await waitFor(() => expect(commandIntroductionsApi.complete).toHaveBeenCalledWith(1, 'feedback-token'))
     await waitFor(() => expect(readTierRunBootstrap(1)?.tutor).toBeNull())
-    expect(client.getQueryData(queryKeys.adventureTierRun(1))).toEqual({ ...run, tutor: null })
+    expect(client.getQueryData(queryKeys.adventureTierRun(1))).toEqual({ ...run, ...nothingToTeach })
   })
 
   it('stays open for clicks in its chat launcher, chat window and terminal, and collapses on a click elsewhere', async () => {
@@ -196,13 +192,13 @@ describe('terminal-led command introduction', () => {
   })
 
   it('does not clear a newer repository introduction when an old acknowledgment returns', async () => {
-    let resolve!: (value: { tutor: null }) => void
+    let resolve!: (value: typeof nothingToTeach) => void
     vi.mocked(commandIntroductionsApi.complete).mockReturnValue(new Promise((done) => { resolve = done }))
     const { client, run } = setup(feedback)
     fireEvent.click(await screen.findByRole('button', { name: 'Got it' }))
     const newer = { ...run, tutor: { ...tutor, context_id: 'snapshot-2' } }
     client.setQueryData(queryKeys.adventureTierRun(1), newer)
-    await act(async () => { resolve({ tutor: null }) })
+    await act(async () => { resolve(nothingToTeach) })
     expect(client.getQueryData(queryKeys.adventureTierRun(1))).toEqual(newer)
   })
 })

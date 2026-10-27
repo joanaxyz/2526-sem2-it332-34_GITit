@@ -3,7 +3,7 @@ from copy import deepcopy
 from adventures.models import SkillMastery
 from testing.frontend_execution import frontend_execution_payload
 from tutoring.models import PlayerCommandIntroduction
-from tutoring.payloads import tutor_payload
+from tutoring.payloads import teaching_payload
 from tutoring.tests.conftest import initialized_state, solution_states, staged
 
 
@@ -42,14 +42,14 @@ def test_wrong_terminal_command_keeps_syntax_private_and_normal_penalty(client, 
     assert teaching_run.steps.count() == 1
     assert not SkillMastery.objects.exists()
     assert not PlayerCommandIntroduction.objects.exists()
-    assert "example_command" not in tutor_payload(teaching_run)  # reload remains safe
+    assert "example_command" not in teaching_payload(teaching_run)["tutor"]  # reload remains safe
     for _ in range(2):
         result = complete(client, teaching_run, tutor["completion_token"])
         assert result.status_code == 200, result.data
         assert result.data["tutor"] is None
     keys = set(PlayerCommandIntroduction.objects.values_list("teaching_key", flat=True))
-    # The guide, plus the beginner concepts it explained (never shown again).
-    assert keys == {"git-init/current-directory", "concept:commands", "concept:repository"}
+    # Only the guide: tips are dismissed on their own.
+    assert keys == {"git-init/current-directory"}
 
 
 def test_successful_init_explains_the_change_then_introduces_the_next_form(client, teaching_run):
