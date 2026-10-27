@@ -129,7 +129,7 @@ The `tutoring` backend app owns two independent tutors behind authenticated
 system prompt and the conversation so far: the client sends both sides of recent
 turns, so follow-ups and clarifications refer to earlier answers.
 
-- **Home** is a general Git tutor. It is not tied to the command guide.
+- **Home** is a general Git and GIT it! platform tutor. It is not tied to the command guide.
 - **Workspace** help belongs to the open command guide: it explains that guide's
   usage form, and the run's public task is context.
 
@@ -175,6 +175,17 @@ Chat opens by default with pointer/keyboard movement and resizing. Its launcher
 appears only when collapsed. Command guides omit the mascot and retain a separate
 command icon for reopening and history.
 The decorative mascot preference does not disable help controls.
+
+Both tutor surfaces offer bundled Offline FAQs with reviewed general Git explanations.
+Network failures and unavailable provider replies offer these saved explanations and
+retain the question for an explicit retry. Drafts survive closing the window within
+the sign-in session; only completed exchanges enter conversation history. New replies
+follow the transcript only when the learner is near its bottom.
+
+`tutoring/services/platform_knowledge.py` supplies reviewed public platform facts and
+live published chapter names, including for recent-topic follow-ups. It does not read
+learner scores, scenario answers or evaluator data. Facts enter the system prompt and
+its cache digest after Home's scenario-decline gate; existing answer guards still apply.
 
 Frontend command simulation remains instant for user experience. Backend verification is authoritative for persisted progress, rewards, and completion state.
 

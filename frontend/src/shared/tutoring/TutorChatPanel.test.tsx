@@ -2,6 +2,7 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 import { useAuthStore } from '@/shared/auth/useAuth'
+import { ApiError } from '@/shared/api/apiError'
 import { setGuideMascotVisibility } from '@/shared/mascot/guideMascotVisibility'
 import { GuideTutor } from './GuideTutor'
 import { HomeTutor } from './HomeTutor'
@@ -12,6 +13,7 @@ const reply: TutorReply = { reply: 'A waiting area for the changes you want in y
   suggested_topics: [], scenario_related: false, response_kind: 'answer' }
 
 beforeEach(() => {
+  Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
   localStorage.clear()
   useAuthStore.getState().setSession('test', { id: 1, username: 'learner', email: 'learner@example.com', is_staff: false })
   vi.mocked(tutorApi.chat).mockReset().mockResolvedValue(reply)
@@ -30,6 +32,175 @@ function ask(text: string) {
 }
 
 describe('shared tutoring surfaces', () => {
+  it('browses saved explanations manually without calling AI', () => {
+    render(<HomeTutor />)
+    fireEvent.click(screen.getByRole('button', { name: 'Offline FAQs' }))
+    expect(screen.getByRole('region', { name: 'Saved Git explanations' })).toBeVisible()
+    expect(screen.getByText('What is a branch?')).toBeVisible()
+    expect(tutorApi.chat).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Chat' }))
+    expect(screen.getByRole('textbox')).toHaveFocus()
+  })
+
+  it('starts offline with saved explanations and never submits while offline', () => {
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+    render(<HomeTutor />)
+    expect(screen.getByRole('region', { name: 'Saved Git explanations' })).toBeVisible()
+    fireEvent.click(screen.getByRole('button', { name: 'Chat' }))
+    ask('Explain staging')
+    expect(screen.getByRole('region', { name: 'Saved Git explanations' })).toBeVisible()
+    expect(tutorApi.chat).not.toHaveBeenCalled()
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
+    fireEvent(window, new Event('online'))
+    expect(screen.getByText(/Your connection is back/)).toBeVisible()
+    expect(tutorApi.chat).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Chat' }))
+    expect(screen.getByRole('textbox')).toHaveValue('Explain staging')
+  })
+
+  it.each([
+    ['network failure', new Error('network')],
+    ['rate limiting', new ApiError('busy', 429, {})],
+    ['server failure', new ApiError('unavailable', 503, {})],
+    ['provider unavailable', null],
+  ])('retains the draft and excludes %s from retry history', async (_label, failure) => {
+    if (failure) vi.mocked(tutorApi.chat).mockRejectedValueOnce(failure)
+    else vi.mocked(tutorApi.chat).mockResolvedValueOnce({ ...reply, response_kind: 'unavailable', reply: 'AI is unavailable.' })
+    render(<HomeTutor />)
+    ask('Explain staging')
+    expect(await screen.findByRole('region', { name: 'Saved Git explanations' })).toBeVisible()
+    fireEvent.click(screen.getByRole('button', { name: 'Chat' }))
+    expect(screen.getByRole('textbox')).toHaveValue('Explain staging')
+    expect(screen.queryByRole('article')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Send question' }))
+    await screen.findByText(reply.reply)
+    expect(vi.mocked(tutorApi.chat).mock.calls[1][0].history).toEqual([])
+    expect(screen.getByRole('textbox')).toHaveValue('')
+    expect(screen.getByRole('textbox')).toHaveFocus()
+    expect(screen.queryByText(/AI help is unavailable. Your question is saved/)).not.toBeInTheDocument()
+  })
+
+  it('keeps a failed draft when closing and reopening the window', async () => {
+    vi.mocked(tutorApi.chat).mockRejectedValueOnce(new Error('network'))
+    render(<HomeTutor />)
+    ask('Explain branches')
+    await screen.findByRole('region', { name: 'Saved Git explanations' })
+    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Git-It' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ask Git-It' }))
+    expect(screen.getByRole('textbox')).toHaveValue('Explain branches')
+  })
+
+  it('offers FAQs when the connection drops and retains the draft on reconnection', () => {
+    render(<HomeTutor />)
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Explain staging' } })
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: false })
+    fireEvent(window, new Event('offline'))
+    expect(screen.getByRole('region', { name: 'Saved Git explanations' })).toBeVisible()
+    expect(screen.getByRole('button', { name: 'Offline FAQs' })).toHaveFocus()
+    Object.defineProperty(navigator, 'onLine', { configurable: true, value: true })
+    fireEvent(window, new Event('online'))
+    fireEvent.click(screen.getByRole('button', { name: 'Chat' }))
+    expect(screen.getByRole('textbox')).toHaveValue('Explain staging')
+    expect(tutorApi.chat).not.toHaveBeenCalled()
+  })
+
+  it('does not retain an unanswered exchange after closing an in-flight chat', async () => {
+    let resolve!: (value: TutorReply) => void
+    vi.mocked(tutorApi.chat).mockImplementationOnce(() => new Promise((done) => { resolve = done }))
+    render(<HomeTutor />)
+    ask('Explain branches')
+    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Git-It' }))
+    fireEvent.click(screen.getByRole('button', { name: 'Ask Git-It' }))
+    await act(async () => { resolve(reply) })
+    expect(screen.getByRole('textbox')).toHaveValue('Explain branches')
+    expect(screen.queryByRole('article')).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Send question' }))
+    await screen.findByText(reply.reply)
+    expect(vi.mocked(tutorApi.chat).mock.calls[1][0].history).toEqual([])
+  })
+
+  it('clears saved drafts across sign-in lifetimes', () => {
+    render(<HomeTutor />)
+    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'Private unsent question' } })
+    act(() => useAuthStore.getState().clearSession())
+    act(() => useAuthStore.getState().setSession('second', { id: 2, username: 'other', email: 'other@example.com', is_staff: false }))
+    expect(screen.getByRole('textbox')).toHaveValue('')
+  })
+
+  it('keeps validation errors in Chat with the original question', async () => {
+    vi.mocked(tutorApi.chat).mockRejectedValueOnce(new ApiError('invalid guide', 400, {}))
+    renderGuideTutor()
+    ask('Explain this guide')
+    expect(await screen.findByRole('alert')).toHaveTextContent('Reopen the guide')
+    expect(screen.getByRole('textbox')).toHaveValue('Explain this guide')
+    expect(screen.queryByRole('region', { name: 'Saved Git explanations' })).not.toBeInTheDocument()
+  })
+
+  it('prevents duplicate sends and ignores a response after New chat', async () => {
+    let resolve!: (value: TutorReply) => void
+    vi.mocked(tutorApi.chat).mockImplementationOnce(() => new Promise((done) => { resolve = done }))
+    render(<HomeTutor />)
+    ask('Explain staging')
+    fireEvent.keyDown(screen.getByRole('textbox'), { key: 'Enter' })
+    expect(tutorApi.chat).toHaveBeenCalledTimes(1)
+    fireEvent.click(screen.getByRole('button', { name: 'Start a new conversation' }))
+    await act(async () => { resolve(reply) })
+    expect(screen.queryByText(reply.reply)).not.toBeInTheDocument()
+    expect(screen.getByRole('textbox')).toHaveValue('')
+    ask('Explain branches')
+    await screen.findByText(reply.reply)
+    expect(vi.mocked(tutorApi.chat).mock.calls[1][0].history).toEqual([])
+  })
+
+  it('keeps the reading position until the learner requests the new message', async () => {
+    let resolve!: (value: TutorReply) => void
+    vi.mocked(tutorApi.chat).mockImplementationOnce(() => new Promise((done) => { resolve = done }))
+    render(<HomeTutor />)
+    ask('Explain staging')
+    const log = screen.getByRole('log')
+    Object.defineProperties(log, {
+      scrollHeight: { configurable: true, value: 900 },
+      clientHeight: { configurable: true, value: 200 },
+    })
+    log.scrollTop = 100
+    fireEvent.scroll(log)
+    await act(async () => { resolve(reply) })
+    expect(log.scrollTop).toBe(100)
+    fireEvent.click(screen.getByRole('button', { name: 'New message' }))
+    expect(log.scrollTop).toBe(900)
+    expect(screen.queryByRole('button', { name: 'New message' })).not.toBeInTheDocument()
+  })
+
+  it('follows replies when already near the bottom', async () => {
+    let resolve!: (value: TutorReply) => void
+    vi.mocked(tutorApi.chat).mockImplementationOnce(() => new Promise((done) => { resolve = done }))
+    render(<HomeTutor />)
+    ask('Explain staging')
+    const log = screen.getByRole('log')
+    Object.defineProperties(log, {
+      scrollHeight: { configurable: true, value: 900 },
+      clientHeight: { configurable: true, value: 200 },
+    })
+    log.scrollTop = 680
+    fireEvent.scroll(log)
+    await act(async () => { resolve(reply) })
+    expect(log.scrollTop).toBe(900)
+    expect(screen.queryByRole('button', { name: 'New message' })).not.toBeInTheDocument()
+  })
+
+  it('cancels old guide requests when the guide changes', async () => {
+    let resolve!: (value: TutorReply) => void
+    vi.mocked(tutorApi.chat).mockImplementationOnce(() => new Promise((done) => { resolve = done }))
+    const view = renderGuideTutor()
+    ask('Old guide question')
+    const signal = vi.mocked(tutorApi.chat).mock.calls[0][1]
+    view.rerender(<GuideTutor runId={17} teachingKey="command:status" usageForm="git status" guideToken="new-guide" />)
+    expect(signal.aborted).toBe(true)
+    await act(async () => { resolve(reply) })
+    expect(screen.queryByText(reply.reply)).not.toBeInTheDocument()
+    expect(screen.getByRole('textbox')).toHaveValue('')
+  })
+
   it('opens Home help independently of guide and mascot appearance settings', async () => {
     setGuideMascotVisibility(false)
     render(<HomeTutor />)
