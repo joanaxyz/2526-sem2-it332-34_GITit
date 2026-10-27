@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 
+import { FloatingMascotLauncher } from '@/shared/mascot/FloatingMascotLauncher'
 import { usePersistentState } from '@/shared/utils/persistentState'
-import { BlueChatLauncher } from './BlueChatLauncher'
 import { TutorWindow, type TutorWindowDismissal } from './TutorWindow'
 
 const HOME_CONTEXT = { surface: 'home' } as const
@@ -9,7 +9,7 @@ const HOME_CONTEXT = { surface: 'home' } as const
 const PHONE_WIDTH = 720
 
 /**
- * General help on Home, the map, and the shop: a chat window that collapses into Ask Blue.
+ * General help on Home, the map, and the shop: a chat window that collapses into Git-It.
  * It remembers whether the learner left it open or closed.
  */
 export function HomeTutor() {
@@ -36,7 +36,10 @@ export function HomeTutor() {
 
   return (
     <>
-      <BlueChatLauncher
+      <FloatingMascotLauncher
+        name="home-tutor"
+        label="Ask Git-It"
+        caption="Ask Git-It"
         open={open}
         buttonRef={launcher}
         onOpen={() => setOpen(true)}
