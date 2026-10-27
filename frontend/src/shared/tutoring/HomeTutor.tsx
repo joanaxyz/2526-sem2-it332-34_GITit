@@ -22,13 +22,10 @@ export function HomeTutor() {
   const refocusLauncher = useRef(false)
 
   useEffect(() => {
-    // The roaming mascot steps aside while Git-It is chatting.
-    document.documentElement.toggleAttribute('data-home-tutor-open', open)
     if (!open && refocusLauncher.current) {
       refocusLauncher.current = false
       launcher.current?.focus()
     }
-    return () => document.documentElement.removeAttribute('data-home-tutor-open')
   }, [open])
 
   const dismiss = useCallback((how: TutorWindowDismissal) => {
@@ -43,6 +40,7 @@ export function HomeTutor() {
         name="home-tutor"
         label="Ask Git-It"
         caption="Ask Git-It"
+        movable={false}
         open={open}
         buttonRef={launcher}
         onOpen={() => setOpen(true)}

@@ -2883,6 +2883,16 @@
                             }
                         },
                         "description": ""
+                    },
+                    "429": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/TutorChatError"
+                                }
+                            }
+                        },
+                        "description": ""
                     }
                 }
             }
@@ -6921,6 +6931,22 @@
                     "surface"
                 ]
             },
+            "TutorChatError": {
+                "type": "object",
+                "properties": {
+                    "detail": {
+                        "type": "string"
+                    },
+                    "retry_after_seconds": {
+                        "type": "integer",
+                        "maximum": 86400,
+                        "minimum": 1
+                    }
+                },
+                "required": [
+                    "detail"
+                ]
+            },
             "TutorChatRequest": {
                 "type": "object",
                 "properties": {
@@ -6960,6 +6986,14 @@
                     },
                     "scenario_related": {
                         "type": "boolean"
+                    },
+                    "unavailable_reason": {
+                        "$ref": "#/components/schemas/UnavailableReasonEnum"
+                    },
+                    "retry_after_seconds": {
+                        "type": "integer",
+                        "maximum": 86400,
+                        "minimum": 1
                     }
                 },
                 "required": [
@@ -6999,6 +7033,15 @@
                     "id",
                     "title"
                 ]
+            },
+            "UnavailableReasonEnum": {
+                "enum": [
+                    "rate_limited",
+                    "timeout",
+                    "unavailable"
+                ],
+                "type": "string",
+                "description": "* `rate_limited` - rate_limited\n* `timeout` - timeout\n* `unavailable` - unavailable"
             },
             "UnitEnum": {
                 "enum": [

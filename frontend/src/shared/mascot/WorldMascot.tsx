@@ -113,7 +113,10 @@ export function WorldMascot({ surface, knowledge = [], contextKey = surface }: {
       const anchor = grounded && phase === 'rest' ? attachedPoint(grounded) : null
       if (bottom < top || bounds.width < 120) { paint(); return }
       if (!placed) {
-        point = { x: Math.max(45, bounds.width - 100), y: surface === 'home' ? bottom - 40 : (top + bottom) / 2 }
+        // Keep the roaming tip guide separate from the chat launcher on the right.
+        point = surface === 'home'
+          ? { x: Math.min(85, bounds.width - 45), y: Math.min(190, bottom) }
+          : { x: Math.max(45, bounds.width - 100), y: (top + bottom) / 2 }
         destination = { ...point }
         placed = true
       } else if (anchor) {
