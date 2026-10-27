@@ -2,8 +2,9 @@
 
 A tip explains a technique (how a command's operands are written, see
 ``techniques.py``) or a concept (an idea the move touches, see ``concepts.py``).
-Neither belongs to the scenario that teaches a command, so a tip shows wherever
-its subject first comes up, until the learner dismisses it.
+Neither belongs to the scenario that teaches a command, so a tip comes with its
+move wherever and whenever that move comes up; the client may put it away for
+the rest of a run.
 """
 
 from __future__ import annotations
@@ -12,7 +13,7 @@ from dataclasses import dataclass
 
 from tutoring.services.concepts import CONCEPTS, concept_key
 from tutoring.services.teaching import safe_usage
-from tutoring.services.techniques import TECHNIQUES, Technique
+from tutoring.services.techniques import Technique
 
 
 @dataclass(frozen=True)
@@ -47,8 +48,3 @@ def technique_tip(technique: Technique, family: str) -> Tip:
         technique.summary,
         safe_usage(technique.syntax(family)),
     )
-
-
-TIP_KEYS = frozenset(
-    [*(concept_key(key) for key in CONCEPTS), *(technique.teaching_key for technique in TECHNIQUES)]
-)

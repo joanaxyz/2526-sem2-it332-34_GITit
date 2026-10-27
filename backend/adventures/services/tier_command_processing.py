@@ -221,11 +221,6 @@ class AdventureLevelTierCommandProcessingService:
             # attempt count the history is keyed by.
             TierCommandHistoryCache().remember(run=run, history=previous_history)
             tutor_reads.remember_history(run, previous_history)
-        tutor_reads.record_step(
-            normalized_command=command_result.normalized_command,
-            processable=command_result.processed,
-            result_category=result_category,
-        )
 
         if execution.state_mutated:
             run.repository_state = next_state

@@ -146,8 +146,6 @@ export type ApiSchemas = {
   "SyntaxPart": { "text": string; "token": string }
   "TeachingResponse": { "command_guides": Array<ApiSchemas["CommandIntroductionResponse"]>; "guide_elsewhere": ApiSchemas["GuideElsewhere"] | null; "tips": Array<ApiSchemas["Tip"]>; "tutor": ApiSchemas["CommandIntroductionResponse"] | null }
   "Tip": { "key": string; "kind": ApiSchemas["TipKindEnum"]; "syntax": string | null; "text": string; "title": string }
-  "TipDismiss": { "key": string }
-  "TipDismissResponse": { "key": string }
   "TipKindEnum": "concept" | "technique"
   "TransferCheckpoint": { "run_id": number | null; "tier_id": number; "title": string }
   "TutorChatContext": { "guide_token"?: string; "run_id"?: number; "surface": ApiSchemas["SurfaceEnum"]; "teaching_key"?: string; "usage_form"?: string }
@@ -231,7 +229,6 @@ export type ApiPath =
   | "/api/skills/learned/"
   | "/api/stories/"
   | "/api/tutoring/chat/"
-  | "/api/tutoring/tips/dismiss/"
 
 export type ApiMethod = 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE' | 'HEAD' | 'OPTIONS'
 
@@ -300,7 +297,6 @@ export type ApiMethodByPath = {
   "/api/skills/learned/": "GET"
   "/api/stories/": "GET"
   "/api/tutoring/chat/": "POST"
-  "/api/tutoring/tips/dismiss/": "POST"
 }
 
 export const apiOperations = {
@@ -382,7 +378,6 @@ export const apiOperations = {
   skills_learned_retrieve: { method: "GET", path: "/api/skills/learned/", operationId: "skills_learned_retrieve", tags: ["skills"] },
   stories_list: { method: "GET", path: "/api/stories/", operationId: "stories_list", tags: ["stories"] },
   tutor_chat: { method: "POST", path: "/api/tutoring/chat/", operationId: "tutor_chat", tags: ["tutoring"] },
-  tutoring_tip_dismiss: { method: "POST", path: "/api/tutoring/tips/dismiss/", operationId: "tutoring_tip_dismiss", tags: ["tutoring"] },
 } as const
 
 export type ApiOperationId = keyof typeof apiOperations
@@ -467,7 +462,6 @@ export type ApiRequestBodyByOperation = {
   skills_learned_retrieve: null
   stories_list: null
   tutor_chat: ApiSchemas["TutorChatRequest"]
-  tutoring_tip_dismiss: ApiSchemas["TipDismiss"]
 }
 
 export type ApiResponseBodyByOperation = {
@@ -549,7 +543,6 @@ export type ApiResponseBodyByOperation = {
   skills_learned_retrieve: ApiSchemas["LearnedSkillsResponse"]
   stories_list: Array<ApiSchemas["Story"]>
   tutor_chat: ApiSchemas["TutorChatResponse"]
-  tutoring_tip_dismiss: ApiSchemas["TipDismissResponse"]
 }
 
 export type ApiRequestBody<TOperation extends ApiOperationId> = ApiRequestBodyByOperation[TOperation]

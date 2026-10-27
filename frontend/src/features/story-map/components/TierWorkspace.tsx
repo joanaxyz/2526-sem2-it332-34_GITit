@@ -9,7 +9,6 @@ import { tierOutcomeNextStep } from '@/features/story-map/components/tierOutcome
 import { CommandIntroductionPanel } from '@/features/story-map/components/CommandIntroductionPanel'
 import { WorkspaceTips } from '@/features/story-map/components/WorkspaceTips'
 import { useTierCommandSubmission } from '@/features/story-map/hooks/useTierCommandSubmission'
-import { useDismissTip } from '@/features/story-map/hooks/useDismissTip'
 import { useTierWorkspaceMutations } from '@/features/story-map/hooks/useTierWorkspaceMutations'
 import { createTierWorkspaceCommandHandler } from '@/features/story-map/utils/tierWorkspaceCommand'
 import { readableGuides } from '@/features/story-map/utils/commandGuides'
@@ -79,7 +78,8 @@ export function TierWorkspace() {
   const [selectedGuideKey, setSelectedGuideKey] = useState<string | null>(null)
   // A hidden "taught elsewhere" note stays hidden for its command.
   const [hiddenElsewhereKey, setHiddenElsewhereKey] = useState<string | null>(null)
-  const dismissTip = useDismissTip(runId)
+  // "Got it" puts a tip away for this run only; the next run shows it again.
+  const [hiddenTips, setHiddenTips] = useState<{ runId: number; keys: readonly string[] }>({ runId, keys: [] })
   const user = useAuthStore((state) => state.user)
   const autoOpen = useWorkspaceAutoOpen({
     userId: user?.id,
@@ -161,6 +161,8 @@ export function TierWorkspace() {
   const story = workspaceStoryContent(run, scene.title)
   const commandGuides = readableGuides(run)
   const elsewhere = run.guide_elsewhere?.guide.teaching_key !== hiddenElsewhereKey ? run.guide_elsewhere : null
+  const hiddenTipKeys = hiddenTips.runId === run.id ? hiddenTips.keys : []
+  const tips = run.tips.filter((tip) => !hiddenTipKeys.includes(tip.key))
   const guideHidden = run.tutor?.phase === 'introduction' && run.tutor.teaching_key === hiddenGuideKey
   const introductionOpen = Boolean(run.tutor && guideAllowed
     && !learnedSkills.pending
@@ -283,9 +285,9 @@ export function TierWorkspace() {
       />
       {run.status === 'started' && guideAllowed && !learnedSkills.pending ? (
         <WorkspaceTips
-          tips={run.tips}
+          tips={tips}
           elsewhere={elsewhere}
-          onDismissTip={dismissTip}
+          onDismissTip={(key) => setHiddenTips({ runId: run.id, keys: [...hiddenTipKeys, key] })}
           onReadGuide={openCommandGuide}
           onHideElsewhere={() => setHiddenElsewhereKey(run.guide_elsewhere?.guide.teaching_key ?? null)}
         />

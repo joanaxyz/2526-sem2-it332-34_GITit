@@ -292,21 +292,23 @@ def test_a_guide_reads_its_syntax_part_by_part(teaching_run):
     }
 
 
-def test_ideas_a_move_touches_are_tips_until_dismissed(teaching_run):
+def test_ideas_a_move_touches_are_tips_every_time(teaching_run):
     tips = teaching_payload(teaching_run)["tips"]
-    # What a command is comes first of all.
-    assert [tip["key"] for tip in tips] == ["concept:commands", "concept:repository"]
-    assert tips[0] == {
-        "key": "concept:commands",
-        "kind": "concept",
-        "title": "Commands",
-        "text": CONCEPTS["commands"][1],
-        "syntax": None,
-    }
+    assert tips == [
+        {
+            "key": "concept:repository",
+            "kind": "concept",
+            "title": "Repository",
+            "text": CONCEPTS["repository"][1],
+            "syntax": None,
+        }
+    ]
     assert "concepts" not in tutor(teaching_run)
 
-    learn(teaching_run, "concept:commands", "concept:repository")
-    assert tip_keys(teaching_run) == []
+    # Finishing the guide, or playing the move before, never takes its tips away.
+    learn(teaching_run, INIT, "concept:repository")
+    ran_successfully(teaching_run, "git init")
+    assert tip_keys(teaching_run) == ["concept:repository"]
     states, _ = solution_states(teaching_run.selected_variant.initial_state)
     move_to(teaching_run, states[1])
     assert tip_keys(teaching_run) == [
@@ -331,7 +333,8 @@ def at_reset_step(run):
     move_to(run, base)
 
 
-def test_a_technique_is_a_tip_wherever_it_first_comes_up(teaching_run):
+def test_a_technique_is_a_tip_wherever_it_comes_up(teaching_run):
+    ran_successfully(teaching_run, "git log HEAD~2")
     at_reset_step(teaching_run)
     payload = teaching_payload(teaching_run)
 
@@ -344,11 +347,3 @@ def test_a_technique_is_a_tip_wherever_it_first_comes_up(teaching_run):
         "text": "HEAD~2 is two commits before HEAD, and HEAD^ is the one right before it.",
         "syntax": "git reset HEAD~<n>",
     }
-    learn(teaching_run, "technique:relative-commit")
-    assert "technique:relative-commit" not in tip_keys(teaching_run)
-
-
-def test_a_technique_already_run_needs_no_tip(teaching_run):
-    ran_successfully(teaching_run, "git log HEAD~2")
-    at_reset_step(teaching_run)
-    assert "technique:relative-commit" not in tip_keys(teaching_run)

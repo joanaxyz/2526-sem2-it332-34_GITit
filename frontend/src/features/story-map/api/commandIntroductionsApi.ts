@@ -11,8 +11,4 @@ export const commandIntroductionsApi = {
       'command_introduction_complete',
       `/adventure-tier-runs/${runId}/introduction/complete/`, { body: { token } })
   },
-  dismissTip(key: string) {
-    return apiOperationRequest<'tutoring_tip_dismiss', ApiSchemas['TipDismissResponse']>(
-      'tutoring_tip_dismiss', '/tutoring/tips/dismiss/', { body: { key } })
-  },
 }

@@ -1,10 +1,4 @@
-from rest_framework.test import APIClient
-
-from tutoring.models import PlayerCommandIntroduction
-
-
-def dismiss(client, key):
-    return client.post("/api/tutoring/tips/dismiss/", {"key": key}, format="json")
+from adventures.models import AdventureLevelTierRun
 
 
 def run_tips(client, run):
@@ -13,24 +7,17 @@ def run_tips(client, run):
     return [tip["key"] for tip in response.data["tips"]]
 
 
-def test_a_dismissed_tip_stays_dismissed(client, teaching_run):
-    assert run_tips(client, teaching_run) == ["concept:commands", "concept:repository"]
-
-    for _ in range(2):
-        response = dismiss(client, "concept:commands")
-        assert response.status_code == 200, response.data
-        assert response.data == {"key": "concept:commands"}
-
+def test_tips_come_back_every_time_the_scenario_is_played(client, teaching_run):
     assert run_tips(client, teaching_run) == ["concept:repository"]
-    assert PlayerCommandIntroduction.objects.get().teaching_key == "concept:commands"
 
-
-def test_only_known_tips_can_be_dismissed(client, teaching_run):
-    # A guide is finished by completing it, never by dismissing it as a tip.
-    for key in ["concept:nonsense", "git-init/current-directory", "form:git init"]:
-        assert dismiss(client, key).status_code == 400
-    assert not PlayerCommandIntroduction.objects.exists()
-
-
-def test_dismissing_needs_a_signed_in_player(teaching_run):
-    assert dismiss(APIClient(), "concept:commands").status_code in {401, 403}
+    teaching_run.status = "completed"
+    teaching_run.save(update_fields=["status"])
+    again = AdventureLevelTierRun.objects.create(
+        player=teaching_run.player,
+        tier=teaching_run.tier,
+        current_scenario=teaching_run.current_scenario,
+        selected_variant=teaching_run.selected_variant,
+        repository_state=teaching_run.selected_variant.initial_state,
+        max_counted_commands=12,
+    )
+    assert run_tips(client, again) == ["concept:repository"]

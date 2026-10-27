@@ -13,8 +13,7 @@ A move teaches two ways:
   never uses a guide up.
 - The techniques it writes (several paths, ``HEAD~2``, ``a..b``...) and the
   ideas it touches (staging area, branch...) become **tips** (``tips.py``),
-  shown wherever they first come up until dismissed. A technique the learner
-  has already run successfully needs no tip.
+  shown with the move every time it comes up.
 """
 
 from __future__ import annotations
@@ -22,20 +21,14 @@ from __future__ import annotations
 from dataclasses import dataclass
 from functools import cached_property
 
-from common.constants import RESULT_INVALID, RESULT_UNPROCESSABLE, SESSION_STATUS_STARTED
+from common.constants import SESSION_STATUS_STARTED
 from curriculum.models import CommandForm
-from practice.models import CommandStep
 from simulator.trajectory import next_solution_step
 from tutoring.models import CommandGuideHome, PlayerCommandIntroduction
 from tutoring.services.concepts import concepts_for
 from tutoring.services.forms import FormGuide, catalog_forms, command_family, resolve_form
-from tutoring.services.techniques import Technique, batch_command, technique_used, techniques_in
+from tutoring.services.techniques import batch_command, techniques_in
 from tutoring.services.tips import Tip, concept_tip, technique_tip
-
-# Bounds the "used it before" scan; a learner with this many distinct commands
-# has certainly met the techniques.
-_USAGE_SCAN_LIMIT = 300
-_UNUSABLE_RESULTS = (RESULT_INVALID, RESULT_UNPROCESSABLE)
 
 
 class PlannerReads:
@@ -43,15 +36,13 @@ class PlannerReads:
 
     A command submission plans twice: before the command runs and again for
     its response. Share one instance between them; only the step the command
-    just recorded changes in between, and ``record_step`` and
-    ``remember_history`` add it. Without a shared instance each plan reads
-    afresh.
+    just recorded changes in between, and ``remember_history`` adds it.
+    Without a shared instance each plan reads afresh.
     """
 
     def __init__(self, player_id: int) -> None:
         self.player_id = player_id
         self._history: dict[tuple[int, int], list[str]] = {}
-        self._used: list[str] | None = None
         self._catalog: dict[str, list[CommandForm]] = {}
         self._scenario_forms: dict[int, list[CommandForm]] = {}
         self._homes: dict[str, CommandGuideHome | None] = {}
@@ -72,36 +63,12 @@ class PlannerReads:
 
     @cached_property
     def introduced(self) -> frozenset[str]:
-        """Keys of every completed guide and dismissed tip."""
+        """Teaching keys of every completed guide."""
         return frozenset(
             PlayerCommandIntroduction.objects.filter(player_id=self.player_id).values_list(
                 "teaching_key", flat=True
             )
         )
-
-    def used_commands(self) -> list[str]:
-        """Distinct Git commands the player ran successfully."""
-        if self._used is None:
-            self._used = list(
-                # The step's own owner column is indexed; going through its
-                # three possible run parents is not.
-                CommandStep.objects.filter(
-                    player_id=self.player_id,
-                    was_processable=True,
-                    normalized_command__startswith="git ",
-                )
-                .exclude(result_category__in=_UNUSABLE_RESULTS)
-                .values_list("normalized_command", flat=True)
-                .distinct()[:_USAGE_SCAN_LIMIT]
-            )
-        return self._used
-
-    def record_step(self, *, normalized_command: str, processable: bool, result_category: str):
-        """Count a command step stored after the history was read."""
-        if not processable or result_category in _UNUSABLE_RESULTS or self._used is None:
-            return
-        if normalized_command.startswith("git ") and normalized_command not in self._used:
-            self._used.append(normalized_command)
 
     def catalog(self, family: str) -> list[CommandForm]:
         if family not in self._catalog:
@@ -195,7 +162,7 @@ def plan_move(run, reads: PlannerReads | None = None) -> MovePlan | None:
             guide = Candidate(form, command, effects, step["index"], last)
         elif home is not None:
             elsewhere = TaughtElsewhere(form, home)
-    return MovePlan(guide, elsewhere, _tips(run, command, effects, reads))
+    return MovePlan(guide, elsewhere, _tips(run, command, effects))
 
 
 def plan_introduction(run, reads: PlannerReads | None = None) -> Candidate | None:
@@ -205,17 +172,12 @@ def plan_introduction(run, reads: PlannerReads | None = None) -> Candidate | Non
     return plan.guide if plan else None
 
 
-def _tips(run, command: str, effects: tuple[dict, ...], reads: PlannerReads) -> tuple[Tip, ...]:
-    seen = reads.introduced
-    concepts = [concept_tip(key) for key in concepts_for(effects, seen)]
+def _tips(run, command: str, effects: tuple[dict, ...]) -> tuple[Tip, ...]:
     family = command_family(command) or ""
-    techniques = [
-        technique_tip(technique, family)
-        for technique in techniques_in(command, run.repository_state)
-        if technique.teaching_key not in seen and not _ran(technique, reads)
-    ]
-    return (*concepts, *techniques)
-
-
-def _ran(technique: Technique, reads: PlannerReads) -> bool:
-    return any(technique_used(technique.key, command) for command in reads.used_commands())
+    return (
+        *(concept_tip(key) for key in concepts_for(effects)),
+        *(
+            technique_tip(technique, family)
+            for technique in techniques_in(command, run.repository_state)
+        ),
+    )

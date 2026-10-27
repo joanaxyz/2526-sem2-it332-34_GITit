@@ -2896,46 +2896,6 @@
                     }
                 }
             }
-        },
-        "/api/tutoring/tips/dismiss/": {
-            "post": {
-                "operationId": "tutoring_tip_dismiss",
-                "tags": [
-                    "tutoring"
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/TipDismiss"
-                            }
-                        },
-                        "application/x-www-form-urlencoded": {
-                            "schema": {
-                                "$ref": "#/components/schemas/TipDismiss"
-                            }
-                        },
-                        "multipart/form-data": {
-                            "schema": {
-                                "$ref": "#/components/schemas/TipDismiss"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/TipDismissResponse"
-                                }
-                            }
-                        },
-                        "description": ""
-                    }
-                }
-            }
         }
     },
     "components": {
@@ -7036,29 +6996,6 @@
                     "syntax",
                     "text",
                     "title"
-                ]
-            },
-            "TipDismiss": {
-                "type": "object",
-                "properties": {
-                    "key": {
-                        "type": "string",
-                        "maxLength": 160
-                    }
-                },
-                "required": [
-                    "key"
-                ]
-            },
-            "TipDismissResponse": {
-                "type": "object",
-                "properties": {
-                    "key": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "key"
                 ]
             },
             "TipKindEnum": {

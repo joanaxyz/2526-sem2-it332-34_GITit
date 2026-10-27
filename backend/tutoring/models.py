@@ -3,11 +3,7 @@ from django.utils import timezone
 
 
 class PlayerCommandIntroduction(models.Model):
-    """A finished lesson: a completed command guide, or a dismissed tip.
-
-    Keys are namespaced (``form:``/``guide:`` for guides, ``concept:`` and
-    ``technique:`` for tips), independent of problem variants and mastery.
-    """
+    """A completed command guide, independent of problem variants and mastery."""
 
     player = models.ForeignKey("players.Player", on_delete=models.CASCADE)
     teaching_key = models.CharField(max_length=160)

@@ -1,13 +1,12 @@
 """Plain-language ideas behind a move, for learners meeting Git for the first time.
 
 Concepts are chosen from what the next move changes in the repository, never
-from a particular level, and are shown as tips (``tips.py``) until dismissed.
-What a command is comes first of all.
+from a particular level, and are shown as tips (``tips.py``) with that move.
 """
 
 from __future__ import annotations
 
-from collections.abc import Collection, Iterable
+from collections.abc import Iterable
 
 # (title, text). Short, concrete, no Git jargon inside the definitions.
 CONCEPTS: dict[str, tuple[str, str]] = {
@@ -85,11 +84,11 @@ def concept_key(key: str) -> str:
     return f"concept:{key}"
 
 
-def concepts_for(changes: Iterable[dict], seen: Collection[str]) -> list[str]:
-    """Keys of the unseen concepts a move touches, most basic first, at most
+def concepts_for(changes: Iterable[dict]) -> list[str]:
+    """Keys of the concepts a move touches, most basic first, at most
     ``MAX_CONCEPTS``."""
 
-    keys = ["commands"]
+    keys: list[str] = []
     changes = list(changes)
     creates_repository = any(change.get("kind") == "repository" for change in changes)
     for change in changes:
@@ -102,4 +101,4 @@ def concepts_for(changes: Iterable[dict], seen: Collection[str]) -> list[str]:
         # Staging only makes sense next to the files it takes changes from.
         if key == "staging-area" and "working-tree" not in keys:
             keys.insert(keys.index(key), "working-tree")
-    return [key for key in keys if concept_key(key) not in seen][:MAX_CONCEPTS]
+    return keys[:MAX_CONCEPTS]

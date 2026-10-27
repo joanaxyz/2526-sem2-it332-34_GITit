@@ -89,10 +89,6 @@ class TeachingResponseSerializer(serializers.Serializer):
     tips = TipSerializer(many=True)
 
 
-class TipDismissResponseSerializer(serializers.Serializer):
-    key = serializers.CharField()
-
-
 class TutorTopicSerializer(serializers.Serializer):
     id = serializers.CharField()
     title = serializers.CharField()

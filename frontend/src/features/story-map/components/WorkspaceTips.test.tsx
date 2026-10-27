@@ -29,7 +29,7 @@ function setup(props: Partial<Parameters<typeof WorkspaceTips>[0]> = {}) {
 afterEach(cleanup)
 
 describe('workspace tips', () => {
-  it('shows one tip at a time and dismisses it for good', () => {
+  it('shows one tip at a time and puts it away on request', () => {
     const { onDismissTip } = setup({ elsewhere: null })
     const tip = screen.getByRole('region', { name: 'Tip: Staging area' })
     expect(within(tip).getByText('A waiting area for your next commit.')).toBeInTheDocument()

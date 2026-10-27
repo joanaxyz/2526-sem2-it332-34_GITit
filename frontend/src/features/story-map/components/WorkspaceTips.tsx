@@ -7,9 +7,10 @@ import { Button } from '@/shared/components/Button'
  * Quiet notes beside the workspace, apart from the command guide.
  *
  * A command whose guide lives in another scenario gets a note saying where it
- * is taught, with its guide to read. Tips explain techniques and new words
- * wherever they first come up, one at a time, until dismissed. Neither blocks
- * the terminal, and both stay readable while a guide is open.
+ * is taught, with its guide to read. Tips explain the techniques and new words
+ * of the next move, one at a time, every time it comes up; "Got it" puts one
+ * away for the rest of the run. Neither blocks the terminal, and both stay
+ * readable while a guide is open.
  */
 export function WorkspaceTips({ tips, elsewhere, onDismissTip, onReadGuide, onHideElsewhere }: {
   tips: readonly Tip[]

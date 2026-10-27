@@ -8,19 +8,13 @@ from rest_framework.views import APIView
 
 from adventures.models import AdventureLevelTierRun
 from players.services import get_or_create_player
-from tutoring.models import PlayerCommandIntroduction
 from tutoring.openapi import (
     TeachingResponseSerializer,
-    TipDismissResponseSerializer,
     TutorChatErrorSerializer,
     TutorChatResponseSerializer,
 )
 from tutoring.payloads import teaching_payload
-from tutoring.serializers import (
-    IntroductionCompleteSerializer,
-    TipDismissSerializer,
-    TutorChatRequestSerializer,
-)
+from tutoring.serializers import IntroductionCompleteSerializer, TutorChatRequestSerializer
 from tutoring.services.chat import chat
 from tutoring.services.introductions import complete_introduction
 
@@ -51,24 +45,6 @@ class IntroductionCompleteAPIView(APIView):
         run = locked_run(request, run_id)
         complete_introduction(run, serializer.validated_data["token"])
         return Response(teaching_payload(run))
-
-
-class TipDismissAPIView(APIView):
-    throttle_scope = "command_submit"
-
-    @extend_schema(
-        operation_id="tutoring_tip_dismiss",
-        request=TipDismissSerializer,
-        responses={200: TipDismissResponseSerializer},
-    )
-    def post(self, request):
-        serializer = TipDismissSerializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        key = serializer.validated_data["key"]
-        PlayerCommandIntroduction.objects.get_or_create(
-            player=get_or_create_player(request.user), teaching_key=key
-        )
-        return Response({"key": key})
 
 
 class TutorChatAPIView(APIView):
