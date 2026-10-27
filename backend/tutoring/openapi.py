@@ -81,3 +81,10 @@ class TutorChatResponseSerializer(serializers.Serializer):
     # True inside a level, and on Home only when it declined a recognised scenario;
     # a guarded reply to an uncertain match is protected without claiming a scenario.
     scenario_related = serializers.BooleanField()
+    unavailable_reason = serializers.ChoiceField(choices=["rate_limited", "timeout", "unavailable"], required=False)
+    retry_after_seconds = serializers.IntegerField(min_value=1, max_value=86400, required=False)
+
+
+class TutorChatErrorSerializer(serializers.Serializer):
+    detail = serializers.CharField()
+    retry_after_seconds = serializers.IntegerField(min_value=1, max_value=86400, required=False)

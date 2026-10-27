@@ -47,7 +47,7 @@ def offline_providers(settings):
 
 def recognized(recognition, only=None):
     """A `recognize_all` stand-in: every turn, or just the turn `only`, is found so."""
-    return lambda texts: [
+    return lambda texts, **kwargs: [
         recognition if only in (None, text) else Recognition(UNMATCHED) for text in texts
     ]
 
@@ -90,7 +90,7 @@ def test_semantic_recognition_matches_a_paraphrase_that_names_the_scenario():
         patch("tutoring.services.scenario_recognition.embed", return_value=[vector]) as embed,
     ):
         assert recognize(named) == Recognition(MATCHED, (NESTED_SERVICE,))
-        embed.assert_called_once_with([named], "RETRIEVAL_QUERY")
+        embed.assert_called_once_with([named], "RETRIEVAL_QUERY", timeout=3)
         # General questions come this close too, so without a name it is only protected.
         assert recognize(renamed) == Recognition(UNCERTAIN, (NESTED_SERVICE,))
 
@@ -194,7 +194,7 @@ def test_guard_covers_file_edits_and_the_runs_own_variant(teaching_run):
 def test_home_answers_general_questions_in_its_own_words_with_follow_ups():
     seen = {}
 
-    def provider(system, turns):
+    def provider(system, turns, **kwargs):
         seen.update(system=system, turns=turns)
         return "It means `git switch -c feature` creates **and** switches to a new branch."
 
@@ -271,7 +271,7 @@ def test_home_protects_a_possible_scenario_and_regenerates_a_leaky_draft():
     )
     prompts = []
 
-    def provider(system, turns):
+    def provider(system, turns, **kwargs):
         prompts.append(system)
         return next(drafts)
 

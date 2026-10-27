@@ -10,6 +10,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+import math
 import time
 from collections.abc import Callable
 from concurrent.futures import FIRST_COMPLETED, wait
@@ -41,7 +42,7 @@ def cooldown_key(provider, model, api_key):
 def retry_seconds(value):
     try:
         return max(1, min(86400, int(float(value))))
-    except (ValueError, TypeError):
+    except (ValueError, TypeError, OverflowError):
         try:
             return max(
                 1,
@@ -124,7 +125,7 @@ class Attempt:
     started: float
 
 
-def _reply(attempt, future):
+def _reply(attempt, future, failures):
     """The finished attempt's text, or None once its failure is recorded.
 
     A ProviderError that should end rotation propagates.
@@ -141,14 +142,20 @@ def _reply(attempt, future):
             exc.status,
         )
         if exc.status == 429:
-            cache.set(attempt.circuit, True, timeout=retry_seconds(exc.retry_after))
+            seconds = retry_seconds(exc.retry_after)
+            failure = {"reason": "rate_limited", "until": time.time() + seconds}
+            cache.set(attempt.circuit, failure, timeout=seconds)
+            failures.append(failure)
             return None
+        failure = {"reason": "timeout" if exc.reason == "timeout" or exc.status in {408, 504} else "unavailable", "until": time.time() + 10}
+        failures.append(failure)
         if exc.status in {408, 500, 502, 503, 504}:
-            cache.set(attempt.circuit, True, timeout=10)
+            cache.set(attempt.circuit, failure, timeout=10)
             return None
         # Bad credentials/configuration are not rate-limit rotation triggers.
         raise
-    except (KeyError, IndexError, TypeError, ValueError):
+    except (AttributeError, KeyError, IndexError, TypeError, ValueError):
+        failures.append({"reason": "unavailable"})
         # A blocked or empty candidate; the next provider may still answer.
         logger.warning(
             "Tutor rejected malformed response provider=%s model=%s",
@@ -165,8 +172,10 @@ def _reply(attempt, future):
     return text.strip()
 
 
-def generate(system, turns):
+def generate(system, turns, *, deadline=None, diagnostics=None):
     """Return provider text or None. Callers own validation of everything returned."""
+    if diagnostics is not None:
+        diagnostics.clear()
     chain = iter(
         [
             ("gemini", *model_entry(entry), settings.GOOGLE_AI_STUDIO_API_KEY, _gemini)
@@ -175,8 +184,9 @@ def generate(system, turns):
         + [("groq", *model_entry(settings.TUTOR_GROQ_MODEL), settings.GROQ_API_KEY, _groq)]
     )
     hedge = settings.TUTOR_PROVIDER_HEDGE_SECONDS
-    deadline = time.monotonic() + settings.TUTOR_PROVIDER_DEADLINE_SECONDS
+    deadline = min(deadline or float("inf"), time.monotonic() + settings.TUTOR_PROVIDER_DEADLINE_SECONDS)
     running = {}
+    failures = []
 
     def launch():
         """Start the next attempt with a key and no cooldown; False when none is left."""
@@ -185,7 +195,9 @@ def generate(system, turns):
             if not key or started >= deadline:
                 continue
             circuit = cooldown_key(provider, model, key)
-            if cache.get(circuit):
+            cooling = cache.get(circuit)
+            if cooling:
+                failures.append(cooling if isinstance(cooling, dict) else {"reason": "unavailable"})
                 continue
             url, headers, body, read = build(model, key, system, turns, effort)
             budget = min(settings.TUTOR_PROVIDER_ATTEMPT_SECONDS, deadline - started)
@@ -204,15 +216,15 @@ def generate(system, turns):
                 # running): keep waiting on those, and start the next model alongside.
                 rotating = launch()
                 continue
-            if not running or now >= deadline + 1:
+            if not running or now >= deadline:
                 break  # Budgets end by the deadline; that check only guards a stalled loop.
             newest = max(attempt.started for attempt in running.values())
-            until = newest + hedge if rotating else deadline + 1
+            until = min(newest + hedge, deadline) if rotating else deadline
             done, _ = wait(running, timeout=max(0, until - now), return_when=FIRST_COMPLETED)
             for future in done:
                 attempt = running.pop(future)
                 try:
-                    text = _reply(attempt, future)
+                    text = _reply(attempt, future, failures)
                 except ProviderError:
                     rotating = False
                     continue
@@ -229,6 +241,16 @@ def generate(system, turns):
                         cache.set(slower.circuit, True, timeout=SLOW_COOLDOWN)
                 return text
     finally:
+        if running:
+            failures.append({"reason": "timeout"})
         for future in running:
             future.cancel()
+    if diagnostics is not None:
+        reason = "unavailable"
+        if failures and all(failure["reason"] == "rate_limited" for failure in failures):
+            reason = "rate_limited"
+            diagnostics["retry_after_seconds"] = max(1, math.ceil(min(f["until"] for f in failures) - time.time()))
+        elif any(failure["reason"] == "timeout" for failure in failures) or time.monotonic() >= deadline:
+            reason = "timeout"
+        diagnostics["unavailable_reason"] = reason
     return None

@@ -11,6 +11,7 @@ import hashlib
 import json
 import math
 import re
+import time
 from collections import Counter
 from dataclasses import dataclass
 from functools import cache, lru_cache
@@ -223,7 +224,7 @@ def _memo(text):
     return f"tutor:recognition:named:{digest}"
 
 
-def recognize_all(texts):
+def recognize_all(texts, *, deadline=None):
     """One recognition per text. Unknown retrieval is protective, never permissive."""
     results = {}
     settled = {}
@@ -241,9 +242,10 @@ def recognize_all(texts):
     if pending:
         index = load_index(str(settings.TUTOR_SCENARIO_INDEX_PATH), corpus_hash())
         vectors = None
-        if index is not None:
+        remaining = min(3, max(0, deadline - time.monotonic())) if deadline is not None else 3
+        if index is not None and remaining > 0:
             try:
-                vectors = embed([text for text, _ in pending], "RETRIEVAL_QUERY")
+                vectors = embed([text for text, _ in pending], "RETRIEVAL_QUERY", timeout=remaining)
             except (ProviderError, ValueError, KeyError, TypeError):
                 vectors = None
         for position, (text, scores) in enumerate(pending):

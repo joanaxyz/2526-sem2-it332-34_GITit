@@ -20,10 +20,11 @@ _runtime = None
 
 
 class ProviderError(Exception):
-    def __init__(self, status, retry_after=None):
+    def __init__(self, status, retry_after=None, *, reason="unavailable"):
         super().__init__(f"Tutor provider status {status}")
         self.status = status
         self.retry_after = retry_after
+        self.reason = reason
 
 
 async def _new_client():
@@ -85,7 +86,10 @@ def collect(future, timeout):
     try:
         # The coroutine enforces the budget; this only guards a stalled loop.
         return future.result(max(0.1, timeout) + 1)
-    except (httpx.HTTPError, TimeoutError):
+    except (httpx.TimeoutException, TimeoutError):
+        future.cancel()
+        raise ProviderError(503, reason="timeout") from None
+    except httpx.HTTPError:
         future.cancel()
         raise ProviderError(503) from None
     except (ValueError, UnicodeError):
