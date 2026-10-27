@@ -176,6 +176,10 @@ appears only when collapsed. Command guides omit the mascot and retain a separat
 command icon for reopening and history.
 The decorative mascot preference does not disable help controls.
 
+General chat reuses the animated Blue sprite and the fixed "Ask Blue" launcher.
+The separate roaming learning mascot continues offering earned Git tips while
+chat is open; the reader's own mascot-hiding preference remains respected.
+
 Both tutor surfaces offer bundled FAQS with reviewed general Git explanations.
 Network failures and unavailable provider replies show a recovery panel in Chat,
 with an explicit Retry and access to saved explanations. Rate-limit responses carry
