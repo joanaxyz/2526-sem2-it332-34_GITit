@@ -1,20 +1,20 @@
 /*
- * GIT it! pointer set — static 32×32 SVGs with precise hotspots.
- * Uses the same white / neon blue / ink vocabulary as DESIGN.md.
+ * GIT it! pointer set — static 28×28 SVGs with scaled hotspots.
+ * Rounded black silhouettes with fine neon-blue edges and highlights.
  * Scope to real mice; touch and coarse pointers retain native behavior.
  * Browser keyword fallbacks remain functional when SVG cursors are unsupported.
  */
 @media (hover: hover) and (pointer: fine) {
   :root:not([data-custom-cursors='off']) {
     --cursor-arrow: url('/cursors/arrow.svg') 4 3, auto;
-    --cursor-hand: url('/cursors/hand.svg') 14 4, pointer;
-    --cursor-text: url('/cursors/text.svg') 16 16, text;
-    --cursor-grab: url('/cursors/grab.svg') 16 15, grab;
-    --cursor-grabbing: url('/cursors/grabbing.svg') 16 16, grabbing;
-    --cursor-blocked: url('/cursors/blocked.svg') 16 16, not-allowed;
+    --cursor-hand: url('/cursors/hand.svg') 12 4, pointer;
+    --cursor-text: url('/cursors/text.svg') 14 14, text;
+    --cursor-grab: url('/cursors/grab.svg') 14 13, grab;
+    --cursor-grabbing: url('/cursors/grabbing.svg') 14 14, grabbing;
+    --cursor-blocked: url('/cursors/blocked.svg') 14 14, not-allowed;
     --cursor-progress: url('/cursors/progress.svg') 4 3, progress;
-    --cursor-crosshair: url('/cursors/crosshair.svg') 16 16, crosshair;
-    --cursor-help: url('/cursors/help.svg') 3 3, help;
+    --cursor-crosshair: url('/cursors/crosshair.svg') 14 14, crosshair;
+    --cursor-help: url('/cursors/help.svg') 4 3, help;
   }
 
   :root:not([data-custom-cursors='off']),
