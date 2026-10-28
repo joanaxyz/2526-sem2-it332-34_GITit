@@ -24,11 +24,15 @@ def transport_error(error):
         future = Future()
         future.set_exception(error)
         return future
+
     return start
 
 
 def test_all_rate_limited_providers_report_their_remaining_cooldown():
-    with patch("tutoring.services.providers.start_json", side_effect=transport_error(ProviderError(429, "25"))) as start:
+    with patch(
+        "tutoring.services.providers.start_json",
+        side_effect=transport_error(ProviderError(429, "25")),
+    ) as start:
         diagnostics = {}
         assert generate("system", [], diagnostics=diagnostics) is None
         assert diagnostics == {"unavailable_reason": "rate_limited", "retry_after_seconds": 25}
@@ -59,7 +63,10 @@ def test_missing_keys_and_malformed_responses_are_unavailable(settings):
 
 def test_provider_timeouts_and_expired_budget_are_distinguished():
     diagnostics = {}
-    with patch("tutoring.services.providers.start_json", side_effect=transport_error(ProviderError(503, reason="timeout"))):
+    with patch(
+        "tutoring.services.providers.start_json",
+        side_effect=transport_error(ProviderError(503, reason="timeout")),
+    ):
         assert generate("system", [], diagnostics=diagnostics) is None
     assert diagnostics["unavailable_reason"] == "timeout"
     with patch("tutoring.services.providers.start_json", side_effect=AssertionError):
@@ -79,7 +86,9 @@ def test_malformed_nested_provider_data_rotates_and_recovers():
 
 def test_api_throttle_has_machine_readable_retry_timing(client):
     with patch("tutoring.views.TutorChatAPIView.check_throttles", side_effect=Throttled(wait=7.2)):
-        response = client.post("/api/tutoring/chat/", {"message": "hi", "context": {"surface": "home"}}, format="json")
+        response = client.post(
+            "/api/tutoring/chat/", {"message": "hi", "context": {"surface": "home"}}, format="json"
+        )
     assert response.status_code == 429
     assert response.data["retry_after_seconds"] == 8
     assert "short break" in response.data["detail"]
@@ -97,7 +106,10 @@ def test_guarded_rewrite_failure_reports_outage_and_uses_same_deadline(teaching_
 
     with (
         patch("tutoring.services.chat.guide_run", return_value=(teaching_run, "git add <path>")),
-        patch("tutoring.services.chat.recognize_all", side_effect=lambda texts, **kwargs: [Recognition(UNMATCHED) for _ in texts]),
+        patch(
+            "tutoring.services.chat.recognize_all",
+            side_effect=lambda texts, **kwargs: [Recognition(UNMATCHED) for _ in texts],
+        ),
         patch("tutoring.services.chat.generate", side_effect=provider),
     ):
         result = chat(teaching_run.player, "Explain this guide", {"surface": "command_guide"})
@@ -111,7 +123,9 @@ def test_guarded_rewrite_failure_reports_outage_and_uses_same_deadline(teaching_
 def test_recognition_and_generation_share_a_thirty_second_budget():
     with (
         patch("tutoring.services.chat.time.monotonic", return_value=100),
-        patch("tutoring.services.chat.recognize_all", return_value=[Recognition(UNMATCHED)]) as recognize,
+        patch(
+            "tutoring.services.chat.recognize_all", return_value=[Recognition(UNMATCHED)]
+        ) as recognize,
         patch("tutoring.services.chat.generate", return_value="Hi! Ask me about Git.") as provider,
     ):
         chat(None, "hello", {"surface": "home"})

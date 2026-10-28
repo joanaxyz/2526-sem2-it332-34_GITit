@@ -18,9 +18,9 @@ from process_companion_spell_sheets import (  # noqa: E402
     clamp_registration_shifts,
     clear_detected_bright_grid_lines,
     clear_frame_edges,
-    content_axis_edges,
     compute_prefit_scale,
     compute_registration_plan,
+    content_axis_edges,
     measure_place_bounds,
     owned_frame_sources,
     stabilize_registration_shifts,
@@ -177,7 +177,9 @@ def test_detached_dragon_mouth_flash_stays_in_its_own_frame(
     source = sources[15]
     assert source.image is not None and source.source_bbox is not None
     for x, y in [(254, 831), (278, 855), (254, 879), (232, 855)]:
-        assert source.image.getpixel((x - source.source_bbox[0], y - source.source_bbox[1]))[3] > 200
+        assert (
+            source.image.getpixel((x - source.source_bbox[0], y - source.source_bbox[1]))[3] > 200
+        )
     assert sources[16].image is None
 
 

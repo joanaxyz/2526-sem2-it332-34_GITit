@@ -46,7 +46,7 @@ django-environ==0.13.0
     # via -r requirements.in
 django-redis==6.0.0
     # via -r requirements.in
-djangorestframework==3.17.2
+djangorestframework==3.18.2
     # via
     #   -r requirements.in
     #   djangorestframework-simplejwt

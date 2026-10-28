@@ -147,7 +147,12 @@ def _reply(attempt, future, failures):
             cache.set(attempt.circuit, failure, timeout=seconds)
             failures.append(failure)
             return None
-        failure = {"reason": "timeout" if exc.reason == "timeout" or exc.status in {408, 504} else "unavailable", "until": time.time() + 10}
+        failure = {
+            "reason": "timeout"
+            if exc.reason == "timeout" or exc.status in {408, 504}
+            else "unavailable",
+            "until": time.time() + 10,
+        }
         failures.append(failure)
         if exc.status in {408, 500, 502, 503, 504}:
             cache.set(attempt.circuit, failure, timeout=10)
@@ -184,7 +189,9 @@ def generate(system, turns, *, deadline=None, diagnostics=None):
         + [("groq", *model_entry(settings.TUTOR_GROQ_MODEL), settings.GROQ_API_KEY, _groq)]
     )
     hedge = settings.TUTOR_PROVIDER_HEDGE_SECONDS
-    deadline = min(deadline or float("inf"), time.monotonic() + settings.TUTOR_PROVIDER_DEADLINE_SECONDS)
+    deadline = min(
+        deadline or float("inf"), time.monotonic() + settings.TUTOR_PROVIDER_DEADLINE_SECONDS
+    )
     running = {}
     failures = []
 
@@ -249,8 +256,13 @@ def generate(system, turns, *, deadline=None, diagnostics=None):
         reason = "unavailable"
         if failures and all(failure["reason"] == "rate_limited" for failure in failures):
             reason = "rate_limited"
-            diagnostics["retry_after_seconds"] = max(1, math.ceil(min(f["until"] for f in failures) - time.time()))
-        elif any(failure["reason"] == "timeout" for failure in failures) or time.monotonic() >= deadline:
+            diagnostics["retry_after_seconds"] = max(
+                1, math.ceil(min(f["until"] for f in failures) - time.time())
+            )
+        elif (
+            any(failure["reason"] == "timeout" for failure in failures)
+            or time.monotonic() >= deadline
+        ):
             reason = "timeout"
         diagnostics["unavailable_reason"] = reason
     return None

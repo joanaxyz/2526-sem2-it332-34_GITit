@@ -155,7 +155,9 @@ def chat(player, message, context, history=()):
         task = str(variant_context.get("task") or getattr(run.current_scenario, "task", "") or "")
     protected = run is not None or recognition.related
     kind = "guarded" if protected else "answer"
-    system = system_prompt(context["surface"], protected, usage, task, platform_context(message, history))
+    system = system_prompt(
+        context["surface"], protected, usage, task, platform_context(message, history)
+    )
     if re.search(r"\bgit[ -]?it\b", message, re.I):
         system += (
             "\nThis learner explicitly asks about the GIT it! platform. This is IN SCOPE, "

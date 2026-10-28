@@ -27,69 +27,122 @@ function selectModule(number: number) {
 }
 
 describe('learner learning objectives', () => {
-  it('plots actual percentages and module-specific goal markers in summary and objective rows', () => {
-    renderRecord(richPerformanceFixture)
-    const summary = moduleMetric(1, 'Command Accuracy Rate')
-    const meter = within(summary).getByRole('meter', { name: 'Command Accuracy Rate' })
-    expect(meter).toHaveAttribute('aria-valuenow', '91')
-    expect(meter).toHaveAttribute('aria-valuemax', '100')
-    expect(meter.querySelector('.kpi-gauge-fill')).toHaveAttribute('stroke-dasharray', '91 100')
-    expect(meter.querySelector('.kpi-gauge-goal')).toBeInTheDocument()
-    expect(meter).toHaveAttribute('aria-valuetext', '91%; goal at least 70%; higher is better')
-    expect(within(objective('SO 1.1')).getByRole('meter')).toHaveClass('kpi-gauge--compact')
+  it('keeps overall readings independent of the selected module and objective', () => {
+    const data = structuredClone(richPerformanceFixture)
+    data.kpis.car = { value: 95, numerator: 95, denominator: 1 }
+    data.modules[0].car = { value: 82, numerator: 82, denominator: 1 }
+    data.objectives['SO 1.1'] = { value: 70, numerator: 70, denominator: 1 }
+    Object.freeze(data)
+    renderRecord(data)
+    const overall = screen.getByRole('group', { name: 'Overall KPIs' })
+    const car = within(overall).getByText('Command Accuracy Rate').closest('.objective-metric')!
+    expect(car).toHaveTextContent('95%')
+    expect(moduleMetric(1, 'Command Accuracy Rate')).toHaveTextContent('82%')
+    expect(objective('SO 1.1')).toHaveTextContent('70%')
+    expect(overall.querySelectorAll('.objective-metric')).toHaveLength(5)
     selectModule(4)
-    expect(within(objective('SO 4.4')).getByRole('meter')).toHaveAttribute('aria-valuetext', '50%; goal at least 65%; higher is better')
+    expect(car).toHaveTextContent('95%')
+    expect(moduleMetric(4, 'Hard-Level Completion Rate')).toHaveTextContent('Goal ≥65%')
+    expect(screen.queryByRole('meter')).not.toBeInTheDocument()
   })
 
-  it('plots retries on a count scale with the correct direction and expands for large values', () => {
+  it('compares all modules by a chosen measure without changing selection or the URL', () => {
+    renderRecord(richPerformanceFixture, '/home?view=progress&range=week#learning-module-3')
+    const measure = screen.getByRole('combobox', { name: 'Compare by' })
+    const tabs = screen.getByRole('tablist', { name: 'Learning modules' })
+    expect(within(tabs).getAllByRole('tab')).toHaveLength(4)
+    expect(within(tabs).getByRole('tab', { name: 'Module 1' })).toHaveTextContent('100%')
+    expect(within(tabs).getByRole('tab', { name: 'Module 2' })).toHaveTextContent('77.8%')
+    fireEvent.change(measure, { target: { value: 'arc' } })
+    expect(within(tabs).getByRole('tab', { name: 'Module 1' })).toHaveTextContent('1.18')
+    expect(screen.getByText('Average retries before mastery · lower is better')).toBeInTheDocument()
+    expect(screen.getByRole('tab', { name: 'Module 3' })).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByTestId('location')).toHaveTextContent('?view=progress&range=week#learning-module-3')
+    fireEvent.change(measure, { target: { value: 'rta' } })
+    expect(within(tabs).getByRole('tab', { name: 'Module 1' })).toHaveTextContent('Not applicable')
+    expect(within(tabs).getByRole('tab', { name: 'Module 2' })).toHaveTextContent('Not applicable')
+    expect(within(tabs).getByRole('tab', { name: 'Module 4' })).toHaveTextContent('100%')
+    expect(within(tabs).getByRole('tab', { name: 'Module 1' })).not.toHaveTextContent('0%')
+  })
+
+  it('shows retry counts directly with their direction, including large unsuccessful averages', () => {
     const data = structuredClone(richPerformanceFixture)
     data.modules[3].arc = { value: 8, numerator: 8, denominator: 1 }
     renderRecord(data)
-    const meter = within(moduleMetric(1, 'Average Retry Count')).getByRole('meter')
-    expect(meter).toHaveAttribute('aria-valuenow', '1.18')
-    expect(meter).toHaveAttribute('aria-valuemax', '6')
-    expect(meter).toHaveAttribute('aria-valuetext', '1.18 retries; goal at most 2 retries; lower is better')
+    expect(moduleMetric(1, 'Average Retry Count')).toHaveTextContent('1.18')
+    expect(moduleMetric(1, 'Average Retry Count')).toHaveTextContent('Lower is better')
     selectModule(4)
-    const expanded = within(objective('SO 4.5')).getByRole('meter', { name: 'Average Retry Count' })
-    expect(expanded).toHaveAttribute('aria-valuenow', '8')
-    expect(expanded).toHaveAttribute('aria-valuemax', '8')
-    expect(expanded.querySelector('.kpi-gauge-fill')).toHaveAttribute('stroke-dasharray', '100 100')
-    expect(expanded).toHaveAttribute('aria-valuetext', '8.00 retries; goal at most 3 retries; lower is better')
+    const reading = within(objective('SO 4.5')).getByText('Average Retry Count').closest('.objective-reading')!
+    expect(reading).toHaveTextContent('8.00')
+    expect(reading).toHaveTextContent('Goal ≤3')
+    expect(reading).toHaveTextContent('Lower is better')
+    expect(reading).toHaveAttribute('data-state', 'miss')
+    expect(reading).toHaveTextContent('Keep practicing')
+    const countRail = moduleMetric(4, 'Average Retry Count').querySelector('.measurement-rail')!
+    expect(countRail).toHaveAttribute('data-count', 'true')
+    expect(countRail.querySelector('.measurement-rail-fill')).not.toBeInTheDocument()
+    expect(countRail.querySelector('.measurement-rail-reading')).toBeInTheDocument()
+    expect(screen.queryByRole('meter')).not.toBeInTheDocument()
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument()
   })
 
-  it('keeps empty gauges unmeasured while distinguishing measured zero', () => {
+  it('places percentage readings and their goals on the same calibrated scale', () => {
+    renderRecord(richPerformanceFixture)
+    const car = moduleMetric(1, 'Command Accuracy Rate')
+    const rail = car.querySelector<HTMLElement>('.measurement-rail')!
+    expect(rail.style.getPropertyValue('--rail-reading')).toBe('91%')
+    expect(rail.style.getPropertyValue('--rail-goal')).toBe('70%')
+    expect(rail.querySelector('.measurement-rail-fill')).toBeInTheDocument()
+    const overall = screen.getByRole('group', { name: 'Overall KPIs' })
+    const overallScr = within(overall).getByText('Scenario Completion Rate').closest('.objective-metric')!
+    expect(overallScr).toHaveTextContent('75.4%')
+    expect(overallScr).toHaveTextContent('Goal ≥80%')
+    expect(overallScr.querySelector<HTMLElement>('.measurement-rail')!.style.getPropertyValue('--rail-reading')).toBe('75.4%')
+  })
+
+  it('compares large retry counts against one shared scale without filling a success bar', () => {
+    const data = structuredClone(richPerformanceFixture)
+    data.modules[0].arc = { value: 8, numerator: 8, denominator: 1 }
+    data.modules[1].arc = { value: 10, numerator: 10, denominator: 1 }
+    renderRecord(data)
+    fireEvent.change(screen.getByRole('combobox', { name: 'Compare by' }), { target: { value: 'arc' } })
+    const first = screen.getByRole('tab', { name: 'Module 1' }).querySelector<HTMLElement>('.measurement-rail')!
+    const second = screen.getByRole('tab', { name: 'Module 2' }).querySelector<HTMLElement>('.measurement-rail')!
+    expect(first.style.getPropertyValue('--rail-reading')).toBe('80%')
+    expect(second.style.getPropertyValue('--rail-reading')).toBe('100%')
+    expect(first.querySelector('.measurement-rail-fill')).not.toBeInTheDocument()
+    expect(second.querySelector('.measurement-rail-fill')).not.toBeInTheDocument()
+  })
+
+  it('keeps unmeasured readings separate from a measured zero', () => {
     const data = structuredClone(emptyPerformanceFixture)
     data.modules[0].arc = { value: 0, numerator: 0, denominator: 1 }
     renderRecord(data)
     const empty = objective('SO 1.1')
-    expect(within(empty).queryByRole('meter')).not.toBeInTheDocument()
-    expect(empty.querySelector('.kpi-gauge')).toHaveAttribute('aria-hidden', 'true')
-    expect(empty.querySelector('.kpi-gauge-zero')).not.toBeInTheDocument()
-    const zero = within(objective('SO 1.8')).getByRole('meter')
-    expect(zero).toHaveAttribute('aria-valuenow', '0')
-    expect(zero.querySelector('.kpi-gauge-zero')).toBeInTheDocument()
+    expect(empty).toHaveAttribute('data-state', 'none')
+    expect(empty.querySelector('.objective-reading-result')).toHaveTextContent('—')
+    expect(objective('SO 1.8').querySelector('.objective-reading-result')).toHaveTextContent('0.00')
     expect(objective('SO 1.8')).toHaveAttribute('data-state', 'met')
   })
 
-  it('uses large overview gauges, compact SO readings, and a collapsed general objective', () => {
+  it('keeps evidence and the general objective available without expanding the default record', () => {
     renderRecord(richPerformanceFixture)
-    const overview = screen.getByRole('group', { name: 'Module 1 KPIs' })
-    expect(overview.querySelectorAll('.kpi-gauge')).toHaveLength(4)
-    expect(overview.querySelector('.kpi-gauge--compact')).not.toBeInTheDocument()
-    const full = within(overview).getByRole('meter', { name: 'Scenario Completion Rate' })
-    expect(full.querySelector('.kpi-gauge-fill')).toHaveAttribute('stroke-dasharray', '100 100')
-    const row = objective('SO 1.1')
-    expect(row.querySelectorAll('.kpi-gauge--compact')).toHaveLength(1)
-    expect(row.querySelectorAll('.kpi-gauge-value')).toHaveLength(1)
-    expect(within(row).getAllByText('Target met')).toHaveLength(1)
+    const overall = screen.getByText('Overall evidence').closest('details')!
+    expect(overall).not.toHaveAttribute('open')
+    fireEvent.click(screen.getByText('Overall evidence'))
+    expect(overall).toHaveTextContent('43 of 57 required tiers mastered')
     const disclosure = screen.getByText('General objective').closest('details')!
     expect(disclosure).not.toHaveAttribute('open')
     fireEvent.click(screen.getByText('General objective'))
     expect(disclosure).toHaveAttribute('open')
     expect(disclosure).toHaveTextContent('independently manage local Git repositories')
-    selectModule(3)
-    expect(screen.getByRole('group', { name: 'Module 3 KPIs' }).querySelectorAll('.kpi-gauge')).toHaveLength(5)
-    expect(objective('SO 3.5').querySelectorAll('.kpi-gauge--compact')).toHaveLength(2)
+    expect(screen.getByText('CAR by objective · other measures by module')).toBeInTheDocument()
+    const row = objective('SO 1.1')
+    const evidence = within(row).getByText('Evidence').closest('details')!
+    expect(evidence).not.toHaveAttribute('open')
+    fireEvent.click(within(row).getByText('Evidence'))
+    expect(evidence).toHaveTextContent('91 score points across 1 assessed tier')
+    expect(evidence).toHaveTextContent('This objective’s first-mastery assessments')
   })
 
   it('honors a linked module and supports keyboard selection without losing query parameters', () => {
@@ -115,12 +168,11 @@ describe('learner learning objectives', () => {
     expect(screen.getAllByRole('tabpanel')).toHaveLength(1)
   })
 
-  it('defaults invalid links to Module 1 and decorates KPI rows with hidden icons', () => {
+  it('defaults invalid links to Module 1', () => {
     renderRecord(richPerformanceFixture, '/home#learning-module-99')
     expect(screen.getByRole('tab', { name: 'Module 1' })).toHaveAttribute('aria-selected', 'true')
-    const metrics = screen.getByRole('group', { name: 'Module 1 KPIs' })
-    expect(metrics.querySelectorAll('.objective-metric-icon[aria-hidden="true"] svg')).toHaveLength(4)
-    expect(objective('SO 1.1').querySelector('.objective-metric-icon')).toHaveAttribute('aria-hidden', 'true')
+    expect(screen.getAllByRole('tabpanel')).toHaveLength(1)
+    expect(screen.getByRole('group', { name: 'Module 1 KPIs' })).toBeInTheDocument()
   })
 
   it('shows every objective in four ordered modules even when no module data exists', () => {
@@ -136,7 +188,7 @@ describe('learner learning objectives', () => {
     expect(screen.getAllByRole('listitem')).toHaveLength(5)
     selectModule(1)
     expect(objective('SO 1.1')).toHaveTextContent('Not measured yet')
-    expect(objective('SO 1.1').querySelector('.kpi-gauge-value')).toHaveTextContent('—')
+    expect(objective('SO 1.1').querySelector('.objective-reading-result')).toHaveTextContent('—')
     expect(screen.queryByRole('list', { name: 'Module 4 specific objectives' })).not.toBeInTheDocument()
   })
 
@@ -178,11 +230,12 @@ describe('learner learning objectives', () => {
     expect(moduleMetric(4, 'Average Retry Count')).toHaveTextContent('Goal ≤3')
   })
 
-  it('requires both metrics for combined objectives and leaves incomplete evidence unmeasured', () => {
+  it('requires both metrics for combined objectives and keeps partial evidence visible', () => {
     const data = structuredClone(richPerformanceFixture)
     data.modules[2].rta = { value: 65, numerator: 13, denominator: 20 }
     data.modules[2].arc = { value: 2.01, numerator: 201, denominator: 100 }
     data.modules[3].rta = { value: null, numerator: 0, denominator: 0 }
+    data.modules[3].arc = { value: 4, numerator: 4, denominator: 1 }
     renderRecord(data)
     selectModule(3)
     expect(objective('SO 3.5')).toHaveAttribute('data-state', 'miss')
@@ -190,7 +243,12 @@ describe('learner learning objectives', () => {
     expect(within(objective('SO 3.5')).getByText('Retry Transfer Accuracy')).toBeInTheDocument()
     expect(within(objective('SO 3.5')).getByText('Average Retry Count')).toBeInTheDocument()
     selectModule(4)
-    expect(objective('SO 4.5')).toHaveAttribute('data-state', 'none')
+    expect(objective('SO 4.5')).toHaveAttribute('data-state', 'partial')
+    expect(objective('SO 4.5')).toHaveTextContent('Incomplete evidence')
+    const known = within(objective('SO 4.5')).getByText('Average Retry Count').closest('.objective-reading')!
+    expect(known).toHaveAttribute('data-state', 'miss')
+    expect(known).toHaveTextContent('Keep practicing')
+    expect(objective('SO 4.5')).toHaveTextContent('Not measured yet')
   })
 
   it('keeps measured zero visible and limits transfer KPIs to Modules 3–4', () => {

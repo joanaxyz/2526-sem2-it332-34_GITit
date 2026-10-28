@@ -37,12 +37,20 @@ import { LoadingScreen } from '@/shared/components/LoadingScreen'
 const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
   ? [
       {
+        path: '/design-preview/home',
+        lazy: async () => ({
+          Component: (await import('@/features/home/preview/HomePreviewPage')).HomePreviewLayout,
+        }),
+        children: [{
+          index: true,
+          lazy: async () => ({
+            Component: (await import('@/features/home/preview/HomePreviewPage')).Component,
+          }),
+        }],
+      },
+      {
         element: <HomeLayout />,
         children: [
-          {
-            path: '/design-preview/home',
-            lazy: () => import('@/features/home/preview/HomePreviewPage'),
-          },
           {
             path: '/design-preview/shop',
             lazy: async () => ({

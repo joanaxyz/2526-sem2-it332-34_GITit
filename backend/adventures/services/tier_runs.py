@@ -253,7 +253,9 @@ class AdventureLevelTierRunService:
         if not AdventureLevelTierCompletion.objects.filter(player=player, tier=tier).exists():
             raise Locked("Master this tier before starting its transfer checkpoint.")
         checkpoint = (
-            KpiCheckpoint.objects.select_for_update()
+            # Lock only the checkpoint row: Postgres refuses FOR UPDATE on the
+            # nullable side of the run/variant outer joins.
+            KpiCheckpoint.objects.select_for_update(of=("self",))
             .filter(
                 player=player,
                 tier=tier,

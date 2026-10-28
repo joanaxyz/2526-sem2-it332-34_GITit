@@ -65,7 +65,9 @@ def test_per_so_car_without_assessments_is_null_for_every_so(db):
     assert all(rate["value"] is None and rate["denominator"] == 0 for rate in objectives.values())
 
 
-def test_learner_objectives_are_scoped_by_player_and_scenario_and_keep_first_assessment(db, django_user_model):
+def test_learner_objectives_are_scoped_by_player_and_scenario_and_keep_first_assessment(
+    db, django_user_model
+):
     from testing.kpi_fixtures import bundle, end, start
 
     learner, tier, _, _ = bundle(django_user_model, username="objective-reader", required=1)
@@ -110,7 +112,9 @@ def test_empty_learner_summary_includes_all_car_objectives(db, django_user_model
     from players.services import get_or_create_player
     from progress.serializers import PerformanceSummaryResponseSerializer
 
-    player = get_or_create_player(django_user_model.objects.create_user(username="empty-objectives"))
+    player = get_or_create_player(
+        django_user_model.objects.create_user(username="empty-objectives")
+    )
     summary = MetricsService().performance_summary(player=player)
     assert set(summary["objectives"]) == set(OFFICIAL_CAR_SOS)
     assert all(rate == NO_DATA for rate in summary["objectives"].values())

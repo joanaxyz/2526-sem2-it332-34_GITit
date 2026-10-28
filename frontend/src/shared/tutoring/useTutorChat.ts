@@ -8,7 +8,7 @@ import { setTutorCooldown, useTutorCooldown } from './useTutorCooldown'
 export type TutorMessage = { role: 'user'; text: string } | { role: 'assistant'; text: string; reply: TutorReply }
 const conversations = new Map<string, TutorMessage[]>()
 const drafts = new Map<string, string>()
-export const TUTOR_REQUEST_TIMEOUT_MS = 40000
+const TUTOR_REQUEST_TIMEOUT_MS = 40000
 
 useAuthStore.subscribe((current, previous) => {
   if (current.sessionGeneration !== previous.sessionGeneration) {

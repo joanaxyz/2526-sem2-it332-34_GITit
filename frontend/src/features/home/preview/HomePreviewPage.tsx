@@ -6,10 +6,11 @@
  * /design-preview/home          -> rich mid-progress player
  * /design-preview/home?empty=1  -> brand-new user (empty states)
  */
-import { useQueryClient } from '@tanstack/react-query'
-import { useRef } from 'react'
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
+import { HomeLayout } from '@/app/layouts/HomeLayout'
 import { HomeHubView } from '@/features/home/components/HomeHubView'
 import {
   emptyHomeFixture,
@@ -46,34 +47,48 @@ const PREVIEW_SKILLS = {
   ],
 }
 
+function createPreviewClient(empty: boolean) {
+  // Fixture state belongs to this preview, including the layout's wallet and
+  // loadout readers. Production hooks remain unchanged; their real queryFns
+  // cannot replace fixtures after invalidation, focus, remount or a long visit.
+  const client = new QueryClient({
+    defaultOptions: {
+      queries: {
+        enabled: false,
+        staleTime: Infinity,
+        gcTime: Infinity,
+        retry: false,
+        refetchOnMount: false,
+        refetchOnWindowFocus: false,
+        refetchOnReconnect: false,
+      },
+    },
+  })
+  client.setQueryData(queryKeys.performanceSummary, empty ? emptyPerformanceFixture : richPerformanceFixture)
+  client.setQueryData(queryKeys.homeSummary, empty ? emptyHomeFixture : richHomeFixture)
+  client.setQueryData(queryKeys.shopCatalog,
+    empty ? { ...PREVIEW_SHOP, active_companion: null, items: PREVIEW_SHOP.items.map((item) => ({ ...item, owned: false, active: false })) } : PREVIEW_SHOP,
+  )
+  client.setQueryData(queryKeys.learnedSkills, empty ? { results: [] } : PREVIEW_SKILLS)
+  client.setQueryData(queryKeys.wallet, { balance: empty ? 0 : 1240 })
+  return client
+}
+
+function PreviewSession({ empty }: { empty: boolean }) {
+  const [client] = useState(() => createPreviewClient(empty))
+  return <QueryClientProvider client={client}><HomeLayout /></QueryClientProvider>
+}
+
+/** DEV route boundary: fixtures never enter the authenticated session cache. */
+export function HomePreviewLayout() {
+  const [params] = useSearchParams()
+  const empty = params.get('empty') === '1'
+  return <PreviewSession key={empty ? 'empty' : 'rich'} empty={empty} />
+}
+
 export function Component() {
   const [params] = useSearchParams()
   const empty = params.get('empty') === '1'
-  const queryClient = useQueryClient()
-
-  // The module band fetches its own summary rather than taking it as a prop, so
-  // the preview seeds the cache before that band mounts. Without this the
-  // preview can only ever render the band's "unavailable" state. Re-seeded when
-  // ?empty flips, which swaps fixtures without remounting this route.
-  const seededEmpty = useRef<boolean | null>(null)
-  if (seededEmpty.current !== empty) {
-    seededEmpty.current = empty
-    queryClient.setQueryData(
-      queryKeys.performanceSummary,
-      empty ? emptyPerformanceFixture : richPerformanceFixture,
-    )
-    // Profile's companion, roster and spellbook are fetched the same way, so
-    // the preview seeds them too rather than showing three error states.
-    queryClient.setQueryData(
-      queryKeys.shopCatalog,
-      empty ? { ...PREVIEW_SHOP, active_companion: null, items: PREVIEW_SHOP.items.map((item) => ({ ...item, owned: false, active: false })) } : PREVIEW_SHOP,
-    )
-    queryClient.setQueryData(queryKeys.learnedSkills, empty ? { results: [] } : PREVIEW_SKILLS)
-    // The app shell's wallet chip fetches on every page. Left unseeded it 401s
-    // here, and the failed token refresh drops the preview on /login a few
-    // seconds after it mounts.
-    queryClient.setQueryData(queryKeys.wallet, { balance: empty ? 0 : 1240 })
-  }
 
   return (
     <HomeHubView
