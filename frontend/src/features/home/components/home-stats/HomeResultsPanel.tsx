@@ -11,8 +11,8 @@ export function HomeResultsPanel() {
     <section className="home-overview-results-panel" aria-label="Practice record" data-onboarding="overview-results">
       <header className="performance-band-heading">
         <div>
-          <h2>Learning performance</h2>
-          <p>Explore your progress, one module at a time.</p>
+          <h2>Learning record</h2>
+          <p>Your mastery, from the whole journey to each objective.</p>
         </div>
         <span>Arcane Spire · All time</span>
       </header>
