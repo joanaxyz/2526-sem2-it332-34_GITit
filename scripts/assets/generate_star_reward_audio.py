@@ -10,13 +10,10 @@ from __future__ import annotations
 import argparse
 import json
 import subprocess
-from pathlib import Path
 
 from elevenlabs.client import ElevenLabs
 from elevenlabs.core.api_error import ApiError
-
 from generate_battle_audio import ROOT, load_api_key
-
 
 RAW_ROOT = ROOT / "frontend/src/assets/raw/audio/star-rewards/soft-magic-v2"
 OUTPUT_ROOT = ROOT / "frontend/public/audio/battle/rewards"
@@ -30,14 +27,26 @@ STYLE = (
 )
 
 CUES = {
-    0: (1.4, "No stars: a tiny breath of soft enchanted air gently settles and fades. "
-        "Warm and understanding, almost a whisper of fairy dust. No bell note, sad melody, alarm or reward flourish."),
-    1: (1.8, "First star: one gentle mid-register chime near D5 appears immediately inside a tiny rising cloud "
-        "of sparkling air. Intimate, warm, weightless wonder. Single rounded note with a smooth unhurried decay."),
-    2: (2.0, "Second star: one gentle mid-register chime near F sharp 5 appears immediately, a little higher "
-        "than the first, wrapped in floating fairy dust. Silky and warm, with a smooth softly sparkling decay."),
-    3: (2.4, "Third star: one gentle chime near A5 appears immediately and blooms into a soft luminous "
-        "D-major glass harmony, then dissolves into airy sparkles. A tender magical completion, no loud fanfare or extra strikes."),
+    0: (
+        1.4,
+        "No stars: a tiny breath of soft enchanted air gently settles and fades. "
+        "Warm and understanding, almost a whisper of fairy dust. No bell note, sad melody, alarm or reward flourish.",
+    ),
+    1: (
+        1.8,
+        "First star: one gentle mid-register chime near D5 appears immediately inside a tiny rising cloud "
+        "of sparkling air. Intimate, warm, weightless wonder. Single rounded note with a smooth unhurried decay.",
+    ),
+    2: (
+        2.0,
+        "Second star: one gentle mid-register chime near F sharp 5 appears immediately, a little higher "
+        "than the first, wrapped in floating fairy dust. Silky and warm, with a smooth softly sparkling decay.",
+    ),
+    3: (
+        2.4,
+        "Third star: one gentle chime near A5 appears immediately and blooms into a soft luminous "
+        "D-major glass harmony, then dissolves into airy sparkles. A tender magical completion, no loud fanfare or extra strikes.",
+    ),
 }
 
 
@@ -78,8 +87,24 @@ def generate(grade: int, *, client: ElevenLabs, force: bool, render_only: bool) 
         f"afade=t=out:st={duration - 0.65:.2f}:d=0.65"
     )
     subprocess.run(
-        ["ffmpeg", "-hide_banner", "-loglevel", "error", "-y", "-i", str(source),
-         "-af", filters, "-ar", "44100", "-ac", "2", "-c:a", "pcm_s16le", str(output)],
+        [
+            "ffmpeg",
+            "-hide_banner",
+            "-loglevel",
+            "error",
+            "-y",
+            "-i",
+            str(source),
+            "-af",
+            filters,
+            "-ar",
+            "44100",
+            "-ac",
+            "2",
+            "-c:a",
+            "pcm_s16le",
+            str(output),
+        ],
         check=True,
     )
     print(f"wrote {output.relative_to(ROOT)} ({output.stat().st_size} bytes)", flush=True)
@@ -87,8 +112,12 @@ def generate(grade: int, *, client: ElevenLabs, force: bool, render_only: bool) 
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--force", action="store_true", help="Regenerate existing cues (uses API credits).")
-    parser.add_argument("--render-only", action="store_true", help="Remix existing originals without API calls.")
+    parser.add_argument(
+        "--force", action="store_true", help="Regenerate existing cues (uses API credits)."
+    )
+    parser.add_argument(
+        "--render-only", action="store_true", help="Remix existing originals without API calls."
+    )
     args = parser.parse_args()
     RAW_ROOT.mkdir(parents=True, exist_ok=True)
     OUTPUT_ROOT.mkdir(parents=True, exist_ok=True)
@@ -96,21 +125,29 @@ def main() -> None:
         if len(STYLE + description) > 450:
             raise ValueError(f"Star {grade}: ElevenLabs prompts must fit within 450 characters")
     manifest = {
-        "provider": "ElevenLabs", "style": "Soft magic: airy shimmer and gentle chimes",
-        "model": MODEL, "output_format": OUTPUT_FORMAT,
+        "provider": "ElevenLabs",
+        "style": "Soft magic: airy shimmer and gentle chimes",
+        "model": MODEL,
+        "output_format": OUTPUT_FORMAT,
         "prompt_influence": 0.65,
         "api_reference": "https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert",
-        "cues": {str(grade): {"duration_seconds": duration, "prompt": STYLE + description}
-                 for grade, (duration, description) in CUES.items()},
+        "cues": {
+            str(grade): {"duration_seconds": duration, "prompt": STYLE + description}
+            for grade, (duration, description) in CUES.items()
+        },
     }
-    (RAW_ROOT / "generation.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")
+    (RAW_ROOT / "generation.json").write_text(
+        json.dumps(manifest, indent=2) + "\n", encoding="utf-8"
+    )
     client = ElevenLabs(api_key=load_api_key())
     for grade in CUES:
         try:
             generate(grade, client=client, force=args.force, render_only=args.render_only)
         except ApiError as exc:
             # Do not print request objects, headers, or credential values.
-            raise SystemExit(f"ElevenLabs rejected star {grade} (HTTP {exc.status_code}).") from None
+            raise SystemExit(
+                f"ElevenLabs rejected star {grade} (HTTP {exc.status_code})."
+            ) from None
 
 
 if __name__ == "__main__":

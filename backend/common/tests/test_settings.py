@@ -27,6 +27,8 @@ def run_settings_import(
             "FRONTEND_BASE_URL": "https://app.example.com",
             "JWT_COOKIE_SECURE": "True" if debug == "False" else "False",
             "REDIS_URL": redis_url,
+            # Pinned for the same reason: production imports require HSTS.
+            "SECURE_HSTS_SECONDS": "31536000" if debug == "False" else "0",
         }
     )
     return subprocess.run(

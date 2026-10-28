@@ -458,9 +458,9 @@ EMAIL_ASSET_BASE_URL = env("EMAIL_ASSET_BASE_URL", default=FRONTEND_BASE_URL).rs
 # simply unavailable. Providers redirect back to
 # <OAUTH_CALLBACK_BASE_URL>/auth/oauth/<provider>/callback/, the API origin the
 # browser uses: the Vercel /api proxy in production, the Django port locally.
-OAUTH_CALLBACK_BASE_URL = env(
-    "OAUTH_CALLBACK_BASE_URL", default=f"{FRONTEND_BASE_URL}/api"
-).rstrip("/")
+OAUTH_CALLBACK_BASE_URL = env("OAUTH_CALLBACK_BASE_URL", default=f"{FRONTEND_BASE_URL}/api").rstrip(
+    "/"
+)
 OAUTH_PROVIDERS = {
     "github": {
         "client_id": env("GITHUB_OAUTH_CLIENT_ID", default="").strip(),
