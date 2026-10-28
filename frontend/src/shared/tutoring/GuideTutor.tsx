@@ -36,6 +36,7 @@ export function GuideTutor({ runId, teachingKey, usageForm, guideToken }: { runI
     <>
       <FloatingMascotLauncher
         name="guide-tutor"
+        homeSlot="lower"
         label={`Ask ${companion.label}`}
         caption={`Ask ${companion.label}`}
         portrait={<TutorCompanionPortrait companion={companion} className="tutor-companion--launcher" />}

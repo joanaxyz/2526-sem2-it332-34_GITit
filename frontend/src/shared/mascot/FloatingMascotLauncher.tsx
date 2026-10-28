@@ -2,7 +2,7 @@ import { useEffect, type ReactNode, type Ref } from 'react'
 import { createPortal } from 'react-dom'
 
 import { MascotPortrait } from './GuideCharacterPortrait'
-import { FLOATING_LAUNCHER_SIZES, rememberShownPosition, useFloatingPosition } from './useFloatingPosition'
+import { FLOATING_LAUNCHER_SIZES, rememberShownPosition, useFloatingPosition, type FloatingHomeSlot } from './useFloatingPosition'
 import './mascot-launcher.css'
 
 /**
@@ -10,7 +10,7 @@ import './mascot-launcher.css'
  * moves it. While that is open the launcher hides but keeps its place, so a
  * closing window can collapse back into it (`[data-mascot-launcher="<name>"]`).
  */
-export function FloatingMascotLauncher({ name, label, caption, size = 'default', takeOverFrom, open = false, onOpen, onDragStart, buttonRef, portrait, children }: {
+export function FloatingMascotLauncher({ name, label, caption, size = 'default', takeOverFrom, homeSlot, open = false, onOpen, onDragStart, buttonRef, portrait, children }: {
   /** Identifies the launcher: its saved position and its collapse selector. */
   name: string
   /** The button's accessible name, e.g. "Open command guide". */
@@ -21,6 +21,8 @@ export function FloatingMascotLauncher({ name, label, caption, size = 'default',
   size?: keyof typeof FLOATING_LAUNCHER_SIZES
   /** Launchers this one replaces: it first appears where the latest of them was last seen. */
   takeOverFrom?: readonly string[]
+  /** Separated default spots for launchers that appear together; saved positions still win. */
+  homeSlot?: FloatingHomeSlot
   open?: boolean
   onOpen: () => void
   onDragStart?: () => void
@@ -37,6 +39,7 @@ export function FloatingMascotLauncher({ name, label, caption, size = 'default',
     onDragStart,
     box,
     takeOverFrom?.map((other) => `mascot-launcher:${other}`),
+    homeSlot,
   )
 
   useEffect(() => {

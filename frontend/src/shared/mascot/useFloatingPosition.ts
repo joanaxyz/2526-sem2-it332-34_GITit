@@ -5,6 +5,7 @@ import { readPreference, writePreference } from '@/shared/utils/persistentState'
 
 type Position = { x: number; y: number }
 export type FloatingSize = { width: number; height: number }
+export type FloatingHomeSlot = 'upper' | 'lower'
 
 // Matches .mascot-launcher (and its [data-size="large"] variant) in mascot-launcher.css.
 export const FLOATING_LAUNCHER_SIZES = {
@@ -12,6 +13,7 @@ export const FLOATING_LAUNCHER_SIZES = {
   large: { width: 128, height: 180 },
 } satisfies Record<string, FloatingSize>
 const GAP = 12
+const LAUNCHER_GAP = 24
 // Below the app's top bar.
 const TOP = 64
 // A press that travels less than this is a click, not a drag.
@@ -32,16 +34,23 @@ function keepInView({ x, y }: Position, size: FloatingSize): Position {
   }
 }
 
-function homePosition(size: FloatingSize): Position {
-  return keepInView({ x: window.innerWidth - size.width - 24, y: window.innerHeight * 0.42 }, size)
+function homePosition(size: FloatingSize, slot?: FloatingHomeSlot): Position {
+  let y = window.innerHeight * 0.42
+  if (slot) {
+    // Reserve both launchers' height so their gap survives shorter viewports.
+    const stackHeight = size.height * 2 + LAUNCHER_GAP
+    y = Math.max(TOP, Math.min(y, window.innerHeight - stackHeight - GAP))
+    if (slot === 'lower') y += size.height + LAUNCHER_GAP
+  }
+  return keepInView({ x: window.innerWidth - size.width - 24, y }, size)
 }
 
 // Saved as fractions of the viewport, so a launcher keeps its spot in a resized window.
-function savedPosition(key: string, size: FloatingSize): Position {
+function savedPosition(key: string, size: FloatingSize, slot?: FloatingHomeSlot): Position {
   const saved = readPreference<Partial<Position> | null>(key, null)
   return saved && Number.isFinite(saved.x) && Number.isFinite(saved.y)
     ? keepInView({ x: saved.x! * window.innerWidth, y: saved.y! * window.innerHeight }, size)
-    : homePosition(size)
+    : homePosition(size, slot)
 }
 
 // Where each launcher last stood while visible, so another can take its place:
@@ -82,8 +91,9 @@ export function useFloatingPosition(
   size: FloatingSize = FLOATING_LAUNCHER_SIZES.default,
   /** Keys of launchers this one replaces; it starts where the latest of them was last seen. */
   takeOverFrom: readonly string[] = [],
+  homeSlot?: FloatingHomeSlot,
 ) {
-  const [position, setPosition] = useState(() => handoffPosition(takeOverFrom, size) ?? savedPosition(key, size))
+  const [position, setPosition] = useState(() => handoffPosition(takeOverFrom, size) ?? savedPosition(key, size, homeSlot))
   const [dragging, setDragging] = useState(false)
   const latest = useRef(position)
   const press = useRef<{ id: number; start: Position; origin: Position; moved: boolean } | null>(null)
@@ -96,13 +106,17 @@ export function useFloatingPosition(
   }
 
   useEffect(() => {
+    let home = homePosition(size, homeSlot)
     const fit = () => {
-      latest.current = keepInView(latest.current, size)
+      const nextHome = homePosition(size, homeSlot)
+      const atHome = homeSlot && latest.current.x === home.x && latest.current.y === home.y
+      latest.current = atHome ? nextHome : keepInView(latest.current, size)
+      home = nextHome
       setPosition(latest.current)
     }
     window.addEventListener('resize', fit)
     return () => window.removeEventListener('resize', fit)
-  }, [size])
+  }, [homeSlot, size])
 
   const handlers = {
     onPointerDown(event: PointerEvent<HTMLElement>) {
@@ -149,7 +163,7 @@ export function useFloatingPosition(
       const step = event.shiftKey ? KEY_STEP_LARGE : KEY_STEP
       place(arrow
         ? { x: latest.current.x + arrow.x * step, y: latest.current.y + arrow.y * step }
-        : homePosition(size))
+        : homePosition(size, homeSlot))
       savePosition(key, latest.current)
     },
   }

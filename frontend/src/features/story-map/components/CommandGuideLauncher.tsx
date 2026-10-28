@@ -89,6 +89,7 @@ export function CommandGuideLauncher({
     <>
       <FloatingMascotLauncher
         name="command-guide"
+        homeSlot="upper"
         label={guideOpen ? 'Command guide is open' : 'Open command guide'}
         caption="Guide"
         open={guideOpen}
