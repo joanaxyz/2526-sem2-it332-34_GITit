@@ -76,6 +76,10 @@ class PerformanceSamplesSerializer(serializers.Serializer):
 
 
 class PerformanceSummaryResponseSerializer(serializers.Serializer):
+    objectives = serializers.DictField(
+        child=RateMetricSerializer(),
+        help_text="CAR by specific objective, scoped to the same learners and runs as this summary.",
+    )
     kpis = PerformanceKpiSetSerializer()
     completed_sessions = serializers.IntegerField()
     modules = PerformanceModuleSerializer(many=True)

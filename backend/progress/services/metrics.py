@@ -172,6 +172,12 @@ class MetricsService:
                 )
         return {
             "kpis": balanced(records, cohort=cohort),
+            "objectives": {
+                code: balanced(
+                    [r for r in records if r["slug"] in slugs], cohort=cohort
+                )["car"]
+                for code, slugs in SO_CAR_LEVELS.items()
+            },
             "completed_sessions": runs.filter(status=SESSION_STATUS_COMPLETED).count(),
             "modules": modules,
             "samples": samples(records),

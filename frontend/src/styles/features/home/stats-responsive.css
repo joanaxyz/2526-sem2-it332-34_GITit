@@ -20,8 +20,6 @@
   .home-overview-stat-subgrid { grid-template-columns: minmax(0, 1fr); }
   .home-overview-mastery-orb .ref-chart-radar { max-width: 24rem; margin-inline: auto; }
   .home-overview-story-block { border-top: 1px solid rgba(var(--theme-primary-rgb), 0.14); border-left: 0; padding-top: 0.9rem; padding-left: 0; }
-  .performance-instrument { grid-template-columns: minmax(0, 1fr); gap: 1.7rem; }
-  .performance-detail { padding-top: 1.2rem; }
 }
 
 @media (max-width: 760px) {
@@ -33,13 +31,6 @@
   .home-overview-standing,
   .ref-panel.home-overview-stats-panel,
   .home-overview-achievements-panel { padding: 0.85rem; }
-  .performance-signal { grid-template-columns: 2rem minmax(0, 1fr) auto; gap: 0.6rem; padding-inline: 0.3rem; }
-  .performance-signal-icon { width: 2rem; height: 2rem; }
-  .performance-signal-chevron { display: none; }
-  .performance-signal-name { font-size: 0.8125rem; }
-  .performance-signal-evidence { font-size: 0.6875rem; }
-  .performance-signal-reading { min-width: 6rem; }
-  .performance-signal-reading strong { font-size: 1.125rem; }
   .performance-band-heading h2 { font-size: 1.4rem; }
 }
 

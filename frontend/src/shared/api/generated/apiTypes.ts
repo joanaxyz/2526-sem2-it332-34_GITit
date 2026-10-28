@@ -115,7 +115,7 @@ export type ApiSchemas = {
   "PerformanceKpiSet": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"] }
   "PerformanceModule": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "number": number; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"]; "title": string }
   "PerformanceSamples": { "attempted_tiers": number; "car_missing": number; "car_scored": number; "in_progress_tiers": number; "mastered_tiers": number; "mastery_missing": number; "participants": number; "transfer_assigned": number; "transfer_missing": number; "transfer_pending": number }
-  "PerformanceSummaryResponse": { "completed_sessions": number; "kpis": ApiSchemas["PerformanceKpiSet"]; "modules": Array<ApiSchemas["PerformanceModule"]>; "samples": ApiSchemas["PerformanceSamples"]; "transfers": Array<ApiSchemas["TransferCheckpoint"]> }
+  "PerformanceSummaryResponse": { "completed_sessions": number; "kpis": ApiSchemas["PerformanceKpiSet"]; "modules": Array<ApiSchemas["PerformanceModule"]>; "objectives": { [key: string]: ApiSchemas["RateMetric"] }; "samples": ApiSchemas["PerformanceSamples"]; "transfers": Array<ApiSchemas["TransferCheckpoint"]> }
   "PhaseEnum": "introduction" | "feedback"
   "PlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
   "RateMetric": { "denominator": number; "numerator": number; "unit"?: ApiSchemas["UnitEnum"]; "value": number | null }

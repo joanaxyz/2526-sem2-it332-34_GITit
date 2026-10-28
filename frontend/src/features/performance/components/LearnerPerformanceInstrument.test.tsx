@@ -1,83 +1,240 @@
 import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it } from 'vitest'
-import { MemoryRouter } from 'react-router-dom'
+import { MemoryRouter, useLocation } from 'react-router-dom'
+import type { PerformanceSummary } from '@/features/performance/types'
 
 import { emptyPerformanceFixture, richPerformanceFixture } from '@/features/performance/preview/fixtures'
 import { LearnerPerformanceInstrument } from './LearnerPerformanceInstrument'
 
 afterEach(cleanup)
 
-describe('learner performance', () => {
-  it('offers explicit starts for reserved transfer checkpoints and reports missing evidence', () => {
+function objective(code: string) {
+  return screen.getByRole('listitem', { name: new RegExp(`^${code.replaceAll('.', String.fromCharCode(92) + '.')} `) })
+}
+function moduleMetric(module: number, name: string) {
+  return within(screen.getByRole('group', { name: `Module ${module} KPIs` })).getByText(name).closest<HTMLElement>('.objective-metric')!
+}
+
+function LocationReading() {
+  const location = useLocation()
+  return <output data-testid="location">{location.search}{location.hash}</output>
+}
+function renderRecord(data: PerformanceSummary, entry = '/home?view=progress') {
+  return render(<MemoryRouter initialEntries={[entry]}><LocationReading /><LearnerPerformanceInstrument data={data} /></MemoryRouter>)
+}
+function selectModule(number: number) {
+  fireEvent.click(screen.getByRole('tab', { name: `Module ${number}` }))
+}
+
+describe('learner learning objectives', () => {
+  it('plots actual percentages and module-specific goal markers in summary and objective rows', () => {
+    renderRecord(richPerformanceFixture)
+    const summary = moduleMetric(1, 'Command Accuracy Rate')
+    const meter = within(summary).getByRole('meter', { name: 'Command Accuracy Rate' })
+    expect(meter).toHaveAttribute('aria-valuenow', '91')
+    expect(meter).toHaveAttribute('aria-valuemax', '100')
+    expect(meter.querySelector('.kpi-gauge-fill')).toHaveAttribute('stroke-dasharray', '91 100')
+    expect(meter.querySelector('.kpi-gauge-goal')).toBeInTheDocument()
+    expect(meter).toHaveAttribute('aria-valuetext', '91%; goal at least 70%; higher is better')
+    expect(within(objective('SO 1.1')).getByRole('meter')).toHaveClass('kpi-gauge--compact')
+    selectModule(4)
+    expect(within(objective('SO 4.4')).getByRole('meter')).toHaveAttribute('aria-valuetext', '50%; goal at least 65%; higher is better')
+  })
+
+  it('plots retries on a count scale with the correct direction and expands for large values', () => {
+    const data = structuredClone(richPerformanceFixture)
+    data.modules[3].arc = { value: 8, numerator: 8, denominator: 1 }
+    renderRecord(data)
+    const meter = within(moduleMetric(1, 'Average Retry Count')).getByRole('meter')
+    expect(meter).toHaveAttribute('aria-valuenow', '1.18')
+    expect(meter).toHaveAttribute('aria-valuemax', '6')
+    expect(meter).toHaveAttribute('aria-valuetext', '1.18 retries; goal at most 2 retries; lower is better')
+    selectModule(4)
+    const expanded = within(objective('SO 4.5')).getByRole('meter', { name: 'Average Retry Count' })
+    expect(expanded).toHaveAttribute('aria-valuenow', '8')
+    expect(expanded).toHaveAttribute('aria-valuemax', '8')
+    expect(expanded.querySelector('.kpi-gauge-fill')).toHaveAttribute('stroke-dasharray', '100 100')
+    expect(expanded).toHaveAttribute('aria-valuetext', '8.00 retries; goal at most 3 retries; lower is better')
+  })
+
+  it('keeps empty gauges unmeasured while distinguishing measured zero', () => {
+    const data = structuredClone(emptyPerformanceFixture)
+    data.modules[0].arc = { value: 0, numerator: 0, denominator: 1 }
+    renderRecord(data)
+    const empty = objective('SO 1.1')
+    expect(within(empty).queryByRole('meter')).not.toBeInTheDocument()
+    expect(empty.querySelector('.kpi-gauge')).toHaveAttribute('aria-hidden', 'true')
+    expect(empty.querySelector('.kpi-gauge-zero')).not.toBeInTheDocument()
+    const zero = within(objective('SO 1.8')).getByRole('meter')
+    expect(zero).toHaveAttribute('aria-valuenow', '0')
+    expect(zero.querySelector('.kpi-gauge-zero')).toBeInTheDocument()
+    expect(objective('SO 1.8')).toHaveAttribute('data-state', 'met')
+  })
+
+  it('uses large overview gauges, compact SO readings, and a collapsed general objective', () => {
+    renderRecord(richPerformanceFixture)
+    const overview = screen.getByRole('group', { name: 'Module 1 KPIs' })
+    expect(overview.querySelectorAll('.kpi-gauge')).toHaveLength(4)
+    expect(overview.querySelector('.kpi-gauge--compact')).not.toBeInTheDocument()
+    const full = within(overview).getByRole('meter', { name: 'Scenario Completion Rate' })
+    expect(full.querySelector('.kpi-gauge-fill')).toHaveAttribute('stroke-dasharray', '100 100')
+    const row = objective('SO 1.1')
+    expect(row.querySelectorAll('.kpi-gauge--compact')).toHaveLength(1)
+    expect(row.querySelectorAll('.kpi-gauge-value')).toHaveLength(1)
+    expect(within(row).getAllByText('Target met')).toHaveLength(1)
+    const disclosure = screen.getByText('General objective').closest('details')!
+    expect(disclosure).not.toHaveAttribute('open')
+    fireEvent.click(screen.getByText('General objective'))
+    expect(disclosure).toHaveAttribute('open')
+    expect(disclosure).toHaveTextContent('independently manage local Git repositories')
+    selectModule(3)
+    expect(screen.getByRole('group', { name: 'Module 3 KPIs' }).querySelectorAll('.kpi-gauge')).toHaveLength(5)
+    expect(objective('SO 3.5').querySelectorAll('.kpi-gauge--compact')).toHaveLength(2)
+  })
+
+  it('honors a linked module and supports keyboard selection without losing query parameters', () => {
+    renderRecord(richPerformanceFixture, '/home?view=progress&range=week#learning-module-3')
+    const third = screen.getByRole('tab', { name: 'Module 3' })
+    expect(third).toHaveAttribute('aria-selected', 'true')
+    expect(screen.queryByRole('group', { name: 'Module 1 KPIs' })).not.toBeInTheDocument()
+    third.focus()
+    fireEvent.keyDown(third, { key: 'ArrowRight' })
+    const fourth = screen.getByRole('tab', { name: 'Module 4' })
+    expect(fourth).toHaveFocus()
+    expect(fourth).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByTestId('location')).toHaveTextContent('?view=progress&range=week#learning-module-4')
+    fireEvent.keyDown(fourth, { key: 'ArrowRight' })
+    const first = screen.getByRole('tab', { name: 'Module 1' })
+    expect(first).toHaveFocus()
+    fireEvent.keyDown(first, { key: 'ArrowLeft' })
+    expect(fourth).toHaveFocus()
+    fireEvent.keyDown(fourth, { key: 'Home' })
+    expect(first).toHaveFocus()
+    fireEvent.keyDown(first, { key: 'End' })
+    expect(fourth).toHaveFocus()
+    expect(screen.getAllByRole('tabpanel')).toHaveLength(1)
+  })
+
+  it('defaults invalid links to Module 1 and decorates KPI rows with hidden icons', () => {
+    renderRecord(richPerformanceFixture, '/home#learning-module-99')
+    expect(screen.getByRole('tab', { name: 'Module 1' })).toHaveAttribute('aria-selected', 'true')
+    const metrics = screen.getByRole('group', { name: 'Module 1 KPIs' })
+    expect(metrics.querySelectorAll('.objective-metric-icon[aria-hidden="true"] svg')).toHaveLength(4)
+    expect(objective('SO 1.1').querySelector('.objective-metric-icon')).toHaveAttribute('aria-hidden', 'true')
+  })
+
+  it('shows every objective in four ordered modules even when no module data exists', () => {
+    renderRecord({ ...emptyPerformanceFixture, modules: [] })
+    const counts = [8, 11, 5, 5]
+    counts.forEach((count, index) => {
+      selectModule(index + 1)
+      const list = screen.getByRole('list', { name: `Module ${index + 1} specific objectives` })
+      expect(within(list).getAllByRole('listitem')).toHaveLength(count)
+      expect(list.firstElementChild).toHaveTextContent(`SO ${index + 1}.1`)
+      expect(list.lastElementChild).toHaveTextContent(`SO ${index + 1}.${count}`)
+    })
+    expect(screen.getAllByRole('listitem')).toHaveLength(5)
+    selectModule(1)
+    expect(objective('SO 1.1')).toHaveTextContent('Not measured yet')
+    expect(objective('SO 1.1').querySelector('.kpi-gauge-value')).toHaveTextContent('—')
+    expect(screen.queryByRole('list', { name: 'Module 4 specific objectives' })).not.toBeInTheDocument()
+  })
+
+  it('uses objective CAR rather than copying the module or overall value', () => {
+    const data = structuredClone(richPerformanceFixture)
+    data.objectives['SO 1.1'] = { value: 70, numerator: 70, denominator: 1 }
+    data.objectives['SO 1.2'] = { value: 35, numerator: 35, denominator: 1 }
+    delete data.objectives['SO 1.3']
+    Object.freeze(data)
+    renderRecord(data)
+    expect(moduleMetric(1, 'Command Accuracy Rate')).toHaveTextContent('91%')
+    expect(objective('SO 1.1')).toHaveTextContent('70%')
+    expect(objective('SO 1.1')).toHaveAttribute('data-state', 'met')
+    expect(objective('SO 1.2')).toHaveTextContent('35%')
+    expect(objective('SO 1.2')).toHaveAttribute('data-state', 'miss')
+    expect(objective('SO 1.3')).toHaveAttribute('data-state', 'none')
+    expect(objective('SO 1.3')).not.toHaveTextContent('91%')
+    expect(objective('SO 1.1')).toHaveTextContent('70 score points across 1 assessed tier')
+  })
+
+  it('uses module-specific targets including inclusive Module 4 thresholds', () => {
+    const data = structuredClone(richPerformanceFixture)
+    data.modules[0].scr = { value: 80, numerator: 4, denominator: 5 }
+    data.modules[0].arc = { value: 2, numerator: 2, denominator: 1 }
+    data.modules[0].hlcr = { value: 70, numerator: 7, denominator: 10 }
+    data.modules[3].hlcr = { value: 65, numerator: 13, denominator: 20 }
+    data.modules[3].arc = { value: 3, numerator: 3, denominator: 1 }
+    data.modules[3].rta = { value: 65, numerator: 13, denominator: 20 }
+    renderRecord(data)
+    expect(moduleMetric(1, 'Scenario Completion Rate')).toHaveAttribute('data-state', 'met')
+    expect(objective('SO 1.7')).toHaveAttribute('data-state', 'met')
+    expect(objective('SO 1.8')).toHaveAttribute('data-state', 'met')
+    selectModule(4)
+    expect(objective('SO 4.4')).toHaveTextContent('Goal ≥65%')
+    expect(objective('SO 4.4')).toHaveAttribute('data-state', 'met')
+    expect(objective('SO 4.5')).toHaveTextContent('Goal ≤3')
+    expect(objective('SO 4.5')).toHaveAttribute('data-state', 'met')
+    expect(moduleMetric(4, 'Hard-Level Completion Rate')).toHaveTextContent('Goal ≥65%')
+    expect(moduleMetric(4, 'Average Retry Count')).toHaveTextContent('Goal ≤3')
+  })
+
+  it('requires both metrics for combined objectives and leaves incomplete evidence unmeasured', () => {
+    const data = structuredClone(richPerformanceFixture)
+    data.modules[2].rta = { value: 65, numerator: 13, denominator: 20 }
+    data.modules[2].arc = { value: 2.01, numerator: 201, denominator: 100 }
+    data.modules[3].rta = { value: null, numerator: 0, denominator: 0 }
+    renderRecord(data)
+    selectModule(3)
+    expect(objective('SO 3.5')).toHaveAttribute('data-state', 'miss')
+    expect(objective('SO 3.5')).toHaveTextContent('Both targets required')
+    expect(within(objective('SO 3.5')).getByText('Retry Transfer Accuracy')).toBeInTheDocument()
+    expect(within(objective('SO 3.5')).getByText('Average Retry Count')).toBeInTheDocument()
+    selectModule(4)
+    expect(objective('SO 4.5')).toHaveAttribute('data-state', 'none')
+  })
+
+  it('keeps measured zero visible and limits transfer KPIs to Modules 3–4', () => {
+    const data = structuredClone(emptyPerformanceFixture)
+    data.modules[0].hlcr = { value: 0, numerator: 0, denominator: 2 }
+    data.modules[0].arc = { value: 0, numerator: 0, denominator: 2 }
+    renderRecord(data)
+    expect(objective('SO 1.7')).toHaveTextContent('0%')
+    expect(objective('SO 1.7')).toHaveAttribute('data-state', 'miss')
+    expect(objective('SO 1.8')).toHaveTextContent('0.00')
+    expect(objective('SO 1.8')).toHaveAttribute('data-state', 'met')
+    for (const number of [1, 2]) {
+      selectModule(number)
+      expect(within(screen.getByRole('group', { name: `Module ${number} KPIs` })).queryByText('Retry Transfer Accuracy')).not.toBeInTheDocument()
+    }
+    selectModule(3)
+    expect(moduleMetric(3, 'Retry Transfer Accuracy')).toHaveTextContent('Not measured yet')
+  })
+
+  it('preserves calculation explanations and supplementary recovery without a target', () => {
+    renderRecord(richPerformanceFixture)
+    const disclosure = screen.getByText('How these KPIs are measured').closest('details')!
+    fireEvent.click(within(disclosure).getByText('How these KPIs are measured'))
+    expect(disclosure).toHaveTextContent('Mean of 100 × S × min(1, T ÷ max(1, A))')
+    const recovery = screen.getByText('Module 1 retry recovery · supplementary').closest('details')!
+    fireEvent.click(within(recovery).getByText('Module 1 retry recovery · supplementary'))
+    expect(recovery).toHaveTextContent('83.3%')
+    expect(recovery).toHaveTextContent('no target')
+    expect(recovery).not.toHaveTextContent('Target met')
+  })
+
+  it('preserves start and resume links for reserved transfer checkpoints', () => {
     const data = structuredClone(emptyPerformanceFixture)
     data.samples.transfer_pending = 1
     data.samples.transfer_missing = 2
-    data.transfers = [{ tier_id: 9, title: 'Resolve a novel conflict', run_id: null }]
-    render(<MemoryRouter><LearnerPerformanceInstrument data={data} /></MemoryRouter>)
-    fireEvent.click(screen.getByRole('button', { name: /Transfer checkpoints cleared/ }))
+    data.transfers = [
+      { tier_id: 9, title: 'Resolve a novel conflict', run_id: null },
+      { tier_id: 10, title: 'Recover novel history', run_id: 42 },
+    ]
+    renderRecord(data)
+    selectModule(3)
+    fireEvent.click(screen.getByText('Available transfer checkpoints · Modules 3–4'))
     expect(screen.getByRole('link', { name: /Start transfer checkpoint/ })).toHaveAttribute('href', '/adventure-level-tiers/9/runs?transfer=1')
+    expect(screen.getByRole('link', { name: /Resume transfer checkpoint/ })).toHaveAttribute('href', '/adventure-tier-runs/42')
     expect(screen.getByText(/1 pending · 2 mastered tiers without eligible transfer evidence/)).toBeInTheDocument()
-  })
-  it('shows exact server values and selects only the requested comparison', () => {
-    const data = structuredClone(richPerformanceFixture)
-    Object.freeze(data)
-    const first = render(<LearnerPerformanceInstrument data={data} />)
-    const measures = screen.getByRole('group', { name: 'Practice measures' })
-    const finish = within(measures).getByRole('button', { name: /Tiers mastered/ })
-    expect(finish).toHaveAttribute('aria-pressed', 'true')
-    expect(finish).toHaveTextContent('75.4%')
-    expect(finish).toHaveTextContent('Goal ≥80%')
-    expect(within(measures).getByRole('button', { name: /Command efficiency/ })).toHaveTextContent('Goal ≥70%')
-    const retries = within(measures).getByRole('button', { name: /Retries before mastery/ })
-    expect(retries).toHaveTextContent('1.60')
-    expect(retries).toHaveTextContent('On track')
-    expect(retries).toHaveTextContent('Goal ≤2')
-    fireEvent.click(retries)
-    expect(retries).toHaveAttribute('aria-pressed', 'true')
-    expect(finish).toHaveAttribute('aria-pressed', 'false')
-    expect(screen.getByRole('region', { name: 'Module comparison' })).toHaveTextContent('Relative scale')
-    first.unmount()
-    render(<LearnerPerformanceInstrument data={data} />)
-    expect(screen.getByRole('button', { name: /Tiers mastered/ })).toHaveAttribute('aria-pressed', 'true')
-  })
-
-  it('restricts changed retries to Modules 3–4 and keeps recovery supplementary', () => {
-    render(<LearnerPerformanceInstrument data={richPerformanceFixture} />)
-    fireEvent.click(screen.getByRole('button', { name: /Transfer checkpoints cleared/ }))
-    const comparison = screen.getByRole('region', { name: 'Module comparison' })
-    expect(within(comparison).getAllByRole('listitem')).toHaveLength(2)
-    expect(comparison).toHaveTextContent('Conflict Resolution')
-    expect(comparison).not.toHaveTextContent('Local Repository')
-    expect(comparison).not.toHaveTextContent('On track')
-    const recovery = screen.getByRole('button', { name: /Retry recovery/ })
-    expect(recovery).toHaveTextContent('For context')
-    expect(recovery).toHaveTextContent('No target')
-    expect(recovery).not.toHaveTextContent('On track')
-    fireEvent.click(recovery)
-    expect(within(screen.getByRole('region', { name: 'Module comparison' })).getAllByRole('listitem')).toHaveLength(4)
-  })
-
-  it('shows module CAR and exposes its assessment formula', () => {
-    render(<LearnerPerformanceInstrument data={richPerformanceFixture} />)
-    fireEvent.click(screen.getByRole('button', { name: /Command efficiency/ }))
-    expect(within(screen.getByRole('region', { name: 'Module comparison' })).getAllByRole('listitem')).toHaveLength(4)
-    const disclosure = screen.getByText('How this is measured').closest('details')!
-    fireEvent.click(within(disclosure).getByText('How this is measured'))
-    expect(disclosure).toHaveTextContent('Mean of 100 × S × min(1, T ÷ max(1, A))')
-  })
-
-  it('never treats missing observations as failure and keeps measured zero visible', () => {
-    const data = structuredClone(emptyPerformanceFixture)
-    data.kpis.hlcr = { value: 0, numerator: 0, denominator: 2 }
-    render(<LearnerPerformanceInstrument data={data} />)
-    const hard = screen.getByRole('button', { name: /Hard tiers mastered/ })
-    expect(hard).toHaveTextContent('0%')
-    expect(hard).toHaveTextContent('Keep practicing')
-    const changed = screen.getByRole('button', { name: /Transfer checkpoints cleared/ })
-    expect(changed).toHaveTextContent('Not measured yet')
-    expect(changed).not.toHaveTextContent('0%')
-    fireEvent.click(changed)
-    expect(screen.getByText(/Measured on unseen transfer checkpoints in Modules 3–4/)).toBeInTheDocument()
-    expect(changed).toHaveAttribute('data-state', 'empty')
   })
 })

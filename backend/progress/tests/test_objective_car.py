@@ -63,3 +63,56 @@ def test_per_so_car_without_assessments_is_null_for_every_so(db):
     objectives = MetricsService().all_player_objective_car()
     assert set(objectives) == set(OFFICIAL_CAR_SOS)
     assert all(rate["value"] is None and rate["denominator"] == 0 for rate in objectives.values())
+
+
+def test_learner_objectives_are_scoped_by_player_and_scenario_and_keep_first_assessment(db, django_user_model):
+    from testing.kpi_fixtures import bundle, end, start
+
+    learner, tier, _, _ = bundle(django_user_model, username="objective-reader", required=1)
+    level = tier.adventure_level
+    level.slug = "resolving-conflicts-manually"
+    level.save()
+    end(start(learner, tier), count=4)
+    end(start(learner, tier), count=3)  # Replay must not replace the 75% assessment.
+
+    other, other_tier, _, _ = bundle(django_user_model, username="objective-other", required=1)
+    other_level = other_tier.adventure_level
+    other_level.slug = "using-a-merge-tool"
+    other_level.save()
+    end(start(other, other_tier), count=3)
+
+    client = APIClient()
+    client.force_authenticate(user=learner.user)
+    response = client.get("/api/progress/performance/")
+    assert response.status_code == 200
+    objectives = response.json()["objectives"]
+    assert set(objectives) == set(OFFICIAL_CAR_SOS)
+    assert objectives["SO 3.1"] == {"value": 75, "numerator": 75, "denominator": 1}
+    assert objectives["SO 3.2"] == NO_DATA  # Other learner's mastery is private.
+
+    # Unlock the hard tier through the same prerequisite used by learners.
+    from adventures.models import AdventureLevelTier
+    from progress.models import AdventureLevelTierCompletion
+
+    AdventureLevelTierCompletion.objects.create(
+        player=learner,
+        tier=AdventureLevelTier.objects.get(adventure_level=other_level, difficulty="medium"),
+    )
+    # Same learner, different mapped scenario contributes only to its own SO.
+    end(start(learner, other_tier), count=3)
+    objectives = client.get("/api/progress/performance/").json()["objectives"]
+    assert objectives["SO 3.1"]["value"] == 75
+    assert objectives["SO 3.2"]["value"] == 100
+    assert objectives["SO 3.3"] == NO_DATA
+
+
+def test_empty_learner_summary_includes_all_car_objectives(db, django_user_model):
+    from players.services import get_or_create_player
+    from progress.serializers import PerformanceSummaryResponseSerializer
+
+    player = get_or_create_player(django_user_model.objects.create_user(username="empty-objectives"))
+    summary = MetricsService().performance_summary(player=player)
+    assert set(summary["objectives"]) == set(OFFICIAL_CAR_SOS)
+    assert all(rate == NO_DATA for rate in summary["objectives"].values())
+    serializer = PerformanceSummaryResponseSerializer(data=summary)
+    assert serializer.is_valid(), serializer.errors

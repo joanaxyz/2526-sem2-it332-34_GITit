@@ -1,9 +1,13 @@
 /** DEV-ONLY fixtures for the real Home preview. Counts aggregate across Modules 1–4. */
 import type { PerformanceSummary } from '@/features/performance/types'
+import { MODULES } from '@/features/performance/utils/learningObjectives'
 
 export const richPerformanceFixture: PerformanceSummary = {
   completed_sessions: 43,
   samples: { participants: 1, attempted_tiers: 57, in_progress_tiers: 0, mastered_tiers: 43, mastery_missing: 0, car_scored: 43, car_missing: 0, transfer_assigned: 5, transfer_pending: 0, transfer_missing: 0 },
+  objectives: Object.fromEntries(MODULES.flatMap((module) => module.sos
+    .filter((objective) => objective.metrics.some((metric) => metric.kpi === 'car'))
+    .map((objective) => [objective.id, { value: 91, numerator: 91, denominator: 1 }]))),
   transfers: [],
   kpis: {
     scr: { value: 75.4, numerator: 43, denominator: 57 },
@@ -57,6 +61,8 @@ export const richPerformanceFixture: PerformanceSummary = {
 export const emptyPerformanceFixture: PerformanceSummary = {
   completed_sessions: 0,
   samples: { participants: 1, attempted_tiers: 0, in_progress_tiers: 0, mastered_tiers: 0, mastery_missing: 0, car_scored: 0, car_missing: 0, transfer_assigned: 0, transfer_pending: 0, transfer_missing: 0 },
+  objectives: Object.fromEntries(Object.keys(richPerformanceFixture.objectives)
+    .map((id) => [id, { value: null, numerator: 0, denominator: 0 }])),
   transfers: [],
   kpis: {
     scr: { value: null, numerator: 0, denominator: 0 },

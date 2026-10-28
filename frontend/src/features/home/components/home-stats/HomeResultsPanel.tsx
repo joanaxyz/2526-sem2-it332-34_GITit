@@ -11,10 +11,10 @@ export function HomeResultsPanel() {
     <section className="home-overview-results-panel" aria-label="Practice record" data-onboarding="overview-results">
       <header className="performance-band-heading">
         <div>
-          <h2>Your practice record</h2>
-          <p>Select a measure to explore your modules.</p>
+          <h2>Learning performance</h2>
+          <p>Explore your progress, one module at a time.</p>
         </div>
-        <span>Arcane Spire · Modules 1–4 · All time</span>
+        <span>Arcane Spire · All time</span>
       </header>
       {performance.isPending ? (
         <div className="performance-loading" role="status">
