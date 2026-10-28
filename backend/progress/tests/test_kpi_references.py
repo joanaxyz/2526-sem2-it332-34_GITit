@@ -1,3 +1,4 @@
+import shutil
 from copy import deepcopy
 
 import pytest
@@ -5,8 +6,14 @@ from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
+from curriculum.services.solution_replay import FRONTEND
 from progress.services.references import ref_hash, valid_ref, validate_refs
 from testing.kpi_fixtures import bundle, routes
+
+needs_simulator = pytest.mark.skipif(
+    shutil.which("node") is None or not (FRONTEND / "node_modules").exists(),
+    reason="replay needs Node and frontend/node_modules (CI: generated-targets job)",
+)
 
 
 @pytest.mark.django_db
@@ -40,6 +47,7 @@ def test_diagnostic_assessment_uses_one_shared_reference_policy(django_user_mode
     assert validate_refs([variant]) == {variant.id: 1}
 
 
+@needs_simulator
 @pytest.mark.django_db
 def test_real_solution_replay_validates_reference_independently_of_star_budget(django_user_model):
     _, _, scenario, variants = bundle(django_user_model)
