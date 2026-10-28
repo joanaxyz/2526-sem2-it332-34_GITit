@@ -6322,6 +6322,13 @@
             "PerformanceSummaryResponse": {
                 "type": "object",
                 "properties": {
+                    "objectives": {
+                        "type": "object",
+                        "additionalProperties": {
+                            "$ref": "#/components/schemas/RateMetric"
+                        },
+                        "description": "CAR by specific objective, scoped to the same learners and runs as this summary."
+                    },
                     "kpis": {
                         "$ref": "#/components/schemas/PerformanceKpiSet"
                     },
@@ -6348,6 +6355,7 @@
                     "completed_sessions",
                     "kpis",
                     "modules",
+                    "objectives",
                     "samples",
                     "transfers"
                 ]

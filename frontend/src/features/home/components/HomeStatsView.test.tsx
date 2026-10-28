@@ -20,6 +20,7 @@ vi.mock('@/features/performance/api/performanceApi', () => ({
 
 const performanceFixture: PerformanceSummary = {
   completed_sessions: 14,
+  objectives: {},
   samples: { participants: 1, attempted_tiers: 35, in_progress_tiers: 0, mastered_tiers: 14, mastery_missing: 0, car_scored: 0, car_missing: 0, transfer_assigned: 0, transfer_pending: 0, transfer_missing: 0 },
   transfers: [],
   kpis: {
@@ -42,7 +43,7 @@ const performanceFixture: PerformanceSummary = {
       arc: { value: null, numerator: 0, denominator: 0 },
     },
     {
-      car: { value: null, numerator: 0, denominator: 0 },
+      car: { value: 82, numerator: 82, denominator: 1 },
     number: 1,
       title: 'Repository Foundations',
       scr: { value: 50, numerator: 1, denominator: 2 },
@@ -116,9 +117,9 @@ describe('HomeStatsView contract', () => {
     expect(within(story as HTMLElement).getByText('76%')).toBeInTheDocument()
     expect(within(story as HTMLElement).getByText('43 of 57 runs you started')).toBeInTheDocument()
     expect(within(story as HTMLElement).getByText('Overall finish rate')).toBeInTheDocument()
-    const signals = await screen.findByRole('group', { name: 'Practice measures' })
-    expect(within(signals).getByRole('button', { name: /Tiers mastered/ })).toHaveTextContent('40%')
-    expect(within(signals).getByRole('button', { name: /Command efficiency/ })).toHaveTextContent('95%')
+    const signals = await screen.findByRole('group', { name: 'Module 1 KPIs' })
+    expect(within(signals).getByText('Scenario Completion Rate').closest('.objective-metric')!).toHaveTextContent('50%')
+    expect(within(signals).getByText('Command Accuracy Rate').closest('.objective-metric')!).toHaveTextContent('82%')
   })
 
   it('renders nothing of its own for the Profile category', () => {
@@ -229,17 +230,17 @@ describe('HomeStatsView contract', () => {
     expect(gallery.querySelectorAll('.home-overview-achievement-card')).toHaveLength(6)
   })
 
-  it('uses one fetched response for the complete record and module selection', async () => {
+  it('uses one fetched response for all four modules and their objectives', async () => {
     renderView('progress')
-    const signals = await screen.findByRole('group', { name: 'Practice measures' })
-    expect(within(signals).getAllByRole('button')).toHaveLength(6)
-    expect(within(signals).getByRole('button', { name: /Hard tiers mastered/ })).toHaveTextContent('0%')
-    expect(within(signals).getByRole('button', { name: /Retries before mastery/ })).toHaveTextContent('1.43')
-    const modules = screen.getByRole('region', { name: 'Module comparison' })
-    expect(modules).not.toHaveTextContent('Module 0')
-    expect(modules).toHaveTextContent('50%')
-    fireEvent.click(within(signals).getByRole('button', { name: /Retries before mastery/ }))
-    expect(modules).toHaveTextContent('1.50')
+    const signals = await screen.findByRole('group', { name: 'Module 1 KPIs' })
+    expect(within(signals).getByText('Scenario Completion Rate').closest('.objective-metric')).toHaveTextContent('50%')
+    expect(within(signals).getByText('Average Retry Count').closest('.objective-metric')).toHaveTextContent('1.50')
+    expect(screen.getByRole('list', { name: 'Module 1 specific objectives' }).children).toHaveLength(8)
+    expect(screen.queryByRole('list', { name: 'Module 4 specific objectives' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: 'Module 4' }))
+    expect(screen.getByRole('list', { name: 'Module 4 specific objectives' }).children).toHaveLength(5)
+    expect(screen.queryByRole('group', { name: 'Module 1 KPIs' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('group', { name: 'Module 0 KPIs' })).not.toBeInTheDocument()
     expect(mocks.summary).toHaveBeenCalledTimes(1)
   })
 
@@ -249,12 +250,12 @@ describe('HomeStatsView contract', () => {
     expect(await screen.findByRole('alert')).toHaveTextContent('Your practice record is unavailable')
     expect(screen.getByRole('region', { name: 'Where you stand' })).toBeInTheDocument()
     fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
-    expect(await screen.findByRole('group', { name: 'Practice measures' })).toBeInTheDocument()
+    expect(await screen.findByRole('group', { name: 'Module 1 KPIs' })).toBeInTheDocument()
     expect(mocks.summary).toHaveBeenCalledTimes(2)
   })
 
   it('preserves the empty-account fallbacks in every category', async () => {
-    mocks.summary.mockResolvedValue({ ...performanceFixture, kpis: Object.fromEntries(Object.keys(performanceFixture.kpis).map((key) => [key, { value: null, numerator: 0, denominator: 0 }])) })
+    mocks.summary.mockResolvedValue({ ...performanceFixture, objectives: {}, modules: [] })
     const progress = renderView('progress', emptyHomeFixture, emptyStatsFixture)
     // No trend means no plot at all, never fourteen empty days drawn as data.
     expect(screen.queryByRole('img', { name: /^Activity over the last/ })).not.toBeInTheDocument()
@@ -264,8 +265,8 @@ describe('HomeStatsView contract', () => {
     // An account with no runs gets an honest dash, not a 0% run meter.
     expect(within(story as HTMLElement).getByText('--')).toBeInTheDocument()
     expect(within(story as HTMLElement).getByText('No runs yet')).toBeInTheDocument()
-    const signals = await screen.findByRole('group', { name: 'Practice measures' })
-    expect(within(signals).getAllByText('Not measured yet')).toHaveLength(6)
+    const signals = await screen.findByRole('group', { name: 'Module 1 KPIs' })
+    expect(within(signals).getAllByText('Not measured yet')).toHaveLength(4)
     progress.unmount()
 
     const skills = renderView('skills', emptyHomeFixture, emptyStatsFixture)
@@ -290,8 +291,8 @@ describe('HomeStatsView contract', () => {
     renderView('progress', richHomeFixture, stats)
     const story = document.querySelector('.home-overview-story-block')
     expect(Array.from(story!.querySelectorAll('dd')).map((value) => value.textContent)).toEqual(['0', '30'])
-    const signals = await screen.findByRole('group', { name: 'Practice measures' })
-    expect(within(signals).getByRole('button', { name: /Command efficiency/ })).toHaveTextContent('95%')
+    const signals = await screen.findByRole('group', { name: 'Module 1 KPIs' })
+    expect(within(signals).getByText('Command Accuracy Rate').closest('.objective-metric')!).toHaveTextContent('82%')
   })
 
   it('does not mutate frozen input summaries', () => {

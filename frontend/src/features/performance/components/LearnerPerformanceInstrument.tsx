@@ -1,193 +1,174 @@
-import { useId, useState, type CSSProperties } from 'react'
-import { Link } from 'react-router-dom'
-import { ArrowDownRight, ArrowUpRight, Check, ChevronRight, GitBranch, RotateCcw, Swords, Target, Terminal } from 'lucide-react'
+import { useId, useRef, type KeyboardEvent } from 'react'
+import { Check, ChevronDown, GitBranch, RotateCcw, Swords, Target, Terminal } from 'lucide-react'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
+
+import { KpiGauge } from './KpiGauge'
 
 import {
-  KPIS, SUPPLEMENTARY_KPI, formatKpi, kpiEvidence, metricStatus,
-  type CardKpi, type EvidenceKey,
+  EMPTY_RATE, KPIS, SUPPLEMENTARY_KPI, formatKpi, kpiEvidence, metricTargetStatus,
+  type KpiKey, type Status,
 } from '@/features/performance/utils/performanceKpis'
+import { GO_SCR_TARGET, MODULES, moduleTarget } from '@/features/performance/utils/learningObjectives'
 import type { PerformanceSummary, RateMetric } from '@/features/performance/types'
 
-const ICONS = {
-  scr: Target, car: Terminal, hlcr: Swords, arc: RotateCcw,
-  rta: GitBranch, retry_success_rate: RotateCcw,
+const KPI_ICONS = { scr: Target, car: Terminal, hlcr: Swords, arc: RotateCcw, rta: GitBranch }
+
+const STATUS_TEXT: Record<Status, string> = {
+  met: 'Target met', miss: 'Keep practicing', none: 'Not measured yet',
 }
 
-function measured(rate: RateMetric) {
-  return rate.value !== null && rate.denominator > 0
+function StatusBadge({ status }: { status: Status }) {
+  return <span className="objective-status" data-state={status}>
+    {status === 'met' ? <Check aria-hidden="true" /> : null}{STATUS_TEXT[status]}
+  </span>
 }
 
-/** Geometry only: the scalar track expands when a retry average exceeds its goal. */
-function trackStyle(definition: CardKpi, rate: RateMetric): CSSProperties {
-  const ceiling = definition.key === 'arc' ? Math.max(4, rate.value ?? 0) : 100
-  return {
-    '--signal-value': Math.max(0, Math.min(1, (rate.value ?? 0) / ceiling)),
-    '--signal-goal': `${'target' in definition ? (definition.target / ceiling) * 100 : 0}%`,
-  } as CSSProperties
-}
-
-function Signal({
-  definition, rate, selected, onSelect, detailId,
-}: {
-  definition: CardKpi
-  rate: RateMetric
-  selected: boolean
-  onSelect: () => void
-  detailId: string
-}) {
-  const Icon = ICONS[definition.key]
-  const status = metricStatus(definition.key, rate)
-  const hasData = measured(rate)
-  const state = !hasData ? 'Not measured yet'
-    : definition.key === 'retry_success_rate' ? 'For context'
-      : status === 'met' ? 'On track' : 'Keep practicing'
+function MetricReading({ metric, rate, target, compact = false }: { metric: KpiKey; rate: RateMetric; target: number; compact?: boolean }) {
+  const definition = KPIS.find((item) => item.key === metric)!
+  const status = metricTargetStatus(rate, target, definition.up)
+  const Icon = KPI_ICONS[metric]
+  const name = 'longName' in definition ? definition.longName : definition.name
+  const heading = <div className="objective-metric-heading">
+    <span className="objective-metric-icon" aria-hidden="true"><Icon /></span><span>{name}</span>
+  </div>
+  const goal = <span className="objective-metric-target">Goal {definition.up ? '≥' : '≤'}{target}{definition.pct ? '%' : ''}</span>
+  const gauge = <KpiGauge rate={rate} target={target} percent={definition.pct} name={name} compact={compact} />
 
   return (
-    <button
-      type="button"
-      className={`performance-signal${selected ? ' is-selected' : ''}`}
-      data-state={hasData ? status : 'empty'}
-      aria-pressed={selected}
-      aria-controls={detailId}
-      onClick={onSelect}
-      style={trackStyle(definition, rate)}
-    >
-      <span className="performance-signal-icon" aria-hidden="true"><Icon /></span>
-      <span className="performance-signal-copy">
-        <span className="performance-signal-name">{definition.label}</span>
-        <span className="performance-signal-evidence">{kpiEvidence(definition.key, rate)}</span>
-        <span className="performance-signal-track" aria-hidden="true">
-          <i />
-          {'target' in definition ? <b /> : null}
-        </span>
-      </span>
-      <span className="performance-signal-reading">
-        <strong>{formatKpi(definition.key, rate)}</strong>
-        <span className="performance-signal-state">
-          {status === 'met' ? <Check aria-hidden="true" /> : null}{state}
-        </span>
-        <small>
-          {'target' in definition
-            ? `Goal ${definition.up ? '≥' : '≤'}${definition.target}${definition.pct ? '%' : ''}`
-            : 'No target'}
-        </small>
-      </span>
-      <ChevronRight className="performance-signal-chevron" aria-hidden="true" />
-    </button>
+    <div className={`objective-metric objective-metric--${compact ? 'compact' : 'overview'}`} data-state={status}>
+      {compact ? <>
+        <div className="objective-metric-copy">
+          {heading}
+          <div className="objective-metric-goal-line">{goal}{!definition.up ? <span>Lower is better</span> : null}</div>
+          <small>{kpiEvidence(metric, rate)}</small>
+        </div>
+        {gauge}
+      </> : <>
+        {heading}
+        {gauge}
+        <div className="objective-metric-goal-line">{goal}<StatusBadge status={status} /></div>
+        <p className="objective-metric-direction">{!definition.up ? 'Lower is better' : ' '}</p>
+        <small>{kpiEvidence(metric, rate)}</small>
+      </>}
+    </div>
   )
 }
 
-function ModuleComparison({ data, selected }: { data: PerformanceSummary; selected: EvidenceKey }) {
-  const modules = data.modules.filter((module) =>
-    selected === 'rta' ? [3, 4].includes(module.number) : [1, 2, 3, 4].includes(module.number),
-  )
-  const ceiling = selected === 'arc'
-    ? Math.max(1, ...modules.map((module) => module.arc.value ?? 0))
-    : 100
-
-  return (
-    <section className="performance-modules" aria-label="Module comparison">
-      <div className="performance-module-heading">
-        <h4>Across your modules</h4>
-        <span>{selected === 'arc' ? 'Relative scale · fewer is better' : '0–100%'}</span>
-      </div>
-      {modules.length === 0 ? <p>No module results available yet.</p> : (
-        <ol>
-          {modules.map((module) => {
-            const rate = module[selected]
-            const hasData = measured(rate)
-            const percent = Math.max(0, Math.min(100, ((rate.value ?? 0) / ceiling) * 100))
-            return (
-              <li key={module.number} data-empty={hasData ? undefined : 'true'}>
-                <span className="performance-module-index">M{module.number}</span>
-                <div className="performance-module-data">
-                  <div><span>{module.title}</span><strong>{formatKpi(selected, rate)}</strong></div>
-                  <div className="performance-module-track" aria-hidden="true">
-                    <i style={{ transform: `scaleX(${percent / 100})` }} />
-                  </div>
-                  <small>{kpiEvidence(selected, rate)}</small>
-                </div>
-              </li>
-            )
-          })}
-        </ol>
-      )}
-      <p className="performance-module-footnote">Module results describe your practice. Goals above apply to your overall record.</p>
-    </section>
-  )
-}
-
-/** One server response; selection changes only the reading, never the data. */
+/** All modules and objectives share one authenticated, server-calculated response. */
 export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummary }) {
-  const [selected, setSelected] = useState<EvidenceKey>('scr')
-  const detailId = useId()
-  const definition = [...KPIS, SUPPLEMENTARY_KPI].find((kpi) => kpi.key === selected)!
-  const rate = data.kpis[selected]
-  const Icon = ICONS[selected]
-  const Direction = selected === 'arc' ? ArrowDownRight : ArrowUpRight
+  const location = useLocation()
+  const navigate = useNavigate()
+  const tabId = useId()
+  const tabRefs = useRef<Record<number, HTMLButtonElement | null>>({})
+  const selected = Number(location.hash.match(/^#learning-module-([1-4])$/)?.[1] ?? 1)
+  const selectedResults = data.modules.find((item) => item.number === selected)
+  const recovery = selectedResults?.retry_success_rate ?? EMPTY_RATE
+
+  function selectModule(number: number) {
+    void navigate({ pathname: location.pathname, search: location.search, hash: `#learning-module-${number}` }, { replace: true, preventScrollReset: true })
+  }
+
+  function onTabKeyDown(event: KeyboardEvent<HTMLButtonElement>, number: number) {
+    const next = event.key === 'ArrowRight' ? number % 4 + 1
+      : event.key === 'ArrowLeft' ? (number + 2) % 4 + 1
+        : event.key === 'Home' ? 1 : event.key === 'End' ? 4 : null
+    if (next === null) return
+    event.preventDefault()
+    selectModule(next)
+    tabRefs.current[next]?.focus()
+  }
 
   return (
-    <div className="performance-instrument">
-      <div className="performance-signal-rail" role="group" aria-label="Practice measures">
-        {KPIS.map((kpi) => (
-          <Signal
-            definition={kpi} rate={data.kpis[kpi.key]} selected={selected === kpi.key}
-            onSelect={() => setSelected(kpi.key)} detailId={detailId} key={kpi.key}
-          />
-        ))}
-        <div className="performance-context-label">For context <span>your recovery record</span></div>
-        <Signal
-          definition={SUPPLEMENTARY_KPI} rate={data.kpis.retry_success_rate}
-          selected={selected === 'retry_success_rate'} onSelect={() => setSelected('retry_success_rate')}
-          detailId={detailId}
-        />
+    <div className="learning-objectives-record">
+      <div className="objective-module-tabs" role="tablist" aria-label="Learning modules">
+        {MODULES.map((module) => <button
+          key={module.num} type="button" role="tab" id={`${tabId}-module-${module.num}`}
+          aria-selected={selected === module.num} aria-controls={`learning-module-${module.num}`}
+          tabIndex={selected === module.num ? 0 : -1}
+          ref={(element) => { tabRefs.current[module.num] = element }}
+          onClick={() => selectModule(module.num)} onKeyDown={(event) => onTabKeyDown(event, module.num)}
+        ><span className="objective-tab-index" aria-hidden="true">0{module.num}</span>Module {module.num}</button>)}
       </div>
-      <section className="performance-detail" id={detailId} aria-label={`${definition.label} details`} data-state={measured(rate) ? metricStatus(selected, rate) : 'empty'}>
-        <header>
-          <span className="performance-detail-icon" style={trackStyle(definition, rate)} aria-hidden="true">
-            <svg className="performance-orbit" viewBox="0 0 80 80">
-              <circle className="performance-orbit-ticks" cx="40" cy="40" r="37" pathLength="100" />
-              <circle className="performance-orbit-track" cx="40" cy="40" r="30" />
-              <circle className="performance-orbit-reading" cx="40" cy="40" r="30" pathLength="100" />
-            </svg>
-            <Icon />
-          </span>
-          <div>
-            <h3>{definition.label}</h3>
-            <p>{definition.scope}</p>
-          </div>
-        </header>
-        <p className="performance-explanation">{definition.explanation}</p>
-        {!measured(rate) ? <p className="performance-empty-hint">{definition.emptyHint}</p> : null}
-        {selected !== 'retry_success_rate' ? (
-          <p className="performance-direction"><Direction aria-hidden="true" />
-            {selected === 'arc' ? 'Fewer unsuccessful attempts before mastery is better' : 'A higher rate is better'}
-          </p>
-        ) : <p className="performance-direction">Supplementary measure · no goal to meet</p>}
-        {selected === 'car' && data.samples.car_missing > 0 ? <p>{data.samples.car_missing} mastered tiers lack validated command evidence and remain unscored.</p> : null}
-        {(selected === 'scr' || selected === 'hlcr') && data.samples.in_progress_tiers > 0 ? <p>{data.samples.in_progress_tiers} opened {data.samples.in_progress_tiers === 1 ? 'tier is' : 'tiers are'} in progress and not counted yet.</p> : null}
-        {selected === 'rta' ? <>
-          <p>{data.samples.transfer_pending} pending · {data.samples.transfer_missing} mastered tiers without eligible transfer evidence</p>
-          {data.transfers.length > 0 ? <ul aria-label="Available transfer checkpoints">
-            {data.transfers.map((point) => <li key={point.tier_id}>
-              <Link to={point.run_id ? `/adventure-tier-runs/${point.run_id}` : `/adventure-level-tiers/${point.tier_id}/runs?transfer=1`}>
-                {point.run_id ? 'Resume' : 'Start'} transfer checkpoint: {point.title}
-              </Link>
-            </li>)}
-          </ul> : null}
-        </> : null}
-        <ModuleComparison data={data} selected={selected} />
-        <details className="performance-calculation" key={selected}>
-          <summary>How this is measured</summary>
-          <p><strong>{definition.abbr}</strong> · {definition.name}</p>
-          <p>{definition.formula}</p>
-          <p>{selected === 'rta'
-            ? 'Only the first reserved unseen checkpoint counts. Failed and abandoned first attempts remain failures; unfinished live checkpoints are pending. Formal studies count unattempted assignments as zero at cutoff.'
-            : selected === 'retry_success_rate'
-              ? 'Counts concluded recovery attempts after failed runs. Required successful repetitions are excluded.'
-              : 'Practice runs in Modules 1–4, across all time. Replay runs are excluded. The activity range above does not change this record.'}</p>
-        </details>
-      </section>
+      {MODULES.map((module) => {
+        const results = data.modules.find((item) => item.number === module.num)
+        const rateFor = (key: KpiKey) => results?.[key] ?? EMPTY_RATE
+        const metrics = KPIS.filter((item) => item.key !== 'rta' || module.num >= 3)
+        return (
+          <section className="learning-module" role="tabpanel" tabIndex={0} hidden={selected !== module.num}
+            id={`learning-module-${module.num}`} key={module.num} aria-labelledby={`${tabId}-module-${module.num}`}>
+            {selected === module.num ? <>
+            <header className="learning-module-heading">
+              <div className="learning-module-eyebrow"><span className="learning-module-number">Module 0{module.num}</span><span>{module.sos.length} specific objectives</span></div>
+              <h3 id={`learning-module-title-${module.num}`}>{module.title}</h3>
+              <details className="learning-module-objective" key={module.num}>
+                <summary>General objective <ChevronDown aria-hidden="true" /></summary>
+                <p>{module.go}</p>
+              </details>
+            </header>
+            <div className="objective-module-kpis" data-count={metrics.length} role="group" aria-label={`Module ${module.num} KPIs`}>
+              {metrics.map((metric) => <MetricReading key={metric.key} metric={metric.key} rate={rateFor(metric.key)} target={metric.key === 'scr' ? GO_SCR_TARGET : moduleTarget(metric.key, module.num)} />)}
+            </div>
+            <div className="specific-objectives-heading"><h4>Specific objectives</h4><span>Performance by learning objective</span></div>
+            <ol className="specific-objectives" aria-label={`Module ${module.num} specific objectives`}>
+              {module.sos.map((objective) => {
+                const readings = objective.metrics.map((metric) => ({
+                  ...metric,
+                  rate: metric.kpi === 'car' ? data.objectives?.[objective.id] ?? EMPTY_RATE : rateFor(metric.kpi),
+                }))
+                const statuses = readings.map((item) => metricTargetStatus(item.rate, item.target, item.up))
+                const status: Status = statuses.includes('none') ? 'none' : statuses.every((item) => item === 'met') ? 'met' : 'miss'
+                return (
+                  <li key={objective.id} className="specific-objective" data-state={status} aria-label={`${objective.id} ${objective.title}`}>
+                    <div className="specific-objective-identity">
+                      <span className="specific-objective-code">{objective.id}</span>
+                      <div className="specific-objective-title">
+                        <h5>{objective.title}</h5>
+                        <StatusBadge status={status} />
+                        {readings.length > 1 ? <small>Both targets required · module results</small> : null}
+                      </div>
+                    </div>
+                    <div className="specific-objective-metrics" data-dual={readings.length > 1 || undefined}>
+                      {readings.map((item) => <MetricReading key={item.kpi} metric={item.kpi} rate={item.rate} target={item.target} compact />)}
+                    </div>
+                  </li>
+                )
+              })}
+            </ol>
+            </> : null}
+          </section>
+        )
+      })}
+      <details className="performance-calculation">
+        <summary>How these KPIs are measured</summary>
+        <p>Arcane Spire practice in Modules 1–4, across all time. Replay runs are excluded. The activity range above does not change these results.</p>
+        <p>Scenario Completion Rate measures each general objective. Command Accuracy Rate uses each specific objective’s mapped scenarios; the module summary combines the module’s assessments. Hard-Level Completion Rate, Average Retry Count, and Retry Transfer Accuracy use module results.</p>
+        {KPIS.map((metric) => <div key={metric.key}>
+          <h4>{'longName' in metric ? metric.longName : metric.name} ({metric.abbr})</h4>
+          <p>{metric.explanation}</p>
+          <p>{metric.formula}</p>
+          <p>{metric.why}</p>
+        </div>)}
+        <p>{data.samples.car_missing} mastered tiers lack validated command evidence and remain unscored.</p>
+        <p>{data.samples.in_progress_tiers} opened tiers are in progress and not counted yet.</p>
+      </details>
+      {selected >= 3 ? <details className="objective-transfer-checkpoints performance-calculation">
+        <summary>Available transfer checkpoints · Modules 3–4</summary>
+        <p>Modules 3–4 · {data.samples.transfer_pending} pending · {data.samples.transfer_missing} mastered tiers without eligible transfer evidence</p>
+        {data.transfers.length > 0 ? <ul aria-label="Available transfer checkpoints">
+          {data.transfers.map((point) => <li key={point.tier_id}>
+            <Link to={point.run_id ? `/adventure-tier-runs/${point.run_id}` : `/adventure-level-tiers/${point.tier_id}/runs?transfer=1`}>
+              {point.run_id ? 'Resume' : 'Start'} transfer checkpoint: {point.title}
+            </Link>
+          </li>)}
+        </ul> : <p>{KPIS.find((metric) => metric.key === 'rta')!.emptyHint}</p>}
+      </details> : null}
+      <details className="performance-calculation" key={selected}>
+        <summary>Module {selected} retry recovery · supplementary</summary>
+        <p>{formatKpi('retry_success_rate', recovery)} · {kpiEvidence('retry_success_rate', recovery)}</p>
+        <p>{SUPPLEMENTARY_KPI.explanation}</p>
+        <p>{SUPPLEMENTARY_KPI.formula}</p>
+        <p>For context · no target</p>
+      </details>
     </div>
   )
 }
