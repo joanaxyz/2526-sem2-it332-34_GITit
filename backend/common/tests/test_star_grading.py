@@ -1,7 +1,6 @@
 from types import SimpleNamespace
 
 import pytest
-
 from adventures.models import AdventureLevelTierProgress
 from adventures.scoring import star_breakdown, stars
 from adventures.services import AdventureLevelTierRunService
@@ -148,6 +147,16 @@ def grading_lane(request, db, django_user_model):
                 player=fixture.player, tier=owner, source_entry_point="level_page", prior_run=prior
             )
 
+    run.scoring_policy_version = 2
+    run.generous_counted_commands = 2
+    run.example_counted_commands = 1
+    run.save(
+        update_fields=[
+            "scoring_policy_version",
+            "generous_counted_commands",
+            "example_counted_commands",
+        ]
+    )
     return SimpleNamespace(
         lane=lane,
         fixture=fixture,
@@ -193,8 +202,8 @@ def test_better_replay_updates_saved_grade_without_repeating_rewards(grading_lan
     context = grading_lane
     _submit(context, context.run, "git nope")
     _submit(context, context.run, "git add README.md")
-    assert context.run.stars == 1
-    assert _score_snapshot(context)[:2] == (1, 2)
+    assert context.run.stars == 2
+    assert _score_snapshot(context)[:2] == (2, 2)
     transactions = list(CoinTransaction.objects.values_list("id", "amount", "award_key"))
     assert transactions
 
@@ -220,11 +229,11 @@ def test_worse_replay_keeps_the_best_saved_grade(grading_lane):
     _submit(context, replay, "git nope")
     _submit(context, replay, "git add README.md")
 
-    assert replay.stars == 1
+    assert replay.stars == 2
     assert _score_snapshot(context) == best
 
 
-@pytest.mark.parametrize("retry_count,expected", [(1, 3), (2, 2), (3, 2)])
+@pytest.mark.parametrize("retry_count,expected", [(1, 3), (2, 3), (3, 3)])
 def test_retry_allowance_and_fresh_replay_grades(grading_lane, retry_count, expected):
     context = grading_lane
     failed = context.run
@@ -248,7 +257,7 @@ def test_retry_allowance_and_fresh_replay_grades(grading_lane, retry_count, expe
 
 
 @pytest.mark.parametrize("grading_lane", ["tier", "challenge"], indirect=True)
-def test_same_grade_replay_keeps_the_lower_command_total(grading_lane):
+def test_better_grade_replay_keeps_the_lower_command_total(grading_lane):
     context = grading_lane
     _submit(context, context.run, "git nope")
     _submit(context, context.run, "git nope")
@@ -259,7 +268,7 @@ def test_same_grade_replay_keeps_the_lower_command_total(grading_lane):
     _submit(context, replay, "git nope")
     _submit(context, replay, "git add README.md")
 
-    assert _score_snapshot(context)[:2] == (1, 2)
+    assert _score_snapshot(context)[:2] == (2, 2)
 
 
 @pytest.mark.parametrize("launch", ["direct", "retry", "stale_prior"])
@@ -275,12 +284,12 @@ def test_retry_grading_cannot_be_reset_by_the_launch_path(grading_lane, launch):
 
     assert failed.retry_index == 2
     payload = _submit(context, failed, "git add README.md")["run"]
-    assert payload["stars"] == 2
+    assert payload["stars"] == 3
     assert payload["star_breakdown"]["retry_count"] == 2
     assert payload["star_breakdown"]["criteria"][-1] == {
-        "key": "retry_allowance",
-        "state": "missed",
-        "reason": "retry_allowance_exceeded",
+        "key": "efficient_target",
+        "state": "earned",
+        "reason": None,
     }
 
 
@@ -312,7 +321,7 @@ def test_restarting_a_submitted_attempt_preserves_retry_evidence(grading_lane, e
         run = next_run
     assert run.retry_index == 2
     _submit(context, run, "git add README.md")
-    assert run.stars == 2
+    assert run.stars == 3
 
 
 def test_empty_restarts_do_not_consume_retry_allowance(grading_lane):

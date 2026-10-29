@@ -1,3 +1,4 @@
+import { CommandComparison } from '@/shared/level/components/CommandComparison'
 import { Gem, Map, RefreshCcw, Repeat2, RotateCcw, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, WandSparkles, XCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
@@ -19,18 +20,18 @@ export function TierOutcomeModal({
   onClose,
   onBackToMap,
   onRetry,
+  onContinue,
 }: {
   open: boolean
   run: TierRun
   onClose: () => void
   onBackToMap: () => void
+  onContinue?: () => void
   onRetry?: () => void
 }) {
   const { isFailed, isReplay, isTransfer, canAdvance, isPartialClear } = tierOutcomeState(run)
   // A cleared scenario that is not the tier's last names itself and the next scenario.
   const nextScenario = run.progress.next_scenario
-  const rewardHint =
-    run.reward.coins > 0 && !run.reward.claimed ? ` Clear it to earn ${run.reward.coins} GitCoins.` : ''
 
   useEffect(() => {
     if (!open) return
@@ -70,7 +71,7 @@ export function TierOutcomeModal({
       : canAdvance
         ? 'Level cleared. The next difficulty is ready.'
         : isPartialClear && nextScenario
-          ? `Scenario ${run.scenario.index ?? nextScenario.index - 1} of ${run.scenario.total} cleared — next: ${nextScenario.title}.${rewardHint}`
+          ? `Next: ${nextScenario.title}`
           : 'Level cleared.'
   const Icon = isFailed ? XCircle : Sparkles
   const targetActionsMet =
@@ -190,12 +191,13 @@ export function TierOutcomeModal({
       level={{ label: `Level ${run.tier.adventure_level_number}`, title: run.tier.adventure_level_title }}
       badges={badges}
       headline={headline}
-      message={message}
+      message={!isFailed && !isReplay && !isTransfer && nextScenario && onContinue ? <button type="button" className="outcome-next-button" onClick={(event) => { event.stopPropagation(); onContinue() }}>Next: {nextScenario.title}</button> : message}
       stats={stats}
       headerActions={headerActions}
     >
+      {!isTransfer && !isFailed ? <CommandComparison comparison={run.command_comparison} /> : null}
       {!isTransfer && run.star_breakdown ? (
-        <StarScoreChecklist breakdown={run.star_breakdown} tier multiScenario={run.scenario.total > 1} savedStars={run.completion?.stars} />
+        <StarScoreChecklist variant="result" breakdown={run.star_breakdown} tier multiScenario={run.scenario.total > 1} savedStars={run.completion?.stars} />
       ) : null}
     </GameOutcomeModal>
   )

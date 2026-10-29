@@ -131,7 +131,7 @@ export function GameOutcomeModal({
             ) : null}
 
             {badges ? <div className="game-outcome-badges">{badges}</div> : null}
-            <p className="game-outcome-message">{message}</p>
+            {message ? <p className="game-outcome-message">{message}</p> : null}
             {note ? <p className="game-outcome-note">{note}</p> : null}
           </div>
 

@@ -5,7 +5,7 @@
 // {targets: {case_id: target_state}, replays: {case_id: replay}} to `outputPath`.
 // A replay records the state in front of every solution command; the backend
 // fingerprints it into the variant's solution trajectory. Driven by
-// `python manage.py generate_targets` — do not run by hand.
+// `python manage.py generate_targets` â€” do not run by hand.
 //
 // The engine is TypeScript with a `@` path alias, so we load it through a Vite
 // dev server (`ssrLoadModule`), which resolves the alias from vite.config.ts.
@@ -84,6 +84,7 @@ try {
     }
 
     const steps = []
+    let failure = null
     let finalBeforeEdits = null
     // The state before authored edits is only worth recording when edits exist:
     // the learner stands there until they make the edit themselves.
@@ -100,11 +101,14 @@ try {
       let cwd = ''
       for (let i = 0; i < commands.length; i += 1) {
         const beforeEdits = applyEdits(i)
+        const submittedCwd = cwd
         const terminal = executeTerminalCommand(state, commands[i], { cwd })
         const execution = terminal.execution
         cwd = terminal.cwd
         steps.push({
           command: commands[i],
+          execution,
+          cwd: submittedCwd,
           diagnostic: Boolean(execution.diagnostic),
           before_edits: beforeEdits,
           ready: normalizeState(state),
@@ -132,15 +136,18 @@ try {
       }
       finalBeforeEdits = applyEdits(commands.length)
     } catch (error) {
-      console.error(`Failed to replay case '${caseId}': ${error?.message ?? error}`)
-      process.exitCode = 1
+      failure = String(error?.message ?? error)
+      if (!spec.allow_failure) {
+        console.error(`Failed to replay case '${caseId}': ${failure}`)
+        process.exitCode = 1
+      }
     }
 
     // Emit the canonical internal state (what the runtime submit payload carries
     // as `next_state`), not a presentation snapshot - so a target matches the
     // learner's normalized final state key-for-key (incl. read-only scenarios).
     targets[caseId] = normalizeState(state)
-    replays[caseId] = { steps, final: targets[caseId], final_before_edits: finalBeforeEdits }
+    replays[caseId] = { failure, steps, final: targets[caseId], final_before_edits: finalBeforeEdits }
   }
 
   writeFileSync(outputPath, JSON.stringify({ targets, replays }))

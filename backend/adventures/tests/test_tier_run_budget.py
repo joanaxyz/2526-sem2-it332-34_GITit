@@ -38,7 +38,8 @@ def test_read_only_scenario_with_zero_minimum_starts_with_a_budget_of_one(db, dj
 
     assert run.status == SESSION_STATUS_STARTED
     assert run.min_counted_commands == 1
-    assert run.max_counted_commands == 1
+    assert run.generous_counted_commands == 2
+    assert run.max_counted_commands == 3
 
 
 def test_variant_budget_overrides_the_shared_scenario_budget(db, django_user_model):

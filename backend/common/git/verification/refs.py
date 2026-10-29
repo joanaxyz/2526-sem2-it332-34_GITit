@@ -10,8 +10,9 @@ from __future__ import annotations
 
 import copy
 
-from common.exceptions import BadRequest
 from simulator.services import parse_git_command
+
+from common.exceptions import BadRequest
 
 
 class RefVerificationMixin:
@@ -234,6 +235,12 @@ class RefVerificationMixin:
                 to=name,
                 target=target,
                 label="git checkout",
+            )
+            return
+
+        if "--ours" not in parts and "--theirs" not in parts:
+            self._verify_switch(
+                command=command, previous_state=previous_state, next_state=next_state
             )
             return
 

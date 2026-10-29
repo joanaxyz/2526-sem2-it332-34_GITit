@@ -32,6 +32,10 @@ function challengeStats(run: ChallengeRun): WorkspaceStat[] {
         </span>
       ),
     },
+    ...(run.policy.generous_counted_commands != null ? [{
+      label: '2-star target', icon: Target,
+      value: <span className="lvlctx-num">≤ {run.policy.generous_counted_commands} commands</span>,
+    }] : []),
     {
       label: 'Star target',
       icon: Target,

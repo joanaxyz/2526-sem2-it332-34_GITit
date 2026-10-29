@@ -1,0 +1,239 @@
+{
+  "be6": [
+    "rebase"
+  ],
+  "be7": [
+    "rebase"
+  ],
+  "be8": [
+    "rebase"
+  ],
+  "cherry-hard-abort-conflict": [
+    "cherry-pick:abort"
+  ],
+  "cherry-hard-backport-capstone-export": [
+    "cherry-pick"
+  ],
+  "cherry-hard-backport-capstone-login": [
+    "cherry-pick"
+  ],
+  "cherry-hard-export-conflict": [
+    "cherry-pick"
+  ],
+  "cherry-medium-conflict-continue-auth": [
+    "cherry-pick"
+  ],
+  "gate3-easy-merge-then-backport-banner": [
+    "merge"
+  ],
+  "gate3-easy-merge-then-backport-footer": [
+    "merge"
+  ],
+  "gate3-hard-abort-then-tool-merge-copy": [
+    "merge"
+  ],
+  "gate3-hard-abort-then-tool-merge-pricing": [
+    "merge"
+  ],
+  "gate3-medium-backport-locale": [
+    "cherry-pick"
+  ],
+  "gate3-medium-backport-tax": [
+    "cherry-pick"
+  ],
+  "gate4-hard-move-branch-onto-main-coupons": [
+    "rebase"
+  ],
+  "gate4-hard-move-branch-onto-main-receipts": [
+    "rebase"
+  ],
+  "manual-easy-auth-copy": [
+    "merge"
+  ],
+  "manual-easy-billing-copy": [
+    "merge"
+  ],
+  "manual-easy-config-copy": [
+    "merge"
+  ],
+  "manual-easy-navbar-copy": [
+    "merge"
+  ],
+  "manual-easy-profile-copy": [
+    "merge"
+  ],
+  "manual-hard-abort-redo": [
+    "merge"
+  ],
+  "manual-hard-abort-redo-payments": [
+    "merge"
+  ],
+  "manual-hard-migration": [
+    "merge"
+  ],
+  "manual-hard-pricing": [
+    "merge"
+  ],
+  "manual-hard-schema": [
+    "merge"
+  ],
+  "manual-medium-gateway": [
+    "merge"
+  ],
+  "manual-medium-policy": [
+    "merge"
+  ],
+  "manual-medium-router": [
+    "merge"
+  ],
+  "merge-easy-cap-docs": [
+    "merge"
+  ],
+  "merge-easy-free-contact": [
+    "merge"
+  ],
+  "merge-hard-devops-cert": [
+    "merge"
+  ],
+  "merge-hard-land-publish-tidy-billing": [
+    "merge"
+  ],
+  "merge-hard-land-publish-tidy-search": [
+    "merge"
+  ],
+  "merge-med-corp-sso": [
+    "merge"
+  ],
+  "merge-medium-commit-switch-noff-auth": [
+    "merge"
+  ],
+  "merge-medium-commit-switch-noff-reports": [
+    "merge"
+  ],
+  "mergetool-easy-app-locale": [
+    "merge"
+  ],
+  "mergetool-easy-cache-ttl": [
+    "merge"
+  ],
+  "mergetool-easy-labels": [
+    "merge"
+  ],
+  "mergetool-easy-mail-footer": [
+    "merge"
+  ],
+  "mergetool-easy-upload-limit": [
+    "merge"
+  ],
+  "mergetool-hard-choose-tool": [
+    "merge"
+  ],
+  "mergetool-hard-no-backup-api": [
+    "merge"
+  ],
+  "mergetool-hard-no-leftovers": [
+    "merge"
+  ],
+  "mergetool-hard-one-of-two": [
+    "merge"
+  ],
+  "mergetool-hard-take-theirs": [
+    "merge"
+  ],
+  "mergetool-medium-api-limits": [
+    "merge"
+  ],
+  "mergetool-medium-checkout-copy": [
+    "merge"
+  ],
+  "mergetool-medium-configure-tool-billing": [
+    "merge"
+  ],
+  "mergetool-medium-db-names": [
+    "merge"
+  ],
+  "mergetool-medium-docs-sync": [
+    "merge"
+  ],
+  "rb-hard-capstone-payments": [
+    "merge"
+  ],
+  "rb-hard-capstone-release-notes": [
+    "merge"
+  ],
+  "rb-medium-land-and-retire-billing": [
+    "merge"
+  ],
+  "rb-medium-land-and-retire-search": [
+    "merge"
+  ],
+  "rebase-easy-continue-config": [
+    "rebase:continue"
+  ],
+  "rebase-easy-continue-routes": [
+    "rebase:continue"
+  ],
+  "rebase-easy-continue-styles": [
+    "rebase:continue"
+  ],
+  "rebase-hard-abort-then-onto-reports": [
+    "rebase"
+  ],
+  "rebase-hard-abort-then-onto-ui": [
+    "rebase"
+  ],
+  "rebase-hard-reset-rebase-lease-api": [
+    "rebase"
+  ],
+  "rebase-hard-reset-rebase-lease-cli": [
+    "rebase"
+  ],
+  "rec-med-qa-testrunner": [
+    "merge"
+  ],
+  "rm6": [
+    "revert"
+  ],
+  "rm7": [
+    "revert"
+  ],
+  "rm8": [
+    "revert"
+  ],
+  "v26m-auth": [
+    "merge"
+  ],
+  "v26m-hotfix": [
+    "merge"
+  ],
+  "v26m-payments": [
+    "merge"
+  ],
+  "v27e-auth": [
+    "merge"
+  ],
+  "v27e-hotfix": [
+    "merge"
+  ],
+  "v27e-payments": [
+    "merge"
+  ],
+  "v27h-auth": [
+    "merge"
+  ],
+  "v27h-hotfix": [
+    "merge"
+  ],
+  "v27h-payments": [
+    "merge"
+  ],
+  "v27m-auth": [
+    "merge"
+  ],
+  "v27m-hotfix": [
+    "merge"
+  ],
+  "v27m-payments": [
+    "merge"
+  ]
+}

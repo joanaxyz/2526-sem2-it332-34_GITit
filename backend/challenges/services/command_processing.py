@@ -1,7 +1,3 @@
-from django.db import transaction
-from django.utils import timezone
-
-from challenges.models import ChallengeRun
 from common.constants import (
     COMMAND_COUNTED,
     RESULT_INVALID,
@@ -24,6 +20,9 @@ from common.runtime import (
 )
 from common.services.performance import timing
 from curriculum.services import ChapterChestService
+from curriculum.services.techniques import record_verified_techniques
+from django.db import transaction
+from django.utils import timezone
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from practice.models import CommandStep
 from practice.services.scaffolding import FeedbackGenerationService, ScaffoldingService
@@ -35,6 +34,8 @@ from simulator.services import (
     RepositorySnapshotService,
     RepositoryStateSimulator,
 )
+
+from challenges.models import ChallengeRun
 
 from .history import CommandHistoryCache
 
@@ -66,6 +67,7 @@ class ChallengeCommandProcessingService:
             timing_label="challenge.command",
             run_id=run.id,
             expected_client_revision=run.total_attempts,
+            scoring_policy_version=run.scoring_policy_version,
         )
         previous_state = execution.previous_state
         next_state = execution.next_state
@@ -89,6 +91,8 @@ class ChallengeCommandProcessingService:
         initial_evaluation = evaluator.evaluate(
             CompletionEvaluationContext(
                 variant=run.selected_variant,
+                required_techniques=run.required_techniques,
+                verified_techniques=[],
                 next_state=initial_state,
                 executed_commands=[],
                 next_state_hash=state_tools.state_hash(initial_state),
@@ -98,6 +102,8 @@ class ChallengeCommandProcessingService:
         previous_evaluation = evaluator.evaluate(
             CompletionEvaluationContext(
                 variant=run.selected_variant,
+                required_techniques=run.required_techniques,
+                verified_techniques=run.verified_techniques,
                 next_state=previous_state,
                 executed_commands=previous_history,
                 next_state_hash=state_tools.state_hash_for_normalized(previous_state),
@@ -111,6 +117,7 @@ class ChallengeCommandProcessingService:
         )
         rules_passing = previous_rules_passing
 
+        record_verified_techniques(run, execution)
         if command_result.processed:
             with span("evaluate"):
                 state_hash = state_tools.state_hash_for_normalized(next_state)
@@ -118,6 +125,8 @@ class ChallengeCommandProcessingService:
                 evaluation = evaluator.evaluate(
                     CompletionEvaluationContext(
                         variant=run.selected_variant,
+                        required_techniques=run.required_techniques,
+                        verified_techniques=run.verified_techniques,
                         next_state=next_state,
                         executed_commands=executed_commands,
                         next_state_hash=state_hash,
@@ -203,6 +212,7 @@ class ChallengeCommandProcessingService:
                 state_mutated=execution.state_mutated,
             )
         )
+        update_fields.add("verified_techniques")
         chest_pending = False
         if solved:
             completion_fields, chest_pending = self._complete_run(run)
@@ -268,6 +278,8 @@ class ChallengeCommandProcessingService:
             counted_commands=run.counted_action_total,
             budget=run.min_counted_commands,
             retry_count=run.retry_index,
+            generous_budget=run.generous_counted_commands,
+            policy_version=run.scoring_policy_version,
         )
         chest_pending = False
         if not run.is_replay:

@@ -1,16 +1,14 @@
-"""Star-target (par) accounting shared by the curriculum seeders.
+"""Shared reference-command accounting and efficient-target authoring floors.
 
-Two stars require ``counted_commands <= min_counted_commands`` and three require
-that with at most one retry, so the target has to be at least what the authored
-solution costs. Authoring defaults and hand-written values drifted below that
-and locked levels at one star, so the seed derives the floor from the solution
-itself, classified by the same engine rule the runtime bills commands with:
-valid read-only inspections are free, everything else costs one counted command.
+Policy 2 awards three stars within the efficient target. Targets must cover
+verified reasonable routes; valid inspections and file-editor operations are free.
 """
 
 from collections.abc import Iterable
 
-from simulator.services import is_diagnostic_command
+from simulator.services import is_diagnostic_command, normalize_command
+
+from common.git.shell_commands import shell_program
 
 # Inspection-only scenarios cost nothing to solve, but a target of 0 renders as
 # "Star target: <= 0 commands" and would dock a star for a single typo
@@ -21,7 +19,13 @@ MINIMUM_STAR_TARGET = 1
 def counted_command_total(commands: Iterable[str] | None) -> int:
     """How many of ``commands`` consume command budget at runtime."""
 
-    return sum(1 for command in commands or [] if not is_diagnostic_command(command))
+    return sum(
+        1
+        for command in commands or []
+        if command.strip()
+        and not is_diagnostic_command(normalize_command(command))
+        and not shell_program(command)
+    )
 
 
 def star_target_for_variants(
