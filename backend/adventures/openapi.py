@@ -10,6 +10,7 @@ from common.openapi import (
     GameplayRunStatusField,
     LearnedSkillResponseSerializer,
     RuntimeStepResponseSerializer,
+    StarBreakdownResponseSerializer,
 )
 from tutoring.openapi import TeachingResponseSerializer
 
@@ -34,6 +35,7 @@ class AdventureLevelTierCommandRunResponseSerializer(TeachingResponseSerializer)
     id = serializers.IntegerField()
     replay = serializers.BooleanField()
     stars = serializers.IntegerField()
+    star_breakdown = StarBreakdownResponseSerializer(allow_null=True)
     status = GameplayRunStatusField()
     failure_reason = serializers.CharField(allow_null=True, allow_blank=True)
     completed_at = serializers.DateTimeField(allow_null=True)
@@ -66,6 +68,7 @@ class AdventureLevelTierRunResponseSerializer(TeachingResponseSerializer):
     replay = serializers.BooleanField()
     transfer = serializers.BooleanField(required=False)
     stars = serializers.IntegerField()
+    star_breakdown = StarBreakdownResponseSerializer(allow_null=True)
     status = GameplayRunStatusField()
     failure_reason = serializers.CharField(allow_null=True, allow_blank=True)
     completed_at = serializers.DateTimeField(allow_null=True)

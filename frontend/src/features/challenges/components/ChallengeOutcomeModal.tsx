@@ -7,6 +7,7 @@ import { canAdvanceFrom, difficultyLabel } from '@/features/challenges/component
 import { GameOutcomeModal } from '@/shared/level/components/game-outcome/GameOutcomeModal'
 import { Badge } from '@/shared/components/Badge'
 import { playGameOverSound, playVictorySound } from '@/shared/audio/battleAudio'
+import { StarScoreChecklist } from '@/shared/level/components/StarScoreChecklist'
 
 export function ChallengeOutcomeModal({
   open,
@@ -50,7 +51,7 @@ export function ChallengeOutcomeModal({
   const message = isReplay
     ? isFailed
       ? "This free-play run ended before reaching the target state. It doesn't affect your saved progress. Play again whenever you like."
-      : "Nice run. Free play doesn't touch your saved progress, so replay as often as you like."
+      : 'Replays can improve your saved star score. Lower scores never replace your best, and rewards are paid only once.'
     : isFailed
       ? hitActionLimit
         ? run.failure_reason ??
@@ -86,9 +87,9 @@ export function ChallengeOutcomeModal({
       accentColor: 'hsl(var(--primary))',
     },
     {
-      label: 'Attempts',
+      label: 'Submissions',
       numerator: run.counts.total_attempts,
-      helper: isReplay ? 'Free-play attempt' : 'Saved attempt count',
+      helper: 'All commands submitted, including free checks',
       icon: Repeat2,
       accentColor: 'hsl(var(--primary))',
     },
@@ -159,6 +160,8 @@ export function ChallengeOutcomeModal({
       message={message}
       stats={stats}
       headerActions={headerActions}
-    />
+    >
+      {run.star_breakdown ? <StarScoreChecklist breakdown={run.star_breakdown} savedStars={run.completion?.stars} /> : null}
+    </GameOutcomeModal>
   )
 }

@@ -18,10 +18,10 @@ function challengeStats(run: ChallengeRun): WorkspaceStat[] {
       ? [{ label: 'Difficulty', icon: Smile, value: <DifficultyChip difficulty={run.difficulty} /> }]
       : []),
     {
-      label: 'Stars',
+      label: run.status === 'started' ? 'Stars on clear' : 'Stars',
       icon: StarSolidIcon,
       iconClass: 'tier-stat-icon--amber',
-      value: <StarTriplet count={run.stars || run.mastery_progress.stars || 0} mode="challenge" />,
+      value: <StarTriplet count={run.status === 'started' ? run.star_breakdown?.available_stars ?? 0 : run.stars} mode="challenge" breakdown={run.star_breakdown} active={run.status === 'started'} savedStars={run.completion?.stars} />,
     },
     {
       label: 'Commands',

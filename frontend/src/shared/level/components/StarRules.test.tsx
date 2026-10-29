@@ -48,4 +48,27 @@ describe('star rules reminder', () => {
     expect(screen.getByText(/your lowest scenario score becomes your level score/)).toBeInTheDocument()
     expect(screen.getByText(/Opening the command guide never costs a star/)).toBeInTheDocument()
   })
+
+  it('shows live server eligibility and exact lost bonuses from the stars', async () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue({
+      x: 80, y: 100, left: 80, top: 100, right: 380, bottom: 260,
+      width: 300, height: 160, toJSON: () => ({}),
+    })
+    render(<StarTriplet count={1} active breakdown={{
+      stars: 0, available_stars: 1, counted_commands: 3, command_target: 2, graded_under_previous_rules: false, retry_count: 0,
+      criteria: [
+        { key: 'clear', state: 'pending', reason: null },
+        { key: 'command_target', state: 'missed', reason: 'command_target_exceeded' },
+        { key: 'retry_allowance', state: 'missed', reason: 'command_target_exceeded' },
+      ],
+    }} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Star rules: 1 of 3 stars available on clear' }))
+    await screen.findByRole('dialog', { name: 'How to earn stars' })
+    expect(screen.getByText('Command target exceeded by 1. Both bonus stars are unavailable.')).toBeInTheDocument()
+    expect(screen.getByText('3 / 2 counted commands.')).toBeInTheDocument()
+    expect(screen.getAllByText('Unavailable')).toHaveLength(2)
+    expect(screen.getByText('+1 on clear')).toBeInTheDocument()
+    fireEvent.keyDown(window, { key: 'Escape' })
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument())
+  })
 })

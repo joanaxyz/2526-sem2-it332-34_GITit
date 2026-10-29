@@ -53,6 +53,6 @@
   margin: 0;
 }
 
-.star-rules p + p {
+.star-rules > p + p {
   margin-top: 0.75rem;
 }

@@ -206,6 +206,8 @@ class AdventureLevelTierRunService:
             retry_index = 0
         prior_reference = prior_run
         if prior_run and prior_run.status == SESSION_STATUS_STARTED:
+            if is_replay and not prior_run.steps.exists():
+                retry_index = prior_run.retry_index
             # "Start over" mid-run: the old run is abandoned (or deleted when
             # empty) and never becomes the new run's prior - the same chain
             # shape as when the old run was always deleted.

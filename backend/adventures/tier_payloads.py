@@ -9,6 +9,7 @@ from django.db.models import Q
 
 from adventures.models import AdventureLevelTier, AdventureLevelTierRun
 from adventures.rewards import claimed_tier_reward_keys, tier_reward_payload
+from adventures.scoring import star_breakdown
 from adventures.tier_scenarios import published_scenarios, scenario_progress
 from common.constants import DIFFICULTIES, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
 from practice.services.context import ScenarioContextNormalizer
@@ -77,6 +78,7 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
         "replay": run.is_replay,
         "transfer": run.is_transfer,
         "stars": run.stars,
+        "star_breakdown": star_breakdown(run),
         "status": run.status,
         "failure_reason": run.failure_reason or None,
         "completed_at": run.completed_at,
@@ -138,6 +140,7 @@ def command_run_payload(
         **teaching_payload(run, **(tutor_context or {})),
         "replay": run.is_replay,
         "stars": run.stars,
+        "star_breakdown": star_breakdown(run),
         "status": run.status,
         "failure_reason": run.failure_reason or None,
         "completed_at": run.completed_at,

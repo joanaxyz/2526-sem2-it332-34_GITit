@@ -9,6 +9,8 @@ import { GameOutcomeConfetti } from './GameOutcomeConfetti'
 import { GameOutcomeStatTile } from './GameOutcomeStatTile'
 import { GameOutcomeStars } from './GameOutcomeStars'
 
+import '@/styles/features/game-outcome-layout.css'
+
 export type GameOutcomeStat = {
   label: string
   numerator: number
@@ -68,7 +70,7 @@ export function GameOutcomeModal({
   /** Optional emphasised aside under the message. */
   note?: ReactNode
   stats?: GameOutcomeStat[]
-  /** Surface-specific section rendered under the stats. */
+  /** Surface-specific score explanation, before supplementary stats. */
   children?: ReactNode
   /** Icon-button actions rendered in the top-right header cluster. */
   headerActions?: ReactNode
@@ -85,7 +87,7 @@ export function GameOutcomeModal({
     <Modal
       open={open}
       title={title}
-      className={cn('game-outcome-shell', className)}
+      className={cn('game-outcome-shell', children && 'has-score-breakdown', className)}
       overlayClassName="game-outcome-backdrop"
       contentClassName="p-0"
       hideHeader
@@ -96,60 +98,64 @@ export function GameOutcomeModal({
         {headerActions ? <div className="game-outcome-header-actions">{headerActions}</div> : null}
         {!isFailed ? <GameOutcomeConfetti /> : null}
 
-        <div className="game-outcome-hero relative text-center">
-          {displayStars !== null ? (
-            <GameOutcomeStars key={displayStars} stars={displayStars} />
-          ) : (
-            <div className={cn('game-outcome-icon-crest', !isFailed && 'game-outcome-sparkle-glow')} aria-hidden="true">
-              <Icon className="game-outcome-result-icon" />
-            </div>
-          )}
-
-          <div
-            className={cn(
-              'game-outcome-title-art game-outcome-headline',
-              isFailed && 'is-lost',
+        <div className="game-outcome-layout">
+          <div className="game-outcome-hero relative text-center">
+            {displayStars !== null ? (
+              <GameOutcomeStars key={displayStars} stars={displayStars} />
+            ) : (
+              <div className={cn('game-outcome-icon-crest', !isFailed && 'game-outcome-sparkle-glow')} aria-hidden="true">
+                <Icon className="game-outcome-result-icon" />
+              </div>
             )}
-            role="img"
-            aria-label={displayLabel}
-            style={{ backgroundImage: `url(${titlesImage})` }}
-          />
-          <h3 className="game-outcome-subline">
-            <span className="game-outcome-subline-rule" aria-hidden="true" />
-            <span className="text-balance">{headline}</span>
-            <span className="game-outcome-subline-rule is-end" aria-hidden="true" />
-          </h3>
 
-          {level ? (
-            <p className="game-outcome-level">
-              <span className="game-outcome-level-label">{level.label}</span>
-              <span className="game-outcome-level-title">{level.title}</span>
-            </p>
-          ) : null}
+            <div
+              className={cn(
+                'game-outcome-title-art game-outcome-headline',
+                isFailed && 'is-lost',
+              )}
+              role="img"
+              aria-label={displayLabel}
+              style={{ backgroundImage: `url(${titlesImage})` }}
+            />
+            <h3 className="game-outcome-subline">
+              <span className="game-outcome-subline-rule" aria-hidden="true" />
+              <span className="text-balance">{headline}</span>
+              <span className="game-outcome-subline-rule is-end" aria-hidden="true" />
+            </h3>
 
-          {badges ? <div className="game-outcome-badges">{badges}</div> : null}
-          <p className="game-outcome-message">{message}</p>
-          {note ? <p className="game-outcome-note">{note}</p> : null}
+            {level ? (
+              <p className="game-outcome-level">
+                <span className="game-outcome-level-label">{level.label}</span>
+                <span className="game-outcome-level-title">{level.title}</span>
+              </p>
+            ) : null}
 
-          {stats && stats.length ? (
-            <div className="game-outcome-stat-grid">
-              {stats.map((stat, index) => (
-                <GameOutcomeStatTile
-                  key={stat.label}
-                  {...stat}
-                  accentColor={stat.accentColor ?? defaultAccent}
-                  animationDelay={160 + index * 60}
-                />
-              ))}
-            </div>
-          ) : null}
+            {badges ? <div className="game-outcome-badges">{badges}</div> : null}
+            <p className="game-outcome-message">{message}</p>
+            {note ? <p className="game-outcome-note">{note}</p> : null}
+          </div>
 
-          {children}
+          <div className="game-outcome-details">
+            {children}
 
-          <p className="game-outcome-hint">
-            Click anywhere to continue<span className="sr-only">, or press Enter, Space, or Escape.</span>
-          </p>
+            {stats && stats.length ? (
+              <div className="game-outcome-stat-grid">
+                {stats.map((stat, index) => (
+                  <GameOutcomeStatTile
+                    key={stat.label}
+                    {...stat}
+                    accentColor={stat.accentColor ?? defaultAccent}
+                    animationDelay={160 + index * 60}
+                  />
+                ))}
+              </div>
+            ) : null}
+
+          </div>
         </div>
+        <p className="game-outcome-hint text-center">
+          Click anywhere to continue<span className="sr-only">, or press Enter, Space, or Escape.</span>
+        </p>
       </div>
     </Modal>
   )

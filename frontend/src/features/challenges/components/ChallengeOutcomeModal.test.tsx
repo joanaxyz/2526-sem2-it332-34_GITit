@@ -10,6 +10,15 @@ const run = {
   replay: false,
   status: 'completed',
   stars: 3,
+  star_breakdown: {
+    stars: 3, available_stars: 3, counted_commands: 2, command_target: 2,
+    retry_count: 0, graded_under_previous_rules: false,
+    criteria: [
+      { key: 'clear', state: 'earned', reason: null },
+      { key: 'command_target', state: 'earned', reason: null },
+      { key: 'retry_allowance', state: 'earned', reason: null },
+    ],
+  },
   failure_reason: null,
   completed_at: '2026-06-30T00:00:00Z',
   challenge: {
@@ -81,6 +90,18 @@ describe('ChallengeOutcomeModal', () => {
     render(<ChallengeOutcomeModal open run={run} onClose={close} onBackToMap={vi.fn()} />)
 
     fireEvent.click(screen.getByText('Repository Basecamp'))
+    expect(close).toHaveBeenCalledOnce()
+  })
+
+  it('allows reading scoring notes without dismissing and keeps Escape working', () => {
+    const close = vi.fn()
+    render(<ChallengeOutcomeModal open run={run} onClose={close} onBackToMap={vi.fn()} />)
+    const summary = screen.getByText('What counts toward the score?')
+    fireEvent.click(summary)
+    expect(summary.closest('details')).toHaveAttribute('open')
+    fireEvent.keyDown(summary, { key: 'Enter' })
+    expect(close).not.toHaveBeenCalled()
+    fireEvent.keyDown(summary, { key: 'Escape' })
     expect(close).toHaveBeenCalledOnce()
   })
 

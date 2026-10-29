@@ -6,11 +6,37 @@ import type { ChallengeRun } from '@/features/challenges/types'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
 import { normalizeStarScore } from '@/shared/level/utils/starScore'
+import { StarTriplet } from '@/shared/level/components/LevelStatValues'
+import type { StarBreakdown } from '@/shared/level/components/StarScoreChecklist'
 
-type PreviewMode = 'challenge-win' | 'challenge-loss'
+type PreviewMode = 'challenge-win' | 'challenge-loss' | 'challenge-active'
 
 function previewMode(value: string | null): PreviewMode {
-  return value === 'challenge-loss' ? 'challenge-loss' : 'challenge-win'
+  return value === 'challenge-loss' || value === 'challenge-active' ? value : 'challenge-win'
+}
+
+// Explicit server-shaped grade fixtures; production scoring stays on the API.
+const scoreFixtures: Record<number, StarBreakdown> = {
+  0: { stars: 0, available_stars: 0, counted_commands: 5, command_target: 2, graded_under_previous_rules: false, retry_count: 0, criteria: [
+    { key: 'clear', state: 'missed', reason: 'not_cleared' },
+    { key: 'command_target', state: 'missed', reason: 'not_cleared' },
+    { key: 'retry_allowance', state: 'missed', reason: 'not_cleared' },
+  ] },
+  1: { stars: 1, available_stars: 1, counted_commands: 3, command_target: 2, graded_under_previous_rules: false, retry_count: 0, criteria: [
+    { key: 'clear', state: 'earned', reason: null },
+    { key: 'command_target', state: 'missed', reason: 'command_target_exceeded' },
+    { key: 'retry_allowance', state: 'missed', reason: 'command_target_exceeded' },
+  ] },
+  2: { stars: 2, available_stars: 2, counted_commands: 2, command_target: 2, graded_under_previous_rules: false, retry_count: 2, criteria: [
+    { key: 'clear', state: 'earned', reason: null },
+    { key: 'command_target', state: 'earned', reason: null },
+    { key: 'retry_allowance', state: 'missed', reason: 'retry_allowance_exceeded' },
+  ] },
+  3: { stars: 3, available_stars: 3, counted_commands: 2, command_target: 2, graded_under_previous_rules: false, retry_count: 0, criteria: [
+    { key: 'clear', state: 'earned', reason: null },
+    { key: 'command_target', state: 'earned', reason: null },
+    { key: 'retry_allowance', state: 'earned', reason: null },
+  ] },
 }
 
 const challengeRun = {
@@ -69,20 +95,30 @@ function OutcomePreviewPage() {
   const [searchParams] = useSearchParams()
   const [mode, setMode] = useState<PreviewMode>(() => previewMode(searchParams.get('mode')))
   const [replay, setReplay] = useState(0)
+  const [open, setOpen] = useState(true)
   const isLoss = mode.endsWith('loss')
-  const stars = isLoss ? 0 : normalizeStarScore(Number(searchParams.get('stars') ?? 3))
+  const active = mode === 'challenge-active'
+  const grade = isLoss ? 0 : Math.max(1, normalizeStarScore(Number(searchParams.get('stars') ?? 3)))
+  const fixture = scoreFixtures[grade]
+  const breakdown: StarBreakdown = active ? {
+    ...fixture, stars: 0,
+    criteria: fixture.criteria.map((criterion) => criterion.state === 'earned' ? { ...criterion, state: 'pending' } : criterion),
+  } : fixture
+  const stars = active ? 0 : grade
 
   const activeChallengeRun = {
     ...challengeRun,
-    status: isLoss ? 'failed' : 'completed',
+    status: active ? 'started' : isLoss ? 'failed' : 'completed',
     stars,
+    star_breakdown: breakdown,
     counts: {
       ...challengeRun.counts,
-      counted_action_total: isLoss ? 5 : 2,
-      remaining_counted_commands: isLoss ? 0 : 3,
+      counted_action_total: breakdown.counted_commands,
+      total_attempts: breakdown.counted_commands + 1,
+      remaining_counted_commands: 5 - breakdown.counted_commands,
       max_reached: isLoss,
     },
-    mastery_progress: { cleared: !isLoss, stars },
+    mastery_progress: { cleared: !active && !isLoss, stars },
     next_difficulty: isLoss ? null : challengeRun.next_difficulty,
   } as ChallengeRun
 
@@ -97,13 +133,15 @@ function OutcomePreviewPage() {
           <p className="text-xs text-muted-foreground">Dev fixture for the game result overlay.</p>
         </div>
         <div className="ml-auto flex flex-wrap gap-2">
-          {(['challenge-win', 'challenge-loss'] as const).map((item) => (
+          <StarTriplet count={active ? breakdown.available_stars : stars} mode="challenge" breakdown={breakdown} active={active} />
+          <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)}>Show result</Button>
+          {(['challenge-win', 'challenge-loss', 'challenge-active'] as const).map((item) => (
             <Button
               key={item}
               type="button"
               size="sm"
               variant={mode === item ? 'default' : 'outline'}
-              onClick={() => setMode(item)}
+              onClick={() => { setMode(item); setOpen(true) }}
             >
               {item.replace('-', ' ')}
             </Button>
@@ -138,9 +176,9 @@ function OutcomePreviewPage() {
 
       <ChallengeOutcomeModal
         key={`${mode}-${stars}-${replay}`}
-        open
+        open={open && !active}
         run={activeChallengeRun}
-        onClose={() => undefined}
+        onClose={() => setOpen(false)}
         onBackToMap={() => setMode('challenge-win')}
         onRetry={() => setReplay(value => value + 1)}
       />

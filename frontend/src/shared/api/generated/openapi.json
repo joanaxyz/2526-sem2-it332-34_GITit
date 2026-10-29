@@ -3156,7 +3156,7 @@
                 "type": "object",
                 "properties": {
                     "key": {
-                        "$ref": "#/components/schemas/KeyEnum"
+                        "$ref": "#/components/schemas/Key7e0Enum"
                     },
                     "label": {
                         "type": "string"
@@ -3180,7 +3180,7 @@
                 "description": "Reject misspelled or stale fields instead of silently ignoring them.",
                 "properties": {
                     "key": {
-                        "$ref": "#/components/schemas/KeyEnum"
+                        "$ref": "#/components/schemas/Key7e0Enum"
                     },
                     "enabled": {
                         "type": "boolean"
@@ -3906,6 +3906,14 @@
                     "stars": {
                         "type": "integer"
                     },
+                    "star_breakdown": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StarBreakdownResponse"
+                            }
+                        ],
+                        "nullable": true
+                    },
                     "status": {
                         "$ref": "#/components/schemas/GameplayRunStatus"
                     },
@@ -3959,6 +3967,7 @@
                     "id",
                     "replay",
                     "repository_state",
+                    "star_breakdown",
                     "stars",
                     "status",
                     "tips",
@@ -4071,6 +4080,14 @@
                     "stars": {
                         "type": "integer"
                     },
+                    "star_breakdown": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/StarBreakdownResponse"
+                            }
+                        ],
+                        "nullable": true
+                    },
                     "status": {
                         "$ref": "#/components/schemas/GameplayRunStatus"
                     },
@@ -4181,6 +4198,7 @@
                     "scaffolding",
                     "scenario",
                     "scenario_context",
+                    "star_breakdown",
                     "stars",
                     "status",
                     "steps",
@@ -4334,6 +4352,9 @@
                     "stars": {
                         "type": "integer"
                     },
+                    "star_breakdown": {
+                        "$ref": "#/components/schemas/StarBreakdownResponse"
+                    },
                     "status": {
                         "$ref": "#/components/schemas/GameplayRunStatus"
                     },
@@ -4387,6 +4408,7 @@
                     "id",
                     "replay",
                     "repository_state",
+                    "star_breakdown",
                     "stars",
                     "status",
                     "visualization"
@@ -4448,6 +4470,9 @@
                     },
                     "stars": {
                         "type": "integer"
+                    },
+                    "star_breakdown": {
+                        "$ref": "#/components/schemas/StarBreakdownResponse"
                     },
                     "status": {
                         "$ref": "#/components/schemas/GameplayRunStatus"
@@ -4561,6 +4586,7 @@
                     "scaffolding",
                     "scenario_context",
                     "sibling_levels",
+                    "star_breakdown",
                     "stars",
                     "status",
                     "steps",
@@ -5849,7 +5875,7 @@
                     "token"
                 ]
             },
-            "KeyEnum": {
+            "Key7e0Enum": {
                 "enum": [
                     "shop-purchases"
                 ],
@@ -6404,6 +6430,16 @@
                     "value"
                 ]
             },
+            "ReasonEnum": {
+                "enum": [
+                    "not_cleared",
+                    "command_target_exceeded",
+                    "retry_allowance_exceeded",
+                    "previous_scoring_rules"
+                ],
+                "type": "string",
+                "description": "* `not_cleared` - not_cleared\n* `command_target_exceeded` - command_target_exceeded\n* `retry_allowance_exceeded` - retry_allowance_exceeded\n* `previous_scoring_rules` - previous_scoring_rules"
+            },
             "Register": {
                 "type": "object",
                 "properties": {
@@ -6655,6 +6691,96 @@
                 ],
                 "type": "string",
                 "description": "* `level_page` - level_page\n* `retry` - retry"
+            },
+            "StarBreakdownResponse": {
+                "type": "object",
+                "properties": {
+                    "stars": {
+                        "type": "integer",
+                        "maximum": 3,
+                        "minimum": 0
+                    },
+                    "available_stars": {
+                        "type": "integer",
+                        "maximum": 3,
+                        "minimum": 0
+                    },
+                    "counted_commands": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "command_target": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "retry_count": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "graded_under_previous_rules": {
+                        "type": "boolean"
+                    },
+                    "criteria": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/StarCriterionResponse"
+                        }
+                    }
+                },
+                "required": [
+                    "available_stars",
+                    "command_target",
+                    "counted_commands",
+                    "criteria",
+                    "graded_under_previous_rules",
+                    "retry_count",
+                    "stars"
+                ]
+            },
+            "StarCriterionResponse": {
+                "type": "object",
+                "properties": {
+                    "key": {
+                        "$ref": "#/components/schemas/StarCriterionResponseKeyEnum"
+                    },
+                    "state": {
+                        "$ref": "#/components/schemas/StateEnum"
+                    },
+                    "reason": {
+                        "nullable": true,
+                        "oneOf": [
+                            {
+                                "$ref": "#/components/schemas/ReasonEnum"
+                            },
+                            {
+                                "$ref": "#/components/schemas/NullEnum"
+                            }
+                        ]
+                    }
+                },
+                "required": [
+                    "key",
+                    "reason",
+                    "state"
+                ]
+            },
+            "StarCriterionResponseKeyEnum": {
+                "enum": [
+                    "clear",
+                    "command_target",
+                    "retry_allowance"
+                ],
+                "type": "string",
+                "description": "* `clear` - clear\n* `command_target` - command_target\n* `retry_allowance` - retry_allowance"
+            },
+            "StateEnum": {
+                "enum": [
+                    "earned",
+                    "pending",
+                    "missed"
+                ],
+                "type": "string",
+                "description": "* `earned` - earned\n* `pending` - pending\n* `missed` - missed"
             },
             "StatsActivityResponse": {
                 "type": "object",

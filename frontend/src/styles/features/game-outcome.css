@@ -76,6 +76,7 @@
 
 /* The dimmed game scene is the result surface. */
 .game-outcome-backdrop {
+  align-items: safe center;
   background: hsl(var(--background) / 0.76);
   backdrop-filter: blur(4px) saturate(0.8);
   -webkit-backdrop-filter: blur(4px) saturate(0.8);

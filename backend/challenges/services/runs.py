@@ -1,10 +1,13 @@
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 
 from challenges.models import ChallengeRun, ChallengeTrial
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
+    SESSION_STATUS_ABANDONED,
     SESSION_STATUS_COMPLETED,
+    SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Conflict, Locked
@@ -81,6 +84,15 @@ class ChallengeRunService:
         if active and (not prior_run or active.id != prior_run.id):
             self.discard(run=active)
 
+        if prior_run is None and not is_replay:
+            latest = (
+                ChallengeRun.objects.filter(player=player, challenge_trial=trial, is_replay=False)
+                .order_by("-started_at", "-id")
+                .first()
+            )
+            if latest and latest.status == SESSION_STATUS_FAILED and not latest.retry_runs.exists():
+                prior_run = latest
+
         selector = VariantSelectionService()
         published_variants = list(
             trial.variants.filter(is_published=True).order_by("semantic_key", "id")
@@ -109,8 +121,22 @@ class ChallengeRunService:
             retry_index = 0
         prior_reference = prior_run
         if prior_run and prior_run.status == SESSION_STATUS_STARTED:
+            if is_replay and not prior_run.steps.exists():
+                retry_index = prior_run.retry_index
             self.discard(run=prior_run)
             prior_reference = None
+
+        if not is_replay:
+            # Persisted history owns grading; omitted or stale prior IDs must
+            # never restore retry allowance. Empty discards do not count.
+            attempts = ChallengeRun.objects.filter(
+                player=player, challenge_trial=trial, is_replay=False
+            )
+            retry_index = attempts.filter(status=SESSION_STATUS_FAILED).count() + (
+                attempts.filter(status=SESSION_STATUS_ABANDONED, steps__isnull=False)
+                .distinct()
+                .count()
+            )
 
         try:
             run = ChallengeRun.objects.create(
@@ -192,5 +218,15 @@ class ChallengeRunService:
             raise Locked("Free play is available only after completing this challenge trial.")
         return completion.challenge_run.selected_variant
 
+    @transaction.atomic
     def discard(self, *, run: ChallengeRun) -> bool:
-        return discard_started_run(run)
+        """Keep submitted attempts as retry evidence; empty starts stay free."""
+        locked = ChallengeRun.objects.select_for_update().filter(pk=run.pk).first()
+        if locked is None or locked.status != SESSION_STATUS_STARTED:
+            return False
+        if not locked.steps.exists():
+            return discard_started_run(locked)
+        locked.status = SESSION_STATUS_ABANDONED
+        locked.ended_at = timezone.now()
+        locked.save(update_fields=["status", "ended_at"])
+        return True

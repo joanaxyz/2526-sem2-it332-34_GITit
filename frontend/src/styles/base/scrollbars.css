@@ -38,6 +38,12 @@
 }
 
 /* Compact workspace panes use a 4px thumb inside a 6px scroll track. */
+.game-outcome-backdrop {
+  --scrollbar-track: transparent;
+  --scrollbar-thumb: hsl(var(--foreground) / 0.22);
+  --scrollbar-thumb-hover: hsl(var(--foreground) / 0.4);
+}
+
 .gameplay-workspace .app-scrollbar {
   --scrollbar-size: 0.375rem;
   --scrollbar-thumb-inset: 1px;

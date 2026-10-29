@@ -46,6 +46,7 @@ CHALLENGE_RUN_KEYS = {
     "scenario_context",
     "sibling_levels",
     "stars",
+    "star_breakdown",
     "status",
     "steps",
     "story",
@@ -70,6 +71,7 @@ CHALLENGE_COMMAND_BASE_RUN_KEYS = {
     "replay",
     "repository_state",
     "stars",
+    "star_breakdown",
     "status",
     "visualization",
 }
