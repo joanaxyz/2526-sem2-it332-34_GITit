@@ -63,7 +63,10 @@ Before starting, prepare:
 - PostgreSQL 16 or newer. A managed database with automated backups is
   strongly recommended.
 - Redis 7 or newer. It is used for shared authentication revocation, caching,
-  and throttling across workers and replicas.
+  and throttling across workers and replicas. If Redis becomes unreachable, the
+  API keeps serving from PostgreSQL: rate limits and the login lockout pause,
+  GitHub and Google sign-in fails, and `/api/health/ready/` reports `degraded`
+  until Redis is back.
 - TLS termination at the host proxy or platform load balancer.
 - SMTP credentials, or an HTTPS email API key such as Brevo when the host
   blocks SMTP, if password-reset email must work.
