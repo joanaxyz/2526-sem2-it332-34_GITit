@@ -33,7 +33,7 @@ function tourSteps(mode: WorkspaceTourMode, repoGraphInDrawer: boolean) {
       selector: '[data-tour-target="command-budget"]',
       icon: TerminalSquare,
       title: 'Watch the command limit',
-      body: 'Commands shows how many commands you have used and the most you can use. Finish before you run out. The Star target is your command goal for a higher score.',
+      body: 'Commands shows how many commands you have used and the most you can use. Finish on or before the last allowed command. The Star target earns 3 stars; the generous target earns 2. Retries never reduce stars.',
       placement: 'bottom',
     },
     {

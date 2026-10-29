@@ -1,3 +1,4 @@
+import { CommandComparison } from '@/shared/level/components/CommandComparison'
 import { Map, RefreshCcw, Repeat2, RotateCcw, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, XCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
@@ -161,7 +162,8 @@ export function ChallengeOutcomeModal({
       stats={stats}
       headerActions={headerActions}
     >
-      {run.star_breakdown ? <StarScoreChecklist breakdown={run.star_breakdown} savedStars={run.completion?.stars} /> : null}
+      {!isFailed ? <CommandComparison comparison={run.command_comparison} /> : null}
+      {run.star_breakdown ? <StarScoreChecklist variant="result" breakdown={run.star_breakdown} savedStars={run.completion?.stars} /> : null}
     </GameOutcomeModal>
   )
 }

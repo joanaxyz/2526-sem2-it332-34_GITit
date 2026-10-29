@@ -65,12 +65,22 @@ class RuntimeStepResponseSerializer(serializers.Serializer):
 
 
 class StarCriterionResponseSerializer(serializers.Serializer):
-    key = serializers.ChoiceField(choices=("clear", "command_target", "retry_allowance"))
+    key = serializers.ChoiceField(
+        choices=(
+            "clear",
+            "command_target",
+            "retry_allowance",
+            "generous_target",
+            "efficient_target",
+        )
+    )
     state = serializers.ChoiceField(choices=("earned", "pending", "missed"))
     reason = serializers.ChoiceField(
         choices=(
             "not_cleared",
             "command_target_exceeded",
+            "generous_target_exceeded",
+            "efficient_target_exceeded",
             "retry_allowance_exceeded",
             "previous_scoring_rules",
         ),
@@ -83,6 +93,9 @@ class StarBreakdownResponseSerializer(serializers.Serializer):
     available_stars = serializers.IntegerField(min_value=0, max_value=3)
     counted_commands = serializers.IntegerField(min_value=0)
     command_target = serializers.IntegerField(min_value=0)
+    generous_target = serializers.IntegerField(min_value=1, required=False)
+    maximum_commands = serializers.IntegerField(min_value=1, required=False)
+    scoring_policy_version = serializers.IntegerField(min_value=1, required=False)
     retry_count = serializers.IntegerField(min_value=0)
     graded_under_previous_rules = serializers.BooleanField()
     criteria = StarCriterionResponseSerializer(many=True)
@@ -132,3 +145,9 @@ class CommandFormPreviewResponseSerializer(serializers.Serializer):
     is_playable = serializers.BooleanField()
     skill = CommandFormPreviewSkillResponseSerializer()
     command_preview = serializers.DictField()
+
+
+class CommandComparisonResponseSerializer(serializers.Serializer):
+    learner_count = serializers.IntegerField(min_value=0)
+    example_count = serializers.IntegerField(min_value=0)
+    relation = serializers.ChoiceField(choices=("fewer", "equal", "more"))

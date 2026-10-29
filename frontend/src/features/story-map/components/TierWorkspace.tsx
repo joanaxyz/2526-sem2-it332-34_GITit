@@ -317,6 +317,7 @@ export function TierWorkspace() {
         />
       ) : null}
       <TierOutcomeModal
+        onContinue={continueTier}
         open={outcomeModalOpen}
         run={run}
         onClose={() => {

@@ -113,6 +113,7 @@ function createAndSwitchBranch(state: MutableRepositoryState, name: string, star
 
 export function gitCheckout(state: MutableRepositoryState, parsed: ParsedGitCommand): CommandOutcome {
   if (hasOption(parsed, '-b')) return createAndSwitchBranch(state, parsed.args[0], parsed.args[1])
+  if (!hasOption(parsed, '--ours') && !hasOption(parsed, '--theirs')) return gitSwitch(state, parsed)
   const side = hasOption(parsed, '--ours') ? 'ours' : 'theirs'
   if (!state.conflicts?.length) {
     throw new SimulatorCommandError('fatal: --ours/--theirs can only be used while resolving merge conflicts.')

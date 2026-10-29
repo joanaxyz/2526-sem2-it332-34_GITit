@@ -19,6 +19,7 @@ export type GameOutcomeStatTileProps = {
   icon?: ComponentType<{ className?: string }>
   /** Neon icon art (battle-outcome assets); wins over `icon` when set. */
   iconSrc?: string
+  compact?: boolean
   style?: HTMLAttributes<HTMLDivElement>['style']
 }
 
@@ -39,6 +40,7 @@ export function GameOutcomeStatTile({
   icon: Icon,
   iconSrc,
   style,
+  compact = false,
 }: GameOutcomeStatTileProps) {
   const animatedNum = useCountUp(numerator, 900, animationDelay + 50)
   const hasBar = denominator !== undefined && denominator > 0
@@ -76,13 +78,13 @@ export function GameOutcomeStatTile({
           ) : null}
         </div>
 
-        <div className={cn('game-outcome-stat-bar-track', !hasBar && 'is-empty')} aria-hidden="true">
+        {!compact ? <div className={cn('game-outcome-stat-bar-track', !hasBar && 'is-empty')} aria-hidden="true">
           {hasBar ? (
             <div className="game-outcome-stat-bar-fill" style={{ transform: `scaleX(${fillPercent / 100})` }} />
           ) : null}
-        </div>
+        </div> : null}
 
-        <p className="game-outcome-stat-caption">{helper}</p>
+        {helper ? <p className="game-outcome-stat-caption">{helper}</p> : null}
       </div>
     </div>
   )

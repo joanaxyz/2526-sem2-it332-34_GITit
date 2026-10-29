@@ -14,11 +14,11 @@ export function StarRulesContent({ mode = 'tier' }: { mode?: LevelTourMode }) {
   return (
     <div className="star-rules">
       <dl>
-        <div><dt>3 stars</dt><dd>Finish within the Star target with no more than one retry.</dd></div>
-        <div><dt>2 stars</dt><dd>Finish within the Star target after two or more retries.</dd></div>
-        <div><dt>1 star</dt><dd>Finish using more commands than the Star target.</dd></div>
+        <div><dt>3 stars</dt><dd>Finish within the efficient command target.</dd></div>
+        <div><dt>2 stars</dt><dd>Finish above the efficient target but within the generous target.</dd></div>
+        <div><dt>1 star</dt><dd>Finish above the generous target but within the maximum allowance.</dd></div>
       </dl>
-      <p>The Star target is your command goal. Git commands that change state and invalid commands count. Valid checks like <code>git status</code>, file edits and opening the command guide are free.</p>
+      <p>Each attempt is scored separately. Retries and restarts never reduce stars. Typos, failed commands, recovery and repeated Git actions count. Valid checks like <code>git status</code>, file edits and opening the command guide are free.</p>
       {mode === 'adventure' ? (
         <p>Clear every scenario; your lowest scenario score becomes your level score. Opening the command guide never costs a star.</p>
       ) : null}

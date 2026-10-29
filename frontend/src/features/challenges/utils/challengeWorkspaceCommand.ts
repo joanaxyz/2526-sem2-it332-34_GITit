@@ -64,7 +64,8 @@ export function createChallengeWorkspaceCommandHandler({
         storyWorldSlug: runStorySlug(queryClient, runId),
       }))
     }
-    const counts = queryClient.getQueryData<ChallengeRun>(queryKeys.challengeRun(runId))?.counts
+    const currentRun = queryClient.getQueryData<ChallengeRun>(queryKeys.challengeRun(runId))
+    const counts = currentRun?.counts
     let predicted: CommandSubmissionOutcome | null = null
 
     const execution = mutation.mutate(command, {
@@ -105,6 +106,7 @@ export function createChallengeWorkspaceCommandHandler({
       ? predictLocalOutcome(execution, {
           counted: counts.counted_action_total,
           max: counts.maximum_counted_commands,
+          scoringPolicyVersion: currentRun?.policy.scoring_policy_version,
         })
       : null
     if (predicted) resolveTurn(predicted)

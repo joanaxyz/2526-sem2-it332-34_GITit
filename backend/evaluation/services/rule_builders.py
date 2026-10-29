@@ -8,7 +8,7 @@ def _canonical_form(command: str) -> str:
     git switch -c <branch> [<start>]; normalize both to the switch form so
     command_matches() accepts either spelling.
     """
-    normalized = normalize_command(command).lower()
+    normalized = normalize_command(command)
     # "git checkout -b <branch>" is equivalent to "git switch -c <branch>".
     parts = normalized.split()
     if len(parts) >= 3 and parts[1] == "checkout" and parts[2] == "-b":
@@ -21,7 +21,13 @@ def _canonical_form(command: str) -> str:
 def command_matches(executed: str, required: str) -> bool:
     executed = _canonical_form(executed)
     required = _canonical_form(required)
-    return executed == required or executed.startswith(f"{required} ")
+    import shlex
+
+    try:
+        executed_parts, required_parts = shlex.split(executed), shlex.split(required)
+    except ValueError:
+        return False
+    return executed_parts[: len(required_parts)] == required_parts
 
 
 def _each(spec: dict, key: str, rule_type: str, field: str) -> list[dict]:

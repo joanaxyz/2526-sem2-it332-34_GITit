@@ -1,6 +1,3 @@
-from django.db import models
-from django.db.models import Q
-
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
@@ -11,6 +8,8 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from common.models import VariantBase
+from django.db import models
+from django.db.models import Q
 
 
 class AdventureLevel(models.Model):
@@ -132,6 +131,7 @@ class AdventureLevelTierScenario(models.Model):
         related_name="adventure_level_tier_scenarios",
         blank=True,
     )
+    generous_counted_commands = models.PositiveIntegerField(null=True, blank=True)
     min_counted_commands = models.PositiveIntegerField(default=1)
     max_counted_commands = models.PositiveIntegerField(default=4)
     objective_checks = models.JSONField(default=list, blank=True)
@@ -244,6 +244,11 @@ class AdventureLevelTierRun(models.Model):
     # the "Changed variant" context-panel tag; not used by any grading logic.
     changed_variant = models.BooleanField(default=False)
     stars = models.PositiveSmallIntegerField(default=0)
+    scoring_policy_version = models.PositiveSmallIntegerField(default=1, db_default=1)
+    generous_counted_commands = models.PositiveIntegerField(null=True, blank=True)
+    example_counted_commands = models.PositiveIntegerField(null=True, blank=True)
+    required_techniques = models.JSONField(default=list, blank=True)
+    verified_techniques = models.JSONField(default=list, blank=True)
     min_counted_commands = models.PositiveIntegerField(default=1)
     max_counted_commands = models.PositiveIntegerField(default=4)
     started_at = models.DateTimeField(auto_now_add=True)
@@ -265,6 +270,15 @@ class AdventureLevelTierRun(models.Model):
             models.Index(fields=["player", "status"], name="advtier_run_plyr_stat_idx"),
         ]
         constraints = [
+            models.CheckConstraint(
+                condition=Q(scoring_policy_version=1)
+                | (
+                    Q(generous_counted_commands__isnull=False)
+                    & Q(generous_counted_commands__gt=models.F("min_counted_commands"))
+                    & Q(max_counted_commands__gt=models.F("generous_counted_commands"))
+                ),
+                name="adv_run_v2_targets",
+            ),
             models.UniqueConstraint(
                 fields=["player", "tier"],
                 condition=Q(status=SESSION_STATUS_STARTED),

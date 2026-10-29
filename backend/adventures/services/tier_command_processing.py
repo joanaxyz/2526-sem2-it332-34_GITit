@@ -1,10 +1,3 @@
-from django.db import transaction
-from django.db.models import Max
-from django.utils import timezone
-
-from adventures.models import AdventureLevelTierProgress, AdventureLevelTierRun, SkillMastery
-from adventures.rewards import award_tier_reward
-from adventures.tier_scenarios import cleared_slugs, next_scenario, published_scenarios
 from common.constants import (
     COMMAND_COUNTED,
     DIFFICULTY_EASY,
@@ -28,6 +21,10 @@ from common.runtime import (
 )
 from common.services.performance import timing
 from curriculum.services import ChapterChestService
+from curriculum.services.techniques import record_verified_techniques
+from django.db import transaction
+from django.db.models import Max
+from django.utils import timezone
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from practice.models import CommandStep
 from practice.services.scaffolding import FeedbackGenerationService, ScaffoldingService
@@ -45,6 +42,10 @@ from tutoring.services.commands import (
 )
 from tutoring.services.forms import forms_used_by
 from tutoring.services.planner import PlannerReads, plan_introduction
+
+from adventures.models import AdventureLevelTierProgress, AdventureLevelTierRun, SkillMastery
+from adventures.rewards import award_tier_reward
+from adventures.tier_scenarios import cleared_slugs, next_scenario, published_scenarios
 
 from .selectors import form_solve_targets
 from .skill_learning import learn_from_command
@@ -88,6 +89,7 @@ class AdventureLevelTierCommandProcessingService:
             timing_label="adventure_tier.command",
             run_id=run.id,
             expected_client_revision=run.total_attempts,
+            scoring_policy_version=run.scoring_policy_version,
         )
         previous_state = execution.previous_state
         # Both tutor plans (before the command and for its response) share one
@@ -116,6 +118,8 @@ class AdventureLevelTierCommandProcessingService:
         initial_evaluation = evaluator.evaluate(
             CompletionEvaluationContext(
                 variant=run.selected_variant,
+                required_techniques=run.required_techniques,
+                verified_techniques=[],
                 next_state=initial_state,
                 executed_commands=[],
                 next_state_hash=state_tools.state_hash(initial_state),
@@ -125,6 +129,8 @@ class AdventureLevelTierCommandProcessingService:
         previous_evaluation = evaluator.evaluate(
             CompletionEvaluationContext(
                 variant=run.selected_variant,
+                required_techniques=run.required_techniques,
+                verified_techniques=run.verified_techniques,
                 next_state=previous_state,
                 executed_commands=previous_history,
                 next_state_hash=state_tools.state_hash_for_normalized(previous_state),
@@ -138,6 +144,7 @@ class AdventureLevelTierCommandProcessingService:
         )
         rules_passing = previous_rules_passing
 
+        record_verified_techniques(run, execution)
         if command_result.processed:
             with span("evaluate"):
                 state_hash = state_tools.state_hash_for_normalized(next_state)
@@ -145,6 +152,8 @@ class AdventureLevelTierCommandProcessingService:
                 evaluation = evaluator.evaluate(
                     CompletionEvaluationContext(
                         variant=run.selected_variant,
+                        required_techniques=run.required_techniques,
+                        verified_techniques=run.verified_techniques,
                         next_state=next_state,
                         executed_commands=executed_commands,
                         next_state_hash=state_hash,
@@ -255,6 +264,7 @@ class AdventureLevelTierCommandProcessingService:
             )
             update_fields.update({"status", "ended_at", "failure_reason"})
 
+        update_fields.add("verified_techniques")
         with span("run_save"):
             run.save(update_fields=sorted(update_fields))
         if run.is_transfer and (solved or failed):
@@ -331,6 +341,8 @@ class AdventureLevelTierCommandProcessingService:
                 counted_commands=run.counted_action_total,
                 budget=run.min_counted_commands,
                 retry_count=run.retry_index,
+                generous_budget=run.generous_counted_commands,
+                policy_version=run.scoring_policy_version,
             )
         )
         rewards = None

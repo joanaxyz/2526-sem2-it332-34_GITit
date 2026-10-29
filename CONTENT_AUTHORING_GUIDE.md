@@ -18,7 +18,7 @@ This guide explains how to author curriculum content that teaches Git through sc
 4. **Challenges must change repository state.** A challenge trial should visibly change commits, branches, refs, or HEAD.
 5. **Author the ideal scenario.** If the simulator lacks a needed behavior, improve the simulator and verifier rather than weakening the curriculum.
 6. **Variants are the same problem.** A retry must not hand the learner a different task. At Easy, variants change only names, paths, messages and story: the same steps, options, kinds of argument and starting repository. Medium may also change counts and option values (two files or three, `--depth 1` or `2`). Hard may also change the starting repository (distractors, which candidate is right). A variant never adds a step, an option or a kind of argument its siblings lack, such as an SSH address, a target folder, a start point or a folder pathspec. A case that differs becomes its own scenario or stays unplaced.
-7. **Grade the repository, not the route.** Every requirement describes the resulting state: commits, branches, refs, files, config, remotes, stash, reflog. Do not require typed commands or check how an operation ran; an equivalent Git route must pass. A task that ends where it started (re-running `git init`, a stash round trip) needs evidence in state, such as the reflog entry a branch switch leaves, or it cannot be graded. The objective checklist promises only what the requirements check.
+7. **Grade the repository and explicit teaching requirements.** Every requirement describes the resulting state: commits, branches, refs, files, config, remotes, stash, reflog. Accept equivalent Git routes by default. When the task explicitly requires a technique, declare it in seed_data/source/technique_requirements.json (or variant parameter_context.required_techniques for custom content) and display it in the task; new runs check backend-verified operation evidence alongside the outcome. Never require an exact answer-key string. A task that ends where it started (re-running `git init`, a stash round trip) needs evidence in state, such as the reflog entry a branch switch leaves, or it cannot be graded. The objective checklist promises only what the requirements check.
 8. **Start plain, then bring it back.** A level's first Easy scenario uses the plainest form of its command (`git init` before `git init -b`). Each scenario adds one new thing, so the guide shows one lesson at a time. Whatever Easy introduces comes back, unguided, later in Easy; whatever Medium introduces comes back in Medium or Hard.
 
 ## Adventure Authoring
@@ -254,3 +254,30 @@ python scripts/check_seed_targets.py
 python scripts/check_generated_targets_current.py
 cd backend && python -m pytest curriculum/tests/test_curriculum_chapter_books.py curriculum/tests/test_curriculum_seed_idempotency.py curriculum/tests/test_star_target_reachability.py curriculum/tests/test_solution_replay_guard.py challenges/tests/test_module_challenge_gates.py -q
 ```
+
+
+## Stars and alternative-solution audit
+
+New runs snapshot scoring policy 2: complete within the efficient target for 3
+stars, the generous target for 2, or the maximum allowance for 1. A successful last
+command wins before the limit is enforced. Retries never reduce stars. Version-1
+runs retain their saved thresholds and grading. Completion rewards remain once-only.
+
+Variant parameters accept minimum_counted_commands, generous_counted_commands
+and maximum_counted_commands. Efficient < generous < maximum is mandatory.
+Absent an override, generous is the ceiling midpoint of efficient and maximum;
+maximum is raised to efficient + 2 if needed. Audited valid routes set a lower
+bound for the efficient target. Reference solution length remains independent.
+
+Typos, unsuccessful Git commands and repeated/recovery actions count. Valid
+inspections are free; successful shell/file-editor operations remain free to
+match the Project Files editor. Blank submissions are free.
+
+Run python manage.py audit_solutions after changing scenarios or simulator
+behavior. Commit solution_audit.json and run audit_solutions --check before
+delivery. The report covers every published story/gate variant, executable
+reference and candidate alternatives, backend verification, technique evidence,
+negative state checks, command costs and unpublished IDs. Candidate failures are
+review evidence, not a whitelist: incomplete snippets may fail legitimately.
+Concrete commands in accepted_alternatives are replayed; parameterized prose
+remains documented context rather than executable acceptance logic.

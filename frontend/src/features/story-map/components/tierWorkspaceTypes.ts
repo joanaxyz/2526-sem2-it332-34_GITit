@@ -84,11 +84,14 @@ export type TierRunResponse = Omit<
     next_scenario: { index: number; slug: string; title: string } | null
   }
   policy: {
+    generous_counted_commands?: number | null
+    scoring_policy_version?: number
     min_counted_commands: number
     max_counted_commands: number
   }
   counts: {
     counted_action_total: number
+    generous_counted_commands?: number | null
     minimum_counted_commands: number
     maximum_counted_commands: number
     non_counted_diagnostic_total: number
