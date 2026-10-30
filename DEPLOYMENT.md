@@ -258,13 +258,18 @@ updates the built-in curriculum:
 
 ```bash
 docker compose -f compose.production.yml exec backend \
-  python manage.py seed_curriculum --validate
+  python manage.py seed_curriculum
 docker compose -f compose.production.yml exec backend \
   python manage.py seed_command_library
 ```
 
-Do not use `seed_curriculum --reset` in production. It removes dependent
-practice and progress rows and is disabled by the default production settings.
+Neither command takes options of its own. `seed_curriculum` updates curriculum
+rows in place and has no reset mode, so it keeps practice and progress rows.
+Runs already in progress keep the requirements they started with; only new runs
+pick up a reseeded variant.
+
+Reseed only after the release that needs the new curriculum is live. A variant
+that requires a technique the running code cannot yet detect cannot be completed.
 
 Create the first administrator interactively if needed:
 
