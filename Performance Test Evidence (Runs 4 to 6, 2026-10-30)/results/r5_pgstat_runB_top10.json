@@ -1,0 +1,62 @@
+[
+ {
+  "calls": 1503,
+  "total_ms": 462.83,
+  "mean_ms": 0.308,
+  "query": "SELECT \"adventures_adventureleveltierrun\".\"id\", \"adventures_adventureleveltierrun\".\"player_id\", \"adventures_adventureleveltierrun\".\"tier_id\", \"adventures_advent"
+ },
+ {
+  "calls": 252,
+  "total_ms": 314.75,
+  "mean_ms": 1.249,
+  "query": "SELECT DISTINCT \"curriculum_commandform\".\"id\", \"curriculum_commandform\".\"command_skill_id\", \"curriculum_commandskill\".\"sort_order\", \"curriculum_commandform\".\"so"
+ },
+ {
+  "calls": 252,
+  "total_ms": 218.91,
+  "mean_ms": 0.869,
+  "query": "SELECT \"adventures_adventureleveltierscenario_command_forms\".\"commandform_id\" AS \"command_forms\", COUNT(DISTINCT \"adventures_adventureleveltierscenario\".\"id\") A"
+ },
+ {
+  "calls": 1503,
+  "total_ms": 203.73,
+  "mean_ms": 0.136,
+  "query": "INSERT INTO \"practice_commandstep\" (\"challenge_run_id\", \"adventure_tier_run_id\", \"player_id\", \"command_text\", \"terminal_output\", \"result_category\", \"command_cla"
+ },
+ {
+  "calls": 1503,
+  "total_ms": 177.3,
+  "mean_ms": 0.118,
+  "query": "UPDATE \"adventures_adventureleveltierrun\" SET \"verified_techniques\" = $1::jsonb, \"total_attempts\" = $2, \"non_counted_diagnostic_total\" = $3 WHERE \"adventures_ad"
+ },
+ {
+  "calls": 1544,
+  "total_ms": 126.14,
+  "mean_ms": 0.082,
+  "query": "SELECT \"curriculum_commandform\".\"id\", \"curriculum_commandform\".\"command_skill_id\", \"curriculum_commandform\".\"chapter_id\", \"curriculum_commandform\".\"slug\", \"curr"
+ },
+ {
+  "calls": 2164,
+  "total_ms": 123.9,
+  "mean_ms": 0.057,
+  "query": "SELECT \"auth_user\".\"id\", \"auth_user\".\"password\", \"auth_user\".\"last_login\", \"auth_user\".\"is_superuser\", \"auth_user\".\"username\", \"auth_user\".\"first_name\", \"auth_u"
+ },
+ {
+  "calls": 1544,
+  "total_ms": 101.57,
+  "mean_ms": 0.066,
+  "query": "SELECT \"tutoring_commandguidehome\".\"id\", \"tutoring_commandguidehome\".\"teaching_key\", \"tutoring_commandguidehome\".\"scenario_id\", \"adventures_adventureleveltiersc"
+ },
+ {
+  "calls": 1544,
+  "total_ms": 66.45,
+  "mean_ms": 0.043,
+  "query": "SELECT \"curriculum_commandform\".\"id\", \"curriculum_commandform\".\"command_skill_id\", \"curriculum_commandform\".\"chapter_id\", \"curriculum_commandform\".\"slug\", \"curr"
+ },
+ {
+  "calls": 41,
+  "total_ms": 66.07,
+  "mean_ms": 1.611,
+  "query": "SELECT \"adventures_adventureleveltierrun\".\"id\", \"adventures_adventureleveltierrun\".\"player_id\", \"adventures_adventureleveltierrun\".\"tier_id\", \"adventures_advent"
+ }
+]

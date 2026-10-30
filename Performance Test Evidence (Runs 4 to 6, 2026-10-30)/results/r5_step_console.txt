@@ -1,0 +1,46 @@
+{
+  "window_seconds": 120.0,
+  "requests": 570,
+  "server_error_rate_pct": 0.0,
+  "error_rate_pct": 0.0,
+  "throughput_rps": 4.75,
+  "endpoints": {
+    "home_dashboard": {
+      "count": 73,
+      "statuses": {
+        "200": 73
+      },
+      "p50_ms": 992.5,
+      "p90_ms": 2258.0,
+      "p95_ms": 3395.8,
+      "p99_ms": 3887.8,
+      "mean_ms": 1237.5,
+      "max_ms": 3899.5
+    },
+    "home_me": {
+      "count": 73,
+      "statuses": {
+        "200": 73
+      },
+      "p50_ms": 239.9,
+      "p90_ms": 712.0,
+      "p95_ms": 1776.4,
+      "p99_ms": 2365.7,
+      "mean_ms": 418.9,
+      "max_ms": 3157.7
+    },
+    "submit_command": {
+      "count": 424,
+      "statuses": {
+        "200": 424
+      },
+      "p50_ms": 887.8,
+      "p90_ms": 2186.8,
+      "p95_ms": 2898.6,
+      "p99_ms": 3525.1,
+      "mean_ms": 1058.1,
+      "max_ms": 5015.4
+    }
+  }
+}
+login_failures 0 start_failures 0
