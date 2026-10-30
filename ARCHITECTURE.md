@@ -399,7 +399,7 @@ Rules:
 - Humans edit `MODULE_LEVELS` in `seed_curriculum`, the scenario Markdown compiled by `scripts/curriculum/import_revised_scenarios.py`, and the scenario plan, fixtures and gate composition under `backend/curriculum/seed_data/source/`.
 - `generate_targets` replays every module case and extension scenario, and fails unless the backend transition verifier accepts each replayed command (`solution_replay.verify_backend_transitions`), so a published answer key can always be submitted live.
 - Humans do not edit files under `backend/curriculum/seed_data/generated/` directly.
-- After changing a variant initial state, solution commands, or workspace-file edits, run `cd backend && python manage.py generate_targets`. It rewrites both generated targets and trajectories.
+- After changing a variant initial state, solution commands, or workspace-file edits, run `cd backend && python manage.py generate_targets`. It rewrites both generated targets and trajectories. Seeding counts each published tier variant's KPI command reference from its trajectory, so references never go stale after a reseed.
 - `scripts/check_seed_targets.py` is the cheap structural guard.
 - `scripts/check_generated_targets_current.py` is the full replay guard and requires `frontend/node_modules`. CI runs it in a dedicated Python + Node job.
 
