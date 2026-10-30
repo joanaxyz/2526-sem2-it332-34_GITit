@@ -169,6 +169,7 @@ export function layoutFor(
   preferredPlacement: WorkspaceTourPlacement,
   measuredCardHeight: number,
   preferredWidth: number = DESKTOP_CARD_WIDTH,
+  contentInset = 0,
 ): TourLayout {
   const viewportWidth = window.innerWidth
   const viewportHeight = window.innerHeight
@@ -177,6 +178,12 @@ export function layoutFor(
   // rather than being clamped against one edge.
   const cardWidth = available <= NARROW_VIEWPORT ? available : Math.min(preferredWidth, available)
   const target = rectSnapshot(targetRect)
+  // Center the visible bubble on its target while the mascot sits to its left.
+  const candidateAt = (placement: WorkspaceTourPlacement) => {
+    const candidate = candidateFor(placement, target, cardWidth, cardHeight)
+    if (placement === 'top' || placement === 'bottom') candidate.left -= contentInset / 2
+    return candidate
+  }
   // Above or below the target, a tall card is capped to the space there (its
   // content scrolls) instead of being pushed over the thing it explains. The
   // cap depends only on the target, so re-measuring the capped card is stable.
@@ -198,7 +205,7 @@ export function layoutFor(
 
   let card: RectSnapshot | null = null
   for (const placement of placements) {
-    const candidate = candidateFor(placement, target, cardWidth, cardHeight)
+    const candidate = candidateAt(placement)
     const nextCard = cardRect(candidate.left, candidate.top, cardWidth, cardHeight)
     if (cardFits(nextCard, target, viewportWidth, viewportHeight)) {
       card = nextCard
@@ -212,7 +219,7 @@ export function layoutFor(
   // a corner and dragging the connector across the whole workspace.
   card ??= placements
     .map((placement) => {
-      const candidate = candidateFor(placement, target, cardWidth, cardHeight)
+      const candidate = candidateAt(placement)
       const clamped = clampIntoViewport(
         candidate.left,
         candidate.top,

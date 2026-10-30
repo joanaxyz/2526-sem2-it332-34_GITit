@@ -30,7 +30,11 @@ export type WorkspaceTourSize = { width: number; height: number }
 export type WorkspaceTourPosition = { left: number; top: number }
 
 /** Layout, plus the main card's measured size when the cards float separately. */
-export type MeasuredWorkspaceTourLayout = TourLayout & { mainSize?: WorkspaceTourSize }
+export type MeasuredWorkspaceTourLayout = TourLayout & {
+  mainSize?: WorkspaceTourSize
+  /** The portrait is outside the visible bubble; connect to the bubble's edge. */
+  bubbleInset?: number
+}
 
 export type ResolvedWorkspaceTourStep = {
   step: WorkspaceTourStep

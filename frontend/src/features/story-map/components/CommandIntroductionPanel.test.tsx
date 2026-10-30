@@ -87,22 +87,56 @@ afterEach(() => {
 })
 
 describe('terminal-led command introduction', () => {
+  it('keeps both views in one guide on wide screens and supports keyboard switching', async () => {
+    vi.stubGlobal('matchMedia', vi.fn().mockReturnValue({
+      matches: true, addEventListener: vi.fn(), removeEventListener: vi.fn(),
+    }))
+    try {
+      setup()
+      const command = await screen.findByRole('tab', { name: 'Command' })
+      const changes = screen.getByRole('tab', { name: 'What changes' })
+      const guide = screen.getByRole('dialog', { name: 'Create and switch' })
+      expect(guide).not.toHaveClass('has-aside')
+      expect(screen.queryByRole('button', { name: 'Move what changes card' })).not.toBeInTheDocument()
+      expect(screen.getByText(/This guide appears automatically only once/)).toBeInTheDocument()
+      fireEvent.keyDown(command, { key: 'ArrowRight' })
+      expect(changes).toHaveFocus()
+      expect(changes).toHaveAttribute('aria-selected', 'true')
+      expect(screen.getByRole('tabpanel')).toHaveAttribute('aria-labelledby', changes.id)
+      expect(screen.getByRole('region', { name: 'What this command does' })).toBeInTheDocument()
+      fireEvent.keyDown(changes, { key: 'Home' })
+      expect(command).toHaveFocus()
+      expect(command).toHaveAttribute('aria-selected', 'true')
+      expect(screen.queryByRole('region', { name: 'What this command does' })).not.toBeInTheDocument()
+      fireEvent.keyDown(screen.getByRole('button', { name: 'Resize command guide' }), { key: 'ArrowRight' })
+      const reset = screen.getByRole('button', { name: 'Reset command guide size and position' })
+      expect(reset.closest('.mascot-message__sender')).not.toBeNull()
+      expect(guide.querySelector('.mascot-message__bubble')).not.toContainElement(reset)
+      fireEvent.click(reset)
+      expect(screen.queryByRole('button', { name: 'Reset command guide size and position' })).not.toBeInTheDocument()
+    } finally {
+      vi.unstubAllGlobals()
+    }
+  })
+
   it('introduces only the one form the repository needs, around the normal terminal', async () => {
     setup()
     expect(await screen.findByText('Syntax: git switch -c <branch>')).toBeInTheDocument()
-    expect(screen.getByText('Command guide')).toBeInTheDocument()
+    expect(screen.queryByText('Command guide')).not.toBeInTheDocument()
     expect(screen.getByTestId('workspace-tour-spotlight')).toBeInTheDocument()
     expect(screen.getByRole('dialog', { name: 'Create and switch' })).toBeInTheDocument()
     // Git-It speaks the guide from beside it; the card is its speech bubble.
     const guide = screen.getByRole('dialog', { name: 'Create and switch' })
+    expect(guide.querySelector('.workspace-tour__header')).toBeNull()
+    const mascot = screen.getByRole('button', { name: 'Close command guide' })
+    expect(mascot.closest('.mascot-message__sender')).not.toBeNull()
+    expect(mascot.querySelector('img')).not.toBeNull()
     expect(within(guide).getByRole('img', { name: 'Learning guide' })).toBeInTheDocument()
     expect(guide.querySelector('.mascot-message:not(.mascot-message--no-speaker) > .mascot-message__bubble')).not.toBeNull()
     expect(screen.getByRole('button', { name: 'Move command guide' })).toBeInTheDocument()
     expect(screen.getByRole('button', { name: 'Resize command guide' })).toBeInTheDocument()
-    expect(screen.getAllByRole('textbox')).toHaveLength(1)
-    // Its chat starts as a launcher, so nothing covers the card.
-    expect(screen.queryByRole('dialog', { name: 'Ask Blue' })).not.toBeInTheDocument()
-    expect(screen.getByRole('button', { name: 'Ask Blue' })).toBeInTheDocument()
+    expect(screen.getAllByRole('textbox')).toHaveLength(2)
+    expect(screen.getByRole('dialog', { name: 'Ask Blue' })).toBeInTheDocument()
     expect(screen.getByText(tutor.command_form.summary)).toBeInTheDocument()
     // Absolute beginners: what each part means. New words are tips, not guide content.
     const parts = within(screen.getByLabelText('What each part means'))
@@ -110,11 +144,12 @@ describe('terminal-led command introduction', () => {
     // A miss never reveals the concrete solution command either.
     expect(screen.queryByText('git switch -c feature')).not.toBeInTheDocument()
     // Nothing to click through: the guide stays while the learner types, with a
-    // single close button (the chat starts collapsed). On a narrow screen the
+    // close button for each guide. At every screen size the
     // change sits in its own tab of the same card.
-    expect(screen.getAllByRole('button', { name: /close/i })).toEqual([
+    expect(screen.getAllByRole('button', { name: /close/i })).toEqual(expect.arrayContaining([
       screen.getByRole('button', { name: 'Close command guide' }),
-    ])
+      screen.getByRole('button', { name: 'Close Ask Blue' }),
+    ]))
     expect(screen.queryByRole('button', { name: 'Got it' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByRole('tab', { name: 'What changes' }))
     const needs = within(screen.getByRole('region', { name: 'What this command does' }))
@@ -141,13 +176,12 @@ describe('terminal-led command introduction', () => {
     expect(await screen.findByText('Syntax: git switch -c <branch>')).toBeInTheDocument()
     expect(screen.queryByText('git switch -c feature')).not.toBeInTheDocument()
     expect(screen.getByTestId('workspace-tour-spotlight')).toHaveStyle({ top: '151px' })
-    // Feedback waits for "Got it": no close button, and neither a click outside
-    // nor Escape puts it away.
-    expect(screen.queryByRole('button', { name: 'Close command guide' })).not.toBeInTheDocument()
+    // Feedback is acknowledged with "Got it"; outside clicks and Escape leave it open.
+    expect(screen.getByRole('button', { name: 'Close command guide' })).toBeInTheDocument()
     fireEvent.pointerDown(document.body)
     fireEvent.keyDown(window, { key: 'Escape' })
     expect(onDismiss).not.toHaveBeenCalled()
-    expect(screen.getByRole('status')).toHaveTextContent('Review the syntax and placeholder meanings')
+    expect(within(screen.getByRole('dialog', { name: 'Create and switch' })).getByRole('status')).toHaveTextContent('Review the syntax and placeholder meanings')
     fireEvent.click(screen.getByRole('tab', { name: 'What changes' }))
     expect(screen.getByRole('region', { name: 'What this command does' })).toBeInTheDocument()
     expect(commandIntroductionsApi.complete).not.toHaveBeenCalled()
@@ -160,6 +194,7 @@ describe('terminal-led command introduction', () => {
   it('stays open for clicks in its chat launcher, chat window and terminal, and collapses on a click elsewhere', async () => {
     const { onDismiss } = setup()
     await screen.findByText('Syntax: git switch -c <branch>')
+    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Blue' }))
     const chatLauncher = screen.getByRole('button', { name: 'Ask Blue' })
     fireEvent.pointerDown(chatLauncher)
     fireEvent.click(chatLauncher)
@@ -173,7 +208,7 @@ describe('terminal-led command introduction', () => {
     expect(commandIntroductionsApi.complete).not.toHaveBeenCalled()
   })
 
-  it('closes from its close button without completing the guide', async () => {
+  it('closes from its mascot without completing the guide', async () => {
     const { onDismiss } = setup()
     fireEvent.click(await screen.findByRole('button', { name: 'Close command guide' }))
     expect(onDismiss).toHaveBeenCalledOnce()

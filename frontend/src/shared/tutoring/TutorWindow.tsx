@@ -40,6 +40,8 @@ export function TutorWindow({ companion, context, workspace = false, onDismiss }
     if (!onDismiss) return
     const dismissOnEscape = (event: KeyboardEvent) => {
       if (event.key !== 'Escape') return
+      // Both guides can start open: Escape belongs to the window being used.
+      if (workspace && !frame.current?.contains(event.target as Node)) return
       event.preventDefault()
       // Only the chat closes, not a tour that is open behind it.
       event.stopPropagation()
@@ -54,7 +56,7 @@ export function TutorWindow({ companion, context, workspace = false, onDismiss }
       document.removeEventListener('keydown', dismissOnEscape)
       document.removeEventListener('pointerdown', dismissOnOutsidePointer)
     }
-  }, [onDismiss])
+  }, [onDismiss, workspace])
 
   return createPortal(
     <div

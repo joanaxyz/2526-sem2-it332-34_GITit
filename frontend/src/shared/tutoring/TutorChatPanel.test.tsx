@@ -26,7 +26,6 @@ afterEach(() => { cleanup(); useAuthStore.getState().clearSession(); setGuideMas
 
 function renderGuideTutor() {
   const view = render(<GuideTutor runId={17} teachingKey="command:add" usageForm="git add <path>" guideToken="signed-guide" />)
-  fireEvent.click(screen.getByRole('button', { name: 'Ask Blue' }))
   return view
 }
 
@@ -275,7 +274,6 @@ describe('shared tutoring surfaces', () => {
       return new Promise(() => {})
     })
     const view = render(<section aria-label="Guide container"><GuideTutor runId={17} teachingKey="form:git add <path>" usageForm="git add <path>" guideToken="signed-guide" /></section>)
-    fireEvent.click(screen.getByRole('button', { name: 'Ask Blue' }))
     const window = screen.getByRole('dialog', { name: 'Ask Blue' })
     expect(window.parentElement?.querySelector('.tutor-window__avatar img')).toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Guide container' })).not.toContainElement(window)
@@ -287,14 +285,15 @@ describe('shared tutoring surfaces', () => {
     expect(signal?.aborted).toBe(true)
   })
 
-  it('starts workspace help as a launcher so it never covers the guide, and remembers it open', () => {
+  it('opens workspace help by default and remembers when the learner closes it', () => {
     const view = render(<GuideTutor runId={17} teachingKey="command:add" usageForm="git add <path>" guideToken="signed-guide" />)
-    expect(screen.queryByRole('dialog', { name: 'Ask Blue' })).not.toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Ask Blue' }))
     expect(screen.getByRole('dialog', { name: 'Ask Blue' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Close Ask Blue' }))
     view.unmount()
     // The next guide opens with the chat as the learner left it.
     render(<GuideTutor runId={17} teachingKey="command:status" usageForm="git status" guideToken="signed-guide" />)
+    expect(screen.queryByRole('dialog', { name: 'Ask Blue' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Ask Blue' }))
     expect(screen.getByRole('dialog', { name: 'Ask Blue' })).toBeInTheDocument()
   })
 

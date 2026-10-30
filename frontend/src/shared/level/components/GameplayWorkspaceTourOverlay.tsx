@@ -35,6 +35,7 @@ export function GameplayWorkspaceTourOverlay({
   skipIconOnly,
   showProgress,
   showSpeaker,
+  controlsWithSpeaker,
   showActions,
   finishDisabled,
   cardClassName,
@@ -61,6 +62,7 @@ export function GameplayWorkspaceTourOverlay({
   skipIconOnly: boolean
   showProgress: boolean
   showSpeaker: boolean
+  controlsWithSpeaker: boolean
   showActions: boolean
   finishDisabled: boolean
   cardClassName?: string
@@ -109,7 +111,12 @@ export function GameplayWorkspaceTourOverlay({
   const mainFrame = workspaceTourFrame(positionOf('main'), paneSizes.main ?? layout.paneLayout?.main ?? layout.mainSize ?? layout.card)
   const spotlight = spotlightRect(layout.target, viewportWidth, viewportHeight)
   // Join the main card to the outline, keeping the connector out of the target itself.
-  const arrowPath = connectorPathFor(mainFrame, spotlight)
+  const bubbleInset = Math.min(layout.bubbleInset ?? 0, mainFrame.width)
+  const arrowPath = connectorPathFor({
+    ...mainFrame,
+    left: mainFrame.left + bubbleInset,
+    width: mainFrame.width - bubbleInset,
+  }, spotlight)
   const targetVisible = layout.target.bottom > HEADER_CLEARANCE
     && layout.target.top < viewportHeight - VIEWPORT_GAP
     && layout.target.right > 0 && layout.target.left < viewportWidth
@@ -181,18 +188,9 @@ export function GameplayWorkspaceTourOverlay({
     onPointerLeave: leavePane,
   } : {}
 
-  const content = (
-    <MascotMessage className="workspace-tour__conversation" showSpeaker={showSpeaker}>
-      <header className="workspace-tour__header">
-        <div className="workspace-tour__meta">
-          <span className="workspace-tour__eyebrow">{label}</span>
-          {availableSteps.length > 1 ? (
-            <span className="workspace-tour__count">
-              {activeIndex + 1} / {availableSteps.length}
-            </span>
-          ) : null}
-        </div>
-        {transformable || showSkip ? <div className="workspace-tour__header-actions">
+  const speakerControls = controlsWithSpeaker && showSpeaker
+  const controls = transformable || showSkip ? (
+        <div className={speakerControls ? 'workspace-tour__speaker-actions' : 'workspace-tour__header-actions'}>
           {moveHandle('main')}
           {transformable && transformed ? <button
             type="button"
@@ -203,7 +201,7 @@ export function GameplayWorkspaceTourOverlay({
           >
             <RotateCcw aria-hidden="true" />
           </button> : null}
-          {showSkip ? <button
+          {showSkip && !speakerControls ? <button
             type="button"
             className={`workspace-tour__skip${skipIconOnly ? ' is-icon-only' : ''}`}
             aria-label={skipIconOnly ? skipLabel : undefined}
@@ -213,8 +211,25 @@ export function GameplayWorkspaceTourOverlay({
             {skipIconOnly ? null : skipLabel}
             <X aria-hidden="true" />
           </button> : null}
-        </div> : null}
-      </header>
+        </div>
+  ) : null
+
+  const content = (
+    <MascotMessage className="workspace-tour__conversation" showSpeaker={showSpeaker}
+      onSpeakerClick={speakerControls ? () => close('skip') : undefined}
+      speakerLabel={speakerControls ? `Close ${label.toLowerCase()}` : undefined}
+      speakerActions={speakerControls ? controls : undefined}>
+      {!speakerControls ? <header className="workspace-tour__header">
+        <div className="workspace-tour__meta">
+          <span className="workspace-tour__eyebrow">{label}</span>
+          {availableSteps.length > 1 ? (
+            <span className="workspace-tour__count">
+              {activeIndex + 1} / {availableSteps.length}
+            </span>
+          ) : null}
+        </div>
+        {controls}
+      </header> : null}
 
       <div className="workspace-tour__message" aria-live="polite">
         <div>

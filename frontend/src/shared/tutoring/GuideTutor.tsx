@@ -10,11 +10,11 @@ import { TutorWindow, type TutorWindowDismissal } from './TutorWindow'
  * Help scoped to a run's command guide: the one in view, else the latest it
  * showed. Its companion launcher stands apart from the guide's own launcher,
  * opens in its own window, and stays while the guide is collapsed. Whether the
- * learner keeps it open is remembered across guides.
+ * learner keeps it open is remembered across guides; it starts open by default.
  */
 export function GuideTutor({ runId, teachingKey, usageForm, guideToken }: { runId: number; teachingKey: string; usageForm: string; guideToken: string }) {
   const { companion } = usePlayerLoadout()
-  const [open, setOpen] = usePersistentState<boolean>('tutor-window:workspace-open', false, (saved) => saved === true)
+  const [open, setOpen] = usePersistentState<boolean>('tutor-window:workspace-open', true, (saved) => saved === true)
   const launcher = useRef<HTMLButtonElement>(null)
   const refocusLauncher = useRef(false)
 
