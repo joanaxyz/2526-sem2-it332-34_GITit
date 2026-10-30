@@ -1,6 +1,10 @@
+import { ArrowLeft } from 'lucide-react'
 import { isRouteErrorResponse, useRouteError } from 'react-router-dom'
 
+import gitLogoImage from '@/assets/images/git-it-logo-arcane.webp'
 import { Button } from '@/shared/components/Button'
+
+import './route-error.css'
 
 /**
  * The router's own error screen. An address with no route reaches it as a 404
@@ -13,19 +17,45 @@ export function RouteErrorPage() {
   if (!notFound) console.error('Route error', error)
 
   return (
-    <main
-      className="flex flex-col items-center justify-center gap-4 bg-background px-5 text-center"
-      style={{ minHeight: '100svh' }}
-    >
-      <h1 className="text-xl font-semibold text-foreground">
-        {notFound ? 'Page not found' : 'This page could not load.'}
-      </h1>
-      <p className="max-w-md text-sm text-muted-foreground">
-        {notFound
-          ? 'This address is not part of GIT it! anymore, or it was typed incorrectly.'
-          : 'Something went wrong while opening this page. Your progress on the server is safe.'}
-      </p>
-      <Button onClick={() => window.location.assign('/')}>Back to GIT it!</Button>
+    <main className="route-error">
+      <header className="route-error__header">
+        <a className="route-error__brand" href="/" aria-label="GIT it! home">
+          <img src={gitLogoImage} alt="" width={900} height={305} />
+        </a>
+      </header>
+
+      <section className="route-error__content" aria-labelledby="route-error-title">
+        <div className="route-error__scene">
+          {notFound ? <span className="route-error__digit" aria-hidden="true">4</span> : null}
+          <div className="route-error__portal">
+            <img
+              className="route-error__mascot"
+              src="/mascot/portrait.png"
+              alt="Git-It, the GIT it! mascot"
+              width={1122}
+              height={1402}
+              draggable={false}
+            />
+          </div>
+          {notFound ? <span className="route-error__digit" aria-hidden="true">4</span> : null}
+        </div>
+
+        <p className="route-error__status">
+          {notFound ? '404 / Off the map' : 'Journey interrupted'}
+        </p>
+        <h1 id="route-error-title" className="route-error__title">
+          {notFound ? 'Page not found' : 'This page could not load.'}
+        </h1>
+        <p className="route-error__description">
+          {notFound
+            ? 'This page may have moved, or the address may be incorrect. Let’s get you back on track.'
+            : 'Something went wrong while opening this page. Your progress on the server is safe.'}
+        </p>
+        <Button className="route-error__home" onClick={() => window.location.assign('/')}>
+          <ArrowLeft size={16} aria-hidden="true" />
+          Back to GIT it!
+        </Button>
+      </section>
     </main>
   )
 }
