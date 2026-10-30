@@ -82,7 +82,7 @@ export const PlayerActor = forwardRef<
     className?: string
     ariaLabel?: string
   }
->(function PlayerActor({ companion, battle, label, companionSlug, scale = 0.78, className, ariaLabel }, ref) {
+>(function PlayerActor({ companion, battle, label, companionSlug, scale = 1, className, ariaLabel }, ref) {
   const spriteRef = useRef<SpriteAnimatorHandle | null>(null)
   const wrapRef = useRef<HTMLDivElement | null>(null)
   const effectiveScale = companion.metrics.scale * scale

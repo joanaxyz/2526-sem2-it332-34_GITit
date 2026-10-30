@@ -17,6 +17,7 @@ import { getStoryWorld, monsterSkin } from '@/shared/story-worlds/registry'
 import type { StoryWorldDef } from '@/shared/story-worlds/types'
 import { storyWorldStyle } from '@/shared/story-worlds/theme'
 import { cn } from '@/shared/utils/cn'
+import { useMediaQuery } from '@/shared/utils/useMediaQuery'
 
 const DEFAULT_RAIL_Y = 88
 const MONSTER_BASE_LEFT = 85
@@ -40,6 +41,7 @@ export function BattleStage({
   storyWorldSlug?: string | null
 }) {
   const { companion, companionSlug } = usePlayerLoadout()
+  const actorScale = useMediaQuery('(max-width: 699.98px)') ? 0.78 : 1
   const storyWorld = getStoryWorld(storyWorldSlug)
   // Memoize on the (stable) companion so the sprite objects keep a stable
   // identity across resolve-driven re-renders. Rebuilding them every render
@@ -80,6 +82,7 @@ export function BattleStage({
                   battle={playerBattle}
                   label={companion.label || companionSlug}
                   companionSlug={companionSlug}
+                  scale={actorScale}
                 />
               </div>
             ) : null}
@@ -96,6 +99,7 @@ export function BattleStage({
                 active={director.activeMonsterId === monster.id}
                 bindMonster={director.bindMonster}
                 storyWorld={storyWorld}
+                scale={actorScale}
               />
             ))}
           </div>
@@ -154,6 +158,7 @@ function MonsterSlot({
   active,
   bindMonster,
   storyWorld,
+  scale,
 }: {
   monster: BattleMonster
   index: number
@@ -164,6 +169,7 @@ function MonsterSlot({
   active: boolean
   bindMonster: BattleDirector['bindMonster']
   storyWorld: StoryWorldDef
+  scale: number
 }) {
   const spread = total <= 1 ? 0 : index - (total - 1) / 2
   const left = baseLeft + spread * spreadStep
@@ -179,6 +185,7 @@ function MonsterSlot({
         stagedHidden={stagedHidden}
         className={active ? 'is-active' : undefined}
         storyWorld={storyWorld}
+        scale={scale}
       />
     </div>
   )
