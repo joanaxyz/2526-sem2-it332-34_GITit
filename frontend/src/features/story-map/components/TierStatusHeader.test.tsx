@@ -17,12 +17,21 @@ const run = {
   replay: false,
   difficulty: 'easy',
   stars: 2,
+  star_breakdown: {
+    stars: 0,
+    available_stars: 2,
+    counted_commands: 2,
+    command_target: 1,
+    retry_count: 0,
+    graded_under_previous_rules: false,
+    criteria: [],
+  },
   policy: { min_counted_commands: 1, max_counted_commands: 8 },
   counts: { counted_action_total: 0 },
   reward: { coins: 25, claimed: false },
   scenario: { index: 1, total: 1, title: '' },
   tier: { adventure_level_title: 'Branching paths' },
-} as TierRun
+} as unknown as TierRun
 
 const guide = (teachingKey: string, title: string, usageForm: string) => ({
   teaching_key: teachingKey,
@@ -45,10 +54,11 @@ describe('TierStatusHeader', () => {
 
     const header = screen.getByRole('banner', { name: 'Adventure command bar' })
     expect(within(header).getByRole('group', { name: 'Level status' })).toBeInTheDocument()
-    expect(within(header).getByRole('button', { name: 'Star rules: 2 of 3 stars' })).toBeInTheDocument()
+    // A started run shows the stars still available on clear, not the saved score.
+    const starRules = within(header).getByRole('button', { name: 'Star rules: 2 of 3 stars available on clear' })
     expect(within(header).queryByText('Adventure · easy')).not.toBeInTheDocument()
 
-    fireEvent.click(within(header).getByRole('button', { name: 'Star rules: 2 of 3 stars' }))
+    fireEvent.click(starRules)
     expect(await screen.findByRole('dialog', { name: 'How to earn stars' })).toBeInTheDocument()
   })
 

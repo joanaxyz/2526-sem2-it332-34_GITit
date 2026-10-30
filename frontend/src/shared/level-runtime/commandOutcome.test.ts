@@ -78,3 +78,14 @@ describe('confirmsPrediction', () => {
     expect(confirmsPrediction(predicted, serverOutcome({ solved: true }))).toBe(false)
   })
 })
+
+it('counts unsuccessful inspections only under the current policy', () => {
+  const failed = execution({ diagnostic: true, exit_code: 128 })
+  expect(predictLocalOutcome(failed, { counted: 2, max: 3, scoringPolicyVersion: 2 }))
+    .toMatchObject({ counted: true, failed: true, counted_command_count: 3 })
+  expect(predictLocalOutcome(failed, { counted: 2, max: 3, scoringPolicyVersion: 1 }))
+    .toMatchObject({ counted: false, failed: false, counted_command_count: 2 })
+})
+it('does not predict a counted mistake for empty input', () => {
+  expect(predictLocalOutcome(execution({ processed: false, normalized_command: '' }), { counted: 2, max: 3 })).toBeNull()
+})

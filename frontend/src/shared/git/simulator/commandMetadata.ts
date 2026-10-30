@@ -13,7 +13,7 @@ export const SUPPORTED_OPTIONS: Record<string, Set<string>> = {
   branch: new Set(['-v', '-vv', '-a', '-d', '-D', '--delete', '-m', '--move', '--merged']),
   remote: new Set(['-v', '--verbose']),
   rm: new Set(['--cached', '-r']),
-  restore: new Set(['--staged', '--source']),
+  restore: new Set(['--staged', '-S', '--source']),
   'check-ignore': new Set(['-v']),
   'ls-files': new Set(['-u', '--unmerged']),
   merge: new Set(['--abort', '--continue', '--no-ff', '--squash']),
@@ -106,6 +106,7 @@ export function validateCommand(parsed: ParsedGitCommand) {
       return parsed.args.length === 1 ? null : 'usage: git merge [--no-ff | --squash] <branch>'
     case 'checkout':
       if (hasOption(parsed, '-b')) return parsed.args.length >= 1 && parsed.args.length <= 2 ? null : 'usage: git checkout -b <branch> [<start-point>]'
+      if (!hasOption(parsed, '--ours') && !hasOption(parsed, '--theirs') && parsed.args.length === 1 && !parsed.argv.includes('--')) return null
       if ([hasOption(parsed, '--ours'), hasOption(parsed, '--theirs')].filter(Boolean).length !== 1) {
         return 'git checkout in this simulator supports -b to create a branch, or --ours/--theirs for conflicted files.'
       }
@@ -128,8 +129,13 @@ export function validateCommand(parsed: ParsedGitCommand) {
     case 'fetch':
       return parsed.args.length > 1 ? 'usage: git fetch [--prune] [<remote>]' : null
     case 'reset':
-      if (!hasOption(parsed, '--soft') && !hasOption(parsed, '--mixed') && !hasOption(parsed, '--hard')) return 'error: this simulator only supports git reset --hard <target>'
-      return parsed.args.length === 1 ? null : 'usage: git reset --hard <target>'
+      if ([hasOption(parsed, '--soft'), hasOption(parsed, '--mixed'), hasOption(parsed, '--hard')].filter(Boolean).length > 1) return 'fatal: reset modes cannot be combined'
+      if (parsed.argv.includes('--')) {
+        if (hasOption(parsed, '--soft') || hasOption(parsed, '--hard')) return 'fatal: reset mode cannot be combined with paths'
+        const separator = parsed.argv.indexOf('--')
+        return separator <= 3 && parsed.argv.length > separator + 1 ? null : 'usage: git reset [HEAD] -- <path>...'
+      }
+      return parsed.args.length <= 1 ? null : 'usage: git reset [--soft | --mixed | --hard] [<target>]'
     case 'revert':
       return parsed.args.length === 1 ? null : 'usage: git revert [--no-edit] <commit>'
     case 'switch':

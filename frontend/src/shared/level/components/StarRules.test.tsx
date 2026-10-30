@@ -21,9 +21,9 @@ describe('star rules reminder', () => {
 
     expect(await screen.findByRole('dialog', { name: 'How to earn stars' })).toBeInTheDocument()
     expect(screen.getByAltText('Learning guide')).toBeInTheDocument()
-    expect(screen.getByText('Finish within the Star target with no more than one retry.')).toBeInTheDocument()
-    expect(screen.getByText('Finish within the Star target after two or more retries.')).toBeInTheDocument()
-    expect(screen.getByText('Finish using more commands than the Star target.')).toBeInTheDocument()
+    expect(screen.getByText('Finish within the efficient command target.')).toBeInTheDocument()
+    expect(screen.getByText('Finish above the efficient target but within the generous target.')).toBeInTheDocument()
+    expect(screen.getByText('Finish above the generous target but within the maximum allowance.')).toBeInTheDocument()
     expect(screen.queryByText(/Opening the command guide/)).not.toBeInTheDocument()
     expect(trigger).toHaveAttribute('aria-expanded', 'true')
 

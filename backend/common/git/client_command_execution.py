@@ -18,6 +18,13 @@ from contextlib import nullcontext
 from dataclasses import dataclass, replace
 from typing import Any
 
+from simulator.services import (
+    RepositoryStateSimulator,
+    is_diagnostic_command,
+    normalize_command,
+    parse_git_command,
+)
+
 from common.constants import COMMAND_COUNTED, COMMAND_DIAGNOSTIC, COMMAND_UNPROCESSABLE
 from common.exceptions import BadRequest, PayloadTooLarge
 from common.git.command_transition_verifier import ClientTransitionVerifier
@@ -31,12 +38,6 @@ from common.git.shell_commands import (
 )
 from common.schemas.schema_validation import validate_repository_state_payload
 from common.services.performance import timing
-from simulator.services import (
-    RepositoryStateSimulator,
-    is_diagnostic_command,
-    normalize_command,
-    parse_git_command,
-)
 
 # Cap for the serialized repository_state JSON. Stored states are typically a
 # few KB; anything near this size means a runaway command sequence, and letting
@@ -122,6 +123,7 @@ class ClientCommandExecutionService:
         timing_label: str | None = None,
         run_id: int | None = None,
         expected_client_revision: int | None = None,
+        scoring_policy_version: int = 1,
     ) -> ExecutedCommand:
         tools = self.state_tools
 
@@ -247,7 +249,8 @@ class ClientCommandExecutionService:
             processed=result.processed,
             # Shell commands never spend the git command budget, including the
             # file-changing ones, which match free Project Files edits.
-            diagnostic=result.diagnostic or is_shell,
+            diagnostic=(result.diagnostic or is_shell)
+            and (scoring_policy_version < 2 or result.exit_code == 0),
         )
         return ExecutedCommand(
             previous_state=previous_state,
@@ -295,6 +298,7 @@ class ClientCommandExecutionService:
         expected_normalized: str,
         result: ClientCommandResult,
         expected_client_revision: int | None = None,
+        scoring_policy_version: int = 1,
     ) -> None:
         if result.normalized_command != expected_normalized:
             raise BadRequest("execution.normalized_command does not match the submitted command.")

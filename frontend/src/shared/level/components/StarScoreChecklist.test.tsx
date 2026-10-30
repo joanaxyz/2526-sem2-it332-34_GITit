@@ -59,3 +59,20 @@ describe('StarScoreChecklist', () => {
     expect(screen.queryByText(/retry allowance was exceeded/)).not.toBeInTheDocument()
   })
 })
+
+it('shows version-2 bands without retry penalties', () => {
+  render(<StarScoreChecklist breakdown={{
+    stars: 2, available_stars: 2, counted_commands: 6, command_target: 4,
+    generous_target: 8, maximum_commands: 12, scoring_policy_version: 2,
+    retry_count: 20, graded_under_previous_rules: false,
+    criteria: [
+      { key: 'clear', state: 'earned', reason: null },
+      { key: 'generous_target', state: 'earned', reason: null },
+      { key: 'efficient_target', state: 'missed', reason: 'efficient_target_exceeded' },
+    ],
+  }} />)
+  expect(screen.getByText('6 / 8 counted commands.')).toBeInTheDocument()
+  expect(screen.getByText('6 / 4 counted commands.')).toBeInTheDocument()
+  expect(screen.getByText(/Retries and restarts never reduce stars/)).toBeInTheDocument()
+  expect(screen.queryByText(/retry allowance was exceeded/)).not.toBeInTheDocument()
+})

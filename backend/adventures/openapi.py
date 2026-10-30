@@ -4,14 +4,14 @@ Runtime values stay in :mod:`adventures.tier_payloads`; these serializers
 document and validate that presenter output for OpenAPI generation.
 """
 
-from rest_framework import serializers
-
 from common.openapi import (
+    CommandComparisonResponseSerializer,
     GameplayRunStatusField,
     LearnedSkillResponseSerializer,
     RuntimeStepResponseSerializer,
     StarBreakdownResponseSerializer,
 )
+from rest_framework import serializers
 from tutoring.openapi import TeachingResponseSerializer
 
 # ---------------------------------------------------------------------------
@@ -35,6 +35,7 @@ class AdventureLevelTierCommandRunResponseSerializer(TeachingResponseSerializer)
     id = serializers.IntegerField()
     replay = serializers.BooleanField()
     stars = serializers.IntegerField()
+    command_comparison = CommandComparisonResponseSerializer(required=False, allow_null=True)
     star_breakdown = StarBreakdownResponseSerializer(allow_null=True)
     status = GameplayRunStatusField()
     failure_reason = serializers.CharField(allow_null=True, allow_blank=True)
@@ -68,6 +69,7 @@ class AdventureLevelTierRunResponseSerializer(TeachingResponseSerializer):
     replay = serializers.BooleanField()
     transfer = serializers.BooleanField(required=False)
     stars = serializers.IntegerField()
+    command_comparison = CommandComparisonResponseSerializer(required=False, allow_null=True)
     star_breakdown = StarBreakdownResponseSerializer(allow_null=True)
     status = GameplayRunStatusField()
     failure_reason = serializers.CharField(allow_null=True, allow_blank=True)

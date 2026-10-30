@@ -4,13 +4,13 @@ Runtime values stay in :mod:`challenges.payloads`; these serializers document
 and validate that presenter output for OpenAPI generation.
 """
 
-from rest_framework import serializers
-
 from common.openapi import (
+    CommandComparisonResponseSerializer,
     GameplayRunStatusField,
     RuntimeStepResponseSerializer,
     StarBreakdownResponseSerializer,
 )
+from rest_framework import serializers
 
 
 class ChallengeRunStepResponseSerializer(RuntimeStepResponseSerializer):
@@ -28,6 +28,7 @@ class ChallengeCommandRunResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     replay = serializers.BooleanField()
     stars = serializers.IntegerField()
+    command_comparison = CommandComparisonResponseSerializer(required=False, allow_null=True)
     star_breakdown = StarBreakdownResponseSerializer()
     status = GameplayRunStatusField()
     failure_reason = serializers.CharField(allow_null=True, allow_blank=True)
@@ -45,6 +46,7 @@ class ChallengeRunResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     replay = serializers.BooleanField()
     stars = serializers.IntegerField()
+    command_comparison = CommandComparisonResponseSerializer(required=False, allow_null=True)
     star_breakdown = StarBreakdownResponseSerializer()
     status = GameplayRunStatusField()
     failure_reason = serializers.CharField(allow_null=True, allow_blank=True)

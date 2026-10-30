@@ -1,6 +1,3 @@
-from django.db import models
-from django.db.models import Q
-
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
@@ -11,6 +8,8 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from common.models import VariantBase
+from django.db import models
+from django.db.models import Q
 
 
 class ChallengeLevel(models.Model):
@@ -69,6 +68,7 @@ class ChallengeTrial(models.Model):
     difficulty = models.CharField(max_length=12, choices=Difficulty.choices)
     story = models.TextField(blank=True)
     task = models.TextField(blank=True)
+    generous_counted_commands = models.PositiveIntegerField(null=True, blank=True)
     min_counted_commands = models.PositiveIntegerField(default=1)
     max_counted_commands = models.PositiveIntegerField(default=4)
     reward_coins = models.PositiveIntegerField(default=0)
@@ -151,6 +151,11 @@ class ChallengeRun(models.Model):
     is_replay = models.BooleanField(default=False)
     status = models.CharField(max_length=16, choices=Status.choices, default=SESSION_STATUS_STARTED)
     stars = models.PositiveSmallIntegerField(default=0)
+    scoring_policy_version = models.PositiveSmallIntegerField(default=1, db_default=1)
+    generous_counted_commands = models.PositiveIntegerField(null=True, blank=True)
+    example_counted_commands = models.PositiveIntegerField(null=True, blank=True)
+    required_techniques = models.JSONField(default=list, blank=True)
+    verified_techniques = models.JSONField(default=list, blank=True)
     min_counted_commands = models.PositiveIntegerField(default=1)
     max_counted_commands = models.PositiveIntegerField(default=4)
     repository_state = models.JSONField(default=dict)
@@ -173,6 +178,15 @@ class ChallengeRun(models.Model):
             ),
         ]
         constraints = [
+            models.CheckConstraint(
+                condition=Q(scoring_policy_version=1)
+                | (
+                    Q(generous_counted_commands__isnull=False)
+                    & Q(generous_counted_commands__gt=models.F("min_counted_commands"))
+                    & Q(max_counted_commands__gt=models.F("generous_counted_commands"))
+                ),
+                name="challenge_run_v2_targets",
+            ),
             models.UniqueConstraint(
                 fields=["player", "challenge_trial"],
                 condition=Q(status=SESSION_STATUS_STARTED),

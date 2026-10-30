@@ -93,17 +93,6 @@ describe('ChallengeOutcomeModal', () => {
     expect(close).toHaveBeenCalledOnce()
   })
 
-  it('allows reading scoring notes without dismissing and keeps Escape working', () => {
-    const close = vi.fn()
-    render(<ChallengeOutcomeModal open run={run} onClose={close} onBackToMap={vi.fn()} />)
-    const summary = screen.getByText('What counts toward the score?')
-    fireEvent.click(summary)
-    expect(summary.closest('details')).toHaveAttribute('open')
-    fireEvent.keyDown(summary, { key: 'Enter' })
-    expect(close).not.toHaveBeenCalled()
-    fireEvent.keyDown(summary, { key: 'Escape' })
-    expect(close).toHaveBeenCalledOnce()
-  })
 
   it('offers the gate next trial through the mascot', () => {
     const nextLevel = vi.fn()

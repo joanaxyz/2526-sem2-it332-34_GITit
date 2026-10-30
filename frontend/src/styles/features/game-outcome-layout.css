@@ -84,3 +84,48 @@
   .has-score-breakdown .game-outcome-stat-target-chip { display: none; }
   .has-score-breakdown .game-outcome-stat-caption { text-align: center; }
 }
+
+
+
+/* A single reading column for scored outcomes. */
+.game-outcome-shell.has-score-breakdown { width: min(100%, 35rem); max-width: 35rem; }
+.has-score-breakdown .game-outcome-layout { grid-template-columns: minmax(0, 1fr); gap: 1rem; }
+.has-score-breakdown .game-outcome-details { text-align: left; }
+.has-score-breakdown .game-outcome-star-art { width: 12rem; }
+.has-score-breakdown .game-outcome-title-art { width: 12rem; margin-top: 0; }
+.has-score-breakdown .game-outcome-stat-grid { width: 100%; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-height: 800px) {
+ .has-score-breakdown .game-outcome-star-art, .has-score-breakdown .game-outcome-title-art { width: 9rem; }
+ .has-score-breakdown .game-outcome-layout { gap: .5rem; }
+}
+
+.game-outcome-backdrop { overflow: hidden; padding-block: .5rem; }
+.has-score-breakdown .game-outcome { padding: 2.5rem 1rem .5rem; max-height: none; overflow: visible; }
+.has-score-breakdown .game-outcome-layout { gap: .3rem; }
+.has-score-breakdown .game-outcome-star-art { width: 18rem; max-width: 80%; }
+.has-score-breakdown .game-outcome-title-art { width: 12rem; margin: -.8rem auto 0; }
+.has-score-breakdown .game-outcome-subline { margin-block: .15rem; }
+.has-score-breakdown .game-outcome-level { margin-block: .3rem; }
+.has-score-breakdown .game-outcome-badges { margin-block: .25rem; }
+.has-score-breakdown .game-outcome-message { margin-top: .35rem; }
+.has-score-breakdown .star-checklist { padding: .4rem .75rem; width: 100%; }
+.has-score-breakdown .star-checklist ul { margin-bottom: 0; }
+.has-score-breakdown .star-checklist__row { padding-block: .3rem; }
+.has-score-breakdown .star-checklist__state { color: hsl(var(--primary)); font-weight: 700; }
+.has-score-breakdown .outcome-comparison { background: hsl(var(--primary) / .12); border: 1px solid hsl(var(--primary) / .4); border-radius: .5rem; }
+.outcome-comparison p { margin: 0; font-size: .875rem; line-height: 1.45; }
+.outcome-comparison strong { color: hsl(var(--primary)); font-weight: 700; }
+.outcome-next-button { border: 1px solid hsl(var(--primary) / .6); border-radius: .4rem; background: hsl(var(--primary) / .15); color: hsl(var(--foreground)); padding: .5rem .9rem; font-size: .875rem; font-weight: 600; cursor: pointer; }
+.outcome-next-button:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; }
+.has-score-breakdown .game-outcome-stat-grid { margin-top: .2rem; padding-block: .25rem; }
+.has-score-breakdown .game-outcome-stat-caption, .has-score-breakdown .game-outcome-stat-bar-track { display: none; }
+.has-score-breakdown .game-outcome-hint { margin-top: .3rem; }
+
+.has-score-breakdown .game-outcome-stat-target-chip { display: none; }
+@media (max-height: 720px) {
+ .has-score-breakdown .game-outcome { padding-top: 2rem; }
+ .has-score-breakdown .game-outcome-star-art { width: 16rem; }
+ .has-score-breakdown .game-outcome-title-art { width: 10rem; }
+ .has-score-breakdown .game-outcome-stat-tile { padding-block: .2rem; }
+ .has-score-breakdown .game-outcome-hint { font-size: .65rem; margin-block: .15rem; }
+}

@@ -98,6 +98,12 @@ function stagePatch(state: MutableRepositoryState, paths: string[]) {
       targetHunks = hunks.slice(0, 1)
       leftoverHunks = hunks.slice(1)
     }
+    // After committing the first selection, another patch action selects the remaining hunks.
+    if (isRecord(authored) && Array.isArray(authored.target_hunks) && authored.target_hunks.length === 0 && leftoverHunks.length) {
+      targetHunks = leftoverHunks
+      leftoverHunks = []
+      state.partial_hunks[path] = { target_hunks: targetHunks, leftover_hunks: [] }
+    }
     if (targetHunks.length || leftoverHunks.length) {
       state.staging[path] = { status: 'partial', hunks: targetHunks }
       if (leftoverHunks.length) state.working_tree[path] = { status: 'modified', hunks: leftoverHunks }
@@ -153,7 +159,7 @@ function expandPathspecs(baseTree: Record<string, RepositoryValue>, paths: strin
 export function gitRestore(state: MutableRepositoryState, parsed: ParsedGitCommand): CommandOutcome {
   let paths = parsed.pathspecs
   const source = String(optionValues(parsed, '--source').at(-1) ?? '')
-  if (hasOption(parsed, '--staged')) {
+  if (hasOption(parsed, '--staged') || hasOption(parsed, '-S')) {
     if (source) throw new SimulatorCommandError('fatal: --source with --staged is not supported in this simulator', 129)
     if (paths.includes('.')) paths = Object.keys(state.staging ?? {}).sort()
     const unstaged: string[] = []
@@ -199,8 +205,17 @@ export function gitRestore(state: MutableRepositoryState, parsed: ParsedGitComma
 }
 
 export function gitReset(state: MutableRepositoryState, parsed: ParsedGitCommand): CommandOutcome {
-  const targetExpr = parsed.args[0]
-  const mode = hasOption(parsed, '--soft') ? 'soft' : hasOption(parsed, '--mixed') ? 'mixed' : 'hard'
+  const separator = parsed.argv.indexOf('--')
+  if (separator !== -1) {
+    const targetExpr = separator > 2 ? parsed.argv[2] : 'HEAD'
+    if (targetExpr !== 'HEAD' && resolveRevision(state, targetExpr) !== headCommit(state)) {
+      throw new SimulatorCommandError('error: path reset currently supports HEAD only', 129)
+    }
+    const paths = parsed.argv.slice(separator + 1)
+    return gitRestore(state, { ...parsed, options: { '--staged': [true] }, args: paths, pathspecs: paths })
+  }
+  const targetExpr = parsed.args[0] ?? 'HEAD'
+  const mode = hasOption(parsed, '--soft') ? 'soft' : hasOption(parsed, '--hard') ? 'hard' : 'mixed'
   const target = resolveRevision(state, targetExpr)
   if (!target) throw new SimulatorCommandError(`fatal: ambiguous argument '${targetExpr}'`)
   const oldHead = headCommit(state)
@@ -209,10 +224,10 @@ export function gitReset(state: MutableRepositoryState, parsed: ParsedGitCommand
   state.merge_abort_state = clone(state)
   setHeadCommit(state, target)
   if (mode === 'soft') {
-    state.staging = entriesFromTreeDiff(targetTree, oldTree)
+    state.staging = { ...entriesFromTreeDiff(targetTree, oldTree), ...clone(state.staging ?? {}) }
   } else if (mode === 'mixed') {
     state.staging = {}
-    state.working_tree = entriesFromTreeDiff(targetTree, oldTree)
+    state.working_tree = { ...entriesFromTreeDiff(targetTree, oldTree), ...clone(state.merge_abort_state.staging ?? {}), ...clone(state.working_tree ?? {}) }
   } else {
     state.staging = {}
     state.working_tree = {}

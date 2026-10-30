@@ -22,3 +22,6 @@ urlpatterns = [
     path("api/progress/", include("progress.urls")),
     path("api/admin/", include("adminconsole.urls")),
 ]
+
+handler404 = "common.api.api_not_found"
+handler500 = "common.api.api_server_error"

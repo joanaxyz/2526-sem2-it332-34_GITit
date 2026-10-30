@@ -25,9 +25,10 @@ export type CommandSubmissionOutcome = {
  */
 export function predictLocalOutcome(
   execution: CommandExecutionPayload,
-  counts: { counted: number; max: number },
+  counts: { counted: number; max: number; scoringPolicyVersion?: number },
 ): CommandSubmissionOutcome | null {
-  const counted = !execution.processed
+  if (!execution.normalized_command.trim()) return null
+  const counted = !execution.processed || ((counts.scoringPolicyVersion ?? 1) >= 2 && execution.diagnostic && execution.exit_code !== 0)
   if (!counted && !execution.diagnostic) return null
   const countedCommands = counts.counted + (counted ? 1 : 0)
   return {

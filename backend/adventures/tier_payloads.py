@@ -5,19 +5,20 @@ snapshots, visualization) - serializers hold input validation only.
 Payload shapes are part of the frontend contract - change them deliberately.
 """
 
-from django.db.models import Q
-
-from adventures.models import AdventureLevelTier, AdventureLevelTierRun
-from adventures.rewards import claimed_tier_reward_keys, tier_reward_payload
-from adventures.scoring import star_breakdown
-from adventures.tier_scenarios import published_scenarios, scenario_progress
 from common.constants import DIFFICULTIES, SESSION_STATUS_COMPLETED, SESSION_STATUS_STARTED
+from common.runtime.scoring_policy import command_comparison
+from django.db.models import Q
 from practice.services.context import ScenarioContextNormalizer
 from practice.services.scaffolding import ScaffoldingService
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import AdventureLevelTierCompletion
 from simulator.services import RepositorySnapshotService
 from tutoring.payloads import teaching_payload
+
+from adventures.models import AdventureLevelTier, AdventureLevelTierRun
+from adventures.rewards import claimed_tier_reward_keys, tier_reward_payload
+from adventures.scoring import star_breakdown
+from adventures.tier_scenarios import published_scenarios, scenario_progress
 
 
 def prefetch_run_payload_context(run: AdventureLevelTierRun) -> None:
@@ -79,6 +80,7 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
         "transfer": run.is_transfer,
         "stars": run.stars,
         "star_breakdown": star_breakdown(run),
+        "command_comparison": command_comparison(run),
         "status": run.status,
         "failure_reason": run.failure_reason or None,
         "completed_at": run.completed_at,
@@ -96,6 +98,8 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
         "progress": progress_payload(run),
         "policy": {
             "min_counted_commands": run.min_counted_commands,
+            "generous_counted_commands": run.generous_counted_commands,
+            "scoring_policy_version": run.scoring_policy_version,
             "max_counted_commands": run.max_counted_commands,
         },
         "counts": run_counts_payload(run),
@@ -141,6 +145,7 @@ def command_run_payload(
         "replay": run.is_replay,
         "stars": run.stars,
         "star_breakdown": star_breakdown(run),
+        "command_comparison": command_comparison(run),
         "status": run.status,
         "failure_reason": run.failure_reason or None,
         "completed_at": run.completed_at,
@@ -233,6 +238,7 @@ def run_counts_payload(run: AdventureLevelTierRun) -> dict:
     return {
         "counted_action_total": run.counted_action_total,
         "minimum_counted_commands": minimum,
+        "generous_counted_commands": run.generous_counted_commands,
         "maximum_counted_commands": maximum,
         "non_counted_diagnostic_total": run.non_counted_diagnostic_total,
         "remaining_counted_commands": max(0, maximum - run.counted_action_total),

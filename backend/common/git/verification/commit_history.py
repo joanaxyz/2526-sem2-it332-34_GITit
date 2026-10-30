@@ -11,8 +11,9 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-from common.exceptions import BadRequest
 from simulator.services import parse_git_command
+
+from common.exceptions import BadRequest
 
 
 class CommitHistoryVerificationMixin:
@@ -62,6 +63,15 @@ class CommitHistoryVerificationMixin:
 
     def _verify_commit(self, *, command: str, previous_state: dict, next_state: dict) -> None:
         parts = parse_git_command(command) or []
+        expanded = []
+        for token in parts:
+            if token == "-am":
+                expanded.extend(["-a", "-m"])
+            elif token.startswith("-am") and len(token) > 3:
+                expanded.extend(["-a", "-m", token[3:]])
+            else:
+                expanded.append(token)
+        parts = expanded
         expected = copy.deepcopy(previous_state)
         staged_by_all: list[str] = []
         if "-a" in parts or "--all" in parts:

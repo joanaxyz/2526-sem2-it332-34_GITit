@@ -231,22 +231,30 @@ if "postgresql" in DATABASES["default"].get("ENGINE", ""):
         }
 
 REDIS_URL = env("REDIS_URL", default="").strip()
-# Refresh-token revocation is stored in the configured Django cache. The
-# process-local fallback is useful for development, but production needs a
-# shared cache so logout and rotated-token revocation apply across workers.
+# Production needs one shared cache so rate limits, the login lockout and the
+# revocation cache agree across workers. The process-local fallback is for
+# development only.
 if not DEBUG and not REDIS_URL:
     raise RuntimeError("REDIS_URL is required in production for shared token revocation cache.")
+
+# Redis only caches: PostgreSQL holds sessions, revocations and progress. If
+# Redis is unreachable, reads return their default and writes are skipped, so
+# rate limits and the login lockout pause instead of failing every request.
+# Readiness still reports the outage, and each skipped call is logged.
+REDIS_CACHE_OPTIONS = {
+    "CLIENT_CLASS": "django_redis.client.DefaultClient",
+    "SOCKET_CONNECT_TIMEOUT": env.float("REDIS_SOCKET_CONNECT_TIMEOUT", default=0.5),
+    "SOCKET_TIMEOUT": env.float("REDIS_SOCKET_TIMEOUT", default=0.5),
+    "IGNORE_EXCEPTIONS": True,
+}
+DJANGO_REDIS_LOG_IGNORED_EXCEPTIONS = True
 
 if REDIS_URL:
     CACHES = {
         "default": {
             "BACKEND": "django_redis.cache.RedisCache",
             "LOCATION": REDIS_URL,
-            "OPTIONS": {
-                "CLIENT_CLASS": "django_redis.client.DefaultClient",
-                "SOCKET_CONNECT_TIMEOUT": env.float("REDIS_SOCKET_CONNECT_TIMEOUT", default=0.5),
-                "SOCKET_TIMEOUT": env.float("REDIS_SOCKET_TIMEOUT", default=0.5),
-            },
+            "OPTIONS": REDIS_CACHE_OPTIONS,
         }
     }
 else:

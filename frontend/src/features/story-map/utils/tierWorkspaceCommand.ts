@@ -64,7 +64,8 @@ export function createTierWorkspaceCommandHandler({
         storyWorldSlug: runStorySlug(queryClient, runId),
       }))
     }
-    const counts = queryClient.getQueryData<TierRun>(queryKeys.adventureTierRun(runId))?.counts
+    const currentRun = queryClient.getQueryData<TierRun>(queryKeys.adventureTierRun(runId))
+    const counts = currentRun?.counts
     let predicted: CommandSubmissionOutcome | null = null
 
     const execution = mutation.mutate(command, {
@@ -106,6 +107,7 @@ export function createTierWorkspaceCommandHandler({
       ? predictLocalOutcome(execution, {
           counted: counts.counted_action_total,
           max: counts.maximum_counted_commands,
+          scoringPolicyVersion: currentRun?.policy.scoring_policy_version,
         })
       : null
     if (predicted) resolveTurn(predicted)

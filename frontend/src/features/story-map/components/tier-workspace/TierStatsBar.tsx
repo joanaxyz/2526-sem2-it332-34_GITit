@@ -7,7 +7,7 @@ import type { RepoGraphTrigger, WorkspaceStat } from '@/shared/level/workspace/t
 import { WorkspaceStatsBar } from '@/shared/level/workspace/WorkspaceStatsBar'
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 
-const HIDDEN_FOR_TRANSFER = new Set(['Stars', 'Stars on clear', 'Star target', 'Reward'])
+const HIDDEN_FOR_TRANSFER = new Set(['Stars', 'Stars on clear', 'Star target', '2-star target', 'Reward'])
 
 /** The adventure tier's facts in the shared stats strip under the command bar. */
 export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: RepoGraphTrigger }) {
@@ -46,6 +46,10 @@ export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: Rep
         </span>
       ),
     },
+    ...(run.policy.generous_counted_commands != null ? [{
+      label: '2-star target', icon: Target,
+      value: <span className="lvlctx-num">≤ {run.policy.generous_counted_commands} commands</span>,
+    }] : []),
     {
       label: 'Star target',
       icon: Target,

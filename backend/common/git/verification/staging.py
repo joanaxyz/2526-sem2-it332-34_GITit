@@ -11,8 +11,9 @@ from __future__ import annotations
 import copy
 from typing import Any
 
-from common.exceptions import BadRequest
 from simulator.services import parse_git_command
+
+from common.exceptions import BadRequest
 
 
 class StagingVerificationMixin:
@@ -41,6 +42,16 @@ class StagingVerificationMixin:
                     continue
                 authored = (expected.get("partial_hunks") or {}).get(path)
                 target_hunks, leftover_hunks = self._partial_hunk_lists(authored)
+                if (
+                    isinstance(authored, dict)
+                    and authored.get("target_hunks") == []
+                    and leftover_hunks
+                ):
+                    target_hunks, leftover_hunks = leftover_hunks, []
+                    expected.setdefault("partial_hunks", {})[path] = {
+                        "target_hunks": target_hunks,
+                        "leftover_hunks": [],
+                    }
                 expected.setdefault("staging", {})[path] = {
                     "status": "partial",
                     "hunks": target_hunks
@@ -129,7 +140,7 @@ class StagingVerificationMixin:
         parts = parse_git_command(command) or []
         paths = self._pathspecs(parts, value_options={"--source"})
         source = self._option_value(parts, "--source")
-        if "--staged" in parts:
+        if "--staged" in parts or "-S" in parts:
             if source:
                 return
             if "." in paths:
@@ -201,12 +212,27 @@ class StagingVerificationMixin:
 
     def _verify_reset(self, *, command: str, previous_state: dict, next_state: dict) -> None:
         parts = parse_git_command(command) or []
+        if "--" in parts:
+            import shlex
+
+            separator = parts.index("--")
+            target_expr = parts[2] if separator > 2 else "HEAD"
+            if target_expr != "HEAD" and self._resolve_revision(
+                previous_state, target_expr
+            ) != self.normalizer.head_commit_id(previous_state):
+                raise BadRequest("Path reset currently supports HEAD only.")
+            self._verify_restore(
+                command=shlex.join(["git", "restore", "--staged", "--", *parts[separator + 1 :]]),
+                previous_state=previous_state,
+                next_state=next_state,
+            )
+            return
         args = self._pathspecs(parts)
         target_expr = args[0] if args else "HEAD"
         target = self._resolve_revision(previous_state, target_expr)
         if not target:
             raise BadRequest("execution.next_state does not match the submitted git reset command.")
-        mode = "soft" if "--soft" in parts else "mixed" if "--mixed" in parts else "hard"
+        mode = "soft" if "--soft" in parts else "hard" if "--hard" in parts else "mixed"
         expected = copy.deepcopy(previous_state)
         expected["merge_abort_state"] = copy.deepcopy(previous_state)
         old_head = self.normalizer.head_commit_id(previous_state)
@@ -214,10 +240,17 @@ class StagingVerificationMixin:
         target_tree = self._tree_for_commit(previous_state, target)
         self._set_head_commit(expected, target)
         if mode == "soft":
-            expected["staging"] = self._entries_from_tree_diff(target_tree, old_tree)
+            expected["staging"] = {
+                **self._entries_from_tree_diff(target_tree, old_tree),
+                **copy.deepcopy(previous_state.get("staging") or {}),
+            }
         elif mode == "mixed":
             expected["staging"] = {}
-            expected["working_tree"] = self._entries_from_tree_diff(target_tree, old_tree)
+            expected["working_tree"] = {
+                **self._entries_from_tree_diff(target_tree, old_tree),
+                **copy.deepcopy(previous_state.get("staging") or {}),
+                **copy.deepcopy(previous_state.get("working_tree") or {}),
+            }
         else:
             expected["staging"] = {}
             expected["working_tree"] = {}

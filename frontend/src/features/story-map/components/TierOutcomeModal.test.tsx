@@ -71,7 +71,7 @@ describe('ordered scenario outcomes', () => {
     render(<TierOutcomeModal open run={clearedScenario()} onClose={() => {}} onBackToMap={() => {}} />)
     expect(screen.getByText('Scenario cleared')).toBeInTheDocument()
     expect(
-      screen.getByText('Scenario 1 of 2 cleared — next: Publish and track. Clear it to earn 25 GitCoins.'),
+      screen.getByText('Next: Publish and track'),
     ).toBeInTheDocument()
     // A partial clear does not claim the tier is complete.
     const props = shown.mock.calls.at(-1)?.[0]

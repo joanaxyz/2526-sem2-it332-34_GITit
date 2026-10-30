@@ -15,9 +15,6 @@ from __future__ import annotations
 
 from typing import Any
 
-from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
-
 from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
@@ -26,6 +23,11 @@ from adventures.models import (
 )
 from adventures.rewards import CHALLENGE_GATE_REWARD_COINS
 from challenges.models import ChallengeLevel, ChallengeTrial, ChallengeTrialVariant
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
+from tutoring.services.forms import catalog_forms, forms_used_by
+from tutoring.services.homes import assign_guide_homes
+
 from curriculum.models import (
     Chapter,
     ChapterOrientationLesson,
@@ -43,8 +45,6 @@ from curriculum.seed_data.source.scenario_fixtures import extension_case
 from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN, ScenarioSpec
 from curriculum.seed_data.source.scenario_plan.types import SPIRAL
 from curriculum.seed_data.spec_helpers import required_commit_message_details
-from tutoring.services.forms import catalog_forms, forms_used_by
-from tutoring.services.homes import assign_guide_homes
 
 STORY_SLUG = "arcane-spire"
 
@@ -13260,6 +13260,22 @@ class Command(BaseCommand):
             if difficulty == revised["difficulty"]
             else DIFFICULTY_MAX_COUNTED_COMMANDS[difficulty]
         )
+        from common.runtime.scoring_policy import thresholds
+        from common.runtime.star_targets import counted_command_total
+
+        from curriculum.services.solution_audit import verified_route_cost
+        from curriculum.services.techniques import required_techniques, technique_label
+
+        techniques = required_techniques(case["case_id"])
+        efficient, generous, maximum = thresholds(
+            max(
+                revised["minimum_counted_commands"],
+                counted_command_total(case["solution_commands"]),
+                verified_route_cost(case["case_id"]),
+            ),
+            maximum,
+            revised.get("generous_counted_commands"),
+        )
         required_values = [
             *(
                 {
@@ -13284,7 +13300,9 @@ class Command(BaseCommand):
             "parameter_context": {
                 "scenario_number": revised["scenario_number"],
                 "difficulty": difficulty,
-                "minimum_counted_commands": revised["minimum_counted_commands"],
+                "minimum_counted_commands": efficient,
+                "generous_counted_commands": generous,
+                "required_techniques": techniques,
                 "maximum_counted_commands": maximum,
             },
             "scenario_context": {
@@ -13292,7 +13310,14 @@ class Command(BaseCommand):
                 "story": revised["story"],
                 "starting_point": revised["starting_point"],
                 "real_world_context": revised["real_world_context"],
-                "task": revised["task"],
+                "task": revised["task"]
+                + (
+                    "\n\nRequired technique: "
+                    + ", ".join(technique_label(t) for t in techniques)
+                    + "."
+                    if techniques
+                    else ""
+                ),
                 "objective_checks": graded_checks(revised["objective_checks"]),
                 "expected_result": revised["expected_result"],
                 "details": required_values,

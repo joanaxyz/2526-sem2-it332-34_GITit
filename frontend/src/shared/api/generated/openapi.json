@@ -3906,6 +3906,14 @@
                     "stars": {
                         "type": "integer"
                     },
+                    "command_comparison": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CommandComparisonResponse"
+                            }
+                        ],
+                        "nullable": true
+                    },
                     "star_breakdown": {
                         "allOf": [
                             {
@@ -4079,6 +4087,14 @@
                     },
                     "stars": {
                         "type": "integer"
+                    },
+                    "command_comparison": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CommandComparisonResponse"
+                            }
+                        ],
+                        "nullable": true
                     },
                     "star_breakdown": {
                         "allOf": [
@@ -4352,6 +4368,14 @@
                     "stars": {
                         "type": "integer"
                     },
+                    "command_comparison": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CommandComparisonResponse"
+                            }
+                        ],
+                        "nullable": true
+                    },
                     "star_breakdown": {
                         "$ref": "#/components/schemas/StarBreakdownResponse"
                     },
@@ -4470,6 +4494,14 @@
                     },
                     "stars": {
                         "type": "integer"
+                    },
+                    "command_comparison": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/CommandComparisonResponse"
+                            }
+                        ],
+                        "nullable": true
                     },
                     "star_breakdown": {
                         "$ref": "#/components/schemas/StarBreakdownResponse"
@@ -5046,6 +5078,27 @@
                     "processed",
                     "stderr",
                     "stdout"
+                ]
+            },
+            "CommandComparisonResponse": {
+                "type": "object",
+                "properties": {
+                    "learner_count": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "example_count": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "relation": {
+                        "$ref": "#/components/schemas/RelationEnum"
+                    }
+                },
+                "required": [
+                    "example_count",
+                    "learner_count",
+                    "relation"
                 ]
             },
             "CommandFormPreviewResponse": {
@@ -6434,11 +6487,13 @@
                 "enum": [
                     "not_cleared",
                     "command_target_exceeded",
+                    "generous_target_exceeded",
+                    "efficient_target_exceeded",
                     "retry_allowance_exceeded",
                     "previous_scoring_rules"
                 ],
                 "type": "string",
-                "description": "* `not_cleared` - not_cleared\n* `command_target_exceeded` - command_target_exceeded\n* `retry_allowance_exceeded` - retry_allowance_exceeded\n* `previous_scoring_rules` - previous_scoring_rules"
+                "description": "* `not_cleared` - not_cleared\n* `command_target_exceeded` - command_target_exceeded\n* `generous_target_exceeded` - generous_target_exceeded\n* `efficient_target_exceeded` - efficient_target_exceeded\n* `retry_allowance_exceeded` - retry_allowance_exceeded\n* `previous_scoring_rules` - previous_scoring_rules"
             },
             "Register": {
                 "type": "object",
@@ -6479,6 +6534,15 @@
                 "required": [
                     "user"
                 ]
+            },
+            "RelationEnum": {
+                "enum": [
+                    "fewer",
+                    "equal",
+                    "more"
+                ],
+                "type": "string",
+                "description": "* `fewer` - fewer\n* `equal` - equal\n* `more` - more"
             },
             "RepositoryChange": {
                 "type": "object",
@@ -6713,6 +6777,18 @@
                         "type": "integer",
                         "minimum": 0
                     },
+                    "generous_target": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "maximum_commands": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
+                    "scoring_policy_version": {
+                        "type": "integer",
+                        "minimum": 1
+                    },
                     "retry_count": {
                         "type": "integer",
                         "minimum": 0
@@ -6768,10 +6844,12 @@
                 "enum": [
                     "clear",
                     "command_target",
-                    "retry_allowance"
+                    "retry_allowance",
+                    "generous_target",
+                    "efficient_target"
                 ],
                 "type": "string",
-                "description": "* `clear` - clear\n* `command_target` - command_target\n* `retry_allowance` - retry_allowance"
+                "description": "* `clear` - clear\n* `command_target` - command_target\n* `retry_allowance` - retry_allowance\n* `generous_target` - generous_target\n* `efficient_target` - efficient_target"
             },
             "StateEnum": {
                 "enum": [

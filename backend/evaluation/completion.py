@@ -16,6 +16,8 @@ class CompletionEvaluationContext:
     expected_state_hash: str | None = None
     next_state_already_normalized: bool = False
     initial_state_already_normalized: bool = False
+    required_techniques: list[str] = field(default_factory=list)
+    verified_techniques: list[str] = field(default_factory=list)
 
 
 class PracticeCompletionEvaluator:
@@ -36,7 +38,7 @@ class PracticeCompletionEvaluator:
             # Level fallback is rare and not keyed by a stable cache id, so
             # compile it directly.
             spec = compile_evaluation_spec(context.level_evaluation_spec)
-        return EvaluationEngine().evaluate(
+        outcome = EvaluationEngine().evaluate(
             spec=spec,
             next_state=context.next_state,
             initial_state=getattr(variant, "initial_state", None),
@@ -45,4 +47,38 @@ class PracticeCompletionEvaluator:
             expected_state_hash=context.expected_state_hash,
             next_state_already_normalized=context.next_state_already_normalized,
             initial_state_already_normalized=context.initial_state_already_normalized,
+        )
+
+        if not context.required_techniques:
+            return outcome
+        from common.constants import RESULT_TARGET_MATCHED, RESULT_TARGET_NOT_YET_MATCHED
+        from curriculum.services.techniques import technique_label
+
+        missing = sorted(set(context.required_techniques) - set(context.verified_techniques))
+        passed = tuple(
+            {
+                "type": "required_technique",
+                "rule": {"technique": t},
+                "reason": "Technique verified.",
+            }
+            for t in context.required_techniques
+            if t not in missing
+        )
+        failed = tuple(
+            {
+                "type": "required_technique",
+                "rule": {"technique": t},
+                "reason": f"Use the required technique: {technique_label(t)}.",
+            }
+            for t in missing
+        )
+        matched = outcome.target_matched and not missing
+        return EvaluationOutcome(
+            result_category=RESULT_TARGET_MATCHED if matched else RESULT_TARGET_NOT_YET_MATCHED,
+            target_matched=matched,
+            passed_rules=outcome.passed_rules + passed,
+            failed_rules=outcome.failed_rules + failed,
+            summary=outcome.summary
+            if not missing
+            else "Required technique has not been demonstrated.",
         )
