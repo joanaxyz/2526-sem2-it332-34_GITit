@@ -260,12 +260,15 @@ python scripts/check_api_type_adoption.py
 `MetricsService._performance_summary_for_runs()` is the response owner and delegates
 arithmetic to `progress/services/mastery_metrics.py`. Dashboard KPI fields use the
 same owner. Ordinary run/session totals and the Stats finish-rate diagnostic remain
-activity measures. Replay and transfer runs do not create practice mastery credit.
+activity measures. Replay and transfer runs do not create practice mastery credit;
+CAR alone reads replays.
 
 The five official KPIs, targets, formulas, Let definitions, reference-validation
 commands and fixed-cohort evaluation workflow are documented in
 [KPI_METHODOLOGY.md](KPI_METHODOLOGY.md). SCR/HLCR count unique required tiers;
-CAR assesses successful command efficiency against a validated reference; ARC
+CAR averages each scenario's command efficiency against a validated reference on
+the learner's latest clear of content they had not cleared before (replays
+included), with `car_first` from each scenario's first such clear as its learner-facing starting point; ARC
 counts unsuccessful attempts before mastery; RTA preserves the first result on
 reserved unseen transfer checkpoints in Modules 3–4. The supplementary Retry
 Success Rate counts concluded recovery retries after actual unsuccessful attempts.

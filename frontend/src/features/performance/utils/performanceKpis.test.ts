@@ -20,7 +20,7 @@ describe('kpiEvidence', () => {
   })
   it.each([
     ['scr', rate(3, 10), '3 of 10 required tiers mastered'],
-    ['car', rate(22, 125), '22 score points across 125 assessed tiers'],
+    ['car', rate(22, 125), '22 score points across 125 scored scenarios'],
     ['hlcr', rate(1, 4), '1 of 4 hard tiers mastered'],
     ['arc', rate(1, 10), '1 unsuccessful attempt across 10 mastered tiers'],
     ['arc', rate(5, 1), '5 unsuccessful attempts across 1 mastered tier'],
@@ -32,7 +32,7 @@ describe('kpiEvidence', () => {
 
   it.each([
     ['scr', 'No attempted required tiers yet'],
-    ['car', 'No validated command assessments yet'],
+    ['car', 'No scored scenarios yet'],
     ['arc', 'No mastered tiers yet'],
     ['rta', 'No assessed transfer checkpoints yet'],
   ] as const)('names the missing unit for %s', (key, text) => {

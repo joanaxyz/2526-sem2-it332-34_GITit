@@ -19,7 +19,16 @@ from players.models import Player
 from progress.models import AdventureLevelTierCompletion, KpiCheckpoint, KpiExposure, KpiStudy
 
 from .checkpoints import actual_count
-from .mastery_metrics import KEYS, balanced, car_score, rate, rates, samples
+from .mastery_metrics import (
+    KEYS,
+    balanced,
+    car_score,
+    content_key,
+    rate,
+    rates,
+    samples,
+    scenario_car,
+)
 from .references import state_key, valid_ref
 
 
@@ -159,7 +168,7 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
             "tiers": specs,
             "weights": weights,
             "assigned_at": timezone.now().isoformat(),
-            "policy": "mastery-kpis-v1",
+            "policy": "mastery-kpis-v2",
         },
     )
 
@@ -186,7 +195,6 @@ def _records(study):
             tier_id__in=specs,
             started_at__gte=manifest["assigned_at"],
             started_at__lte=study.cutoff,
-            is_replay=False,
             is_transfer=False,
         )
         .prefetch_related("steps")
@@ -219,19 +227,39 @@ def _records(study):
                 and r.ref_hash == refs[r.selected_variant_id]["hash"]
             ]
             wins = [r for r in valid if r.status == "completed"]
-            mastery = wins[spec["required"] - 1] if len(wins) >= spec["required"] else None
-            missing = len(valid) != len(ended) or not available or not requirements_match
-            score = (
-                car_score(
-                    passed=True,
-                    target=refs[mastery.selected_variant_id]["count"],
-                    actual=actual_count(mastery),
-                )
-                if mastery
-                else None
-                if missing
-                else 0
+            firsts = [r for r in valid if not r.is_replay]
+            first_wins = [r for r in firsts if r.status == "completed"]
+            mastery = (
+                first_wins[spec["required"] - 1] if len(first_wins) >= spec["required"] else None
             )
+            missing = len(valid) != len(ended) or not available or not requirements_match
+            # Every assigned scenario is scored: its first/latest clear of content
+            # not cleared before, else zero, or unscored when evidence is missing.
+            clears = {content[ref_id].scenario_id: [] for ref_id in refs if ref_id in content}
+            cleared = set()
+            for run in sorted(wins, key=lambda r: (r.ended_at, r.id)):
+                variant = content[run.selected_variant_id]
+                key = content_key(variant.semantic_key, variant.id)
+                if key not in cleared:
+                    cleared.add(key)
+                    clears[variant.scenario_id].append(
+                        car_score(
+                            passed=True,
+                            target=refs[run.selected_variant_id]["count"],
+                            actual=actual_count(run),
+                        )
+                    )
+            car_first, car_latest, unscored = scenario_car(
+                {s: scores for s, scores in clears.items() if scores}
+            )
+            unscored += sum(not scores for scores in clears.values())
+            if not available or not requirements_match:
+                # Changed assigned content cannot be scored against the manifest.
+                car_first, car_latest, unscored = [], [], len(clears)
+            elif not missing:
+                car_first += [0] * unscored
+                car_latest += [0] * unscored
+                unscored = 0
             checkpoint = transfers.get((player_id, tier_id))
             transfer_ref = spec["transfer"]
             transfer = None
@@ -275,7 +303,8 @@ def _records(study):
                     "difficulty": spec["difficulty"],
                     "mastered": mastery is not None,
                     "mastery_missing": mastery is None and missing,
-                    "car": score,
+                    "car_scores": car_latest,
+                    "car_first_scores": car_first,
                     "transfer": transfer,
                     "failures": sum(
                         r.ended_at <= mastery.ended_at
@@ -283,7 +312,7 @@ def _records(study):
                             r.status == "failed"
                             or (r.status == "abandoned" and bool(list(r.steps.all())))
                         )
-                        for r in valid
+                        for r in firsts
                     )
                     if mastery
                     else 0,
@@ -291,7 +320,7 @@ def _records(study):
                     and player_id not in spec["transfer_missing"],
                     "attempted": bool(attempts),
                     "invalid_runs": len(ended) - len(valid),
-                    "car_missing": score is None,
+                    "car_missing": unscored,
                     "transfer_missing": spec["module"] in (3, 4) and transfer is None,
                     "mastery_run": mastery.id if mastery else None,
                     "transfer_run": checkpoint.run_id if checkpoint else None,
@@ -305,7 +334,7 @@ def _weighted(records, weights):
     by_module = {n: rates([r for r in records if r["module"] == n]) for n in modules}
     result = {}
     for key in KEYS:
-        if key == "retry_success_rate":
+        if key in ("retry_success_rate", "car_first"):
             continue  # Formal study evaluates the five official KPIs only.
         eligible = {n for n in modules if key != "rta" or n in (3, 4)}
         if key == "hlcr":

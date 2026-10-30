@@ -20,6 +20,14 @@ RTA_HELP_TEXT = (
     "Retry Transfer Accuracy (Modules 3-4): successful first attempts on reserved, "
     "unseen transfer checkpoints over concluded checkpoints. Formal studies include unattempted assignments."
 )
+CAR_HELP_TEXT = (
+    "Command Accuracy Rate: mean over scenarios of 100 x min(1, reference / commands) "
+    "on each scenario's latest clear of content the learner had not cleared before."
+)
+CAR_FIRST_HELP_TEXT = (
+    "CAR's starting point: the same mean using each scenario's first such clear. "
+    "Shown beside CAR to make improvement visible; not an evaluated KPI."
+)
 RETRY_SUCCESS_RATE_HELP_TEXT = (
     "Concluded retries following actual unsuccessful attempts that succeed."
 )
@@ -30,7 +38,8 @@ RTR_DEPRECATED_HELP_TEXT = "Deprecated alias of retry_success_rate. Will be remo
 
 class PerformanceKpiSetSerializer(serializers.Serializer):
     scr = RateMetricSerializer()
-    car = RateMetricSerializer()
+    car = RateMetricSerializer(help_text=CAR_HELP_TEXT)
+    car_first = RateMetricSerializer(help_text=CAR_FIRST_HELP_TEXT)
     hlcr = RateMetricSerializer()
     rta = RateMetricSerializer(help_text=RTA_HELP_TEXT)
     retry_success_rate = RateMetricSerializer(help_text=RETRY_SUCCESS_RATE_HELP_TEXT)
@@ -42,7 +51,8 @@ class PerformanceModuleSerializer(serializers.Serializer):
     number = serializers.IntegerField()
     title = serializers.CharField()
     scr = RateMetricSerializer()
-    car = RateMetricSerializer()
+    car = RateMetricSerializer(help_text=CAR_HELP_TEXT)
+    car_first = RateMetricSerializer(help_text=CAR_FIRST_HELP_TEXT)
     hlcr = RateMetricSerializer()
     rta = RateMetricSerializer(help_text=RTA_HELP_TEXT)
     retry_success_rate = RateMetricSerializer(help_text=RETRY_SUCCESS_RATE_HELP_TEXT)
@@ -68,8 +78,10 @@ class PerformanceSamplesSerializer(serializers.Serializer):
     )
     mastered_tiers = serializers.IntegerField()
     mastery_missing = serializers.IntegerField()
-    car_scored = serializers.IntegerField()
-    car_missing = serializers.IntegerField()
+    car_scored = serializers.IntegerField(help_text="Scenarios with a CAR score.")
+    car_missing = serializers.IntegerField(
+        help_text="Scenarios cleared without validated reference evidence; unscored."
+    )
     transfer_assigned = serializers.IntegerField()
     transfer_pending = serializers.IntegerField()
     transfer_missing = serializers.IntegerField()

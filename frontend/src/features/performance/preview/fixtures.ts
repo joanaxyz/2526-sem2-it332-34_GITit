@@ -12,6 +12,7 @@ export const richPerformanceFixture: PerformanceSummary = {
   kpis: {
     scr: { value: 75.4, numerator: 43, denominator: 57 },
     car: { value: 91, numerator: 3913, denominator: 43 },
+    car_first: { value: 78, numerator: 3354, denominator: 43 },
     hlcr: { value: 61.5, numerator: 8, denominator: 13 },
     rta: { value: 60, numerator: 3, denominator: 5 },
     retry_success_rate: { value: 63.6, numerator: 21, denominator: 33 },
@@ -20,6 +21,7 @@ export const richPerformanceFixture: PerformanceSummary = {
   modules: [
     {
       car: { value: 91, numerator: 91, denominator: 1 },
+      car_first: { value: 76, numerator: 76, denominator: 1 },
       number: 1, title: 'Local Repository Foundations',
       scr: { value: 100, numerator: 11, denominator: 11 },
       hlcr: { value: 100, numerator: 3, denominator: 3 },
@@ -29,6 +31,7 @@ export const richPerformanceFixture: PerformanceSummary = {
     },
     {
       car: { value: 91, numerator: 91, denominator: 1 },
+      car_first: { value: 76, numerator: 76, denominator: 1 },
       number: 2, title: 'Branching and Collaboration',
       scr: { value: 77.8, numerator: 14, denominator: 18 },
       hlcr: { value: 66.7, numerator: 2, denominator: 3 },
@@ -38,6 +41,7 @@ export const richPerformanceFixture: PerformanceSummary = {
     },
     {
       car: { value: 91, numerator: 91, denominator: 1 },
+      car_first: { value: 76, numerator: 76, denominator: 1 },
       number: 3, title: 'Conflict Resolution',
       scr: { value: 50, numerator: 10, denominator: 20 },
       hlcr: { value: 33.3, numerator: 1, denominator: 3 },
@@ -47,6 +51,7 @@ export const richPerformanceFixture: PerformanceSummary = {
     },
     {
       car: { value: 91, numerator: 91, denominator: 1 },
+      car_first: { value: 76, numerator: 76, denominator: 1 },
       number: 4, title: 'Advanced Recovery and History',
       scr: { value: 100, numerator: 8, denominator: 8 },
       hlcr: { value: 50, numerator: 2, denominator: 4 },
@@ -67,6 +72,7 @@ export const emptyPerformanceFixture: PerformanceSummary = {
   kpis: {
     scr: { value: null, numerator: 0, denominator: 0 },
     car: { value: null, numerator: 0, denominator: 0 },
+    car_first: { value: null, numerator: 0, denominator: 0 },
     hlcr: { value: null, numerator: 0, denominator: 0 },
     rta: { value: null, numerator: 0, denominator: 0 },
     retry_success_rate: { value: null, numerator: 0, denominator: 0 },
@@ -76,6 +82,7 @@ export const emptyPerformanceFixture: PerformanceSummary = {
     number,
     title: `Module ${number}`,
     car: { value: null, numerator: 0, denominator: 0 },
+    car_first: { value: null, numerator: 0, denominator: 0 },
     scr: { value: null, numerator: 0, denominator: 0 },
     hlcr: { value: null, numerator: 0, denominator: 0 },
     rta: { value: null, numerator: 0, denominator: 0 },
