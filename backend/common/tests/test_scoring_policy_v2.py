@@ -177,6 +177,7 @@ def test_technique_requires_verified_execution_not_typed_text():
 def test_noop_and_failed_commands_do_not_produce_technique_evidence():
     run = SimpleNamespace(scoring_policy_version=2, verified_techniques=[])
     execution = SimpleNamespace(
+        previous_state={},
         state_mutated=False,
         result=SimpleNamespace(processed=True, normalized_command="git rebase main"),
     )

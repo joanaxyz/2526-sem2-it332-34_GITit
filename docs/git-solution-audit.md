@@ -14,7 +14,7 @@ This audit establishes verified routes, not an exhaustive list of all possible G
 |---|---|---|---|---|---|
 | init-easy-plain-notes | story | syntax_alternatives | 3 / 3 | Outcome only | 1 / 7 / 12 |
 | init-easy-plain-recipes | story | syntax_alternatives | 3 / 3 | Outcome only | 1 / 7 / 12 |
-| init-easy-current-empty | story | syntax_alternatives | 3 / 3 | Outcome only | 1 / 7 / 12 |
+| init-easy-current-empty | story | syntax_alternatives | 3 / 3 | init:initial-branch:main | 1 / 7 / 12 |
 | init-easy-trunk-branch | story | syntax_alternatives | 2 / 8 | Outcome only | 1 / 7 / 12 |
 | init-easy-invoice | story | syntax_alternatives | 3 / 3 | Outcome only | 1 / 7 / 12 |
 | init-med-oss | story | syntax_alternatives | 3 / 3 | Outcome only | 1 / 6 / 10 |

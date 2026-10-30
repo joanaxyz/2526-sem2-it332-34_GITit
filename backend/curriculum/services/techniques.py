@@ -6,7 +6,7 @@ from functools import cache
 from pathlib import Path
 
 
-def techniques_for_command(command):
+def techniques_for_command(command, *, previous_state=None):
     try:
         parts = shlex.split(command)
     except ValueError:
@@ -14,6 +14,21 @@ def techniques_for_command(command):
     if len(parts) < 2 or parts[0] != "git":
         return set()
     family = parts[1]
+    if family == "init":
+        # Choosing an initial branch must happen when the repository is created.
+        # Verified prior state prevents a later reinit from earning this evidence.
+        if previous_state is None or previous_state.get("repository_initialized", True):
+            return set()
+        branch = None
+        tokens = iter(parts[2:])
+        for token in tokens:
+            if token == "--":
+                break
+            if token in {"-b", "--initial-branch"}:
+                branch = next(tokens, None)
+            elif token.startswith("--initial-branch="):
+                branch = token.split("=", 1)[1]
+        return {f"init:initial-branch:{branch}"} if branch and not branch.startswith("-") else set()
     # Option values are operands, even when their text looks like a flag.
     flags = set()
     index = 2
@@ -63,12 +78,17 @@ def record_verified_techniques(run, execution):
         or not execution.state_mutated
     ):
         return
-    found = techniques_for_command(execution.result.normalized_command)
+    found = techniques_for_command(
+        execution.result.normalized_command, previous_state=execution.previous_state
+    )
     if found:
         run.verified_techniques = sorted(set(run.verified_techniques) | found)
 
 
 def technique_label(technique):
+    if technique.startswith("init:initial-branch:"):
+        branch = technique.removeprefix("init:initial-branch:")
+        return f"git init -b {shlex.quote(branch)}"
     if technique == "amend":
         return "git commit --amend"
     family, separator, action = technique.partition(":")

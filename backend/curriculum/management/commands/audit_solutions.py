@@ -73,7 +73,10 @@ class Command(BaseCommand):
                             )
                             if verified.state_mutated and verified.result.processed:
                                 evidence.update(
-                                    techniques_for_command(verified.result.normalized_command)
+                                    techniques_for_command(
+                                        verified.result.normalized_command,
+                                        previous_state=verified.previous_state,
+                                    )
                                 )
                         except BadRequest as exc:
                             errors.append(str(exc))

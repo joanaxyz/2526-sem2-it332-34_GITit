@@ -168,6 +168,12 @@ class AdventureLevelTierCommandProcessingService:
                 )
                 if _uses_contextual_feedback(run) and classification == COMMAND_COUNTED:
                     feedback = FeedbackGenerationService().describe(previous_state, next_state)
+                    missing_techniques = [
+                        rule["reason"]
+                        for rule in evaluation.failed_rules
+                        if rule.get("type") == "required_technique"
+                    ]
+                    feedback = " ".join(part for part in [feedback, *missing_techniques] if part)
         else:
             result_category = (
                 RESULT_INVALID

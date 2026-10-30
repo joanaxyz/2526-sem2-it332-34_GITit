@@ -1,16 +1,23 @@
 from copy import deepcopy
+import json
+import shutil
+from pathlib import Path
 
+import pytest
+from django.core.management import call_command
 from rest_framework.test import APIClient
 
 from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierProgress,
+    AdventureLevelTierRun,
     AdventureLevelTierScenario,
     AdventureLevelTierScenarioVariant,
 )
 from adventures.services import AdventureLevelTierRunService
 from curriculum.models import Chapter, CommandForm, CommandSkill, Story
+from curriculum.services.solution_replay import replay_solutions
 from players.services import get_or_create_player
 from progress.models import AdventureLevelTierCompletion, Wallet
 from testing.frontend_execution import frontend_execution_payload
@@ -212,3 +219,109 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
         source_entry_point="level_page",
     )
     assert unlocked_run.status == "started"
+
+
+@pytest.mark.skipif(
+    shutil.which("node") is None
+    or not (Path(__file__).resolve().parents[3] / "frontend" / "node_modules").exists(),
+    reason="Requires the frontend simulator and Node for real command payloads.",
+)
+def test_seeded_initial_branch_task_requires_explicit_main_creation(db, django_user_model):
+    from adventures.tests.test_adventure_start_access import make_player
+
+    call_command("seed_curriculum", verbosity=0)
+    tier = AdventureLevelTier.objects.get(
+        adventure_level__slug="initializing-a-local-repository", difficulty="easy"
+    )
+    first_variant = AdventureLevelTierScenarioVariant.objects.get(case_id="init-easy-plain-notes")
+    branch_variant = AdventureLevelTierScenarioVariant.objects.get(case_id="init-easy-current-empty")
+    technique = "init:initial-branch:main"
+    assert branch_variant.parameter_context["required_techniques"] == [technique]
+    assert first_variant.parameter_context["required_techniques"] == []
+    routes = {
+        "bare": (["git init"], False),
+        "short": (["git init -b main"], True),
+        "long-equals": (["git init --initial-branch=main"], True),
+        "long-space": (["git init --initial-branch main"], True),
+        "explicit-current-directory": (["git init -b main ."], True),
+        "wrong-branch-then-rename": (["git init -b trunk", "git branch -m main"], False),
+        "reinitialize": (["git init", "git init -b main"], False),
+    }
+    specs = {
+        name: {
+            "initial_state": branch_variant.initial_state,
+            "solution_commands": commands,
+            "max_counted_commands": 12,
+        }
+        for name, (commands, _) in routes.items()
+    }
+    specs["plain-lesson"] = {
+        "initial_state": first_variant.initial_state,
+        "solution_commands": ["git init"],
+        "max_counted_commands": 12,
+    }
+    _, replays = replay_solutions(specs)
+    evidence = []
+
+    def submit_replay(client, run, name):
+        payload = None
+        for index, step in enumerate(replays[name]["steps"]):
+            response = client.post(
+                f"/api/adventure-tier-runs/{run.id}/submit-command/",
+                {
+                    "command": step["command"],
+                    "execution": {
+                        **step["execution"],
+                        "cwd": step["cwd"],
+                        "client_run_revision": index,
+                    },
+                },
+                format="json",
+            )
+            assert response.status_code == 200, response.content
+            payload = response.json()
+            assert payload["exit_code"] == 0, payload
+        return payload
+
+    for name, (commands, solved) in routes.items():
+        client, _ = make_player(django_user_model, username=f"explicit-init-{name}")
+        first = client.post(
+            f"/api/adventure-level-tiers/{tier.id}/runs/",
+            {"source_entry_point": "level_page"},
+            format="json",
+        )
+        assert first.status_code == 201, first.content
+        first_run = AdventureLevelTierRun.objects.get(pk=first.json()["id"])
+        assert first_run.selected_variant_id == first_variant.id
+        assert submit_replay(client, first_run, "plain-lesson")["command_outcome"]["solved"]
+
+        started = client.post(
+            f"/api/adventure-level-tiers/{tier.id}/runs/",
+            {"source_entry_point": "level_page"},
+            format="json",
+        )
+        assert started.status_code == 201, started.content
+        run = AdventureLevelTierRun.objects.get(pk=started.json()["id"])
+        assert run.selected_variant_id == branch_variant.id
+        assert run.required_techniques == [technique]
+        assert "Required technique: git init -b main." in started.json()["scenario_context"]["task"]
+
+        result = submit_replay(client, run, name)
+        run.refresh_from_db()
+        assert result["command_outcome"]["solved"] is solved, result
+        assert run.status == ("completed" if solved else "started")
+        assert (technique in run.verified_techniques) is solved
+        assert run.repository_state["head"]["name"] == "main"
+        if not solved:
+            assert "Use the required technique: git init -b main." in result["step"]["contextual_feedback"]
+        evidence.append(
+            {
+                "commands": commands,
+                "exit_code": result["exit_code"],
+                "solved": result["command_outcome"]["solved"],
+                "status": run.status,
+                "verified_techniques": run.verified_techniques,
+            }
+        )
+
+    print("Initial-branch API evidence: " + json.dumps(evidence))
