@@ -15,6 +15,9 @@ from __future__ import annotations
 
 from typing import Any
 
+from django.core.management.base import BaseCommand, CommandError
+from django.db import transaction
+
 from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
@@ -23,11 +26,6 @@ from adventures.models import (
 )
 from adventures.rewards import CHALLENGE_GATE_REWARD_COINS
 from challenges.models import ChallengeLevel, ChallengeTrial, ChallengeTrialVariant
-from django.core.management.base import BaseCommand, CommandError
-from django.db import transaction
-from tutoring.services.forms import catalog_forms, forms_used_by
-from tutoring.services.homes import assign_guide_homes
-
 from curriculum.models import (
     Chapter,
     ChapterOrientationLesson,
@@ -45,6 +43,8 @@ from curriculum.seed_data.source.scenario_fixtures import extension_case
 from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN, ScenarioSpec
 from curriculum.seed_data.source.scenario_plan.types import SPIRAL
 from curriculum.seed_data.spec_helpers import required_commit_message_details
+from tutoring.services.forms import catalog_forms, forms_used_by
+from tutoring.services.homes import assign_guide_homes
 
 STORY_SLUG = "arcane-spire"
 
@@ -13262,7 +13262,6 @@ class Command(BaseCommand):
         )
         from common.runtime.scoring_policy import thresholds
         from common.runtime.star_targets import counted_command_total
-
         from curriculum.services.solution_audit import verified_route_cost
         from curriculum.services.techniques import required_techniques, technique_label
 

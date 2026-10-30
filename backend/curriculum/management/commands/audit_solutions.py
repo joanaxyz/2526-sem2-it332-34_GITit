@@ -4,16 +4,16 @@ import copy
 import json
 from pathlib import Path
 
+from django.core.management.base import BaseCommand, CommandError
+
 from common.exceptions import BadRequest
 from common.git.client_command_execution import ClientCommandExecutionService
 from common.runtime.star_targets import counted_command_total
-from django.core.management.base import BaseCommand, CommandError
-from evaluation.services.state_based import StateBasedEvaluator
-
 from curriculum.seed_data.scenario_bank import extension_scenario_bank, scenario_bank
 from curriculum.services.solution_audit import authored_content, candidate_routes, published_cases
 from curriculum.services.solution_replay import replay_solutions
 from curriculum.services.techniques import required_techniques, techniques_for_command
+from evaluation.services.state_based import StateBasedEvaluator
 
 REPORT = Path(__file__).resolve().parents[2] / "seed_data" / "solution_audit.json"
 

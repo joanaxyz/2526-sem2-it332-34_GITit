@@ -1,17 +1,17 @@
 from types import SimpleNamespace
 
 import pytest
-from adventures.scoring import stars
-from curriculum.services.techniques import record_verified_techniques
-from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
-from evaluation.services.rule_builders import command_matches
-from testing.frontend_execution import frontend_execution_payload
 
+from adventures.scoring import stars
 from common.constants import COMMAND_COUNTED
 from common.git.client_command_execution import ClientCommandExecutionService
 from common.runtime.scoring_policy import command_comparison, thresholds
 from common.tests.test_star_grading import _submit
 from common.tests.test_star_grading import grading_lane as lane_fixture
+from curriculum.services.techniques import record_verified_techniques
+from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
+from evaluation.services.rule_builders import command_matches
+from testing.frontend_execution import frontend_execution_payload
 
 # Register the shared parametrized fixture without shadowing its import.
 grading_lane = lane_fixture

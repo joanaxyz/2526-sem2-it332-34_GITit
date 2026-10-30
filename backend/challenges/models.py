@@ -1,3 +1,6 @@
+from django.db import models
+from django.db.models import Q
+
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_HARD,
@@ -8,8 +11,6 @@ from common.constants import (
     SESSION_STATUS_STARTED,
 )
 from common.models import VariantBase
-from django.db import models
-from django.db.models import Q
 
 
 class ChallengeLevel(models.Model):

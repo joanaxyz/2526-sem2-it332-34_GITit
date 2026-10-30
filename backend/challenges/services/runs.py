@@ -1,3 +1,7 @@
+from django.db import IntegrityError, transaction
+from django.utils import timezone
+
+from challenges.models import ChallengeRun, ChallengeTrial
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
@@ -9,14 +13,10 @@ from common.constants import (
 from common.exceptions import Conflict, Locked
 from common.runtime import discard_started_run
 from common.runtime.scoring_policy import run_scoring_snapshot
-from django.db import IntegrityError, transaction
-from django.utils import timezone
 from progress.models import (
     ChallengeLevelCompletion,
     ChallengeTrialCompletion,
 )
-
-from challenges.models import ChallengeRun, ChallengeTrial
 
 from .variants import VariantSelectionService
 
@@ -36,6 +36,7 @@ class ChallengeRunService:
     @staticmethod
     def hydrate_run(run: ChallengeRun | int, *, player=None) -> ChallengeRun:
         from django.db.models import Prefetch
+
         from practice.models import CommandStep
 
         queryset = ChallengeRun.objects.select_related(

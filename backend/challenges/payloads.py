@@ -6,6 +6,7 @@ Payload shapes are part of the frontend contract - change them deliberately.
 """
 
 from adventures.scoring import star_breakdown
+from challenges.models import ChallengeRun
 from common.constants import (
     DIFFICULTIES,
     SESSION_STATUS_COMPLETED,
@@ -17,8 +18,6 @@ from practice.services.scaffolding import ScaffoldingService
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import ChallengeTrialCompletion
 from simulator.services import RepositorySnapshotService
-
-from challenges.models import ChallengeRun
 
 
 def prefetch_run_payload_context(run: ChallengeRun) -> None:

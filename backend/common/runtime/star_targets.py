@@ -6,9 +6,8 @@ verified reasonable routes; valid inspections and file-editor operations are fre
 
 from collections.abc import Iterable
 
-from simulator.services import is_diagnostic_command, normalize_command
-
 from common.git.shell_commands import shell_program
+from simulator.services import is_diagnostic_command, normalize_command
 
 # Inspection-only scenarios cost nothing to solve, but a target of 0 renders as
 # "Star target: <= 0 commands" and would dock a star for a single typo
