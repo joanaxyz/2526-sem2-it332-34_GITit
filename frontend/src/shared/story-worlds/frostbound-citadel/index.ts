@@ -17,7 +17,7 @@ const chapterKeys = [
 const chapterBackgrounds = chapterKeys.map(
   (_, index) => {
     const chapter = String(index + 1).padStart(2, '0')
-    return `/cosmetics/story-worlds/frostbound-citadel/backgrounds/battle/chapter-${chapter}.png`
+    return `/cosmetics/story-worlds/frostbound-citadel/backgrounds/battle/chapter-${chapter}.webp`
   },
 )
 

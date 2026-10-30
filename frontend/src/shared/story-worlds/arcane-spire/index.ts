@@ -7,7 +7,7 @@ const battleBackgrounds = Array.from(
   { length: 8 },
   (_, index) => {
     const chapter = String(index + 1).padStart(2, '0')
-    return `/cosmetics/story-worlds/arcane-spire/backgrounds/battle/chapter-${chapter}.png`
+    return `/cosmetics/story-worlds/arcane-spire/backgrounds/battle/chapter-${chapter}.webp`
   },
 )
 
