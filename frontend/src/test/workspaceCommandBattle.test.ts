@@ -1,7 +1,7 @@
 import { QueryClient } from '@tanstack/react-query'
 import { describe, expect, it, vi } from 'vitest'
 
-import type { ChallengeCommandResponse } from '@/features/challenges/types'
+import type { ChallengeCommandResponse, ChallengeRun } from '@/features/challenges/types'
 import { createChallengeWorkspaceCommandHandler } from '@/features/challenges/utils/challengeWorkspaceCommand'
 import type { TierCommandResponse } from '@/features/story-map/components/tierWorkspaceTypes'
 import { createTierWorkspaceCommandHandler } from '@/features/story-map/utils/tierWorkspaceCommand'
@@ -20,6 +20,12 @@ function setup(createHandler: typeof createChallengeWorkspaceCommandHandler | ty
     id: 1,
     status: 'started',
     replay: true,
+    policy: {
+      scoring_policy_version: 2,
+      min_counted_commands: 1,
+      generous_counted_commands: 3,
+      max_counted_commands: 5,
+    } satisfies ChallengeRun['policy'],
     counts: { counted_action_total: 0, maximum_counted_commands: 5 },
   }
   queryClient.setQueryData(queryKeys.challengeRun(1), run)
