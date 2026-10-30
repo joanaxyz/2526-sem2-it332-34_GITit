@@ -27,7 +27,7 @@ function applyResponse(queryClient: QueryClient, response: TierCommandResponse) 
   }
   const updatedRun = mergeCommandStepIntoRun(queryClient, response)
   updateTierRunCache(queryClient, updatedRun)
-  if (!response.run.replay && response.run.status !== 'started') {
+  if (response.run.status !== 'started' && (!response.run.replay || response.run.status === 'completed')) {
     syncTierRunInCache(queryClient, updatedRun)
     invalidateTierProgressQueries(queryClient)
   }

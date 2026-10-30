@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
+import { executeGitCommand } from '@/shared/git/simulator/engine'
+import type { MutableRepositoryState } from '@/shared/git/simulator/types'
 import { confirmsPrediction, predictLocalOutcome, type CommandSubmissionOutcome } from '@/shared/level-runtime/commandOutcome'
 import type { CommandExecutionPayload } from '@/shared/level/types'
 
@@ -86,6 +88,42 @@ it('counts unsuccessful inspections only under the current policy', () => {
   expect(predictLocalOutcome(failed, { counted: 2, max: 3, scoringPolicyVersion: 1 }))
     .toMatchObject({ counted: false, failed: false, counted_command_count: 2 })
 })
+
+it.each([
+  'git check-ignore -v README.md',
+  'git grep DOES_NOT_EXIST',
+  'git merge-base main unrelated',
+  'git config --get user.nonexistent',
+])('keeps a normal negative query free: %s', (command) => {
+  const state: MutableRepositoryState = {
+    repository_initialized: true,
+    commits: [
+      { id: 'c0', message: 'main', parents: [], tree: { 'README.md': 'hello' } },
+      { id: 'c1', message: 'unrelated', parents: [], tree: {} },
+    ],
+    branches: { main: 'c0', unrelated: 'c1' },
+    head: { type: 'branch', name: 'main' },
+    staging: {},
+    working_tree: {},
+    conflicts: [],
+  }
+  const negative = executeGitCommand(state, command)
+  expect(negative).toMatchObject({ processed: true, diagnostic: true, exit_code: 1, stderr: '' })
+  expect(predictLocalOutcome(negative, { counted: 2, max: 3, scoringPolicyVersion: 2 }))
+    .toMatchObject({ counted: false, failed: false, counted_command_count: 2 })
+})
+
+it.each(['check-ignore', 'grep', 'merge-base', 'config'])('counts a genuine %s query error', (family) => {
+  const failed = execution({ diagnostic: true, command_family: family, exit_code: 128 })
+  expect(predictLocalOutcome(failed, { counted: 2, max: 3, scoringPolicyVersion: 2 }))
+    .toMatchObject({ counted: true, failed: true, counted_command_count: 3 })
+})
+
+it('still counts a nonzero inspection result outside the normal negative query families', () => {
+  expect(predictLocalOutcome(execution({ diagnostic: true, exit_code: 1 }), { counted: 2, max: 3, scoringPolicyVersion: 2 }))
+    .toMatchObject({ counted: true, failed: true, counted_command_count: 3 })
+})
+
 it('does not predict a counted mistake for empty input', () => {
   expect(predictLocalOutcome(execution({ processed: false, normalized_command: '' }), { counted: 2, max: 3 })).toBeNull()
 })

@@ -243,13 +243,19 @@ class ClientCommandExecutionService:
                     "Retry the run to start from a clean state."
                 )
 
+        # These read-only queries use exit 1 for a normal negative answer, such
+        # as no matching text, ignore rule, common ancestor, or config value.
+        inspection_succeeded = result.exit_code == 0 or (
+            result.exit_code == 1
+            and result.command_family in {"check-ignore", "grep", "merge-base", "config"}
+        )
         classification, increment = CommandCountClassifier().classify(
             command=command,
             processed=result.processed,
             # Shell commands never spend the git command budget, including the
             # file-changing ones, which match free Project Files edits.
             diagnostic=(result.diagnostic or is_shell)
-            and (scoring_policy_version < 2 or result.exit_code == 0),
+            and (scoring_policy_version < 2 or inspection_succeeded),
         )
         return ExecutedCommand(
             previous_state=previous_state,

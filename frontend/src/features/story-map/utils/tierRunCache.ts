@@ -40,7 +40,7 @@ export function syncTierRunInCache(
   const owner = cacheOwner(queryClient)
   if (!isCurrentOwner(owner) || owner.userId === null) return
   updateTierRunCache(queryClient, run)
-  if (options.broadcast !== false && !run.replay) {
+  if (options.broadcast !== false && (!run.replay || run.status === 'completed')) {
     broadcastTierRunSync(run, owner.userId)
   }
 

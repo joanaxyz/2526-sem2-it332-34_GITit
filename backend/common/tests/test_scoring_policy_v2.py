@@ -3,7 +3,7 @@ from types import SimpleNamespace
 import pytest
 
 from adventures.scoring import stars
-from common.constants import COMMAND_COUNTED
+from common.constants import COMMAND_COUNTED, COMMAND_DIAGNOSTIC
 from common.git.client_command_execution import ClientCommandExecutionService
 from common.runtime.scoring_policy import command_comparison, thresholds
 from common.tests.test_star_grading import _submit
@@ -80,6 +80,44 @@ def test_failed_inspection_costs_a_command_under_v2(grading_lane):
     )
     assert execution.classification == COMMAND_COUNTED
     assert execution.increment == 1
+
+
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git check-ignore -v README.md",
+        "git grep DOES_NOT_EXIST",
+        "git merge-base main unrelated",
+        "git config --get user.name",
+    ],
+)
+@pytest.mark.parametrize("exit_code", [1, 128, 129])
+def test_negative_inspection_is_free_but_actual_errors_are_counted(
+    grading_lane, command, exit_code
+):
+    context = grading_lane
+    response = context.client.post(
+        f"/api/{context.endpoint}/{context.run.id}/submit-command/",
+        {
+            "command": command,
+            "execution": frontend_execution_payload(
+                command,
+                context.run.repository_state,
+                diagnostic=True,
+                exit_code=exit_code,
+                client_run_revision=0,
+            ),
+        },
+        format="json",
+    )
+    assert response.status_code == 200, response.content
+    assert response.json()["step"]["command_classification"] == (
+        COMMAND_DIAGNOSTIC if exit_code == 1 else COMMAND_COUNTED
+    )
+    context.run.refresh_from_db()
+    result = _submit(context, context.run, "git add README.md")["run"]
+    assert result["stars"] == (3 if exit_code == 1 else 2)
+    assert result["counts"]["counted_action_total"] == (1 if exit_code == 1 else 2)
 
 
 def test_last_allowed_command_can_complete_for_one_star(grading_lane):
