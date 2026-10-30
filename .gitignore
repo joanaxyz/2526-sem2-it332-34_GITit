@@ -106,3 +106,7 @@ LEVEL_CHEAT_SHEET.md
 MODULE_1_ANSWERS.md
 backend/filelist.txt
 backend/tier_targets.json
+
+# Software Test Document deliverables are kept outside the repository.
+*Software Test Document*
+Performance Test Evidence*/STD v*.pdf
