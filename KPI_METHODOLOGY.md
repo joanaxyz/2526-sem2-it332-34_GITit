@@ -14,9 +14,8 @@ Let:
 | M | Required tiers mastered, each counted once after all required successful clears | `mastered` |
 | N | Unique required tiers attempted (with an outcome) in live progress, or fixed tiers assigned in a study | tier records |
 | H | Required hard tiers in that same population | `difficulty == "hard"` |
-| T | Validated reference number of counted commands for the assessed variant | `ref_count` |
-| A | Actual counted commands on the assessed run | `actual` |
-| S | 1 when the assessed run succeeded; otherwise 0 | `passed` |
+| T | Validated reference number of counted commands for the scored variant | run `ref_count` |
+| A | Actual counted commands on the scored clear | `actual_count(run)` |
 | F | Failed or meaningfully abandoned attempts before first mastery | `failures`, checkpoint `retries` |
 | C | Eligible novel transfer checkpoints assessed live, or assigned in a study | transfer records |
 | P | Transfer checkpoints cleared on their first run | transfer `passed` |
@@ -24,7 +23,7 @@ Let:
 | Official KPI | Formula | Target |
 | --- | --- | --- |
 | SCR — Scenario Completion Rate | `100 × M / N` | ≥80% |
-| CAR — Command Accuracy Rate | Mean of `100 × S × min(1, T / max(1, A))` | ≥70% |
+| CAR — Command Accuracy Rate | Mean over scenarios of `100 × min(1, T / max(1, A))` | ≥70% |
 | HLCR — Hard-Level Completion Rate | `100 × mastered H / assigned-or-attempted H` | ≥70%; Module 4 ≥65% |
 | ARC — Average Retry Count | `sum(F for mastered tiers) / M` | ≤2; Module 4 ≤3 |
 | RTA — Retry Transfer Accuracy | `100 × P / C` | ≥65%, Modules 3–4 only |
@@ -33,19 +32,32 @@ CAR's approved name is retained. Its operational meaning is **benchmark-relative
 command efficiency**, not the percentage of individual commands that were
 semantically correct. A validated reference is a working solution, not a claim
 that no shorter Git solution exists. A successful shorter solution receives
-100%; an unsuccessful assessed solution receives 0%.
+100%.
 
 For example, `failure → success → failure → success → success` masters a tier
-requiring three clears. If its final run uses 4 commands against reference 3,
-and its first transfer checkpoint succeeds: SCR 100%, CAR 75%, HLCR 100% when
+of three scenarios. If those clears use 3, 3 and 4 commands against reference 3,
+and the first transfer checkpoint succeeds: SCR 100%, CAR 91.67%, HLCR 100% when
 hard, ARC 2, RTA 100%. The preceding successful repetitions do not add retries.
 
 ## Command assessment and references
 
-The first run that achieves mastery is the live CAR assessment. A separate
-`KpiCheckpoint` preserves its run, reference hash/count, actual count, result,
-timestamp and unsuccessful-attempt total. Improving the best-star score later
-cannot overwrite it. Stars keep their separate scoring budget.
+CAR scores each scenario by the learner's **latest clear of content they had not
+cleared before** (a "fresh clear"). Content is the variant's case
+(`semantic_key`), so the same case re-rowed by a reseed is still solved content.
+Free-play replays count: replay picks a variant the learner has not tried in that
+scenario, so a more efficient fresh clear raises the scenario's score and a
+sloppier one lowers it. Clearing solved content again never changes CAR, so
+memorized answers cannot inflate it. Failed and abandoned runs are not scored;
+they stay in ARC. A learner's CAR is the mean of their scenario scores.
+
+`car_first` is the same mean using each scenario's **first** fresh clear. It is
+CAR's starting point, shown beside CAR so learners can see their improvement;
+it is not an evaluated KPI and has no target.
+
+The first run that achieves mastery still records a `KpiCheckpoint` with its
+run, reference hash/count, actual count, timestamp and unsuccessful-attempt
+total. It dates mastery and fixes ARC's retries; later best-star scores cannot
+overwrite it. Stars keep their separate scoring budget.
 
 Count the commands that consume the action budget, including incorrect input.
 Optional diagnostics and shell operations stay free, using the existing runtime
@@ -96,8 +108,9 @@ days old. Opening a tier without submitting a command is not an attempt; such
 tiers appear in `samples.in_progress_tiers` and stay outside both denominators.
 The rule applies to mastered and unmastered tiers alike, so it does not filter
 out failures. Mastery is dated by its first clear, never by a later best-score
-replay. Live CAR uses recorded valid
-mastery assessments; live RTA uses concluded valid transfer checkpoints.
+replay. Live CAR uses fresh clears whose run kept a valid reference, replays
+included; a cleared scenario without one counts in `samples.car_missing`. Live
+RTA uses concluded valid transfer checkpoints.
 Pending transfer checkpoints and unavailable evidence are reported separately.
 ARC includes only mastered tiers, with their contributing count shown.
 
@@ -112,9 +125,11 @@ reference hashes, reserved transfer variants, positive module weights and an
 aware cutoff timestamp. Adding curriculum later does not change its denominator.
 
 At cutoff, only terminal run evidence at or before the cutoff can establish
-mastery. The run reaching the frozen required-clear count is the study CAR
-assessment. Valid failed, unfinished or unattempted assignments score zero for
-completion/CAR/transfer. Missing or invalid reference/novelty evidence stays
+mastery or score CAR. Study CAR scores every assigned scenario by its latest
+fresh clear before cutoff, replays included, against the manifest reference; an
+assigned scenario without a valid clear scores zero. Valid failed, unfinished or
+unattempted assignments score zero for completion/CAR/transfer. If a reseed
+changed the tier's scenarios or assigned variants, its CAR is missing evidence. Missing or invalid reference/novelty evidence stays
 unscored and is counted separately; it is never fabricated as success or failure.
 ARC remains null without a mastered tier. An unavailable assigned variant is
 reported as missing assessment evidence.
@@ -166,7 +181,8 @@ assigned module. The creation command rejects retrospective enrollment and
 unvalidated references. The export command requires an already frozen study.
 
 `RateMetric.value` is authoritative. For live learner rates, `numerator` and
-`denominator` count the formula's units; CAR's numerator sums percentage scores.
+`denominator` count the formula's units; CAR's numerator sums scenario
+percentage scores over scored scenarios.
 For cohort means, `unit: "participants"` means numerator sums participant
 scores and denominator counts contributing participants. `samples` gives tier,
 assessment and exposure coverage. No observations is null; measured failure is

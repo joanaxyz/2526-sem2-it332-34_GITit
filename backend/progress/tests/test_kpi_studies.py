@@ -12,7 +12,7 @@ from players.services import get_or_create_player
 from progress.models import AdventureLevelTierCompletion
 from progress.services import MetricsService
 from progress.services.studies import _weighted, create_study, freeze_study
-from testing.kpi_fixtures import bundle, end, start
+from testing.kpi_fixtures import bundle, end, start, variant
 
 
 def test_predefined_module_weights_prevent_larger_modules_dominating():
@@ -21,7 +21,8 @@ def test_predefined_module_weights_prevent_larger_modules_dominating():
             "module": module,
             "difficulty": "hard",
             "mastered": mastered,
-            "car": 100 if mastered else 0,
+            "car_scores": [100 if mastered else 0],
+            "car_first_scores": [100 if mastered else 0],
             "failures": 0,
             "transfer": transfer,
         }
@@ -160,3 +161,25 @@ def test_changed_required_clears_are_missing_evidence_not_failed_mastery(
     assert report["kpis"]["car"]["value"] is None
     assert report["kpis"]["rta"]["value"] is None
     assert report["coverage"]["mastery_missing"] == 1
+
+
+@pytest.mark.django_db
+def test_study_car_uses_fresh_replays_before_cutoff_like_live_reports(
+    django_user_model, monkeypatch
+):
+    player, tier, scenario, _ = bundle(django_user_model, required=1)
+    variant(scenario, "kpi-practice-b")
+    cutoff = timezone.now() + timedelta(hours=1)
+    study = create_study(slug="fresh-v2", player_ids=[player.id], tier_ids=[tier.id], cutoff=cutoff)
+    end(start(player, tier), count=4)
+    assert end(start(player, tier), count=3).is_replay  # Unsolved variant b.
+    live = MetricsService().all_player_performance_summary()["kpis"]
+    assert (live["car"]["value"], live["car_first"]["value"]) == (100, 75)
+    monkeypatch.setattr(
+        "progress.services.studies.timezone.now", lambda: cutoff + timedelta(seconds=1)
+    )
+    report = freeze_study(study)
+    assert report["kpis"]["car"]["value"] == 100
+    assert report["modules"][0]["kpis"]["car_first"]["value"] == 75
+    assert report["kpis"]["arc"]["value"] == 0  # The replay is not a retry.
+    assert "car_first" not in report["participants"][0]["kpis"]

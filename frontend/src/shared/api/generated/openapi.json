@@ -6249,7 +6249,20 @@
                         "$ref": "#/components/schemas/RateMetric"
                     },
                     "car": {
-                        "$ref": "#/components/schemas/RateMetric"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RateMetric"
+                            }
+                        ],
+                        "description": "Command Accuracy Rate: mean over scenarios of 100 x min(1, reference / commands) on each scenario's latest clear of content the learner had not cleared before."
+                    },
+                    "car_first": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RateMetric"
+                            }
+                        ],
+                        "description": "CAR's starting point: the same mean using each scenario's first such clear. Shown beside CAR to make improvement visible; not an evaluated KPI."
                     },
                     "hlcr": {
                         "$ref": "#/components/schemas/RateMetric"
@@ -6285,6 +6298,7 @@
                 "required": [
                     "arc",
                     "car",
+                    "car_first",
                     "hlcr",
                     "retry_success_rate",
                     "rta",
@@ -6304,7 +6318,20 @@
                         "$ref": "#/components/schemas/RateMetric"
                     },
                     "car": {
-                        "$ref": "#/components/schemas/RateMetric"
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RateMetric"
+                            }
+                        ],
+                        "description": "Command Accuracy Rate: mean over scenarios of 100 x min(1, reference / commands) on each scenario's latest clear of content the learner had not cleared before."
+                    },
+                    "car_first": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/RateMetric"
+                            }
+                        ],
+                        "description": "CAR's starting point: the same mean using each scenario's first such clear. Shown beside CAR to make improvement visible; not an evaluated KPI."
                     },
                     "hlcr": {
                         "$ref": "#/components/schemas/RateMetric"
@@ -6340,6 +6367,7 @@
                 "required": [
                     "arc",
                     "car",
+                    "car_first",
                     "hlcr",
                     "number",
                     "retry_success_rate",
@@ -6370,10 +6398,12 @@
                         "type": "integer"
                     },
                     "car_scored": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Scenarios with a CAR score."
                     },
                     "car_missing": {
-                        "type": "integer"
+                        "type": "integer",
+                        "description": "Scenarios cleared without validated reference evidence; unscored."
                     },
                     "transfer_assigned": {
                         "type": "integer"

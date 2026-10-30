@@ -99,8 +99,9 @@ class MetricsService:
         )
 
     def _performance_runs(self):
+        # Replays stay in: CAR scores a replay on content the learner has not
+        # cleared before; every other KPI reads first-play runs only.
         return AdventureLevelTierRun.objects.filter(
-            is_replay=False,
             is_transfer=False,
             tier__adventure_level__chapter__story__slug=self.PERFORMANCE_STORY_SLUG,
             tier__adventure_level__chapter__number__in=self.PERFORMANCE_MODULE_NUMBERS,
@@ -176,7 +177,9 @@ class MetricsService:
                 code: balanced([r for r in records if r["slug"] in slugs], cohort=cohort)["car"]
                 for code, slugs in SO_CAR_LEVELS.items()
             },
-            "completed_sessions": runs.filter(status=SESSION_STATUS_COMPLETED).count(),
+            "completed_sessions": runs.filter(
+                status=SESSION_STATUS_COMPLETED, is_replay=False
+            ).count(),
             "modules": modules,
             "samples": samples(records),
             "transfers": transfers,
