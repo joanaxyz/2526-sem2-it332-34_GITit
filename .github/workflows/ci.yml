@@ -152,7 +152,7 @@ jobs:
       # The default pytest job has no Node, so these replays skip there.
       - name: Solution replays
         working-directory: backend
-        run: pytest -q curriculum/tests/test_module_4_variants.py progress/tests/test_kpi_references.py
+        run: pytest -q curriculum/tests/test_module_4_variants.py progress/tests/test_kpi_references.py curriculum/tests/test_solution_audit.py
 
   # Proves a clean PostgreSQL database migrates from zero, audits Python
   # dependencies, verifies committed migration history, and runs the backend

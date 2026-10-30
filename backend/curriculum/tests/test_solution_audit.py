@@ -1,12 +1,20 @@
 import json
+import shutil
 from pathlib import Path
 
+import pytest
 from django.core.management import call_command
 
 from curriculum.services.solution_audit import published_cases
 from curriculum.services.techniques import required_techniques
 
 REPORT = Path(__file__).resolve().parents[1] / "seed_data" / "solution_audit.json"
+FRONTEND = Path(__file__).resolve().parents[3] / "frontend"
+
+needs_simulator = pytest.mark.skipif(
+    shutil.which("node") is None or not (FRONTEND / "node_modules").exists(),
+    reason="replay needs Node and frontend/node_modules (CI: generated-targets job)",
+)
 
 
 def test_audit_covers_every_published_variant_and_valid_reference():
@@ -23,5 +31,6 @@ def test_audit_covers_every_published_variant_and_valid_reference():
         assert targets["efficient"] < targets["generous"] < targets["maximum"]
 
 
+@needs_simulator
 def test_audit_replays_browser_backend_and_objectives_without_drift():
     call_command("audit_solutions", check=True)
