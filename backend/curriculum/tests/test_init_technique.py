@@ -48,9 +48,10 @@ def test_default_branch_and_option_like_operands_do_not_earn_evidence(command):
 def test_initial_branch_evidence_requires_verified_creation_and_the_correct_value():
     assert techniques_for_command("git init -b main") == set()
     assert techniques_for_command("git init -b main", previous_state={}) == set()
-    assert techniques_for_command(
-        "git init -b main", previous_state={"repository_initialized": True}
-    ) == set()
+    assert (
+        techniques_for_command("git init -b main", previous_state={"repository_initialized": True})
+        == set()
+    )
     assert techniques_for_command("git init -b trunk", previous_state=UNINITIALIZED) == {
         "init:initial-branch:trunk"
     }

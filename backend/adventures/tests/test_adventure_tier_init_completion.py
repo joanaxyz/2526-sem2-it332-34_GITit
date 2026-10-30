@@ -1,6 +1,6 @@
-from copy import deepcopy
 import json
 import shutil
+from copy import deepcopy
 from pathlib import Path
 
 import pytest
@@ -234,7 +234,9 @@ def test_seeded_initial_branch_task_requires_explicit_main_creation(db, django_u
         adventure_level__slug="initializing-a-local-repository", difficulty="easy"
     )
     first_variant = AdventureLevelTierScenarioVariant.objects.get(case_id="init-easy-plain-notes")
-    branch_variant = AdventureLevelTierScenarioVariant.objects.get(case_id="init-easy-current-empty")
+    branch_variant = AdventureLevelTierScenarioVariant.objects.get(
+        case_id="init-easy-current-empty"
+    )
     technique = "init:initial-branch:main"
     assert branch_variant.parameter_context["required_techniques"] == [technique]
     assert first_variant.parameter_context["required_techniques"] == []
@@ -313,7 +315,10 @@ def test_seeded_initial_branch_task_requires_explicit_main_creation(db, django_u
         assert (technique in run.verified_techniques) is solved
         assert run.repository_state["head"]["name"] == "main"
         if not solved:
-            assert "Use the required technique: git init -b main." in result["step"]["contextual_feedback"]
+            assert (
+                "Use the required technique: git init -b main."
+                in result["step"]["contextual_feedback"]
+            )
         evidence.append(
             {
                 "commands": commands,
