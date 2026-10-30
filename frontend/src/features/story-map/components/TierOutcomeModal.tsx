@@ -1,10 +1,11 @@
 import { CommandComparison } from '@/shared/level/components/CommandComparison'
-import { Gem, Map, RefreshCcw, Repeat2, RotateCcw, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, WandSparkles, XCircle } from 'lucide-react'
+import { ArrowRight, Gem, Map, RefreshCcw, Repeat2, RotateCcw, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, WandSparkles, XCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
 
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { GameOutcomeModal } from '@/shared/level/components/game-outcome/GameOutcomeModal'
+import { Button } from '@/shared/components/Button'
 import { Badge } from '@/shared/components/Badge'
 import { playGameOverSound, playVictorySound } from '@/shared/audio/battleAudio'
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
@@ -55,6 +56,8 @@ export function TierOutcomeModal({
         : isPartialClear
           ? 'Scenario cleared'
           : 'Level cleared'
+
+  const hasNextScenario = !isFailed && !isReplay && !isTransfer && Boolean(nextScenario && onContinue)
 
   const hitActionLimit = isFailed && run.counts.max_reached
   const message = isTransfer
@@ -191,7 +194,16 @@ export function TierOutcomeModal({
       level={{ label: `Level ${run.tier.adventure_level_number}`, title: run.tier.adventure_level_title }}
       badges={badges}
       headline={headline}
-      message={!isFailed && !isReplay && !isTransfer && nextScenario && onContinue ? <button type="button" className="outcome-next-button" onClick={(event) => { event.stopPropagation(); onContinue() }}>Next: {nextScenario.title}</button> : message}
+      message={hasNextScenario ? null : message}
+      footerActions={hasNextScenario && nextScenario ? (
+        <Button type="button" size="lg" className="outcome-next-button" onClick={(event) => {
+          event.stopPropagation()
+          onContinue?.()
+        }}>
+          <span>Next: {nextScenario.title}</span>
+          <ArrowRight className="size-4" aria-hidden="true" />
+        </Button>
+      ) : null}
       stats={stats}
       headerActions={headerActions}
     >

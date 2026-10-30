@@ -129,3 +129,18 @@ describe('GameOutcomeModal dismissal', () => {
     expect(close).toHaveBeenCalledOnce()
   })
 })
+
+it('places the next action below results without dismissing the modal', () => {
+  const next = vi.fn()
+  const close = vi.fn()
+  render(<GameOutcomeModal open onClose={close} title="Result" icon={Star} headline="Cleared" message={null}
+    footerActions={<button onClick={(event) => { event.stopPropagation(); next() }}>Next scenario</button>}>
+    <section>Score details</section>
+  </GameOutcomeModal>)
+  const details = screen.getByText('Score details')
+  const button = screen.getByRole('button', { name: 'Next scenario' })
+  expect(details.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  fireEvent.click(button)
+  expect(next).toHaveBeenCalledOnce()
+  expect(close).not.toHaveBeenCalled()
+})
