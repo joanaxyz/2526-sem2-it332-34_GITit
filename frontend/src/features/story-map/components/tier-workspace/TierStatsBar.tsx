@@ -1,4 +1,4 @@
-import { Layers, Smile, Target, TerminalSquare } from 'lucide-react'
+import { Layers, Smile, TerminalSquare } from 'lucide-react'
 
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { DifficultyChip, StarTriplet } from '@/shared/level/components/LevelStatValues'
@@ -7,11 +7,10 @@ import type { RepoGraphTrigger, WorkspaceStat } from '@/shared/level/workspace/t
 import { WorkspaceStatsBar } from '@/shared/level/workspace/WorkspaceStatsBar'
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 
-const HIDDEN_FOR_TRANSFER = new Set(['Stars', 'Stars on clear', 'Star target', '2-star target', 'Reward'])
+const HIDDEN_FOR_TRANSFER = new Set(['Stars', 'Reward'])
 
 /** The adventure tier's facts in the shared stats strip under the command bar. */
 export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: RepoGraphTrigger }) {
-  const starTarget = run.policy.min_counted_commands
   const rewardClaimed = run.reward.claimed || Boolean(run.rewards?.coins_awarded)
   const stats: WorkspaceStat[] = [
     { label: 'Mode', icon: RookIcon, value: run.transfer ? 'Transfer checkpoint' : `Adventure${run.replay ? ' · Replay' : ''}` },
@@ -32,10 +31,10 @@ export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: Rep
         ]
       : []),
     {
-      label: run.status === 'started' ? 'Stars on clear' : 'Stars',
+      label: 'Stars',
       icon: StarSolidIcon,
       iconClass: 'tier-stat-icon--amber',
-      value: <StarTriplet count={run.status === 'started' ? run.star_breakdown?.available_stars ?? 0 : run.stars} breakdown={run.star_breakdown} active={run.status === 'started'} savedStars={run.completion?.stars} multiScenario={run.scenario.total > 1} />,
+      value: <span data-tour-target="star-budget"><StarTriplet count={run.status === 'started' ? run.star_breakdown?.available_stars ?? 0 : run.stars} breakdown={run.star_breakdown} active={run.status === 'started'} savedStars={run.completion?.stars} multiScenario={run.scenario.total > 1} /></span>,
     },
     {
       label: 'Commands',
@@ -43,19 +42,6 @@ export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: Rep
       value: (
         <span className="lvlctx-num" data-tour-target="command-budget">
           {run.counts.counted_action_total} / {run.policy.max_counted_commands}
-        </span>
-      ),
-    },
-    ...(run.policy.generous_counted_commands != null ? [{
-      label: '2-star target', icon: Target,
-      value: <span className="lvlctx-num">≤ {run.policy.generous_counted_commands} commands</span>,
-    }] : []),
-    {
-      label: 'Star target',
-      icon: Target,
-      value: (
-        <span className="lvlctx-num" data-tour-target="star-budget">
-          ≤ {starTarget} {starTarget === 1 ? 'command' : 'commands'}
         </span>
       ),
     },
@@ -73,6 +59,7 @@ export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: Rep
   return (
     <WorkspaceStatsBar
       stats={stats.filter((stat) => !run.transfer || !HIDDEN_FOR_TRANSFER.has(stat.label))}
+      compactLabels={['Mode', 'Difficulty']}
       repoGraph={repoGraph}
     />
   )

@@ -11,7 +11,7 @@ function makeRun(overrides: Partial<TierRun> = {}): TierRun {
     replay: false,
     difficulty: 'easy',
     stars: 2,
-    policy: { min_counted_commands: 1, max_counted_commands: 12 },
+    policy: { min_counted_commands: 1, max_counted_commands: 12, generous_counted_commands: 7 },
     counts: { counted_action_total: 3 },
     reward: { coins: 35, claimed: false },
     scenario: { index: 1, total: 1, title: '' },
@@ -27,14 +27,15 @@ function statValue(label: string) {
 afterEach(cleanup)
 
 describe('TierStatsBar', () => {
-  it('shows mode, difficulty, stars, command budget and star target', () => {
+  it('shows essential run stats without command-target indicators', () => {
     render(<TierStatsBar run={makeRun()} />)
 
     expect(statValue('Mode')).toHaveTextContent('Adventure')
     expect(statValue('Difficulty')).toHaveTextContent('Easy')
     expect(within(statValue('Stars')).getByLabelText('2 of 3 stars')).toBeInTheDocument()
     expect(statValue('Commands')).toHaveTextContent('3 / 12')
-    expect(statValue('Star target')).toHaveTextContent('≤ 1 command')
+    expect(screen.queryByText('Star target')).not.toBeInTheDocument()
+    expect(screen.queryByText('2-star target')).not.toBeInTheDocument()
   })
 
   it('shows the tier reward before play and marks it claimed once paid', () => {
@@ -75,10 +76,10 @@ describe('TierStatsBar', () => {
     render(<TierStatsBar run={makeRun()} />)
 
     expect(document.querySelector('[data-tour-target="command-budget"]')).toHaveTextContent('3 / 12')
-    expect(document.querySelector('[data-tour-target="star-budget"]')).toHaveTextContent('≤ 1 command')
+    expect(document.querySelector('[data-tour-target="star-budget"]')).toContainElement(screen.getByLabelText('2 of 3 stars'))
   })
 
-  it('pluralizes the star target, marks replays and omits a missing difficulty', () => {
+  it('marks replays and omits a missing difficulty', () => {
     render(
       <TierStatsBar
         run={makeRun({
@@ -91,7 +92,7 @@ describe('TierStatsBar', () => {
 
     expect(statValue('Mode')).toHaveTextContent('Adventure · Replay')
     expect(screen.queryByText('Difficulty')).not.toBeInTheDocument()
-    expect(statValue('Star target')).toHaveTextContent('≤ 3 commands')
+    expect(screen.queryByText('Star target')).not.toBeInTheDocument()
   })
 
   it('has no Repo graph button unless the layout uses the drawer', () => {
