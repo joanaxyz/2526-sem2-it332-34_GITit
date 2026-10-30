@@ -205,6 +205,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
             "evaluation_result",
         },
         "ChallengeCommandRunResponse": {
+            "command_comparison",
             "id",
             "replay",
             "stars",
@@ -221,6 +222,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
             "sibling_levels",
         },
         "ChallengeRunResponse": {
+            "command_comparison",
             "id",
             "replay",
             "stars",
@@ -259,7 +261,9 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
         },
     }
     optional_fields = {
+        "ChallengeRunResponse": {"command_comparison"},
         "ChallengeCommandRunResponse": {
+            "command_comparison",
             "mastery_progress",
             "completion",
             "next_difficulty",
@@ -283,6 +287,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
     expected_nullable = {
         "AdventureLevelTierScenarioPositionResponse": {"index"},
         "ChallengeRunResponse": {
+            "command_comparison",
             "failure_reason",
             "completed_at",
             "story",
@@ -292,6 +297,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
             "completion",
         },
         "ChallengeCommandRunResponse": {
+            "command_comparison",
             "failure_reason",
             "completed_at",
             "completion",

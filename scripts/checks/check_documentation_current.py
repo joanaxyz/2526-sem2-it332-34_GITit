@@ -43,6 +43,9 @@ REQUIRED_README_SNIPPETS = [
     "npm run api:type-adoption-check",
 ]
 
+# Checked-in solution references introduced with the scoring and alternatives audit.
+ALLOWED_DOC_ENTRIES = {"goals", "git-solution-audit.md", "taught-vs-alternative-solutions.md"}
+
 STALE_DOC_SNIPPETS = [
     "Command Adventure",
     "Command Adventures",
@@ -69,10 +72,12 @@ def main() -> int:
     docs_dir = ROOT / "docs"
     if docs_dir.exists():
         unexpected_docs = [
-            path.relative_to(ROOT).as_posix() for path in docs_dir.iterdir() if path.name != "goals"
+            path.relative_to(ROOT).as_posix()
+            for path in docs_dir.iterdir()
+            if path.name not in ALLOWED_DOC_ENTRIES
         ]
         for path in unexpected_docs:
-            violations.append(f"Unexpected documentation path outside docs/goals: {path}")
+            violations.append(f"Unexpected documentation path outside approved references: {path}")
 
     for rel in REQUIRED_FILES:
         path = ROOT / rel
