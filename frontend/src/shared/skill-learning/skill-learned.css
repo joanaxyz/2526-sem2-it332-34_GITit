@@ -1,0 +1,112 @@
+.skill-learned-backdrop.app-modal-overlay {
+  padding: clamp(1rem, 4vw, 2.5rem);
+  background: hsl(var(--background) / 0.84);
+  cursor: pointer;
+}
+
+.skill-learned-backdrop:focus {
+  outline: none;
+}
+
+.skill-learned-shell.app-modal-card {
+  width: min(100%, 42rem);
+  max-height: none;
+  overflow: visible;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+.skill-learned-content.app-modal-content {
+  padding: 0;
+  overflow: visible;
+}
+
+.skill-learned-reveal {
+  display: grid;
+  justify-items: center;
+  color: hsl(var(--foreground));
+  text-align: center;
+  animation: skill-learned-arrive 240ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.skill-learned-reveal p,
+.skill-learned-reveal h3 {
+  margin: 0;
+}
+
+.skill-learned-announcement {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  font-size: clamp(0.875rem, 2.5vw, 1.0625rem);
+  font-weight: 600;
+  line-height: 1.4;
+}
+
+.skill-learned-mascot {
+  width: 3rem;
+  height: 3rem;
+  object-fit: contain;
+}
+
+.skill-learned-portrait {
+  display: block;
+  width: min(clamp(13rem, 35vw, 23rem), 43svh);
+  max-width: 100%;
+  height: auto;
+  aspect-ratio: 1;
+  margin: 0.75rem 0 0.5rem;
+  object-fit: contain;
+  filter: drop-shadow(0 0 24px rgba(var(--theme-primary-rgb), 0.28));
+  user-select: none;
+}
+
+.skill-learned-title {
+  max-width: 100%;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  font-weight: 700;
+  line-height: 1.12;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+
+.skill-learned-reveal .skill-learned-command {
+  margin-top: 0.75rem;
+  color: hsl(var(--primary));
+  font-family: var(--font-mono);
+  font-size: clamp(0.875rem, 2.3vw, 1.0625rem);
+  line-height: 1.5;
+}
+
+.skill-learned-reveal .skill-learned-hint {
+  margin-top: clamp(1.5rem, 5svh, 3rem);
+  color: hsl(var(--foreground) / 0.72);
+  font-size: var(--text-xs);
+  line-height: 1.5;
+}
+
+@keyframes skill-learned-arrive {
+  from { opacity: 0; transform: translateY(8px) scale(0.98); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-height: 34rem) and (orientation: landscape) {
+  .skill-learned-portrait {
+    width: min(clamp(13rem, 35vw, 23rem), 33svh);
+    margin: 0;
+  }
+
+  .skill-learned-mascot { width: 2rem; height: 2rem; }
+  .skill-learned-reveal .skill-learned-hint { margin-top: 1rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .skill-learned-reveal,
+  .skill-learned-backdrop { animation: none; }
+}

@@ -22,6 +22,9 @@ function applyOptimisticState(run: TierRun, repositoryState: RepositorySnapshot,
 function replaceSteps(run: TierRun, steps: TierStepLog[]): TierRun { return { ...run, steps } }
 
 function applyResponse(queryClient: QueryClient, response: TierCommandResponse) {
+  if (response.learned_skills?.length && (response.run.replay || response.run.status === 'started')) {
+    void queryClient.invalidateQueries({ queryKey: queryKeys.learnedSkills })
+  }
   const updatedRun = mergeCommandStepIntoRun(queryClient, response)
   updateTierRunCache(queryClient, updatedRun)
   if (!response.run.replay && response.run.status !== 'started') {

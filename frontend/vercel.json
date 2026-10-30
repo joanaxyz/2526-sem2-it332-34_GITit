@@ -10,7 +10,7 @@
       "destination": "https://git-it-app-czpy.onrender.com/api/:path"
     },
     {
-      "source": "/:path((?!api/|assets/|cosmetics/|audio/).*)",
+      "source": "/:path((?!api/|assets/|cosmetics/|audio/|favicon\\.ico$|favicon\\.png$|apple-touch-icon\\.png$|g34-icon\\.png$).*)",
       "destination": "/index.html"
     }
   ],

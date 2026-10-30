@@ -124,9 +124,8 @@ worksheet.
 
 The system runs at **two intensities, one vocabulary: immersion outside, clarity inside.**
 Atmospheric surfaces — home hub, level map, quest selection — carry the world: living sky,
-depth, aurora glow, weighty motion. The practice workspace (terminal, DAG) and the
-authoring tools invert the ratio: a faint atmospheric wash behind ruthlessly legible
-controls. Both modes share the same palette, type system, and single accent; only their
+depth, aurora glow, weighty motion. The practice workspace (terminal, DAG) inverts the
+ratio: a faint atmospheric wash behind ruthlessly legible controls. Both modes share the same palette, type system, and single accent; only their
 density and motion change.
 
 This system explicitly rejects the **flat SaaS dashboard** (rows of identical stat
@@ -228,9 +227,16 @@ so glow never competes with the art.
 
 ### Buttons
 - **Shape:** Rounded (`--radius` 0.75rem; `sm` uses `--radius-sm` 0.45rem). Height 2.5rem default, 2rem small.
-- **Primary:** Ocean→Deep blue gradient (`#00B4D8`→`#0077B6`), white text; an ocean shadow that warms to a cyan glow on hover. The single "go forward" action.
+- **Primary:** the **drawn plate** — Ocean→Deep blue gradient (`#00B4D8`→`#0077B6`) inside a wobbly fill shape with an inked bottom lip, chalk line art (sketchy double outline, highlight hatching) over it, and a drop-shadow glow that follows the drawn edge and warms on hover. White text. The single "go forward" action. `Button` (default variant) draws it; feature CTAs that must keep their own markup opt in with `.ui-drawn-plate`.
 - **Secondary:** Solid Observatory Stone, ink text. **Outline:** 1px hairline on translucent Night Sky. **Ghost:** muted ink, hover fills. **Destructive:** Ember Red.
 - **Hover / Focus:** 150ms transitions; `focus-visible` shows a 2px cyan ring offset from the surface. Never ship a control without hover + focus-visible.
+
+### Drawn Plate (primary actions)
+- **Construction:** SVG masks in `src/assets/images/ui/button-primary-*.svg` — one wobbly fill shape and three jittered line-art frames — painted on `::before`/`::after` while the element itself stays transparent, so it works on `<button>`, `<Link>`, `asChild`, and inline spans. The masks stretch to the box, so keep plates button-shaped; never put one on a container.
+- **Boil:** on hover the line art flips between its three frames (~7 fps) like a redrawn animation cel. Reduced motion holds the first frame.
+- **Tuning:** `--ui-plate-fill`, `--ui-plate-lip`, `--ui-plate-glow`, and `--ui-plate-boil`. A row whose hover should light a nested plate sets these on the plate from the row's own hover state.
+- **Drawn outline:** `.ui-drawn-outline` is the same line art without the fill or glow (colour from `--ui-outline-ink`), for the quieter actions that sit beside a plate — the level-map tier/drill row pills.
+- **Scope:** primary actions and those row pills only. Everything else keeps its straight hairline.
 
 ### Chips
 - **Style:** Pill (`--radius-pill`), Observatory Stone background, Mist text, hairline border.
@@ -245,12 +251,12 @@ so glow never competes with the art.
 - **Style:** Translucent Night Sky fill, 1px cyan-tinted hairline, `--radius-sm`. Interface inputs use **Inter**; numeric/transform/code inputs use **JetBrains Mono**.
 - **Focus:** Border brightens to cyan + 2px cyan ring. **Error:** rendered as text near the field — never colour-only. **Disabled:** ~0.4 opacity.
 
+### Cursors
+- Use rounded black cursor silhouettes with fine neon-blue edges and highlights. The static SVG set renders at 28×28px, with scaled click points for each action. Directional resize cursors remain native, and touch devices keep their normal behavior.
+
 ### Navigation
 - **Hub chrome (atmospheric):** a floating, centered "launcher blade" (HOME · TRACKS · SHOP) with the brand badge and wallet/profile loose in the corners (Halo-style), over the living sky. Atmospheric pages only.
-- **Workspace chrome:** focused tools (the level editor) use their own solid command bar (`ite-cmdbar`) — a docked, opaque blade with identity, history, and apply/publish. Dense, scrolling surfaces must NOT sit under the floating hub blade.
-
-### Signature: The Editor Inspector
-A right rail of **hairline-split sections** (`ite-section`, no inner panels): a mono eyebrow + title per section, a 2-col numeric transform grid (X/Y/W/H/Rotation/Z) in mono, and the draft model (`Apply edits (N)` / Discard / Undo-Redo) in the command bar. This is the reference pattern for any structured editing surface — content authoring should adopt the same hairline sections and numeric+drag controls rather than boxed cards.
+- **Workspace chrome:** focused tools use their own solid, docked chrome. Dense, scrolling surfaces must NOT sit under the floating hub blade.
 
 ## 6. Do's and Don'ts
 

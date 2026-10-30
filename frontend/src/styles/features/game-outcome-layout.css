@@ -1,0 +1,86 @@
+/* Scored results: artwork beside the checklist; single column on phones. */
+.game-outcome-shell.has-score-breakdown {
+  width: min(100%, 68rem);
+  max-width: 68rem;
+}
+
+/* On small screens the overlay scrolls as a page, without a nested scroll box. */
+.has-score-breakdown .game-outcome {
+  max-height: none;
+  overflow: visible;
+}
+
+.game-outcome-details {
+  display: grid;
+  justify-items: center;
+  min-width: 0;
+}
+
+.has-score-breakdown .game-outcome-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr);
+  align-items: center;
+  gap: 2rem;
+}
+
+.has-score-breakdown .game-outcome-details .star-checklist {
+  margin-top: 0;
+}
+
+.has-score-breakdown .game-outcome-stat-grid {
+  margin-top: 0.75rem;
+  padding-block: 0.625rem;
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+}
+
+.has-score-breakdown .game-outcome-stat-tile {
+  padding-inline: 0.6rem;
+}
+
+.has-score-breakdown .game-outcome-stat-caption {
+  font-size: var(--text-2xs);
+}
+
+.has-score-breakdown .game-outcome-hint {
+  margin-top: 0.75rem;
+}
+
+
+@media (max-width: 720px) {
+  .has-score-breakdown .game-outcome-layout {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 1rem;
+  }
+
+  .has-score-breakdown .game-outcome-star-art { width: 12rem; }
+  .has-score-breakdown .game-outcome-title-art { width: 12rem; margin-top: 0; }
+  .has-score-breakdown .game-outcome-message { margin-top: 0.5rem; }
+}
+
+@media (max-width: 480px) {
+  .has-score-breakdown .game-outcome-stat-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .has-score-breakdown .game-outcome-stat-tile {
+    display: flex;
+    gap: 0;
+    padding: 0.5rem 0.25rem;
+    border-top: 0;
+  }
+
+  .has-score-breakdown .game-outcome-stat-tile + .game-outcome-stat-tile {
+    border-left: 1px solid hsl(var(--foreground) / 0.14);
+  }
+
+  .has-score-breakdown .game-outcome-stat-header { gap: 0.25rem; }
+  .has-score-breakdown .game-outcome-stat-chip { display: none; }
+  .has-score-breakdown .game-outcome-stat-label { letter-spacing: 0; }
+  .has-score-breakdown .game-outcome-stat-tile-main { align-items: center; }
+  .has-score-breakdown .game-outcome-stat-number-row { justify-content: center; margin-top: 0.5rem; }
+  .has-score-breakdown .game-outcome-stat-bar-track,
+  .has-score-breakdown .game-outcome-stat-target-chip { display: none; }
+  .has-score-breakdown .game-outcome-stat-caption { text-align: center; }
+}

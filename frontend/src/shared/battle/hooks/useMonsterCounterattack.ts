@@ -86,6 +86,9 @@ export function useMonsterCounterattack({
 
         await handle.attack({ approachPx, resolveAt: 'complete', recover: false })
 
+        // Whatever is still playing once the attack connects; Blue reacts on
+        // contact while it finishes.
+        let remaining: Promise<void> = Promise.resolve()
         if (def?.attack.effect && layer && playerEl) {
           const effect = def.attack.effect
           const playback = effect.playback
@@ -100,7 +103,11 @@ export function useMonsterCounterattack({
                   ? groundImpact
                   : anchor(playerEl, 6, -4, 0.58, 0.52)
           const impactTo = playback === 'projectile' && effect.anchor === 'feet' ? groundImpact : undefined
-          await monsterAttackEffect(effect)({
+          let markImpact = () => {}
+          const impact = new Promise<void>((resolve) => {
+            markImpact = resolve
+          })
+          remaining = monsterAttackEffect(effect)({
             layer,
             backLayer,
             from: anchor(handle.element(), -14, -6),
@@ -108,7 +115,11 @@ export function useMonsterCounterattack({
             impactTo,
             sizeScale: effect.placement === 'caster' ? def.metrics.scale : 1,
             targetFacing: effect.placement === 'caster' ? 'left' : 'right',
+            onImpact: () => markImpact(),
           })
+          // A caster-placed effect plays on the monster itself; it never touches
+          // Blue, so the hit lands once it has run its course.
+          await (effect.placement === 'caster' ? remaining : Promise.race([impact, remaining]))
         } else if (def?.attack.kind === 'projectile' && def.attack.sheet && layer && playerEl) {
           await spriteProjectile(def.attack.sheet, { flip: true })({
             layer,
@@ -118,8 +129,7 @@ export function useMonsterCounterattack({
         }
 
         applyDamage()
-        if (lethal) await player.defeat()
-        else await boundedAnimation(player.hurt(), 900)
+        await Promise.all([remaining, lethal ? player.defeat() : boundedAnimation(player.hurt(), 900)])
         await recoverMonster()
       } finally {
         applyDamage()

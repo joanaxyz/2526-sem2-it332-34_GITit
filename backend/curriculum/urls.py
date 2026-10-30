@@ -2,6 +2,7 @@ from django.urls import path
 
 from curriculum.views import (
     ChapterBookAPIView,
+    ChapterChestsAPIView,
     ChapterContentOverviewAPIView,
     ChapterListAPIView,
     ChapterOrientationLessonListAPIView,
@@ -15,6 +16,9 @@ from curriculum.views import (
 urlpatterns = [
     path("stories/", StoryListAPIView.as_view(), name="stories"),
     path("chapters/", ChapterListAPIView.as_view(), name="chapters"),
+    path(
+        "chapters/<int:chapter_id>/chests/", ChapterChestsAPIView.as_view(), name="chapter-chests"
+    ),
     path(
         "chapters/<int:chapter_id>/overview/",
         ChapterContentOverviewAPIView.as_view(),

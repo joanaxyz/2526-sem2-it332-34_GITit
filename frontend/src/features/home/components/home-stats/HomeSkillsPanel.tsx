@@ -68,7 +68,7 @@ export function HomeSkillsPanel({ skills }: { skills: HomeSkillsModel }) {
     >
       <div className="home-overview-band-head">
         <header className="ref-panel-head">
-          Command confidence <em>how reliably you reach for each one</em>
+          Command mastery <em>Arcane Spire curriculum</em>
         </header>
         <div className="home-overview-segmented" role="group" aria-label="Skill profile view">
           <button
@@ -101,7 +101,7 @@ export function HomeSkillsPanel({ skills }: { skills: HomeSkillsModel }) {
               value: row.value,
               caption: row.hint,
             }))}
-            label={`Mastery across ${skills.rows.length} git commands, overall ${skills.overallMastery}%. Switch to Bars for every value in text.`}
+            label={`Mastery across ${skills.rows.length} Arcane Spire commands, overall ${skills.overallMastery}%. Switch to Bars for every value in text.`}
             onActiveKeyChange={setActiveKey}
             overall={skills.overallMastery}
           />
@@ -110,7 +110,7 @@ export function HomeSkillsPanel({ skills }: { skills: HomeSkillsModel }) {
               <i className={index < skills.masteryStars ? 'is-lit' : ''} key={index} />
             ))}
           </div>
-          <small>Overall mastery across all {skills.rows.length} commands</small>
+          <small>Overall mastery across all {skills.rows.length} Arcane Spire commands</small>
         </aside>
       ) : (
         <SkillProfileBars activeKey={activeKey} onHover={setActiveKey} rows={skills.rows} />

@@ -1,19 +1,15 @@
-import { Check, Info } from 'lucide-react'
-
 import chapterBadgeImage from '@/assets/images/chapter_badge.png'
-import rewardChestActiveImage from '@/assets/images/chest_active.png'
-import rewardChestNormalImage from '@/assets/images/chest_normal.png'
 import { ChapterBookCard } from '@/features/story-map/components/book/ChapterBookCard'
+import { ChapterProgressRewards } from '@/features/story-map/components/ChapterProgressRewards'
 import type { LearningChapter } from '@/features/story-map/types'
 import { GamePanel } from '@/shared/components/GamePanel'
 import { ProgressBar } from '@/shared/components/ProgressBar'
 
-export function ChapterOverview({ chapter }: { chapter: LearningChapter }) {
+export function ChapterOverview({ chapter, preview = false }: { chapter: LearningChapter; preview?: boolean }) {
   const title = chapter.title
   const progress = chapter.level_completion?.value ?? 0
   const levels = chapter.level_completion?.denominator ?? chapter.adventure_level_count + chapter.challenge_count * 3
   const cleared = chapter.level_completion?.numerator ?? 0
-  const chests = [...chapter.chest_schedule].sort((a, b) => a.threshold - b.threshold)
 
   return (
     <aside className="chapter-overview">
@@ -57,36 +53,7 @@ export function ChapterOverview({ chapter }: { chapter: LearningChapter }) {
         </dl>
       </GamePanel>
 
-      <GamePanel
-        as="section"
-        eyebrow={
-          <span className="story-panel-title-with-action">
-            Progress Reward
-            <Info className="size-3.5" aria-hidden="true" />
-          </span>
-        }
-        className="story-skill-reward-panel"
-      >
-        <div className="story-skill-reward-grid" aria-label={`${title} progress rewards`}>
-          {chests.map((chest) => {
-            const earned = progress >= chest.threshold
-            return (
-              <div className="story-skill-reward" data-earned={earned} key={chest.threshold}>
-                <span className="story-reward-chest" aria-hidden="true">
-                  <img src={earned ? rewardChestActiveImage : rewardChestNormalImage} alt="" />
-                </span>
-                <span className="story-skill-threshold">
-                  {earned ? <Check aria-hidden="true" /> : null}
-                  {chest.threshold}%
-                </span>
-                <span className="story-skill-reward-amount">
-                  {chest.coins > 0 ? `+${chest.coins} GitCoins` : null}
-                </span>
-              </div>
-            )
-          })}
-        </div>
-      </GamePanel>
+      <ChapterProgressRewards key={chapter.id} chapter={chapter} preview={preview} />
 
       <ChapterBookCard chapterId={chapter.id} chapterTitle={title} commandCount={chapter.command_skill_count} />
     </aside>

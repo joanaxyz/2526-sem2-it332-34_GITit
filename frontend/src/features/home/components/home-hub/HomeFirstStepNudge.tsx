@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from 'react'
-import { ArrowRight, UserRoundPlus, X } from 'lucide-react'
+import { ArrowRight, X } from 'lucide-react'
+import { MascotMessage } from '@/shared/mascot/MascotMessage'
 import { Link } from 'react-router-dom'
 
 import { SHOP_ROUTE } from '@/shared/navigation/routes'
@@ -76,9 +77,7 @@ export function HomeFirstStepNudge() {
 
   return (
     <aside className="home-first-step" role="note" aria-label="First step">
-      <span className="home-first-step-mark" aria-hidden="true">
-        <UserRoundPlus />
-      </span>
+      <MascotMessage>
       <div className="home-first-step-copy">
         <strong>Choose your first companion</strong>
         <p>Adventures and Challenges need one, and you can afford any of them.</p>
@@ -90,6 +89,7 @@ export function HomeFirstStepNudge() {
       <button type="button" className="home-first-step-dismiss" onClick={dismiss} aria-label="Dismiss first step">
         <X aria-hidden="true" />
       </button>
+      </MascotMessage>
     </aside>
   )
 }

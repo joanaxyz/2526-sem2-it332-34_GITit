@@ -168,11 +168,17 @@ def auth_contract_source_violations(
         violations.append(f"{AUTH_FRONTEND_TYPES}: handwritten Auth response DTOs are not allowed")
 
     api_without_comments = strip_ts_comments(auth_api_source)
+    # Requests made without a session skip the refresh path: their 401 is the
+    # API's answer (wrong credentials), not an expired access token.
     expected_method_bodies = {
         "register": (
-            "returnapiOperationRequest('auth_register_create','/auth/register/',{body:payload})"
+            "returnapiOperationRequest('auth_register_create','/auth/register/',"
+            "{body:payload,skipAuthRefresh:true})"
         ),
-        "login": ("returnapiOperationRequest('auth_login_create','/auth/login/',{body:payload})"),
+        "login": (
+            "returnapiOperationRequest('auth_login_create','/auth/login/',"
+            "{body:payload,skipAuthRefresh:true})"
+        ),
         "logout": (
             "returnapiOperationRequest('auth_logout_create','/auth/logout/',{skipAuthRefresh:true})"
         ),

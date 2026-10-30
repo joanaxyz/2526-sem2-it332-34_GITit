@@ -71,6 +71,11 @@ async function parseResponse(response: Response) {
   return response.text()
 }
 
+/** Absolute API URL for full-page navigations (OAuth) that cannot go through fetch. */
+export function apiUrl(path: string) {
+  return `${API_BASE_URL}${path}`
+}
+
 export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
   return requestForSession<T>(path, options, useAuthStore.getState().sessionGeneration)
 }

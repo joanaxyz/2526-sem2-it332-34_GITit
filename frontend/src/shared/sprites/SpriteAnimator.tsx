@@ -1,25 +1,36 @@
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 
 import { useSpritePixelAnchor } from '@/shared/sprites/usePixelBounds'
+import { getWarmedImage, warmImage } from '@/shared/sprites/preload'
 import { cn } from '@/shared/utils/cn'
 import type { FrameSegment, SpriteAnimation, SpriteAnimatorHandle } from '@/shared/sprites/types'
 
-function framePosition(animation: SpriteAnimation, frame: number): string {
-  // Percentage positioning: p% aligns the p% point of the oversized sheet
-  // with the p% point of the frame box, so column c maps to c/(cols-1)-100%.
+function paintCanvasFrame(canvas: HTMLCanvasElement, animation: SpriteAnimation, frame: number) {
+  const image = getWarmedImage(animation.src)
+  if (!image) return
+  const context = canvas.getContext('2d')
+  if (!context) return
+
+  if (canvas.width !== animation.frameWidth) canvas.width = animation.frameWidth
+  if (canvas.height !== animation.frameHeight) canvas.height = animation.frameHeight
   const col = frame % animation.columns
   const row = Math.floor(frame / animation.columns)
-  const x = animation.columns > 1 ? (col * 100) / (animation.columns - 1) : 0
-  const y = animation.rows > 1 ? (row * 100) / (animation.rows - 1) : 0
-  return `${x}% ${y}%`
+  context.clearRect(0, 0, canvas.width, canvas.height)
+  context.imageSmoothingEnabled = false
+  context.drawImage(
+    image,
+    col * animation.frameWidth, row * animation.frameHeight,
+    animation.frameWidth, animation.frameHeight,
+    0, 0, canvas.width, canvas.height,
+  )
 }
 
 /**
  * Zero-dependency spritesheet animator.
  *
- * Steps frames with requestAnimationFrame and paints them by shifting the
- * sheet's background-position - no per-frame React re-renders. Exposes an
- * imperative handle (play/pause/setAnimation/setFlipX) so the character can
+ * Steps frames with requestAnimationFrame and crops them into a fixed canvas,
+ * so transformed scenes never resample a moving atlas. No per-frame React
+ * re-renders. Exposes an imperative handle (play/pause/setAnimation/setFlipX) so the character can
  * later be driven around the story map page.
  *
  * Honors `prefers-reduced-motion` by holding the first frame.
@@ -68,7 +79,7 @@ export const SpriteAnimator = forwardRef<
   },
   ref,
 ) {
-  const spriteRef = useRef<HTMLDivElement>(null)
+  const spriteRef = useRef<HTMLCanvasElement>(null)
   const frameRef = useRef(0)
   const playingRef = useRef(autoPlay)
   const [anim, setAnim] = useState(animation)
@@ -90,7 +101,11 @@ export const SpriteAnimator = forwardRef<
     setAnim(animation)
     frameRef.current = 0
     segmentRef.current = null
-  }, [animation])
+    completeRef.current = null
+    // A completed one-shot pauses playback. Each new prop-driven pose must
+    // start again, just like an imperative setAnimation call does.
+    playingRef.current = autoPlay
+  }, [animation, autoPlay])
 
   function clampSegment(segment: FrameSegment, frameCount: number): FrameSegment {
     const to = Math.max(0, Math.min(frameCount - 1, segment.to))
@@ -104,21 +119,25 @@ export const SpriteAnimator = forwardRef<
 
   const paintFrame = useCallback((frame: number) => {
     const node = spriteRef.current
-    const a = animRef.current
     if (!node) return
-    node.style.backgroundPosition = framePosition(a, frame)
+    paintCanvasFrame(node, animRef.current, frame)
   }, [])
 
   function paintAnimation(a: SpriteAnimation, frame: number) {
     const node = spriteRef.current
     if (!node) return
-    // The source, grid and first frame are one visual transaction. Updating
-    // only the position before React commits the new source briefly paints the
-    // old sheet using the new sheet's coordinates, which reads as a flash.
-    node.style.backgroundImage = `url(${a.src})`
-    node.style.backgroundSize = `${a.columns * 100}% ${a.rows * 100}%`
-    node.style.backgroundPosition = framePosition(a, frame)
+    // Source, dimensions and pixels change together, before React commits.
+    paintCanvasFrame(node, a, frame)
   }
+
+  useEffect(() => {
+    let active = true
+    void warmImage(anim.src).then(() => {
+      // A slower sheet must never paint over a newer pose or an unmounted actor.
+      if (active && animRef.current.src === anim.src) paintFrame(frameRef.current)
+    })
+    return () => { active = false }
+  }, [anim, paintFrame])
 
   useImperativeHandle(ref, () => ({
     play: () => {
@@ -159,10 +178,7 @@ export const SpriteAnimator = forwardRef<
   // The rAF frame-stepper. One loop per mounted animator; advances by
   // elapsed time so dropped frames never slow the walk cycle down.
   useEffect(() => {
-    if (typeof window.matchMedia === 'function' && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      paintFrame(0)
-      return
-    }
+    const media = window.matchMedia?.('(prefers-reduced-motion: reduce)')
     let rafId = 0
     let lastTick = performance.now()
     paintFrame(frameRef.current)
@@ -193,8 +209,22 @@ export const SpriteAnimator = forwardRef<
       }
       rafId = requestAnimationFrame(step)
     }
-    rafId = requestAnimationFrame(step)
-    return () => cancelAnimationFrame(rafId)
+    const syncMotion = () => {
+      cancelAnimationFrame(rafId)
+      if (media?.matches) {
+        frameRef.current = segmentRef.current?.from ?? 0
+        paintFrame(frameRef.current)
+      } else {
+        lastTick = performance.now()
+        rafId = requestAnimationFrame(step)
+      }
+    }
+    media?.addEventListener('change', syncMotion)
+    syncMotion()
+    return () => {
+      cancelAnimationFrame(rafId)
+      media?.removeEventListener('change', syncMotion)
+    }
   }, [anim, paintFrame])
 
   const displayScale = anim.displayScale ?? 1
@@ -224,15 +254,13 @@ export const SpriteAnimator = forwardRef<
         transform: transforms.length ? transforms.join(' ') : undefined,
       }}
     >
-      <div
+      <canvas
         ref={spriteRef}
+        aria-hidden="true"
         style={{
+          display: 'block',
           width: '100%',
           height: '100%',
-          backgroundImage: `url(${anim.src})`,
-          backgroundRepeat: 'no-repeat',
-          backgroundSize: `${anim.columns * 100}% ${anim.rows * 100}%`,
-          backgroundPosition: framePosition(anim, frameRef.current),
           imageRendering: pixelated ? 'pixelated' : 'auto',
         }}
       />

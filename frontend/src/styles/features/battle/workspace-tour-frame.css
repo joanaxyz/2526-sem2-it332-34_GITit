@@ -5,12 +5,37 @@
   user-select: none;
 }
 
-.workspace-tour[data-transforming='move'] .workspace-tour__card {
-  cursor: grabbing;
+/* While a card moves or resizes, the whole card keeps that drag's cursor. */
+.workspace-tour[data-transforming] .workspace-tour__card,
+.workspace-tour[data-transforming] .workspace-tour__card * {
+  cursor: var(--workspace-tour-cursor, grabbing);
 }
 
-.workspace-tour[data-transforming='resize'] .workspace-tour__card {
+/* One card by itself is laid out like a pane, so its bubble can fill it. */
+.workspace-tour__card.is-transformable:not(.has-aside) {
+  display: flex;
+  flex-direction: column;
+}
+
+/* A mouse resizes a card from any edge: the cursor shows which. */
+.workspace-tour [data-resize-cursor='ew-resize'],
+.workspace-tour [data-resize-cursor='ew-resize'] * {
+  cursor: ew-resize;
+}
+
+.workspace-tour [data-resize-cursor='ns-resize'],
+.workspace-tour [data-resize-cursor='ns-resize'] * {
+  cursor: ns-resize;
+}
+
+.workspace-tour [data-resize-cursor='nwse-resize'],
+.workspace-tour [data-resize-cursor='nwse-resize'] * {
   cursor: nwse-resize;
+}
+
+.workspace-tour [data-resize-cursor='nesw-resize'],
+.workspace-tour [data-resize-cursor='nesw-resize'] * {
+  cursor: nesw-resize;
 }
 
 /* A guide with a second card (wide screens only). There is no frame: the
@@ -131,6 +156,30 @@
   to {
     opacity: 1;
     transform: none;
+  }
+}
+
+/* With a mouse the card itself is the grip and its edges resize it, so the
+   grip and corner buttons only show for touch. They stay in the tab order
+   and appear on keyboard focus, where arrow keys move and resize. */
+@media (hover: hover) and (pointer: fine) {
+  .workspace-tour__card.is-transformable:not(.has-aside),
+  .workspace-tour__card.is-transformable .workspace-tour__pane {
+    user-select: none;
+  }
+
+  .workspace-tour__card.is-transformable :is(code, pre, kbd) {
+    user-select: text;
+  }
+
+  .workspace-tour__transform-control.is-move:not(:focus-visible),
+  .workspace-tour__resize-handle:not(:focus-visible) {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
   }
 }
 

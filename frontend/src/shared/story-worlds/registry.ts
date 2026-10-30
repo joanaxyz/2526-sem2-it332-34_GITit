@@ -5,6 +5,9 @@ import { arcaneSpireWorld } from './arcane-spire'
 import { frostboundCitadelWorld } from './frostbound-citadel'
 import { neonBackstreetsWorld } from './neon-backstreets'
 
+// Only Arcane Spire is selected by the active story record. The other visual
+// packs remain as an asset library; they no longer imply active curricula.
+
 /** The default render-ready story world everyone can enter. */
 export const DEFAULT_STORY_WORLD_SLUG = 'arcane-spire'
 

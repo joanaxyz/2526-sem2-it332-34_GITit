@@ -1,5 +1,5 @@
 import { hasOption } from '@/shared/git/simulator/parser'
-import { clone, headBranch, headCommit, isRecord, setOperationMetadata } from '@/shared/git/simulator/state'
+import { clone, headBranch, headCommit, isRecord, recordReflog, setOperationMetadata } from '@/shared/git/simulator/state'
 import { isAncestor, resolveRef } from '@/shared/git/simulator/commands/refs'
 import { SimulatorCommandError, type CommandOutcome, type MutableRepositoryState, type ParsedGitCommand } from '@/shared/git/simulator/types'
 
@@ -62,6 +62,12 @@ function renameBranch(state: MutableRepositoryState, parsed: ParsedGitCommand): 
   return { command: 'branch', details: { renamed: newName, old_name: oldName } }
 }
 
+/** Git's HEAD reflog entry for a switch, recorded before HEAD moves. */
+function recordCheckout(state: MutableRepositoryState, to: string, target: string | null) {
+  const from = headBranch(state) ?? headCommit(state) ?? 'HEAD'
+  recordReflog(state, target, `checkout: moving from ${from} to ${to}`)
+}
+
 export function gitSwitch(state: MutableRepositoryState, parsed: ParsedGitCommand): CommandOutcome {
   if (hasOption(parsed, '-c') || hasOption(parsed, '--create')) {
     const [name, startPoint] = parsed.args
@@ -70,6 +76,7 @@ export function gitSwitch(state: MutableRepositoryState, parsed: ParsedGitComman
   if (hasOption(parsed, '--detach')) {
     const targetId = resolveRef(state, parsed.args[0] ?? 'HEAD')
     if (!targetId) throw new SimulatorCommandError(`fatal: invalid reference: ${parsed.args[0]}`)
+    recordCheckout(state, targetId, targetId)
     state.head = { type: 'detached', target: targetId }
     setOperationMetadata(state, { detached_head: true, last_detached_to: targetId })
     return { command: 'switch', stdout: `HEAD is now at ${targetId}` }
@@ -86,6 +93,7 @@ export function gitSwitch(state: MutableRepositoryState, parsed: ParsedGitComman
       throw new SimulatorCommandError(`fatal: invalid reference: ${name}`)
     }
   }
+  recordCheckout(state, name, state.branches?.[name] ?? null)
   state.head = { type: 'branch', name, target: state.branches?.[name] ?? null }
   setOperationMetadata(state, { last_switch_branch: name, last_switched_to: name })
   return { command: 'switch', stdout: `Switched to branch '${name}'` }
@@ -97,6 +105,7 @@ function createAndSwitchBranch(state: MutableRepositoryState, name: string, star
   if (startPoint && !targetId) throw new SimulatorCommandError(`fatal: invalid reference: ${startPoint}`)
   state.branches ??= {}
   state.branches[name] = targetId ?? null
+  recordCheckout(state, name, targetId ?? null)
   state.head = { type: 'branch', name, target: targetId ?? null }
   setOperationMetadata(state, { last_branch_created: name, last_switch_branch: name, last_switched_to: name })
   return { command: 'switch', stdout: `Switched to a new branch '${name}'` }

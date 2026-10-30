@@ -49,6 +49,26 @@ def test_write_workspace_file_uses_tracked_status_for_committed_files():
     }
 
 
+def test_mergetool_save_stages_only_the_conflict_path_opened_by_the_tool():
+    state = {
+        **base_state(),
+        "conflicts": ["src/app.py"],
+        "conflict_details": {"src/app.py": {"base": "base", "ours": "ours", "theirs": "theirs"}},
+        "working_tree": {"src/app.py": {"status": "conflicted", "content": "markers"}},
+        "operation_metadata": {"last_mergetool_paths": ["src/app.py"]},
+    }
+
+    next_state = write_workspace_file(state, path="src/app.py", content="resolved")
+
+    assert next_state["conflicts"] == []
+    assert next_state["working_tree"] == {}
+    assert next_state["staging"]["src/app.py"] == {
+        "status": "modified",
+        "content": "resolved",
+    }
+    assert next_state["operation_metadata"]["last_mergetool_resolved_paths"] == ["src/app.py"]
+
+
 def test_delete_workspace_file_marks_tracked_files_deleted_and_removes_untracked_files():
     state = create_workspace_file(base_state(), path="notes/todo.md", content="draft")
 

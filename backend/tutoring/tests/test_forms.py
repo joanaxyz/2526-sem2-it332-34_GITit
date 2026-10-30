@@ -13,6 +13,11 @@ from tutoring.services.forms import command_matches_form, resolve_form, teaching
         ("git log --author=Jo", "git log --author=<pattern>"),
         ("git sparse-checkout set src docs", "git sparse-checkout set <paths...>"),
         ("git show c1:README.md", "git show <commit>:<path>"),
+        ("git rebase --abort", "git rebase --abort"),
+        ("git reset --hard c4", "git reset --hard <commit>"),
+        ("git switch -c fix/x c1", "git switch -c <branch> [<start-point>]"),
+        ("git clone --depth=1 https://x.test/a.git", "git clone --depth=<depth> <url>"),
+        ("git checkout -- app.py", "git checkout -- <file>"),
     ],
 )
 def test_command_form_matcher_accepts_placeholders_optional_operands_and_aliases(command, usage):
@@ -25,6 +30,12 @@ def test_command_form_matcher_accepts_placeholders_optional_operands_and_aliases
         ("git add README.md", "git add -A"),
         ("git switch main", "git switch -c <branch>"),
         ("git status --short", "git status --porcelain"),
+        # An operand placeholder never swallows an option token.
+        ("git rebase --abort", "git rebase <upstream>"),
+        ("git rebase --continue", "git rebase [<upstream>]"),
+        ("git merge --abort", "git merge <branch>"),
+        ("git cherry-pick --continue", "git cherry-pick <commit>"),
+        ("git reset --hard c4", "git reset [<commit>]"),
     ],
 )
 def test_command_form_matcher_keeps_distinct_forms_separate(command, usage):
@@ -33,24 +44,38 @@ def test_command_form_matcher_keeps_distinct_forms_separate(command, usage):
 
 def test_catalog_prefers_the_most_specific_playable_form(db):
     skill = CommandSkill.objects.create(slug="git-add", title="git add", base_command="git add")
-    for slug, usage in [("file", "git add <file>"), ("all", "git add ."), ("paths", "git add <path>...")]:
+    for slug, usage in [
+        ("file", "git add <file>"),
+        ("all", "git add ."),
+        ("paths", "git add <path>..."),
+    ]:
         CommandForm.objects.create(command_skill=skill, slug=slug, usage_form=usage, label=slug)
 
     assert resolve_form("git add .").usage_form == "git add ."
     assert resolve_form("git add README.md").usage_form == "git add <file>"
 
 
-def test_wave_forms_win_over_the_catalog(db):
-    skill = CommandSkill.objects.create(slug="git-switch", title="git switch", base_command="git switch")
-    catalog = CommandForm.objects.create(
-        command_skill=skill, slug="create", usage_form="git switch -c <branch>", label="Create",
+def test_scenario_forms_win_over_the_catalog(db):
+    skill = CommandSkill.objects.create(
+        slug="git-switch", title="git switch", base_command="git switch"
     )
-    wave_form = CommandForm.objects.create(
-        command_skill=skill, slug="recover", usage_form="git switch -c <branch> [<start-point>]",
+    catalog = CommandForm.objects.create(
+        command_skill=skill,
+        slug="create",
+        usage_form="git switch -c <branch>",
+        label="Create",
+    )
+    scenario_form = CommandForm.objects.create(
+        command_skill=skill,
+        slug="recover",
+        usage_form="git switch -c <branch> [<start-point>]",
         label="Create at a commit",
     )
     assert resolve_form("git switch -c fix").usage_form == catalog.usage_form
-    assert resolve_form("git switch -c fix", preferred=[wave_form]).usage_form == wave_form.usage_form
+    assert (
+        resolve_form("git switch -c fix", preferred=[scenario_form]).usage_form
+        == scenario_form.usage_form
+    )
 
 
 def test_uncatalogued_commands_get_a_syntax_shape(db):

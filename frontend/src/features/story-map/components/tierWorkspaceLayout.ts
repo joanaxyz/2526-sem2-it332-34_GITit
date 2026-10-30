@@ -1,26 +1,16 @@
+import { queryKeys } from '@/shared/api/queryKeys'
+import type { WorkspaceScene } from '@/shared/level/workspace/types'
 import { storyPath, storyPathWithQuery } from '@/shared/navigation/routes'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 
-export const DEFAULT_TERMINAL_PANE_RATIO = 0.60
-const RESIZE_HANDLE_WIDTH = 6
-export const TERMINAL_PANE_RATIO_KEY = 'tier-workspace:terminal-pane-ratio'
-export const DAG_ZOOM_KEY = 'tier-workspace:dag-zoom-vertical'
-
-const MIN_TERMINAL_PANE_WIDTH = 544
-const MIN_FEEDBACK_PANE_WIDTH = 288
-const MAX_FEEDBACK_PANE_WIDTH = 480
-
-export function ratioSanitizer(min: number, max: number, fallback: number) {
-  return (value: number) =>
-    typeof value === 'number' && Number.isFinite(value) ? clamp(value, min, max) : fallback
-}
-
-export function stringList(value: unknown): string[] {
-  return Array.isArray(value) ? value.filter((item): item is string => typeof item === 'string') : []
-}
-
-export function clamp(value: number, min: number, max: number) {
-  return Math.min(Math.max(value, min), max)
+/** Where a tier run sits, for the shared gameplay workspace. */
+export function tierScene(run: Pick<TierRun, 'id' | 'tier'>): WorkspaceScene {
+  return {
+    title: run.tier.adventure_level_title,
+    rootName: run.tier.adventure_level_slug,
+    runQueryKey: queryKeys.adventureTierRun(run.id),
+    battle: { stageKey: String(run.tier.id), levelKey: String(run.tier.adventure_level_id) },
+  }
 }
 
 export function mapUrlForRun(run: Pick<TierRun, 'chapter' | 'story'>) {
@@ -30,18 +20,17 @@ export function mapUrlForRun(run: Pick<TierRun, 'chapter' | 'story'>) {
     : storyPath(storySlug)
 }
 
-export function constrainedTerminalPaneRatio(clientX: number, bounds: DOMRect) {
-  const usableWidth = Math.max(bounds.width - RESIZE_HANDLE_WIDTH, 1)
-  const rawRatio = (clientX - bounds.left) / bounds.width
-  const minRatio = Math.max(
-    MIN_TERMINAL_PANE_WIDTH / usableWidth,
-    1 - MAX_FEEDBACK_PANE_WIDTH / usableWidth,
-  )
-  const maxRatio = 1 - MIN_FEEDBACK_PANE_WIDTH / usableWidth
+/** Every new tier attempt opens through TierStartPage, which holds the loading
+ * screen until the run exists and its artwork has decoded. */
+export function tierStartUrl(
+  tierId: number,
+  { replay = false, priorRunId }: { replay?: boolean; priorRunId?: number } = {},
+) {
+  if (replay) return `/adventure-level-tiers/${tierId}/replay`
+  const url = `/adventure-level-tiers/${tierId}/runs`
+  return priorRunId === undefined ? url : `${url}?prior_run_id=${priorRunId}`
+}
 
-  if (minRatio > maxRatio) {
-    return clamp(rawRatio, 0.58, 0.86)
-  }
-
-  return clamp(rawRatio, minRatio, maxRatio)
+export function tierRetryUrl(runId: number) {
+  return `/adventure-tier-runs/${runId}/retry`
 }

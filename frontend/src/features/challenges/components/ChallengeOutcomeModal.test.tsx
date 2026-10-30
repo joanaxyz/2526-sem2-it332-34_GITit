@@ -1,7 +1,8 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import { ChallengeOutcomeModal } from './ChallengeOutcomeModal'
+import { challengeOutcomeNextStep } from './challengeOutcome'
 import type { ChallengeRun } from '@/features/challenges/types'
 
 const run = {
@@ -9,6 +10,15 @@ const run = {
   replay: false,
   status: 'completed',
   stars: 3,
+  star_breakdown: {
+    stars: 3, available_stars: 3, counted_commands: 2, command_target: 2,
+    retry_count: 0, graded_under_previous_rules: false,
+    criteria: [
+      { key: 'clear', state: 'earned', reason: null },
+      { key: 'command_target', state: 'earned', reason: null },
+      { key: 'retry_allowance', state: 'earned', reason: null },
+    ],
+  },
   failure_reason: null,
   completed_at: '2026-06-30T00:00:00Z',
   challenge: {
@@ -60,9 +70,6 @@ describe('ChallengeOutcomeModal', () => {
         run={run}
         onClose={vi.fn()}
         onBackToMap={vi.fn()}
-        onNextLevel={vi.fn()}
-        onSelectLevel={vi.fn()}
-        nextDifficultyLabel="Medium"
       />,
     )
 
@@ -70,6 +77,43 @@ describe('ChallengeOutcomeModal', () => {
     expect(screen.getByRole('img', { name: 'You Won' })).toBeInTheDocument()
     expect(screen.getByText('Level ready')).toBeInTheDocument()
     expect(screen.queryByRole('img', { name: 'Game Over' })).not.toBeInTheDocument()
+    expect(screen.getByText('Challenge gate')).toBeInTheDocument()
+    expect(screen.getByText('Repository Basecamp')).toBeInTheDocument()
+    expect(screen.queryByText('Jump to a level')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Continue' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Close modal' })).not.toBeInTheDocument()
+    expect(screen.getByText('Click anywhere to continue')).toBeInTheDocument()
+  })
+
+  it('closes on a click anywhere', () => {
+    const close = vi.fn()
+    render(<ChallengeOutcomeModal open run={run} onClose={close} onBackToMap={vi.fn()} />)
+
+    fireEvent.click(screen.getByText('Repository Basecamp'))
+    expect(close).toHaveBeenCalledOnce()
+  })
+
+  it('allows reading scoring notes without dismissing and keeps Escape working', () => {
+    const close = vi.fn()
+    render(<ChallengeOutcomeModal open run={run} onClose={close} onBackToMap={vi.fn()} />)
+    const summary = screen.getByText('What counts toward the score?')
+    fireEvent.click(summary)
+    expect(summary.closest('details')).toHaveAttribute('open')
+    fireEvent.keyDown(summary, { key: 'Enter' })
+    expect(close).not.toHaveBeenCalled()
+    fireEvent.keyDown(summary, { key: 'Escape' })
+    expect(close).toHaveBeenCalledOnce()
+  })
+
+  it('offers the gate next trial through the mascot', () => {
+    const nextLevel = vi.fn()
+    const step = challengeOutcomeNextStep({ run, onBackToMap: vi.fn(), onNextLevel: nextLevel })
+
+    expect(step?.prompt).toBe('Click me to continue to the Medium trial!')
+    step?.onSelect()
+    expect(nextLevel).toHaveBeenCalledOnce()
+    expect(challengeOutcomeNextStep({ run, onBackToMap: vi.fn(), onNextLevel: nextLevel, isStartingNextLevel: true }))
+      .toMatchObject({ pending: true, pendingPrompt: 'Opening the next trial…' })
   })
 
   it('renders failed challenges as game over', () => {
@@ -92,7 +136,18 @@ describe('ChallengeOutcomeModal', () => {
 
     expect(screen.getByRole('img', { name: 'Game Over' })).toBeInTheDocument()
     expect(screen.getByText('Attempt limit reached')).toBeInTheDocument()
+    expect(screen.getByText('Challenge gate')).toBeInTheDocument()
+    expect(screen.getByText('Repository Basecamp')).toBeInTheDocument()
     expect(screen.getByRole('button', { name: /start fresh variant/i })).toBeInTheDocument()
     expect(screen.queryByRole('img', { name: 'You Won' })).not.toBeInTheDocument()
+  })
+
+  it('returns to the map after the final trial', () => {
+    const backToMap = vi.fn()
+    const step = challengeOutcomeNextStep({ run: { ...run, difficulty: 'hard', next_difficulty: null }, onBackToMap: backToMap })
+
+    expect(step?.prompt).toBe('Click me to head back to the map!')
+    step?.onSelect()
+    expect(backToMap).toHaveBeenCalledOnce()
   })
 })

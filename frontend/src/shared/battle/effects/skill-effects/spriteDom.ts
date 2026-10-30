@@ -21,6 +21,16 @@ export function reduceMotion(): boolean {
   )
 }
 
+/** Fire `callback` at most once, however many layers or timers report contact. */
+export function onceImpact(callback?: () => void): () => void {
+  let fired = false
+  return () => {
+    if (fired) return
+    fired = true
+    callback?.()
+  }
+}
+
 /** Decode one effect sheet before it is painted. Shares the session-wide image
  *  cache with level asset warming, so a sheet is only ever fetched once. */
 export function preloadSpriteSheet(sheet: SpriteAnimation): Promise<void> {

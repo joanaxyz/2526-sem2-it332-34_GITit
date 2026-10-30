@@ -1,46 +1,109 @@
-"""Introduce a command form, or a technique, the moment the problem needs it.
+"""Plan what to teach around the learner's next move.
 
 The next useful move comes from the variant's generated solution trajectory,
 not from per-command rules, so any seeded or authored problem is covered.
 Back-to-back steps that one command can do together are offered as that one
-command (`git add a` + `git add b` -> `git add a b`). An unknown command form
-is introduced first; once the form is known, an unknown technique in the same
-command (several paths, `HEAD~2`, `a..b`...) gets the guide instead.
+command (`git add a` + `git add b` -> `git add a b`).
 
-A lesson is known once its guide was completed, or the learner used it
-successfully anywhere; forms also count as known after a mastery solve.
+A move teaches two ways:
+
+- Its command form gets a **command guide**, anchored to the form's home
+  scenario (``homes.py``). The guide opens there until the learner completes
+  it; anywhere else the plan only points at the home, so playing out of order
+  never uses a guide up.
+- The techniques it writes (several paths, ``HEAD~2``, ``a..b``...) and the
+  ideas it touches (staging area, branch...) become **tips** (``tips.py``),
+  shown with the move every time it comes up.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
+from functools import cached_property
 
-from django.db.models import Q
-
-from adventures.models import SkillMastery
-from common.constants import RESULT_INVALID, RESULT_UNPROCESSABLE, SESSION_STATUS_STARTED
-from practice.models import CommandStep
+from common.constants import SESSION_STATUS_STARTED
+from curriculum.models import CommandForm
 from simulator.trajectory import next_solution_step
-from tutoring.models import PlayerCommandIntroduction
+from tutoring.models import CommandGuideHome, PlayerCommandIntroduction
 from tutoring.services.concepts import concepts_for
-from tutoring.services.forms import (
-    FormGuide,
-    command_family,
-    command_matches_form,
-    is_variadic,
-    resolve_form,
-    same_shape,
-    widened_usage,
-)
+from tutoring.services.forms import FormGuide, catalog_forms, command_family, resolve_form
 from tutoring.services.techniques import batch_command, techniques_in
+from tutoring.services.tips import Tip, concept_tip, technique_tip
 
-# Bounds the "used it before" scan; a learner with this many distinct commands
-# of one family has certainly met its forms.
-_USAGE_SCAN_LIMIT = 300
+
+class PlannerReads:
+    """The player history and form catalog a plan reads, each read at most once.
+
+    A command submission plans twice: before the command runs and again for
+    its response. Share one instance between them; only the step the command
+    just recorded changes in between, and ``remember_history`` adds it.
+    Without a shared instance each plan reads afresh.
+    """
+
+    def __init__(self, player_id: int) -> None:
+        self.player_id = player_id
+        self._history: dict[tuple[int, int], list[str]] = {}
+        self._catalog: dict[str, list[CommandForm]] = {}
+        self._scenario_forms: dict[int, list[CommandForm]] = {}
+        self._homes: dict[str, CommandGuideHome | None] = {}
+
+    def history(self, run) -> list[str]:
+        """The run's processable commands so far."""
+        key = (run.pk, run.total_attempts)
+        if key not in self._history:
+            from adventures.services.tier_history import TierCommandHistoryCache
+
+            self._history[key] = TierCommandHistoryCache().history_for(run=run)
+        return self._history[key]
+
+    def remember_history(self, run, history: list[str]) -> None:
+        # The shared history cache publishes only on commit, so it cannot
+        # answer again inside the submission that is still recording.
+        self._history[(run.pk, run.total_attempts)] = list(history)
+
+    @cached_property
+    def introduced(self) -> frozenset[str]:
+        """Teaching keys of every completed guide."""
+        return frozenset(
+            PlayerCommandIntroduction.objects.filter(player_id=self.player_id).values_list(
+                "teaching_key", flat=True
+            )
+        )
+
+    def catalog(self, family: str) -> list[CommandForm]:
+        if family not in self._catalog:
+            self._catalog[family] = catalog_forms(family)
+        return self._catalog[family]
+
+    def scenario_forms(self, scenario) -> list[CommandForm]:
+        if scenario.id not in self._scenario_forms:
+            self._scenario_forms[scenario.id] = list(
+                scenario.command_forms.filter(is_published=True).select_related("command_skill")
+            )
+        return self._scenario_forms[scenario.id]
+
+    def home(self, teaching_key: str) -> CommandGuideHome | None:
+        if teaching_key not in self._homes:
+            self._homes[teaching_key] = (
+                CommandGuideHome.objects.filter(teaching_key=teaching_key)
+                .select_related("scenario__tier__adventure_level__chapter")
+                .first()
+            )
+        return self._homes[teaching_key]
+
+    def homes_in(self, scenario_id: int) -> list[str]:
+        """Teaching keys of the forms whose guides open in this scenario."""
+        return list(
+            CommandGuideHome.objects.filter(scenario_id=scenario_id)
+            .order_by("id")
+            .values_list("teaching_key", flat=True)
+        )
 
 
 @dataclass(frozen=True)
 class Candidate:
+    """A command guide for the next move."""
+
     form: FormGuide
     # The concrete command for this step, revealed only after a missed attempt.
     example: str
@@ -50,94 +113,71 @@ class Candidate:
     # The last solution step the command covers (later than step_index when
     # back-to-back steps were combined into one command).
     last_step_index: int
-    # Plain-language ideas the learner has not met yet (see concepts.py).
-    concepts: tuple[dict[str, str], ...] = ()
 
     @property
     def teaching_key(self) -> str:
         return self.form.teaching_key
 
 
-def plan_introduction(run) -> Candidate | None:
-    if run.status != SESSION_STATUS_STARTED or not run.current_wave_id:
-        return None
-    from adventures.services.tier_history import TierCommandHistoryCache
+@dataclass(frozen=True)
+class TaughtElsewhere:
+    """The next move's form, whose unfinished guide lives in another scenario."""
 
+    form: FormGuide
+    home: CommandGuideHome
+
+
+@dataclass(frozen=True)
+class MovePlan:
+    guide: Candidate | None = None
+    elsewhere: TaughtElsewhere | None = None
+    tips: tuple[Tip, ...] = ()
+
+
+def plan_move(run, reads: PlannerReads | None = None) -> MovePlan | None:
+    """What to teach for the run's next solution move, or ``None`` off route."""
+
+    if run.status != SESSION_STATUS_STARTED or not run.current_scenario_id:
+        return None
+    reads = reads or PlannerReads(run.player_id)
     trajectory = run.selected_variant.solution_trajectory
-    history = TierCommandHistoryCache().history_for(run=run)
-    step = next_solution_step(trajectory, run.repository_state, history)
+    step = next_solution_step(trajectory, run.repository_state, reads.history(run))
     if step is None:
         return None
     steps = trajectory["steps"]
     command, last = batch_command(steps, step["index"])
-    lesson = _next_lesson(run, command)
-    if lesson is None:
-        return None
     effects = tuple(
         change
         for covered in steps[step["index"] : last + 1]
         if not covered.get("diagnostic")
         for change in covered.get("effect") or ()
     )
-    seen = set(PlayerCommandIntroduction.objects.filter(player_id=run.player_id).values_list("teaching_key", flat=True))
-    first_guide = not any(not key.startswith("concept:") for key in seen)
-    return Candidate(
-        form=lesson,
-        example=command,
-        step_effect=effects,
-        step_index=step["index"],
-        last_step_index=last,
-        concepts=tuple(concepts_for(effects, seen, first_guide=first_guide)),
+    form = resolve_form(
+        command, preferred=reads.scenario_forms(run.current_scenario), catalog=reads.catalog
     )
+    guide = elsewhere = None
+    if form is not None and form.teaching_key not in reads.introduced:
+        home = reads.home(form.teaching_key)
+        if home is not None and home.scenario_id == run.current_scenario_id:
+            guide = Candidate(form, command, effects, step["index"], last)
+        elif home is not None:
+            elsewhere = TaughtElsewhere(form, home)
+    return MovePlan(guide, elsewhere, _tips(run, command, effects))
 
 
-def _next_lesson(run, command: str) -> FormGuide | None:
-    wave_forms = run.current_wave.command_forms.filter(is_published=True).select_related("command_skill")
-    form = resolve_form(command, preferred=wave_forms)
-    if form is None:
-        return None
-    if not lesson_is_known(run.player_id, form):
-        return form
-    family = command_family(command)
-    for technique in techniques_in(command, run.repository_state):
-        guide = technique.guide(family)
-        if not lesson_is_known(run.player_id, guide):
-            return guide
-    return None
+def plan_introduction(run, reads: PlannerReads | None = None) -> Candidate | None:
+    """The command guide for the run's next move, if one opens here."""
+
+    plan = plan_move(run, reads)
+    return plan.guide if plan else None
 
 
-def lesson_is_known(player_id: int, lesson: FormGuide) -> bool:
-    introduced = PlayerCommandIntroduction.objects.filter(player_id=player_id)
-    if introduced.filter(teaching_key=lesson.teaching_key).exists():
-        return True
-    if lesson.technique is None and not is_variadic(lesson.usage_form) and any(
-        # A completed "several files" guide covers the one-file form too.
-        is_variadic(key.removeprefix("form:")) and same_shape(key.removeprefix("form:"), lesson.usage_form)
-        for key in introduced.filter(teaching_key__startswith=f"form:git {lesson.family} ").values_list(
-            "teaching_key", flat=True
-        )
-    ):
-        return True
-    if lesson.technique is None and not is_variadic(lesson.usage_form) and SkillMastery.objects.filter(
-        player_id=player_id, command_form__usage_form=lesson.usage_form, solves__gt=0
-    ).exists():
-        return True
-    prefix = "git " if lesson.technique is not None else f"git {lesson.family}"
-    used = (
-        CommandStep.objects.filter(
-            Q(adventure_tier_run__player_id=player_id)
-            | Q(attempt__player_id=player_id)
-            | Q(challenge_run__player_id=player_id),
-            was_processable=True,
-            normalized_command__startswith=prefix,
-        )
-        .exclude(result_category__in=[RESULT_INVALID, RESULT_UNPROCESSABLE])
-        .values_list("normalized_command", flat=True)
-        .distinct()[:_USAGE_SCAN_LIMIT]
-    )
-    # Naming several files already shows you can name one.
-    wider = None if lesson.technique is not None else widened_usage(lesson.usage_form)
-    return any(
-        lesson.used_by(command) or (wider is not None and command_matches_form(command, wider))
-        for command in used
+def _tips(run, command: str, effects: tuple[dict, ...]) -> tuple[Tip, ...]:
+    family = command_family(command) or ""
+    return (
+        *(concept_tip(key) for key in concepts_for(effects)),
+        *(
+            technique_tip(technique, family)
+            for technique in techniques_in(command, run.repository_state)
+        ),
     )

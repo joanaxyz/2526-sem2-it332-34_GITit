@@ -1,5 +1,5 @@
 import { SUPPLEMENTARY_KPI } from '@/features/admin/utils/kpiCatalogue'
-import { kpiEvidence } from '@/features/admin/utils/kpiEvidence'
+import { formatMetricValue, kpiEvidence } from '@/features/performance/utils/performanceKpis'
 import type { ApiSchemas } from '@/shared/api/generated/apiTypes'
 
 type Rate = ApiSchemas['RateMetric']
@@ -14,7 +14,7 @@ export function SupplementaryRetryModuleRow({ rate }: { rate: Rate }) {
         <span className="dk-kpi-tag">No target</span>
       </div>
       <div className="dk-supp-row-value">
-        <strong>{rate.value === null ? '—' : `${rate.value}%`}</strong>
+        <strong>{formatMetricValue(rate.value, true)}</strong>
         <small>{kpiEvidence('retry_success_rate', rate)}</small>
       </div>
     </div>

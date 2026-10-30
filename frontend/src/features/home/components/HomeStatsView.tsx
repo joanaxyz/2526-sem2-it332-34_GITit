@@ -16,9 +16,8 @@ import { buildHomeStatsModel } from './home-stats/homeStatsModel'
  * the hub instead, because it owns companion and rank state rather than summary
  * data. Whichever category is active, exactly one panel set renders.
  *
- * Progress is one plaque of two bands: where the account stands, then the record
- * behind that standing. They were separate categories until each discovered it
- * was quoting the other's numbers back.
+ * Progress combines activity/curriculum context with the separately fetched
+ * Modules 1–4 practice record.
  */
 export function HomeStatsView({
   home,
@@ -46,7 +45,7 @@ export function HomeStatsView({
             onSelectActivityWindow={selectActivityWindow}
             progress={model.progress}
           />
-          <HomeResultsPanel results={model.results} />
+          <HomeResultsPanel />
         </article>
       ) : null}
       {view === 'skills' ? (

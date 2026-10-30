@@ -63,12 +63,12 @@
       "impactStartFrame": 15,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/clone.png",
       "placeAnchor": {
-        "x": 0.4863,
-        "y": 0.9062
+        "x": 0.4893,
+        "y": 0.9121
       },
       "placeBounds": {
-        "left": 0.0703,
-        "top": 0.1484,
+        "left": 0.0742,
+        "top": 0.1562,
         "right": 0.8828,
         "bottom": 1.0
       }
@@ -184,9 +184,9 @@
       },
       "placeBounds": {
         "left": 0.207,
-        "top": 0.2188,
+        "top": 0.2461,
         "right": 0.7617,
-        "bottom": 1.0
+        "bottom": 0.957
       }
     },
     "diff": {
@@ -300,14 +300,14 @@
       "impactStartFrame": 16,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/rm.png",
       "placeAnchor": {
-        "x": 0.541,
-        "y": 0.4902
+        "x": 0.5371,
+        "y": 0.4863
       },
       "placeBounds": {
-        "left": 0.0547,
-        "top": 0.1836,
-        "right": 0.9414,
-        "bottom": 0.7852
+        "left": 0.1602,
+        "top": 0.1914,
+        "right": 0.9297,
+        "bottom": 0.7773
       }
     },
     "check-ignore": {
@@ -334,7 +334,7 @@
       },
       "placeBounds": {
         "left": 0.1328,
-        "top": 0.2656,
+        "top": 0.2852,
         "right": 0.8633,
         "bottom": 1.0
       }
@@ -388,14 +388,14 @@
       "impactStartFrame": 19,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/branch.png",
       "placeAnchor": {
-        "x": 0.4844,
-        "y": 0.873
+        "x": 0.4922,
+        "y": 0.8711
       },
       "placeBounds": {
-        "left": 0.125,
-        "top": 0.1953,
-        "right": 0.8203,
-        "bottom": 1.0
+        "left": 0.1641,
+        "top": 0.207,
+        "right": 0.8008,
+        "bottom": 0.8867
       }
     },
     "switch": {
@@ -447,14 +447,14 @@
       "impactStartFrame": 16,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/checkout.png",
       "placeAnchor": {
-        "x": 0.5195,
-        "y": 0.4902
+        "x": 0.5215,
+        "y": 0.4961
       },
       "placeBounds": {
-        "left": 0.1484,
-        "top": 0.125,
-        "right": 0.8867,
-        "bottom": 0.8867
+        "left": 0.1523,
+        "top": 0.1289,
+        "right": 0.8828,
+        "bottom": 0.8828
       }
     },
     "merge": {
@@ -477,14 +477,14 @@
       "impactStartFrame": 20,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/merge.png",
       "placeAnchor": {
-        "x": 0.5,
+        "x": 0.502,
         "y": 0.4863
       },
       "placeBounds": {
-        "left": 0.0078,
-        "top": 0.1562,
-        "right": 0.8789,
-        "bottom": 1.0
+        "left": 0.125,
+        "top": 0.125,
+        "right": 0.8516,
+        "bottom": 0.8203
       }
     },
     "merge-base": {
@@ -569,7 +569,7 @@
       },
       "placeBounds": {
         "left": 0.0391,
-        "top": 0.1133,
+        "top": 0.1094,
         "right": 0.918,
         "bottom": 1.0
       }
@@ -623,11 +623,11 @@
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/mergetool.png",
       "placeAnchor": {
         "x": 0.5039,
-        "y": 0.4746
+        "y": 0.4766
       },
       "placeBounds": {
         "left": 0.0703,
-        "top": 0.0,
+        "top": 0.0977,
         "right": 0.9102,
         "bottom": 0.9062
       }
@@ -651,13 +651,13 @@
       "generationSource": "imagegen-raw",
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/reset.png",
       "placeAnchor": {
-        "x": 0.4785,
-        "y": 0.9219
+        "x": 0.4805,
+        "y": 0.9258
       },
       "placeBounds": {
         "left": 0.0352,
-        "top": 0.0938,
-        "right": 0.8711,
+        "top": 0.1055,
+        "right": 0.8594,
         "bottom": 1.0
       }
     },
@@ -680,14 +680,14 @@
       "generationSource": "imagegen-raw",
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/revert.png",
       "placeAnchor": {
-        "x": 0.5215,
+        "x": 0.5137,
         "y": 0.4863
       },
       "placeBounds": {
         "left": 0.125,
         "top": 0.1562,
-        "right": 0.9219,
-        "bottom": 0.8828
+        "right": 0.875,
+        "bottom": 0.8047
       }
     },
     "reflog": {
@@ -740,13 +740,13 @@
       "impactStartFrame": 15,
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/stash.png",
       "placeAnchor": {
-        "x": 0.498,
-        "y": 0.501
+        "x": 0.4961,
+        "y": 0.4912
       },
       "placeBounds": {
-        "left": 0.1289,
-        "top": 0.1562,
-        "right": 0.8555,
+        "left": 0.1406,
+        "top": 0.1758,
+        "right": 0.8438,
         "bottom": 1.0
       }
     },
@@ -831,9 +831,9 @@
         "y": 0.4844
       },
       "placeBounds": {
-        "left": 0.043,
-        "top": 0.0977,
-        "right": 0.875,
+        "left": 0.0547,
+        "top": 0.1055,
+        "right": 0.8633,
         "bottom": 1.0
       }
     },
@@ -885,13 +885,13 @@
       "generationSource": "imagegen-raw",
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/push.png",
       "placeAnchor": {
-        "x": 0.4902,
-        "y": 0.8828
+        "x": 0.4863,
+        "y": 0.8789
       },
       "placeBounds": {
-        "left": 0.0664,
-        "top": 0.1406,
-        "right": 0.9844,
+        "left": 0.0938,
+        "top": 0.1914,
+        "right": 0.9414,
         "bottom": 1.0
       }
     },
@@ -914,13 +914,13 @@
       "generationSource": "imagegen-raw",
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/rebase.png",
       "placeAnchor": {
-        "x": 0.4473,
+        "x": 0.4238,
         "y": 0.9102
       },
       "placeBounds": {
         "left": 0.043,
         "top": 0.2344,
-        "right": 0.8984,
+        "right": 0.793,
         "bottom": 0.9727
       }
     },
@@ -974,13 +974,13 @@
       "rawSrc": "/cosmetics/companion/blue/effects/skill-flames-25/_raw/tag.png",
       "placeAnchor": {
         "x": 0.4609,
-        "y": 0.9297
+        "y": 0.9102
       },
       "placeBounds": {
         "left": 0.0977,
-        "top": 0.1914,
+        "top": 0.2305,
         "right": 0.8125,
-        "bottom": 1.0
+        "bottom": 0.957
       }
     },
     "rev-list": {

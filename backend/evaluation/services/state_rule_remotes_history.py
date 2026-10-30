@@ -6,12 +6,14 @@ SUPPORTED_RULE_TYPES = frozenset(
         "branch_moved_to",
         "cherry_pick_copied_changes_from",
         "cherry_pick_created_new_commit",
+        "cherry_pick_not_in_progress",
         "fetch_updated_remote_tracking_without_moving_local",
         "new_revert_commit_exists",
         "operation_metadata_absent",
         "operation_metadata_contains",
         "operation_metadata_equals",
         "operation_metadata_not_equals",
+        "operation_metadata_path_matches",
         "pull_moved_local_to_upstream",
         "push_moved_remote_to_local_tip",
         "rebase_not_in_progress",
@@ -23,6 +25,7 @@ SUPPORTED_RULE_TYPES = frozenset(
         "stash_pop_restored_paths",
         "stash_stack_contains_paths",
         "stash_stack_empty",
+        "stash_stack_length_equals",
         "stash_top_contains",
     }
 )
@@ -63,6 +66,20 @@ def check_remote_history_state_rule(
         "operation_metadata_contains",
     }:
         return self._check_operation_metadata(rule_type, state, rule)
+    if rule_type == "operation_metadata_path_matches":
+        actual = str(self._operation_value(state, str(rule.get("key") or "")) or "")
+        expected = str(rule.get("value") or "")
+        normalized_actual = actual.replace("\\", "/").rstrip("/").removeprefix("./")
+        normalized_expected = expected.replace("\\", "/").strip("/").removeprefix("./")
+        passed = normalized_actual == normalized_expected or normalized_actual.endswith(
+            f"/{normalized_expected}"
+        )
+        return (
+            passed,
+            f"Operation path {actual!r} identifies {expected!r}."
+            if passed
+            else f"Operation path {actual!r} does not identify {expected!r}.",
+        )
     if rule_type == "fetch_updated_remote_tracking_without_moving_local":
         branch = rule.get("branch") or self._head_branch(state)
         local_unchanged = True
@@ -110,6 +127,16 @@ def check_remote_history_state_rule(
     if rule_type == "stash_stack_empty":
         passed = not state.get("stash_stack")
         return passed, "Stash stack is empty." if passed else "Stash stack is not empty."
+    if rule_type == "stash_stack_length_equals":
+        expected = int(rule.get("count", 0))
+        actual = len(state.get("stash_stack") or [])
+        passed = actual == expected
+        return (
+            passed,
+            f"Stash stack has {actual} entries."
+            if passed
+            else f"Stash stack has {actual} entries, expected {expected}.",
+        )
     if rule_type == "stash_stack_contains_paths":
         paths = set(rule.get("paths", []))
         available = self._stash_paths(state)
@@ -149,6 +176,12 @@ def check_remote_history_state_rule(
         return (
             passed,
             "No rebase is in progress." if passed else "A rebase is still in progress.",
+        )
+    if rule_type == "cherry_pick_not_in_progress":
+        passed = not state.get("cherry_pick_in_progress")
+        return (
+            passed,
+            "No cherry-pick is in progress." if passed else "A cherry-pick is still in progress.",
         )
     if rule_type == "reflog_contains":
         passed = self._reflog_contains(state, rule.get("expected"))
@@ -193,23 +226,33 @@ def check_remote_history_state_rule(
             else f"{target!r} is missing from history.",
         )
     if rule_type == "cherry_pick_created_new_commit":
+        source_ref = (
+            rule.get("source")
+            or rule.get("commit")
+            or self._operation_value(state, "last_cherry_pick_source")
+        )
         source = self.normalizer.commit_by_id(
-            state, self._resolve_expected(rule.get("source"), state, initial_state)
+            state, self._resolve_expected(source_ref, state, initial_state)
         )
         tip = self._latest_commit_for_rule(state, rule)
         passed = bool(
             source
             and tip
             and tip.get("id") != source.get("id")
-            and tip.get("message") == source.get("message")
+            and str(tip.get("message", "")).startswith(str(source.get("message", "")))
         )
         return (
             passed,
             "Cherry-pick created a new commit." if passed else "Cherry-pick commit was not found.",
         )
     if rule_type == "cherry_pick_copied_changes_from":
+        source_ref = (
+            rule.get("source")
+            or rule.get("commit")
+            or self._operation_value(state, "last_cherry_pick_source")
+        )
         source = self.normalizer.commit_by_id(
-            state, self._resolve_expected(rule.get("source"), state, initial_state)
+            state, self._resolve_expected(source_ref, state, initial_state)
         )
         tip = self._latest_commit_for_rule(state, rule)
         passed = bool(

@@ -55,11 +55,12 @@ export function writePreference<T>(key: string, value: T): void {
  * (out-of-range numbers, stale shapes) back into a safe `T`.
  */
 export function usePersistentState<T>(
-  key: string,
+  key: string | null,
   defaultValue: T,
   sanitize?: (value: T) => T,
 ): readonly [T, Dispatch<SetStateAction<T>>] {
   const [value, setValue] = useState<T>(() => {
+    if (!key) return defaultValue
     const raw = readRawPreference(key)
     if (raw === undefined) return defaultValue
     return sanitize ? sanitize(raw as T) : (raw as T)
@@ -69,6 +70,7 @@ export function usePersistentState<T>(
   // touched the setting.
   const hydrated = useRef(false)
   useEffect(() => {
+    if (!key) return
     if (!hydrated.current) {
       hydrated.current = true
       return

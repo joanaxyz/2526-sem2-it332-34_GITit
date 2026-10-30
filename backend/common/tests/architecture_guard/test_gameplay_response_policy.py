@@ -19,7 +19,6 @@ from scripts.checks.architecture_guard.contracts.gameplay_response import (  # n
     gameplay_response_openapi_violations,
 )
 from scripts.checks.architecture_guard.contracts.gameplay_response_frontend import (  # noqa: E402
-    GAMEPLAY_ADVENTURE_TYPES,
     GAMEPLAY_CHALLENGE_ENTRY_API,
     GAMEPLAY_CHALLENGE_TYPES,
     GAMEPLAY_RESPONSE_FRONTEND_APIS,
@@ -42,7 +41,7 @@ def test_gameplay_response_backend_guard_rejects_displaced_owners_and_common_fac
     }
     sources = {path: (ROOT / path).read_text(encoding="utf-8") for path in source_paths}
     sources[GAMEPLAY_COMMON_OPENAPI] += (
-        "\nfrom adventures.openapi import AdventureRunResponseSerializer\n"
+        "\nfrom adventures.openapi import AdventureLevelTierRunResponseSerializer\n"
     )
     sources["backend/example/openapi.py"] = "class ChallengeRunResponseSerializer:\n    pass\n"
     sources["backend/example/facade.py"] = (
@@ -67,22 +66,32 @@ def test_gameplay_response_backend_guard_rejects_displaced_owners_and_common_fac
 def test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift():
     schema = json.loads((ROOT / GAMEPLAY_RESPONSE_GENERATED_OPENAPI).read_text(encoding="utf-8"))
     schemas = schema["components"]["schemas"]
-    schemas["AdventureRunResponse"]["properties"].pop("passed")
+    schemas["AdventureLevelTierRewardResponse"]["properties"].pop("claimed")
     schemas["ChallengeRunResponse"]["required"].remove("story")
     schemas["ChallengeCommandStepResponse"]["properties"].pop("evaluation_result")
     schemas["ChallengeCommandStepResponse"]["required"].remove("evaluation_result")
-    schemas["AdventureCommandRunResponse"] = {"type": "object", "additionalProperties": {}}
+    schemas["AdventureRunResponse"] = {"type": "object", "additionalProperties": {}}
+    schemas["AdventureLevelTierRunResponse"]["properties"]["scenario"] = {"type": "object"}
     schemas["ChallengeCommandRunResponse"]["required"].append("completion")
     schema["paths"]["/api/challenge-runs/{run_id}/"]["get"]["responses"]["200"]["content"][
         "application/json"
     ]["schema"] = {"type": "object"}
+    schema["paths"]["/api/adventure-tier-runs/{run_id}/"]["get"]["responses"]["200"]["content"][
+        "application/json"
+    ]["schema"] = {"type": "object"}
     violations = gameplay_response_openapi_violations(schema)
-    assert any("AdventureRunResponse properties/required" in row for row in violations)
+    assert any("AdventureLevelTierRewardResponse properties/required" in row for row in violations)
     assert any("ChallengeRunResponse properties/required" in row for row in violations)
     assert any("ChallengeCommandStepResponse properties/required" in row for row in violations)
-    assert any("exact full/patch union" in row for row in violations)
+    assert any("retired AdventureRunResponse must stay absent" in row for row in violations)
+    assert any(
+        "AdventureLevelTierRunResponse.scenario must reference AdventureLevelTierScenarioPositionResponse"
+        in row
+        for row in violations
+    )
     assert any("ChallengeCommandRunResponse properties/required" in row for row in violations)
     assert any("must return ChallengeRunResponse" in row for row in violations)
+    assert any("must return AdventureLevelTierRunResponse" in row for row in violations)
 
     for field_name in ("mastery_progress", "completion", "next_difficulty", "sibling_levels"):
         required_schema = json.loads(
@@ -118,30 +127,29 @@ def test_gameplay_response_openapi_guard_rejects_key_union_and_operation_drift()
     status_schema = json.loads(
         (ROOT / GAMEPLAY_RESPONSE_GENERATED_OPENAPI).read_text(encoding="utf-8")
     )
-    status_schema["components"]["schemas"]["AdventureRunResponse"]["properties"]["status"] = {
-        "type": "string"
-    }
+    status_schema["components"]["schemas"]["AdventureLevelTierRunResponse"]["properties"][
+        "status"
+    ] = {"type": "string"}
     assert any(
-        "AdventureRunResponse.status must reference GameplayRunStatus" in row
+        "AdventureLevelTierRunResponse.status must reference GameplayRunStatus" in row
         for row in gameplay_response_openapi_violations(status_schema)
     )
 
-    empty_nullable_schema = json.loads(
+    scenario_nullable_schema = json.loads(
         (ROOT / GAMEPLAY_RESPONSE_GENERATED_OPENAPI).read_text(encoding="utf-8")
     )
-    empty_nullable_schema["components"]["schemas"]["RuntimeStepResponse"]["properties"][
-        "terminal_output"
-    ]["nullable"] = True
+    scenario_nullable_schema["components"]["schemas"]["AdventureLevelTierScenarioPositionResponse"][
+        "properties"
+    ]["index"].pop("nullable")
     assert any(
-        "RuntimeStepResponse nullable fields" in row
-        for row in gameplay_response_openapi_violations(empty_nullable_schema)
+        "AdventureLevelTierScenarioPositionResponse nullable fields" in row
+        for row in gameplay_response_openapi_violations(scenario_nullable_schema)
     )
 
 
 def test_gameplay_response_frontend_guard_rejects_wire_widening_and_client_http_types():
     source_paths = {
         GAMEPLAY_RESPONSE_SHARED_COMMAND_TYPES,
-        GAMEPLAY_ADVENTURE_TYPES,
         GAMEPLAY_CHALLENGE_TYPES,
         *GAMEPLAY_RESPONSE_FRONTEND_APIS,
         GAMEPLAY_CHALLENGE_ENTRY_API,
@@ -160,11 +168,11 @@ def test_gameplay_response_frontend_guard_rejects_wire_widening_and_client_http_
             1,
         )
     )
-    challenge_api = GAMEPLAY_RESPONSE_FRONTEND_APIS[1]
+    challenge_api = GAMEPLAY_RESPONSE_FRONTEND_APIS[0]
     sources[challenge_api] = sources[challenge_api].replace("ChallengeRunResponse", "ChallengeRun")
     sources[f"{_FRONTEND}/src/features/example/responseFacade.ts"] = (
         "export type ChallengeRunResponse = { id: number }\n"
-        "export type { AdventureRun } from '@/features/adventures/types'\n"
+        "export type { ChallengeRun } from '@/features/challenges/types'\n"
     )
     sources[challenge_api] += (
         "\nconst widened = value as Promise<ChallengeRunResponse & { extra: string }>\n"
@@ -182,7 +190,6 @@ def test_gameplay_response_frontend_guard_rejects_wire_widening_and_client_http_
 def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass():
     source_paths = {
         GAMEPLAY_RESPONSE_SHARED_COMMAND_TYPES,
-        GAMEPLAY_ADVENTURE_TYPES,
         GAMEPLAY_CHALLENGE_TYPES,
         *GAMEPLAY_RESPONSE_FRONTEND_APIS,
         GAMEPLAY_CHALLENGE_ENTRY_API,
@@ -215,7 +222,7 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
         ),
         "unrelated generated component": challenge_source.replace(
             "ApiSchemas['ChallengeRunResponse'],",
-            "ApiSchemas['AdventureRunResponse'],",
+            "ApiSchemas['AdventureLevelTierRunResponse'],",
             1,
         ),
         "extra client divergence": challenge_source.replace(
@@ -255,12 +262,12 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
     terminal_sources[GAMEPLAY_RESPONSE_SHARED_COMMAND_TYPES] = terminal_sources[
         GAMEPLAY_RESPONSE_SHARED_COMMAND_TYPES
     ].replace(
-        "ApiSchemas['RuntimeStepResponse']",
         "ApiSchemas['ChallengeRunStepResponse']",
+        "ApiSchemas['AdventureLevelTierRunStepResponse']",
         1,
     )
     assert any(
-        "TerminalStep must derive exactly" in row
+        "TerminalStep must pick exactly" in row
         for row in gameplay_response_frontend_violations(terminal_sources)
     )
 
@@ -278,8 +285,8 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
     )
 
     cast_sources = dict(original)
-    cast_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = cast_sources[
-        GAMEPLAY_RESPONSE_FRONTEND_APIS[1]
+    cast_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[0]] = cast_sources[
+        GAMEPLAY_RESPONSE_FRONTEND_APIS[0]
     ].replace(
         "return apiOperationRequest<'challenge_runs_retrieve', ChallengeRunResponse>("
         "'challenge_runs_retrieve', `/challenge-runs/${runId}/`)",
@@ -293,8 +300,8 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
     )
 
     adapter_sources = dict(original)
-    adapter_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = adapter_sources[
-        GAMEPLAY_RESPONSE_FRONTEND_APIS[1]
+    adapter_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[0]] = adapter_sources[
+        GAMEPLAY_RESPONSE_FRONTEND_APIS[0]
     ].replace(
         "getRun(runId: number) {\n"
         "    return apiOperationRequest<'challenge_runs_retrieve', ChallengeRunResponse>("
@@ -314,8 +321,8 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
     )
 
     then_sources = dict(original)
-    then_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = then_sources[
-        GAMEPLAY_RESPONSE_FRONTEND_APIS[1]
+    then_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[0]] = then_sources[
+        GAMEPLAY_RESPONSE_FRONTEND_APIS[0]
     ].replace(
         "return apiOperationRequest<'challenge_runs_retrieve', ChallengeRunResponse>("
         "'challenge_runs_retrieve', `/challenge-runs/${runId}/`)",
@@ -334,8 +341,8 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
         ".finally(() => normalize())",
     ):
         suffix_sources = dict(original)
-        suffix_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = suffix_sources[
-            GAMEPLAY_RESPONSE_FRONTEND_APIS[1]
+        suffix_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[0]] = suffix_sources[
+            GAMEPLAY_RESPONSE_FRONTEND_APIS[0]
         ].replace(
             "return apiOperationRequest<'challenge_runs_retrieve', ChallengeRunResponse>("
             "'challenge_runs_retrieve', `/challenge-runs/${runId}/`)",
@@ -349,12 +356,12 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
         ), suffix
 
     shadow_sources = dict(original)
-    shadow_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = (
+    shadow_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[0]] = (
         "function getRun(runId: number) {\n"
         "  return apiOperationRequest<'challenge_runs_retrieve', ChallengeRunResponse>("
         "'challenge_runs_retrieve', `/challenge-runs/${runId}/`)\n"
         "}\n\n"
-        + shadow_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]].replace(
+        + shadow_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[0]].replace(
             "getRun(runId: number) {\n"
             "    return apiOperationRequest<'challenge_runs_retrieve', ChallengeRunResponse>("
             "'challenge_runs_retrieve', `/challenge-runs/${runId}/`)\n"
@@ -373,8 +380,8 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
 
     for generator_header in ("*getRun", "async *getRun"):
         generator_sources = dict(original)
-        generator_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = generator_sources[
-            GAMEPLAY_RESPONSE_FRONTEND_APIS[1]
+        generator_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[0]] = generator_sources[
+            GAMEPLAY_RESPONSE_FRONTEND_APIS[0]
         ].replace("getRun(runId: number) {", f"{generator_header}(runId: number) {{", 1)
         assert any(
             "getRun must directly return the exact challenge_runs_retrieve response" in row
@@ -387,8 +394,8 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
         ("computed override", "  [getRunKey]: getRunOverride,\n"),
     ):
         member_sources = dict(original)
-        member_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] = member_sources[
-            GAMEPLAY_RESPONSE_FRONTEND_APIS[1]
+        member_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[0]] = member_sources[
+            GAMEPLAY_RESPONSE_FRONTEND_APIS[0]
         ].replace("  },\n  submitCommand", f"  }},\n{member}  submitCommand", 1)
         assert any(
             "must not override owned methods through spread, computed, or property members" in row
@@ -418,7 +425,7 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
         ("delete member", "delete challengeRunsApi.getRun"),
     ):
         mutation_sources = dict(original)
-        mutation_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] += f"\n{mutation}\n"
+        mutation_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[0]] += f"\n{mutation}\n"
         assert any(
             "challengeRunsApi must not be reassigned or mutated" in row
             for row in gameplay_response_frontend_violations(mutation_sources)
@@ -426,7 +433,7 @@ def test_gameplay_response_frontend_guard_rejects_each_generated_contract_bypass
 
     for equality_operator in ("===", "=="):
         equality_sources = dict(original)
-        equality_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[1]] += (
+        equality_sources[GAMEPLAY_RESPONSE_FRONTEND_APIS[0]] += (
             f"\nconst sameGetRun = challengeRunsApi.getRun {equality_operator} expectedGetRun\n"
         )
         assert gameplay_response_frontend_violations(equality_sources) == []

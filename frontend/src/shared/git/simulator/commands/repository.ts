@@ -11,6 +11,8 @@ export function gitInit(state: MutableRepositoryState, parsed: ParsedGitCommand)
   const directory = parsed.args[0] ?? null
   const quiet = hasOption(parsed, '-q') || hasOption(parsed, '--quiet')
   state.repository_initialized = true
+  // Where the repository's .git lives, from the project root: graded as state.
+  if (!reinitialized) state.repository_root = directory ?? '.'
   state.head = { type: 'branch', name: branch, target: state.branches?.[branch] ?? null }
   state.branches ??= {}
   state.branches[branch] ??= null
@@ -52,6 +54,7 @@ export function gitClone(state: MutableRepositoryState, parsed: ParsedGitCommand
   const directory = parsed.args[1] ?? defaultCloneDirectory(url)
   const remoteName = 'origin'
   state.repository_initialized = true
+  state.repository_root = directory
   state.remotes = { [remoteName]: url }
   state.remote_branches = {}
   applyRemoteFixtureBranches(state)
@@ -103,7 +106,7 @@ function truncateShallow(state: MutableRepositoryState, tip: string | null, dept
   if (oldest) oldest.parents = []
 }
 
-function defaultCloneDirectory(url: string) {
+export function defaultCloneDirectory(url: string) {
   const tail = url.split('/').filter(Boolean).at(-1) ?? 'repository'
   return tail.replace(/\.git$/, '') || 'repository'
 }
@@ -135,7 +138,7 @@ export function gitConfig(state: MutableRepositoryState, parsed: ParsedGitComman
   const [key, value] = parsed.args
   state.config[key] = value
   const metadata: Record<string, RepositoryValue> = {
-    last_config_scope: 'global',
+    last_config_scope: hasOption(parsed, '--global') ? 'global' : 'local',
     last_config_key: key,
     last_config_value: value,
   }

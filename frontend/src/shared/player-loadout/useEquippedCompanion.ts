@@ -2,11 +2,13 @@ import { useMemo } from 'react'
 import { useQuery } from '@tanstack/react-query'
 
 import { DEFAULT_COMPANION_SLUG } from '@/shared/cosmetics/companions/registry'
+import { useAuthStore } from '@/shared/auth/useAuth'
 import { shopCatalogQueryOptions } from '@/shared/shop/api/shopApi'
 
 export type EquippedCompanion = {
-  /** Always renderable: falls back to the default companion. */
-  slug: string
+  /** Null until the catalog is known, so callers never paint Blue as a
+   * temporary stand-in for another equipped companion. */
+  slug: string | null
   /**
    * True only once the catalog is known AND nothing is equipped. An unread
    * catalog is not the same answer as an empty one, and a surface that greets
@@ -16,24 +18,24 @@ export type EquippedCompanion = {
 }
 
 /**
- * The equipped companion, read from cache only.
+ * The equipped companion used by shared chrome such as the loading screen.
  *
- * Loading states have to show the player's own companion without being the
- * reason it gets fetched: a loader can mount before sign-in resolves, or
- * several can mount at once, and none of them should fire a catalog request.
- * `enabled: false` subscribes to the cached entry without ever running the
- * query, so a loader shows the default until the catalog is known and swaps to
- * the real companion the moment some other screen has loaded it.
+ * A loader can mount before sign-in resolves, so the catalog request stays
+ * disabled until an authenticated session exists. Once it does, React Query
+ * deduplicates this request with any screen that also needs the catalog. Until
+ * that shared result arrives, `slug` remains null instead of briefly showing
+ * the default Blue companion and then swapping to the equipped one.
  *
  * It lives apart from `usePlayerLoadout` on purpose: that hook is mocked
  * wholesale by tests of the surfaces it gates, and the shared loading state
  * must not break when it is.
  */
 export function useEquippedCompanion(): EquippedCompanion {
-  const { data } = useQuery({ ...shopCatalogQueryOptions(), enabled: false })
+  const accessToken = useAuthStore((state) => state.accessToken)
+  const { data } = useQuery({ ...shopCatalogQueryOptions(), enabled: Boolean(accessToken) })
   return useMemo(
     () => ({
-      slug: data?.active_companion ?? DEFAULT_COMPANION_SLUG,
+      slug: data ? data.active_companion ?? DEFAULT_COMPANION_SLUG : null,
       isUnequipped: Boolean(data) && !data?.active_companion,
     }),
     [data],

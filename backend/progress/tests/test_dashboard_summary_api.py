@@ -1,13 +1,17 @@
-from datetime import date
-
-from django.contrib.auth import get_user_model
 from rest_framework.test import APIClient
 
-from challenges.models import ChallengeRun
+from adventures.models import (
+    AdventureLevel,
+    AdventureLevelTier,
+    AdventureLevelTierRun,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
+)
 from common.constants import SESSION_STATUS_COMPLETED, SESSION_STATUS_FAILED
-from progress.models import StreakRecord
+from curriculum.models import Chapter, Story
+from players.services import get_or_create_player
+from progress.models import AdventureLevelTierCompletion
 from progress.serializers import DashboardSummaryResponseSerializer
-from testing.runtime_factories import create_stage_readme_challenge_run
 
 SUMMARY_KEYS = {
     "kpis",
@@ -15,7 +19,6 @@ SUMMARY_KEYS = {
     "counts",
     "completed_story_slug",
     "completed_stories",
-    "streak",
     "perfect_clears",
     "mastery",
     "retry_trends",
@@ -23,7 +26,6 @@ SUMMARY_KEYS = {
 KPI_KEYS = {"scr", "arc", "hlcr"}
 RATE_KEYS = {"value", "numerator", "denominator"}
 COUNT_KEYS = {"started", "completed", "failed", "abandoned"}
-STREAK_KEYS = {"current", "longest", "last_completed_on"}
 RETRY_KEYS = {"level_title", "attempts", "retries", "label"}
 
 
@@ -52,13 +54,6 @@ def assert_dashboard_wire_shape(payload):
     assert payload["completed_story_slug"] is None or type(payload["completed_story_slug"]) is str
     assert type(payload["completed_stories"]) is list
     assert all(type(slug) is str for slug in payload["completed_stories"])
-
-    streak = payload["streak"]
-    assert set(streak) == STREAK_KEYS
-    assert type(streak["current"]) is int
-    assert type(streak["longest"]) is int
-    if streak["last_completed_on"] is not None:
-        assert date.fromisoformat(streak["last_completed_on"])
 
     assert type(payload["perfect_clears"]) is int
     assert type(payload["mastery"]) in {int, float}
@@ -94,11 +89,6 @@ def test_authenticated_empty_dashboard_matches_exact_documented_contract(db, dja
     }
     assert payload["completed_story_slug"] is None
     assert payload["completed_stories"] == []
-    assert payload["streak"] == {
-        "current": 0,
-        "longest": 0,
-        "last_completed_on": None,
-    }
     assert payload["retry_trends"] == []
 
     documented = DashboardSummaryResponseSerializer(data=payload)
@@ -112,33 +102,55 @@ def test_authenticated_empty_dashboard_matches_exact_documented_contract(db, dja
     assert set(rejected.errors) == {"completed_story_slug", "retry_trends"}
 
 
-def test_authenticated_dashboard_exposes_typed_chapter_and_retry_rows(db):
-    fixture = create_stage_readme_challenge_run(
-        get_user_model(), username="dashboard-contract-seeded"
+def test_authenticated_dashboard_exposes_typed_runebound_chapter_and_retry_rows(
+    db, django_user_model
+):
+    user = django_user_model.objects.create_user(username="dashboard-contract-seeded")
+    player = get_or_create_player(user)
+    story = Story.objects.create(slug="arcane-spire", title="The Arcane Spire")
+    chapter = Chapter.objects.create(
+        story=story,
+        slug="dashboard-module",
+        number=2,
+        title="Branching",
     )
-    fixture.run.status = SESSION_STATUS_COMPLETED
-    fixture.run.retry_index = 0
-    fixture.run.save(update_fields=["status", "retry_index"])
-    ChallengeRun.objects.create(
-        player=fixture.player,
-        challenge_trial=fixture.trial,
-        selected_variant=fixture.variant,
-        prior_run=fixture.run,
+    level = AdventureLevel.objects.create(
+        chapter=chapter,
+        slug="dashboard-level",
+        title="Runebound Branching",
+    )
+    tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="medium")
+    scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug="dashboard-scenario")
+    variant = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
+        slug="dashboard-variant",
+    )
+    first = AdventureLevelTierRun.objects.create(
+        player=player,
+        tier=tier,
+        current_scenario=scenario,
+        selected_variant=variant,
+        source_entry_point="runtime_test",
+        status=SESSION_STATUS_COMPLETED,
+    )
+    AdventureLevelTierRun.objects.create(
+        player=player,
+        tier=tier,
+        current_scenario=scenario,
+        selected_variant=variant,
+        prior_run=first,
         source_entry_point="runtime_test",
         status=SESSION_STATUS_FAILED,
         retry_index=1,
-        min_counted_commands=fixture.trial.min_counted_commands,
-        max_counted_commands=fixture.trial.max_counted_commands,
-        repository_state=fixture.states.initial,
     )
-    StreakRecord.objects.create(
-        player=fixture.player,
-        current_streak=3,
-        longest_streak=5,
-        last_completed_on=date(2026, 8, 9),
+    AdventureLevelTierCompletion.objects.create(
+        player=player,
+        tier=tier,
+        tier_run=first,
+        stars=3,
     )
     client = APIClient()
-    client.force_authenticate(user=fixture.user)
+    client.force_authenticate(user=user)
 
     response = client.get("/api/progress/dashboard/")
 
@@ -152,23 +164,18 @@ def test_authenticated_dashboard_exposes_typed_chapter_and_retry_rows(db):
         "abandoned": 0,
     }
     assert payload["kpis"]["scr"] == {
-        "value": 50.0,
+        "value": 100.0,
         "numerator": 1,
-        "denominator": 2,
+        "denominator": 1,
     }
-    chapter_kpis = payload["chapter_kpis"][str(fixture.chapter.number)]
+    chapter_kpis = payload["chapter_kpis"][str(chapter.number)]
     assert chapter_kpis["scr"] == payload["kpis"]["scr"]
-    assert payload["streak"] == {
-        "current": 3,
-        "longest": 5,
-        "last_completed_on": "2026-08-09",
-    }
     assert payload["retry_trends"] == [
         {
-            "level_title": "Stage README Challenge",
+            "level_title": "Runebound Branching",
             "attempts": 2,
             "retries": 1,
-            "label": "1 retry runs",
+            "label": "1 retry run",
         }
     ]
     assert "completed_story_slug" in payload

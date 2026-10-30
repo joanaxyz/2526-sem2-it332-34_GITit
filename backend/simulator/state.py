@@ -68,6 +68,9 @@ class RepositoryStateNormalizer:
         "config": dict,
         "remote_fixtures": dict,
         "remote_updates": dict,
+        # Where the repository's .git lives, from the project root; None when
+        # the fixture does not say (an already-initialized starting state).
+        "repository_root": None,
         "merge_abort_state": dict,
         "merge_parent": None,
         "merge_conflicts": dict,
@@ -77,6 +80,8 @@ class RepositoryStateNormalizer:
         "merge_conflict_files": list,
         "cherry_pick_in_progress": False,
         "cherry_pick_original_head": None,
+        "cherry_pick_source": None,
+        "cherry_pick_conflict_files": list,
         "rebase_state": dict,
     }
 

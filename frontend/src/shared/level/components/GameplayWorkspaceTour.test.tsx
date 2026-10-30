@@ -87,6 +87,7 @@ describe('GameplayWorkspaceTour', () => {
     document.querySelectorAll('[data-test-tour-target]').forEach((element) => element.remove())
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: originalWidth })
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: originalHeight })
+    window.localStorage.clear()
     vi.restoreAllMocks()
   })
 
@@ -374,6 +375,52 @@ describe('GameplayWorkspaceTour', () => {
     expect(screen.queryByRole('button', { name: 'Reset command guide size and position' })).not.toBeInTheDocument()
   })
 
+  it('restores a transformable guide layout from browser preferences', async () => {
+    const preferenceKey = 'test:command-guide-layout'
+    addTarget('first')
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.classList.contains('workspace-tour__card')) {
+        return rect({ left: 420, top: 220, width: 352, height: 240 })
+      }
+      return rect()
+    })
+
+    const renderGuide = () => render(
+      <GameplayWorkspaceTour
+        label="Command guide"
+        steps={[step('first')]}
+        transformable
+        transformPreferenceKey={preferenceKey}
+        onClose={vi.fn()}
+      />,
+    )
+
+    const first = renderGuide()
+    await screen.findByRole('dialog', { name: 'first title' })
+    const move = screen.getByRole('button', { name: 'Move command guide' })
+    fireEvent.pointerDown(move, { clientX: 100, clientY: 100, pointerId: 1 })
+    fireEvent.pointerMove(window, { clientX: 140, clientY: 130, pointerId: 1 })
+    fireEvent.pointerUp(window, { pointerId: 1 })
+    fireEvent.keyDown(screen.getByRole('button', { name: 'Resize command guide' }), {
+      key: 'ArrowRight',
+    })
+
+    await waitFor(() => expect(window.localStorage.getItem(`git-it:pref:${preferenceKey}`)).not.toBeNull())
+    first.unmount()
+
+    renderGuide()
+    const restored = await screen.findByRole('dialog', { name: 'first title' })
+    expect(restored).toHaveStyle({ left: '460px', top: '250px', width: '368px', height: '240px' })
+
+    fireEvent.click(screen.getByRole('button', { name: 'Reset command guide size and position' }))
+    expect(restored).not.toHaveStyle({ left: '460px', top: '250px' })
+    expect(restored).toHaveStyle({ width: '352px' })
+    expect(restored.style.height).toBe('')
+    expect(screen.queryByRole('button', { name: 'Reset command guide size and position' })).not.toBeInTheDocument()
+  })
+
   it('shows a second card as its own card, moved and resized apart from the first', async () => {
     Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 })
     Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 })
@@ -445,6 +492,75 @@ describe('GameplayWorkspaceTour', () => {
     expect(main.style.height).toBe('')
   })
 
+  it('lets a mouse move a card by dragging it and resize it from its edges', async () => {
+    Object.defineProperty(window, 'innerWidth', { configurable: true, value: 1280 })
+    Object.defineProperty(window, 'innerHeight', { configurable: true, value: 800 })
+    addTarget('first')
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (
+      this: HTMLElement,
+    ) {
+      if (this.dataset.tourPane === 'main') return rect({ left: 220, top: 120, width: 352, height: 300 })
+      // The command card's visible edge is its bubble, right of the guide's portrait.
+      if (this.classList.contains('mascot-message__bubble')) return rect({ left: 284, top: 120, width: 288, height: 300 })
+      if (this.dataset.tourPane === 'aside') return rect({ left: 584, top: 120, width: 336, height: 200 })
+      return rect()
+    })
+
+    render(
+      <GameplayWorkspaceTour
+        label="Command guide"
+        steps={[step('first')]}
+        aside={<p>What changes</p>}
+        paneLabels={{ main: 'command card', aside: 'what changes card' }}
+        transformable
+        onClose={vi.fn()}
+      />,
+    )
+
+    await screen.findByRole('dialog', { name: 'first title' })
+    const card = (name: string) => screen.getByRole('button', { name }).closest<HTMLElement>('[data-tour-pane]')!
+    const main = card('Move command card')
+    const aside = card('Move what changes card')
+    const asideText = screen.getByText('What changes')
+    const mouse = { pointerType: 'mouse', button: 0 }
+    const reset = () => screen.queryByRole('button', { name: 'Reset command guide size and position' })
+
+    // A click is not a drag.
+    fireEvent.pointerDown(asideText, { ...mouse, clientX: 700, clientY: 200, pointerId: 1 })
+    fireEvent.pointerUp(window, { pointerId: 1 })
+    expect(reset()).not.toBeInTheDocument()
+
+    fireEvent.pointerDown(asideText, { ...mouse, clientX: 700, clientY: 200, pointerId: 2 })
+    fireEvent.pointerMove(window, { clientX: 650, clientY: 300, pointerId: 2 })
+    fireEvent.pointerUp(window, { pointerId: 2 })
+    expect(aside).toHaveStyle({ left: '534px', top: '220px' })
+    expect(reset()).toBeInTheDocument()
+
+    // The bubble's left edge resizes the command card; its right edge stays put.
+    fireEvent.pointerMove(main, { ...mouse, clientX: 286, clientY: 250 })
+    expect(main.dataset.resizeCursor).toBe('ew-resize')
+    fireEvent.pointerDown(main, { ...mouse, clientX: 286, clientY: 250, pointerId: 3 })
+    fireEvent.pointerMove(window, { clientX: 246, clientY: 250, pointerId: 3 })
+    fireEvent.pointerUp(window, { pointerId: 3 })
+    expect(main).toHaveStyle({ left: '180px', top: '120px', width: '392px', height: '300px' })
+
+    // A control at the bubble edge must keep pointer clicks and focus (AI help
+    // expands at the bottom of a guide, next to the resize hit area).
+    const control = document.createElement('button')
+    control.textContent = 'Ask about this guide'
+    main.appendChild(control)
+    fireEvent.pointerDown(control, { ...mouse, clientX: 286, clientY: 250, pointerId: 9 })
+    fireEvent.pointerMove(window, { clientX: 200, clientY: 250, pointerId: 9 })
+    fireEvent.pointerUp(window, { pointerId: 9 })
+    expect(main).toHaveStyle({ left: '180px', top: '120px', width: '392px', height: '300px' })
+
+    // Touch leaves the card body to scroll; it moves cards with the grip.
+    fireEvent.pointerDown(asideText, { pointerType: 'touch', button: 0, clientX: 700, clientY: 300, pointerId: 4 })
+    fireEvent.pointerMove(window, { clientX: 600, clientY: 300, pointerId: 4 })
+    fireEvent.pointerUp(window, { pointerId: 4 })
+    expect(aside).toHaveStyle({ left: '534px', top: '220px' })
+  })
+
   it('treats Skip as dismissal and restores focus to the launch control', async () => {
     addTarget('first')
     const onClose = vi.fn()
@@ -460,6 +576,39 @@ describe('GameplayWorkspaceTour', () => {
 
     expect(onClose).toHaveBeenCalledWith('skip')
     await waitFor(() => expect(launcher).toHaveFocus())
+  })
+
+  it('closes on a click outside, leaving focus where the learner clicked', async () => {
+    const target = addTarget('first')
+    const companion = document.createElement('div')
+    companion.className = 'test-companion'
+    const elsewhere = document.createElement('button')
+    document.body.append(companion, elsewhere)
+    const onClose = vi.fn()
+
+    const view = render(
+      <GameplayWorkspaceTour
+        label="Gameplay guide"
+        steps={[step('first')]}
+        showSkip={false}
+        closeOnOutsideClick={{ except: ['.test-companion'] }}
+        onClose={onClose}
+      />,
+    )
+
+    const dialog = await screen.findByRole('dialog', { name: 'first title' })
+    expect(screen.queryByRole('button', { name: 'Skip tour' })).not.toBeInTheDocument()
+    // The card, what it points at, and its companion regions are inside.
+    for (const inside of [dialog, target, companion]) fireEvent.pointerDown(inside)
+    expect(onClose).not.toHaveBeenCalled()
+
+    elsewhere.focus()
+    fireEvent.pointerDown(elsewhere)
+    expect(onClose).toHaveBeenCalledWith('outside')
+    view.unmount()
+    expect(elsewhere).toHaveFocus()
+    companion.remove()
+    elsewhere.remove()
   })
 
   it('collapses into a supplied launcher before closing', async () => {

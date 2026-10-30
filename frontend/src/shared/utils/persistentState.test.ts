@@ -48,6 +48,15 @@ describe('usePersistentState', () => {
     expect(window.localStorage.getItem(`${STORAGE_PREFIX}untouched`)).toBeNull()
   })
 
+  it('acts like ordinary state when persistence is disabled', () => {
+    const { result } = renderHook(() => usePersistentState<number>(null, 2))
+
+    act(() => result.current[1](4))
+
+    expect(result.current[0]).toBe(4)
+    expect(window.localStorage.length).toBe(0)
+  })
+
   it('runs the sanitizer over the hydrated value', () => {
     writePreference('ratio', 99)
 

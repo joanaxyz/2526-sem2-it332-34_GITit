@@ -2,7 +2,10 @@ import type { MonsterRuntimeAttackEffect, MonsterRuntimeEffectLayer } from '@/sh
 
 import type { MonsterBattleEffect, MonsterEffectContext } from './types'
 import { playChargeProjectileLayer, playProjectileLayer, playTargetLayer } from './layerPlayback'
-import { CENTER_ANCHOR, FEET_ANCHOR, reduceMotion } from './spriteDom'
+import { CENTER_ANCHOR, FEET_ANCHOR, onceImpact, reduceMotion } from './spriteDom'
+
+/** A target effect lands once its bloom reaches full strength. */
+const TARGET_BLOOM_FRAC = 0.18
 
 function orientationTransform(
   orientTo: MonsterRuntimeEffectLayer['orientTo'],
@@ -21,39 +24,36 @@ function monsterLayer(ctx: MonsterEffectContext, layer: MonsterRuntimeEffectLaye
  *  skills - one shared core per depth layer - so the two never diverge. */
 export function monsterAttackEffect(effect: MonsterRuntimeAttackEffect): MonsterBattleEffect {
   return async (ctx) => {
-    if (reduceMotion()) return
-    const sizeScale = ctx.sizeScale && ctx.sizeScale > 0 ? ctx.sizeScale : 1
-    if (effect.playback === 'projectile') {
-      const charge = effect.motion === 'charge'
-      const impactAnchor = effect.placeAnchor ?? (effect.anchor === 'feet' ? FEET_ANCHOR : CENTER_ANCHOR)
-      const flip = ctx.to.x < ctx.from.x
-      await Promise.all(
-        effect.layers.map((layer) => {
-          const from = { x: ctx.from.x + layer.offsetX, y: ctx.from.y + layer.offsetY }
-          const to = { x: ctx.to.x + layer.offsetX, y: ctx.to.y + layer.offsetY }
-          const impactTo = ctx.impactTo
-            ? { x: ctx.impactTo.x + layer.offsetX, y: ctx.impactTo.y + layer.offsetY }
-            : undefined
-          const host = monsterLayer(ctx, layer)
-          if (charge) {
-            return playChargeProjectileLayer({
-              host,
-              sheet: layer.sheet,
-              scale: layer.scale,
-              from,
-              to,
-              impactTo,
-              durationMs: effect.durationMs,
-              launchStartFrame: effect.launchStartFrame,
-              impactStartFrame: effect.impactStartFrame,
-              impactAnchor,
-              impactScale: sizeScale,
-              impactBounds: effect.placeBounds,
-              opacity: layer.opacity,
-              flip,
-            })
-          }
-          return playProjectileLayer({
+    const hit = onceImpact(ctx.onImpact)
+    try {
+      await playMonsterAttack(effect, ctx, hit)
+    } finally {
+      hit()
+    }
+  }
+}
+
+async function playMonsterAttack(
+  effect: MonsterRuntimeAttackEffect,
+  ctx: MonsterEffectContext,
+  hit: () => void,
+): Promise<void> {
+  if (reduceMotion()) return
+  const sizeScale = ctx.sizeScale && ctx.sizeScale > 0 ? ctx.sizeScale : 1
+  if (effect.playback === 'projectile') {
+    const charge = effect.motion === 'charge'
+    const impactAnchor = effect.placeAnchor ?? (effect.anchor === 'feet' ? FEET_ANCHOR : CENTER_ANCHOR)
+    const flip = ctx.to.x < ctx.from.x
+    await Promise.all(
+      effect.layers.map((layer) => {
+        const from = { x: ctx.from.x + layer.offsetX, y: ctx.from.y + layer.offsetY }
+        const to = { x: ctx.to.x + layer.offsetX, y: ctx.to.y + layer.offsetY }
+        const impactTo = ctx.impactTo
+          ? { x: ctx.impactTo.x + layer.offsetX, y: ctx.impactTo.y + layer.offsetY }
+          : undefined
+        const host = monsterLayer(ctx, layer)
+        if (charge) {
+          return playChargeProjectileLayer({
             host,
             sheet: layer.sheet,
             scale: layer.scale,
@@ -61,34 +61,53 @@ export function monsterAttackEffect(effect: MonsterRuntimeAttackEffect): Monster
             to,
             impactTo,
             durationMs: effect.durationMs,
+            launchStartFrame: effect.launchStartFrame,
             impactStartFrame: effect.impactStartFrame,
             impactAnchor,
             impactScale: sizeScale,
             impactBounds: effect.placeBounds,
             opacity: layer.opacity,
-            orientation: orientationTransform(layer.orientTo, ctx),
+            flip,
+            onImpact: hit,
           })
-        }),
-      )
-      return
-    }
-    const anchor = effect.placeAnchor ?? (effect.anchor === 'feet' ? FEET_ANCHOR : CENTER_ANCHOR)
-    await Promise.all(
-      effect.layers.map((layer) =>
-        playTargetLayer({
-          host: monsterLayer(ctx, layer),
+        }
+        return playProjectileLayer({
+          host,
           sheet: layer.sheet,
-          scale: layer.scale * sizeScale,
-          to: ctx.to,
-          anchor,
+          scale: layer.scale,
+          from,
+          to,
+          impactTo,
           durationMs: effect.durationMs,
+          impactStartFrame: effect.impactStartFrame,
+          impactAnchor,
+          impactScale: sizeScale,
+          impactBounds: effect.placeBounds,
           opacity: layer.opacity,
-          offsetX: layer.offsetX,
-          offsetY: layer.offsetY,
           orientation: orientationTransform(layer.orientTo, ctx),
-          visualBounds: effect.placeBounds,
-        }),
-      ),
+          onImpact: hit,
+        })
+      }),
     )
+    return
   }
+  const anchor = effect.placeAnchor ?? (effect.anchor === 'feet' ? FEET_ANCHOR : CENTER_ANCHOR)
+  const bloom = window.setTimeout(hit, Math.round(effect.durationMs * TARGET_BLOOM_FRAC))
+  await Promise.all(
+    effect.layers.map((layer) =>
+      playTargetLayer({
+        host: monsterLayer(ctx, layer),
+        sheet: layer.sheet,
+        scale: layer.scale * sizeScale,
+        to: ctx.to,
+        anchor,
+        durationMs: effect.durationMs,
+        opacity: layer.opacity,
+        offsetX: layer.offsetX,
+        offsetY: layer.offsetY,
+        orientation: orientationTransform(layer.orientTo, ctx),
+        visualBounds: effect.placeBounds,
+      }),
+    ),
+  ).finally(() => window.clearTimeout(bloom))
 }

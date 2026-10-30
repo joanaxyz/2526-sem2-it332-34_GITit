@@ -7,7 +7,7 @@ import type { HomeSummary } from '@/features/home/types'
 
 export const previewPlayerName = 'Learner'
 
-/** Mid-tier player: Warden rank, 40+ levels, mixed retry history, 5 chapters, 12-day streak. */
+/** Mid-tier player: Warden rank, 40+ levels, mixed retry history, 5 chapters. */
 export const richHomeFixture: HomeSummary = {
   kpis: {
     scr: { value: 83, numerator: 39, denominator: 47 },
@@ -49,11 +49,6 @@ export const richHomeFixture: HomeSummary = {
   },
   completed_story_slug: null,
   completed_stories: [],
-  streak: {
-    current: 12,
-    longest: 19,
-    last_completed_on: '2026-06-11',
-  },
   perfect_clears: 26,
   mastery: 68,
   retry_trends: [
@@ -79,7 +74,6 @@ export const emptyHomeFixture: HomeSummary = {
   counts: { started: 0, completed: 0, failed: 0, abandoned: 0 },
   completed_story_slug: null,
   completed_stories: [],
-  streak: { current: 0, longest: 0, last_completed_on: null },
   perfect_clears: 0,
   mastery: 0,
   retry_trends: [],

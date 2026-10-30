@@ -1,9 +1,14 @@
+import { ClipboardPaste } from 'lucide-react'
 import { useEffect, useMemo, useRef } from 'react'
 import type { ReactNode } from 'react'
 
 import type { TerminalLine } from '@/shared/level/types'
 import { cn } from '@/shared/utils/cn'
 import { CommandInput } from './CommandInput'
+import type { CommandInputHandle } from './CommandInput'
+
+/** How close (px) to the end of the scrollback still counts as "at the bottom". */
+const BOTTOM_THRESHOLD = 8
 
 /** Lines after the most recent `clear`, like a real terminal's visible screen. */
 function linesAfterClear(lines: TerminalLine[]) {
@@ -39,33 +44,87 @@ export function TerminalPanel({
   headerAction?: ReactNode
   className?: string
 }) {
+  const panelRef = useRef<HTMLElement>(null)
   const outputRef = useRef<HTMLDivElement>(null)
+  const commandInputRef = useRef<CommandInputHandle>(null)
+  const followOutput = useRef(true)
   const visibleLines = useMemo(() => linesAfterClear(lines), [lines])
 
   useEffect(() => {
     const container = outputRef.current
     if (!container) return
+    // Leave the reader in place while they read earlier output.
+    if (!followOutput.current) return
     container.scrollTop = container.scrollHeight
   }, [visibleLines])
+
+  function trackFollow() {
+    const container = outputRef.current
+    if (!container) return
+    followOutput.current =
+      container.scrollHeight - container.scrollTop - container.clientHeight <= BOTTOM_THRESHOLD
+  }
 
   // Clicking anywhere in the scrollback focuses the prompt, like a real shell
   // (but never steal an in-progress text selection).
   function focusPrompt() {
     if (window.getSelection()?.toString()) return
-    outputRef.current?.querySelector<HTMLInputElement>('[data-command-input]')?.focus()
+    panelRef.current?.querySelector<HTMLInputElement>('[data-command-input]')?.focus()
   }
+
+  const renderedLines = visibleLines.map((line) => (
+    <div
+      key={line.id}
+      className={cn('terminal-line', `terminal-line--${line.kind}`)}
+    >
+      {line.kind === 'input' ? (
+        <span className="terminal-prompt" aria-hidden="true">
+          <span>{prompt}</span>
+          <small>$ </small>
+        </span>
+      ) : null}
+      {line.text}
+    </div>
+  ))
+  const input = (
+    <CommandInput
+      ref={commandInputRef}
+      prompt={prompt}
+      cwd={cwd}
+      disabled={disabled}
+      runDisabled={runDisabled}
+      processing={processing}
+      onSubmit={(command) => {
+        followOutput.current = true
+        onCommand(command)
+      }}
+    />
+  )
 
   return (
     <section
+      ref={panelRef}
       aria-label={title}
       className={cn('terminal-panel', className)}
     >
       <div className="terminal-titlebar workspace-panel-header">
         <span className="panel-eyebrow">{title}</span>
-        {headerAction}
+        <div className="terminal-actions">
+          {headerAction}
+          <button
+            type="button"
+            className="terminal-paste"
+            aria-label="Paste from clipboard"
+            title="Paste from clipboard"
+            disabled={disabled}
+            onClick={() => void commandInputRef.current?.paste()}
+          >
+            <ClipboardPaste aria-hidden="true" />
+            <span>Paste</span>
+          </button>
+        </div>
       </div>
 
-      {/* The prompt is the last line of the stream, not a separate bar. */}
       <div
         className="terminal-output app-scrollbar"
         ref={outputRef}
@@ -73,29 +132,10 @@ export function TerminalPanel({
         aria-live="polite"
         aria-relevant="additions text"
         onClick={focusPrompt}
+        onScroll={trackFollow}
       >
-        {visibleLines.map((line) => (
-          <div
-            key={line.id}
-            className={cn('terminal-line', `terminal-line--${line.kind}`)}
-          >
-            {line.kind === 'input' ? (
-              <span className="terminal-prompt" aria-hidden="true">
-                <span>{prompt}</span>
-                <small>$ </small>
-              </span>
-            ) : null}
-            {line.text}
-          </div>
-        ))}
-        <CommandInput
-          prompt={prompt}
-          cwd={cwd}
-          disabled={disabled}
-          runDisabled={runDisabled}
-          processing={processing}
-          onSubmit={onCommand}
-        />
+        {renderedLines}
+        {input}
       </div>
     </section>
   )

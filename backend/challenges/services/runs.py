@@ -1,15 +1,18 @@
 from django.db import IntegrityError, transaction
+from django.utils import timezone
 
 from challenges.models import ChallengeRun, ChallengeTrial
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
+    SESSION_STATUS_ABANDONED,
+    SESSION_STATUS_COMPLETED,
+    SESSION_STATUS_FAILED,
     SESSION_STATUS_STARTED,
 )
 from common.exceptions import Conflict, Locked
 from common.runtime import discard_started_run
 from progress.models import (
-    AdventureLevelCompletion,
     ChallengeLevelCompletion,
     ChallengeTrialCompletion,
 )
@@ -21,7 +24,6 @@ RUN_HYDRATE_SELECT_RELATED = (
     "challenge_trial__challenge_level",
     "challenge_trial__challenge_level__chapter",
     "challenge_trial__challenge_level__chapter__story",
-    "challenge_trial__challenge_level__source_content_definition",
     "selected_variant",
     "selected_variant__trial",
     "prior_run",
@@ -82,6 +84,15 @@ class ChallengeRunService:
         if active and (not prior_run or active.id != prior_run.id):
             self.discard(run=active)
 
+        if prior_run is None and not is_replay:
+            latest = (
+                ChallengeRun.objects.filter(player=player, challenge_trial=trial, is_replay=False)
+                .order_by("-started_at", "-id")
+                .first()
+            )
+            if latest and latest.status == SESSION_STATUS_FAILED and not latest.retry_runs.exists():
+                prior_run = latest
+
         selector = VariantSelectionService()
         published_variants = list(
             trial.variants.filter(is_published=True).order_by("semantic_key", "id")
@@ -104,10 +115,28 @@ class ChallengeRunService:
             raise Locked("This challenge trial has no published variants.")
 
         retry_index = prior_run.retry_index + 1 if prior_run else 0
+        # Playing again after a clear starts a fresh scoring attempt. Failed
+        # replays still extend their retry chain for star grading.
+        if is_replay and prior_run and prior_run.status == SESSION_STATUS_COMPLETED:
+            retry_index = 0
         prior_reference = prior_run
         if prior_run and prior_run.status == SESSION_STATUS_STARTED:
+            if is_replay and not prior_run.steps.exists():
+                retry_index = prior_run.retry_index
             self.discard(run=prior_run)
             prior_reference = None
+
+        if not is_replay:
+            # Persisted history owns grading; omitted or stale prior IDs must
+            # never restore retry allowance. Empty discards do not count.
+            attempts = ChallengeRun.objects.filter(
+                player=player, challenge_trial=trial, is_replay=False
+            )
+            retry_index = attempts.filter(status=SESSION_STATUS_FAILED).count() + (
+                attempts.filter(status=SESSION_STATUS_ABANDONED, steps__isnull=False)
+                .distinct()
+                .count()
+            )
 
         try:
             run = ChallengeRun.objects.create(
@@ -137,9 +166,14 @@ class ChallengeRunService:
         return queryset.first()
 
     def _ensure_unlocked(self, *, player, trial: ChallengeTrial) -> None:
+        from curriculum.selectors.adventure_access import chapter_tiers_cleared
+
         self._ensure_previous_challenge_level_complete(player=player, trial=trial)
+        if chapter_tiers_cleared(player=player, chapter_id=trial.chapter.id) is False:
+            raise Locked(
+                "Clear every tier of every level in this chapter to open its Challenge Gate."
+            )
         if trial.difficulty == DIFFICULTY_EASY:
-            self._ensure_adventure_complete(player=player, chapter=trial.chapter)
             return
         previous = DIFFICULTY_EASY if trial.difficulty == DIFFICULTY_MEDIUM else DIFFICULTY_MEDIUM
         previous_trial = ChallengeTrial.objects.filter(
@@ -174,28 +208,6 @@ class ChallengeRunService:
         ):
             raise Locked("Complete the previous challenge level first.")
 
-    def _ensure_adventure_complete(self, *, player, chapter) -> None:
-        from adventures.models import AdventureLevel
-
-        required_level_ids = set(
-            AdventureLevel.objects.filter(
-                chapter=chapter,
-                is_published=True,
-                is_required=True,
-            ).values_list("id", flat=True)
-        )
-        if not required_level_ids:
-            return
-        completed_level_ids = set(
-            AdventureLevelCompletion.objects.filter(
-                player=player,
-                adventure_level_id__in=required_level_ids,
-            ).values_list("adventure_level_id", flat=True)
-        )
-        if required_level_ids <= completed_level_ids:
-            return
-        raise Locked("Complete this chapter's required Adventure levels to unlock its challenges.")
-
     def _replay_variant(self, *, player, trial: ChallengeTrial):
         completion = (
             ChallengeTrialCompletion.objects.select_related("challenge_run__selected_variant")
@@ -206,5 +218,15 @@ class ChallengeRunService:
             raise Locked("Free play is available only after completing this challenge trial.")
         return completion.challenge_run.selected_variant
 
+    @transaction.atomic
     def discard(self, *, run: ChallengeRun) -> bool:
-        return discard_started_run(run)
+        """Keep submitted attempts as retry evidence; empty starts stay free."""
+        locked = ChallengeRun.objects.select_for_update().filter(pk=run.pk).first()
+        if locked is None or locked.status != SESSION_STATUS_STARTED:
+            return False
+        if not locked.steps.exists():
+            return discard_started_run(locked)
+        locked.status = SESSION_STATUS_ABANDONED
+        locked.ended_at = timezone.now()
+        locked.save(update_fields=["status", "ended_at"])
+        return True

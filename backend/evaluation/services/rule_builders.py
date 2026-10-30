@@ -54,6 +54,12 @@ def _command_rules(spec: dict) -> list[dict]:
 def _branch_rules(spec: dict) -> list[dict]:
     return [
         *_presence_bool(spec, "repository_initialized", "repository_initialized"),
+        *(
+            [{"type": "repository_root_equals", "path": spec["repository_root"]}]
+            if "repository_root" in spec
+            else []
+        ),
+        *([{"type": "config_equals", "values": spec["config"]}] if spec.get("config") else []),
         *_each(spec, "branch_exists", "branch_exists", "branch"),
         *_each(spec, "branch_absent", "branch_absent", "branch"),
         *_pairs(spec, "branch_points_to", "branch_points_to", "branch", "commit"),

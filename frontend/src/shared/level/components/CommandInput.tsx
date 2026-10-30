@@ -1,9 +1,10 @@
-import { Check, ClipboardPaste } from 'lucide-react'
-import { useEffect, useRef, useState } from 'react'
-import type { FormEvent, KeyboardEvent } from 'react'
+import { useEffect, useImperativeHandle, useRef, useState } from 'react'
+import type { FormEvent, KeyboardEvent, Ref } from 'react'
 
-// A bare prompt line, like the reference mock: Enter submits, no button chrome.
+export type CommandInputHandle = { paste: () => Promise<void> }
+
 export function CommandInput({
+  ref,
   prompt,
   cwd,
   disabled,
@@ -11,6 +12,7 @@ export function CommandInput({
   processing,
   onSubmit,
 }: {
+  ref?: Ref<CommandInputHandle>
   prompt: string
   /** Working directory shown after the user, as `~/<folder>` (`~` is the project root). */
   cwd?: string
@@ -85,6 +87,8 @@ export function CommandInput({
     }
   }
 
+  useImperativeHandle(ref, () => ({ paste: pasteFromClipboard }))
+
   function submit(event: FormEvent) {
     event.preventDefault()
     if (disabled || runDisabled) return
@@ -139,19 +143,13 @@ export function CommandInput({
         onKeyDown={handleKeyDown}
         disabled={disabled}
         autoFocus
-        placeholder={processing ? 'Processing command' : 'Type a git or shell command'}
+        autoComplete="off"
+        autoCapitalize="none"
+        spellCheck={false}
+        enterKeyHint="enter"
+        aria-busy={processing || undefined}
+        placeholder={processing ? 'Processing command…' : undefined}
       />
-      <button
-        type="button"
-        className="command-input-paste"
-        aria-label="Paste from clipboard"
-        title="Paste from clipboard"
-        disabled={disabled}
-        onClick={pasteFromClipboard}
-      >
-        {pasteStatus === 'pasted' ? <Check aria-hidden="true" /> : <ClipboardPaste aria-hidden="true" />}
-        <span>{pasteStatus === 'pasted' ? 'Pasted' : 'Paste'}</span>
-      </button>
       <span className="sr-only" role="status" aria-live="polite">
         {pasteStatus === 'pasted' ? 'Pasted into command.' : null}
         {pasteStatus === 'empty' ? 'Clipboard is empty.' : null}

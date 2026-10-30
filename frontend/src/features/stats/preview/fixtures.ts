@@ -5,7 +5,7 @@
 import type { StatsSummary } from '@/features/stats/types'
 import type { ActivityWindow } from '@/features/stats/utils/activityWindow'
 
-/** Mirrors the home preview player: 43 levels, 12-day streak, 1240 coins. */
+/** Mirrors the home preview player: 43 levels, 5 gate trials, 1240 coins. */
 export const richStatsFixture: StatsSummary = {
   skill_profile: [
     { key: 'git-init', label: 'git init', hint: 'Create Git metadata in the current directory or a named directory.', value: 100, command: 'git init' },
@@ -64,12 +64,13 @@ export const richStatsFixture: StatsSummary = {
     levels_completed: 43,
     finish_rate: { value: 76, numerator: 43, denominator: 57 },
     accuracy: 91,
-    boss_floors: { value: 4, scope: 'hard challenges beaten' },
+    hard_tier_clears: { value: 4, scope: 'hard challenges beaten' },
     comebacks: { value: 6, scope: 'retries turned into wins' },
     perfect_clears: 12,
-    day_streak: 12,
-    longest_streak: 19,
+    gate_trial_clears: 5,
+    hard_gate_trial_clears: 1,
     gitcoins: 1240,
+    gitcoins_earned: 2165,
     commands_run: 1187,
   },
 }
@@ -102,12 +103,13 @@ export const emptyStatsFixture: StatsSummary = {
     levels_completed: 0,
     finish_rate: { value: null, numerator: 0, denominator: 0 },
     accuracy: null,
-    boss_floors: { value: 0, scope: 'hard challenges beaten' },
+    hard_tier_clears: { value: 0, scope: 'hard challenges beaten' },
     comebacks: { value: 0, scope: 'retries turned into wins' },
     perfect_clears: 0,
-    day_streak: 0,
-    longest_streak: 0,
+    gate_trial_clears: 0,
+    hard_gate_trial_clears: 0,
     gitcoins: 0,
+    gitcoins_earned: 0,
     commands_run: 0,
   },
 }

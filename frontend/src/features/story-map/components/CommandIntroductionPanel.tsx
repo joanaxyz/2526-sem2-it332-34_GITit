@@ -1,38 +1,58 @@
 import { Check, CircleAlert } from 'lucide-react'
-import { useEffect, useId, useState, useSyncExternalStore } from 'react'
+import { useEffect, useId, useState } from 'react'
 import type { CSSProperties, ReactNode } from 'react'
 
 import type { CommandIntroduction } from '@/features/story-map/api/commandIntroductionsApi'
 import { RepositoryChangeDiagram } from '@/features/story-map/components/RepositoryChangeDiagram'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { useCommandIntroduction } from '@/features/story-map/hooks/useCommandIntroduction'
+import { useMediaQuery } from '@/shared/utils/useMediaQuery'
 import { commandFamilyIcon, repositoryChangeIcon } from '@/features/story-map/utils/commandIntroductionIcons'
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
+import { COMMAND_GUIDE_LAYOUT_KEY } from '@/shared/level/workspaceKeys'
 
 type RepositoryChange = CommandIntroduction['needs'][number]
-type Concept = CommandIntroduction['concepts'][number]
 type Tab = 'command' | 'change'
 
 // Room for the command card and the "What changes" card side by side, with
 // the workspace still visible around them. Below this they share one card.
 const WIDE_QUERY = '(min-width: 1180px) and (min-height: 640px)'
-// The scenario and project files stay readable while a guide is open.
-const CONTEXT_REGIONS = ['[data-tour-target="level-story"]', '[data-tour-target="project-files"]']
+const DEFAULT_PANE_LAYOUT = {
+  main: { width: 454, height: 410 },
+  aside: { width: 426, height: 396 },
+  gap: 52,
+  top: 24,
+}
+// The scenario, project files and tips stay readable while a guide is open.
+// (Its chat launcher sits above the veil instead: see tutor.css.)
+const CONTEXT_REGIONS = [
+  '[data-tour-target="level-story"]',
+  '[data-tour-target="project-files"]',
+  '[data-tour-target="workspace-tips"]',
+]
 const FEEDBACK_REGIONS = [...CONTEXT_REGIONS, '[data-tour-target="terminal"]']
+// The guide's chat window, its launcher and the terminal belong with the guide: clicks there keep it open.
+const CLOSE_ON_OUTSIDE_CLICK = {
+  except: ['.tutor-window', '[data-mascot-launcher="guide-tutor"]', '[data-tour-target="terminal"]'],
+}
 
 /**
- * "Command guide": introduces the one new command form, or technique, the
- * repository needs next.
+ * "Command guide": introduces the command form the repository needs next, in
+ * the scenario that teaches it.
  *
- * It explains the command part by part, shows what it will change as a
- * diagram, and defines new words the first times they come up. Wide screens
+ * Git-It, the guide mascot, speaks it: the card is its speech bubble, pointing
+ * at the mascot beside it, as the companion sits beside its chat.
+ * It explains the command part by part and shows what it will change as a
+ * diagram; new words and techniques are tips beside it. Wide screens
  * show the guide as one frame holding the explanation and the change as their
  * own cards, each resized on its own; narrower screens use tabs in one card.
  *
- * Before a command it has no buttons: it stays beside the terminal while the
- * learner types and turns into feedback once the command runs. Hiding it (×)
- * is the only way to put it away; the command-bar book can bring it back.
- * After a command, "Got it" records the guide (and its new words) as done.
+ * Before a command its only button is close (×): it stays beside the terminal
+ * while the learner types and turns into feedback once the command runs. Close,
+ * Escape, or a click outside collapses it into the mascot launcher, which
+ * brings it back. After a command, "Got it" records the guide as done.
+ * Its AI chat is a launcher of its own in the workspace (GuideTutor, beside
+ * the Guide launcher), so it never covers the card.
  */
 export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss }: {
   run: TierRun
@@ -44,10 +64,10 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
   const wide = useMediaQuery(WIDE_QUERY)
   const [tab, setTab] = useState<Tab>('command')
   const introduction = tutor.phase === 'introduction'
+  // Feedback waits for "Got it"; introductions and replays can be put away.
+  const dismissible = replay || introduction
   const missed = tutor.verdict === 'incorrect'
   const form = tutor.command_form
-  const primer = tutor.concepts.find((concept) => concept.key === 'commands')
-  const words = tutor.concepts.filter((concept) => concept.key !== 'commands')
   const focusTerminal = () => {
     requestAnimationFrame(() => document.querySelector<HTMLInputElement>('[data-command-input]')?.focus())
   }
@@ -57,12 +77,11 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
 
   const error = lesson.error ? <p className="command-intro__error" role="alert">{lesson.error}</p> : null
   const changeTitle = 'What changes'
-  const hasChange = (introduction || missed) && (tutor.needs.length > 0 || words.length > 0)
+  const hasChange = (introduction || missed) && tutor.needs.length > 0
   const change = hasChange ? (
     <>
-      <RepositoryChangeDiagram changes={tutor.needs} repository={run.repository_state} />
-      <ChangeList label={introduction ? 'Your repository needs' : 'It will'} changes={tutor.needs} />
-      <Words concepts={words} />
+      <RepositoryChangeDiagram changes={tutor.needs} repository={undefined} />
+      <ChangeList label="What this command does" changes={tutor.needs} />
     </>
   ) : null
 
@@ -70,7 +89,6 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
   if (introduction) {
     command = (
       <>
-        {primer ? <Primer concept={primer} /> : null}
         <CommandSyntax usage={form.usage_form} />
         <Anatomy parts={tutor.anatomy} />
         {form.summary && !sameWords(form.summary, tutor.title) ? (
@@ -85,12 +103,7 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
     command = (
       <>
         <Verdict tone="miss">{tutor.explanation}</Verdict>
-        {tutor.example_command ? (
-          <section className="command-intro__section" aria-label="Command to try">
-            <h3 className="command-intro__label">Try this</h3>
-            <code className="command-intro__example">{tutor.example_command}</code>
-          </section>
-        ) : <CommandSyntax usage={form.usage_form} />}
+        <CommandSyntax usage={form.usage_form} />
         {error}
       </>
     )
@@ -135,16 +148,20 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
       finishLabel={lesson.pending ? 'Saving…' : 'Got it'}
       finishDisabled={lesson.pending}
       cardClassName="command-intro"
-      skipLabel={replay ? 'Close command guide' : 'Hide command guide'}
+      skipLabel="Close command guide"
       skipIconOnly
-      showSkip={replay || introduction}
+      showSkip={dismissible}
+      closeOnOutsideClick={dismissible ? CLOSE_ON_OUTSIDE_CLICK : undefined}
       showActions={!replay && !introduction}
       focusCard={replay || !introduction}
       showProgress={false}
+      showSpeaker
       transformable
+      transformPreferenceKey={COMMAND_GUIDE_LAYOUT_KEY}
+      paneLayout={DEFAULT_PANE_LAYOUT}
       paneLabels={{ main: 'command card', aside: `${changeTitle.toLowerCase()} card` }}
       reveal={introduction ? CONTEXT_REGIONS : FEEDBACK_REGIONS}
-      collapseTarget="[data-command-guide-launcher]"
+      collapseTarget='[data-mascot-launcher="command-guide"]'
       aside={split ? (
         <section className="command-intro__aside" aria-label={changeTitle}>
           <h3 className="command-intro__aside-title">{changeTitle}</h3>
@@ -152,17 +169,13 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
         </section>
       ) : undefined}
       onClose={(reason) => {
-        if (replay) {
-          onDismiss()
-          focusTerminal()
+        if (reason === 'finish') {
+          void lesson.complete().then((completed) => { if (completed) focusTerminal() })
           return
         }
-        if (reason === 'skip') {
-          onDismiss()
-          focusTerminal()
-        } else {
-          void lesson.complete().then((completed) => { if (completed) focusTerminal() })
-        }
+        onDismiss()
+        // After a click elsewhere, focus stays where the learner clicked.
+        if (reason === 'skip') focusTerminal()
       }}
     />
   )
@@ -171,18 +184,6 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
 function sameWords(left: string, right: string) {
   const words = (text: string) => text.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim()
   return words(left) === words(right)
-}
-
-function useMediaQuery(query: string) {
-  return useSyncExternalStore(
-    (notify) => {
-      const list = window.matchMedia?.(query)
-      list?.addEventListener('change', notify)
-      return () => list?.removeEventListener('change', notify)
-    },
-    () => window.matchMedia?.(query).matches ?? false,
-    () => false,
-  )
 }
 
 function GuideTabs({ tab, onTab, tabs }: {
@@ -225,14 +226,6 @@ function GuideTabs({ tab, onTab, tabs }: {
   )
 }
 
-function Primer({ concept }: { concept: Concept }) {
-  return (
-    <p className="command-intro__primer">
-      <strong>{concept.title}.</strong> {concept.text}
-    </p>
-  )
-}
-
 /** The command read part by part: git, the command, then each option and slot. */
 function Anatomy({ parts }: { parts: CommandIntroduction['anatomy'] }) {
   if (parts.length === 0) return null
@@ -245,23 +238,6 @@ function Anatomy({ parts }: { parts: CommandIntroduction['anatomy'] }) {
         </div>
       ))}
     </dl>
-  )
-}
-
-function Words({ concepts }: { concepts: readonly Concept[] }) {
-  if (concepts.length === 0) return null
-  return (
-    <section className="command-intro__section" aria-label="Words to know">
-      <h3 className="command-intro__label">Words to know</h3>
-      <dl className="command-intro__words">
-        {concepts.map((concept) => (
-          <div key={concept.key}>
-            <dt>{concept.title}</dt>
-            <dd>{concept.text}</dd>
-          </div>
-        ))}
-      </dl>
-    </section>
   )
 }
 

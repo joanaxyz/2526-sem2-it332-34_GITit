@@ -1,12 +1,10 @@
 import { ChevronDown, Lock } from 'lucide-react'
 import { type CSSProperties, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { Link } from 'react-router-dom'
 
 import type { LearningChapter } from '@/features/story-map/types'
 import { chapterTitle } from '@/features/story-map/utils/storyMapChapter'
 import { GamePanel } from '@/shared/components/GamePanel'
-import { STORIES_ROUTE } from '@/shared/navigation/routes'
 
 export function StoryChapterList({
   chapters,
@@ -140,7 +138,6 @@ export function StoryChapterList({
           <ChevronDown aria-hidden="true" />
         </button>
       </div>
-      <Link className="story-chapter-all-stories" to={STORIES_ROUTE}>All stories</Link>
       {open && menuPosition ? createPortal(
         <div
           ref={menuRef}

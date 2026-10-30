@@ -14,3 +14,4 @@ class AdventureLevelTierRunStartSerializer(serializers.Serializer):
     )
     prior_run_id = serializers.IntegerField(required=False, allow_null=True)
     replay = serializers.BooleanField(required=False, default=False)
+    transfer = serializers.BooleanField(required=False, default=False)

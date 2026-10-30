@@ -29,6 +29,15 @@ export function commandsMatch(a: string, b: string): boolean {
   return normalizeCommand(a) === normalizeCommand(b)
 }
 
+/** Locate the first unsafe piece using the same equivalence rules as grading. */
+export function firstWrongBlock(placed: string[], expected: string[], variant: 'tokens' | 'steps'): number | null {
+  if (variant === 'tokens' && commandsMatch(placed.join(' '), expected.join(' '))) return null
+  const index = expected.findIndex((value, i) => placed[i] === undefined ||
+    (variant === 'steps' ? placed[i] !== value : !commandsMatch(placed[i], value)))
+  if (index !== -1) return index
+  return placed.length > expected.length ? expected.length : null
+}
+
 function expectedFor(card: DrillCard, rung: DrillRung): string {
   if (rung === 'read') return card.intent
   if (rung === 'complete') return card.blank?.answer ?? ''

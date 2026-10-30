@@ -21,7 +21,7 @@ export const SUPPORTED_OPTIONS: Record<string, Set<string>> = {
   checkout: new Set(['--ours', '--theirs', '-b']),
   config: new Set(['--global', '--list', '-l', '--get']),
   fetch: new Set(['--prune', '-p', '--all']),
-  'cherry-pick': new Set(['--no-commit', '-n', '--abort']),
+  'cherry-pick': new Set(['--no-commit', '-n', '--abort', '--continue', '-x']),
   reset: new Set(['--soft', '--mixed', '--hard']),
   revert: new Set(['--no-edit']),
   switch: new Set(['-c', '--create', '--detach']),
@@ -83,9 +83,6 @@ export function validateCommand(parsed: ParsedGitCommand) {
     case 'commit':
       if (optionValues(parsed, '-m').length > 1) return 'error: only one -m option is supported in this session.'
       if (hasOption(parsed, '--allow-empty')) return unknownOptionMessage(parsed.subcommand, '--allow-empty')
-      if (hasOption(parsed, '--no-edit') && !hasOption(parsed, '--amend')) {
-        return "fatal: options '--no-edit' and '--amend' must be used together"
-      }
       if (parsed.pathspecs.length) return 'fatal: paths with git commit are not supported in this simulator'
       return null
     case 'remote':
@@ -116,14 +113,20 @@ export function validateCommand(parsed: ParsedGitCommand) {
     case 'config':
       if (hasOption(parsed, '--list') || hasOption(parsed, '-l')) return parsed.args.length ? 'usage: git config [--list|-l]' : null
       if (hasOption(parsed, '--get')) return parsed.args.length === 1 ? null : 'usage: git config --get <key>'
-      if (!hasOption(parsed, '--global')) return 'error: expected git config --global <key> <value>, git config --get <key>, or git config --list'
-      return parsed.args.length === 2 ? null : 'usage: git config --global <key> <value>'
-    case 'fetch':
-      return parsed.args.length > 1 ? 'usage: git fetch [--prune] [<remote>]' : null
+      return parsed.args.length === 2 ? null : 'usage: git config [--global] <key> <value>'
     case 'cherry-pick':
-      if (hasOption(parsed, '--abort')) return parsed.args.length || hasOption(parsed, '--no-commit') || hasOption(parsed, '-n') ? 'fatal: --abort cannot be combined with commit arguments' : null
+      if (hasOption(parsed, '--abort') && hasOption(parsed, '--continue')) {
+        return 'fatal: --abort and --continue cannot be used together'
+      }
+      if (hasOption(parsed, '--abort') || hasOption(parsed, '--continue')) {
+        return parsed.args.length || hasOption(parsed, '--no-commit') || hasOption(parsed, '-n')
+          ? 'fatal: --abort/--continue cannot be combined with commit arguments'
+          : null
+      }
       if (hasOption(parsed, '--no-commit') && hasOption(parsed, '-n')) return 'error: use only one no-commit option'
       return parsed.args.length === 1 ? null : 'usage: git cherry-pick [--no-commit] <commit>'
+    case 'fetch':
+      return parsed.args.length > 1 ? 'usage: git fetch [--prune] [<remote>]' : null
     case 'reset':
       if (!hasOption(parsed, '--soft') && !hasOption(parsed, '--mixed') && !hasOption(parsed, '--hard')) return 'error: this simulator only supports git reset --hard <target>'
       return parsed.args.length === 1 ? null : 'usage: git reset --hard <target>'

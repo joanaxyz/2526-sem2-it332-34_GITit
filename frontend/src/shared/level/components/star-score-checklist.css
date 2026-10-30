@@ -1,0 +1,136 @@
+.star-checklist {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  color: hsl(var(--foreground));
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  text-shadow: none;
+}
+
+.star-checklist__heading {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.25rem 1rem;
+}
+
+.star-checklist__heading h4 {
+  margin: 0;
+  font-size: var(--text-base);
+  font-weight: 700;
+}
+
+.star-checklist__heading > span,
+.star-checklist__detail,
+.star-checklist__footnote {
+  color: hsl(var(--foreground) / 0.78);
+}
+
+.star-checklist strong,
+.star-checklist__state {
+  font-family: var(--font-mono);
+}
+
+.star-checklist p.star-checklist__summary {
+  margin: 0.5rem 0 0.75rem;
+}
+
+.star-checklist__summary.is-reduced {
+  color: hsl(var(--warning));
+}
+
+.star-checklist ul {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 0.75rem;
+}
+
+.star-checklist__row {
+  display: grid;
+  grid-template-columns: 1rem minmax(0, 1fr) auto;
+  gap: 0.6rem;
+  align-items: start;
+  padding: 0.65rem 0;
+  border-top: 1px solid hsl(var(--foreground) / 0.14);
+}
+
+.star-checklist__icon {
+  width: 1rem;
+  height: 1rem;
+  margin-top: 0.15rem;
+}
+
+.star-checklist__row.is-earned .star-checklist__icon,
+.star-checklist__row.is-earned .star-checklist__state {
+  color: hsl(var(--success));
+}
+
+.star-checklist__row.is-missed .star-checklist__icon,
+.star-checklist__row.is-missed .star-checklist__state {
+  color: hsl(var(--warning));
+}
+
+.star-checklist__label {
+  font-weight: 600;
+}
+
+.star-checklist .star-checklist__row p,
+.star-checklist p.star-checklist__footnote,
+.star-checklist p.star-checklist__saved {
+  margin: 0;
+}
+
+.star-checklist__detail,
+.star-checklist__state,
+.star-checklist__footnote,
+.star-checklist__saved {
+  font-size: var(--text-xs);
+}
+
+.star-checklist__state {
+  padding-top: 0.1rem;
+  white-space: nowrap;
+}
+
+.star-checklist__rules summary {
+  min-height: 44px;
+  padding-block: 0.65rem;
+  color: hsl(var(--foreground) / 0.85);
+  cursor: pointer;
+  font-size: var(--text-xs);
+}
+
+.star-checklist__rules summary:hover {
+  color: hsl(var(--foreground));
+}
+
+.star-checklist__rules summary:focus-visible {
+  outline: 2px solid hsl(var(--primary));
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+.star-checklist p.star-checklist__footnote + .star-checklist__footnote,
+.star-checklist p.star-checklist__saved {
+  margin-top: 0.5rem;
+}
+
+.game-outcome .star-checklist {
+  margin-top: 1.25rem;
+  padding: 1rem;
+  background: hsl(var(--background) / 0.85);
+  border-radius: var(--radius-sm);
+}
+
+@media (max-width: 420px) {
+  .star-checklist__row {
+    grid-template-columns: 1rem minmax(0, 1fr);
+  }
+
+  .star-checklist__state {
+    grid-column: 2;
+    padding-top: 0;
+  }
+}

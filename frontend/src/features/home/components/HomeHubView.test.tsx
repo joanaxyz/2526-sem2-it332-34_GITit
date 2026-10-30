@@ -173,6 +173,7 @@ describe('HomeHubView contract', () => {
       error: null,
     })
     mocks.catalog.mockResolvedValue(catalog())
+    mocks.playEffect.mockResolvedValue(undefined)
     mocks.effectForSkill.mockReturnValue(mocks.playEffect)
     mocks.effectPlacementForSkill.mockReturnValue({ playback: 'projectile', anchor: 'feet' })
   })
@@ -181,6 +182,39 @@ describe('HomeHubView contract', () => {
     cleanup()
     vi.useRealTimers()
     window.sessionStorage.clear()
+  })
+
+  it('shares earned knowledge through the mascot and dismisses it when the Home view changes', () => {
+    renderHub()
+    fireEvent.click(screen.getByRole('button', { name: 'Learning guide: share a Git tip' }))
+    expect(within(screen.getByRole('region', { name: 'Git knowledge' })).getByRole('status')).toHaveTextContent('Read the repository timeline.')
+    openView('Progress')
+    expect(screen.queryByRole('region', { name: 'Git knowledge' })).not.toBeInTheDocument()
+  })
+
+  it('cycles past the init summary through learned options and arguments before anatomy', () => {
+    mocks.useLearnedSkills.mockReturnValue({ data: [{
+      ...learnedSkills[0],
+      base_command: 'git init',
+      summary: 'Create Git metadata.',
+      knowledge: [
+        { id: 'form:1:branch', kind: 'option', command: 'git init', title: 'Initial branch', token: '-b', syntax: 'git init -b <branch>', text: 'Name the first branch.', when_to_use: 'Choose the initial branch.' },
+        { id: 'form:2:directory', kind: 'argument', command: 'git init', title: 'Directory', token: '<directory>', syntax: 'git init <directory>', text: 'Choose where the repository is created.', when_to_use: 'Initialize another directory.' },
+      ],
+    }], isLoading: false })
+    renderHub()
+    fireEvent.click(screen.getByRole('button', { name: 'Learning guide: share a Git tip' }))
+    const tip = () => within(screen.getByRole('region', { name: 'Git knowledge' })).getByRole('status')
+    expect(tip()).toHaveTextContent('Create Git metadata.')
+    fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))
+    expect(tip()).toHaveTextContent('git init -b <branch>')
+    expect(tip()).toHaveTextContent('Choose the initial branch.')
+    fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))
+    expect(tip()).toHaveTextContent('git init <directory>')
+    fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))
+    expect(tip()).toHaveTextContent('Parts of a Git command')
+    fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))
+    expect(tip()).toHaveTextContent('Create Git metadata.')
   })
 
   it('treats an invalid view as Profile and replaces only the view parameter', () => {
@@ -400,7 +434,7 @@ describe('HomeHubView contract', () => {
     const profile = profileRegion()
     // The ladder used to sit behind a tab; it is always on screen now, so a
     // companion failure can never be the reason a rank is not visible.
-    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
+    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
 
     mocks.usePlayerLoadout.mockReturnValue({
       companion: COMPANIONS.blue,
@@ -412,7 +446,7 @@ describe('HomeHubView contract', () => {
     })
     await act(async () => router.navigate('/home?view=profile&refresh=error', { replace: true }))
 
-    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
+    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
     expect(within(profile).getAllByRole('alert')[0]).toHaveTextContent('Companion unavailable')
   })
 
@@ -421,14 +455,14 @@ describe('HomeHubView contract', () => {
     const profile = profileRegion()
 
     fireEvent.click(within(profile).getByRole('button', { name: /attack with inspect history/i }))
-    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
+    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
 
     openView('Progress')
     expect(profileWorkspace()).toHaveAttribute('hidden')
     openView('Profile')
 
     expect(profileWorkspace()).not.toHaveAttribute('hidden')
-    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
+    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
     expect(within(profile).getByRole('button', { name: /attack with inspect history/i })).toHaveClass('is-selected')
   })
 
@@ -437,7 +471,9 @@ describe('HomeHubView contract', () => {
     const profile = profileRegion()
 
     expect(within(profile).getByText('Learner')).toBeInTheDocument()
-    expect(within(profile).getByText('Arcane Adept of the Fifth Chapter')).toBeInTheDocument()
+    // Levels and chapters are not gated, so the title is the bare rank name.
+    expect(within(profile).getByText('Learner').closest('.home-profile-name')).toHaveTextContent('Arcane Adept')
+    expect(within(profile).queryByText(/of the .* Chapter/)).not.toBeInTheDocument()
 
     // Each of these is stated once now that both halves render together: the
     // clear counts sit under the crest, the meter sits in it.
@@ -570,7 +606,7 @@ describe('HomeHubView contract', () => {
     })
     await act(async () => router.navigate('/home?view=profile&refresh=1', { replace: true }))
 
-    expect(within(profile).getByText('Arcane Adept')).toBeInTheDocument()
+    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
     expect(screen.getByLabelText(/white idle animation/i)).toBeInTheDocument()
   })
 })

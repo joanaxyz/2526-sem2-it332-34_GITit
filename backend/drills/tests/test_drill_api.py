@@ -43,7 +43,7 @@ def result_body(**overrides) -> dict:
 
 
 def test_plan_returns_cards_and_a_zeroed_progress_row(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     client, _player = make_client(django_user_model)
     level = first_drillable_level()
@@ -64,7 +64,7 @@ def test_drill_does_not_require_a_companion(db, django_user_model):
     """Unlike an adventure run: a drill is recall practice on text, not a
     battle, so the companion gate would only lock beginners out of the rung
     that exists to help them."""
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     client, player = make_client(django_user_model)
     level = first_drillable_level()
@@ -76,7 +76,7 @@ def test_drill_does_not_require_a_companion(db, django_user_model):
 
 
 def test_recording_a_cleared_session_marks_the_level_drilled(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     client, player = make_client(django_user_model)
     level = first_drillable_level()
@@ -98,7 +98,7 @@ def test_recording_a_cleared_session_marks_the_level_drilled(db, django_user_mod
 
 
 def test_best_accuracy_keeps_the_high_water_mark(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     client, _player = make_client(django_user_model)
     level = first_drillable_level()
@@ -115,7 +115,7 @@ def test_best_accuracy_keeps_the_high_water_mark(db, django_user_model):
 
 
 def test_an_abandoned_session_counts_but_does_not_clear(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     client, _player = make_client(django_user_model)
     level = first_drillable_level()
@@ -136,7 +136,7 @@ def test_an_abandoned_session_counts_but_does_not_clear(db, django_user_model):
 def test_reported_weak_spots_are_intersected_with_the_levels_real_forms(db, django_user_model):
     """Stored vocabulary stays authored: a client cannot write arbitrary
     strings into the practice readout."""
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     client, _player = make_client(django_user_model)
     level = first_drillable_level()
@@ -152,7 +152,7 @@ def test_reported_weak_spots_are_intersected_with_the_levels_real_forms(db, djan
 
 
 def test_more_correct_than_answered_is_rejected(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     client, _player = make_client(django_user_model)
     level = first_drillable_level()
@@ -168,8 +168,7 @@ def test_more_correct_than_answered_is_rejected(db, django_user_model):
 
 
 def test_a_locked_level_cannot_be_drilled(db, django_user_model):
-    call_command("seed_curriculum")
-    call_command("seed_legacy_modules")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     client, _player = make_client(django_user_model)
     locked = (
@@ -187,7 +186,7 @@ def test_a_locked_level_cannot_be_drilled(db, django_user_model):
 
 
 def test_an_unknown_level_is_a_404(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     client, _player = make_client(django_user_model)
 
@@ -195,7 +194,7 @@ def test_an_unknown_level_is_a_404(db, django_user_model):
 
 
 def test_the_chapter_overview_reports_drill_state_per_level(db, django_user_model):
-    call_command("seed_curriculum")
+    call_command("seed_curriculum", verbosity=0)
     call_command("seed_drills")
     client, _player = make_client(django_user_model)
     level = first_drillable_level()

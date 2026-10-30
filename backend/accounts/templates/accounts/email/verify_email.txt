@@ -1,0 +1,12 @@
+Hi {{ user.username }},
+
+Your GIT it! verification code is:
+
+    {{ code }}
+
+Enter it on the sign-up screen. The code expires in {{ expires_minutes }} minutes. If it runs out, choose "Send a new code" on the sign-up screen.
+
+Didn't create a GIT it! account? Ignore this email. Nobody can use the account without this code.
+
+— GIT it!
+{{ site_url }}

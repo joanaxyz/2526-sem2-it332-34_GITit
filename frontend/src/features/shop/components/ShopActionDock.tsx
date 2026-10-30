@@ -47,7 +47,7 @@ export function ShopActionDock({
       {!insufficientFunds ? (
         <button
           type="button"
-          className={owned ? 'shop-stage-action-button' : 'shop-purchase-button'}
+          className={owned ? 'shop-stage-action-button' : 'shop-purchase-button ui-drawn-plate'}
           disabled={actionDisabled(item, pending, balance, walletPending, purchasesEnabled)}
           onClick={() => onAction(item)}
           data-onboarding={!owned ? onboardingTarget : undefined}

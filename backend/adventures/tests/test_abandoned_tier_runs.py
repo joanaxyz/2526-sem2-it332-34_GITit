@@ -13,8 +13,8 @@ from adventures.models import (
     AdventureLevel,
     AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWave,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from adventures.services import AdventureLevelTierRunService
 from adventures.services.tier_variants import TierVariantSelectionService
@@ -34,10 +34,10 @@ def tier(db):
     chapter = Chapter.objects.create(story=story, slug="abandon-m1", number=1, title="Module 1")
     level = AdventureLevel.objects.create(chapter=chapter, slug="abandon-level", title="Level")
     tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
-    wave = AdventureLevelTierWave.objects.create(tier=tier, slug="abandon-wave")
+    scenario = AdventureLevelTierScenario.objects.create(tier=tier, slug="abandon-scenario")
     for key in ("a", "b"):
-        AdventureLevelTierWaveVariant.objects.create(
-            wave=wave,
+        AdventureLevelTierScenarioVariant.objects.create(
+            scenario=scenario,
             slug=f"abandon-{key}",
             label=key,
             semantic_key=f"abandon-{key}",
@@ -188,15 +188,15 @@ def test_abandoned_runs_do_not_count_as_tried_variants(tier, learner):
     AdventureLevelTierRunService().discard(run=run)
     selector = TierVariantSelectionService()
 
-    assert selector._tried_variant_keys(player=player, tier=tier) == set()
+    assert selector._tried_variant_keys(player=player, scenario=run.current_scenario) == set()
 
     AdventureLevelTierRun.objects.create(
         player=player,
         tier=tier,
-        current_wave=run.current_wave,
+        current_scenario=run.current_scenario,
         selected_variant=run.selected_variant,
         status=SESSION_STATUS_FAILED,
     )
-    assert selector._tried_variant_keys(player=player, tier=tier) == {
+    assert selector._tried_variant_keys(player=player, scenario=run.current_scenario) == {
         run.selected_variant.semantic_key
     }

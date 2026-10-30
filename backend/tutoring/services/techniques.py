@@ -1,10 +1,10 @@
-"""Techniques: ways of using a command that deserve their own introduction.
+"""Techniques: ways of using a command that deserve their own tip.
 
 A command form says *which* command to type (`git add <file>`). A technique is
 how its operands are written: several paths at once, `.` for the current
 folder, `HEAD~2`, `main..feature`... Detectors read only the shape of a
 command, never a particular level, so any seeded or authored solution that
-uses a technique triggers its guide.
+uses a technique triggers its tip.
 """
 
 from __future__ import annotations
@@ -14,27 +14,83 @@ import shlex
 from collections.abc import Callable
 from dataclasses import dataclass
 
-from tutoring.services.forms import FormGuide, command_family
+from tutoring.services.forms import command_family
 
 # Families whose operands are all paths, so consecutive calls can be merged
 # into one command and several operands mean "several files".
 BATCHABLE_FAMILIES = frozenset({"add", "rm", "restore", "check-ignore"})
-PATH_FAMILIES = BATCHABLE_FAMILIES | {"reset", "checkout", "diff", "log", "stash", "ls-files", "clean"}
-REF_FAMILIES = frozenset({
-    "log", "show", "diff", "reset", "revert", "rebase", "switch", "checkout", "branch",
-    "cherry-pick", "merge", "tag", "rev-list", "shortlog", "rev-parse", "restore",
-})
+PATH_FAMILIES = BATCHABLE_FAMILIES | {
+    "reset",
+    "checkout",
+    "diff",
+    "log",
+    "stash",
+    "ls-files",
+    "clean",
+}
+REF_FAMILIES = frozenset(
+    {
+        "log",
+        "show",
+        "diff",
+        "reset",
+        "revert",
+        "rebase",
+        "switch",
+        "checkout",
+        "branch",
+        "cherry-pick",
+        "merge",
+        "tag",
+        "rev-list",
+        "shortlog",
+        "rev-parse",
+        "restore",
+    }
+)
 # Options whose value is a message, name, or count - never a path or ref to teach.
-_VALUE_OPTIONS = frozenset({
-    "-m", "--message", "-F", "--file", "--author", "--format", "--pretty", "-n", "--max-count",
-    "--grep", "-b", "-B", "-c", "-C", "--since", "--until", "--date", "--set-upstream-to",
-})
+_VALUE_OPTIONS = frozenset(
+    {
+        "-m",
+        "--message",
+        "-F",
+        "--file",
+        "--author",
+        "--format",
+        "--pretty",
+        "-n",
+        "--max-count",
+        "--grep",
+        "-b",
+        "-B",
+        "--branch",
+        "--initial-branch",
+        "-c",
+        "-C",
+        "--create",
+        "--depth",
+        "--since",
+        "--until",
+        "--date",
+        "--set-upstream-to",
+    }
+)
 # Options whose value *is* a ref, so ref techniques apply to it.
 _REF_VALUE_OPTIONS = frozenset({"--source", "-s", "--onto"})
 _DEFAULT_REMOTES = ("origin", "upstream")
 # Interactive modes walk one file at a time; never merge their steps.
 _INTERACTIVE_OPTIONS = frozenset({"-p", "--patch", "-i", "--interactive", "-e", "--edit"})
 _RELATIVE_REF = re.compile(r"[\w./@{}-]+(?:[~^]\d*)+")
+# git@host:team/repo.git or ssh://host/team/repo.git
+_SSH_URL = re.compile(r"^(?:ssh://|[\w.-]+@[\w.-]+:)")
+# Options that create a branch and name it, so a further operand is its start point.
+_CREATE_BRANCH_OPTIONS = {
+    "switch": frozenset({"-c", "-C", "--create", "--force-create"}),
+    "checkout": frozenset({"-b", "-B"}),
+}
+_BRANCH_LIST_OR_DELETE_OPTIONS = frozenset(
+    {"-d", "-D", "--delete", "-m", "-M", "--move", "-l", "--list", "-a", "-r", "--merged"}
+)
 
 
 @dataclass(frozen=True)
@@ -44,6 +100,8 @@ class ParsedCommand:
     paths_after_separator: tuple[str, ...]
     # Values of options that name a commit (--source=HEAD~1): refs, never paths.
     option_refs: tuple[str, ...] = ()
+    # Option names as typed (-c, --depth), without their values.
+    options: tuple[str, ...] = ()
 
     @property
     def refs(self) -> tuple[str, ...]:
@@ -62,16 +120,6 @@ class Technique:
     def teaching_key(self) -> str:
         return f"technique:{self.key}"
 
-    def guide(self, family: str) -> FormGuide:
-        return FormGuide(
-            teaching_key=self.teaching_key,
-            family=family,
-            usage_form=self.syntax(family),
-            label=self.title,
-            summary=self.summary,
-            technique=self.key,
-        )
-
 
 def parse_command(command: str) -> ParsedCommand | None:
     try:
@@ -87,6 +135,7 @@ def parse_command(command: str) -> ParsedCommand | None:
     operands: list[str] = []
     after: list[str] = []
     option_refs: list[str] = []
+    options: list[str] = []
     separator = False
     skip_next = False
     ref_next = False
@@ -102,6 +151,7 @@ def parse_command(command: str) -> ParsedCommand | None:
             separator = True
         elif token.startswith("-"):
             option, _, value = token.partition("=")
+            options.append(option)
             if option in _REF_VALUE_OPTIONS:
                 if value:
                     option_refs.append(value)
@@ -111,7 +161,7 @@ def parse_command(command: str) -> ParsedCommand | None:
                 skip_next = True
         else:
             operands.append(token)
-    return ParsedCommand(family, tuple(operands), tuple(after), tuple(option_refs))
+    return ParsedCommand(family, tuple(operands), tuple(after), tuple(option_refs), tuple(options))
 
 
 def _paths(parsed: ParsedCommand) -> tuple[str, ...]:
@@ -123,6 +173,25 @@ def _paths(parsed: ParsedCommand) -> tuple[str, ...]:
 def _remotes(state: dict | None) -> tuple[str, ...]:
     remotes = (state or {}).get("remotes")
     return tuple(remotes) if isinstance(remotes, dict) and remotes else _DEFAULT_REMOTES
+
+
+def _start_point(parsed: ParsedCommand) -> bool:
+    """A new branch named with a commit or branch to start from instead of HEAD."""
+    creating = _CREATE_BRANCH_OPTIONS.get(parsed.family)
+    if creating is not None:
+        # The new name is the option's value, so any operand is the start point.
+        return bool(creating & set(parsed.options)) and bool(parsed.operands)
+    if parsed.family == "branch":
+        return len(parsed.operands) >= 2 and not (
+            _BRANCH_LIST_OR_DELETE_OPTIONS & set(parsed.options)
+        )
+    return False
+
+
+def _start_point_syntax(family: str) -> str:
+    if family == "switch":
+        return "git switch -c <branch> <start-point>"
+    return f"git {family} <branch> <start-point>"
 
 
 TECHNIQUES: tuple[Technique, ...] = (
@@ -145,40 +214,50 @@ TECHNIQUES: tuple[Technique, ...] = (
         "Match files with a pattern",
         "Quote a pattern like '*.css' and Git picks every file it fits.",
         lambda family: f"git {family} '<pattern>'",
-        lambda parsed, _state: parsed.family in PATH_FAMILIES
-        and any("*" in path or "?" in path for path in _paths(parsed)),
+        lambda parsed, _state: (
+            parsed.family in PATH_FAMILIES
+            and any("*" in path or "?" in path for path in _paths(parsed))
+        ),
     ),
     Technique(
         "path-separator",
         "Mark where file names start",
         "Everything after -- is read as a file path, even if it looks like a branch name.",
         lambda family: f"git {family} -- <path>",
-        lambda parsed, _state: parsed.family in PATH_FAMILIES and bool(parsed.paths_after_separator),
+        lambda parsed, _state: (
+            parsed.family in PATH_FAMILIES and bool(parsed.paths_after_separator)
+        ),
     ),
     Technique(
         "relative-commit",
         "Count back from a commit",
         "HEAD~2 is two commits before HEAD, and HEAD^ is the one right before it.",
         lambda family: f"git {family} HEAD~<n>",
-        lambda parsed, _state: parsed.family in REF_FAMILIES
-        and any(_RELATIVE_REF.fullmatch(ref) for ref in parsed.refs),
+        lambda parsed, _state: (
+            parsed.family in REF_FAMILIES
+            and any(_RELATIVE_REF.fullmatch(ref) for ref in parsed.refs)
+        ),
     ),
     Technique(
         "commit-range",
         "Name a range of commits",
         "a..b means the commits on b that are not on a.",
         lambda family: f"git {family} <from>..<to>",
-        lambda parsed, _state: parsed.family in REF_FAMILIES
-        and any(".." in ref and "..." not in ref for ref in parsed.refs),
+        lambda parsed, _state: (
+            parsed.family in REF_FAMILIES
+            and any(".." in ref and "..." not in ref for ref in parsed.refs)
+        ),
     ),
     Technique(
         "remote-branch",
         "Use a remote-tracking branch",
         "origin/main is where main was on origin the last time you fetched.",
         lambda family: f"git {family} <remote>/<branch>",
-        lambda parsed, state: parsed.family in REF_FAMILIES
-        and any(
-            ref.startswith(f"{remote}/") for ref in parsed.refs for remote in _remotes(state)
+        lambda parsed, state: (
+            parsed.family in REF_FAMILIES
+            and any(
+                ref.startswith(f"{remote}/") for ref in parsed.refs for remote in _remotes(state)
+            )
         ),
     ),
     Technique(
@@ -187,6 +266,31 @@ TECHNIQUES: tuple[Technique, ...] = (
         "@{upstream}, or @{u}, is the remote branch your current branch tracks.",
         lambda family: f"git {family} @{{upstream}}",
         lambda parsed, _state: any("@{u" in ref for ref in parsed.refs),
+    ),
+    Technique(
+        "start-point",
+        "Start a branch somewhere else",
+        "Name a commit or branch after the new branch, and it starts there instead of where you are.",
+        _start_point_syntax,
+        lambda parsed, _state: _start_point(parsed),
+    ),
+    Technique(
+        "target-folder",
+        "Name the folder to set up",
+        "Put a folder after git init and only that folder becomes a repository, created if needed.",
+        lambda family: f"git {family} <directory>",
+        lambda parsed, _state: (
+            parsed.family == "init" and any(operand != "." for operand in parsed.operands)
+        ),
+    ),
+    Technique(
+        "ssh-url",
+        "Clone over SSH",
+        "An address like git@host:team/repo.git signs in with your SSH key instead of a password.",
+        lambda family: f"git {family} git@<host>:<path>.git",
+        lambda parsed, _state: (
+            parsed.family == "clone" and any(_SSH_URL.match(operand) for operand in parsed.operands)
+        ),
     ),
 )
 _BY_KEY = {technique.key: technique for technique in TECHNIQUES}
@@ -229,7 +333,11 @@ def batch_command(steps: list[dict], index: int) -> tuple[str, int]:
         if len(later.get("positions") or []) > 1:
             break  # an authored edit has to happen before this step
         parsed = parse_command(later["command"])
-        if parsed is None or parsed.family != first.family or _option_signature(later["command"]) != base:
+        if (
+            parsed is None
+            or parsed.family != first.family
+            or _option_signature(later["command"]) != base
+        ):
             break
         new_paths = [path for path in _paths(parsed) if path not in paths]
         if not new_paths:

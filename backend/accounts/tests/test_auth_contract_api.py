@@ -1,7 +1,10 @@
+import re
+
 import pytest
 from django.conf import settings
 from django.contrib.auth import get_user_model
 from django.contrib.auth.tokens import default_token_generator
+from django.core import mail
 from django.utils.encoding import force_bytes
 from django.utils.http import urlsafe_base64_encode
 from rest_framework import status
@@ -56,23 +59,36 @@ def test_auth_response_serializers_declare_exact_success_families():
 
 
 @pytest.mark.django_db
-def test_register_login_me_and_password_change_return_exact_contracts(api_client):
-    register = api_client.post(
-        "/api/auth/register/",
-        {
-            "username": "contract-user",
-            "email": "contract@example.com",
-            "password": "Password123!",
-            "password_confirm": "Password123!",
-        },
-        format="json",
-    )
+def test_register_login_me_and_password_change_return_exact_contracts(
+    api_client, django_capture_on_commit_callbacks
+):
+    with django_capture_on_commit_callbacks(execute=True):
+        register = api_client.post(
+            "/api/auth/register/",
+            {
+                "username": "contract-user",
+                "email": "contract@example.com",
+                "password": "Password123!",
+                "password_confirm": "Password123!",
+            },
+            format="json",
+        )
     user = get_user_model().objects.get(username="contract-user")
 
     assert register.status_code == status.HTTP_201_CREATED
     assert set(register.data) == {"user"}
     assert_exact_user(register.data["user"], user)
     assert register.data == RegisterResponseSerializer({"user": user}).data
+
+    code = re.match(r"\d{6}", mail.outbox[-1].subject).group(0)
+    verified = api_client.post(
+        "/api/auth/email-verification/confirm/",
+        {"email": "contract@example.com", "code": code},
+        format="json",
+    )
+    assert verified.status_code == status.HTTP_200_OK
+    assert set(verified.data) == {"access", "user"}
+    assert_exact_user(verified.data["user"], user)
 
     login = api_client.post(
         "/api/auth/login/",

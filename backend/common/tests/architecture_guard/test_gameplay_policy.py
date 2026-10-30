@@ -35,7 +35,7 @@ def test_gameplay_mutation_guard_rejects_frontend_contract_shadows_and_casts():
             f"{_FRONTEND}/src/features/example/shadows.ts": "type CreateFileInput = { path: string; content: string }\ninterface RenameFileInput { path: string; newPath: string }\ninterface CommandExecutionPayload { processed: boolean }\ntype WorkspaceFileRequest = WorkspaceFileInput\nexport type { WorkspaceFileInput } from '@/shared/level/workspaceFileTypes'\n",
             GAMEPLAY_FRONTEND_APIS[
                 0
-            ]: "import type { ApiRequestBody } from '@/shared/api/generated/apiTypes'\nconst body = value as ApiRequestBody<'adventure_runs_files_create'>\n",
+            ]: "import type { ApiRequestBody } from '@/shared/api/generated/apiTypes'\nconst body = value as ApiRequestBody<'challenge_runs_files_create'>\n",
         }
     )
     assert any("CreateFileInput" in row for row in violations)
@@ -122,7 +122,7 @@ def test_gameplay_mutation_openapi_guard_rejects_schema_forks_and_http_drift():
         "properties": {"path": {"type": "string"}},
     }
     schema["components"]["schemas"]["WorkspaceFile"]["properties"]["extra"] = {"type": "string"}
-    adventure_path = "/api/adventure-runs/{run_id}/files/"
+    adventure_path = "/api/adventure-tier-runs/{run_id}/files/"
     schema["paths"][adventure_path]["patch"]["requestBody"]["content"]["application/json"][
         "schema"
     ] = {"$ref": "#/components/schemas/PatchedWorkspaceFile"}

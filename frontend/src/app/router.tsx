@@ -5,20 +5,17 @@ import { ADMIN_SECTIONS } from '@/features/admin/utils/adminSections'
 import { AuthLayout } from '@/app/layouts/AuthLayout'
 import { HomeLayout } from '@/app/layouts/HomeLayout'
 import { LevelLayout } from '@/app/layouts/LevelLayout'
-import {
-  LegacySharedStoryRedirect,
-  LegacyStoryEditorRedirect,
-  LegacyStoryRouteRedirect,
-} from '@/app/LegacyRedirects'
 import { Protected } from '@/app/Protected'
+import { RouteErrorPage } from '@/app/RouteErrorPage'
 import { RequireCompanion } from '@/app/RequireCompanion'
 import { ForgotPasswordPage } from '@/features/auth/pages/ForgotPasswordPage'
 import { LoginPage } from '@/features/auth/pages/LoginPage'
+import { OAuthCallbackPage } from '@/features/auth/pages/OAuthCallbackPage'
 import { RegisterPage } from '@/features/auth/pages/RegisterPage'
 import { ResetPasswordPage } from '@/features/auth/pages/ResetPasswordPage'
+import { VerifyEmailPage } from '@/features/auth/pages/VerifyEmailPage'
 import { HomePage } from '@/features/home/pages/HomePage'
-import { AdventureStartPage } from '@/features/adventures/pages/AdventureStartPage'
-import { loadAdventureRunPage } from '@/features/adventures/pages/loadAdventureRunPage'
+import { LandingPage } from '@/features/landing/pages/LandingPage'
 import { ChallengeStartPage } from '@/features/challenges/pages/ChallengeStartPage'
 import { TierStartPage } from '@/features/story-map/pages/TierStartPage'
 import { loadTierRunPage } from '@/features/story-map/pages/loadTierRunPage'
@@ -26,21 +23,9 @@ import {
   DESIGN_PREVIEW_STORY_MAP_ROUTE,
   ADMIN_ROUTES,
   HOME_ROUTE,
-  LEGACY_PERFORMANCE_ROUTE,
-  OVERVIEW_RESULTS_ROUTE,
   SHOP_ROUTE,
-  STORIES_ROUTE,
   STORY_DETAIL_ROUTE,
-  storyPath,
-  storyPathWithQuery,
 } from '@/shared/navigation/routes'
-import {
-  LEGACY_ARCHIVE_ROUTE,
-  LEGACY_DESIGN_PREVIEW_STORY_ROUTE,
-  LEGACY_MY_STORY_ROUTE,
-  LEGACY_STORY_ROUTE,
-  LEGACY_STORIES_ROUTE,
-} from '@/shared/navigation/legacyRoutes'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 /**
@@ -52,12 +37,20 @@ import { LoadingScreen } from '@/shared/components/LoadingScreen'
 const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
   ? [
       {
+        path: '/design-preview/home',
+        lazy: async () => ({
+          Component: (await import('@/features/home/preview/HomePreviewPage')).HomePreviewLayout,
+        }),
+        children: [{
+          index: true,
+          lazy: async () => ({
+            Component: (await import('@/features/home/preview/HomePreviewPage')).Component,
+          }),
+        }],
+      },
+      {
         element: <HomeLayout />,
         children: [
-          {
-            path: '/design-preview/home',
-            lazy: () => import('@/features/home/preview/HomePreviewPage'),
-          },
           {
             path: '/design-preview/shop',
             lazy: async () => ({
@@ -75,6 +68,10 @@ const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
         lazy: () => import('@/features/dev/pages/DrillPlayground'),
       },
       {
+        path: '/dev/guides',
+        lazy: () => import('@/features/dev/pages/GuidancePlayground'),
+      },
+      {
         path: '/dev/monster-scales',
         lazy: () => import('@/features/dev/pages/MonsterScalePlayground'),
       },
@@ -90,24 +87,24 @@ const designPreviewRoutes: RouteObject[] = import.meta.env.DEV
         path: DESIGN_PREVIEW_STORY_MAP_ROUTE,
         lazy: () => import('@/features/story-map/pages/StoryMapPreviewPage'),
       },
-      { path: LEGACY_DESIGN_PREVIEW_STORY_ROUTE, element: <Navigate replace to={DESIGN_PREVIEW_STORY_MAP_ROUTE} /> },
     ]
   : []
 
 const appRoutes: RouteObject[] = [
   ...designPreviewRoutes,
+  // The public front door. It forwards a live session to the story map itself.
+  { path: '/', element: <LandingPage /> },
   {
     element: <AuthLayout />,
     children: [
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
+      { path: '/verify-email', element: <VerifyEmailPage /> },
+      { path: '/oauth/callback', element: <OAuthCallbackPage /> },
       { path: '/forgot-password', element: <ForgotPasswordPage /> },
       { path: '/reset-password/:uid/:token', element: <ResetPasswordPage /> },
     ],
   },
-  // Legacy shared-map links redirect to the canonical story map.
-  { path: `${LEGACY_STORY_ROUTE}/shared/:designId`, element: <Navigate replace to={storyPath()} /> },
-  { path: `${LEGACY_ARCHIVE_ROUTE}/shared/:designId`, element: <LegacySharedStoryRedirect /> },
   {
     element: (
       <Protected>
@@ -115,62 +112,15 @@ const appRoutes: RouteObject[] = [
       </Protected>
     ),
     children: [
-      { path: '/', element: <Navigate replace to={storyPath()} /> },
       { path: HOME_ROUTE, element: <HomePage /> },
-      // Browsing Home, Stories, and repository-only challenges does not require
+      // Browsing Home, the story map, and repository-only challenges does not require
       // a companion. Adventure play remains protected below.
-      { path: LEGACY_STORY_ROUTE, element: <Navigate replace to={storyPath()} /> },
-      { path: LEGACY_STORIES_ROUTE, element: <Navigate replace to={STORIES_ROUTE} /> },
-      { path: `${LEGACY_STORIES_ROUTE}/:storySlug`, element: <LegacyStoryRouteRedirect /> },
-      {
-        path: STORIES_ROUTE,
-        lazy: async () => ({
-          Component: (await import('@/features/story-map/pages/StorySelectPage')).StorySelectPage,
-        }),
-      },
       {
         path: STORY_DETAIL_ROUTE,
         lazy: async () => ({
           Component: (await import('@/features/story-map/pages/StoryMapPage')).StoryMapPage,
         }),
       },
-      { path: LEGACY_ARCHIVE_ROUTE, element: <Navigate replace to={storyPath()} /> },
-      { path: LEGACY_MY_STORY_ROUTE, element: <Navigate replace to={storyPathWithQuery(undefined, 'view=mine')} /> },
-      { path: '/gallery', element: <Navigate replace to={HOME_ROUTE} /> },
-      { path: '/dashboard', element: <Navigate replace to={HOME_ROUTE} /> },
-      { path: '/stats', element: <Navigate replace to={`${HOME_ROUTE}?tab=overview`} /> },
-      { path: LEGACY_PERFORMANCE_ROUTE, element: <Navigate replace to={OVERVIEW_RESULTS_ROUTE} /> },
-      {
-        path: '/level-editor',
-        lazy: async () => ({
-          Component: (await import('@/features/authoring/pages/AuthoringLibraryPage')).AuthoringLibraryPage,
-        }),
-      },
-      {
-        path: '/level-editor/new/:kind',
-        lazy: async () => ({
-          Component: (await import('@/features/authoring/pages/ContentEditorPage')).ContentEditorPage,
-        }),
-      },
-      {
-        path: '/level-editor/chapters/new',
-        lazy: async () => ({
-          Component: (await import('@/features/authoring/pages/ChapterEditorPage')).ChapterEditorPage,
-        }),
-      },
-      {
-        path: '/level-editor/chapters/:chapterId',
-        lazy: async () => ({
-          Component: (await import('@/features/authoring/pages/ChapterEditorPage')).ChapterEditorPage,
-        }),
-      },
-      {
-        path: '/level-editor/:definitionId',
-        lazy: async () => ({
-          Component: (await import('@/features/authoring/pages/ContentEditorPage')).ContentEditorPage,
-        }),
-      },
-      { path: '/store', element: <Navigate replace to={SHOP_ROUTE} /> },
       {
         path: SHOP_ROUTE,
         lazy: async () => ({
@@ -183,23 +133,6 @@ const appRoutes: RouteObject[] = [
           Component: (await import('@/features/settings/pages/SettingsPage')).SettingsPage,
         }),
       },
-    ],
-  },
-  // Legacy map-editor routes are kept as redirects while the old editor URLs age out.
-  {
-    element: (
-      <Protected>
-        <Outlet />
-      </Protected>
-    ),
-    children: [
-      // Editing has been removed: story maps are rendered from curriculum + story-world data.
-      { path: `${LEGACY_STORY_ROUTE}/editor`, element: <Navigate replace to={storyPath()} /> },
-      { path: `${LEGACY_STORY_ROUTE}/editor/official`, element: <Navigate replace to={storyPath()} /> },
-      { path: `${LEGACY_STORY_ROUTE}/editor/:designId`, element: <Navigate replace to={storyPath()} /> },
-      // Legacy editor route removal target: 2026-09-30.
-      { path: `${LEGACY_ARCHIVE_ROUTE}/editor`, element: <LegacyStoryEditorRedirect /> },
-      { path: `${LEGACY_ARCHIVE_ROUTE}/editor/:designId`, element: <LegacyStoryEditorRedirect /> },
     ],
   },
   // Staff-only admin console (its own full-screen shell; AdminLayout redirects
@@ -254,14 +187,8 @@ const appRoutes: RouteObject[] = [
       </Protected>
     ),
     children: [
-      { path: '/adventure-levels/:levelId', element: <AdventureStartPage /> },
-      {
-        path: '/adventure-runs/:runId',
-        lazy: async () => ({
-          Component: (await loadAdventureRunPage()).AdventureRunPage,
-        }),
-      },
       { path: '/adventure-level-tiers/:tierId/runs', element: <TierStartPage mode="start" /> },
+      { path: '/adventure-level-tiers/:tierId/replay', element: <TierStartPage mode="replay" /> },
       { path: '/adventure-tier-runs/:runId/retry', element: <TierStartPage mode="retry" /> },
       {
         path: '/adventure-tier-runs/:runId',
@@ -276,6 +203,7 @@ const appRoutes: RouteObject[] = [
 export const router = createBrowserRouter([
   {
     element: <Outlet />,
+    errorElement: <RouteErrorPage />,
     hydrateFallbackElement: <LoadingScreen label="Loading application" />,
     children: appRoutes,
   },

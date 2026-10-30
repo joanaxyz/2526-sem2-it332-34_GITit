@@ -53,20 +53,6 @@ def chapter_stage_config(chapter) -> dict:
     return {"parallax": slug} if slug else {}
 
 
-def _content_battle_stage(content_owner) -> dict:
-    content = getattr(content_owner, "source_content_definition", None)
-    definition = getattr(content, "definition", None) or {}
-    config = definition.get("battle_stage") if isinstance(definition, dict) else None
-    return config if isinstance(config, dict) else {}
-
-
-def merged_battle_stage(*, chapter, content_owner) -> dict:
-    """Chapter-level stage config overridden by the content's authored config."""
-    config = chapter_stage_config(chapter)
-    config.update(_content_battle_stage(content_owner))
-    return config
-
-
 def stage_payload(config: dict | None) -> dict | None:
     """Normalize authored battle-stage config for API responses.
 

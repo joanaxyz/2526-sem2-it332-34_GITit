@@ -1,28 +1,34 @@
 from adventures.models import (
-    AdventureLevelTier,
     AdventureLevelTierRun,
-    AdventureLevelTierWaveVariant,
+    AdventureLevelTierScenario,
+    AdventureLevelTierScenarioVariant,
 )
 from common.constants import SESSION_STATUS_ABANDONED
 
 
 class TierVariantSelectionService:
-    """Picks a tier-wave-owned variant, rotating retries within the same tier.
+    """Picks a variant of one tier scenario, rotating retries within that scenario.
 
-    Mirrors challenges.services.variants.VariantSelectionService exactly:
-    deterministic first pick (not random), novelty-preferring on retry.
+    Mirrors challenges.services.variants.VariantSelectionService: the first
+    pick is the scenario's first variant in authored order (not random), and a
+    retry prefers a variant the learner has not seen in this scenario.
     """
 
     def select_variant(
         self,
         *,
         player,
-        tier: AdventureLevelTier,
+        scenario: AdventureLevelTierScenario,
         prior_run: AdventureLevelTierRun | None = None,
-        published_variants: list[AdventureLevelTierWaveVariant] | None = None,
+        published_variants: list[AdventureLevelTierScenarioVariant] | None = None,
         tried_variant_keys: set[str] | None = None,
-    ) -> AdventureLevelTierWaveVariant | None:
-        variants = published_variants or self._published_variants(tier)
+    ) -> AdventureLevelTierScenarioVariant | None:
+        variants = (
+            published_variants
+            if published_variants is not None
+            else self._published_variants(scenario)
+        )
+        variants = [variant for variant in variants if not variant.is_transfer]
         if not variants:
             return None
         if prior_run is None:
@@ -46,7 +52,7 @@ class TierVariantSelectionService:
     def is_loopback_from_keys(
         self,
         *,
-        variants: list[AdventureLevelTierWaveVariant],
+        variants: list[AdventureLevelTierScenarioVariant],
         selected_variant,
         tried_keys: set[str],
     ) -> bool:
@@ -61,23 +67,25 @@ class TierVariantSelectionService:
     def variant_identity(self, variant) -> str:
         return variant.semantic_key or f"id:{variant.id}"
 
-    def _published_variants(self, tier: AdventureLevelTier) -> list[AdventureLevelTierWaveVariant]:
+    def _published_variants(
+        self, scenario: AdventureLevelTierScenario
+    ) -> list[AdventureLevelTierScenarioVariant]:
         return list(
-            AdventureLevelTierWaveVariant.objects.filter(
-                wave__tier=tier, is_published=True
-            ).order_by("semantic_key", "id")
+            AdventureLevelTierScenarioVariant.objects.filter(
+                scenario=scenario, is_published=True, is_transfer=False
+            ).order_by("sort_order", "semantic_key", "id")
         )
 
-    def _tried_variant_keys(self, *, player, tier: AdventureLevelTier) -> set[str]:
+    def _tried_variant_keys(self, *, player, scenario: AdventureLevelTierScenario) -> set[str]:
         variant_ids = (
             # Abandoned runs are excluded so variant rotation behaves exactly
             # as when they were deleted.
-            AdventureLevelTierRun.objects.filter(player=player, tier=tier)
+            AdventureLevelTierRun.objects.filter(player=player, current_scenario=scenario)
             .exclude(status=SESSION_STATUS_ABANDONED)
             .values_list("selected_variant_id", flat=True)
             .distinct()
         )
         return {
             self.variant_identity(variant)
-            for variant in AdventureLevelTierWaveVariant.objects.filter(id__in=variant_ids)
+            for variant in AdventureLevelTierScenarioVariant.objects.filter(id__in=variant_ids)
         }

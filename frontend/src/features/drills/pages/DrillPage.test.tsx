@@ -24,6 +24,7 @@ function SessionProbe({ plan }: { plan: DrillPlan }) {
   return (
     <div>
       <p>Answered {session.answered}</p>
+      <p>Lives {session.lives}</p>
       <p>{session.finished ? 'Finished' : rung}</p>
       <button onClick={() => session.setAnswer({
         kind: 'choice',
@@ -32,6 +33,7 @@ function SessionProbe({ plan }: { plan: DrillPlan }) {
       <button onClick={session.check}>Check</button>
       <button onClick={session.advance}>Continue</button>
       <button onClick={session.restart}>Restart</button>
+      <button onClick={() => session.collide('git status')}>Wrong collision</button>
     </div>
   )
 }
@@ -252,6 +254,42 @@ describe('drill checkpoint lifecycle', () => {
     mount(queryClient)
     expect(await screen.findByText('Answered 0')).toBeInTheDocument()
     expect(drillsApi.reportSession).toHaveBeenCalledTimes(1)
+  })
+
+  it('ends on the third wrong collision, reports an incomplete run, and restarts with three lives', async () => {
+    mount(client())
+    await screen.findByText('Answered 0')
+    expect(screen.getByText('Lives 3')).toBeInTheDocument()
+    for (let lives = 2; lives >= 0; lives--) {
+      fireEvent.click(screen.getByText('Wrong collision'))
+      expect(screen.getByText(`Lives ${lives}`)).toBeInTheDocument()
+      fireEvent.click(screen.getByText('Continue'))
+    }
+    expect(screen.getByText('Finished')).toBeInTheDocument()
+    expect(screen.getByText('Answered 3')).toBeInTheDocument()
+    await waitFor(() => expect(drillsApi.reportSession).toHaveBeenCalledTimes(1))
+    expect(drillsApi.reportSession).toHaveBeenCalledWith(51, expect.objectContaining({
+      answers_total: 3, answers_correct: 0, completed: false,
+    }))
+    await waitFor(() => expect(drillsApi.saveRun).toHaveBeenCalledTimes(2))
+    fireEvent.click(screen.getByText('Restart'))
+    expect(screen.getByText('Lives 3')).toBeInTheDocument()
+    expect(screen.getByText('Answered 0')).toBeInTheDocument()
+  })
+
+  it('restores spent lives from the saved queue and preserves them on a correct answer', async () => {
+    const queryClient = client()
+    const first = mount(queryClient)
+    await screen.findByText('Answered 0')
+    fireEvent.click(screen.getByText('Wrong collision'))
+    fireEvent.click(screen.getByText('Continue'))
+    await waitFor(() => expect(queryClient.isMutating()).toBe(0))
+    first.unmount()
+    mount(queryClient)
+    await screen.findByText('Answered 1')
+    expect(screen.getByText('Lives 2')).toBeInTheDocument()
+    answer()
+    expect(screen.getByText('Lives 2')).toBeInTheDocument()
   })
 
   it('refuses to send a queued checkpoint after an account change', async () => {

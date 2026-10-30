@@ -41,10 +41,14 @@ def rebase_git_pathspecs(command: str, cwd: str) -> str:
         words = shlex.split(command.strip())
     except ValueError:
         return command
-    if len(words) < 3 or words[0] != "git":
+    if len(words) < 2 or words[0] != "git":
         return command
 
     family = _ALIASES.get(words[1], words[1])
+    if family in _REPOSITORY_VALUE_OPTIONS:
+        return _rebase_repository_directory(command, words, family, cwd)
+    if len(words) < 3:
+        return command
     value_options = _VALUE_OPTIONS.get(family, frozenset())
     path_arguments = family in _PATH_ARGUMENT_FAMILIES
     rebased = words[:2]
@@ -63,6 +67,60 @@ def rebase_git_pathspecs(command: str, cwd: str) -> str:
         else:
             rebased.append(_rebase_path(word, cwd) if positional_only or path_arguments else word)
         index += 1
+    if rebased == words:
+        return command
+    return " ".join(shlex.quote(word) if _needs_quote(word) else word for word in rebased)
+
+
+# `git init` and `git clone` create a repository in a folder, which is relative
+# to the folder they run in: `git init` inside `site` initializes `site`.
+_REPOSITORY_VALUE_OPTIONS = {
+    "init": frozenset(
+        {"-b", "--initial-branch", "--template", "--separate-git-dir", "--object-format"}
+    ),
+    "clone": frozenset(
+        {
+            "-b",
+            "--branch",
+            "--depth",
+            "-o",
+            "--origin",
+            "--template",
+            "--reference",
+            "-c",
+            "--config",
+        }
+    ),
+}
+
+
+def _default_clone_directory(url: str) -> str:
+    tail = next((part for part in reversed(url.split("/")) if part), "repository")
+    return tail.removesuffix(".git") or "repository"
+
+
+def _rebase_repository_directory(command: str, words: list[str], family: str, cwd: str) -> str:
+    value_options = _REPOSITORY_VALUE_OPTIONS[family]
+    rebased = words[:2]
+    positional: list[int] = []
+    index = 2
+    while index < len(words):
+        word = words[index]
+        rebased.append(word)
+        if word.startswith("-") and word != "-":
+            if word in value_options and index + 1 < len(words):
+                rebased.append(words[index + 1])
+                index += 1
+        else:
+            positional.append(len(rebased) - 1)
+        index += 1
+    slot = 0 if family == "init" else 1
+    if len(positional) > slot:
+        rebased[positional[slot]] = _rebase_path(rebased[positional[slot]], cwd)
+    elif family == "init":
+        rebased.append(cwd)
+    elif len(positional) == 1:
+        rebased.append(_rebase_path(_default_clone_directory(rebased[positional[0]]), cwd))
     if rebased == words:
         return command
     return " ".join(shlex.quote(word) if _needs_quote(word) else word for word in rebased)

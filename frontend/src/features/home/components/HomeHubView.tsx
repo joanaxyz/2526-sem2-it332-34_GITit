@@ -9,9 +9,9 @@ import { HomeProfileWorkspace } from '@/features/home/components/home-hub/HomePr
 import { HomeViewSwitcher } from '@/features/home/components/home-hub/HomeViewSwitcher'
 import { DEFAULT_HOME_VIEW, homeViewFromParam, type HomeView } from '@/features/home/components/home-hub/homeViews'
 import type { HomeSummary } from '@/features/home/types'
+import { homeBackdropSrc } from '@/features/home/utils/homeAssets'
 import type { StatsSummary } from '@/features/stats/types'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
-import { DEFAULT_STORY_WORLD_SLUG, getStoryWorld } from '@/shared/story-worlds/registry'
 
 export function HomeHubView({
   home,
@@ -38,9 +38,8 @@ export function HomeHubView({
       : loadoutError
         ? { status: 'error' }
         : { status: 'empty' }
-  const storyWorld = getStoryWorld(DEFAULT_STORY_WORLD_SLUG)
   const homeBackdropStyle = {
-    '--home-theme-map': `url("${storyWorld.map?.background.src ?? '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png'}")`,
+    '--home-theme-map': `url("${homeBackdropSrc()}")`,
   } as CSSProperties
 
   const selectView = useCallback(

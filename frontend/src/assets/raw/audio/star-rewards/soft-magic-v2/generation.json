@@ -1,0 +1,26 @@
+{
+  "provider": "ElevenLabs",
+  "style": "Soft magic: airy shimmer and gentle chimes",
+  "model": "eleven_text_to_sound_v2",
+  "output_format": "mp3_44100_128",
+  "prompt_influence": 0.65,
+  "api_reference": "https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert",
+  "cues": {
+    "0": {
+      "duration_seconds": 1.4,
+      "prompt": "Soft magical UI reward: airy fairy shimmer and a rounded glass chime, velvety attack, delicate sparkles, natural fading tail. Clean stereo SFX. No click, impact, beep, harsh metal ringing, voice, percussion or music bed. No stars: a tiny breath of soft enchanted air gently settles and fades. Warm and understanding, almost a whisper of fairy dust. No bell note, sad melody, alarm or reward flourish."
+    },
+    "1": {
+      "duration_seconds": 1.8,
+      "prompt": "Soft magical UI reward: airy fairy shimmer and a rounded glass chime, velvety attack, delicate sparkles, natural fading tail. Clean stereo SFX. No click, impact, beep, harsh metal ringing, voice, percussion or music bed. First star: one gentle mid-register chime near D5 appears immediately inside a tiny rising cloud of sparkling air. Intimate, warm, weightless wonder. Single rounded note with a smooth unhurried decay."
+    },
+    "2": {
+      "duration_seconds": 2.0,
+      "prompt": "Soft magical UI reward: airy fairy shimmer and a rounded glass chime, velvety attack, delicate sparkles, natural fading tail. Clean stereo SFX. No click, impact, beep, harsh metal ringing, voice, percussion or music bed. Second star: one gentle mid-register chime near F sharp 5 appears immediately, a little higher than the first, wrapped in floating fairy dust. Silky and warm, with a smooth softly sparkling decay."
+    },
+    "3": {
+      "duration_seconds": 2.4,
+      "prompt": "Soft magical UI reward: airy fairy shimmer and a rounded glass chime, velvety attack, delicate sparkles, natural fading tail. Clean stereo SFX. No click, impact, beep, harsh metal ringing, voice, percussion or music bed. Third star: one gentle chime near A5 appears immediately and blooms into a soft luminous D-major glass harmony, then dissolves into airy sparkles. A tender magical completion, no loud fanfare or extra strikes."
+    }
+  }
+}

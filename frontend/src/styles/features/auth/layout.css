@@ -73,27 +73,17 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.8rem;
+  max-width: 100%;
   color: var(--text-primary);
   text-decoration: none;
 }
 
 .auth-brand img {
-  width: 4rem;
-  height: 4rem;
+  display: block;
+  width: 19.5rem;
+  max-width: 100%;
+  height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 18px rgba(var(--theme-primary-rgb), 0.52));
 }
 
-.auth-brand span {
-  /* Cinzel is scoped to the "GIT it!" wordmark only - --font-display stays
-     Chakra Petch for every other heading. See .app-brand strong in
-     base/page-shell.css for the nav-bar instance of this same treatment. */
-  font-family: 'Cinzel', serif;
-  font-size: 2.35rem;
-  font-weight: 800;
-  letter-spacing: -0.02em;
-}
-
-.auth-brand--sm img { width: 2.5rem; height: 2.5rem; }
-.auth-brand--sm span { font-size: 1.55rem; }
+.auth-brand--sm img { width: 12rem; }

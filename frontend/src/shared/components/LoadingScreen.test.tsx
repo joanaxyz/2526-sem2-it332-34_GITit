@@ -10,7 +10,10 @@ import { useAuthStore } from '@/shared/auth/useAuth'
 function renderLoading(node: ReactElement, catalog?: { active_companion: string | null }) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
   if (catalog) client.setQueryData(queryKeys.shopCatalog, catalog)
-  return render(<QueryClientProvider client={client}>{node}</QueryClientProvider>)
+  return {
+    ...render(<QueryClientProvider client={client}>{node}</QueryClientProvider>),
+    client,
+  }
 }
 
 function screenNode() {
@@ -72,6 +75,21 @@ describe('LoadingScreen', () => {
     expect(document.body.querySelector('[aria-label="White running"]')).toBeInTheDocument()
   })
 
+  it('does not flash the default companion while the equipped one is unresolved', async () => {
+    const { client } = renderLoading(<LoadingScreen label="Loading" />)
+
+    expect(document.body.querySelector('[aria-label="Blue running"]')).not.toBeInTheDocument()
+
+    act(() => {
+      client.setQueryData(queryKeys.shopCatalog, { active_companion: 'white' })
+    })
+
+    await waitFor(() => {
+      expect(document.body.querySelector('[aria-label="White running"]')).toBeInTheDocument()
+    })
+    expect(document.body.querySelector('[aria-label="Blue running"]')).not.toBeInTheDocument()
+  })
+
   it('greets a player who owns no companion yet, by name', () => {
     useAuthStore.setState({ user: { username: 'ada' } as never })
     renderLoading(<LoadingScreen label="Loading" />, { active_companion: null })
@@ -93,6 +111,14 @@ describe('LoadingScreen', () => {
     renderLoading(<LoadingScreen companionSlug="black" label="Loading" />, { active_companion: null })
 
     expect(screen.queryByText('Welcome, ada')).not.toBeInTheDocument()
+  })
+
+  it('does not greet when the companion is intentionally hidden', () => {
+    useAuthStore.setState({ user: { username: 'ada' } as never })
+    renderLoading(<LoadingScreen companionSlug={null} label="Loading" />, { active_companion: null })
+
+    expect(screen.queryByText('Welcome, ada')).not.toBeInTheDocument()
+    expect(document.body.querySelector('[aria-label$=" running"]')).not.toBeInTheDocument()
   })
 
   it('owns up to a wait that has stopped looking like a wait', async () => {

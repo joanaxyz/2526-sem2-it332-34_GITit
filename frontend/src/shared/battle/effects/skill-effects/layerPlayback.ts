@@ -38,6 +38,9 @@ export type ProjectileLayerSpec = {
   pixelated?: boolean
   /** Extra transform appended after placement: travel rotate, or a facing flip. */
   orientation?: string
+  /** Floor on how long one sheet frame stays up, so a short duration never
+   *  flickers a phase's frames past faster than the art reads. */
+  minFrameMs?: number
   onLaunch?: () => void
   onImpact?: () => void
 }
@@ -114,24 +117,28 @@ export async function playProjectileLayer(spec: ProjectileLayerSpec): Promise<vo
 
   const fc = sheetDef.frameCount
   const impactStart = clampFrame(spec.impactStartFrame ?? DEFAULT_PROJECTILE_IMPACT_START_FRAME, 1, fc - 1)
-  const flightMs = Math.round(durationMs * PROJECTILE_FLIGHT_MS_FRAC)
-  const impactMs = Math.max(PROJECTILE_MIN_IMPACT_MS, durationMs - flightMs)
+  const minFrameMs = spec.minFrameMs ?? 0
+  const baseFlightMs = Math.round(durationMs * PROJECTILE_FLIGHT_MS_FRAC)
+  const flightMs = Math.max(baseFlightMs, Math.round(impactStart * minFrameMs))
+  const impactMs = Math.max(
+    PROJECTILE_MIN_IMPACT_MS,
+    durationMs - baseFlightMs,
+    Math.round((fc - impactStart) * minFrameMs),
+  )
 
   const launchTransform = placeAt(from, size, launchAnchor, orientation)
   const noseTransform = placeAt(to, size, noseAnchor, orientation)
   const settleTransform = placeAt(impactTo, size, impactAnchor, orientation)
 
-  // Flight: fly frames 0..impactStart-1 from the hand onto the body target,
-  // landing the nose there; if the authored impact is ground-rooted, the final
-  // keyframe plants the upcoming burst on the floor without changing the flight
-  // trajectory.
+  // Keep every flight frame aimed at the body. Moving to the impact anchor
+  // here would bend the projectile toward the floor before the eruption starts.
   node.style.transformOrigin = '50% 50%'
   node.style.transform = launchTransform
   const flight = node.animate(
     [
       { transform: launchTransform, opacity: Math.min(0.96, opacity) },
       { transform: noseTransform, opacity, offset: 0.82 },
-      { transform: settleTransform, opacity },
+      { transform: noseTransform, opacity },
     ],
     { duration: flightMs, easing: 'cubic-bezier(0.2, 0.8, 0.25, 1)', fill: 'forwards' },
   )
@@ -178,6 +185,8 @@ export type ChargeProjectileLayerSpec = {
   opacity?: number
   filter?: string
   pixelated?: boolean
+  /** Floor on how long one sheet frame stays up in every phase. */
+  minFrameMs?: number
   onCharge?: () => void
   onLaunch?: () => void
   onImpact?: () => void
@@ -246,9 +255,13 @@ export async function playChargeProjectileLayer(spec: ChargeProjectileLayerSpec)
   const impactStart = clampFrame(spec.impactStartFrame ?? DEFAULT_CHARGE_IMPACT_START_FRAME, launchStart + 1, fc - 1)
   const gatherEnd = launchStart - 1
   const travelEnd = impactStart - 1
-  const gatherMs = phaseDuration(durationMs, launchStart, fc)
-  const travelMs = phaseDuration(durationMs, impactStart - launchStart, fc)
-  const dissipateMs = Math.max(180, durationMs - gatherMs - travelMs)
+  const minFrameMs = spec.minFrameMs ?? 0
+  const gatherMs = Math.max(phaseDuration(durationMs, launchStart, fc), Math.round(launchStart * minFrameMs))
+  const travelMs = Math.max(
+    phaseDuration(durationMs, impactStart - launchStart, fc),
+    Math.round((impactStart - launchStart) * minFrameMs),
+  )
+  const dissipateMs = Math.max(180, durationMs - gatherMs - travelMs, Math.round((fc - impactStart) * minFrameMs))
 
   const chargeTransform = placeCenter(gatherCenter)
   const noseTransform = placeAt(to, size, noseAnchor, orientation)
@@ -269,13 +282,13 @@ export async function playChargeProjectileLayer(spec: ChargeProjectileLayerSpec)
   await Promise.all([animateFrameRange(node, sheetDef, 0, gatherEnd, gatherMs), finishAnimation(gather, gatherMs)])
   gather.cancel()
 
-  // Travel: fly onto the target.
+  // Travel: land and hold the nose on the body until the impact frames begin.
   spec.onLaunch?.()
   const travel = node.animate(
     [
       { transform: chargeTransform, opacity: 1 },
       { transform: noseTransform, opacity: 1, offset: 0.82 },
-      { transform: impactTransform, opacity: 1 },
+      { transform: noseTransform, opacity: 1 },
     ],
     { duration: travelMs, easing: 'cubic-bezier(0.18, 0.82, 0.24, 1)', fill: 'forwards' },
   )

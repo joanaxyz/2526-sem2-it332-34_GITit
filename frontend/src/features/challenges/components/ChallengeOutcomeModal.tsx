@@ -1,53 +1,32 @@
-import { Map, RefreshCcw, RotateCcw, Sparkles, XCircle } from 'lucide-react'
+import { Map, RefreshCcw, Repeat2, RotateCcw, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, XCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
 
-import bugIconImage from '@/assets/images/battle-outcome/bug.png'
-import skullIconImage from '@/assets/images/battle-outcome/skull.png'
-import terminalIconImage from '@/assets/images/battle-outcome/terminal.png'
-import warnIconImage from '@/assets/images/battle-outcome/warn.png'
-import { ChallengeLevelNav } from '@/features/challenges/components/ChallengeLevelNav'
 import type { ChallengeRun } from '@/features/challenges/types'
+import { canAdvanceFrom, difficultyLabel } from '@/features/challenges/components/challengeOutcome'
 import { GameOutcomeModal } from '@/shared/level/components/game-outcome/GameOutcomeModal'
 import { Badge } from '@/shared/components/Badge'
-import { Button } from '@/shared/components/Button'
 import { playGameOverSound, playVictorySound } from '@/shared/audio/battleAudio'
-
-function difficultyLabel(run: ChallengeRun) {
-  if (!run.difficulty) return 'Challenge'
-  return run.difficulty.charAt(0).toUpperCase() + run.difficulty.slice(1)
-}
+import { StarScoreChecklist } from '@/shared/level/components/StarScoreChecklist'
 
 export function ChallengeOutcomeModal({
   open,
   run,
   onClose,
   onBackToMap,
-  onNextLevel,
   onRetry,
-  onSelectLevel,
-  busyLevelId,
-  isStartingNextLevel = false,
   isRetrying = false,
-  nextDifficultyLabel,
 }: {
   open: boolean
   run: ChallengeRun
   onClose: () => void
   onBackToMap: () => void
-  onNextLevel?: () => void
   onRetry?: () => void
-  /** Start a fresh run on an arbitrary sibling level from the level navigator. */
-  onSelectLevel?: (levelId: number) => void
-  busyLevelId?: number | null
-  isStartingNextLevel?: boolean
   isRetrying?: boolean
-  nextDifficultyLabel?: string | null
 }) {
   const isFailed = run.status === 'failed'
   const isReplay = run.replay
-  const isNavigating = isStartingNextLevel || isRetrying || Boolean(busyLevelId)
-  const canAdvance = !isReplay && run.status === 'completed' && Boolean(run.next_difficulty)
+  const canAdvance = canAdvanceFrom(run)
 
   useEffect(() => {
     if (!open) return
@@ -72,7 +51,7 @@ export function ChallengeOutcomeModal({
   const message = isReplay
     ? isFailed
       ? "This free-play run ended before reaching the target state. It doesn't affect your saved progress. Play again whenever you like."
-      : "Free play complete. This run is just a replay and doesn't change your saved progress."
+      : 'Replays can improve your saved star score. Lower scores never replace your best, and rewards are paid only once.'
     : isFailed
       ? hitActionLimit
         ? run.failure_reason ??
@@ -87,7 +66,8 @@ export function ChallengeOutcomeModal({
     run.counts.counted_action_total > 0 &&
     run.counts.counted_action_total <= run.counts.minimum_counted_commands
 
-  const actionsAccent = targetActionsMet ? 'hsl(142 70% 55%)' : '#f59e0b'
+  // Hitting the target lights the stat gold, matching the star and wordmark art.
+  const actionsAccent = targetActionsMet ? 'hsl(var(--warning))' : 'hsl(var(--primary))'
 
   const stats = [
     {
@@ -95,7 +75,7 @@ export function ChallengeOutcomeModal({
       numerator: run.counts.counted_action_total,
       denominator: run.counts.minimum_counted_commands,
       helper: `Max allowed: ${run.counts.maximum_counted_commands}`,
-      iconSrc: terminalIconImage,
+      icon: SquareTerminal,
       accentColor: actionsAccent,
       targetMet: targetActionsMet,
     },
@@ -103,14 +83,14 @@ export function ChallengeOutcomeModal({
       label: 'Diagnostics',
       numerator: run.counts.non_counted_diagnostic_total,
       helper: 'Free inspections used',
-      iconSrc: bugIconImage,
+      icon: ScanSearch,
       accentColor: 'hsl(var(--primary))',
     },
     {
-      label: 'Attempts',
+      label: 'Submissions',
       numerator: run.counts.total_attempts,
-      helper: isReplay ? 'Free-play attempt' : 'Saved attempt count',
-      iconSrc: skullIconImage,
+      helper: 'All commands submitted, including free checks',
+      icon: Repeat2,
       accentColor: 'hsl(var(--primary))',
     },
   ]
@@ -118,11 +98,11 @@ export function ChallengeOutcomeModal({
   const badges = (
     <>
       <Badge
-        variant={isFailed ? 'destructive' : 'default'}
+        variant={isFailed ? 'secondary' : 'default'}
         className="game-outcome-badge"
         style={{ animationDelay: '60ms' } as CSSProperties}
       >
-        {isFailed ? <img className="game-outcome-badge-icon" src={warnIconImage} alt="" aria-hidden="true" /> : null}
+        {isFailed ? <TriangleAlert className="size-3.5" aria-hidden="true" /> : null}
         {difficultyLabel(run)} {isFailed ? 'failed' : 'complete'}
       </Badge>
       {isReplay ? (
@@ -144,7 +124,7 @@ export function ChallengeOutcomeModal({
         <button
           type="button"
           className="game-outcome-header-btn"
-          disabled={isNavigating}
+          disabled={isRetrying}
           onClick={onRetry}
           aria-label={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
           title={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
@@ -155,7 +135,7 @@ export function ChallengeOutcomeModal({
       <button
         type="button"
         className="game-outcome-header-btn"
-        disabled={isNavigating}
+        disabled={isRetrying}
         onClick={onBackToMap}
         aria-label="Back to Map"
         title="Back to Map"
@@ -164,32 +144,6 @@ export function ChallengeOutcomeModal({
       </button>
     </>
   )
-
-  const actions = canAdvance ? (
-    onNextLevel && nextDifficultyLabel ? (
-      <Button type="button" disabled={isNavigating} onClick={onNextLevel}>
-        {isStartingNextLevel ? 'Opening next level…' : 'Continue'}
-      </Button>
-    ) : (
-      <Button type="button" variant="secondary" disabled={isNavigating} onClick={onClose}>
-        Stay in workspace
-      </Button>
-    )
-  ) : isFailed ? (
-    onRetry ? (
-      <Button type="button" disabled={isNavigating} onClick={onRetry}>
-        <RefreshCcw data-icon="inline-start" />
-        {isRetrying ? 'Starting fresh variant…' : 'Try again'}
-      </Button>
-    ) : null
-  ) : isReplay ? (
-    onRetry ? (
-      <Button type="button" disabled={isNavigating} onClick={onRetry}>
-        <RefreshCcw data-icon="inline-start" />
-        {isRetrying ? 'Starting…' : 'Play again'}
-      </Button>
-    ) : null
-  ) : run.status === 'completed' ? null : null
 
   return (
     <GameOutcomeModal
@@ -200,23 +154,14 @@ export function ChallengeOutcomeModal({
       icon={Icon}
       resultLabel={isFailed ? 'Game Over' : 'You Won'}
       stars={run.stars}
+      level={{ label: 'Challenge gate', title: run.challenge.title }}
       badges={badges}
       headline={headline}
       message={message}
       stats={stats}
-      actions={actions}
       headerActions={headerActions}
     >
-      {/* Level navigation is challenge-only - the adventure modal omits it. */}
-      {!isReplay && onSelectLevel && run.sibling_levels && run.difficulty ? (
-        <ChallengeLevelNav
-          levels={run.sibling_levels}
-          currentLevelId={run.challenge.level_id}
-          onSelectLevel={onSelectLevel}
-          busyLevelId={busyLevelId}
-          disabled={isNavigating}
-        />
-      ) : null}
+      {run.star_breakdown ? <StarScoreChecklist breakdown={run.star_breakdown} savedStars={run.completion?.stars} /> : null}
     </GameOutcomeModal>
   )
 }

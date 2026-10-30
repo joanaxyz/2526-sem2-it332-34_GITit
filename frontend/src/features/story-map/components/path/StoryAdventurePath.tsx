@@ -1,21 +1,18 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import type { AdventureLevelSummary, ChallengeSummary } from '@/features/story-map/types'
 import { allChallengeTrials } from '@/features/story-map/utils/challengeUi'
 import { pathDataFor, pathGeometry } from '@/features/story-map/utils/pathGeometry'
 import { useStoryArtifactNavigation } from '@/features/story-map/hooks/useStoryArtifactNavigation'
+import { useStoryAdventureStarts } from '@/features/story-map/hooks/useStoryAdventureStarts'
 import type { LearningChapter } from '@/features/story-map/types'
-import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
-import { syncTierRunInCache } from '@/features/story-map/utils/tierRunCache'
 import { useFocusTrap } from '@/shared/utils/useFocusTrap'
 
 import { nextPlayableLevelId } from '@/features/story-map/utils/storyMapChapter'
 import { StoryLevelTierPanel, StoryTrialsPanel } from './StoryAdventurePanels'
 import { StoryChallengeNode, StoryPathLevelNode, type StoryTrialState } from './StoryPathNodes'
 
-const PILL_CLOSE_MS = 180
 
 // Callout geometry. The route's amplitude leaves the right side of the canvas
 // permanently empty, which is where the level callout docks: beside-the-node
@@ -34,6 +31,8 @@ export function StoryAdventurePath({
   challenges,
   challengesLocked,
   loading,
+  hasCompanion,
+  onCompanionRequired,
   defaultTrialsOpen = false,
 }: {
   chapter: LearningChapter
@@ -41,19 +40,13 @@ export function StoryAdventurePath({
   challenges: ChallengeSummary[]
   challengesLocked: boolean
   loading: boolean
+  hasCompanion: boolean
+  onCompanionRequired: () => void
   defaultTrialsOpen?: boolean
 }) {
-  const { openAdventureLevel, openChallengeArtifact } = useStoryArtifactNavigation()
+  const { openChallengeArtifact } = useStoryArtifactNavigation()
   const navigate = useNavigate()
-  const queryClient = useQueryClient()
-  const startTierRunMutation = useMutation({
-    mutationFn: ({ tierId, replay }: { tierId: number; replay?: boolean }) =>
-      tierRunsApi.startRun(tierId, replay ? { replay: true } : undefined),
-    onSuccess: (run) => {
-      syncTierRunInCache(queryClient, run)
-      navigate(`/adventure-tier-runs/${run.id}`)
-    },
-  })
+  const { startTier } = useStoryAdventureStarts({ hasCompanion, onCompanionRequired })
   const currentLevelId = nextPlayableLevelId(levels, chapter.locked)
   const placeholderCount = Math.max(3, chapter.adventure_level_count || 6)
   const nodes: Array<AdventureLevelSummary | undefined> = levels.length
@@ -63,8 +56,6 @@ export function StoryAdventurePath({
   const [trialsOpen, setTrialsOpen] = useState(defaultTrialsOpen)
   const trialsPanelRef = useRef<HTMLElement | null>(null)
   const [selectedLevelId, setSelectedLevelId] = useState<number | null>(null)
-  const [closingLevelId, setClosingLevelId] = useState<number | null>(null)
-  const closeTimerRef = useRef<number | null>(null)
 
   const pathRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLDivElement | null>(null)
@@ -92,30 +83,13 @@ export function StoryAdventurePath({
     return () => observer.disconnect()
   }, [measureNodeRadius])
 
-  function queueClosingPill(levelId: number) {
-    if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current)
-    setClosingLevelId(levelId)
-    closeTimerRef.current = window.setTimeout(() => {
-      setClosingLevelId((current) => (current === levelId ? null : current))
-      closeTimerRef.current = null
-    }, PILL_CLOSE_MS)
-  }
-
   function toggleLevelPill(levelId: number) {
-    if (selectedLevelId === levelId) {
-      queueClosingPill(levelId)
-      setSelectedLevelId(null)
-      return
-    }
-    if (selectedLevelId !== null) queueClosingPill(selectedLevelId)
-    setClosingLevelId((closing) => (closing === levelId ? null : closing))
-    setSelectedLevelId(levelId)
+    setSelectedLevelId((selected) => (selected === levelId ? null : levelId))
   }
 
   useEffect(() => {
     setTrialsOpen(defaultTrialsOpen)
     setSelectedLevelId(null)
-    setClosingLevelId(null)
   }, [chapter.id, defaultTrialsOpen])
 
   useEffect(() => {
@@ -123,12 +97,6 @@ export function StoryAdventurePath({
       setSelectedLevelId(null)
     }
   }, [levels, selectedLevelId])
-
-  useEffect(() => {
-    return () => {
-      if (closeTimerRef.current) window.clearTimeout(closeTimerRef.current)
-    }
-  }, [])
 
   useEffect(() => {
     if (!trialsOpen) return
@@ -315,9 +283,7 @@ export function StoryAdventurePath({
             currentLevelId={currentLevelId}
             loading={loading}
             selectedLevelId={selectedLevelId}
-            closingLevelId={closingLevelId}
             onToggle={toggleLevelPill}
-            onOpenLevel={openAdventureLevel}
           />
         ))}
 
@@ -357,10 +323,8 @@ export function StoryAdventurePath({
             panelRef={levelTierPanelRef}
             placement="docked"
             style={levelTierPanelStyle}
-            pendingTierId={startTierRunMutation.variables?.tierId}
-            isStarting={startTierRunMutation.isPending}
             onClose={() => setSelectedLevelId(null)}
-            onStartTier={(tierId, replay) => startTierRunMutation.mutate({ tierId, replay })}
+            onStartTier={startTier}
             onOpenDrill={() => navigate(`/adventure-levels/${selectedTierLevel.id}/drill`)}
           />
         ) : null}
@@ -372,10 +336,8 @@ export function StoryAdventurePath({
           levelNumber={selectedTierNodeIndex + 1}
           panelRef={levelTierPanelRef}
           placement="inline"
-          pendingTierId={startTierRunMutation.variables?.tierId}
-          isStarting={startTierRunMutation.isPending}
           onClose={() => setSelectedLevelId(null)}
-          onStartTier={(tierId, replay) => startTierRunMutation.mutate({ tierId, replay })}
+          onStartTier={startTier}
           onOpenDrill={() => navigate(`/adventure-levels/${selectedTierLevel.id}/drill`)}
         />
       ) : null}

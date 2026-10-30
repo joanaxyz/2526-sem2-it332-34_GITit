@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 
 import type { DrillCard } from '@/features/drills/types'
-import { commandsMatch, gradeCard, gradeSequence } from '@/features/drills/utils/drillGrading'
+import { commandsMatch, firstWrongBlock, gradeCard, gradeSequence } from '@/features/drills/utils/drillGrading'
 
 const commitCard: DrillCard = {
   key: 'git-commit/message',
@@ -70,6 +70,19 @@ describe('grading a pick', () => {
 })
 
 describe('grading an assembly', () => {
+  it('opens the first incorrect block, including swapped flags and missing or extra pieces', () => {
+    const expected = ['git', 'init', '-b', 'main']
+    expect(firstWrongBlock(['git', 'init', 'main', '-b'], expected, 'tokens')).toBe(2)
+    expect(firstWrongBlock(['git', 'init'], expected, 'tokens')).toBe(2)
+    expect(firstWrongBlock([...expected, 'extra'], expected, 'tokens')).toBe(4)
+    expect(firstWrongBlock(expected, expected, 'tokens')).toBeNull()
+  })
+
+  it('uses command equivalence for token paths and exact ordering for step paths', () => {
+    expect(firstWrongBlock(['git', 'commit', '-m', '"message"'], commitCard.tokens, 'tokens')).toBeNull()
+    expect(firstWrongBlock(['git add .', 'git init'], ['git init', 'git add .'], 'steps')).toBe(0)
+  })
+
   it('accepts the tokens in order', () => {
     const verdict = gradeCard(commitCard, 'forge', {
       kind: 'tokens',

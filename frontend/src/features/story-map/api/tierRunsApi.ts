@@ -13,11 +13,12 @@ import type { CommandExecutionPayload } from '@/shared/level/types'
 import type { TierCommandResponse, TierRunResponse } from '@/features/story-map/components/tierWorkspaceTypes'
 
 export const tierRunsApi = {
-  startRun(tierId: number, input?: { prior_run_id?: number | null; replay?: boolean }) {
+  startRun(tierId: number, input?: { prior_run_id?: number | null; replay?: boolean; transfer?: boolean }) {
     const body = {
       source_entry_point: 'level_page',
       prior_run_id: input?.prior_run_id ?? null,
       replay: input?.replay ?? false,
+      transfer: input?.transfer ?? false,
     } as ApiRequestBody<'adventure_level_tiers_runs_create'>
     return apiOperationRequest<'adventure_level_tiers_runs_create', TierRunResponse>(
       'adventure_level_tiers_runs_create',

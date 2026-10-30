@@ -25,6 +25,7 @@ function moduleRow(number: number, overrides: Partial<ApiSchemas['PerformanceMod
     number,
     title: `Module ${number}`,
     scr: NONE,
+    car: NONE,
     hlcr: NONE,
     rta: NONE,
     retry_success_rate: NONE,
@@ -56,6 +57,8 @@ function analyticsFixture(
         arc: NONE,
       },
       completed_sessions: 2,
+      samples: { participants: 1, attempted_tiers: 4, in_progress_tiers: 0, mastered_tiers: 0, mastery_missing: 0, car_scored: 0, car_missing: 0, transfer_assigned: 0, transfer_pending: 0, transfer_missing: 0 },
+      transfers: [],
       modules: [1, 2, 3, 4].map((number) => moduleRow(number)),
       ...overrides,
     },
@@ -85,13 +88,13 @@ describe('AdminDashboardPage overall SCR', () => {
     vi.clearAllMocks()
   })
 
-  it('reads overall SCR from the Runebound KPI payload, not all-story run totals', async () => {
+  it('reads overall SCR from the Arcane Spire KPI payload, not all-story run totals', async () => {
     renderPage(analyticsFixture())
 
     await screen.findByText('KPI Overview')
     const card = kpiCard('SCR')
     expect(card).toHaveTextContent('50%')
-    expect(card).toHaveTextContent('2 of 4 sessions completed')
+    expect(card).toHaveTextContent('2 of 4 required tiers mastered')
     expect(card).not.toHaveTextContent('90%')
   })
 
@@ -99,7 +102,7 @@ describe('AdminDashboardPage overall SCR', () => {
     renderPage(analyticsFixture())
 
     await screen.findByText('KPI Overview')
-    const stat = screen.getByText('sessions').closest('.dk-stat') as HTMLElement
+    const stat = screen.getByText('attempted tiers').closest('.dk-stat') as HTMLElement
     expect(stat).toHaveTextContent('4')
     expect(stat).not.toHaveTextContent('20')
   })
@@ -359,9 +362,7 @@ describe('AdminDashboardPage supplementary retry success rate', () => {
     vi.clearAllMocks()
   })
 
-  const TOOLTIP =
-    'Share of retry sessions that eventually ended in completion, any variant, any attempt. ' +
-    'Supplementary indicator only; RTA is the evaluation KPI for SO 3.5, SO 4.5 and RQ4.'
+  const TOOLTIP = 'Successful required repetitions are not recovery retries. Transfer is measured separately.'
 
   function fixtureWithRetrySuccess() {
     const base = analyticsFixture()
@@ -392,7 +393,7 @@ describe('AdminDashboardPage supplementary retry success rate', () => {
     expect(cards[5]).toBe(card)
     expect(card).toHaveTextContent('Retry Success Rate (supplementary)')
     expect(card).toHaveTextContent('30%')
-    expect(card).toHaveTextContent('3 of 10 retry sessions completed')
+    expect(card).toHaveTextContent('3 of 10 recovery retries succeeded')
     expect(card).toHaveTextContent('No target')
     expect(card).toHaveAttribute('title', TOOLTIP)
     expect(card).not.toHaveTextContent('Target:')
@@ -419,7 +420,7 @@ describe('AdminDashboardPage supplementary retry success rate', () => {
     expect(row).toHaveTextContent('Retry Success Rate (supplementary)')
     expect(row).toHaveTextContent('No target')
     expect(row).toHaveTextContent('80%')
-    expect(row).toHaveTextContent('4 of 5 retry sessions completed')
+    expect(row).toHaveTextContent('4 of 5 recovery retries succeeded')
     expect(row).toHaveAttribute('title', TOOLTIP)
   })
 })
@@ -445,11 +446,11 @@ describe('AdminDashboardPage denominator labels', () => {
     )
     await screen.findByText('KPI Overview')
 
-    expect(kpiCard('SCR')).toHaveTextContent('2 of 4 sessions completed')
-    expect(kpiCard('CAR')).toHaveTextContent('22 processable / 125 submitted commands')
-    expect(kpiCard('HLCR')).toHaveTextContent('1 of 4 hard sessions completed')
-    expect(kpiCard('ARC')).toHaveTextContent('1 retry across 10 completed sessions')
-    expect(kpiCard('RTA')).toHaveTextContent('1 of 2 eligible retries succeeded')
+    expect(kpiCard('SCR')).toHaveTextContent('2 of 4 required tiers mastered')
+    expect(kpiCard('CAR')).toHaveTextContent('22 score points across 125 assessed tiers')
+    expect(kpiCard('HLCR')).toHaveTextContent('1 of 4 hard tiers mastered')
+    expect(kpiCard('ARC')).toHaveTextContent('1 unsuccessful attempt across 10 mastered tiers')
+    expect(kpiCard('RTA')).toHaveTextContent('1 of 2 transfer checkpoints cleared first time')
     expect(kpiCard('CAR')).not.toHaveTextContent('sessions')
   })
 })

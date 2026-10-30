@@ -10,7 +10,11 @@ import { RegisterForm } from './RegisterForm'
 const mocks = vi.hoisted(() => ({ register: vi.fn(), login: vi.fn() }))
 
 vi.mock('@/shared/auth/authApi', () => ({
-  authApi: { register: mocks.register, login: mocks.login },
+  authApi: {
+    register: mocks.register,
+    login: mocks.login,
+    oauthStartUrl: (provider: string) => `/api/auth/oauth/${provider}/start/`,
+  },
 }))
 
 const TOO_COMMON = 'This password is too common.'

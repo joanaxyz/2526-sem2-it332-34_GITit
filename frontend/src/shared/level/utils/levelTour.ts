@@ -1,12 +1,18 @@
 export type LevelTourMode = 'adventure' | 'challenge' | 'tier'
 
-const LEVEL_TOUR_VERSION = 'v3'
+// Versioned per mode so a tour change replays only the affected onboarding.
+const LEVEL_TOUR_VERSIONS: Record<LevelTourMode, string> = {
+  adventure: 'v5',
+  challenge: 'v6',
+  tier: 'v6',
+}
+const levelTourModes: readonly LevelTourMode[] = ['adventure', 'challenge', 'tier']
 
 export function levelTourStorageKey(
   userId?: number | null,
   mode: LevelTourMode = 'challenge',
 ) {
-  return `git-it-practice-workspace-tour:${LEVEL_TOUR_VERSION}:${userId ?? 'guest'}:${mode}`
+  return `git-it-practice-workspace-tour:${LEVEL_TOUR_VERSIONS[mode]}:${userId ?? 'guest'}:${mode}`
 }
 
 function safeStorage() {
@@ -15,6 +21,18 @@ function safeStorage() {
     return window.localStorage
   } catch {
     return null
+  }
+}
+
+/** Reopen every level tour for one account on this browser. */
+export function resetLevelTours(userId?: number | null): boolean {
+  const storage = safeStorage()
+  if (!storage) return false
+  try {
+    levelTourModes.forEach((mode) => storage.removeItem(levelTourStorageKey(userId, mode)))
+    return true
+  } catch {
+    return false
   }
 }
 

@@ -8,6 +8,8 @@ import { z } from 'zod'
 
 import { authApi } from '@/shared/auth/authApi'
 import { presentAuthError } from '@/features/auth/api/authError'
+import { unverifiedEmailFrom, verifyEmailPath } from '@/features/auth/api/emailVerification'
+import { OAuthButtons } from '@/features/auth/components/OAuthButtons'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { storyPath } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
@@ -46,6 +48,11 @@ export function LoginForm() {
       queryClient.clear()
       setSession(data.access, data.user)
       navigate(data.user.is_staff ? '/admin' : storyPath(), { replace: true })
+    },
+    onError: (error) => {
+      // Right password, but the sign-up code was never entered: finish that first.
+      const unverifiedEmail = unverifiedEmailFrom(error)
+      if (unverifiedEmail) navigate(verifyEmailPath(unverifiedEmail))
     },
   })
   const errorPresentation = useMemo(
@@ -153,10 +160,12 @@ export function LoginForm() {
         </div>
       ) : null}
 
-      <button type="submit" className="auth-submit" disabled={mutation.isPending || isLocked}>
+      <button type="submit" className="auth-submit ui-drawn-plate" disabled={mutation.isPending || isLocked}>
         {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <LogIn data-icon="inline-start" />}
         {mutation.isPending ? 'Signing in' : 'Sign in'}
       </button>
+
+      <OAuthButtons />
 
       <p className="auth-alt-link">
         New to GIT it!?{' '}

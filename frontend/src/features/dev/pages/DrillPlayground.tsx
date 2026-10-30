@@ -1,5 +1,17 @@
 import { DrillSession } from '@/features/drills/components/DrillSession'
 import { DRILL_PLAN_FIXTURE } from '@/features/dev/utils/drillPlan'
+import type { DrillPlan } from '@/features/drills/types'
+
+const CHECKPOINT_PLAN: DrillPlan = {
+  ...DRILL_PLAN_FIXTURE,
+  resume: null,
+  sequence: null,
+  cards: [{
+    key: 'checkpoint-init', command: 'git init -b main', intent: 'Initialize a repository with main as its first branch.',
+    base_command: 'git init', summary: '', tokens: ['git', 'init', '-b', 'main'],
+    bank: ['main', 'git', '-b', 'init'], command_choices: [], intent_choices: [], blank: null,
+  }],
+}
 
 /**
  * Squire's Drill on fixture content, with no auth and no level gate.
@@ -16,7 +28,8 @@ import { DRILL_PLAN_FIXTURE } from '@/features/dev/utils/drillPlan'
  * "could not be saved" notice, which is otherwise hard to see.
  */
 export default function DrillPlayground() {
-  return <DrillSession plan={DRILL_PLAN_FIXTURE} />
+  const plan = new URLSearchParams(window.location.search).has('checkpoint') ? CHECKPOINT_PLAN : DRILL_PLAN_FIXTURE
+  return <DrillSession plan={plan} />
 }
 
 export const Component = DrillPlayground

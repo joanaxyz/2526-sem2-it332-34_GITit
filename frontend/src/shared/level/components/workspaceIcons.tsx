@@ -39,14 +39,3 @@ export function StarSolidIcon(props: IconProps) {
     </svg>
   )
 }
-
-/** Circled check with a spark — the mock's TASK glyph. */
-export function TaskSealIcon(props: IconProps) {
-  return (
-    <svg {...base(props)}>
-      <circle cx="11.4" cy="12.6" r="7.4" />
-      <path d="m8.4 12.8 2.1 2.1 4-4.4" />
-      <path d="M18.6 3.6v3.2M17 5.2h3.2" strokeWidth={1.4} />
-    </svg>
-  )
-}

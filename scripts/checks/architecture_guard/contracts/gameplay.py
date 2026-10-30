@@ -58,10 +58,7 @@ GAMEPLAY_BACKEND_VIEWS = (
 )
 
 
-GAMEPLAY_FRONTEND_APIS = (
-    "frontend/src/features/adventures/api/adventuresApi.ts",
-    "frontend/src/features/challenges/api/challengeRunsApi.ts",
-)
+GAMEPLAY_FRONTEND_APIS = ("frontend/src/features/challenges/api/challengeRunsApi.ts",)
 
 
 GAMEPLAY_SHARED_SERIALIZERS = {
@@ -264,7 +261,7 @@ def gameplay_mutation_openapi_violations(schema: dict) -> list[str]:
         "patch": "WorkspaceFile",
         "put": "WorkspaceFileRename",
     }
-    for prefix in ("adventure-runs", "challenge-runs"):
+    for prefix in ("adventure-tier-runs", "challenge-runs"):
         path = f"/api/{prefix}/{{run_id}}/files/"
         operations = schema.get("paths", {}).get(path, {})
         for method, component in expected_refs.items():
@@ -379,13 +376,11 @@ def gameplay_mutation_backend_violations(sources: dict[str, str]) -> list[str]:
 
     expected_runtime_calls = {
         "backend/adventures/views.py": {
-            ("AdventureRunSubmitCommandAPIView", "post"): "CommandSubmitSerializer",
-            (
-                "AdventureWorkspaceFileAPIView",
-                "_mutate_file",
-            ): "WorkspaceFileSerializer",
-            ("AdventureWorkspaceFileAPIView", "put"): "WorkspaceFileRenameSerializer",
-            ("AdventureWorkspaceFileAPIView", "delete"): "WorkspaceFilePathSerializer",
+            ("AdventureLevelTierCommandSubmitAPIView", "post"): "CommandSubmitSerializer",
+            ("AdventureLevelTierWorkspaceFileAPIView", "post"): "WorkspaceFileSerializer",
+            ("AdventureLevelTierWorkspaceFileAPIView", "patch"): "WorkspaceFileSerializer",
+            ("AdventureLevelTierWorkspaceFileAPIView", "put"): "WorkspaceFileRenameSerializer",
+            ("AdventureLevelTierWorkspaceFileAPIView", "delete"): "WorkspaceFilePathSerializer",
         },
         "backend/challenges/views.py": {
             ("ChallengeCommandSubmitAPIView", "post"): "CommandSubmitSerializer",

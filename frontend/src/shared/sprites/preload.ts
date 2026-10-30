@@ -4,20 +4,25 @@ import type { SpriteAnimation } from '@/shared/sprites/types'
 /**
  * Session-wide image warming.
  *
- * Every sprite sheet and backdrop is painted as a CSS `background-image`, so the
- * browser only starts fetching it when the element that uses it mounts - the
- * stage paints an empty box first and the art pops in a frame or several later.
- * Warming a sheet here decodes it into the browser's image cache ahead of that
- * mount, so the element paints complete on its first frame.
+ * Decode sheets before the sprite canvas needs its first frame, and backdrops
+ * before their CSS background mounts. Keep the decoded images available to the
+ * canvas painter so warmed poses can swap synchronously without a blank frame.
  *
- * Two caches, both keyed by src and both permanent for the session:
+ * Caches are keyed by src and retained for the session:
  * `pending` de-duplicates concurrent requests, `warmed` answers "has this
- * already been done" synchronously so a gate can decide without a re-render.
+ * already been done" synchronously, and `decodedImages` supplies successful
+ * loads to frame painters.
  * A sheet that fails to load counts as warmed: a 404 must not make a loading
  * gate wait for it twice, and the stage renders the same either way.
  */
 const pending = new Map<string, Promise<void>>()
 const warmed = new Set<string>()
+const decodedImages = new Map<string, HTMLImageElement>()
+
+/** The decoded sheet, shared by preload gates and frame painters. */
+export function getWarmedImage(src: string): HTMLImageElement | null {
+  return decodedImages.get(src) ?? null
+}
 
 /** True once `src` has been decoded (or has failed and will not be retried). */
 export function isImageWarm(src: string): boolean {
@@ -45,6 +50,7 @@ export function warmImage(src: string): Promise<void> {
 
   const settled = loaded.then(
     () => {
+      decodedImages.set(src, image)
       warmed.add(src)
     },
     () => {

@@ -88,6 +88,7 @@
   --control-bg-active: rgba(var(--theme-primary-rgb), 0.16);
   --control-primary-bg: linear-gradient(180deg, rgba(0, 180, 216, 0.96), rgba(0, 119, 182, 0.96));
   --control-primary-bg-hover: linear-gradient(180deg, rgba(24, 203, 238, 0.98), rgba(0, 133, 202, 0.98));
+  --control-primary-bg-active: linear-gradient(180deg, rgba(0, 140, 190, 0.98), rgba(0, 96, 160, 0.98));
   --control-primary-border: rgba(0, 180, 216, 0.72);
   --control-primary-text: #f6fdff;
   --control-danger-bg: hsl(var(--destructive) / 0.1);
@@ -150,6 +151,8 @@
   --z-modal: 60;
   --z-toast: 70;
   --z-tooltip: 80;
+  --z-mascot: 85;
+  --z-tutor: 86;
   /* The full-screen loading screen outranks everything: while it is up the app
      behind it is not ready to be touched, modals and toasts included. */
   --z-loading-screen: 90;

@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { MemoryRouter } from 'react-router-dom'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
@@ -20,6 +20,9 @@ vi.mock('@/features/performance/api/performanceApi', () => ({
 
 const performanceFixture: PerformanceSummary = {
   completed_sessions: 14,
+  objectives: {},
+  samples: { participants: 1, attempted_tiers: 35, in_progress_tiers: 0, mastered_tiers: 14, mastery_missing: 0, car_scored: 0, car_missing: 0, transfer_assigned: 0, transfer_pending: 0, transfer_missing: 0 },
+  transfers: [],
   kpis: {
     scr: { value: 40, numerator: 14, denominator: 35 },
     car: { value: 95, numerator: 40, denominator: 42 },
@@ -30,7 +33,8 @@ const performanceFixture: PerformanceSummary = {
   },
   modules: [
     {
-      number: 0,
+      car: { value: null, numerator: 0, denominator: 0 },
+    number: 0,
       title: 'Module 0',
       scr: { value: 100, numerator: 2, denominator: 2 },
       hlcr: { value: null, numerator: 0, denominator: 0 },
@@ -39,7 +43,8 @@ const performanceFixture: PerformanceSummary = {
       arc: { value: null, numerator: 0, denominator: 0 },
     },
     {
-      number: 1,
+      car: { value: 82, numerator: 82, denominator: 1 },
+    number: 1,
       title: 'Repository Foundations',
       scr: { value: 50, numerator: 1, denominator: 2 },
       hlcr: { value: null, numerator: 0, denominator: 0 },
@@ -48,7 +53,8 @@ const performanceFixture: PerformanceSummary = {
       arc: { value: 1.5, numerator: 3, denominator: 2 },
     },
     {
-      number: 2,
+      car: { value: null, numerator: 0, denominator: 0 },
+    number: 2,
       title: 'Module 2',
       scr: { value: null, numerator: 0, denominator: 0 },
       hlcr: { value: null, numerator: 0, denominator: 0 },
@@ -98,30 +104,22 @@ describe('HomeStatsView contract', () => {
     // Progress is one plaque of two bands; both belong to the same category.
     expect(screen.getByRole('article', { name: 'Progress' })).toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Where you stand' })).toBeInTheDocument()
-    expect(screen.getByRole('region', { name: 'Run results' })).toBeInTheDocument()
+    expect(screen.getByRole('region', { name: 'Practice record' })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Git skills' })).not.toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Achievement gallery' })).not.toBeInTheDocument()
     // Progress is one column; only Skills splits into two.
     expect(screen.getByRole('region', { name: 'Player overview' })).not.toHaveClass('is-split')
   })
 
-  it('states the finish rate once, in the citadel the record band never repeats', () => {
+  it('keeps the active curriculum finish-rate context separate from module performance', async () => {
     renderView('progress')
-
     const story = screen.getByRole('region', { name: 'Where you stand' }).querySelector('.home-overview-story-block')
     expect(within(story as HTMLElement).getByText('76%')).toBeInTheDocument()
     expect(within(story as HTMLElement).getByText('43 of 57 runs you started')).toBeInTheDocument()
-    expect(within(story as HTMLElement).getByLabelText('Runs finished 76%')).toBeInTheDocument()
-
-    // The record band used to open with its own "Levels finished" tile carrying
-    // the very same backend rate.
-    const record = screen.getByRole('region', { name: 'Run results' })
-    expect(within(record).queryByText('Levels finished')).not.toBeInTheDocument()
-    expect(Array.from(record.querySelectorAll('.home-overview-kpi-row > div > span:not(.home-overview-mini-sigil)')).map((label) => label.textContent)).toEqual([
-      'Hard levels finished',
-      'Retries per finish',
-      'Commands accepted',
-    ])
+    expect(within(story as HTMLElement).getByText('Overall finish rate')).toBeInTheDocument()
+    const signals = await screen.findByRole('group', { name: 'Module 1 KPIs' })
+    expect(within(signals).getByText('Scenario Completion Rate').closest('.objective-metric')!).toHaveTextContent('50%')
+    expect(within(signals).getByText('Command Accuracy Rate').closest('.objective-metric')!).toHaveTextContent('82%')
   })
 
   it('renders nothing of its own for the Profile category', () => {
@@ -130,17 +128,17 @@ describe('HomeStatsView contract', () => {
     expect(container.querySelector('.home-overview-grid')?.children).toHaveLength(0)
   })
 
-  it('plots the activity window and shows the citadel counts under Progress', () => {
+  it('plots the activity window and shows Arcane Spire tier counts under Progress', () => {
     renderView('progress')
 
     const progress = screen.getByRole('region', { name: 'Where you stand' })
     // The plot describes itself with the same totals the caption under it states.
     const plot = within(progress).getByRole('img', {
-      name: 'Last 30 days: 1,084 commands run and 56 levels finished, busiest in Tue, June 9 with 84 commands.',
+      name: 'Last 30 days: 1,084 Arcane Spire commands run and 56 tiers cleared, busiest in Tue, June 9 with 84 commands.',
     })
     expect(plot.querySelectorAll('.recharts-wrapper')).toHaveLength(2)
     expect(progress.querySelector('.home-overview-activity-summary')).toHaveTextContent(
-      '1,084 commands and 56 levels finished on 27 of 30 days',
+      '1,084 Arcane Spire commands and 56 tiers cleared on 27 of 30 days',
     )
 
     // The span control states which window is on screen, and only one is.
@@ -154,10 +152,10 @@ describe('HomeStatsView contract', () => {
     expect(progress.querySelector('.home-overview-activity')).not.toHaveAttribute('data-pending')
 
     // Hard trials won is gone from the list: it was the same count the record
-    // band's "Hard levels finished" tile already reports as its numerator.
+    // band's "Hard runs finished" tile already reports as its numerator.
     const story = progress.querySelector('.home-overview-story-block')
     expect(Array.from(story!.querySelectorAll('dt')).map((label) => label.textContent)).toEqual([
-      'Levels finished',
+      'Tiers cleared',
       'Flawless finishes',
     ])
     expect(Array.from(story!.querySelectorAll('dd')).map((value) => value.textContent)).toEqual(['43', '26'])
@@ -183,7 +181,9 @@ describe('HomeStatsView contract', () => {
     expect(skills.querySelectorAll('.home-overview-command-row')).toHaveLength(0)
     expect(within(skills).getByLabelText('Overall mastery 54%')).toBeInTheDocument()
     expect(within(skills).getByLabelText('2 of 3 proficiency stars')).toBeInTheDocument()
-    const radar = within(skills).getByRole('img', { name: /^Mastery across 18 git commands, overall 54%/ })
+    const radar = within(skills).getByRole('img', {
+      name: /^Mastery across 18 Arcane Spire commands, overall 54%/,
+    })
     expect(Array.from(radar.querySelectorAll('.ref-chart-rim-label')).map((tick) => tick.textContent)).toEqual([
       'init', 'clone', 'log', 'show', 'add', 'commit', 'restore', 'branch', 'switch',
       'merge', 'revert', 'reflog', 'stash', 'cherry-pick', 'fetch', 'pull', 'push', 'rebase',
@@ -209,94 +209,64 @@ describe('HomeStatsView contract', () => {
     renderView('skills')
 
     const gallery = screen.getByRole('region', { name: 'Achievement gallery' })
-    expect(within(gallery).getByText('325')).toBeInTheDocument()
-    expect(within(gallery).getByText('/ 435 pts')).toBeInTheDocument()
-    expect(within(gallery).getByLabelText('325 of 435 achievement points earned')).toBeInTheDocument()
+    expect(within(gallery).getByText('240')).toBeInTheDocument()
+    expect(within(gallery).getByText('/ 455 pts')).toBeInTheDocument()
+    expect(within(gallery).getByLabelText('240 of 455 achievement points earned')).toBeInTheDocument()
 
-    const unlocked = within(gallery).getByRole('button', { name: 'Unlocked 16' })
-    const locked = within(gallery).getByRole('button', { name: 'Locked 3' })
+    const unlocked = within(gallery).getByRole('button', { name: 'Unlocked 13' })
+    const locked = within(gallery).getByRole('button', { name: 'Locked 6' })
     expect(within(gallery).getByRole('button', { name: 'All 19' })).toHaveAttribute('aria-pressed', 'true')
-    // The gallery used to stop at eight cards, so "16 unlocked" displayed seven.
+    // The gallery used to stop at eight cards, so a long unlocked list was cut short.
     expect(gallery.querySelectorAll('.home-overview-achievement-card')).toHaveLength(19)
-    expect(gallery.querySelectorAll('.home-overview-achievement-card.is-unlocked')).toHaveLength(16)
+    expect(gallery.querySelectorAll('.home-overview-achievement-card.is-unlocked')).toHaveLength(13)
 
     fireEvent.click(unlocked)
     expect(unlocked).toHaveAttribute('aria-pressed', 'true')
-    expect(gallery.querySelectorAll('.home-overview-achievement-card')).toHaveLength(16)
+    expect(gallery.querySelectorAll('.home-overview-achievement-card')).toHaveLength(13)
     expect(gallery.querySelectorAll('.home-overview-achievement-card.is-locked')).toHaveLength(0)
 
     fireEvent.click(locked)
     expect(locked).toHaveAttribute('aria-pressed', 'true')
-    expect(gallery.querySelectorAll('.home-overview-achievement-card')).toHaveLength(3)
+    expect(gallery.querySelectorAll('.home-overview-achievement-card')).toHaveLength(6)
   })
 
-  it('shows the account record and the fetched module breakdown under Progress', async () => {
-    mocks.summary.mockResolvedValue(performanceFixture)
+  it('uses one fetched response for all four modules and their objectives', async () => {
     renderView('progress')
-
-    const results = screen.getByRole('region', { name: 'Run results' })
-    expect(Array.from(results.querySelectorAll('.home-overview-kpi-row > div > strong')).map((value) => value.textContent)).toEqual([
-      '62%', '1.60', '91%',
-    ])
-
-    const modules = within(results).getByRole('region', { name: 'Main story modules 1 to 4' })
-    // One small chart per measure, and Module 0 stays outside the reported band.
-    const charts = await waitFor(() => {
-      const found = Array.from(modules.querySelectorAll('.ref-chart-mini'))
-      expect(found).toHaveLength(4)
-      return found
-    })
-    expect(charts.map((chart) => chart.querySelector('figcaption')?.textContent)).toEqual([
-      'Levels finished',
-      'Hard levels finished',
-      'Retries that worked',
-      'Retries per finish',
-    ])
-    expect(
-      within(charts[0] as HTMLElement).getByRole('img', {
-        name: 'Levels finished per module: Module 1 - Repository Foundations 50%, Module 2 --',
-      }),
-    ).toBeInTheDocument()
-    // Every column is direct-labelled, so no value is reachable only by hovering.
-    expect(Array.from(charts[0].querySelectorAll('.ref-chart-column-value')).map((label) => label.textContent)).toEqual([
-      '50%',
-      '--',
-    ])
-    expect(Array.from(charts[3].querySelectorAll('.ref-chart-column-value')).map((label) => label.textContent)).toEqual([
-      '1.50',
-      '--',
-    ])
-    // The "M1" ticks stay short, so the key underneath expands them.
-    expect(Array.from(modules.querySelectorAll('.home-overview-module-key li')).map((entry) => entry.textContent)).toEqual([
-      'M1Module 1 - Repository Foundations',
-      'M2Module 2',
-    ])
+    const signals = await screen.findByRole('group', { name: 'Module 1 KPIs' })
+    expect(within(signals).getByText('Scenario Completion Rate').closest('.objective-metric')).toHaveTextContent('50%')
+    expect(within(signals).getByText('Average Retry Count').closest('.objective-metric')).toHaveTextContent('1.50')
+    expect(screen.getByRole('list', { name: 'Module 1 specific objectives' }).children).toHaveLength(8)
+    expect(screen.queryByRole('list', { name: 'Module 4 specific objectives' })).not.toBeInTheDocument()
+    fireEvent.click(screen.getByRole('tab', { name: 'Module 4' }))
+    expect(screen.getByRole('list', { name: 'Module 4 specific objectives' }).children).toHaveLength(5)
+    expect(screen.queryByRole('group', { name: 'Module 1 KPIs' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('group', { name: 'Module 0 KPIs' })).not.toBeInTheDocument()
+    expect(mocks.summary).toHaveBeenCalledTimes(1)
   })
 
-  it('keeps the account record readable when the module request fails', async () => {
-    mocks.summary.mockRejectedValue(new Error('metrics offline'))
+  it('keeps activity available and recovers the record with Retry', async () => {
+    mocks.summary.mockRejectedValueOnce(new Error('metrics offline'))
     renderView('progress')
-
-    expect(await screen.findByRole('alert')).toHaveTextContent('Module results are unavailable right now')
-    expect(Array.from(document.querySelectorAll('.home-overview-kpi-row > div > strong')).map((value) => value.textContent)).toEqual([
-      '62%', '1.60', '91%',
-    ])
+    expect(await screen.findByRole('alert')).toHaveTextContent('Your practice record is unavailable')
+    expect(screen.getByRole('region', { name: 'Where you stand' })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Retry' }))
+    expect(await screen.findByRole('group', { name: 'Module 1 KPIs' })).toBeInTheDocument()
+    expect(mocks.summary).toHaveBeenCalledTimes(2)
   })
 
-  it('preserves the empty-account fallbacks in every category', () => {
+  it('preserves the empty-account fallbacks in every category', async () => {
+    mocks.summary.mockResolvedValue({ ...performanceFixture, objectives: {}, modules: [] })
     const progress = renderView('progress', emptyHomeFixture, emptyStatsFixture)
     // No trend means no plot at all, never fourteen empty days drawn as data.
     expect(screen.queryByRole('img', { name: /^Activity over the last/ })).not.toBeInTheDocument()
     expect(screen.getByText(/Run your first command and this window starts filling in/)).toBeInTheDocument()
     const story = document.querySelector('.home-overview-story-block')
     expect(Array.from(story!.querySelectorAll('dd')).map((value) => value.textContent)).toEqual(['0', '0'])
-    // An account with no runs gets an honest dash, not a 0% citadel.
+    // An account with no runs gets an honest dash, not a 0% run meter.
     expect(within(story as HTMLElement).getByText('--')).toBeInTheDocument()
     expect(within(story as HTMLElement).getByText('No runs yet')).toBeInTheDocument()
-    expect(Array.from(document.querySelectorAll('.home-overview-kpi-row > div > strong')).map((value) => value.textContent)).toEqual([
-      '--', '--', '--',
-    ])
-    expect(screen.getByText('Unlocks after 100 commands')).toBeInTheDocument()
+    const signals = await screen.findByRole('group', { name: 'Module 1 KPIs' })
+    expect(within(signals).getAllByText('Not measured yet')).toHaveLength(4)
     progress.unmount()
 
     const skills = renderView('skills', emptyHomeFixture, emptyStatsFixture)
@@ -312,23 +282,17 @@ describe('HomeStatsView contract', () => {
     skills.unmount()
   })
 
-  it('keeps story precedence and the 100-command accuracy threshold exact', () => {
-    const home = structuredClone(richHomeFixture)
+  it('keeps tier-completion zero exact and reads command acceptance only from performance', async () => {
     const stats = structuredClone(richStatsFixture)
     stats.headline.levels_completed = 0
     stats.headline.perfect_clears = 30
-    stats.headline.commands_run = 99
-    stats.headline.accuracy = 95
-
-    const first = renderView('progress', home, stats)
+    stats.headline.commands_run = 1
+    stats.headline.accuracy = 10
+    renderView('progress', richHomeFixture, stats)
     const story = document.querySelector('.home-overview-story-block')
-    expect(Array.from(story!.querySelectorAll('dd')).map((value) => value.textContent)).toEqual(['43', '30'])
-    expect(Array.from(document.querySelectorAll('.home-overview-kpi-row > div > strong')).at(-1)).toHaveTextContent('--')
-    first.unmount()
-
-    stats.headline.commands_run = 100
-    renderView('progress', home, stats)
-    expect(Array.from(document.querySelectorAll('.home-overview-kpi-row > div > strong')).at(-1)).toHaveTextContent('95%')
+    expect(Array.from(story!.querySelectorAll('dd')).map((value) => value.textContent)).toEqual(['0', '30'])
+    const signals = await screen.findByRole('group', { name: 'Module 1 KPIs' })
+    expect(within(signals).getByText('Command Accuracy Rate').closest('.objective-metric')!).toHaveTextContent('82%')
   })
 
   it('does not mutate frozen input summaries', () => {

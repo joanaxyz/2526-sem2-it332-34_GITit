@@ -108,6 +108,11 @@ try {
           diagnostic: Boolean(execution.diagnostic),
           before_edits: beforeEdits,
           ready: normalizeState(state),
+          // What the browser submits with the command, so the backend's
+          // transition verifier can be replayed over the same route.
+          normalized_command: execution.normalized_command ?? commands[i],
+          command_family: execution.command_family ?? '',
+          exit_code: execution.exit_code ?? 0,
         })
         if (!execution.processed) {
           throw new Error(

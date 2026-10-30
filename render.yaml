@@ -59,13 +59,13 @@ services:
       # Hostnames only. A scheme or a trailing slash never matches and makes
       # Django reject every request with DisallowedHost.
       - key: DJANGO_ALLOWED_HOSTS
-        value: git-it-app-czpy.onrender.com,git-it-eight.vercel.app
+        value: git-it-app-czpy.onrender.com,git-it-34.vercel.app
 
       # Password-reset links. Render no longer serves the SPA, so point this
       # at the Vercel origin once it exists. Must be an https:// origin or
       # Django refuses to start.
       - key: FRONTEND_BASE_URL
-        value: https://git-it-eight.vercel.app
+        value: https://git-it-34.vercel.app
 
       # The Vercel origin, for example https://your-project.vercel.app.
       # While the Vercel rewrite is in place the browser never calls this
@@ -171,11 +171,28 @@ services:
       - key: DJANGO_SUPERUSER_PASSWORD
         sync: false
 
-      # Email is deliberately disabled for this disposable preview.
+      # Free web services block outbound SMTP ports, so password emails go
+      # through Brevo's HTTPS API. No domain is needed: verify one sender
+      # address in Brevo (Senders, Domains & Dedicated IPs > Senders) and
+      # set it as DEFAULT_FROM_EMAIL, e.g. GIT it! <your-sender@gmail.com>.
+      # Set both secrets in the Render dashboard; never commit the API key.
       - key: EMAIL_BACKEND
-        value: django.core.mail.backends.dummy.EmailBackend
+        value: anymail.backends.brevo.EmailBackend
+      - key: BREVO_API_KEY
+        sync: false
       - key: DEFAULT_FROM_EMAIL
-        value: GIT it! <no-reply@example.com>
+        sync: false
+      # GitHub and Google sign-in. Providers call back through the Vercel /api
+      # proxy (FRONTEND_BASE_URL + /api/auth/oauth/<provider>/callback/); see
+      # deploy/RENDER.md. A provider with a blank id or secret is unavailable.
+      - key: GITHUB_OAUTH_CLIENT_ID
+        sync: false
+      - key: GITHUB_OAUTH_CLIENT_SECRET
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_ID
+        sync: false
+      - key: GOOGLE_OAUTH_CLIENT_SECRET
+        sync: false
       - key: PASSWORD_RESET_TIMEOUT
         value: "3600"
       - key: API_VERSION

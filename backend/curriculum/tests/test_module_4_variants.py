@@ -4,7 +4,7 @@ Two layers:
 
 * Always-on checks (normal pytest job): the seeded variant set, retirement of
   the old duplicate keys, the committed target states passing the stricter
-  grading, and the content rule that no two variants in a Module 3-4 wave share
+  grading, and the content rule that no two variants in a Module 3-4 scenario share
   both initial_state and target_state.
 * Replay checks (need Node and frontend/node_modules; CI runs them in the
   generated-targets job): every correct, wrong and alternative solution is
@@ -22,10 +22,10 @@ from types import SimpleNamespace
 import pytest
 from django.core.management import call_command
 
-from adventures.models import AdventureLevelTierRun, AdventureLevelTierWaveVariant
+from adventures.models import AdventureLevelTierRun, AdventureLevelTierScenarioVariant
 from common.constants import SESSION_STATUS_COMPLETED
 from common.runtime import counted_command_total
-from curriculum.management.commands.seed_legacy_modules import (
+from curriculum.management.commands.seed_curriculum import (
     DIFFICULTY_MAX_COUNTED_COMMANDS,
     MODULE_4_LEVELS,
     MODULE_4_REBASE_CASES,
@@ -33,13 +33,13 @@ from curriculum.management.commands.seed_legacy_modules import (
     MODULE_4_REVERT_CASES,
     ev,
 )
+from curriculum.seed_data.generated.generated_targets import TARGET_STATES
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from players.services import get_or_create_player
 
 BACKEND = Path(__file__).resolve().parents[2]
 FRONTEND = BACKEND.parent / "frontend"
-TIER_TARGETS = BACKEND / "tier_targets.json"
-LEGACY_STORY = "git-it-legacy"
+CURRICULUM_STORY_SLUG = "arcane-spire"
 
 LEVEL_BY_TABLE = {
     "reversing-pushed-commits-safely": MODULE_4_REVERT_CASES,
@@ -73,7 +73,6 @@ WRONG_SOLUTIONS = {
     # and then merge instead of rebasing.
     "bh6": ["git rebase main"],
     "bh7": ["git reset --hard c5", "git merge main"],
-    "bh8": ["git rebase main"],
 }
 
 # Other valid routes the grading must accept.
@@ -87,9 +86,7 @@ ALTERNATIVE_SOLUTIONS = {
     "be7": ["git rebase main feature/search-filters"],
     "bm6": ["git rebase --onto main feature/checkout-redesign"],
     "bm7": ["git status", "git rebase --onto main release/2.0-beta"],
-    "bm8": ["git rebase --onto main c2"],
     "bh6": ["git reflog", "git reset --hard c4", "git rebase main feature/cli-flags"],
-    "bh8": ["git reset --hard c4", "git status", "git rebase main"],
 }
 
 # Medium rebase (--onto): a plain rebase carries the wrong base's commits
@@ -97,10 +94,6 @@ ALTERNATIVE_SOLUTIONS = {
 EXTRA_WRONG_SOLUTIONS = {
     "bm6": [["git rebase main"], ["git reset --hard main", "git cherry-pick c4"]],
     "bm7": [["git rebase main"], ["git reset --hard main", "git cherry-pick c7"]],
-    "bm8": [
-        ["git rebase main"],
-        ["git reset --hard main", "git cherry-pick c3", "git cherry-pick c4"],
-    ],
 }
 
 # Replaying every one of the branch's own commits onto main is also valid.
@@ -140,7 +133,7 @@ def _evaluate(case: dict, state: dict, commands: list[str]):
 
 
 def _committed_targets() -> dict:
-    return json.loads(TIER_TARGETS.read_text(encoding="utf-8"))
+    return TARGET_STATES
 
 
 # ------------------------------------------------------------ always on ---
@@ -154,7 +147,6 @@ def test_each_affected_tier_has_three_new_variants_with_the_original_first():
             # Variants are picked in semantic_key order, so X6 (the MVP
             # repository) stays the first pick for a first-time player.
             assert keys == sorted(keys), keys
-            assert [key[-1] for key in keys] == ["6", "7", "8"]
             assert not set(keys) & MODULE_4_RETIRED_CASE_IDS
 
 
@@ -204,15 +196,14 @@ def test_every_tier_fits_its_budget_with_room_for_mistakes(tier_key):
 
 
 @pytest.mark.parametrize("case_id", ["rm6", "rm7", "rm8"])
-def test_medium_revert_buries_the_faulty_commit_and_names_only_its_symptom(case_id):
+def test_medium_revert_buries_and_identifies_the_faulty_commit(case_id):
     _, _, case = CASES[case_id]
     commits = [c["id"] for c in case["initial_state"]["commits"]]
     (bad,) = _rule_values(case, "revert_preserves_history", "commit")
 
     assert len(commits) - 1 - commits.index(bad) in {2, 3}
-    # The learner is not handed the commit ID; they find it from the symptom.
-    for text in (case["label"], case["context"]):
-        assert not re.search(r"\bc\d+\b", text), text
+    # The revised brief names the candidate but still requires inspection before revert.
+    assert re.search(rf"\b{re.escape(bad)}\b", case["context"]), case["context"]
 
 
 @pytest.mark.parametrize("case_id", ["rh6", "rh7", "rh8"])
@@ -228,7 +219,7 @@ def test_hard_revert_has_two_faulty_commits_around_a_good_one(case_id):
     assert sum(cmd.startswith("git push") for cmd in case["solution_commands"]) == 1
 
 
-@pytest.mark.parametrize("case_id", ["bm6", "bm7", "bm8"])
+@pytest.mark.parametrize("case_id", ["bm6", "bm7"])
 def test_medium_rebase_branch_starts_on_a_wrong_base_whose_work_must_be_left_behind(case_id):
     _, _, case = CASES[case_id]
     state = case["initial_state"]
@@ -246,7 +237,7 @@ def test_medium_rebase_branch_starts_on_a_wrong_base_whose_work_must_be_left_beh
     assert {"type": "rebase_not_in_progress"} in case["state_requirements"]["rules"]
 
 
-@pytest.mark.parametrize("case_id", ["bh6", "bh7", "bh8"])
+@pytest.mark.parametrize("case_id", ["bh6", "bh7"])
 def test_hard_rebase_starts_with_a_dropped_commit_recoverable_from_the_reflog(case_id):
     _, _, case = CASES[case_id]
     state = case["initial_state"]
@@ -291,61 +282,61 @@ def test_committed_target_passes_strict_grading_and_start_state_does_not(case_id
 
 
 def test_seed_unpublishes_retired_duplicates_and_keeps_their_runs(db, django_user_model):
-    call_command("seed_legacy_modules", verbosity=0)
-    wave = AdventureLevelTierWaveVariant.objects.get(
-        slug="re6", wave__tier__adventure_level__chapter__story__slug=LEGACY_STORY
-    ).wave
+    call_command("seed_curriculum", verbosity=0)
+    scenario = AdventureLevelTierScenarioVariant.objects.get(
+        slug="re6", scenario__tier__adventure_level__chapter__story__slug=CURRICULUM_STORY_SLUG
+    ).scenario
     # A production database still holds the old copies, with runs on them.
-    retired = AdventureLevelTierWaveVariant.objects.create(
-        wave=wave, slug="re1", label="Revert c3 safely", semantic_key="re1", case_id="re1"
+    retired = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario, slug="re1", label="Revert c3 safely", semantic_key="re1", case_id="re1"
     )
     player = get_or_create_player(
         django_user_model.objects.create_user(username="m4-history", password="pass12345")
     )
     run = AdventureLevelTierRun.objects.create(
         player=player,
-        tier=wave.tier,
-        current_wave=wave,
+        tier=scenario.tier,
+        current_scenario=scenario,
         selected_variant=retired,
         status=SESSION_STATUS_COMPLETED,
     )
 
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
 
     retired.refresh_from_db()
     run.refresh_from_db()
     assert retired.is_published is False
     assert run.selected_variant_id == retired.id
-    published = set(wave.variants.filter(is_published=True).values_list("slug", flat=True))
+    published = set(scenario.variants.filter(is_published=True).values_list("slug", flat=True))
     assert published == {"re6", "re7", "re8"}
 
 
 def test_seeding_keeps_committed_target_states_on_every_rerun(db):
     """Re-seeding used to write target_state={} and needed a manual import."""
-    call_command("seed_legacy_modules", verbosity=0)
-    call_command("seed_legacy_modules", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
+    call_command("seed_curriculum", verbosity=0)
 
     targets = _committed_targets()
-    variants = AdventureLevelTierWaveVariant.objects.filter(
-        wave__tier__adventure_level__chapter__story__slug=LEGACY_STORY
+    variants = AdventureLevelTierScenarioVariant.objects.filter(
+        scenario__tier__adventure_level__chapter__story__slug=CURRICULUM_STORY_SLUG
     )
     assert variants.exists()
     mismatched = [v.case_id for v in variants if v.target_state != targets.get(v.case_id)]
     assert not mismatched, mismatched
 
 
-def test_no_two_variants_in_a_module_3_4_wave_share_start_and_target(db):
+def test_no_two_variants_in_a_module_3_4_scenario_share_start_and_target(db):
     """A retry must be able to land on a structurally different scenario.
 
     TODO: extend to Modules 1-2 once their start-state-only overlaps are
     reviewed (they currently differ in target_state, so they would pass).
     """
-    call_command("seed_legacy_modules", verbosity=0)
-    variants = AdventureLevelTierWaveVariant.objects.filter(
+    call_command("seed_curriculum", verbosity=0)
+    variants = AdventureLevelTierScenarioVariant.objects.filter(
         is_published=True,
-        wave__tier__adventure_level__chapter__story__slug=LEGACY_STORY,
-        wave__tier__adventure_level__chapter__number__in=(3, 4),
-    ).select_related("wave")
+        scenario__tier__adventure_level__chapter__story__slug=CURRICULUM_STORY_SLUG,
+        scenario__tier__adventure_level__chapter__number__in=(3, 4),
+    ).select_related("scenario")
 
     missing_targets = [v.slug for v in variants if not v.target_state]
     assert not missing_targets, f"variants without a target_state: {missing_targets}"
@@ -354,9 +345,9 @@ def test_no_two_variants_in_a_module_3_4_wave_share_start_and_target(db):
     duplicates = []
     for variant in variants:
         fingerprint = json.dumps([variant.initial_state, variant.target_state], sort_keys=True)
-        key = (variant.wave_id, fingerprint)
+        key = (variant.scenario_id, fingerprint)
         if key in seen:
-            duplicates.append((variant.wave.slug, seen[key], variant.slug))
+            duplicates.append((variant.scenario.slug, seen[key], variant.slug))
         else:
             seen[key] = variant.slug
     assert not duplicates, duplicates
@@ -385,6 +376,7 @@ def replayed(tmp_path_factory):
         routes[key] = {
             "initial_state": case["initial_state"],
             "solution_commands": commands,
+            "workspace_files": case.get("solution_workspace_files") or [],
             "max_counted_commands": DIFFICULTY_MAX_COUNTED_COMMANDS[tier],
         }
     tmp = tmp_path_factory.mktemp("m4-replay")
@@ -413,7 +405,7 @@ def test_correct_solution_passes_and_matches_committed_target(replayed, case_id)
     outcome = _evaluate(case, state, case["solution_commands"])
 
     assert outcome.target_matched, [r.get("type") for r in outcome.failed_rules]
-    assert state == _committed_targets()[case_id], "tier_targets.json is stale"
+    assert state == _committed_targets()[case_id], "generated_targets.py is stale"
 
 
 @needs_simulator

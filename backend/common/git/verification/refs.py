@@ -94,6 +94,26 @@ class RefVerificationMixin:
         if next_state.get("head") != previous_state.get("head"):
             raise BadRequest("git branch must not move HEAD unless renaming the current branch.")
 
+    def _require_checkout_reflog(
+        self, *, previous_state: dict, next_state: dict, to: str, target: str | None, label: str
+    ) -> None:
+        """A switch appends Git's ``checkout: moving from X to Y`` HEAD entry."""
+        expected = list(previous_state.get("reflog") or [])
+        if target:
+            head = previous_state.get("head") or {}
+            moved_from = (
+                head.get("name") if head.get("type") == "branch" else head.get("target")
+            ) or "HEAD"
+            expected.append(
+                {
+                    "ref": f"HEAD@{{{len(expected)}}}",
+                    "target": target,
+                    "message": f"checkout: moving from {moved_from} to {to}",
+                }
+            )
+        if (next_state.get("reflog") or []) != expected:
+            raise BadRequest(f"execution.next_state does not match the submitted {label} command.")
+
     def _verify_switch(self, *, command: str, previous_state: dict, next_state: dict) -> None:
         for key in self.REF_ONLY_IMMUTABLE_KEYS:
             self._require_same_key(key, previous_state, next_state)
@@ -110,6 +130,13 @@ class RefVerificationMixin:
                     "execution.next_state does not match the submitted git switch command."
                 )
             self._require_same_key("branches", previous_state, next_state)
+            self._require_checkout_reflog(
+                previous_state=previous_state,
+                next_state=next_state,
+                to=target,
+                target=target,
+                label="git switch",
+            )
             return
         create = "-c" in parts or "--create" in parts
         if create:
@@ -134,6 +161,13 @@ class RefVerificationMixin:
                 raise BadRequest(
                     "execution.next_state does not match the submitted git switch command."
                 )
+            self._require_checkout_reflog(
+                previous_state=previous_state,
+                next_state=next_state,
+                to=name,
+                target=target,
+                label="git switch",
+            )
             return
         name = args[0] if args else ""
         expected_branches = copy.deepcopy(previous_state.get("branches") or {})
@@ -159,6 +193,13 @@ class RefVerificationMixin:
             raise BadRequest(
                 "execution.next_state does not match the submitted git switch command."
             )
+        self._require_checkout_reflog(
+            previous_state=previous_state,
+            next_state=next_state,
+            to=name,
+            target=target,
+            label="git switch",
+        )
 
     def _verify_checkout(self, *, command: str, previous_state: dict, next_state: dict) -> None:
         parts = parse_git_command(command) or []
@@ -187,6 +228,13 @@ class RefVerificationMixin:
                 raise BadRequest(
                     "execution.next_state does not match the submitted git checkout command."
                 )
+            self._require_checkout_reflog(
+                previous_state=previous_state,
+                next_state=next_state,
+                to=name,
+                target=target,
+                label="git checkout",
+            )
             return
 
         for key in self.INDEX_WORKTREE_IMMUTABLE_KEYS:

@@ -189,33 +189,6 @@ class AdminTransactionListQuerySerializer(serializers.Serializer):
     user_id = serializers.IntegerField(required=False, min_value=1)
 
 
-class AdminOfficialChapterBriefSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    title = serializers.CharField()
-
-
-class AdminContentSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    kind = serializers.ChoiceField(choices=["adventure", "challenge", "lesson"])
-    slug = serializers.SlugField()
-    title = serializers.CharField()
-    status = serializers.CharField()
-    visibility = serializers.CharField()
-    official_chapter = AdminOfficialChapterBriefSerializer(allow_null=True)
-    updated_at = serializers.DateTimeField()
-
-
-class AdminContentListResponseSerializer(serializers.Serializer):
-    results = AdminContentSerializer(many=True)
-
-
-class AdminContentListQuerySerializer(serializers.Serializer):
-    kind = serializers.ChoiceField(
-        choices=["adventure", "challenge", "lesson"],
-        required=False,
-    )
-
-
 class AdminRunBreakdownSerializer(serializers.Serializer):
     by_status = serializers.DictField(child=serializers.IntegerField(min_value=0))
     total = serializers.IntegerField(min_value=0)
@@ -261,27 +234,6 @@ class AdminUserKpisResponseSerializer(serializers.Serializer):
     has_data = serializers.BooleanField()
     kpis = PerformanceKpiSetSerializer(allow_null=True)
     modules = PerformanceModuleSerializer(many=True)
-
-
-class AdminModerationContentSerializer(serializers.Serializer):
-    id = serializers.IntegerField()
-    kind = serializers.CharField()
-    title = serializers.CharField()
-    owner = serializers.CharField(allow_null=True)
-    updated_at = serializers.DateTimeField()
-
-
-class AdminModerationListResponseSerializer(serializers.Serializer):
-    content = AdminModerationContentSerializer(many=True)
-
-
-class AdminModerationUnpublishRequestSerializer(StrictSerializer):
-    kind = serializers.ChoiceField(choices=["content"])
-    id = serializers.IntegerField(min_value=1)
-
-
-class AdminOkayResponseSerializer(serializers.Serializer):
-    ok = serializers.BooleanField()
 
 
 class AdminStoryPrerequisiteSerializer(serializers.Serializer):

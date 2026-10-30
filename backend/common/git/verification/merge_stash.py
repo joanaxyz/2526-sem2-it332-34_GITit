@@ -203,16 +203,20 @@ class MergeStashVerificationMixin:
         base_tree = self._tree_for_commit(previous_state, base_id)
 
         if "--squash" in parts:
+            # A squash merges three ways too: work only the current branch has survives.
+            if self._overlapping_conflicts(base_tree, current_tree, target_tree):
+                raise BadRequest("The simulator does not stage a conflicted squash merge.")
+            merged_tree = self._three_way_tree(base_tree, current_tree, target_tree, set())
             expected = copy.deepcopy(previous_state)
             expected_staging = copy.deepcopy(previous_state.get("staging") or {})
-            for path, value in target_tree.items():
+            for path, value in merged_tree.items():
                 if value != current_tree.get(path):
                     expected_staging[path] = {
                         "status": self.normalizer.change_type(current_tree.get(path), value),
                         "content": copy.deepcopy(value),
                     }
             for path in current_tree:
-                if path not in target_tree:
+                if path not in merged_tree:
                     expected_staging[path] = "deleted"
             expected["staging"] = expected_staging
             self._set_operation_metadata(
@@ -227,6 +231,12 @@ class MergeStashVerificationMixin:
 
         conflict_paths = set(self._authored_conflict_paths(previous_state))
         conflict_paths.update(self._overlapping_conflicts(base_tree, current_tree, target_tree))
+        merged_tree = self._three_way_tree(base_tree, current_tree, target_tree, conflict_paths)
+        incoming_paths = sorted(self.normalizer.diff_trees(current_tree, merged_tree))
+        # Like Git, a merge never overwrites uncommitted work on a path it touches.
+        local_paths = self._locally_changed_paths(previous_state)
+        if local_paths & (set(incoming_paths) | conflict_paths):
+            raise BadRequest("Local changes would be overwritten by the submitted git merge.")
         if conflict_paths:
             expected = copy.deepcopy(previous_state)
             expected["merge_parent"] = target_id
@@ -250,10 +260,9 @@ class MergeStashVerificationMixin:
                     target_tree.get(path),
                     resolution,
                 )
-            for path in sorted(set(current_tree) | set(target_tree)):
-                if path in conflict_paths or current_tree.get(path) == target_tree.get(path):
-                    continue
-                after = target_tree.get(path)
+            # Only incoming changes are staged; files only this branch changed stay committed.
+            for path in incoming_paths:
+                after = merged_tree.get(path)
                 expected.setdefault("staging", {})[path] = (
                     "deleted"
                     if after is None
@@ -287,21 +296,17 @@ class MergeStashVerificationMixin:
             )
             return expected
 
-        staged_paths = [
-            path
-            for path in sorted(set(current_tree) | set(target_tree))
-            if current_tree.get(path) != target_tree.get(path)
-        ]
+        staged_paths = incoming_paths
         expected = copy.deepcopy(previous_state)
         commit_id = self._next_commit_id(previous_state)
-        changes = self.normalizer.diff_trees(current_tree, target_tree)
+        changes = self.normalizer.diff_trees(current_tree, merged_tree)
         expected.setdefault("commits", []).append(
             self._commit_payload(
                 state=previous_state,
                 commit_id=commit_id,
                 message=f"Merge branch '{branch}'",
                 parents=[value for value in (current_id, target_id) if value],
-                tree=target_tree,
+                tree=merged_tree,
                 changes=changes,
             )
         )
@@ -416,6 +421,30 @@ class MergeStashVerificationMixin:
             if ours != base and theirs != base and ours != theirs:
                 conflicts.append(path)
         return conflicts
+
+    @staticmethod
+    def _three_way_tree(
+        base_tree: dict, current_tree: dict, target_tree: dict, conflict_paths: set[str]
+    ) -> dict:
+        """Merge result for every non-conflicting path: take whichever side changed it."""
+        merged: dict = {}
+        for path in set(base_tree) | set(current_tree) | set(target_tree):
+            ours = current_tree.get(path)
+            if path in conflict_paths or ours != base_tree.get(path):
+                result = ours
+            else:
+                result = target_tree.get(path)
+            if result is not None:
+                merged[path] = copy.deepcopy(result)
+        return merged
+
+    def _locally_changed_paths(self, state: dict) -> set[str]:
+        """Paths with uncommitted work: anything staged, or a tracked working-tree change."""
+        paths = set(state.get("staging") or {})
+        for path, entry in (state.get("working_tree") or {}).items():
+            if self.normalizer.entry_status(entry) not in {"untracked", "ignored"}:
+                paths.add(path)
+        return paths
 
     def _conflict_entry(
         self, branch: str, base: Any, ours: Any, theirs: Any, resolution: Any

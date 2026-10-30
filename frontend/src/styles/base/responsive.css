@@ -11,10 +11,6 @@
     padding-inline: 0.85rem;
   }
 
-  .app-brand small {
-    display: none;
-  }
-
   .app-nav {
     --nav-item-width: 7.2rem;
   }
@@ -62,13 +58,6 @@
   }
 }
 
-/* The wordmark is the last thing to go, after the labels it outranks. */
-@media (max-width: 800px) {
-  .app-brand-copy {
-    display: none;
-  }
-}
-
 @media (max-width: 720px) {
   :root {
     --app-topbar-height: 3.55rem;
@@ -87,12 +76,8 @@
     border-right: 0;
   }
 
-  .app-brand-copy {
-    display: block;
-  }
-
-  .app-brand strong {
-    font-size: 1.26rem;
+  .app-brand-logo {
+    width: 7.5rem;
   }
 
   .app-audio-control {
@@ -124,26 +109,41 @@
 }
 
 @media (max-width: 430px) {
-  .app-brand strong {
-    font-size: 1.12rem;
-  }
-
-  .app-brand-sigil {
-    width: 2.1rem;
-    height: 2.1rem;
-  }
-
-  .app-brand-sigil img {
-    width: 1.6rem;
-    height: 1.6rem;
-  }
-
-  .app-brand {
-    gap: 0.45rem;
+  .app-brand-logo {
+    width: 6.5rem;
   }
 
   .app-audio-control {
     width: 2rem;
     min-width: 2rem;
+  }
+}
+
+@media (max-width: 360px) {
+  .app-brand {
+    padding-inline: 0.5rem 0.25rem;
+  }
+
+  .app-brand-logo {
+    width: 5rem;
+  }
+
+  .app-wallet {
+    gap: 0.35rem;
+    padding-inline: 0.4rem;
+  }
+
+  .app-wallet img {
+    width: 1.4rem;
+    height: 1.4rem;
+  }
+
+  .app-wallet strong {
+    font-size: var(--text-sm);
+  }
+
+  .app-profile-trigger {
+    gap: 0.35rem;
+    padding-inline: 0.45rem;
   }
 }

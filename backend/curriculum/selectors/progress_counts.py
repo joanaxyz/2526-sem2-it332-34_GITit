@@ -9,22 +9,7 @@ def chapter_completion_count_map(*, player, chapter_ids: list[int]) -> dict[int,
         return {}
 
     completed_levels_by_chapter = {chapter_id: set() for chapter_id in chapter_ids}
-    from progress.models import (
-        AdventureLevelCompletion,
-        AdventureLevelTierCompletion,
-        ChallengeTrialCompletion,
-    )
-
-    for chapter_id, _level_id in (
-        AdventureLevelCompletion.objects.filter(
-            player=player,
-            adventure_level__is_published=True,
-            adventure_level__chapter_id__in=chapter_ids,
-        )
-        .values_list("adventure_level__chapter_id", "adventure_level_id")
-        .distinct()
-    ):
-        completed_levels_by_chapter[chapter_id].add(_level_id)
+    from progress.models import AdventureLevelTierCompletion, ChallengeTrialCompletion
 
     for chapter_id, level_id in (
         AdventureLevelTierCompletion.objects.filter(

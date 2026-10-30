@@ -9,39 +9,21 @@ import { Map, Sparkles, UserRound, type LucideIcon } from 'lucide-react'
  * things a player comes back to look at, and the companion is a prerequisite for
  * playing at all, so a player with none sees the gap immediately.
  *
- * Progress and Run results used to be separate categories, but they reported the
- * same facts under different names — the citadel meter and the "Levels finished"
- * tile were both the backend's one finish rate. They are one category now, and
- * each number is stated exactly once.
+ * Progress combines recent activity, active-curriculum context, and the
+ * Modules 1–4 practice record. Legacy Run results links land there too.
  */
 export type HomeView = 'profile' | 'progress' | 'skills'
 
 export type HomeViewOption = {
   id: HomeView
   label: string
-  blurb: string
   Icon: LucideIcon
 }
 
 export const HOME_VIEWS: readonly HomeViewOption[] = [
-  {
-    id: 'profile',
-    label: 'Profile',
-    blurb: 'Your rank, your companion, and the spells you have learned',
-    Icon: UserRound,
-  },
-  {
-    id: 'progress',
-    label: 'Progress',
-    blurb: 'How far through the story you are, your recent activity, and your run record',
-    Icon: Map,
-  },
-  {
-    id: 'skills',
-    label: 'Skills & achievements',
-    blurb: 'How confidently you handle each Git command, and what you have earned',
-    Icon: Sparkles,
-  },
+  { id: 'profile', label: 'Profile', Icon: UserRound },
+  { id: 'progress', label: 'Progress', Icon: Map },
+  { id: 'skills', label: 'Skills & achievements', Icon: Sparkles },
 ] as const
 
 export const DEFAULT_HOME_VIEW: HomeView = 'profile'

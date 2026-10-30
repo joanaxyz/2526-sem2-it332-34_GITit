@@ -1,0 +1,79 @@
+@media (max-width: 960px) {
+  .landing-how {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-areas:
+      'intro'
+      'vignette'
+      'steps';
+    grid-template-rows: none;
+  }
+
+  .landing-climb {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .landing-encounter {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+/* Mid widths: the copy reaches the Spire, so the shade reaches further too. */
+@media (min-width: 721px) and (max-width: 1100px) {
+  .landing-hero::after {
+    background:
+      linear-gradient(90deg, rgba(4, 9, 20, 0.95) 0%, rgba(4, 9, 20, 0.85) 48%, rgba(4, 9, 20, 0.3) 82%, transparent 100%),
+      linear-gradient(180deg, transparent 62%, hsl(var(--background)) 100%);
+  }
+}
+
+@media (max-width: 720px) {
+  .landing-hero {
+    align-items: end;
+    padding-top: 6rem;
+  }
+
+  .landing-hero__sky {
+    background-position: 8% center;
+  }
+
+  .landing-hero::after {
+    background: linear-gradient(180deg, rgba(4, 9, 20, 0.2) 0%, rgba(4, 9, 20, 0.7) 40%, hsl(var(--background)) 100%);
+  }
+
+  /* EncounterStage also scales its actors down at this width. */
+  .landing-stage {
+    --landing-ground: 1.75rem;
+
+    height: 13rem;
+  }
+
+  .landing-tiers__row {
+    grid-template-columns: 3.75rem repeat(3, minmax(0, 1fr));
+    gap: var(--space-2);
+  }
+
+  .landing-tiers__support {
+    font-size: var(--text-xs);
+  }
+
+  .landing-vignette__terminal {
+    font-size: var(--text-xs);
+  }
+}
+
+/* Every animated part settles on its final frame without moving. */
+:root[data-motion='reduced'] .landing *,
+:root[data-motion='reduced'] .landing *::before,
+:root[data-motion='reduced'] .landing *::after {
+  animation: none !important;
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .landing *,
+  .landing *::before,
+  .landing *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

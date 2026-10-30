@@ -1,18 +1,23 @@
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { PanelLeftOpen, PanelRightOpen, X } from 'lucide-react'
 
 import { StoryAdventurePath } from '@/features/story-map/components/path/StoryAdventurePath'
+import { CompanionRequiredOverlay } from '@/features/story-map/components/CompanionRequiredOverlay'
 import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
 import { ChapterOverview } from '@/features/story-map/components/ChapterOverview'
 import { OrientationLessonWorkspace } from '@/features/story-map/components/orientation/OrientationLessonWorkspace'
 import { StoryChapterList } from '@/features/story-map/components/StoryChapterList'
 import { StoryOnboarding } from '@/features/story-map/components/StoryOnboarding'
 import { StoryCompanionPanel, StorySkillFocusPanel } from '@/features/story-map/components/StorySidePanels'
-import { storyMapApi } from '@/features/story-map/api/storyMapApi'
+import {
+  chapterOverviewQueryOptions,
+  storyChaptersQueryOptions,
+  storyMapApi,
+} from '@/features/story-map/api/storyMapApi'
 import { useStories } from '@/features/story-map/hooks/useStories'
-import { chapterTitle, firstOpenChapter } from '@/features/story-map/utils/storyMapChapter'
+import { chapterTitle, firstOpenChapter, mascotKnowledgeFocusLevelId } from '@/features/story-map/utils/storyMapChapter'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
@@ -21,6 +26,8 @@ import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { useAuthStore } from '@/shared/auth/useAuth'
 import { getStoryWorld } from '@/shared/story-worlds/registry'
 import { storyWorldStyle } from '@/shared/story-worlds/theme'
+import { WorldMascot } from '@/shared/mascot/WorldMascot'
+import { useMascotKnowledge } from '@/features/skills/hooks/useMascotKnowledge'
 
 const COMPACT_STORY_MAP_QUERY = '(max-width: 1120px)'
 
@@ -47,16 +54,15 @@ export function StoryMapPage() {
   const userId = useAuthStore((state) => state.user?.id)
   const onboarding = useAppOnboarding()
   const { storySlug: routeStorySlug } = useParams<{ storySlug: string }>()
-  const storySlug = routeStorySlug ?? 'git-it-legacy'
-  const [searchParams] = useSearchParams()
+  const storySlug = routeStorySlug ?? 'arcane-spire'
+  const [searchParams, setSearchParams] = useSearchParams()
   const chapterParam = searchParams.get('chapter')
   const focusedChapterId = chapterParam ? Number(chapterParam) : null
+  const companionRequiredFromRoute = searchParams.get('companion-required') === '1'
+  const [companionPromptOpen, setCompanionPromptOpen] = useState(companionRequiredFromRoute)
 
-  const chaptersQuery = useQuery({
-    queryKey: queryKeys.storyChapters(storySlug),
-    queryFn: () => storyMapApi.listChapters(storySlug),
-    staleTime: 5 * 60 * 1000,
-  })
+  const queryClient = useQueryClient()
+  const chaptersQuery = useQuery(storyChaptersQueryOptions(storySlug))
   const storiesQuery = useStories()
 
   const chapters = useMemo(() => chaptersQuery.data ?? [], [chaptersQuery.data])
@@ -90,6 +96,20 @@ export function StoryMapPage() {
   const [leftRailOpen, setLeftRailOpen] = useState(false)
   const [rightRailOpen, setRightRailOpen] = useState(false)
   const compactStoryMap = useCompactStoryMap()
+
+  useEffect(() => {
+    if (companionRequiredFromRoute && !hasCompanion && !loadoutLoading) {
+      setCompanionPromptOpen(true)
+    }
+  }, [companionRequiredFromRoute, hasCompanion, loadoutLoading])
+
+  useEffect(() => {
+    if (!hasCompanion || !companionRequiredFromRoute) return
+    const next = new URLSearchParams(searchParams)
+    next.delete('companion-required')
+    setSearchParams(next, { replace: true })
+    setCompanionPromptOpen(false)
+  }, [companionRequiredFromRoute, hasCompanion, searchParams, setSearchParams])
   // A story only runs orientation if it actually has a Module 0. Without this
   // guard the disabled lessons query stays `isPending` forever, and the map
   // below never leaves its loading state.
@@ -149,19 +169,31 @@ export function StoryMapPage() {
     () => chapters.find((chapter) => chapter.id === activeChapterId) ?? firstOpenChapter(chapters, !orientationRequested),
     [activeChapterId, chapters, orientationRequested],
   )
-
   const overviewQuery = useQuery({
-    queryKey: queryKeys.chapterOverview(activeChapter?.id ?? 0),
-    queryFn: () => storyMapApi.getChapterOverview(activeChapter!.id),
+    ...chapterOverviewQueryOptions(activeChapter?.id ?? 0),
     // Orientation chapters carry no AdventureLevel/ChallengeLevel content, so
     // their overview would always resolve to empty arrays - skip the request
     // and route them to OrientationLessonWorkspace instead (see render below).
     enabled: Boolean(activeChapter) && !activeChapter?.is_orientation,
-    staleTime: 2 * 60 * 1000,
   })
+  const activeOverviewReady = overviewQuery.isSuccess
+  // Once the visible chapter has landed, warm every other open chapter so
+  // switching chapters paints its path at once rather than placeholder nodes.
+  useEffect(() => {
+    if (!activeOverviewReady) return
+    for (const chapter of chapters) {
+      if (chapter.locked || chapter.is_orientation || chapter.id === activeChapter?.id) continue
+      void queryClient.prefetchQuery(chapterOverviewQueryOptions(chapter.id))
+    }
+  }, [activeChapter?.id, activeOverviewReady, chapters, queryClient])
+  const mapLevels = overviewQuery.data?.adventures
+  const currentLevelId = mascotKnowledgeFocusLevelId(mapLevels ?? [], activeChapter?.locked ?? true)
+  const mascotKnowledge = useMascotKnowledge(activeChapter ?? undefined, mapLevels
+    ? { currentLevelId, levels: mapLevels }
+    : undefined)
 
   if (chaptersQuery.isLoading || (orientationRequested && orientationLessonsQuery.isPending)) {
-    return <LoadingScreen companionSlug={companionSlug} description="Preparing the story map." label="Loading map" />
+    return <LoadingScreen description="Preparing the story map." label="Loading map" />
   }
   if (chaptersQuery.isError) {
     return <ErrorState title="Could not load map" description={chaptersQuery.error.message} />
@@ -174,7 +206,8 @@ export function StoryMapPage() {
   const adventures = overview?.adventures ?? []
   const challenges = overview?.challenges ?? []
   const levels = adventures
-  const challengesLocked = activeChapter.locked
+  // A Challenge Gate opens once every tier of every level in the chapter is cleared.
+  const challengesLocked = activeChapter.locked || (challenges.length > 0 && challenges.every((gate) => gate.locked))
   const leftRailHidden = compactStoryMap && !leftRailOpen
   const rightRailHidden = compactStoryMap && !rightRailOpen
   const showingOrientation = activeChapter.is_orientation
@@ -199,6 +232,13 @@ export function StoryMapPage() {
     userSelectedChapterId.current = orientationChapter.id
     setActiveChapterId(orientationChapter.id)
   }
+  const dismissCompanionPrompt = () => {
+    setCompanionPromptOpen(false)
+    if (!searchParams.has('companion-required')) return
+    const next = new URLSearchParams(searchParams)
+    next.delete('companion-required')
+    setSearchParams(next, { replace: true })
+  }
 
   return (
     <div
@@ -206,6 +246,16 @@ export function StoryMapPage() {
       style={storyWorldStyle(storyWorld)}
     >
       <div className="story-map-backdrop" style={storyMapStyle} aria-hidden="true" />
+      {!showingOrientation ? <WorldMascot
+        surface="track"
+        knowledge={mascotKnowledge}
+        contextKey={`${storySlug}:${activeChapter.id}:${currentLevelId ?? 'complete'}`}
+      /> : null}
+
+      <CompanionRequiredOverlay
+        open={companionPromptOpen && !hasCompanion && !loadoutLoading}
+        onDismiss={dismissCompanionPrompt}
+      />
 
       <div className="story-map-rail-controls" aria-label="Map panels">
         {!showingOrientation ? <button
@@ -259,7 +309,7 @@ export function StoryMapPage() {
           {userId != null ? (
             <StoryOnboarding
               key={userId}
-              ready={!showingOrientation && Boolean(overview) && !overviewQuery.isError && !loadoutLoading && !loadoutError}
+              ready={!companionPromptOpen && !showingOrientation && Boolean(overview) && !overviewQuery.isError && !loadoutLoading && !loadoutError}
               compact={compactStoryMap}
               hasCompanion={hasCompanion}
               orientationAvailable={Boolean(orientationChapter)}
@@ -281,6 +331,8 @@ export function StoryMapPage() {
               challenges={challenges}
               challengesLocked={challengesLocked}
               loading={overviewQuery.isLoading}
+              hasCompanion={hasCompanion}
+              onCompanionRequired={() => setCompanionPromptOpen(true)}
             />
           )}
         </section>

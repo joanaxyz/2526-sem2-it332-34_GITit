@@ -10,7 +10,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('adventures', '0001_initial'),
-        ('authoring', '0001_initial'),
         ('curriculum', '0001_initial'),
         ('players', '0001_initial'),
     ]
@@ -25,11 +24,6 @@ class Migration(migrations.Migration):
             model_name='adventurelevel',
             name='command_forms',
             field=models.ManyToManyField(blank=True, related_name='adventure_levels', to='curriculum.commandform'),
-        ),
-        migrations.AddField(
-            model_name='adventurelevel',
-            name='source_content_definition',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, related_name='runtime_adventure_levels', to='authoring.contentdefinition'),
         ),
         migrations.AddField(
             model_name='adventurerun',

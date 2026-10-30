@@ -1,9 +1,8 @@
 #!/usr/bin/env python3
 """Validate that root documentation describes the current architecture.
 
-The root markdown files are the architectural source of truth. ``docs/goals``
-may contain scoped implementation artifacts, but no other documentation tree is
-allowed to become a competing source of current guidance.
+The root markdown files are the architectural source of truth. Local planning
+artifacts are not required project documentation.
 """
 
 from __future__ import annotations
@@ -18,7 +17,6 @@ REQUIRED_FILES = [
     "ARCHITECTURE.md",
     "CLAUDE.md",
     "CONTENT_AUTHORING_GUIDE.md",
-    "CURRICULUM_AUTHORING_PLAN.md",
     "DESIGN.md",
     "PRODUCT.md",
 ]
@@ -39,7 +37,7 @@ REQUIRED_ARCHITECTURE_SECTIONS = [
 ]
 
 REQUIRED_README_SNIPPETS = [
-    "frontend/src/shared/navigation/legacyRoutes.ts",
+    "frontend/src/shared/navigation/routes.ts",
     "python scripts/check_api_contract.py",
     "python scripts/check_documentation_current.py",
     "npm run api:type-adoption-check",
@@ -99,7 +97,6 @@ def main() -> int:
         "ARCHITECTURE.md",
         "CLAUDE.md",
         "CONTENT_AUTHORING_GUIDE.md",
-        "CURRICULUM_AUTHORING_PLAN.md",
     ]:
         path = ROOT / rel
         if not path.exists():
@@ -115,7 +112,7 @@ def main() -> int:
             print(f"  {violation}", file=sys.stderr)
         return 1
 
-    print("Root documentation is current and /docs is limited to scoped goals.")
+    print("Root documentation is current.")
     return 0
 
 

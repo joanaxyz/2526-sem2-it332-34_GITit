@@ -16,6 +16,9 @@ ROOT = Path(__file__).resolve().parents[2]
 BACKEND = ROOT / "backend"
 
 DEPLOY_ENV = {
+    # CI runs the guards with config.test_settings, which forces DEBUG on; the
+    # deployment check must load the production settings module instead.
+    "DJANGO_SETTINGS_MODULE": "config.settings",
     "DJANGO_DEBUG": "False",
     "DJANGO_SECRET_KEY": "ci-deploy-check-secret-key-change-before-production-12345",
     "DJANGO_ALLOWED_HOSTS": "example.com,localhost,127.0.0.1",

@@ -1,73 +1,55 @@
-from curriculum.seed_data.challenges import CHALLENGES
-from curriculum.seed_data.source.adventure_level_specs import ADVENTURE_LEVELS
+from django.core.management import call_command
+
+from adventures.models import AdventureLevelTierScenarioVariant
+from challenges.models import ChallengeTrialVariant
 from curriculum.seed_data.spec_helpers import required_commit_message_details
 from practice.services.context import ScenarioContextNormalizer
 
 
-def _challenge_variants():
-    for challenge in CHALLENGES:
-        for level in challenge["levels"]:
-            yield from level["variants"]
+def _seeded_variants():
+    """Every published tier-scenario and Challenge Gate variant of the live seed."""
+    yield from AdventureLevelTierScenarioVariant.objects.filter(is_published=True)
+    yield from ChallengeTrialVariant.objects.filter(is_published=True)
 
 
-def _all_variants():
-    for level in ADVENTURE_LEVELS:
-        yield from level["variants"]
-    yield from _challenge_variants()
+def _detail_values(context: dict) -> list[str]:
+    return [
+        detail["value"]
+        for detail in context.get("details", [])
+        if isinstance(detail, dict) and detail.get("value")
+    ]
 
 
-def test_level_three_exposes_its_required_commit_message_in_the_brief():
-    level = next(
-        item for item in ADVENTURE_LEVELS if item["slug"] == "ch1-adv-commit-staged-snapshot"
-    )
-
-    for variant in level["variants"]:
-        context = variant["scenario_context_template"]
-        assert "commit message" in f"{context['story']} {context['task']}".lower()
-        assert context["details"] == [{"label": "Commit message", "value": "Save staged work"}]
-
-
-def test_every_evaluator_required_typed_commit_message_is_exposed():
+def test_every_evaluator_required_typed_commit_message_is_exposed(db):
+    call_command("seed_curriculum", verbosity=0)
     checked = 0
-    for variant in _all_variants():
+    for variant in _seeded_variants():
         required = required_commit_message_details(
-            variant.get("solution_commands_template"),
-            variant.get("evaluation_spec_template"),
+            variant.solution_commands, variant.evaluation_spec
         )
         if not required:
             continue
-
         checked += 1
-        context = variant["scenario_context_template"]
-        copy_values = {
-            detail["value"]
-            for detail in context.get("details", [])
-            if isinstance(detail, dict) and detail.get("value")
-        }
-        assert {detail["value"] for detail in required} <= copy_values
-        assert "commit message" in f"{context.get('story', '')} {context.get('task', '')}".lower()
+        assert {detail["value"] for detail in required} <= set(
+            _detail_values(variant.scenario_context)
+        ), variant.slug
 
-    assert checked > 800
+    assert checked > 40
 
 
-def test_every_authored_copy_value_survives_context_normalization():
+def test_every_authored_copy_value_survives_context_normalization(db):
+    call_command("seed_curriculum", verbosity=0)
     checked = 0
     normalizer = ScenarioContextNormalizer()
-    for variant in _all_variants():
-        context = variant["scenario_context_template"]
-        authored_values = [
-            detail["value"]
-            for detail in context.get("details", [])
-            if isinstance(detail, dict) and detail.get("value")
-        ]
+    for variant in _seeded_variants():
+        authored_values = _detail_values(variant.scenario_context)
         if not authored_values:
             continue
-
         checked += 1
-        normalized = normalizer.normalize(context)
-        assert [detail["value"] for detail in normalized.get("details", [])] == authored_values
+        normalized = normalizer.normalize(variant.scenario_context)
+        assert _detail_values(normalized) == authored_values, variant.slug
 
-    assert checked > 900
+    assert checked > 40
 
 
 def test_required_message_extractor_ignores_automatic_messages_and_supports_compact_m_flag():

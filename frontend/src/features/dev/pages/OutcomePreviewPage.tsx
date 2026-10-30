@@ -1,81 +1,43 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 
-import { AdventureOutcomeModal } from '@/features/adventures/components/AdventureOutcomeModal'
-import type { AdventureRun } from '@/features/adventures/types'
 import { ChallengeOutcomeModal } from '@/features/challenges/components/ChallengeOutcomeModal'
 import type { ChallengeRun } from '@/features/challenges/types'
 import { Button } from '@/shared/components/Button'
 import { cn } from '@/shared/utils/cn'
+import { normalizeStarScore } from '@/shared/level/utils/starScore'
+import { StarTriplet } from '@/shared/level/components/LevelStatValues'
+import type { StarBreakdown } from '@/shared/level/components/StarScoreChecklist'
 
-type PreviewMode = 'adventure-win' | 'adventure-loss' | 'challenge-win' | 'challenge-loss'
+type PreviewMode = 'challenge-win' | 'challenge-loss' | 'challenge-active'
 
 function previewMode(value: string | null): PreviewMode {
-  if (value === 'adventure-loss' || value === 'challenge-win' || value === 'challenge-loss') return value
-  return 'adventure-win'
+  return value === 'challenge-loss' || value === 'challenge-active' ? value : 'challenge-win'
 }
 
-const adventureRun = {
-  id: 1,
-  status: 'completed',
-  replay: false,
-  stars: 3,
-  library_opened: false,
-  is_passed: true,
-  selected_level: { id: 1, slug: 'create-repository', title: 'Create a repository', is_required: true },
-  next_level: { id: 2, slug: 'first-commit', title: 'First commit', is_required: true },
-  chapter_id: 1,
-  current_level_index: 2,
-  total_levels: 3,
-  current_wave: 3,
-  total_waves: 3,
-  mastery: {
-    commands: [
-      {
-        slug: 'git-init/current-directory',
-        form_id: 1,
-        form_slug: 'current-directory',
-        skill_slug: 'git-init',
-        title: 'Initialize the current folder',
-        strength: 1,
-        mastered_bar: 1,
-        introduced: true,
-        mastered: true,
-      },
-      {
-        slug: 'git-init/named-folder',
-        form_id: 2,
-        form_slug: 'named-folder',
-        skill_slug: 'git-init',
-        title: 'Initialize a named folder',
-        strength: 1,
-        mastered_bar: 1,
-        introduced: true,
-        mastered: true,
-      },
-      {
-        slug: 'git-branch/first-name',
-        form_id: 3,
-        form_slug: 'first-name',
-        skill_slug: 'git-branch',
-        title: 'Choose the first branch name',
-        strength: 1,
-        mastered_bar: 1,
-        introduced: true,
-        mastered: true,
-      },
-    ],
-    commands_mastered: 3,
-    total_commands: 3,
-    total_achievable: 3,
-    passed: true,
-  },
-  story: { id: 1, slug: 'arcane-spire', title: 'The Arcane Spire', world_slug: 'arcane-spire' },
-  completed_at: '2026-06-30T00:00:00Z',
-  current_attempt: null,
-  results: [],
-  progress: { completed: 2, total: 7 },
-} as unknown as AdventureRun
+// Explicit server-shaped grade fixtures; production scoring stays on the API.
+const scoreFixtures: Record<number, StarBreakdown> = {
+  0: { stars: 0, available_stars: 0, counted_commands: 5, command_target: 2, graded_under_previous_rules: false, retry_count: 0, criteria: [
+    { key: 'clear', state: 'missed', reason: 'not_cleared' },
+    { key: 'command_target', state: 'missed', reason: 'not_cleared' },
+    { key: 'retry_allowance', state: 'missed', reason: 'not_cleared' },
+  ] },
+  1: { stars: 1, available_stars: 1, counted_commands: 3, command_target: 2, graded_under_previous_rules: false, retry_count: 0, criteria: [
+    { key: 'clear', state: 'earned', reason: null },
+    { key: 'command_target', state: 'missed', reason: 'command_target_exceeded' },
+    { key: 'retry_allowance', state: 'missed', reason: 'command_target_exceeded' },
+  ] },
+  2: { stars: 2, available_stars: 2, counted_commands: 2, command_target: 2, graded_under_previous_rules: false, retry_count: 2, criteria: [
+    { key: 'clear', state: 'earned', reason: null },
+    { key: 'command_target', state: 'earned', reason: null },
+    { key: 'retry_allowance', state: 'missed', reason: 'retry_allowance_exceeded' },
+  ] },
+  3: { stars: 3, available_stars: 3, counted_commands: 2, command_target: 2, graded_under_previous_rules: false, retry_count: 0, criteria: [
+    { key: 'clear', state: 'earned', reason: null },
+    { key: 'command_target', state: 'earned', reason: null },
+    { key: 'retry_allowance', state: 'earned', reason: null },
+  ] },
+}
 
 const challengeRun = {
   id: 7,
@@ -132,36 +94,31 @@ const challengeRun = {
 function OutcomePreviewPage() {
   const [searchParams] = useSearchParams()
   const [mode, setMode] = useState<PreviewMode>(() => previewMode(searchParams.get('mode')))
-  const isAdventure = mode.startsWith('adventure')
+  const [replay, setReplay] = useState(0)
+  const [open, setOpen] = useState(true)
   const isLoss = mode.endsWith('loss')
-
-  const activeAdventureRun = {
-    ...adventureRun,
-    status: isLoss ? 'failed' : 'completed',
-    stars: isLoss ? 0 : 3,
-    mastery: {
-      ...adventureRun.mastery,
-      passed: !isLoss,
-      commands: adventureRun.mastery.commands.map((command) => ({
-        ...command,
-        strength: isLoss ? 0 : command.strength,
-        mastered: isLoss ? false : command.mastered,
-      })),
-      commands_mastered: isLoss ? 0 : adventureRun.mastery.commands_mastered,
-    },
-  } as AdventureRun
+  const active = mode === 'challenge-active'
+  const grade = isLoss ? 0 : Math.max(1, normalizeStarScore(Number(searchParams.get('stars') ?? 3)))
+  const fixture = scoreFixtures[grade]
+  const breakdown: StarBreakdown = active ? {
+    ...fixture, stars: 0,
+    criteria: fixture.criteria.map((criterion) => criterion.state === 'earned' ? { ...criterion, state: 'pending' } : criterion),
+  } : fixture
+  const stars = active ? 0 : grade
 
   const activeChallengeRun = {
     ...challengeRun,
-    status: isLoss ? 'failed' : 'completed',
-    stars: isLoss ? 0 : 3,
+    status: active ? 'started' : isLoss ? 'failed' : 'completed',
+    stars,
+    star_breakdown: breakdown,
     counts: {
       ...challengeRun.counts,
-      counted_action_total: isLoss ? 5 : 2,
-      remaining_counted_commands: isLoss ? 0 : 3,
+      counted_action_total: breakdown.counted_commands,
+      total_attempts: breakdown.counted_commands + 1,
+      remaining_counted_commands: 5 - breakdown.counted_commands,
       max_reached: isLoss,
     },
-    mastery_progress: { cleared: !isLoss, stars: isLoss ? 0 : 3 },
+    mastery_progress: { cleared: !active && !isLoss, stars },
     next_difficulty: isLoss ? null : challengeRun.next_difficulty,
   } as ChallengeRun
 
@@ -169,20 +126,22 @@ function OutcomePreviewPage() {
     <div className="workspace-bg min-h-screen overflow-hidden p-4 text-foreground">
       <header className="flex items-center gap-2 border-b border-primary/15 pb-3">
         <span className="grid size-8 place-items-center rounded-md border border-primary/30 bg-primary/10 text-primary">
-          {isAdventure ? 'A' : 'C'}
+          C
         </span>
         <div>
           <h1 className="text-sm font-semibold">Outcome preview</h1>
           <p className="text-xs text-muted-foreground">Dev fixture for the game result overlay.</p>
         </div>
         <div className="ml-auto flex flex-wrap gap-2">
-          {(['adventure-win', 'adventure-loss', 'challenge-win', 'challenge-loss'] as const).map((item) => (
+          <StarTriplet count={active ? breakdown.available_stars : stars} mode="challenge" breakdown={breakdown} active={active} />
+          <Button type="button" size="sm" variant="outline" onClick={() => setOpen(true)}>Show result</Button>
+          {(['challenge-win', 'challenge-loss', 'challenge-active'] as const).map((item) => (
             <Button
               key={item}
               type="button"
               size="sm"
               variant={mode === item ? 'default' : 'outline'}
-              onClick={() => setMode(item)}
+              onClick={() => { setMode(item); setOpen(true) }}
             >
               {item.replace('-', ' ')}
             </Button>
@@ -215,27 +174,14 @@ function OutcomePreviewPage() {
         </section>
       </main>
 
-      {isAdventure ? (
-        <AdventureOutcomeModal
-          open
-          run={activeAdventureRun}
-          onRestart={() => setMode('adventure-win')}
-          onNextLevel={() => setMode('challenge-win')}
-          onBackToMap={() => setMode('adventure-win')}
-          onClose={() => undefined}
-        />
-      ) : (
-        <ChallengeOutcomeModal
-          open
-          run={activeChallengeRun}
-          onClose={() => undefined}
-          onBackToMap={() => setMode('challenge-win')}
-          onRetry={() => setMode('challenge-win')}
-          onNextLevel={() => setMode('challenge-win')}
-          onSelectLevel={() => undefined}
-          nextDifficultyLabel="Medium"
-        />
-      )}
+      <ChallengeOutcomeModal
+        key={`${mode}-${stars}-${replay}`}
+        open={open && !active}
+        run={activeChallengeRun}
+        onClose={() => setOpen(false)}
+        onBackToMap={() => setMode('challenge-win')}
+        onRetry={() => setReplay(value => value + 1)}
+      />
     </div>
   )
 }

@@ -5,6 +5,8 @@ import { BrandMark } from '@/features/auth/components/BrandMark'
 const pageLabels: Record<string, string> = {
   '/login': 'Sign in',
   '/register': 'Create account',
+  '/verify-email': 'Confirm your email',
+  '/oauth/callback': 'Signing in',
   '/forgot-password': 'Password recovery',
 }
 

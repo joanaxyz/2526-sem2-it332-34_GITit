@@ -9,10 +9,25 @@ import {
   animateSheet,
   containSpriteInHost,
   finishAnimation,
+  onceImpact,
   placeAt,
   reduceMotion,
   spriteNode,
 } from './spriteDom'
+
+/** Companion sheets are authored at 18fps. Battle-tuned durations may quicken
+ *  them, but never past 24fps, or impact bursts flicker by before they read. */
+const SKILL_MIN_FRAME_MS = 1000 / 24
+/** A target effect lands once its bloom reaches full strength (the fade-in
+ *  offset in playTargetLayer). */
+const TARGET_BLOOM_FRAC = 0.18
+/** A ground run reaches the target at this point of its travel. */
+const GROUND_ARRIVAL_FRAC = 0.72
+
+function paced(spec: SkillSpriteSpec): SkillSpriteSpec {
+  const minMs = Math.round(spec.sheet.frameCount * SKILL_MIN_FRAME_MS)
+  return spec.durationMs >= minMs ? spec : { ...spec, durationMs: minMs }
+}
 
 /** The point on the sprite to pin at the target while it rests/impacts. The
  *  pixel-measured `placeAnchor` (emitted from the baked art) wins; otherwise we
@@ -49,8 +64,12 @@ async function playProjectile(
     filter: options?.filter,
     pixelated: options?.pixelated,
     orientation: options?.flip ? ' scaleX(-1)' : '',
+    minFrameMs: SKILL_MIN_FRAME_MS,
     onLaunch: spec.element ? () => playSkillSound(spec.element, 'projectile') : undefined,
-    onImpact: spec.element ? () => playSkillSound(spec.element, 'impact') : undefined,
+    onImpact: () => {
+      ctx.onImpact?.()
+      if (spec.element) playSkillSound(spec.element, 'impact')
+    },
   })
 }
 
@@ -74,9 +93,13 @@ async function playGatherOrbProjectileImpact(
     impactAnchor: impactAnchorFor(spec),
     impactScale,
     impactBounds: spec.placeBounds,
+    minFrameMs: SKILL_MIN_FRAME_MS,
     onCharge: spec.element ? () => playSkillSound(spec.element, 'charge') : undefined,
     onLaunch: spec.element ? () => playSkillSound(spec.element, 'projectile') : undefined,
-    onImpact: spec.element ? () => playSkillSound(spec.element, 'impact') : undefined,
+    onImpact: () => {
+      ctx.onImpact?.()
+      if (spec.element) playSkillSound(spec.element, 'impact')
+    },
   })
 }
 
@@ -166,12 +189,15 @@ async function playGround(ctx: EffectContext, spec: SkillSpriteSpec): Promise<vo
   const impactTransform = placeAt(to, size, anchor)
   const duration = spec.durationMs
   playSkillSound(spec.element, 'ground-run')
-  window.setTimeout(() => playSkillSound(spec.element, 'target-ground'), Math.round(duration * 0.72))
+  window.setTimeout(() => {
+    ctx.onImpact?.()
+    playSkillSound(spec.element, 'target-ground')
+  }, Math.round(duration * GROUND_ARRIVAL_FRAC))
   const sheetRun = animateSheet(node, spec.sheet, duration)
   const travel = node.animate(
     [
       { transform: fromTransform, opacity: 0.85 },
-      { transform: impactTransform, opacity: 1, offset: 0.72 },
+      { transform: impactTransform, opacity: 1, offset: GROUND_ARRIVAL_FRAC },
       { transform: impactTransform, opacity: 1 },
     ],
     { duration, easing: 'cubic-bezier(0.22, 0.7, 0.3, 1)', fill: 'forwards' },
@@ -182,6 +208,15 @@ async function playGround(ctx: EffectContext, spec: SkillSpriteSpec): Promise<vo
 }
 
 export async function playResolvedSkillEffect(ctx: EffectContext, spec: SkillSpriteSpec): Promise<void> {
+  const hit = onceImpact(ctx.onImpact)
+  try {
+    await playSkillEffect({ ...ctx, onImpact: hit }, spec)
+  } finally {
+    hit()
+  }
+}
+
+async function playSkillEffect(ctx: EffectContext, spec: SkillSpriteSpec): Promise<void> {
   if (reduceMotion()) return
   // Impacts and target effects follow the rendered monster size.
   const sizeScale = ctx.sizeScale && ctx.sizeScale > 0 ? ctx.sizeScale : 1
@@ -193,13 +228,18 @@ export async function playResolvedSkillEffect(ctx: EffectContext, spec: SkillSpr
     await playProjectile(ctx, spec, { impactScale: sizeScale })
     return
   }
-  const sized = sizeScale === 1 ? spec : { ...spec, scale: spec.scale * sizeScale }
+  const sized = paced(sizeScale === 1 ? spec : { ...spec, scale: spec.scale * sizeScale })
   if (sized.playback === 'ground') {
     await playGround(ctx, sized)
     return
   }
   playSkillSound(sized.element, sized.anchor === 'center' ? 'target-center' : 'target-ground')
-  await playTarget(ctx, sized)
+  const bloom = window.setTimeout(() => ctx.onImpact?.(), Math.round(sized.durationMs * TARGET_BLOOM_FRAC))
+  try {
+    await playTarget(ctx, sized)
+  } finally {
+    window.clearTimeout(bloom)
+  }
 }
 
 export async function playSpriteProjectileEffect(
@@ -215,5 +255,10 @@ export async function playSpriteProjectileEffect(
     durationMs: 360,
   }
   const filter = opts?.hue ? `hue-rotate(${opts.hue}deg)` : undefined
-  await playProjectile(ctx, spec, { filter, flip: opts?.flip, pixelated: true })
+  // A solid strip has no impact phase: it makes contact as its flight ends.
+  try {
+    await playProjectile(ctx, spec, { filter, flip: opts?.flip, pixelated: true })
+  } finally {
+    ctx.onImpact?.()
+  }
 }

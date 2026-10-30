@@ -5,8 +5,8 @@ import { cn } from '@/shared/utils/cn'
 
 /**
  * A still thumbnail: the first frame of a code-registry `SpriteDef`, cropped out
- * of its sheet with the same background-position trick the SpriteAnimator paints
- * with — no animation, no extra requests. The DB-free counterpart to the old
+ * of its sheet using a static background — no animation, no extra requests.
+ * The DB-free counterpart to the old
  * AssetPortrait (which read backend descriptor sprites).
  */
 export function SpritePortrait({

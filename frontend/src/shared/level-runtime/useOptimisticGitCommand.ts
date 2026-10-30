@@ -1,5 +1,5 @@
 import { useRef } from 'react'
-import { useMutation, useQueryClient, type QueryClient, type QueryKey } from '@tanstack/react-query'
+import { useMutation, useQueryClient, type MutateOptions, type QueryClient, type QueryKey } from '@tanstack/react-query'
 
 import { ApiError } from '@/shared/api/apiError'
 import { executeTerminalCommand } from '@/shared/git/simulator/engine'
@@ -19,6 +19,13 @@ type OptimisticCommandSession<TStep extends TerminalStep> = {
 }
 
 type MutationContext<TRun> = { previous?: TRun; previousCwd?: string }
+
+/** A command already simulated, shown and sent before the mutation started. */
+type PreparedCommand<TRun, TResponse> = {
+  execution: CommandExecutionPayload
+  request: Promise<TResponse>
+  context: MutationContext<TRun>
+}
 
 // Surface the backend's rejection reason (DRF `detail`) in the terminal so a
 // refused command explains itself; server faults stay behind a generic retry.
@@ -46,6 +53,7 @@ export function useOptimisticGitCommand<TRun, TStep extends TerminalStep, TRespo
 ) {
   const queryClient = useQueryClient()
   const pendingExecutionRef = useRef<CommandExecutionPayload | null>(null)
+  const preparedRef = useRef<PreparedCommand<TRun, TResponse> | null>(null)
 
   // Runs the command in the terminal's working directory and moves the
   // terminal there right away; `onError` restores the previous folder.
@@ -58,8 +66,50 @@ export function useOptimisticGitCommand<TRun, TStep extends TerminalStep, TRespo
     return withClientRunRevision(terminal.execution, session.revision)
   }
 
-  return useMutation<TResponse, unknown, string, MutationContext<TRun>>({
+  function showOptimisticState(
+    previous: TRun,
+    session: OptimisticCommandSession<TStep>,
+    command: string,
+    execution: CommandExecutionPayload,
+  ) {
+    const id = nextEphemeralStepId()
+    const steps = [
+      ...stripEphemeralSteps(session.steps),
+      execution.output
+        ? config.createLocalStep(command, execution.output, id)
+        : config.createPendingStep(command, id),
+    ]
+    queryClient.setQueryData(
+      config.queryKey,
+      config.applyOptimisticState(previous, snapshot(execution.next_state, true), steps),
+    )
+  }
+
+  // Simulates, shows and sends the command before anything renders, so the
+  // first frame after Enter already holds its output and repository change,
+  // and the request is not queued behind that render. A refetch of the run in
+  // flight would revert the cache once cancelled, so that rare case keeps the
+  // ordinary cancel-then-apply path in `onMutate`.
+  function prepare(command: string): PreparedCommand<TRun, TResponse> | null {
+    if (queryClient.isFetching({ queryKey: config.queryKey }) > 0) return null
+    const previous = queryClient.getQueryData<TRun>(config.queryKey)
+    const session = previous ? config.readSession(previous) : null
+    if (!previous || !session) return null
+    const previousCwd = terminalCwd(config.queryKey)
+    const execution = runInTerminal(session, command)
+    pendingExecutionRef.current = execution
+    const request = config.submit(command, execution)
+    // The mutation awaits this request; mark it handled until it does.
+    request.catch(() => undefined)
+    showOptimisticState(previous, session, command, execution)
+    return { execution, request, context: { previous, previousCwd } }
+  }
+
+  const mutation = useMutation<TResponse, unknown, string, MutationContext<TRun>>({
     mutationFn: (command) => {
+      const prepared = preparedRef.current
+      preparedRef.current = null
+      if (prepared) return prepared.request
       const pending = pendingExecutionRef.current
       if (pending) return config.submit(command, pending)
       const current = queryClient.getQueryData<TRun>(config.queryKey)
@@ -68,25 +118,17 @@ export function useOptimisticGitCommand<TRun, TStep extends TerminalStep, TRespo
       return config.submit(command, runInTerminal(session, command))
     },
     onMutate: async (command) => {
+      const prepared = preparedRef.current
+      if (prepared) return prepared.context
       await queryClient.cancelQueries({ queryKey: config.queryKey })
       const previous = queryClient.getQueryData<TRun>(config.queryKey)
       const previousCwd = terminalCwd(config.queryKey)
       const session = previous ? config.readSession(previous) : null
       if (!previous || !session) return { previous, previousCwd }
 
-      const id = nextEphemeralStepId()
       const execution = runInTerminal(session, command)
       pendingExecutionRef.current = execution
-      const steps = [
-        ...stripEphemeralSteps(session.steps),
-        execution.output
-          ? config.createLocalStep(command, execution.output, id)
-          : config.createPendingStep(command, id),
-      ]
-      queryClient.setQueryData(
-        config.queryKey,
-        config.applyOptimisticState(previous, snapshot(execution.next_state, true), steps),
-      )
+      showOptimisticState(previous, session, command, execution)
       return { previous, previousCwd }
     },
     onSuccess: (response, _command, context) => {
@@ -109,4 +151,16 @@ export function useOptimisticGitCommand<TRun, TStep extends TerminalStep, TRespo
       )
     },
   })
+
+  /** Starts the command; returns its local execution once it is on screen. */
+  function mutate(
+    command: string,
+    options?: MutateOptions<TResponse, unknown, string, MutationContext<TRun>>,
+  ): CommandExecutionPayload | null {
+    const prepared = prepare(command)
+    preparedRef.current = prepared
+    mutation.mutate(command, options)
+    return prepared?.execution ?? null
+  }
+  return { ...mutation, mutate }
 }

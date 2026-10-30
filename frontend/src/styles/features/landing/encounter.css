@@ -1,0 +1,152 @@
+/* ─── Encounter band: a live duel in the battle hall ────────────────────── */
+
+.landing-encounter {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 26rem) minmax(0, 1fr);
+  gap: clamp(2rem, 5vw, 4rem);
+  align-items: center;
+  padding: clamp(4rem, 9vw, 6.5rem) var(--landing-inline);
+  overflow: hidden;
+  isolation: isolate;
+}
+
+.landing-encounter__hall {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(180deg, hsl(var(--background)) 0%, rgba(4, 9, 20, 0.5) 20%, rgba(4, 9, 20, 0.45) 58%, hsl(var(--background)) 96%),
+    linear-gradient(90deg, rgba(4, 9, 20, 0.85) 0%, rgba(4, 9, 20, 0.35) 45%, transparent 70%),
+    url('/cosmetics/story-worlds/arcane-spire/backgrounds/battle/chapter-03.png') center 62% / cover no-repeat;
+}
+
+.landing-encounter__coin {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-5) 0 0;
+  color: hsl(var(--warning));
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 800;
+}
+
+.landing-arena {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: center;
+}
+
+/* Both actors stand on one ground line; the fx layer spans the whole stage so
+   a spell can fly from Blue's hand to the monster. */
+.landing-stage {
+  --landing-ground: 2.25rem;
+
+  position: relative;
+  display: flex;
+  width: min(100%, 40rem);
+  height: 19rem;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 0 clamp(0.5rem, 4vw, 3rem) var(--landing-ground);
+}
+
+.landing-stage__ground {
+  position: absolute;
+  inset: auto 6% calc(var(--landing-ground) - 0.6rem);
+  height: 1.2rem;
+  border-radius: 50%;
+  background: radial-gradient(50% 50% at 50% 50%, rgba(var(--theme-primary-rgb), 0.16), transparent 70%);
+}
+
+.landing-stage__caster,
+.landing-stage__foe {
+  position: relative;
+  z-index: 1;
+}
+
+.landing-stage__foe {
+  display: grid;
+  justify-items: center;
+}
+
+.landing-stage__nameplate {
+  position: absolute;
+  bottom: calc(var(--landing-ground) * -1 + 0.35rem);
+  left: 50%;
+  margin: 0;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  white-space: nowrap;
+  transform: translateX(-50%);
+}
+
+.landing-stage__fx {
+  position: absolute;
+  inset: 0;
+  z-index: var(--z-raised);
+  overflow: hidden;
+  pointer-events: none;
+  contain: strict;
+}
+
+.landing-spells {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.landing-spells__spell {
+  display: inline-flex;
+  min-height: var(--control-height-sm);
+  align-items: center;
+  gap: var(--space-2);
+  padding: 0 0.85rem 0 0.55rem;
+  border: 1px solid var(--control-border);
+  border-radius: var(--radius-pill);
+  color: var(--text-primary);
+  background: var(--control-bg);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    border-color var(--motion-normal) var(--ease-out),
+    background var(--motion-normal) var(--ease-out),
+    box-shadow var(--motion-normal) var(--ease-out);
+}
+
+.landing-spells__spell:hover:not(:disabled) {
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+  box-shadow: var(--glow-interactive);
+}
+
+.landing-spells__spell:focus-visible {
+  outline: none;
+  box-shadow: var(--control-focus-ring);
+}
+
+.landing-spells__spell:disabled {
+  cursor: default;
+}
+
+.landing-spells__spell:disabled:not(.is-active) {
+  opacity: 0.55;
+}
+
+.landing-spells__spell.is-active {
+  border-color: hsl(var(--primary));
+  background: rgba(var(--theme-primary-rgb), 0.18);
+  box-shadow: var(--glow-active);
+}
+
+.landing-spells__icon {
+  width: 1.35rem;
+  height: 1.35rem;
+}

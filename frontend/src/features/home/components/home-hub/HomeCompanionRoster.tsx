@@ -3,24 +3,23 @@ import { CheckCircle2, ChevronRight, ShoppingBag } from 'lucide-react'
 import { useState } from 'react'
 import { Link } from 'react-router-dom'
 
+import { companionAvatarSrc } from '@/features/home/utils/homeAssets'
 import { queryKeys } from '@/shared/api/queryKeys'
-import { COMPANIONS } from '@/shared/cosmetics/companions/registry'
 import { SHOP_ROUTE } from '@/shared/navigation/routes'
 import { playerLoadoutApi } from '@/shared/player-loadout/playerLoadoutApi'
 import { shopCatalogQueryOptions } from '@/shared/shop/api/shopApi'
 import { hasLocalDefinition, toDisplayItem } from '@/shared/shop/model/shopPresentation'
 
-/** Square avatar art, falling back to portrait/idle for companions without one. */
-function companionAvatar(slug: string, fallback?: string) {
-  const sprites = COMPANIONS[slug]?.sprites
-  return sprites?.avatar?.src ?? sprites?.portrait?.src ?? fallback
+type HomeCompanionRosterProps = {
+  /** Called when a roster entry is picked, so the showcase can preview it. */
+  onSelect?: (slug: string) => void
 }
 
 /**
  * Picking who fights beside you. This lives in Profile because it answers the
  * same question as the rank badge above it: who am I playing as right now.
  */
-export function HomeCompanionRoster() {
+export function HomeCompanionRoster({ onSelect }: HomeCompanionRosterProps = {}) {
   const queryClient = useQueryClient()
   const catalog = useQuery(shopCatalogQueryOptions())
   const equip = useMutation({
@@ -35,7 +34,8 @@ export function HomeCompanionRoster() {
     .filter(hasLocalDefinition)
     .map(toDisplayItem)
     .filter((item) => item.owned)
-  const selected = owned.find((item) => item.slug === selectedSlug) ?? owned[0]
+  const selected =
+    owned.find((item) => item.slug === selectedSlug) ?? owned.find((item) => item.active) ?? owned[0]
 
   return (
     <section className="home-roster-panel" aria-label="Companion roster">
@@ -67,7 +67,7 @@ export function HomeCompanionRoster() {
         <>
           <div className="home-roster-list" role="tablist" aria-label="Owned companions" data-onboarding="profile-roster">
             {owned.map((companion) => {
-              const avatar = companionAvatar(companion.slug, companion.art)
+              const avatar = companionAvatarSrc(companion.slug, companion.art)
               return (
                 <button
                   key={companion.slug}
@@ -76,7 +76,10 @@ export function HomeCompanionRoster() {
                   aria-selected={companion.slug === selected?.slug}
                   className="home-roster-item"
                   data-active={companion.slug === selected?.slug}
-                  onClick={() => setSelectedSlug(companion.slug)}
+                  onClick={() => {
+                    setSelectedSlug(companion.slug)
+                    onSelect?.(companion.slug)
+                  }}
                 >
                   <span>{avatar ? <img src={avatar} alt="" loading="lazy" /> : null}</span>
                   <strong>{companion.label}</strong>
@@ -101,7 +104,6 @@ export function HomeCompanionRoster() {
                     ? 'Equipping'
                     : 'Equip companion'}
               </button>
-              <small>{selected.active ? 'Joins your next Adventure or Challenge.' : `Send ${selected.label} into your next run instead.`}</small>
             </div>
           ) : null}
 

@@ -1,0 +1,209 @@
+/* ─── How a scenario plays ──────────────────────────────────────────────── */
+
+.landing-how {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
+  grid-template-areas:
+    'vignette intro'
+    'vignette steps';
+  grid-template-rows: auto 1fr;
+  gap: var(--space-6) clamp(2rem, 5vw, 4.5rem);
+  align-items: start;
+}
+
+.landing-how__intro { grid-area: intro; }
+.landing-how .landing-vignette { grid-area: vignette; }
+
+.landing-steps {
+  grid-area: steps;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-steps__item {
+  display: grid;
+  grid-template-columns: 3rem minmax(0, 1fr);
+  gap: var(--space-3);
+  padding: var(--space-5) 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.landing-steps__item:last-child {
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.landing-steps__number {
+  color: hsl(var(--primary));
+  font-family: var(--font-mono);
+  font-size: 1.35rem;
+  font-weight: 800;
+  line-height: 1.1;
+}
+
+.landing-steps__title,
+.landing-spire__title {
+  margin: 0;
+  font-size: var(--text-md);
+  font-weight: 800;
+  line-height: 1.25;
+}
+
+.landing-steps__body {
+  margin: var(--space-2) 0 0;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* ─── The climb ─────────────────────────────────────────────────────────── */
+
+.landing-climb {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: clamp(2.5rem, 6vw, 5rem);
+  align-items: center;
+}
+
+.landing-tiers {
+  display: grid;
+  margin-top: var(--space-6);
+}
+
+.landing-tiers__caption {
+  margin: 0 0 var(--space-2);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.landing-tiers__row {
+  display: grid;
+  grid-template-columns: 4.5rem repeat(3, minmax(0, 1fr));
+  gap: var(--space-3);
+  align-items: center;
+  padding: 0.7rem 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.landing-tiers__tier {
+  font-size: var(--text-sm);
+  font-weight: 700;
+}
+
+.landing-tiers__support {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.landing-tiers__support > span[aria-hidden='true'] {
+  color: hsl(var(--primary));
+  font-size: var(--text-2xs);
+}
+
+.landing-tiers__support.is-off {
+  color: var(--text-tertiary);
+  text-decoration: line-through;
+  text-decoration-color: hsl(var(--border));
+}
+
+.landing-tiers__support.is-off > span[aria-hidden='true'] {
+  color: var(--text-tertiary);
+}
+
+/* Read top-down in the DOM (base first); drawn bottom-up so the climb rises. */
+.landing-spire {
+  position: relative;
+  display: flex;
+  flex-direction: column-reverse;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.landing-spire::before {
+  content: '';
+  position: absolute;
+  top: 1.6rem;
+  bottom: 1.6rem;
+  left: 0.6875rem;
+  width: 1px;
+  background: linear-gradient(0deg, rgba(var(--theme-rail-rgb), 0.25), rgba(var(--theme-primary-rgb), 0.7));
+}
+
+.landing-spire__storey {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1.375rem 2.5rem minmax(0, 1fr);
+  gap: var(--space-3);
+  align-items: baseline;
+  padding: var(--space-4) 0;
+}
+
+.landing-spire__node {
+  align-self: center;
+  width: 0.75rem;
+  height: 0.75rem;
+  justify-self: center;
+  border: 2px solid hsl(var(--primary));
+  border-radius: var(--radius-pill);
+  background: hsl(var(--background));
+}
+
+.landing-spire__storey:last-child .landing-spire__node {
+  background: hsl(var(--primary));
+  box-shadow: 0 0 12px rgba(var(--theme-primary-rgb), 0.45);
+}
+
+.landing-spire__number {
+  color: hsl(var(--primary));
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 800;
+}
+
+.landing-spire__commands {
+  margin: var(--space-1) 0 0;
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+}
+
+/* ─── Closing call and footer ───────────────────────────────────────────── */
+
+.landing-closing {
+  display: grid;
+  justify-items: center;
+  text-align: center;
+  background: radial-gradient(40% 60% at 50% 45%, rgba(var(--theme-primary-rgb), 0.09), transparent 70%);
+}
+
+.landing-closing__title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 2.4rem);
+  font-weight: 700;
+  line-height: 1.05;
+}
+
+.landing-closing .landing-hero__actions {
+  justify-content: center;
+  margin-top: var(--space-6);
+}
+
+.landing-footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: var(--space-2);
+  padding: var(--space-5) var(--landing-gutter);
+  border-top: 1px solid var(--border-subtle);
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+}

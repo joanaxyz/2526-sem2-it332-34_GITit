@@ -35,7 +35,7 @@ export function ResetPasswordForm() {
       <div className="auth-form auth-forgot" role="status">
         <span className="auth-reset-icon"><KeyRound aria-hidden="true" /></span>
         <div className="auth-form-heading"><h2>Password updated</h2><p>{mutation.data.detail}</p></div>
-        <Link className="auth-submit auth-link-button" to="/login">Sign in</Link>
+        <Link className="auth-submit auth-link-button ui-drawn-plate" to="/login">Sign in</Link>
       </div>
     )
   }
@@ -60,7 +60,7 @@ export function ResetPasswordForm() {
         {form.formState.errors.password_confirm ? <small className="auth-error">{form.formState.errors.password_confirm.message}</small> : null}
       </label>
       {mutation.isError && serverFields.length === 0 ? <p className="auth-error-box">{mutation.error.message}</p> : null}
-      <button type="submit" className="auth-submit" disabled={mutation.isPending || !uid || !token}>
+      <button type="submit" className="auth-submit ui-drawn-plate" disabled={mutation.isPending || !uid || !token}>
         {mutation.isPending ? <Loader2 className="size-4 animate-spin" /> : <KeyRound aria-hidden="true" />}
         {mutation.isPending ? 'Updating password' : 'Reset password'}
       </button>

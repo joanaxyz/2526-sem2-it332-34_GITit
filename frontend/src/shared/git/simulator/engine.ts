@@ -1,7 +1,6 @@
 import type {
   CommandExecutionPayload,
   RepositoryCommandState,
-  RepositorySnapshot,
 } from '@/shared/level/types'
 import { GitCommandParser } from '@/shared/git/simulator/parser'
 import {
@@ -20,7 +19,7 @@ import {
   type MutableRepositoryState,
   type ParsedGitCommand,
 } from '@/shared/git/simulator/types'
-import { normalizeState, snapshotForCommand } from '@/shared/git/simulator/state'
+import { normalizeState } from '@/shared/git/simulator/state'
 import { rebaseGitPathspecs } from '@/shared/git/simulator/gitPathspecs'
 import {
   effectiveCwd,
@@ -316,43 +315,3 @@ function formatCommandList(commands: string[]) {
   return commands.map((command) => `  git ${command}`).join('\n')
 }
 
-/**
- * Derive the canonical target repository state by replaying an authored
- * solution against an initial state through the same engine learners use. This
- * is the authoring-time counterpart of the runtime submit path: the frontend
- * (not Django) owns command execution, so content authoring computes the target
- * here and ships it in the definition for the backend to persist and hash.
- */
-export function computeTargetState(
-  initialState: MutableRepositoryState,
-  solutionCommands: string[],
-): RepositorySnapshot {
-  let state = normalizeState(initialState)
-  let cwd = ''
-  for (const command of solutionCommands) {
-    if (!command.trim()) continue
-    const terminal = executeTerminalCommand(state, command, { cwd })
-    state = terminal.execution.next_state
-    cwd = terminal.cwd
-  }
-  return snapshotForCommand(state, true)
-}
-
-/**
- * The state in front of every solution command, in the shape
- * `generate-targets.mjs` emits. The backend fingerprints it into the variant's
- * solution trajectory, which tells the tutor which step a learner is at.
- */
-export function replaySolution(initialState: MutableRepositoryState, solutionCommands: string[]) {
-  let state = normalizeState(initialState)
-  let cwd = ''
-  const steps = []
-  for (const command of solutionCommands) {
-    if (!command.trim()) continue
-    const { execution, cwd: nextCwd } = executeTerminalCommand(state, command, { cwd })
-    steps.push({ command, diagnostic: Boolean(execution.diagnostic), ready: normalizeState(state) })
-    state = execution.next_state
-    cwd = nextCwd
-  }
-  return { steps, final: normalizeState(state) }
-}

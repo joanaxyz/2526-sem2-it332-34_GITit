@@ -41,14 +41,7 @@ export type RankInfo = {
   ratingForNext: number
   /** 0-100 toward the next tier (100 when at the top tier). */
   progressPct: number
-  /** Flavored title, e.g. "Glyph Weaver of the Third Chapter". */
-  title: string
 }
-
-const CHAPTER_ORDINALS = [
-  'First', 'Second', 'Third', 'Fourth', 'Fifth',
-  'Sixth', 'Seventh', 'Eighth', 'Ninth', 'Tenth',
-]
 
 function rankScore(summary: HomeSummary): number {
   return summary.mastery
@@ -72,21 +65,7 @@ export function deriveRank(summary: HomeSummary): RankInfo {
     ? Math.min(100, Math.round((ratingInTier / ratingForNext) * 100))
     : 100
 
-  const touchedChapters = Object.entries(summary.chapter_kpis)
-    .filter(([, kpis]) => kpis.scr.denominator > 0)
-    .map(([chapter]) => Number(chapter))
-    .filter((n) => Number.isFinite(n))
-  const highestChapter = touchedChapters.length > 0 ? Math.max(...touchedChapters) : 0
-
-  let title = tier.name
-  if (!nextTier) {
-    title = `${tier.name} of the Story`
-  } else if (highestChapter > 0) {
-    const ordinal = CHAPTER_ORDINALS[Math.min(highestChapter, CHAPTER_ORDINALS.length) - 1]
-    title = `${tier.name} of the ${ordinal} Chapter`
-  }
-
-  return { tier, nextTier, score, ratingInTier, ratingForNext, progressPct, title }
+  return { tier, nextTier, score, ratingInTier, ratingForNext, progressPct }
 }
 
 /**
@@ -102,11 +81,3 @@ export function useRank(): RankInfo | null {
   return home.data ? deriveRank(home.data) : null
 }
 
-/** Highest story chapter with at least one attempted scenario. */
-export function highestChapterTouched(summary: HomeSummary): number {
-  const touched = Object.entries(summary.chapter_kpis)
-    .filter(([, kpis]) => kpis.scr.denominator > 0)
-    .map(([chapter]) => Number(chapter))
-    .filter((n) => Number.isFinite(n))
-  return touched.length > 0 ? Math.max(...touched) : 0
-}

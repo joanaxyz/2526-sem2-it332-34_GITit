@@ -1,35 +1,27 @@
 import { CheckCircle2, XCircle } from 'lucide-react'
 
 import type { KpiRate, UserKpisResponse } from '@/features/admin/api/adminApi'
-import { SUPPLEMENTARY_KPI } from '@/features/admin/utils/kpiCatalogue'
-import { kpiEvidence } from '@/features/admin/utils/kpiEvidence'
+import { KPIS, SUPPLEMENTARY_KPI, type KpiKey } from '@/features/performance/utils/performanceKpis'
+import { formatMetricValue, kpiEvidence, metricStatus } from '@/features/performance/utils/performanceKpis'
+import { metricTargetStatus } from '@/features/performance/utils/performanceKpis'
+import { moduleTarget } from '@/features/admin/utils/kpiCatalogue'
 
-// ─── KPI catalogue ───────────────────────────────────────────────────────────
-const KPI_META = {
-  scr:  { abbr: 'SCR',  name: 'Scenario Completion Rate',  target: 80, up: true,  pct: true  },
-  car:  { abbr: 'CAR',  name: 'Command Accuracy Rate',     target: 70, up: true,  pct: true  },
-  hlcr: { abbr: 'HLCR', name: 'Hard-Level Completion Rate',target: 70, up: true,  pct: true  },
-  arc:  { abbr: 'ARC',  name: 'Avg Retry Count',           target: 2,  up: false, pct: false },
-  rta:  { abbr: 'RTA',  name: 'Retry Transfer Accuracy',   target: 65, up: true,  pct: true  },
-} as const
+const KPI_META = Object.fromEntries(KPIS.map((kpi) => [kpi.key, kpi])) as Record<KpiKey, (typeof KPIS)[number]>
 
-type KpiKey = keyof typeof KPI_META
 type Kpis = NonNullable<UserKpisResponse['kpis']>
 type Module = UserKpisResponse['modules'][number]
 
 // Evaluation KPIs only; the supplementary rate is shown but never counted.
 const OVERALL_KEYS: KpiKey[] = ['scr', 'car', 'hlcr', 'arc', 'rta']
-// CAR is per SO, not per module, so modules have no car column.
-const MODULE_KEYS = ['scr', 'hlcr', 'arc', 'rta'] as const satisfies readonly KpiKey[]
+// Module rows use the same server-owned assessment definitions.
+const MODULE_KEYS = ['scr', 'car', 'hlcr', 'arc', 'rta'] as const satisfies readonly KpiKey[]
 
 function fmtKpi(r: KpiRate, pct: boolean) {
-  return r.value === null ? '—' : pct ? `${r.value}%` : r.value.toFixed(2)
+  return formatMetricValue(r.value, pct)
 }
 
 function kpiStatus(r: KpiRate, key: KpiKey): 'met' | 'miss' | 'none' {
-  if (r.value === null || r.denominator === 0) return 'none'
-  const { target, up } = KPI_META[key]
-  return (up ? r.value >= target : r.value <= target) ? 'met' : 'miss'
+  return metricStatus(key, r)
 }
 
 export function LearnerKpiPanel({ kpis, modules }: { kpis: Kpis; modules: Module[] }) {
@@ -90,7 +82,7 @@ export function LearnerKpiPanel({ kpis, modules }: { kpis: Kpis; modules: Module
                   <td className="kp-mod-num">M{mod.number}</td>
                   {MODULE_KEYS.map(key => {
                     const r = mod[key]
-                    const s = kpiStatus(r, key)
+                    const s = metricTargetStatus(r, moduleTarget(key, mod.number), KPI_META[key].up)
                     return (
                       <td key={key} className={`kp-mod-cell kp-mod-cell--${s}`} title={kpiEvidence(key, r)}>
                         {fmtKpi(r, KPI_META[key].pct)}

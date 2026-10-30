@@ -29,6 +29,7 @@ htmlcov/
 # Django/local backend artifacts
 backend/db.sqlite3
 backend/media/
+backend/tutoring/data/*.building
 *.sqlite3
 *.sqlite3-shm
 *.sqlite3-wal
@@ -93,3 +94,15 @@ home-loadout-1920*.png
 # Local reference/docs dumps should not ship with source packages
 REFERENCE/
 GIT_PEDAGOGY_BLUEPRINT_PACK/
+
+# Local planning, review evidence, and database backups
+docs/goals/
+backend/.db-backups/
+frontend/design/
+frontend/register_state.png
+CURRICULUM_AUTHORING_PLAN.md
+LEVEL_QUALITY_REPORT.md
+LEVEL_CHEAT_SHEET.md
+MODULE_1_ANSWERS.md
+backend/filelist.txt
+backend/tier_targets.json

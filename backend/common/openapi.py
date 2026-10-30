@@ -64,6 +64,41 @@ class RuntimeStepResponseSerializer(serializers.Serializer):
     result_category = serializers.CharField(allow_blank=True)
 
 
+class StarCriterionResponseSerializer(serializers.Serializer):
+    key = serializers.ChoiceField(choices=("clear", "command_target", "retry_allowance"))
+    state = serializers.ChoiceField(choices=("earned", "pending", "missed"))
+    reason = serializers.ChoiceField(
+        choices=(
+            "not_cleared",
+            "command_target_exceeded",
+            "retry_allowance_exceeded",
+            "previous_scoring_rules",
+        ),
+        allow_null=True,
+    )
+
+
+class StarBreakdownResponseSerializer(serializers.Serializer):
+    stars = serializers.IntegerField(min_value=0, max_value=3)
+    available_stars = serializers.IntegerField(min_value=0, max_value=3)
+    counted_commands = serializers.IntegerField(min_value=0)
+    command_target = serializers.IntegerField(min_value=0)
+    retry_count = serializers.IntegerField(min_value=0)
+    graded_under_previous_rules = serializers.BooleanField()
+    criteria = StarCriterionResponseSerializer(many=True)
+
+
+class CommandKnowledgeResponseSerializer(serializers.Serializer):
+    id = serializers.CharField()
+    kind = serializers.ChoiceField(choices=("command", "option", "argument"))
+    command = serializers.CharField()
+    title = serializers.CharField()
+    token = serializers.CharField(allow_blank=True)
+    syntax = serializers.CharField()
+    text = serializers.CharField()
+    when_to_use = serializers.CharField(allow_blank=True)
+
+
 class LearnedSkillResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     slug = serializers.CharField()
@@ -73,6 +108,8 @@ class LearnedSkillResponseSerializer(serializers.Serializer):
     chapter_id = serializers.IntegerField(required=False, allow_null=True)
     chapter_number = serializers.IntegerField()
     chapter_title = serializers.CharField(allow_blank=True)
+    learned_at = serializers.DateTimeField()
+    knowledge = CommandKnowledgeResponseSerializer(many=True, required=False)
 
 
 class LearnedSkillsResponseSerializer(serializers.Serializer):

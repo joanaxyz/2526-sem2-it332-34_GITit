@@ -85,7 +85,6 @@
   display: inline-flex;
   align-items: center;
   align-self: stretch;
-  gap: 0.66rem;
   width: fit-content;
   min-width: 13.5rem;
   padding: 0 1.1rem;
@@ -93,69 +92,13 @@
   color: var(--text-primary);
 }
 
-/* The logo sits in a lit plate, so it reads as an inlaid emblem. */
-.app-brand-sigil {
-  position: relative;
-  display: grid;
+/* The supplied artwork includes both the emblem and its lettering. */
+.app-brand-logo {
+  display: block;
   flex: 0 0 auto;
-  width: 2.45rem;
-  height: 2.45rem;
-  place-items: center;
-  border: 1px solid rgba(var(--theme-primary-rgb), 0.28);
-  border-radius: 999px;
-  background: #0a1729;
-  transition:
-    border-color var(--motion-normal) var(--ease-out),
-    box-shadow var(--motion-normal) var(--ease-out);
-}
-
-.app-brand-sigil img {
-  width: 1.85rem;
-  height: 1.85rem;
+  width: 9rem;
+  height: auto;
   object-fit: contain;
-  filter: drop-shadow(0 0 10px rgba(var(--theme-primary-rgb), 0.45));
-}
-
-.app-brand:hover .app-brand-sigil,
-.app-brand:focus-visible .app-brand-sigil {
-  border-color: rgba(var(--theme-primary-rgb), 0.7);
-  box-shadow: var(--glow-active);
-}
-
-.app-brand-copy {
-  display: block;
-  min-width: 0;
-}
-
-.app-brand strong {
-  display: block;
-  /* Cinzel is scoped to this wordmark only - --font-display stays Chakra
-     Petch for every other heading (settings, shop, story-map, etc.). */
-  font-family: 'Cinzel', serif;
-  font-size: 1.42rem;
-  font-weight: 800;
-  line-height: 0.98;
-  letter-spacing: -0.015em;
-}
-
-/* The machine voice under the display voice: the lockup pairs two contrasting
-   families instead of two sizes of the same one. */
-.app-brand small {
-  display: block;
-  margin-top: 0.2rem;
-  color: hsl(var(--muted-foreground));
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  line-height: 1;
-  text-transform: uppercase;
-  transition: color var(--motion-normal) var(--ease-out);
-}
-
-.app-brand:hover small,
-.app-brand:focus-visible small {
-  color: rgb(var(--theme-primary-soft-rgb));
 }
 
 /* ---------- Nav blade ---------- */

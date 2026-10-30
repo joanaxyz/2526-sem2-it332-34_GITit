@@ -1,9 +1,10 @@
-import { Navigate, useSearchParams } from 'react-router-dom'
+import { Navigate } from 'react-router-dom'
 import type { ReactElement } from 'react'
 
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { ErrorState } from '@/shared/components/ErrorState'
+import { storyPath } from '@/shared/navigation/routes'
 
 /**
  * Nobody can play without a companion: no companion is free anymore, so a
@@ -11,13 +12,11 @@ import { ErrorState } from '@/shared/components/ErrorState'
  * only used around playable Adventure/Challenge routes, never Home or Stories.
  */
 export function RequireCompanion({ children }: { children: ReactElement }) {
-  const { companionSlug, hasCompanion, isLoading, isError, error } = usePlayerLoadout()
-  const [searchParams] = useSearchParams()
+  const { hasCompanion, isLoading, isError, error } = usePlayerLoadout()
 
   if (isLoading) {
     return (
       <LoadingScreen
-        companionSlug={companionSlug}
         description="Checking your adventuring party."
         label="Loading"
       />
@@ -34,10 +33,7 @@ export function RequireCompanion({ children }: { children: ReactElement }) {
   }
 
   if (!hasCompanion) {
-    const next = new URLSearchParams(searchParams)
-    next.set('tab', 'companions')
-    next.set('required', '1')
-    return <Navigate replace to={`/shop?${next.toString()}`} />
+    return <Navigate replace to={`${storyPath()}?companion-required=1`} />
   }
 
   return children

@@ -11,6 +11,14 @@ export type RectSnapshot = {
 
 type Point = { x: number; y: number }
 
+/** Initial sizes for two cards centered across the top of the workspace. */
+export type WorkspaceTourPaneLayout = {
+  main: { width: number; height: number }
+  aside: { width: number; height: number }
+  gap: number
+  top: number
+}
+
 export type TourLayout = {
   target: RectSnapshot
   card: RectSnapshot
@@ -19,6 +27,7 @@ export type TourLayout = {
   reveals?: RectSnapshot[]
   /** Height the card must stay within to sit beside its target without covering it. */
   room?: number | null
+  paneLayout?: WorkspaceTourPaneLayout
 }
 
 export const VIEWPORT_GAP = 16
@@ -221,6 +230,33 @@ export function layoutFor(
     card,
     arrowPath: connectorPathFor(card, target),
     room,
+  }
+}
+
+/** Fit the initial two-card arrangement without storing it as a manual transform. */
+export function layoutForPanes(targetRect: DOMRect, defaults: WorkspaceTourPaneLayout): TourLayout {
+  const availableWidth = window.innerWidth - VIEWPORT_GAP * 2
+  const scale = Math.min(1, (availableWidth - defaults.gap) / (defaults.main.width + defaults.aside.width))
+  const target = rectSnapshot(targetRect)
+  const targetRoom = target.top - defaults.top - TARGET_GAP
+  const room = Math.min(
+    window.innerHeight - defaults.top - VIEWPORT_GAP,
+    targetRoom >= MIN_ROOM ? targetRoom : Number.POSITIVE_INFINITY,
+  )
+  const paneLayout = {
+    ...defaults,
+    main: { width: defaults.main.width * scale, height: Math.min(defaults.main.height, room) },
+    aside: { width: defaults.aside.width * scale, height: Math.min(defaults.aside.height, room) },
+  }
+  const width = paneLayout.main.width + defaults.gap + paneLayout.aside.width
+  const left = (window.innerWidth - width) / 2
+  const main = cardRect(left, defaults.top, paneLayout.main.width, paneLayout.main.height)
+  return {
+    target,
+    card: cardRect(left, defaults.top, width, Math.max(paneLayout.main.height, paneLayout.aside.height)),
+    arrowPath: connectorPathFor(main, target),
+    room,
+    paneLayout,
   }
 }
 

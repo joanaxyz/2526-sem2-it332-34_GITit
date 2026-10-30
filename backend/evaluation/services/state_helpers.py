@@ -70,6 +70,16 @@ class StateHelperMixin:
     def _ref_target(self, state: dict, ref: str | None) -> str | None:
         if not ref:
             return None
+        base, separator, steps = ref.rpartition("~")
+        if separator and base and steps.isdigit():
+            # `main~1` names the first-parent ancestor, as in Git. Branch names
+            # cannot contain `~`, so this never shadows a real ref.
+            commits = {commit["id"]: commit for commit in state.get("commits", [])}
+            commit_id = self._ref_target(state, base)
+            for _ in range(int(steps)):
+                parents = (commits.get(commit_id) or {}).get("parents") or []
+                commit_id = parents[0] if parents else None
+            return commit_id
         if ref in state.get("branches", {}):
             return state["branches"][ref]
         if ref in state.get("remote_branches", {}):

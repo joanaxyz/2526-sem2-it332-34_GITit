@@ -43,6 +43,7 @@ env = environ.Env(
     EMAIL_HOST_USER=(str, ""),
     EMAIL_HOST_PASSWORD=(str, ""),
     EMAIL_USE_TLS=(bool, True),
+    BREVO_API_KEY=(str, ""),
     DEFAULT_FROM_EMAIL=(str, "GIT it! <no-reply@example.com>"),
     PASSWORD_RESET_TIMEOUT=(int, 3600),
     JWT_ACCESS_TOKEN_LIFETIME_MINUTES=(int, 15),
@@ -107,7 +108,6 @@ INSTALLED_APPS = [
     "drf_spectacular",
     "accounts",
     "players",
-    "authoring",
     "shop",
     "curriculum",
     "adventures.apps.AdventuresConfig",
@@ -213,6 +213,22 @@ if "postgresql" in DATABASES["default"].get("ENGINE", ""):
         f"-c lock_timeout={env.int('DATABASE_LOCK_TIMEOUT_MS', default=10000)} "
         f"-c statement_timeout={env.int('DATABASE_STATEMENT_TIMEOUT_MS', default=30000)}"
     )
+    # Opt-in shared connection pool. `manage.py runserver` handles every request
+    # on a new thread, so persistent per-thread connections are never reused
+    # there, and against a remote pooler each request pays a full TLS + auth
+    # handshake (close to a second from a laptop). A pool keeps connections open
+    # across threads; Django requires persistent connections off when pooling.
+    _pool_max_size = env.int("DATABASE_POOL_MAX_SIZE", default=0)
+    if _pool_max_size > 0:
+        DATABASES["default"]["CONN_MAX_AGE"] = 0
+        # With a pool, Django validates a connection on checkout instead of per
+        # request, so a session the remote pooler dropped is replaced, not failed.
+        DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
+        DATABASES["default"]["OPTIONS"]["pool"] = {
+            "min_size": 1,
+            "max_size": _pool_max_size,
+            "timeout": env.float("DATABASE_POOL_TIMEOUT_SECONDS", default=10.0),
+        }
 
 REDIS_URL = env("REDIS_URL", default="").strip()
 # Refresh-token revocation is stored in the configured Django cache. The
@@ -350,9 +366,35 @@ REST_FRAMEWORK = {
         "auth_password_reset_confirm": env(
             "THROTTLE_AUTH_PASSWORD_RESET_CONFIRM", default="60/hour"
         ),
+        "auth_email_verification": env("THROTTLE_AUTH_EMAIL_VERIFICATION", default="120/hour"),
+        "auth_email_verification_resend": env(
+            "THROTTLE_AUTH_EMAIL_VERIFICATION_RESEND", default="60/hour"
+        ),
+        "auth_oauth": env("THROTTLE_AUTH_OAUTH", default="120/hour"),
         "command_submit": env("THROTTLE_COMMAND_SUBMIT", default="120/min"),
+        "tutor_chat": env("THROTTLE_TUTOR_CHAT", default="12/min"),
     },
 }
+
+# Tutor credentials never enter frontend configuration or response payloads.
+GOOGLE_AI_STUDIO_API_KEY = env("GOOGLE_AI_STUDIO_API_KEY", default="").strip()
+GROQ_API_KEY = env("GROQ_API_KEY", default="").strip()
+TUTOR_GEMINI_MODELS = tuple(
+    dict.fromkeys(
+        model.strip()
+        for model in env(
+            "TUTOR_GEMINI_MODELS", default="gemini-3.5-flash:minimal,gemini-3.6-flash:minimal"
+        ).split(",")
+        if model.strip()
+    )
+)[:4]
+TUTOR_GROQ_MODEL = env("TUTOR_GROQ_MODEL", default="openai/gpt-oss-20b:low").strip()
+TUTOR_PROVIDER_ATTEMPT_SECONDS = env.float("TUTOR_PROVIDER_ATTEMPT_SECONDS", default=10)
+TUTOR_PROVIDER_DEADLINE_SECONDS = env.float("TUTOR_PROVIDER_DEADLINE_SECONDS", default=20)
+TUTOR_PROVIDER_HEDGE_SECONDS = env.float("TUTOR_PROVIDER_HEDGE_SECONDS", default=4)
+TUTOR_SCENARIO_INDEX_PATH = env(
+    "TUTOR_SCENARIO_INDEX_PATH", default=str(BASE_DIR / "tutoring" / "data" / "scenario-index.json")
+)
 
 JWT_ACCESS_TOKEN_LIFETIME_MINUTES = env("JWT_ACCESS_TOKEN_LIFETIME_MINUTES")
 JWT_REFRESH_TOKEN_LIFETIME_DAYS = env("JWT_REFRESH_TOKEN_LIFETIME_DAYS")
@@ -389,6 +431,9 @@ SPECTACULAR_SETTINGS = {
     "TITLE": "GIT it! API",
     "DESCRIPTION": "Student-facing Git scenario level API.",
     "VERSION": env("API_VERSION"),
+    "ENUM_NAME_OVERRIDES": {
+        "EmailVerificationRequiredCodeEnum": ["email_unverified"],
+    },
 }
 
 EMAIL_BACKEND = env("EMAIL_BACKEND")
@@ -397,10 +442,35 @@ EMAIL_PORT = env("EMAIL_PORT")
 EMAIL_HOST_USER = env("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = env("EMAIL_HOST_PASSWORD")
 EMAIL_USE_TLS = env("EMAIL_USE_TLS")
+# Render's free tier blocks outbound SMTP, so hosted deploys send through
+# Brevo's HTTPS API (EMAIL_BACKEND=anymail.backends.brevo.EmailBackend).
+# DEFAULT_FROM_EMAIL must be a sender address verified in Brevo.
+ANYMAIL = {"BREVO_API_KEY": env("BREVO_API_KEY").strip()}
 DEFAULT_FROM_EMAIL = env("DEFAULT_FROM_EMAIL")
 PASSWORD_RESET_TIMEOUT = env("PASSWORD_RESET_TIMEOUT")
 
 FRONTEND_BASE_URL = env("FRONTEND_BASE_URL", default="http://localhost:5173").rstrip("/")
+# Where emails load their logo and guide portrait from. Inboxes cannot reach a
+# localhost dev server, so local setups point this at the deployed site.
+EMAIL_ASSET_BASE_URL = env("EMAIL_ASSET_BASE_URL", default=FRONTEND_BASE_URL).rstrip("/")
+
+# GitHub and Google sign-in. A provider whose client id or secret is blank is
+# simply unavailable. Providers redirect back to
+# <OAUTH_CALLBACK_BASE_URL>/auth/oauth/<provider>/callback/, the API origin the
+# browser uses: the Vercel /api proxy in production, the Django port locally.
+OAUTH_CALLBACK_BASE_URL = env("OAUTH_CALLBACK_BASE_URL", default=f"{FRONTEND_BASE_URL}/api").rstrip(
+    "/"
+)
+OAUTH_PROVIDERS = {
+    "github": {
+        "client_id": env("GITHUB_OAUTH_CLIENT_ID", default="").strip(),
+        "client_secret": env("GITHUB_OAUTH_CLIENT_SECRET", default="").strip(),
+    },
+    "google": {
+        "client_id": env("GOOGLE_OAUTH_CLIENT_ID", default="").strip(),
+        "client_secret": env("GOOGLE_OAUTH_CLIENT_SECRET", default="").strip(),
+    },
+}
 
 if not DEBUG:
     if not FRONTEND_BASE_URL.startswith("https://"):

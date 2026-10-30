@@ -76,9 +76,39 @@ def write_workspace_file(repository_state: dict, *, path: str, content: object =
         "status": "modified" if normalized_path in base_tree else "untracked",
         "content": content,
     }
+    _stage_mergetool_resolution(state, normalized_path, content)
     refresh_ignored_paths(runtime, state)
     _set_operation_metadata(state, last_workspace_file_written=normalized_path)
     return runtime.normalize_state(state)
+
+
+def _stage_mergetool_resolution(
+    state: dict,
+    path: str,
+    content: object,
+) -> None:
+    opened = [
+        str(item)
+        for item in (state.get("operation_metadata") or {}).get("last_mergetool_paths", [])
+    ]
+    if path not in (state.get("conflicts") or []) or path not in opened:
+        return
+
+    state.setdefault("staging", {})[path] = {
+        "status": "modified",
+        "content": copy.deepcopy(content),
+    }
+    state.setdefault("working_tree", {}).pop(path, None)
+    state["conflicts"] = sorted(item for item in state.get("conflicts", []) if item != path)
+    (state.get("conflict_details") or {}).pop(path, None)
+    previous = [
+        str(item)
+        for item in (state.get("operation_metadata") or {}).get("last_mergetool_resolved_paths", [])
+    ]
+    _set_operation_metadata(
+        state,
+        last_mergetool_resolved_paths=sorted({*previous, path}),
+    )
 
 
 def delete_workspace_file(repository_state: dict, *, path: str) -> dict:

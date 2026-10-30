@@ -123,15 +123,6 @@
   font-weight: 800;
 }
 
-.home-switcher-option small {
-  display: block;
-  margin-top: 0.1rem;
-  color: var(--text-secondary);
-  font-size: var(--text-2xs);
-  line-height: 1.4;
-  text-wrap: pretty;
-}
-
 .home-switcher-option.is-active {
   border-color: rgba(var(--theme-primary-rgb), 0.3);
   background: rgba(var(--theme-primary-rgb), 0.1);
@@ -154,13 +145,6 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-}
-
-.home-switcher-blurb {
-  margin: 0;
-  color: var(--text-secondary);
-  font-size: var(--text-xs);
-  text-wrap: pretty;
 }
 
 @media (prefers-reduced-motion: reduce) {

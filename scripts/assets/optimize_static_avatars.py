@@ -52,6 +52,16 @@ def targets() -> list[Target]:
                 (256, 256),
             ),
             Target(
+                PUBLIC / "companion" / "black" / "raw" / "avatar.png",
+                PUBLIC / "companion" / "black" / "avatar.png",
+                (256, 256),
+            ),
+            Target(
+                PUBLIC / "companion" / "white" / "raw" / "avatar.png",
+                PUBLIC / "companion" / "white" / "avatar.png",
+                (256, 256),
+            ),
+            Target(
                 PUBLIC / "companion" / "blue" / "raw" / "battle_portrait.png",
                 PUBLIC / "companion" / "blue" / "battle_portrait.png",
                 (384, 288),

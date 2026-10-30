@@ -1,5 +1,27 @@
 # Production Deployment
 
+The optional learning tutor reads `GOOGLE_AI_STUDIO_API_KEY` and `GROQ_API_KEY`
+on the backend only. `TUTOR_GEMINI_MODELS` is an ordered comma-separated list
+(default `gemini-3.5-flash:minimal,gemini-3.6-flash:minimal`), followed by
+`TUTOR_GROQ_MODEL` (default `openai/gpt-oss-20b:low`). The optional `:effort` suffix
+sets Gemini `thinkingLevel` or Groq `reasoning_effort`; use only levels the model
+supports, because a rejected request is a configuration failure. Limited models enter
+a shared-cache cooldown; authentication/configuration failures do not trigger
+rate-limit rotation. Each attempt is capped by `TUTOR_PROVIDER_ATTEMPT_SECONDS`
+(default 10) within `TUTOR_PROVIDER_DEADLINE_SECONDS` (default 20). A model with no
+reply after `TUTOR_PROVIDER_HEDGE_SECONDS` (default 4) keeps running while the next
+one starts; the first usable reply wins, and a model outrun this way sits out for two
+minutes. A hedge of at least the attempt budget tries models strictly one at a time.
+`THROTTLE_TUTOR_CHAT` defaults to `12/min` per authenticated user. If every provider
+fails, the tutor says it is unavailable; scenario protection never relaxes.
+
+The packaged tutor scenario index must match the seed banks. Run
+`python manage.py build_tutor_index --check` from `backend/` before release.
+After changing public scenario content, run `python manage.py build_tutor_index`
+with the Google key configured and include the regenerated JSON in the release.
+It resumes quota-limited builds; see `backend/tutoring/data/README.md`.
+No API keys belong in frontend variables or generated assets.
+
 This guide provides three supported deployment paths:
 
 1. A reference Linux host using Docker Compose and a TLS reverse proxy.
@@ -43,7 +65,8 @@ Before starting, prepare:
 - Redis 7 or newer. It is used for shared authentication revocation, caching,
   and throttling across workers and replicas.
 - TLS termination at the host proxy or platform load balancer.
-- SMTP credentials if password-reset email must work.
+- SMTP credentials, or an HTTPS email API key such as Brevo when the host
+  blocks SMTP, if password-reset email must work.
 
 For an initial 100-concurrent-user staging test, a reasonable starting point is
 4 vCPU and 8 GB RAM for the application host, with PostgreSQL and Redis managed
@@ -291,7 +314,7 @@ HTTPS domain:
 5. Start one challenge and submit a command.
 6. Open the shop and verify companion/story presentation.
 7. Sign out and sign back in.
-8. Request a password reset if SMTP is configured.
+8. Request a password reset if email delivery is configured.
 9. Confirm there are no unexpected `/cosmetics`, `/audio`, `/assets`, or API
    404/5xx responses in the browser network panel.
 

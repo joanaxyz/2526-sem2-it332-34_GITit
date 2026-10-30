@@ -2,6 +2,8 @@ import { useEffect, useId, useMemo, useRef, useState } from 'react'
 
 import { DrillAssembleBoard } from '@/features/drills/components/DrillAssembleBoard'
 import { DrillChoiceBoard } from '@/features/drills/components/DrillChoiceBoard'
+import { DrillCheckpointArena } from '@/features/drills/components/DrillCheckpointArena'
+import type { DrillCheckpointControls } from '@/features/drills/components/DrillCheckpointArena'
 import type {
   DrillAnswer,
   DrillCard,
@@ -43,6 +45,9 @@ export function DrillQuestion({
   round,
   verdict,
   onAnswer,
+  flightChoices = false,
+  flightSelection = null,
+  checkpoint,
 }: {
   card: DrillCard | null
   rung: DrillRung | null
@@ -50,6 +55,9 @@ export function DrillQuestion({
   round: number
   verdict: DrillVerdict | null
   onAnswer: (answer: DrillAnswer | null) => void
+  flightChoices?: boolean
+  flightSelection?: string | null
+  checkpoint?: DrillCheckpointControls
 }) {
   const [selected, setSelected] = useState<string | null>(null)
   const [placedIds, setPlacedIds] = useState<string[]>([])
@@ -123,14 +131,15 @@ export function DrillQuestion({
           Put this run in the order it happens.
         </h2>
         <p className="drill-subject-note">{sequence.task || sequence.label}</p>
-        <DrillAssembleBoard
+        {checkpoint ? <DrillCheckpointArena values={bank} expected={sequence.steps} variant="steps"
+          verdict={verdict} onAnswer={onAnswer} {...checkpoint} /> : <DrillAssembleBoard
           values={bank}
           placedIds={placedIds}
           onChange={(next) => placeAll(next, bank)}
           variant="steps"
           verdict={verdict}
           expected={sequence.steps}
-        />
+        />}
       </section>
     )
   }
@@ -138,6 +147,7 @@ export function DrillQuestion({
   if (!card || !rung) return null
 
   const blankIndex = card.blank?.index ?? -1
+  const visibleSelection = flightChoices ? flightSelection : selected
 
   return (
     <section className="drill-question" ref={sectionRef} tabIndex={-1} aria-labelledby={askId}>
@@ -169,9 +179,9 @@ export function DrillQuestion({
                 <span
                   key={`slot-${index}`}
                   className="drill-gap"
-                  data-filled={selected ? '' : undefined}
+                  data-filled={visibleSelection ? '' : undefined}
                 >
-                  {selected ?? '   '}
+                  {visibleSelection ?? '   '}
                 </span>
               ) : (
                 <span key={`${token}-${index}`}>{token}</span>
@@ -183,7 +193,8 @@ export function DrillQuestion({
       {rung === 'forge' ? <p className="drill-subject">{card.intent}</p> : null}
 
       {rung === 'forge' ? (
-        <DrillAssembleBoard
+        checkpoint ? <DrillCheckpointArena values={bank} expected={card.tokens} variant="tokens"
+          verdict={verdict} onAnswer={onAnswer} {...checkpoint} /> : <DrillAssembleBoard
           values={bank}
           placedIds={placedIds}
           onChange={(next) => placeAll(next, bank)}
@@ -198,7 +209,7 @@ export function DrillQuestion({
             onAnswer(values.length ? { kind: 'tokens', values } : null)
           }}
         />
-      ) : (
+      ) : flightChoices ? null : (
         <DrillChoiceBoard
           options={options}
           layout={rung === 'complete' ? 'chips' : 'rows'}

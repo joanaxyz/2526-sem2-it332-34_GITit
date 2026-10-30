@@ -8,7 +8,7 @@ import { useLeaveAbandonedRun } from './useLeaveAbandonedRun'
 function tierRun(status: TierRun['status']) {
   return {
     status,
-    story: { slug: 'git-it-legacy' },
+    story: { slug: 'arcane-spire' },
     chapter: { id: 4 },
   } as unknown as TierRun
 }

@@ -11,11 +11,11 @@ from rest_framework_simplejwt.exceptions import TokenError
 from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.models import AccountIdentity, AccountSecurity, SessionRecord
+from accounts.services.verification import EmailVerificationService
 from common.exceptions import Conflict
 from common.http import get_client_ip
 from players.models import PlayerPreferences
 from players.services import get_or_create_player
-from progress.models import StreakRecord
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +34,14 @@ class UserService:
         *,
         username: str,
         email: str,
-        password: str,
+        password: str | None,
+        verify_email: bool = True,
     ):
+        """Create an account with its player, wallet grant, and onboarding.
+
+        OAuth sign-up passes no password (the account gets an unusable one) and
+        verify_email=False, because the provider already proved the inbox.
+        """
         User = get_user_model()
         normalized_username = username.strip()
         normalized_email = User.objects.normalize_email(email).lower()
@@ -67,7 +73,6 @@ class UserService:
         PlayerPreferences.objects.create(
             player=player, onboarding_phase=PlayerPreferences.ONBOARDING_START
         )
-        StreakRecord.objects.create(player=player)
         # The default Arcane Spire story is owned implicitly by
         # everyone — nothing to grant at signup. Companions are NOT free: the
         # new player owns none yet and must buy one in the Shop before they can
@@ -82,6 +87,9 @@ class UserService:
             reason="signup_grant",
             award_key=f"signup:{player.id}",
         )
+        if verify_email:
+            # The account cannot sign in until the emailed code proves the inbox.
+            EmailVerificationService().start(user)
         return user
 
 

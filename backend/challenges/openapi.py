@@ -6,7 +6,11 @@ and validate that presenter output for OpenAPI generation.
 
 from rest_framework import serializers
 
-from common.openapi import GameplayRunStatusField, RuntimeStepResponseSerializer
+from common.openapi import (
+    GameplayRunStatusField,
+    RuntimeStepResponseSerializer,
+    StarBreakdownResponseSerializer,
+)
 
 
 class ChallengeRunStepResponseSerializer(RuntimeStepResponseSerializer):
@@ -24,6 +28,7 @@ class ChallengeCommandRunResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     replay = serializers.BooleanField()
     stars = serializers.IntegerField()
+    star_breakdown = StarBreakdownResponseSerializer()
     status = GameplayRunStatusField()
     failure_reason = serializers.CharField(allow_null=True, allow_blank=True)
     completed_at = serializers.DateTimeField(allow_null=True)
@@ -40,6 +45,7 @@ class ChallengeRunResponseSerializer(serializers.Serializer):
     id = serializers.IntegerField()
     replay = serializers.BooleanField()
     stars = serializers.IntegerField()
+    star_breakdown = StarBreakdownResponseSerializer()
     status = GameplayRunStatusField()
     failure_reason = serializers.CharField(allow_null=True, allow_blank=True)
     completed_at = serializers.DateTimeField(allow_null=True)

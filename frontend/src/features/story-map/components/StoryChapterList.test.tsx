@@ -1,6 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { MemoryRouter } from 'react-router-dom'
 
 import type { LearningChapter } from '@/features/story-map/types'
 
@@ -43,16 +42,13 @@ describe('StoryChapterList', () => {
       title: 'Module 0',
     }
     render(
-      <MemoryRouter>
-        <StoryChapterList
-          chapters={[orientation, baseChapter]}
-          activeChapterId={orientation.id}
-          onSelectChapter={selectChapter}
-        />
-      </MemoryRouter>,
+      <StoryChapterList
+        chapters={[orientation, baseChapter]}
+        activeChapterId={orientation.id}
+        onSelectChapter={selectChapter}
+      />,
     )
 
-    expect(screen.getByRole('link', { name: 'All stories' })).toHaveAttribute('href', '/stories')
     const trigger = screen.getByRole('button', { name: /current 00 Module 0/i })
     expect(trigger.querySelector('.story-chapter-diamond')).toBeInTheDocument()
     fireEvent.click(trigger)

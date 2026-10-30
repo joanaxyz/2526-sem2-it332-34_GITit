@@ -392,8 +392,8 @@ describe('effectRegistry', () => {
       const layer = document.createElement('div')
       await effectForSkill('default')({ layer, from: { x: 80, y: 90 }, to: { x: 300, y: 140 } })
 
-      // The flight is launch -> nose(@0.82) -> settle; its nose keyframe lands the
-      // nose on the target (the impact/dissipate pop then plays there, pinned).
+      // The flight is launch -> nose(@0.82) -> hold; the impact/dissipate
+      // frames then play on their own pinned anchor.
       const flight = runtime.animations.find((frames) => frames.length === 3 && frames[1].offset === 0.82)
       expect(flight).toBeDefined()
       const nose = translateOf(flight![1])
@@ -480,9 +480,11 @@ describe('effectRegistry', () => {
 
       // Travel lands the projectile nose on the body point; only the impact
       // phase pins its base to the ground line.
-      const impact = translateOf(travel![1])
-      expect(impact.x + metrics.width * 0.78).toBeCloseTo(bodyPoint.x, 4)
-      expect(impact.y + metrics.height * 0.52).toBeCloseTo(bodyPoint.y, 4)
+      for (const frame of travel!.slice(1)) {
+        const nose = translateOf(frame)
+        expect(nose.x + metrics.width * 0.78).toBeCloseTo(bodyPoint.x, 4)
+        expect(nose.y + metrics.height * 0.52).toBeCloseTo(bodyPoint.y, 4)
+      }
 
       // The impact/dissipate frames pin the pixel-measured placeAnchor onto the
       // ground point, not a fixed 0.86 fraction.
@@ -547,9 +549,13 @@ describe('effectRegistry', () => {
       const node = runtime.animationElements[runtime.animations.indexOf(flight!)]
       expect(Number.parseFloat(node.style.width)).toBeCloseTo(metrics.width, 4)
       expect(Number.parseFloat(node.style.height)).toBeCloseTo(metrics.height, 4)
-      const nose = translateOf(flight![1])
-      expect(nose.x + metrics.width * 0.78).toBeCloseTo(bodyPoint.x, 4)
-      expect(nose.y + metrics.height * 0.52).toBeCloseTo(bodyPoint.y, 4)
+      // Every remaining flight frame stays on the body, even though the next
+      // phase erupts from a separate point on the floor.
+      for (const frame of flight!.slice(1)) {
+        const nose = translateOf(frame)
+        expect(nose.x + metrics.width * 0.78).toBeCloseTo(bodyPoint.x, 4)
+        expect(nose.y + metrics.height * 0.52).toBeCloseTo(bodyPoint.y, 4)
+      }
 
       const pa = effectSpecForSkill('clone', 'blue').placeAnchor!
       const settle = translateOf(impact![0])

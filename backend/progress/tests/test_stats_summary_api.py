@@ -1,9 +1,17 @@
 from datetime import date
 
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from rest_framework.test import APIClient
 
-from curriculum.models import CommandSkill
-from progress.serializers import StatsSummaryResponseSerializer
+from adventures.models import AdventureLevel, AdventureLevelTier, AdventureLevelTierScenario
+from challenges.models import ChallengeLevel, ChallengeTrial
+from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD
+from curriculum.models import Chapter, CommandForm, CommandSkill, Story
+from players.services import get_or_create_player
+from progress.models import ChallengeTrialCompletion, CoinTransaction
+from progress.serializers import StatsActivityResponseSerializer, StatsSummaryResponseSerializer
+from progress.services import MetricsService
 
 SUMMARY_KEYS = {"skill_profile", "activity_trend", "activity_window", "headline"}
 SKILL_AXIS_KEYS = {"key", "label", "hint", "value", "command"}
@@ -12,24 +20,58 @@ HEADLINE_KEYS = {
     "levels_completed",
     "finish_rate",
     "accuracy",
-    "boss_floors",
+    "hard_tier_clears",
     "comebacks",
     "perfect_clears",
-    "day_streak",
-    "longest_streak",
+    "gate_trial_clears",
+    "hard_gate_trial_clears",
     "gitcoins",
+    "gitcoins_earned",
     "commands_run",
 }
 
 
 def test_authenticated_stats_summary_matches_documented_contract(db, django_user_model):
-    CommandSkill.objects.create(
+    skill = CommandSkill.objects.create(
         slug="status",
         base_command="git status",
         title="Status",
         summary="Inspect the working tree.",
         sort_order=1,
     )
+    story = Story.objects.create(slug="arcane-spire", title="The Arcane Spire")
+    chapter = Chapter.objects.create(
+        story=story,
+        slug="stats-chapter",
+        number=1,
+        title="Stats Chapter",
+        description="A chapter used to verify mastery metrics.",
+    )
+    form = CommandForm.objects.create(
+        command_skill=skill,
+        chapter=chapter,
+        slug="plain",
+        usage_form="git status",
+        label="Read repository status",
+        is_published=True,
+        is_playable=True,
+    )
+    level = AdventureLevel.objects.create(
+        chapter=chapter,
+        slug="stats-level",
+        title="Stats Level",
+        is_required=True,
+        is_published=True,
+    )
+    level.command_forms.add(form)
+    tier = AdventureLevelTier.objects.create(adventure_level=level, difficulty="easy")
+    scenario = AdventureLevelTierScenario.objects.create(
+        tier=tier,
+        slug="stats-scenario",
+        title="Stats Scenario",
+        is_published=True,
+    )
+    scenario.command_forms.add(form)
     user = django_user_model.objects.create_user(
         username="stats-contract",
         email="stats-contract@example.com",
@@ -48,7 +90,7 @@ def test_authenticated_stats_summary_matches_documented_contract(db, django_user
         "key": "status",
         "label": "Status",
         "hint": "Inspect the working tree.",
-        "value": None,
+        "value": 0.0,
         "command": "git status",
     } in payload["skill_profile"]
     assert all(set(axis) == SKILL_AXIS_KEYS for axis in payload["skill_profile"])
@@ -89,7 +131,7 @@ def test_authenticated_stats_summary_matches_documented_contract(db, django_user
     assert type(finish_rate["numerator"]) is int
     assert type(finish_rate["denominator"]) is int
     assert payload["headline"]["accuracy"] is None
-    for field_name in ("boss_floors", "comebacks"):
+    for field_name in ("hard_tier_clears", "comebacks"):
         scoped_count = payload["headline"][field_name]
         assert set(scoped_count) == {"value", "scope"}
         assert type(scoped_count["value"]) is int
@@ -97,9 +139,10 @@ def test_authenticated_stats_summary_matches_documented_contract(db, django_user
     for field_name in (
         "levels_completed",
         "perfect_clears",
-        "day_streak",
-        "longest_streak",
+        "gate_trial_clears",
+        "hard_gate_trial_clears",
         "gitcoins",
+        "gitcoins_earned",
         "commands_run",
     ):
         assert type(payload["headline"][field_name]) is int
@@ -109,6 +152,134 @@ def test_authenticated_stats_summary_matches_documented_contract(db, django_user
 
     documented = StatsSummaryResponseSerializer(data=payload)
     assert documented.is_valid(), documented.errors
+
+
+def test_stats_skill_profile_excludes_unearnable_and_non_runebound_commands(db, django_user_model):
+    CommandSkill.objects.create(
+        slug="library-only",
+        base_command="git library-only",
+        title="Library only",
+        summary="Reference material with no playable curriculum scenario.",
+    )
+    reference_skill = CommandSkill.objects.create(
+        slug="reference-only",
+        base_command="git reference-only",
+        title="Reference only",
+    )
+    CommandForm.objects.create(
+        command_skill=reference_skill,
+        slug="reference",
+        usage_form="git reference-only",
+        label="Read about a command",
+        is_published=True,
+        is_playable=False,
+    )
+    simulator_only_skill = CommandSkill.objects.create(
+        slug="simulator-only",
+        base_command="git simulator-only",
+        title="Simulator only",
+    )
+    CommandForm.objects.create(
+        command_skill=simulator_only_skill,
+        slug="supported",
+        usage_form="git simulator-only",
+        label="Supported but not taught",
+        is_published=True,
+        is_playable=True,
+    )
+    other_story = Story.objects.create(slug="frostbound-citadel", title="Frostbound Citadel")
+    other_chapter = Chapter.objects.create(
+        story=other_story,
+        slug="arcane-chapter",
+        number=1,
+        title="Arcane Chapter",
+        description="A published curriculum outside Runebound Turret.",
+    )
+    other_skill = CommandSkill.objects.create(
+        slug="arcane-command",
+        base_command="git arcane",
+        title="Arcane command",
+    )
+    other_form = CommandForm.objects.create(
+        command_skill=other_skill,
+        chapter=other_chapter,
+        slug="playable",
+        usage_form="git arcane",
+        label="A playable command from another story",
+        is_published=True,
+        is_playable=True,
+    )
+    other_level = AdventureLevel.objects.create(
+        chapter=other_chapter,
+        slug="arcane-level",
+        title="Arcane Level",
+        is_required=True,
+        is_published=True,
+    )
+    other_level.command_forms.add(other_form)
+    other_tier = AdventureLevelTier.objects.create(adventure_level=other_level, difficulty="easy")
+    other_scenario = AdventureLevelTierScenario.objects.create(
+        tier=other_tier,
+        slug="arcane-scenario",
+        title="Arcane Scenario",
+        is_published=True,
+    )
+    other_scenario.command_forms.add(other_form)
+    user = django_user_model.objects.create_user(username="stats-curriculum-scope")
+    player = get_or_create_player(user)
+
+    skill_profile = MetricsService()._command_skill_profile(player=player)
+
+    assert skill_profile == []
+
+
+def test_stats_headline_counts_gate_trials_and_coins_won_through_play(db, django_user_model):
+    user = django_user_model.objects.create_user(
+        username="stats-gates",
+        email="stats-gates@example.com",
+        password="pass12345",
+    )
+    player = get_or_create_player(user)
+
+    def gate_trials(story_slug: str) -> list[ChallengeTrial]:
+        story, _ = Story.objects.get_or_create(slug=story_slug, defaults={"title": story_slug})
+        chapter = Chapter.objects.create(
+            story=story, slug=f"{story_slug}-gate-chapter", number=1, title="Gate", description=""
+        )
+        level = ChallengeLevel.objects.create(
+            chapter=chapter, slug=f"{story_slug}-gate", title="Gate", is_published=True
+        )
+        return [
+            ChallengeTrial.objects.create(
+                challenge_level=level,
+                difficulty=difficulty,
+                min_counted_commands=1,
+                max_counted_commands=3,
+                is_published=True,
+            )
+            for difficulty in (DIFFICULTY_EASY, DIFFICULTY_HARD)
+        ]
+
+    # Both Arcane Spire trials count; a retired story's gate never does.
+    for trial in gate_trials("arcane-spire") + gate_trials("frostbound-citadel")[:1]:
+        ChallengeTrialCompletion.objects.create(player=player, challenge_trial=trial, stars=2)
+
+    for amount, reason, key in (
+        (100, "signup_grant", "signup"),
+        (25, "adventure_level_reward", "level"),
+        (50, "adventure_tier_reward", "tier"),
+        (100, "challenge_trial_reward", "trial"),
+        (40, "chapter_chest", "chest"),
+        (-80, "shop_purchase", "shop"),
+    ):
+        CoinTransaction.objects.create(player=player, amount=amount, reason=reason, award_key=key)
+
+    headline = MetricsService().stats_summary(player=player)["headline"]
+
+    assert headline["gate_trial_clears"] == 2
+    assert headline["hard_gate_trial_clears"] == 1
+    # Spending in the shop never lowers it, and the signup grant is not won.
+    assert headline["gitcoins_earned"] == 215
 
 
 def test_stats_contract_rejects_the_displaced_openapi_shape():
@@ -154,3 +325,35 @@ def test_stats_summary_activity_window_selects_the_trailing_span(db, django_user
     months = [date.fromisoformat(point["date"]) for point in year["activity_trend"]]
     assert months == sorted(months)
     assert months[-1].month == date.today().month
+
+
+def test_stats_activity_endpoint_returns_only_range_dependent_data(db, django_user_model):
+    user = django_user_model.objects.create_user(
+        username="stats-activity",
+        email="stats-activity@example.com",
+        password="pass12345",
+    )
+    client = APIClient()
+    client.force_authenticate(user=user)
+
+    response = client.get("/api/progress/stats/activity/", {"window": "week"})
+
+    assert response.status_code == 200
+    payload = response.json()
+    assert set(payload) == {"activity_trend", "activity_window"}
+    assert payload["activity_window"] == "week"
+    assert len(payload["activity_trend"]) == 7
+    assert "headline" not in payload
+    assert "skill_profile" not in payload
+    documented = StatsActivityResponseSerializer(data=payload)
+    assert documented.is_valid(), documented.errors
+
+
+def test_activity_summary_uses_only_the_two_runebound_trend_queries(db, django_user_model):
+    user = django_user_model.objects.create_user(username="stats-activity-query-count")
+    player = get_or_create_player(user)
+    with CaptureQueriesContext(connection) as captured:
+        payload = MetricsService().activity_summary(player=player, activity_window="month")
+
+    assert payload["activity_window"] == "month"
+    assert len(captured) == 2

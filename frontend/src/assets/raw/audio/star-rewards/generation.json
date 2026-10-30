@@ -1,0 +1,25 @@
+{
+  "provider": "ElevenLabs",
+  "model": "eleven_text_to_sound_v2",
+  "output_format": "mp3_44100_128",
+  "prompt_influence": 0.65,
+  "api_reference": "https://elevenlabs.io/docs/api-reference/text-to-sound-effects/convert",
+  "cues": {
+    "0": {
+      "duration_seconds": 0.65,
+      "prompt": "Premium fantasy RPG crystal star UI cue. Soft glass/celesta, clear immediate attack, short shimmer decay. Clean isolated SFX, no voices, music bed, noise, drums, harsh treble or long reverb. No stars earned: one quiet low muted crystal tap, gently falling airy glass sigh. Kind and restrained, no reward sparkle, no alarm, no failure buzzer."
+    },
+    "1": {
+      "duration_seconds": 0.6,
+      "prompt": "Premium fantasy RPG crystal star UI cue. Soft glass/celesta, clear immediate attack, short shimmer decay. Clean isolated SFX, no voices, music bed, noise, drums, harsh treble or long reverb. First star earned: exactly one clear, warm crystal bell note around D6. A tiny soft magical click at the attack, then a delicate luminous glass tail. Modest positive reward."
+    },
+    "2": {
+      "duration_seconds": 0.65,
+      "prompt": "Premium fantasy RPG crystal star UI cue. Soft glass/celesta, clear immediate attack, short shimmer decay. Clean isolated SFX, no voices, music bed, noise, drums, harsh treble or long reverb. Second star earned: exactly one brighter, higher crystal bell note around F sharp 6. A tiny crisp magical click at the attack, then light shimmering glass harmonics. More rewarding than the first star, a clear upward step in pitch."
+    },
+    "3": {
+      "duration_seconds": 0.9,
+      "prompt": "Premium fantasy RPG crystal star UI cue. Soft glass/celesta, clear immediate attack, short shimmer decay. Clean isolated SFX, no voices, music bed, noise, drums, harsh treble or long reverb. Third star earned, perfect result: one high crystal bell strike around A6, a soft major chord underneath and a compact glittering flourish. Bright satisfying resolution, fuller than the first two stars. No extra bell strikes."
+    }
+  }
+}

@@ -37,13 +37,6 @@ class ChallengeLevel(models.Model):
     )
     is_published = models.BooleanField(default=True)
     sort_order = models.PositiveIntegerField(default=0)
-    source_content_definition = models.ForeignKey(
-        "authoring.ContentDefinition",
-        null=True,
-        blank=True,
-        related_name="runtime_challenge_levels",
-        on_delete=models.SET_NULL,
-    )
 
     class Meta:
         ordering = ["chapter__sort_order", "sort_order", "id"]

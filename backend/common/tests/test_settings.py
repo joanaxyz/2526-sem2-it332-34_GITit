@@ -22,8 +22,13 @@ def run_settings_import(
             "DJANGO_CORS_ALLOWED_ORIGINS": "http://localhost:5173",
             "DJANGO_DEBUG": debug,
             "DJANGO_SECRET_KEY": "test-secret",
+            # Pinned so a developer's local http:// origin in backend/.env cannot
+            # trip the production HTTPS guard.
+            "FRONTEND_BASE_URL": "https://app.example.com",
             "JWT_COOKIE_SECURE": "True" if debug == "False" else "False",
             "REDIS_URL": redis_url,
+            # Pinned for the same reason: production imports require HSTS.
+            "SECURE_HSTS_SECONDS": "31536000" if debug == "False" else "0",
         }
     )
     return subprocess.run(

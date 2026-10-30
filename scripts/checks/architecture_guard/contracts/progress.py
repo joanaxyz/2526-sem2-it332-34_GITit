@@ -89,8 +89,9 @@ def progress_summary_backend_contract_violations(
     expected_progress_fields = {
         "RateMetricSerializer": {
             "value": "serializers.FloatField(allow_null=True)",
-            "numerator": "serializers.IntegerField()",
+            "numerator": "serializers.FloatField()",
             "denominator": "serializers.IntegerField()",
+            "unit": "serializers.ChoiceField(choices=['participants'],required=False)",
         },
         "DashboardKpiSetSerializer": {
             "scr": "RateMetricSerializer()",
@@ -102,11 +103,6 @@ def progress_summary_backend_contract_violations(
             "completed": "serializers.IntegerField()",
             "failed": "serializers.IntegerField()",
             "abandoned": "serializers.IntegerField()",
-        },
-        "DashboardStreakSerializer": {
-            "current": "serializers.IntegerField()",
-            "longest": "serializers.IntegerField()",
-            "last_completed_on": "serializers.DateField(allow_null=True)",
         },
         "DashboardRetryTrendSerializer": {
             "level_title": "serializers.CharField()",
@@ -134,12 +130,13 @@ def progress_summary_backend_contract_violations(
             "levels_completed": "serializers.IntegerField()",
             "finish_rate": "RateMetricSerializer()",
             "accuracy": "serializers.FloatField(allow_null=True)",
-            "boss_floors": "StatsScopedCountSerializer()",
+            "hard_tier_clears": "StatsScopedCountSerializer()",
             "comebacks": "StatsScopedCountSerializer()",
             "perfect_clears": "serializers.IntegerField()",
-            "day_streak": "serializers.IntegerField()",
-            "longest_streak": "serializers.IntegerField()",
+            "gate_trial_clears": "serializers.IntegerField()",
+            "hard_gate_trial_clears": "serializers.IntegerField()",
             "gitcoins": "serializers.IntegerField()",
+            "gitcoins_earned": "serializers.IntegerField()",
             "commands_run": "serializers.IntegerField()",
         },
         "StatsSummaryResponseSerializer": {
@@ -150,13 +147,16 @@ def progress_summary_backend_contract_violations(
             "activity_window": "serializers.ChoiceField(choices=sorted(ACTIVITY_WINDOWS))",
             "headline": "StatsHeadlineSerializer()",
         },
+        "StatsActivityResponseSerializer": {
+            "activity_trend": "StatsTrendPointSerializer(many=True)",
+            "activity_window": "serializers.ChoiceField(choices=sorted(ACTIVITY_WINDOWS))",
+        },
         "DashboardSummaryResponseSerializer": {
             "kpis": "DashboardKpiSetSerializer()",
             "chapter_kpis": ("serializers.DictField(child=DashboardKpiSetSerializer())"),
             "counts": "DashboardCountsSerializer()",
             "completed_story_slug": "serializers.CharField(allow_null=True)",
             "completed_stories": "serializers.ListField(child=serializers.CharField())",
-            "streak": "DashboardStreakSerializer()",
             "perfect_clears": "serializers.IntegerField()",
             "mastery": "serializers.FloatField()",
             "retry_trends": "DashboardRetryTrendSerializer(many=True)",
@@ -309,12 +309,15 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
 
     violations: list[str] = []
     schemas = schema.get("components", {}).get("schemas", {})
+    if schemas.get("UnitEnum", {}).get("enum") != ["participants"]:
+        violations.append(f"{STATS_GENERATED_OPENAPI}: cohort rate unit must be participants")
     nullable_number = {"type": "number", "format": "double", "nullable": True}
     expected_schema_properties = {
         "RateMetric": {
             "value": nullable_number,
-            "numerator": {"type": "integer"},
+            "numerator": {"type": "number", "format": "double"},
             "denominator": {"type": "integer"},
+            "unit": {"$ref": "#/components/schemas/UnitEnum"},
         },
         "StatsSkillAxis": {
             "key": {"type": "string"},
@@ -336,12 +339,13 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
             "levels_completed": {"type": "integer"},
             "finish_rate": {"$ref": "#/components/schemas/RateMetric"},
             "accuracy": nullable_number,
-            "boss_floors": {"$ref": "#/components/schemas/StatsScopedCount"},
+            "hard_tier_clears": {"$ref": "#/components/schemas/StatsScopedCount"},
             "comebacks": {"$ref": "#/components/schemas/StatsScopedCount"},
             "perfect_clears": {"type": "integer"},
-            "day_streak": {"type": "integer"},
-            "longest_streak": {"type": "integer"},
+            "gate_trial_clears": {"type": "integer"},
+            "hard_gate_trial_clears": {"type": "integer"},
             "gitcoins": {"type": "integer"},
+            "gitcoins_earned": {"type": "integer"},
             "commands_run": {"type": "integer"},
         },
         "StatsSummaryResponse": {
@@ -356,9 +360,19 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
             "activity_window": {"$ref": "#/components/schemas/ActivityWindowEnum"},
             "headline": {"$ref": "#/components/schemas/StatsHeadline"},
         },
+        "StatsActivityResponse": {
+            "activity_trend": {
+                "type": "array",
+                "items": {"$ref": "#/components/schemas/StatsTrendPoint"},
+            },
+            "activity_window": {"$ref": "#/components/schemas/ActivityWindowEnum"},
+        },
     }
     for schema_name, expected_properties in expected_schema_properties.items():
         expected_fields = set(expected_properties)
+        expected_required = (
+            expected_fields - {"unit"} if schema_name == "RateMetric" else expected_fields
+        )
         component = schemas.get(schema_name)
         actual_properties = component.get("properties", {}) if isinstance(component, dict) else {}
         actual_fields = set(actual_properties)
@@ -369,7 +383,7 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
             not isinstance(component, dict)
             or component.get("type") != "object"
             or actual_fields != expected_fields
-            or required_fields != expected_fields
+            or required_fields != expected_required
         ):
             violations.append(
                 f"{STATS_GENERATED_OPENAPI}: {schema_name} properties/required must be exactly "
@@ -393,6 +407,21 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
     if response_schema.get("$ref") != "#/components/schemas/StatsSummaryResponse":
         violations.append(
             f"{STATS_GENERATED_OPENAPI}: progress_stats_retrieve must return StatsSummaryResponse"
+        )
+    activity_response_schema = (
+        schema.get("paths", {})
+        .get("/api/progress/stats/activity/", {})
+        .get("get", {})
+        .get("responses", {})
+        .get("200", {})
+        .get("content", {})
+        .get("application/json", {})
+        .get("schema", {})
+    )
+    if activity_response_schema.get("$ref") != "#/components/schemas/StatsActivityResponse":
+        violations.append(
+            f"{STATS_GENERATED_OPENAPI}: progress_stats_activity_retrieve must return "
+            "StatsActivityResponse"
         )
     return violations
 
@@ -580,15 +609,6 @@ def dashboard_openapi_contract_violations(schema: dict) -> list[str]:
             "retries": {"type": "integer"},
             "label": {"type": "string"},
         },
-        "DashboardStreak": {
-            "current": {"type": "integer"},
-            "longest": {"type": "integer"},
-            "last_completed_on": {
-                "type": "string",
-                "format": "date",
-                "nullable": True,
-            },
-        },
         "DashboardSummaryResponse": {
             "kpis": {"$ref": "#/components/schemas/DashboardKpiSet"},
             "chapter_kpis": {
@@ -601,7 +621,6 @@ def dashboard_openapi_contract_violations(schema: dict) -> list[str]:
                 "type": "array",
                 "items": {"type": "string"},
             },
-            "streak": {"$ref": "#/components/schemas/DashboardStreak"},
             "perfect_clears": {"type": "integer"},
             "mastery": {"type": "number", "format": "double"},
             "retry_trends": {

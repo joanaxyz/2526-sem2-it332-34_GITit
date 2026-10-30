@@ -8,7 +8,9 @@ from .core import (
     clear_refresh_cookie,
     set_refresh_cookie,
 )
+from .oauth import OAuthError, OAuthService
 from .passwords import PasswordResetService
+from .verification import EmailVerificationService
 
 __all__ = [
     "IssuedTokens",
@@ -16,6 +18,9 @@ __all__ = [
     "TokenBlacklistService",
     "TokenService",
     "PasswordResetService",
+    "EmailVerificationService",
+    "OAuthError",
+    "OAuthService",
     "set_refresh_cookie",
     "clear_refresh_cookie",
 ]

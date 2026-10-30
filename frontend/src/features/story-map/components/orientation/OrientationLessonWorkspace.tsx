@@ -154,7 +154,7 @@ export function OrientationLessonWorkspace({ chapter, onLeaveModule }: {
 
   const masthead = (
     <header className="orientation-masthead">
-      <p className="orientation-kicker"><Compass aria-hidden="true" /> Module 0 · Orientation</p>
+      <p className="orientation-kicker"><Compass aria-hidden="true" /> Module 0</p>
       <h1 id="orientation-title">{chapter.title}</h1>
       <p className="orientation-masthead-copy">Learn the mental model in short, interactive topics—or jump straight to your first quest.</p>
       <Button type="button" variant="ghost" className="orientation-skip-primer" onClick={onLeaveModule}>

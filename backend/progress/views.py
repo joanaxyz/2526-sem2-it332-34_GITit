@@ -7,6 +7,7 @@ from players.services import get_or_create_player
 from progress.serializers import (
     DashboardSummaryResponseSerializer,
     PerformanceSummaryResponseSerializer,
+    StatsActivityResponseSerializer,
     StatsSummaryResponseSerializer,
 )
 from progress.services import MetricsService
@@ -43,6 +44,29 @@ class StatsSummaryAPIView(APIView):
         return Response(
             MetricsService().stats_summary(
                 player=player, activity_window=request.query_params.get("window")
+            )
+        )
+
+
+class StatsActivityAPIView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="window",
+                description="Trailing activity window: week, month, or year.",
+                enum=sorted(ACTIVITY_WINDOWS),
+                default=DEFAULT_ACTIVITY_WINDOW,
+                required=False,
+            )
+        ],
+        responses={200: StatsActivityResponseSerializer},
+    )
+    def get(self, request):
+        player = get_or_create_player(request.user)
+        return Response(
+            MetricsService().activity_summary(
+                player=player,
+                activity_window=request.query_params.get("window"),
             )
         )
 
