@@ -70,12 +70,34 @@ def validate_refs(variants, *, allow_unscored=False) -> dict[int, int]:
         for v in variants
     }
     targets, replays = replay_solutions(cases)
+    routes = {v.id: (targets[str(v.id)], replays[str(v.id)]["steps"]) for v in variants}
+    return _save_refs(variants, routes, allow_unscored=allow_unscored)
+
+
+def seed_refs(variants) -> dict[int, int]:
+    """Persist references from the committed replay, so seeding needs no Node.
+
+    ``generate_targets`` stores the browser engine's replay as each variant's
+    target state and solution trajectory, and CI proves both match a fresh
+    replay. A variant without a stored route stays unscored.
+    """
+    variants = list(variants)
+    routes = {
+        v.id: (v.target_state, steps)
+        for v in variants
+        if (steps := (v.solution_trajectory or {}).get("steps"))
+    }
+    return _save_refs(variants, routes, allow_unscored=True)
+
+
+def _save_refs(variants, routes, *, allow_unscored) -> dict[int, int]:
     counts = {}
     tools = RepositoryStateSimulator()
     evaluator = PracticeCompletionEvaluator()
     for variant in variants:
-        key = str(variant.id)
-        final, replay = targets[key], replays[key]
+        if variant.id not in routes:
+            continue
+        final, steps = routes[variant.id]
         result = evaluator.evaluate(
             CompletionEvaluationContext(
                 variant=variant,
@@ -89,7 +111,7 @@ def validate_refs(variants, *, allow_unscored=False) -> dict[int, int]:
             raise ValidationError(f"Reference for {variant.slug} does not solve its objective.")
         count = sum(
             1
-            for step in replay["steps"]
+            for step in steps
             if not shell_program(step["command"])
             and (not step["diagnostic"] or variant.assess_diag)
         )
@@ -100,11 +122,11 @@ def validate_refs(variants, *, allow_unscored=False) -> dict[int, int]:
                 f"{variant.slug} has no counted commands; explicitly assess diagnostics if appropriate."
             )
         counts[variant.id] = count
-    from django.db import transaction
-
-    with transaction.atomic():
-        for variant in variants:
-            variant.ref_count = counts.get(variant.id)
-            variant.ref_hash = ref_hash(variant) if variant.ref_count else ""
-            variant.save(update_fields=["ref_count", "ref_hash", "assess_diag"])
+    for variant in variants:
+        variant.ref_count = counts.get(variant.id)
+        variant.ref_hash = ref_hash(variant) if variant.ref_count else ""
+    if variants:
+        type(variants[0]).objects.bulk_update(
+            variants, ["ref_count", "ref_hash", "assess_diag"], batch_size=200
+        )
     return counts

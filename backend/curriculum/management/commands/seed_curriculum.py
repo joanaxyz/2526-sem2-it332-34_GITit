@@ -8,13 +8,15 @@ current authored scenario contract through ``scenario_bank`` and
 
 Re-running the command upserts existing rows and preserves their identities.
 Target states and solution trajectories come from the committed
-``generate_targets`` output; seeding never invents or backfills them.
+``generate_targets`` output; seeding never invents or backfills them. KPI
+command references are counted from those same trajectories.
 """
 
 from __future__ import annotations
 
 from typing import Any
 
+from django.core.exceptions import ValidationError
 from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
@@ -13036,12 +13038,30 @@ class Command(BaseCommand):
         self._seed_challenge_gates(chapters)
         # Every scenario is placed, so each command form's guide can find its home.
         homes = assign_guide_homes()
+        refs = self._seed_kpi_refs(story)
         self.stdout.write(
             self.style.SUCCESS(
                 "Seeded Story, Chapters, Module 0 orientation lessons, Module 1-4 levels "
-                f"and their Challenge Gates; {homes} command guides have a home scenario."
+                f"and their Challenge Gates; {homes} command guides have a home scenario; "
+                f"{refs} variants have a KPI command reference."
             )
         )
+
+    @staticmethod
+    def _seed_kpi_refs(story: Story) -> int:
+        """Refresh CAR references, which any change to a variant's route invalidates."""
+        from progress.services.references import seed_refs
+
+        variants = AdventureLevelTierScenarioVariant.objects.filter(
+            is_published=True,
+            scenario__is_published=True,
+            scenario__tier__is_published=True,
+            scenario__tier__adventure_level__chapter__story=story,
+        ).select_related("scenario")
+        try:
+            return len(seed_refs(variants))
+        except ValidationError as exc:
+            raise CommandError(str(exc)) from exc
 
     def _seed_story(self) -> Story:
         story, _ = Story.objects.update_or_create(

@@ -54,9 +54,12 @@ accounting. For a diagnostic objective, an author may explicitly enable
 submissions. Shell commands remain excluded. A zero-count reference stays
 unscored until an appropriate diagnostic policy is explicitly selected.
 
-`ref_count` is never copied from `min_counted_commands`. The `kpi_refs` command
+`ref_count` is never copied from `min_counted_commands`. `generate_targets`
 replays the authored route and workspace edits through the actual browser Git
-engine, then runs the backend completion evaluator. Merely processing every
+engine, and CI proves the committed targets and trajectories match a fresh
+replay. Every seed then runs the backend completion evaluator on that replay and
+counts its trajectory, so a reseed refreshes references without Node. The
+`kpi_refs` command re-runs the live replay on demand. Merely processing every
 command does not validate a solution. `ref_hash` covers the initial and target
 states, objective, solution, workspace edits, diagnostic policy, action limit and
 counting policy version. A run snapshots this evidence at launch; content drift during
@@ -134,10 +137,12 @@ conservatively as missing evidence.
 
 Run from `backend/` with the project's Python environment and installed frontend
 Node dependencies. Migrations add storage without inventing historic assessments.
+`seed_curriculum` (and so `seed_all`) refreshes every reference from the
+committed replay; run `kpi_refs` for the author-selected cases below.
 
 ```powershell
 python manage.py migrate
-python manage.py kpi_refs
+python manage.py seed_all
 # Diagnostic-only cases need explicit author selection:
 python manage.py kpi_refs --cases CASE_SLUG --diagnostics
 # Review a structurally different case before reserving it:
