@@ -214,7 +214,32 @@ describe('HomeHubView contract', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))
     expect(tip()).toHaveTextContent('Parts of a Git command')
     fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))
+    expect(tip()).toHaveTextContent('Git keeps a history of your project.')
+    fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))
+    expect(tip()).toHaveTextContent('Adventures let you practice Git')
+    fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))
+    expect(tip()).toHaveTextContent('Before making a move, look at the repository')
+    fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))
     expect(tip()).toHaveTextContent('Create Git metadata.')
+  })
+
+  it('keeps general tips in the cycle when only one command is learned', () => {
+    mocks.useLearnedSkills.mockReturnValue({ data: [{
+      ...learnedSkills[0],
+      base_command: 'git status',
+      summary: 'Show the working tree status.',
+      knowledge: [],
+    }], isLoading: false })
+    renderHub()
+    fireEvent.click(screen.getByRole('button', { name: 'Learning guide: share a Git tip' }))
+    const tip = () => within(screen.getByRole('region', { name: 'Git knowledge' })).getByRole('status')
+    const seen = new Set<string>()
+    for (let step = 0; step < 5; step += 1) {
+      seen.add(tip().textContent ?? '')
+      fireEvent.click(screen.getByRole('button', { name: 'Another tip' }))
+    }
+    expect(seen.size).toBe(5)
+    expect(tip()).toHaveTextContent('Show the working tree status.')
   })
 
   it('treats an invalid view as Profile and replaces only the view parameter', () => {
