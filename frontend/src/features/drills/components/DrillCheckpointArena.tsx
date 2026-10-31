@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState } from 'react'
-import { Check, Flag, Keyboard, Pause, Play, Undo2 } from 'lucide-react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
+import { Check, Flag, Pause, Play } from 'lucide-react'
 
 import type { DrillAnswer, DrillVerdict } from '@/features/drills/types'
 import { firstWrongBlock } from '@/features/drills/utils/drillGrading'
@@ -17,10 +17,13 @@ type Phase = 'walking' | 'checking' | 'running' | 'falling' | 'fallen' | 'crosse
 
 export type DrillCheckpointControls = {
   onResolve: (answer: DrillAnswer | null, fell: boolean) => void
+  paused?: boolean
+  onPauseChange?: (paused: boolean) => void
+  showHud?: boolean
 }
 
 /** The answer is the pavement: missing pieces and the first wrong piece are holes. */
-export function DrillCheckpointArena({ values, expected, variant, verdict, onAnswer, onResolve }: {
+export function DrillCheckpointArena({ values, expected, variant, verdict, onAnswer, onResolve, paused: pausedProp, onPauseChange, showHud = true }: {
   values: string[]
   expected: string[]
   variant: 'tokens' | 'steps'
@@ -28,32 +31,90 @@ export function DrillCheckpointArena({ values, expected, variant, verdict, onAns
   onAnswer: (answer: DrillAnswer | null) => void
 } & DrillCheckpointControls) {
   const [placedIds, setPlacedIds] = useState<number[]>([])
-  const [typed, setTyped] = useState<string | null>(null)
-  const [typedConfirmed, setTypedConfirmed] = useState(false)
+  const placedIdsRef = useRef<number[]>([])
+  const [keystrokes, setKeystrokes] = useState('')
+  const keystrokesRef = useRef('')
   const [phase, setPhase] = useState<Phase>('walking')
   const [hole, setHole] = useState<number | null>(null)
-  const [paused, setPaused] = useState(false)
+  const [localPaused, setLocalPaused] = useState(false)
+  const paused = pausedProp ?? localPaused
+  function setPaused(next: boolean) { setLocalPaused(next); onPauseChange?.(next) }
   const [facingLeft, setFacingLeft] = useState(false)
   const viewportRef = useRef<HTMLDivElement>(null)
   const actorRef = useRef<HTMLDivElement>(null)
   const position = useRef(64)
   const resolved = useRef(false)
   const attempt = useRef<{ values: string[]; wrong: number | null; canRun: boolean } | null>(null)
-  const typedValues = typed?.trim().split(/\s+/).filter(Boolean) ?? []
-  const placed = typed === null ? placedIds.map((id) => values[id]) : typedConfirmed ? typedValues : []
+  const placed = placedIds.map((id) => values[id])
   const latest = useRef({ placed, onResolve, readyToJudge: false })
-  latest.current = { placed, onResolve, readyToJudge: typed === null ? placed.length >= expected.length : typedConfirmed }
+  latest.current = { placed, onResolve, readyToJudge: placed.length >= expected.length }
   const locked = Boolean(verdict) || phase !== 'walking'
   const slotCount = Math.max(expected.length, placed.length)
 
-  function update(nextIds: number[], nextTyped = typed) {
-    if (locked) return
+  function typePrefix(next: string) {
+    keystrokesRef.current = next
+    setKeystrokes(next)
+  }
+
+  function update(nextIds: number[]) {
+    if (locked || paused) return
+    placedIdsRef.current = nextIds
     setPlacedIds(nextIds)
-    setTyped(nextTyped)
-    setTypedConfirmed(false)
-    const next = nextTyped === null ? nextIds.map((id) => values[id]) : nextTyped.trim().split(/\s+/).filter(Boolean)
+    typePrefix('')
+    const next = nextIds.map((id) => values[id])
     onAnswer(next.length ? { kind: 'tokens', values: next } : null)
   }
+
+  const onPieceKey = useEffectEvent((event: KeyboardEvent) => {
+    if (event.defaultPrevented || event.repeat || event.isComposing || event.metaKey || event.ctrlKey || event.altKey || locked || paused) return
+    const target = event.target
+    if (target instanceof Element) {
+      if (target.closest('input, textarea, select, [contenteditable]:not([contenteditable="false"]), [role="dialog"]')) return
+      const control = target.closest('button, a, [role="button"], [role="tab"]')
+      if (control && !control.matches('.drill-piece, .drill-path-slab')) return
+      // A focused piece keeps its native Space/Enter activation unless a
+      // partially typed value needs the delimiter to finish it.
+      if (control && !keystrokesRef.current && (event.key === ' ' || event.key === 'Enter')) return
+    }
+    if (event.key === 'Escape') return
+    const ids = placedIdsRef.current
+    if (event.key === 'Backspace') {
+      event.preventDefault()
+      if (keystrokesRef.current) typePrefix(keystrokesRef.current.slice(0, -1))
+      else if (ids.length) update(ids.slice(0, -1))
+      return
+    }
+    const delimiter = event.key === 'Enter' || (variant === 'tokens' && event.key === ' ')
+    if (!delimiter && event.key.length !== 1) return
+    if (delimiter && !keystrokesRef.current) {
+      if (event.key === ' ') event.preventDefault()
+      return
+    }
+    event.preventDefault()
+    const prefix = delimiter ? keystrokesRef.current : keystrokesRef.current + event.key
+    const available = values.map((value, id) => ({ value, id })).filter(({ id }) => !ids.includes(id))
+    const exact = available.find(({ value }) => value === prefix)
+    const ambiguous = available.some(({ value }) => value !== prefix && value.startsWith(prefix))
+    if (exact && (delimiter || !ambiguous)) {
+      update([...ids, exact.id])
+      // Typing has taken over from piece-button navigation. Return focus
+      // to the course so the next separator cannot activate an older slab.
+      if (target instanceof Element && target.closest('.drill-piece, .drill-path-slab')) {
+        viewportRef.current?.focus({ preventScroll: true })
+      }
+      return
+    }
+    // Keep a mistyped prefix visible so Backspace can correct it without
+    // committing a wrong block or silently discarding keystrokes.
+    const maxLength = Math.max(0, ...available.map(({ value }) => value.length)) + 1
+    typePrefix(prefix.slice(0, maxLength))
+  })
+
+  useEffect(() => {
+    const onKey = (event: KeyboardEvent) => onPieceKey(event)
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [])
 
   useEffect(() => {
     if (paused || verdict) return
@@ -142,14 +203,13 @@ export function DrillCheckpointArena({ values, expected, variant, verdict, onAns
     : 'Fill the gaps before Blue reaches them.'
 
   return <div className="drill-checkpoint" data-phase={phase}>
-    <div className="drill-path-hud">
-      <span><Flag aria-hidden="true" /> Walking checkpoint</span>
-      <span className="drill-path-count">{placed.length}/{expected.length} blocks</span>
+    {showHud ? <div className="drill-path-hud">
+      <span className="drill-path-count" aria-label={`${placed.length} of ${expected.length} blocks placed`}>{placed.length}/{expected.length}</span>
       <button type="button" className="drill-path-pause" disabled={['falling', 'fallen', 'crossed'].includes(phase)}
         aria-label={paused ? 'Resume crossing' : 'Pause crossing'} onClick={() => setPaused(!paused)}>
         {paused ? <Play aria-hidden="true" /> : <Pause aria-hidden="true" />}
       </button>
-    </div>
+    </div> : null}
     <div ref={viewportRef} className="drill-path-viewport" role="region" aria-label="Command pavement" tabIndex={0}>
       <div className="drill-path-course" style={{ width: START_WIDTH + slotCount * BLOCK_WIDTH + FINISH_WIDTH }}>
         <div className="drill-path-scenery" aria-hidden="true" />
@@ -165,7 +225,7 @@ export function DrillCheckpointArena({ values, expected, variant, verdict, onAns
             return <div key={index} className="drill-path-block" data-hole={empty || collapsed || undefined}
               data-collapsed={collapsed || undefined} data-state={collapsed ? 'wrong' : verdict?.correct ? 'right' : undefined}>
               {empty || collapsed ? <div className="drill-path-hole" aria-hidden="true"><span /><i /><i /></div> : null}
-              {value !== undefined ? <button type="button" className="drill-path-slab" disabled={locked || typed !== null}
+              {value !== undefined ? <button type="button" className="drill-path-slab" disabled={locked || paused}
                 aria-label={`${collapsed ? 'Wrong block' : 'Remove'} ${value} ${collapsed ? 'at' : 'from'} position ${index + 1}`}
                 onClick={() => update(placedIds.filter((_, i) => i !== index))}>
                 <span className="drill-path-block-number">{index + 1}</span><code>{value}</code>
@@ -180,30 +240,19 @@ export function DrillCheckpointArena({ values, expected, variant, verdict, onAns
     <div className="drill-path-caption" role="status" aria-live="polite">
       {phase === 'crossed' ? <Check aria-hidden="true" /> : null}<span>{status}</span>
     </div>
-    {typed !== null ? <form className="drill-path-typing" onSubmit={(event) => {
-      event.preventDefault()
-      if (!locked && typedValues.length) setTypedConfirmed(true)
-    }}>
-      <label>Type the command<input className="drill-typed-input" value={typed} disabled={locked}
-        spellCheck={false} autoComplete="off" autoCapitalize="off" autoCorrect="off" placeholder="git …"
-        onKeyDown={(event) => { if (event.key === 'Enter') event.stopPropagation() }}
-        onChange={(event) => update([], event.target.value)} /></label>
-      {!locked ? <button type="submit" className="ui-button ui-button--outline" disabled={!typedValues.length || typedConfirmed}>
-        {typedConfirmed ? 'Command placed' : 'Place command'}
-      </button> : null}
-      {!locked ? <button type="button" className="drill-mode-toggle" onClick={() => update([], null)}><Undo2 aria-hidden="true" />Use the token bank</button> : null}
-    </form> : <>
-      <div className="drill-path-bank-label">{locked ? 'Arrangement locked' : 'Build from left to right'}
-        {!locked ? <span>Click a placed block to remove it</span> : null}
-      </div>
-      <ul className="drill-bank" aria-label="Available pieces">
-        {values.map((value, id) => placedIds.includes(id) ? null : <li key={id}>
-          <button type="button" className="drill-piece" disabled={locked} onClick={() => update([...placedIds, id])}>{value}</button>
-        </li>)}
-      </ul>
-      {variant === 'tokens' && !locked ? <button type="button" className="drill-mode-toggle" onClick={() => update([], '')}>
-        <Keyboard aria-hidden="true" />Type it instead
-      </button> : null}
-    </>}
+    <ul className="drill-bank" aria-label="Available pieces">
+      {values.map((value, id) => placedIds.includes(id) ? null : <li key={id}>
+        <button type="button" className="drill-piece" disabled={locked || paused}
+          data-typing={Boolean(keystrokes && value.startsWith(keystrokes)) || undefined}
+          onClick={() => update([...placedIdsRef.current, id])}>{value}</button>
+      </li>)}
+    </ul>
+    <output className="drill-path-keystrokes" role="status" aria-live="polite"
+      data-invalid={Boolean(keystrokes && !values.some((value, id) => !placedIds.includes(id) && value.startsWith(keystrokes))) || undefined}>
+      {!locked && keystrokes ? <kbd>{keystrokes}</kbd> : null}
+    </output>
+    {paused ? <div className="drill-flight-overlay"><Pause aria-hidden="true" /><h2>Crossing paused</h2>
+      <button type="button" className="ui-button ui-button--default" onClick={() => setPaused(false)}>Resume</button>
+    </div> : null}
   </div>
 }

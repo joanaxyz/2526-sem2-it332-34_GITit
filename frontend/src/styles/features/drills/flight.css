@@ -1,49 +1,55 @@
-/* The arena is the working surface. Its moving answers carry the interaction. */
-.drill-screen--flight .drill-header { padding: 0.9rem max(1.25rem, calc((100vw - 1180px) / 2)); }
-.drill-screen--flight .drill-wordmark { font-size: 1.2rem; }
-.drill-wordmark > span { margin-left: 0.6rem; color: hsl(var(--muted-foreground)); font-size: 0.85rem; }
-.drill-screen--flight .drill-stage { padding: 1rem 1.25rem 1.5rem; }
-.drill-screen--flight .drill-stage > * { width: min(100%, 1180px); }
-.drill-flight-round { display: grid; gap: 1.4rem; }
-.drill-screen--flight .drill-question { width: min(100%, 52rem); justify-self: center; animation: none; }
-.drill-screen--flight .drill-subject { font-size: clamp(1.2rem, 2.1vw, 1.65rem); }
-.drill-screen--flight .drill-rung { font-size: var(--text-xs); text-transform: none; letter-spacing: 0; }
-.drill-flight {
-  position: relative; isolation: isolate; border: 1px solid hsl(var(--border));
-  border-radius: 12px; overflow: hidden; background: #080f1b;
+/* One continuous play surface, with the question and HUD inside it. */
+.drill-screen--flight .drill-header { padding: 0.8rem 1.5rem; }
+.drill-screen--flight .drill-identity { align-items: center; }
+.drill-screen--flight .drill-level { margin: 0; color: hsl(var(--foreground)); font-size: var(--text-sm); }
+.drill-screen--flight .drill-level::before { display: none; }
+.drill-screen-controls { display: flex; align-items: center; gap: 0.5rem; margin-left: auto; pointer-events: auto; }
+.drill-screen-controls .drill-flight-lives { margin-right: 0.75rem; }
+.drill-screen-control, .drill-flight-pause {
+  display: grid; place-items: center; flex: none; width: 2.5rem; height: 2.5rem;
+  border: 1px solid hsl(var(--foreground) / 0.16); border-radius: var(--radius-sm);
+  background: hsl(var(--background) / 0.55); color: hsl(var(--foreground)); cursor: pointer;
 }
+.drill-screen-control svg, .drill-flight-pause svg { width: 1rem; height: 1rem; }
+.drill-screen-control:hover, .drill-flight-pause:hover { background: hsl(var(--secondary)); }
+.drill-screen-control:focus-visible, .drill-flight-pause:focus-visible, .drill-projectile:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; }
+.drill-screen.drill-screen--immersive {
+  position: relative; isolation: isolate; display: grid; grid-template-rows: auto minmax(0, 1fr); height: 100dvh; min-height: 0; overflow: hidden;
+  background: #040b15;
+}
+.drill-screen--immersive .drill-header {
+  position: relative; z-index: 6; gap: 0.7rem; border-bottom: 1px solid hsl(var(--border));
+  background: #0a1726;
+}
+.drill-screen--immersive .drill-level { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: #d3e1ed; }
+.drill-screen--immersive .drill-header > .drill-track { padding: 0; }
+.drill-screen--immersive .drill-track-bar { --track-height: 7px; --track-gap: 4px; }
+.drill-screen--immersive .drill-stage { position: relative; min-height: 0; display: block; overflow: hidden; padding: 0.75rem 1rem 1rem; }
+.drill-screen--immersive .drill-stage > .drill-flight-round { width: 100%; height: 100%; }
+.drill-flight-round { position: relative; }
+.drill-screen--immersive .drill-flight-round { overflow: hidden; border: 1px solid #294159; border-radius: 12px; }
+.drill-flight { position: relative; isolation: isolate; width: 100%; height: 100%; background: #07111e; }
 .drill-flight-hud {
-  position: absolute; z-index: 4; inset: 0 0 auto; display: flex; align-items: center;
-  gap: 1rem; padding: 0.85rem 1.1rem; pointer-events: none;
-  background: linear-gradient(#080f1bf5, #080f1b00); color: hsl(var(--foreground));
+  position: absolute; z-index: 7; top: 1rem; right: 5rem;
+  display: flex; align-items: center; gap: 1rem;
 }
-.drill-flight-name { display: flex; align-items: center; gap: 0.55rem; font-size: var(--text-xs); font-weight: 600; }
-.drill-flight-beacon { width: 6px; height: 6px; border-radius: 50%; background: hsl(var(--primary)); }
-.drill-flight-lives { display: flex; align-items: center; gap: 0.35rem; margin-left: auto; }
-.drill-flight-lives svg { width: 19px; height: 19px; color: hsl(var(--destructive)); fill: currentColor; }
+.drill-flight-lives { display: flex; align-items: center; gap: 0.4rem; }
+.drill-flight-lives svg { width: 18px; height: 18px; color: hsl(var(--destructive)); fill: currentColor; }
 .drill-flight-lives svg[data-lost] { color: #7f8b9c; fill: transparent; }
-.drill-flight-lives > span { margin-left: 0.5rem; font: 600 var(--text-xs) var(--font-mono); }
-.drill-flight-pause {
-  display: grid; place-items: center; width: 32px; height: 32px; padding: 0;
-  border: 1px solid #526175; border-radius: 6px; background: #101d2b;
-  color: hsl(var(--foreground)); cursor: pointer; pointer-events: auto;
-}
-.drill-flight-pause svg { width: 15px; height: 15px; }
-.drill-flight-pause:disabled { opacity: 0.4; cursor: default; }
-.drill-flight-pause:hover:enabled { background: #23364a; }
-.drill-flight-pause:focus-visible, .drill-projectile:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; }
-.drill-flight-field { position: relative; height: clamp(330px, 48vh, 450px); overflow: hidden; cursor: crosshair; touch-action: manipulation; }
+.drill-flight-field { position: relative; width: 100%; height: 100%; overflow: hidden; cursor: crosshair; touch-action: manipulation; }
 .drill-flight-sky {
-  position: absolute; inset: 0; opacity: 0.5; pointer-events: none;
-  background: linear-gradient(90deg, #07122245, #07122280),
-    url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png') center 30% / cover;
+  position: absolute; inset: 0; pointer-events: none;
+  background: linear-gradient(180deg, #040c18a6, #0712221a 45%, #040b18a6),
+    url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png') center 35% / cover;
 }
-.drill-flight-horizon { position: absolute; inset: 35% 0 0; pointer-events: none; background: linear-gradient(transparent, #070f1be0 90%); }
-.drill-flight-platform {
-  position: absolute; left: calc(15% - 50px); bottom: 19px; width: 100px; height: 18px;
-  background: #23374e; border-top: 2px solid hsl(var(--primary));
-  clip-path: polygon(0 0, 100% 0, 92% 50%, 70% 100%, 25% 75%, 6% 50%);
-}
+.drill-flight-horizon { position: absolute; inset: 45% 0 0; pointer-events: none; background: linear-gradient(transparent, #050e1b8c); }
+.drill-flight-question { position: absolute; z-index: 3; top: 1.75rem; left: max(1.5rem, 3vw); width: min(48rem, calc(100% - 3rem)); pointer-events: none; }
+.drill-screen--immersive .drill-question { width: 100%; min-width: 0; animation: none; }
+.drill-screen--immersive .drill-ask { margin: 0; color: #bacbdf; font-size: var(--text-sm); font-weight: 500; }
+.drill-screen--immersive .drill-subject { margin: 0.55rem 0 0; color: hsl(var(--foreground)); font-size: 1.85rem; line-height: 1.25; text-wrap: balance; overflow-wrap: anywhere; }
+.drill-screen--immersive .drill-subject[data-voice='machine'] { padding: 0; border: 0; border-radius: 0; background: none; box-shadow: none; font-size: 1.65rem; }
+.drill-screen--immersive .drill-subject-note { margin: 0.4rem 0 0; color: #bacbdf; font-size: var(--text-sm); }
+.drill-flight-platform { position: absolute; left: calc(15% - 50px); bottom: 19px; width: 100px; height: 18px; background: #23374e; border-top: 2px solid hsl(var(--primary)); clip-path: polygon(0 0, 100% 0, 92% 50%, 70% 100%, 25% 75%, 6% 50%); }
 .drill-flight-platform span { display: block; height: 3px; background: #8bcffb; opacity: 0.5; }
 .drill-flight-lane { position: absolute; left: 34%; right: 0; border-top: 1px solid #89a7c90c; pointer-events: none; }
 .drill-flight-actor { position: absolute; z-index: 2; top: 0; left: 0; width: 0; height: 0; pointer-events: none; will-change: transform; }
@@ -58,98 +64,59 @@
   80% { transform: translate(-2px, -3px) rotate(4deg); }
   100% { transform: translate(0, 0) rotate(0); }
 }
-.drill-projectile[data-hit] { justify-content: center; color: hsl(var(--foreground)); font-family: var(--font-sans); }
-.drill-projectile[data-hit] svg { width: 18px; height: 18px; }
-.drill-projectile[data-hit]::after { display: none; }
-.drill-flight-actor[data-pose='fly']::before {
-  content: ''; position: absolute; right: 30px; top: 6px; width: 85px; height: 2px;
-  background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.6));
-}
+.drill-flight-actor[data-pose='fly']::before { content: ''; position: absolute; right: 30px; top: 6px; width: 85px; height: 2px; background: linear-gradient(90deg, transparent, hsl(var(--primary) / 0.6)); }
 .drill-flight-projectiles { position: absolute; inset: 0; pointer-events: none; }
 .drill-projectile {
   position: absolute; z-index: 2; top: 0; left: 0; display: flex; align-items: center;
-  gap: 0.6rem; width: max-content; max-width: min(39%, 400px); min-height: 45px;
-  padding: 0.7rem 1.15rem 0.7rem 0.65rem; border: 1px solid #6383a4;
-  border-radius: 7px; background: #101e30f5; color: #e8f6fa;
-  font-family: var(--font-mono); font-size: var(--text-sm); line-height: 1.4;
-  text-align: left; overflow-wrap: anywhere; pointer-events: auto; cursor: crosshair;
-  will-change: transform;
+  gap: 0.75rem; width: max-content; max-width: min(45%, 440px); min-height: 48px;
+  padding: 0.75rem 1.25rem 0.75rem 0.75rem; border: 1px solid #7895b3;
+  border-radius: 7px; background: #0a1b2eed; color: #e8f6fa;
+  font: 500 var(--text-base)/1.4 var(--font-mono); text-align: left; overflow-wrap: anywhere;
+  pointer-events: auto; cursor: crosshair; will-change: transform;
 }
 .drill-projectile[data-voice='prose'] { font-family: var(--font-sans); font-size: var(--text-sm); }
-.drill-projectile::after {
-  content: ''; position: absolute; top: 50%; left: 100%; width: 64px; height: 1px;
-  background: linear-gradient(90deg, #6383a480, transparent); pointer-events: none;
-}
+.drill-projectile::after { content: ''; position: absolute; top: 50%; left: 100%; width: 72px; height: 1px; background: linear-gradient(90deg, #7895b380, transparent); pointer-events: none; }
 .drill-projectile:hover:enabled { border-color: hsl(var(--primary)); background: #172e47; }
 .drill-projectile-number { flex: none; color: #a4c0d8; font: 500 var(--text-xs) var(--font-mono); }
-.drill-projectile-nose { position: absolute; left: -10px; top: calc(50% - 12px); color: #a4c0d8; font-size: 20px; }
+.drill-projectile[data-hit] { justify-content: center; color: hsl(var(--foreground)); font-family: var(--font-sans); }
+.drill-projectile[data-hit] svg { width: 18px; height: 18px; }
+.drill-projectile[data-hit]::after { display: none; }
 .drill-projectile[data-hit='right'] { border-color: hsl(var(--success)); background: #123537; }
 .drill-projectile[data-hit='wrong'] { border-color: hsl(var(--destructive)); background: #3c1d28; }
-.drill-flight-intro {
-  position: absolute; z-index: 3; top: 22%; left: 31%; width: 35%;
-  pointer-events: none; color: hsl(var(--foreground));
-}
-.drill-flight-intro-icon { display: inline-flex; color: hsl(var(--primary)); margin-bottom: 0.4rem; }
-.drill-flight-intro-icon svg { width: 20px; height: 20px; }
-.drill-flight-intro h2 { margin: 0; font: 700 clamp(1.8rem, 3.5vw, 2.6rem)/1.1 var(--font-display); letter-spacing: -0.02em; }
-.drill-flight-intro p { margin: 0.65rem 0 1rem; font-size: var(--text-sm); line-height: 1.6; color: #bdd0e1; }
-.drill-flight-intro button { pointer-events: auto; font-size: var(--text-xs); }
-.drill-flight-overlay {
-  position: absolute; z-index: 5; inset: 0; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 1rem; background: #080f1be8;
-  color: hsl(var(--foreground)); cursor: default;
-}
+.drill-flight-intro { position: absolute; z-index: 3; left: 50%; bottom: 2rem; transform: translateX(-50%); text-align: center; color: hsl(var(--foreground)); }
+.drill-flight-intro button { display: inline-flex; gap: 0.5rem; align-items: center; min-width: 9rem; pointer-events: auto; }
+.drill-flight-intro button svg { width: 1rem; height: 1rem; }
+.drill-flight-intro p { margin: 0.7rem 0 0; color: #bacbdf; font-size: var(--text-xs); white-space: nowrap; }
+.drill-flight-overlay { position: absolute; z-index: 8; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem; background: #040c18ed; color: hsl(var(--foreground)); cursor: default; }
 .drill-flight-overlay h2 { margin: 0; font: 700 1.8rem var(--font-display); }
-.drill-flight-result {
-  position: absolute; z-index: 3; left: 30%; right: 25%; bottom: 34px;
-  display: grid; grid-template-columns: 24px 1fr; gap: 0.3rem 0.6rem;
-  color: hsl(var(--foreground)); pointer-events: none; background: #080f1be8;
-  padding: 0.75rem 1rem; border-radius: 8px;
-}
-.drill-flight-result > svg { width: 21px; height: 21px; grid-row: span 2; color: hsl(var(--success)); }
-[data-tone='wrong'] .drill-flight-result > svg { color: hsl(var(--destructive)); }
-.drill-flight-result strong { font-size: var(--text-base); }
-.drill-flight-result > span { font-size: var(--text-xs); color: #bdd0e1; line-height: 1.5; }
-.drill-flight-steer, .drill-flight-checkpoint { position: absolute; left: 30%; bottom: 60px; margin: 0; color: #bdd0e1; font-size: var(--text-sm); pointer-events: none; }
-.drill-flight-floor {
-  position: absolute; inset: auto 0 0; display: flex; justify-content: space-between;
-  padding: 0.6rem 1.1rem; border-top: 1px solid #6383a429; background: #080f1b80;
-  color: #98b0c5; font: 400 var(--text-2xs) var(--font-mono); pointer-events: none;
-}
-.drill-flight-controls { display: flex; justify-content: space-between; gap: 0.5rem 1rem; padding: 0.7rem 1rem; color: #bdd0e1; font-size: var(--text-xs); border-top: 1px solid hsl(var(--border)); background: #0c1725; }
-.drill-flight-controls > span:first-child { display: flex; align-items: center; gap: 0.4rem; }
-.drill-flight-controls svg { width: 13px; height: 13px; }
-.drill-flight-footer-note { color: #bdd0e1; font-size: var(--text-xs); }
-.drill-screen--flight .drill-summary { width: min(100%, 52rem); margin-top: 2rem; }
-@media (max-height: 740px) and (min-width: 641px) {
-  .drill-flight-field { height: 270px; }
-  .drill-flight-intro { top: 18%; }
-  .drill-flight-intro h2 { font-size: 2rem; }
-  .drill-flight-intro p { margin: 0.4rem 0 0.7rem; }
-  .drill-projectile { min-height: 34px; padding-top: 0.4rem; padding-bottom: 0.4rem; font-size: var(--text-xs); }
-  .drill-projectile[data-voice='prose'] { font-size: var(--text-xs); }
-  .drill-screen--flight .drill-header { padding-top: 0.5rem; padding-bottom: 0.5rem; }
-  .drill-flight-round { gap: 0.8rem; }
-}
+.drill-screen--immersive > .drill-verdict { position: absolute; z-index: 7; bottom: max(1rem, env(safe-area-inset-bottom)); left: 50%; transform: translateX(-50%); border: 0; border-radius: var(--radius-md); background: #040c18de; }
+.drill-screen--immersive .drill-verdict-bar { width: auto; min-height: 0; padding: 0.65rem 1rem; }
+.drill-screen--immersive .drill-verdict-state { white-space: nowrap; font-size: var(--text-sm); }
+.drill-screen--immersive .drill-resumed { position: absolute; z-index: 4; right: 1.5rem; bottom: 1.5rem; width: auto; margin: 0; color: #bacbdf; font-size: var(--text-xs); }
 @media (max-width: 640px) {
-  .drill-screen--flight .drill-header { padding: 0.65rem 0.75rem; }
-  .drill-screen--flight .drill-stage { padding: 0.75rem 0.6rem 1.25rem; }
-  .drill-screen--flight .drill-level { display: none; }
-  .drill-flight-field { height: 440px; }
-  .drill-flight-hud { padding: 0.65rem; gap: 0.6rem; }
-  .drill-flight-name { font-size: var(--text-2xs); }
-  .drill-projectile { max-width: 48%; gap: 0.4rem; padding: 0.6rem 0.7rem; font-size: var(--text-xs); }
+  .drill-screen--flight .drill-header { padding: 0.8rem 0.9rem; }
+  .drill-screen--immersive .drill-level { display: block; font-size: var(--text-xs); }
+  .drill-screen--immersive .drill-stage { padding: 0.5rem 0.5rem 0.65rem; }
+  .drill-screen--immersive .drill-track-bar { --track-height: 6px; }
+  .drill-screen-controls .drill-flight-lives { margin-right: 0.25rem; }
+  .drill-screen-control, .drill-flight-pause { width: 2.25rem; height: 2.25rem; }
+  .drill-flight-hud { top: 0.8rem; right: 3.9rem; gap: 0.65rem; }
+  .drill-flight-lives { gap: 0.25rem; }
+  .drill-flight-lives svg { width: 16px; height: 16px; }
+  .drill-flight-question { top: 1.25rem; left: 1.25rem; width: calc(100% - 2.5rem); }
+  .drill-screen--immersive .drill-subject, .drill-screen--immersive .drill-subject[data-voice='machine'] { font-size: 1.4rem; }
+  .drill-projectile { gap: 0.5rem; max-width: 60%; padding: 0.65rem; font-size: var(--text-sm); }
   .drill-projectile[data-voice='prose'] { font-size: var(--text-xs); }
-  .drill-flight-intro { top: 21%; left: 10%; width: 45%; }
-  .drill-flight-intro h2 { font-size: 1.7rem; }
-  .drill-flight-intro p { font-size: var(--text-xs); }
-  .drill-flight-intro button { max-width: 100%; height: auto; min-height: 44px; padding: 0.6rem; white-space: normal; }
-  .drill-flight-controls { flex-wrap: wrap; padding: 0.6rem 0.7rem; }
-  .drill-flight-controls > span:last-child { color: #98b0c5; }
-  .drill-flight-result { left: 8%; right: 8%; }
-  .drill-flight-checkpoint, .drill-flight-steer { left: 15%; right: 10%; font-size: var(--text-xs); }
-  .drill-flight-round { gap: 1rem; }
-  .drill-flight-footer-note { display: none; }
+  .drill-flight-intro { bottom: 1.5rem; }
+}
+@media (max-height: 480px) {
+  .drill-screen--immersive .drill-header { padding-block: 0.5rem; }
+  .drill-flight-hud { top: 0.5rem; }
+  .drill-flight-question { top: 0.75rem; }
+  .drill-screen--immersive .drill-ask { font-size: var(--text-xs); }
+  .drill-screen--immersive .drill-subject, .drill-screen--immersive .drill-subject[data-voice='machine'] { margin-top: 0.25rem; font-size: 1.15rem; }
+  .drill-projectile { min-height: 36px; padding-block: 0.4rem; font-size: var(--text-xs); }
+  .drill-flight-intro { left: 32%; bottom: 1rem; }
 }
 @media (prefers-reduced-motion: reduce) {
   .drill-flight-recoil[data-stagger] { animation: none; }

@@ -50,15 +50,15 @@
 
 .drill-ask {
   margin: 0.25rem 0 0;
-  color: hsl(var(--muted-foreground));
-  font-size: var(--text-sm);
-  font-weight: 600;
+  color: hsl(var(--foreground));
+  font-size: var(--text-base);
+  font-weight: 700;
   line-height: 1.35;
 }
 
 .drill-subject {
   margin: 0.55rem 0 0;
-  color: hsl(var(--foreground));
+  color: color-mix(in oklch, hsl(var(--primary)) 30%, hsl(var(--foreground)));
   font-size: clamp(1.35rem, 4vw, 1.85rem);
   font-weight: 800;
   line-height: 1.2;
@@ -69,6 +69,7 @@
 /* The machine voice, made physical: a command sits on its own inset line
    so it reads as something typed, not something written about. */
 .drill-subject[data-voice='machine'] {
+  color: hsl(var(--foreground));
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;

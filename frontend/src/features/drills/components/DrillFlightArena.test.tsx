@@ -31,6 +31,12 @@ function step(count: number) {
   })
 }
 
+function positionOf(node: HTMLElement) {
+  const match = node.style.transform.match(/translate\(([-\d.]+)px,\s*([-\d.]+)px\)/)
+  expect(match).not.toBeNull()
+  return { x: Number(match![1]), y: Number(match![2]) }
+}
+
 describe('flight controls and collisions', () => {
   beforeEach(() => {
     vi.useFakeTimers()
@@ -80,6 +86,32 @@ describe('flight controls and collisions', () => {
     expect(collide).toHaveBeenCalledExactlyOnceWith('git add')
   })
 
+  it('lets a steering tap reach the right edge while keeping the mascot on screen', () => {
+    render(<Harness />)
+    const arena = screen.getByRole('group', { name: /^Flight arena/ })
+    fireEvent.pointerDown(arena, { clientX: 150, clientY: 90 })
+    act(() => vi.advanceTimersByTime(1350))
+    step(40)
+    fireEvent.pointerDown(arena, { clientX: 1200, clientY: 90 })
+    step(100)
+    expect(document.querySelector('.drill-flight-actor')).toHaveStyle({ transform: 'translate(950px, 90px)' })
+    expect(collide).not.toHaveBeenCalled()
+  })
+
+  it('follows mouse movement after takeoff without requiring another click', () => {
+    render(<Harness />)
+    const arena = screen.getByRole('group', { name: /^Flight arena/ })
+    fireEvent.pointerMove(arena, { pointerType: 'mouse', clientX: 900, clientY: 90 })
+    expect(screen.getByTestId('pose')).toHaveTextContent('idle')
+    fireEvent.pointerDown(arena, { clientX: 150, clientY: 90 })
+    act(() => vi.advanceTimersByTime(1350))
+    step(40)
+    fireEvent.pointerMove(arena, { pointerType: 'mouse', clientX: 900, clientY: 90 })
+    step(100)
+    expect(document.querySelector('.drill-flight-actor')).toHaveStyle({ transform: 'translate(900px, 90px)' })
+    expect(collide).not.toHaveBeenCalled()
+  })
+
   it('keeps the actor mounted and sends the next wave without another launch', () => {
     const view = render(<DrillFlightArena options={options} verdict={null} lives={2} started round={1}
       onStart={vi.fn()} onCollide={collide} voice="machine" />)
@@ -89,7 +121,7 @@ describe('flight controls and collisions', () => {
     view.rerender(<DrillFlightArena options={nextOptions} verdict={null} lives={2} started round={2}
       onStart={vi.fn()} onCollide={collide} voice="machine" />)
     expect(document.querySelector('.drill-flight-actor')).toBe(actor)
-    expect(screen.queryByText('Take flight.')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Take off' })).not.toBeInTheDocument()
     const projectile = screen.getByRole('button', { name: 'Fly to answer 1: git init' })
     const before = projectile.style.transform
     step(20)
@@ -133,6 +165,30 @@ describe('flight controls and collisions', () => {
     expect(collide).not.toHaveBeenCalled()
   })
 
+  it('ends a single-pass wave only after every answer exits, without submitting a collision', () => {
+    const missed = vi.fn()
+    vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.getAttribute('aria-label')?.includes('git status') ? 360 : 180
+    })
+    render(<DrillFlightArena options={options} verdict={null} lives={3} started
+      onStart={vi.fn()} onCollide={collide} onMiss={missed} voice="machine" />)
+    const answer = screen.getByRole('button', { name: 'Fly to answer 1: git add' })
+    const widerAnswer = screen.getByRole('button', { name: 'Fly to answer 2: git status' })
+    step(630)
+    expect(positionOf(answer).x + answer.offsetWidth / 2).toBeLessThan(0)
+    expect(positionOf(widerAnswer).x + widerAnswer.offsetWidth / 2).toBeGreaterThan(0)
+    expect(missed).not.toHaveBeenCalled()
+    expect(collide).not.toHaveBeenCalled()
+    step(100)
+    expect(positionOf(widerAnswer).x + widerAnswer.offsetWidth / 2).toBeLessThan(0)
+    expect(missed).toHaveBeenCalledTimes(1)
+    const finalPosition = answer.style.transform
+    step(500)
+    expect(answer.style.transform).toBe(finalPosition)
+    expect(missed).toHaveBeenCalledTimes(1)
+    expect(collide).not.toHaveBeenCalled()
+  })
+
   it('replaces a hit choice with its verdict and staggers a wrong hit', () => {
     render(<DrillFlightArena options={options} verdict={{ correct: false, picked: 'git status', pickedGloss: 'Inspect' }}
       lives={2} started onStart={vi.fn()} onCollide={collide} voice="machine" />)
@@ -152,5 +208,92 @@ describe('flight controls and collisions', () => {
     expect(collide).toHaveBeenCalledExactlyOnceWith('git add')
     step(200)
     expect(collide).toHaveBeenCalledTimes(1)
+  })
+
+  it('keeps answer lanes and steering below the measured in-arena question', () => {
+    vi.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.classList.contains('drill-flight-question') ? 40 : 0
+    })
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.classList.contains('drill-flight-question') ? 120 : 44
+    })
+    render(<DrillFlightArena options={options} verdict={null} lives={3} started
+      onStart={vi.fn()} onCollide={collide} voice="machine">
+      <section aria-label="Question">Which command stages the selected files?</section>
+    </DrillFlightArena>)
+    const question = document.querySelector<HTMLElement>('.drill-flight-question')!
+    const questionBottom = question.offsetTop + question.offsetHeight
+    for (const answer of screen.getAllByRole('button', { name: /^Fly to answer/ })) {
+      expect(positionOf(answer).y - answer.offsetHeight / 2).toBeGreaterThan(questionBottom)
+    }
+    fireEvent.pointerDown(screen.getByRole('group', { name: /^Flight arena/ }), { clientX: 50, clientY: 0 })
+    step(40)
+    const actor = document.querySelector<HTMLElement>('.drill-flight-actor')!
+    expect(positionOf(actor).y).toBeGreaterThanOrEqual(questionBottom + 28)
+    expect(collide).not.toHaveBeenCalled()
+  })
+
+  it('updates lanes and clamps steering when the question grows without restarting the wave', () => {
+    let questionHeight = 80
+    let resize = () => {}
+    const observed = new Set<Element>()
+    vi.stubGlobal('ResizeObserver', class {
+      constructor(callback: () => void) { resize = callback }
+      observe(element: Element) { observed.add(element) }
+      disconnect() {}
+    })
+    vi.spyOn(HTMLElement.prototype, 'offsetTop', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.classList.contains('drill-flight-question') ? 40 : 0
+    })
+    vi.spyOn(HTMLElement.prototype, 'offsetHeight', 'get').mockImplementation(function (this: HTMLElement) {
+      return this.classList.contains('drill-flight-question') ? questionHeight : 44
+    })
+    render(<DrillFlightArena options={options} verdict={null} lives={3} started
+      onStart={vi.fn()} onCollide={collide} voice="machine"><p>Stage the selected files.</p></DrillFlightArena>)
+    const question = document.querySelector<HTMLElement>('.drill-flight-question')!
+    expect(observed.has(question)).toBe(true)
+    fireEvent.pointerDown(screen.getByRole('group', { name: /^Flight arena/ }), { clientX: 50, clientY: 0 })
+    step(176)
+    const projectile = screen.getByRole('button', { name: 'Fly to answer 1: git add' })
+    const before = positionOf(projectile)
+    act(() => {
+      questionHeight = 120
+      resize()
+    })
+    const after = positionOf(projectile)
+    expect(after.x).toBeCloseTo(before.x)
+    expect(after.y).toBeGreaterThan(before.y)
+    const questionBottom = question.offsetTop + question.offsetHeight
+    expect(after.y - projectile.offsetHeight / 2).toBeGreaterThan(questionBottom)
+    expect(positionOf(document.querySelector<HTMLElement>('.drill-flight-actor')!).y).toBeGreaterThanOrEqual(questionBottom + 28)
+    step(175)
+    expect(before.x - positionOf(projectile).x).toBeCloseTo(250)
+    expect(collide).not.toHaveBeenCalled()
+  })
+
+  it('keeps long reduced-motion answers fully visible in a 320px arena', () => {
+    reduced = true
+    const missed = vi.fn()
+    vi.spyOn(HTMLElement.prototype, 'clientWidth', 'get').mockReturnValue(320)
+    vi.spyOn(HTMLElement.prototype, 'offsetWidth', 'get').mockReturnValue(260)
+    const longOptions = [
+      { value: 'Stage changes below the current folder', gloss: 'Folder' },
+      { value: 'Stage selected paths for the next commit', gloss: 'Paths' },
+      { value: 'Discard changes in the working directory', gloss: 'Restore' },
+      { value: 'Unstage selected paths without losing edits', gloss: 'Unstage' },
+    ]
+    render(<DrillFlightArena options={longOptions} verdict={null} lives={3} started round={2}
+      onStart={vi.fn()} onCollide={collide} onMiss={missed} voice="prose"><p>What does this command do?</p></DrillFlightArena>)
+    const answers = screen.getAllByRole('button', { name: /^Fly to answer/ })
+    const positions = answers.map((answer) => answer.style.transform)
+    for (const answer of answers) {
+      const { x } = positionOf(answer)
+      expect(x - answer.offsetWidth / 2).toBeGreaterThanOrEqual(16)
+      expect(x + answer.offsetWidth / 2).toBeLessThanOrEqual(320 - 16)
+    }
+    step(2000)
+    expect(answers.map((answer) => answer.style.transform)).toEqual(positions)
+    expect(collide).not.toHaveBeenCalled()
+    expect(missed).not.toHaveBeenCalled()
   })
 })

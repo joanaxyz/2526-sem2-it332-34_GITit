@@ -1,158 +1,33 @@
 import { Check, X } from 'lucide-react'
-import { useEffect, useRef } from 'react'
+import type { DrillVerdict } from '@/features/drills/types'
 
-import type { DrillCard, DrillRung, DrillSequence, DrillVerdict } from '@/features/drills/types'
-
-/**
- * Feedback for each flight question, with a check control for assembly rounds.
- *
- * A wrong answer is answered with authored truth rather than a red cross:
- * every distractor is a real command form, so the panel can say what the
- * learner actually reached for and what it really does, next to what they
- * wanted. That comparison is the whole reason the drill exists - it is the
- * confusion that stalls people in the terminal.
- *
- * A right answer is confirmed, not just scored. "Correct" on its own
- * teaches nothing; restating the pairing the learner just proved is the
- * other half of a recall loop, and it costs them one line instead of the
- * miss panel's three - a nod against an explanation, so the rhythm of a
- * clean run stays quick.
- *
- * Feedback stays visible until the learner continues; the third miss leads to results.
- */
-export function DrillVerdictBar({
-  verdict,
-  canCheck,
-  card,
-  rung,
-  sequence,
-  optionCount,
-  onCheck,
-  onContinue,
-  flightChoices = false,
-  outOfLives = false,
-  checkpoint = false,
-  fell = false,
+/** Brief hit feedback; detailed corrections belong in the end-of-run review. */
+export function DrillVerdictBar({ verdict, canCheck, optionCount, onCheck,
+  flightChoices = false, outOfLives = false, checkpoint = false, fell = false,
 }: {
   verdict: DrillVerdict | null
   canCheck: boolean
-  card: DrillCard | null
-  rung: DrillRung | null
-  sequence: DrillSequence | null
-  /** How many numbered choices the current question offers, if any. */
   optionCount: number
   onCheck: () => void
-  onContinue: () => void
   flightChoices?: boolean
   outOfLives?: boolean
   checkpoint?: boolean
   fell?: boolean
 }) {
-  const continueRef = useRef<HTMLButtonElement>(null)
-  useEffect(() => {
-    if (verdict) continueRef.current?.focus({ preventScroll: true })
-  }, [verdict])
-
   const tone = !verdict ? 'idle' : verdict.correct ? 'right' : 'wrong'
-  const answerText = !card
-    ? (sequence?.steps.join('  →  ') ?? '')
-    : rung === 'read'
-      ? card.intent
-      : rung === 'complete'
-        ? (card.blank?.answer ?? '')
-        : card.command
-  const answerGloss = !card ? (sequence?.label ?? '') : rung === 'read' ? card.command : card.intent
-  // Read is the one rung whose answer is prose and whose gloss is a
-  // command, so the two voices have to swap with it. Setting a command in
-  // Inter and a sentence in JetBrains Mono reads as a rendering fault.
-  const answerVoice = rung === 'read' ? 'prose' : 'machine'
-  const glossVoice = rung === 'read' ? 'machine' : 'prose'
-  // Only the pick-one rungs have numbered rows to shortcut to.
-  const picksByNumber = optionCount && optionCount > 1 ? optionCount : null
-
-  return (
-    <div className="drill-verdict" data-tone={tone}>
-      {/* Always mounted: the bar opens by animating its first grid row, and
-          a row that does not exist cannot transition. */}
-      <div className="drill-teach-slot">
-        {verdict?.correct ? (
-          <p className="drill-confirm" role="status">
-            <code data-voice={answerVoice}>{answerText}</code>
-            {answerGloss ? <em data-voice={glossVoice}>{answerGloss}</em> : null}
-          </p>
-        ) : null}
-        {verdict && !verdict.correct ? (
-          <div className="drill-teach" role="status">
-            {verdict.picked ? (
-              <p className="drill-teach-row" data-role="picked">
-                <span className="drill-teach-label">You picked</span>
-                <code data-voice={answerVoice}>{verdict.picked}</code>
-                {verdict.pickedGloss ? <em data-voice={glossVoice}>{verdict.pickedGloss}</em> : null}
-              </p>
-            ) : null}
-            <p className="drill-teach-row" data-role="answer">
-              <span className="drill-teach-label">The answer</span>
-              <code data-voice={answerVoice}>{answerText}</code>
-              {answerGloss ? <em data-voice={glossVoice}>{answerGloss}</em> : null}
-            </p>
-            <p className="drill-teach-note">{fell ? 'A hole ended this run. Review the order and try again.' : outOfLives ? 'Take another flight to practice this command.' : 'One life lost. This command returns for another pass.'}</p>
-          </div>
-        ) : null}
-      </div>
-
-      <div className="drill-verdict-bar">
-        <p className="drill-verdict-state" role="status">
-          {tone === 'right' ? (
-            <>
-              <span className="drill-verdict-badge" aria-hidden="true">
-                <Check />
-              </span>
-              <span>Correct</span>
-            </>
-          ) : null}
-          {tone === 'wrong' ? (
-            <>
-              <span className="drill-verdict-badge" aria-hidden="true">
-                <X />
-              </span>
-              <span>{fell ? 'Game over' : outOfLives ? 'Out of lives' : 'Life lost'}</span>
-            </>
-          ) : null}
-          {tone === 'idle' ? (
-            <span className="drill-verdict-hint">
-              {/* The numbered badges on each row imply the shortcut; naming
-                  it is what makes a keyboard-first loop discoverable. */}
-              {picksByNumber ? (
-                <>
-                  <kbd>1</kbd>&ndash;<kbd>{picksByNumber}</kbd> to pick
-                  <span aria-hidden="true"> · </span>
-                </>
-              ) : null}
-              {flightChoices ? 'Fly into an answer' : checkpoint ? 'Build the path before Blue reaches a gap' : <><kbd>Enter</kbd> to check</>}
-            </span>
-          ) : null}
-        </p>
-
-        {verdict ? (
-          <button
-            ref={continueRef}
-            type="button"
-            className="ui-button ui-button--default"
-            onClick={onContinue}
-          >
-            {outOfLives ? 'View results' : 'Continue'}
-          </button>
-        ) : flightChoices ? <span className="drill-flight-footer-note">Collisions submit your answer</span> : checkpoint ? <span className="drill-flight-footer-note">Reach the checkpoint</span> : (
-          <button
-            type="button"
-            className="ui-button ui-button--default"
-            disabled={!canCheck}
-            onClick={onCheck}
-          >
-            Check
-          </button>
-        )}
-      </div>
+  if (!verdict && (flightChoices || checkpoint)) return null
+  return <div className="drill-verdict" data-tone={tone}>
+    <div className="drill-verdict-bar">
+      <p className="drill-verdict-state" role="status">
+        {verdict ? <>
+          <span className="drill-verdict-badge" aria-hidden="true">{verdict.correct ? <Check /> : <X />}</span>
+          <span>{verdict.correct ? 'Correct' : fell ? 'Game over' : outOfLives ? 'Out of lives' : verdict.reason === 'passed' ? 'Missed' : 'Life lost'}</span>
+        </> : <span className="drill-verdict-hint">
+          {optionCount > 1 ? <><kbd>1</kbd>–<kbd>{optionCount}</kbd> to pick<span aria-hidden="true"> · </span></> : null}
+          {flightChoices ? 'Fly into an answer' : checkpoint ? 'Build the path before Blue reaches a gap' : <><kbd>Enter</kbd> to check</>}
+        </span>}
+      </p>
+      {!verdict ? <button type="button" className="ui-button ui-button--default" disabled={!canCheck} onClick={onCheck}>Check</button> : null}
     </div>
-  )
+  </div>
 }

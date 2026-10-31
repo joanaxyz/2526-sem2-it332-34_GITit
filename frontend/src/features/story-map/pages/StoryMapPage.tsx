@@ -58,6 +58,8 @@ export function StoryMapPage() {
   const [searchParams, setSearchParams] = useSearchParams()
   const chapterParam = searchParams.get('chapter')
   const focusedChapterId = chapterParam ? Number(chapterParam) : null
+  const levelParam = Number(searchParams.get('level'))
+  const focusedLevelId = Number.isSafeInteger(levelParam) && levelParam > 0 ? levelParam : null
   const companionRequiredFromRoute = searchParams.get('companion-required') === '1'
   const [companionPromptOpen, setCompanionPromptOpen] = useState(companionRequiredFromRoute)
 
@@ -327,6 +329,7 @@ export function StoryMapPage() {
           ) : (
             <StoryAdventurePath
               chapter={activeChapter}
+              focusedLevelId={focusedLevelId}
               levels={levels}
               challenges={challenges}
               challengesLocked={challengesLocked}

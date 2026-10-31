@@ -95,11 +95,10 @@
 .drill-path-caption { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; min-height: 24px; color: #bdd0e1; font-size: var(--text-sm); }
 .drill-path-caption > svg { width: 17px; height: 17px; color: hsl(var(--success)); }
 .drill-checkpoint[data-phase='fallen'] .drill-path-caption { color: #ffc3c3; }
-.drill-path-bank-label { display: flex; flex-wrap: wrap; gap: 0.25rem 1rem; font-size: var(--text-xs); color: hsl(var(--foreground)); }
-.drill-path-bank-label > span { margin-left: auto; color: #bdd0e1; }
-.drill-path-typing, .drill-path-typing > label { display: grid; gap: 0.6rem; }
-.drill-path-typing > label { color: #bdd0e1; font-size: var(--text-xs); }
-.drill-path-typing > button[type='submit'] { justify-self: start; }
+.drill-path-keystrokes { min-height: 1.25rem; margin: 0; color: hsl(var(--foreground)); font: 500 var(--text-sm)/1.4 var(--font-mono); }
+.drill-path-keystrokes kbd { font: inherit; }
+.drill-path-keystrokes[data-invalid] { color: hsl(var(--destructive)); }
+.drill-piece[data-typing] { border-color: hsl(var(--primary)); background: hsl(var(--primary) / 0.16); }
 @keyframes drill-path-collapse {
   from { opacity: 1; transform: translateY(-24px); }
   to { opacity: 0.9; transform: translateY(0); }
@@ -115,7 +114,6 @@
   .drill-path-hud { gap: 0.5rem; }
   .drill-path-hud > span:first-child { font-size: var(--text-xs); }
   .drill-path-count { font-size: var(--text-2xs); }
-  .drill-path-bank-label > span { margin-left: 0; width: 100%; }
   .drill-path-course { height: 322px; }
 }
 @media (max-height: 800px) {
@@ -140,11 +138,46 @@
   .drill-path-actor { top: -4px; }
   .drill-path-course::after { top: 170px; }
   .drill-path-caption { font-size: var(--text-xs); }
-  .drill-path-bank-label { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {
   .drill-path-actor { will-change: auto; }
   .drill-checkpoint[data-phase='falling'] .drill-path-actor-art { animation: none; opacity: 0; }
   .drill-path-block[data-collapsed] .drill-path-slab { animation: none; }
   .drill-path-slab { transition: none; }
+}
+
+/* The crossing shares the same full-screen scene as flight. */
+.drill-screen--immersive .drill-flight-round[data-checkpoint] > .drill-question {
+  display: flex; flex-direction: column; gap: 0; width: 100%; height: 100%;
+  padding: 1.75rem max(1.5rem, 3vw) 1.25rem;
+  background: linear-gradient(#040c18a6, #0712221a 45%, #040b18cc);
+}
+.drill-screen--immersive .drill-flight-round[data-checkpoint] { background: #07111e url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png') center 35% / cover; }
+.drill-screen--immersive .drill-checkpoint { display: flex; flex: 1; flex-direction: column; min-height: 0; gap: 0.75rem; margin-top: 1rem; }
+.drill-screen--immersive .drill-path-hud { position: absolute; z-index: 7; top: 1rem; right: 5rem; gap: 1rem; }
+.drill-screen--immersive .drill-path-count { font: 500 var(--text-xs) var(--font-mono); }
+.drill-screen--immersive .drill-path-pause { width: 2.5rem; height: 2.5rem; background: hsl(var(--background) / 0.55); border-color: hsl(var(--foreground) / 0.16); }
+.drill-screen--immersive .drill-path-viewport { flex: 1; min-height: 6rem; width: 100%; border: 0; border-radius: 0; background: none; scrollbar-width: none; }
+.drill-screen--immersive .drill-path-viewport::-webkit-scrollbar { display: none; }
+.drill-screen--immersive .drill-path-course { height: 100%; }
+.drill-screen--immersive .drill-path-scenery { display: none; }
+.drill-screen--immersive .drill-path-ground { top: calc(100% - 110px); }
+.drill-screen--immersive .drill-path-actor { top: calc(100% - 240px); }
+.drill-screen--immersive .drill-path-course::after { inset: auto 0 0; height: 45px; }
+.drill-screen--immersive .drill-path-caption { min-height: 0; font-size: var(--text-xs); }
+.drill-screen--immersive .drill-checkpoint[data-phase='walking'] .drill-path-caption { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+.drill-screen--immersive .drill-bank { margin: 0; gap: 0.5rem; flex: none; }
+.drill-screen--immersive .drill-piece { min-height: 2.75rem; }
+@media (max-width: 640px) {
+  .drill-screen--immersive .drill-flight-round[data-checkpoint] > .drill-question { padding: 1.25rem 1.25rem 1.25rem; }
+  .drill-screen--immersive .drill-path-hud { top: 0.8rem; right: 3.9rem; gap: 0.6rem; }
+  .drill-screen--immersive .drill-path-pause { width: 2.25rem; height: 2.25rem; }
+}
+@media (max-height: 480px) {
+  .drill-screen--immersive .drill-flight-round[data-checkpoint] > .drill-question { padding-top: 0.75rem; padding-bottom: 0.6rem; }
+  .drill-screen--immersive .drill-path-hud { top: 0.5rem; }
+  .drill-screen--immersive .drill-checkpoint { gap: 0.35rem; margin-top: 0.5rem; }
+  .drill-screen--immersive .drill-path-ground { top: calc(100% - 65px); }
+  .drill-screen--immersive .drill-path-actor { top: calc(100% - 195px); }
+  .drill-screen--immersive .drill-piece { min-height: 2.25rem; padding-block: 0.35rem; }
 }

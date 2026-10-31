@@ -15,6 +15,7 @@ const mocks = vi.hoisted(() => ({
   useAppOnboarding: vi.fn(),
   usePlayerLoadout: vi.fn(),
   useStories: vi.fn(),
+  storyAdventurePath: vi.fn(),
 }))
 
 vi.mock('@/features/onboarding/hooks/onboardingContext', () => ({
@@ -55,7 +56,10 @@ vi.mock('@/features/story-map/components/StorySidePanels', () => ({
 }))
 
 vi.mock('@/features/story-map/components/path/StoryAdventurePath', () => ({
-  StoryAdventurePath: () => <div>Story path</div>,
+  StoryAdventurePath: (props: { focusedLevelId?: number | null }) => {
+    mocks.storyAdventurePath(props)
+    return <div>Story path</div>
+  },
 }))
 
 const chapter: LearningChapter = {
@@ -148,6 +152,19 @@ describe('StoryMapPage responsive rails', () => {
   afterEach(() => {
     cleanup()
     vi.restoreAllMocks()
+  })
+
+  it('passes a requested practice level to the path in its owning chapter', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
+    render(<QueryClientProvider client={queryClient}>
+      <MemoryRouter initialEntries={['/stories/arcane-spire?chapter=1&level=11']}>
+        <Routes><Route path="/stories/:storySlug" element={<StoryMapPage />} /></Routes>
+      </MemoryRouter>
+    </QueryClientProvider>)
+    await screen.findByText('Story path')
+    expect(storyMapApi.getChapterOverview).toHaveBeenCalledWith(chapter.id)
+    expect(mocks.storyAdventurePath).toHaveBeenLastCalledWith(expect.objectContaining({ focusedLevelId: 11 }))
+    queryClient.clear()
   })
 
   it('matches mascot knowledge to the active chapter using the earned spellbook', async () => {

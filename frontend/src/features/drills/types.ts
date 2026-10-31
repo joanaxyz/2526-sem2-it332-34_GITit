@@ -22,7 +22,19 @@ export type DrillAnswer =
 
 export type DrillVerdict = {
   correct: boolean
+  reason?: 'passed'
   /** The authored line that explains what they actually picked, when wrong. */
   pickedGloss: string | null
   picked: string | null
+}
+
+export type DrillMistake = {
+  cardKey?: string | null
+  round: number
+  subject: string
+  picked: string | null
+  pickedGloss: string | null
+  expected: string
+  expectedGloss: string
+  voice: 'machine' | 'prose'
 }

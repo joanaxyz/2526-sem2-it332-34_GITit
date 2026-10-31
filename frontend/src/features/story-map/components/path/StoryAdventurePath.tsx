@@ -34,6 +34,7 @@ export function StoryAdventurePath({
   hasCompanion,
   onCompanionRequired,
   defaultTrialsOpen = false,
+  focusedLevelId = null,
 }: {
   chapter: LearningChapter
   levels: AdventureLevelSummary[]
@@ -43,6 +44,7 @@ export function StoryAdventurePath({
   hasCompanion: boolean
   onCompanionRequired: () => void
   defaultTrialsOpen?: boolean
+  focusedLevelId?: number | null
 }) {
   const { openChallengeArtifact } = useStoryArtifactNavigation()
   const navigate = useNavigate()
@@ -56,6 +58,7 @@ export function StoryAdventurePath({
   const [trialsOpen, setTrialsOpen] = useState(defaultTrialsOpen)
   const trialsPanelRef = useRef<HTMLElement | null>(null)
   const [selectedLevelId, setSelectedLevelId] = useState<number | null>(null)
+  const appliedLevelFocus = useRef<string | null>(null)
 
   const pathRef = useRef<HTMLDivElement | null>(null)
   const canvasRef = useRef<HTMLDivElement | null>(null)
@@ -91,6 +94,24 @@ export function StoryAdventurePath({
     setTrialsOpen(defaultTrialsOpen)
     setSelectedLevelId(null)
   }, [chapter.id, defaultTrialsOpen])
+
+  useEffect(() => {
+    if (focusedLevelId == null) {
+      appliedLevelFocus.current = null
+      return
+    }
+    if (loading || chapter.locked) return
+    const focusKey = `${chapter.id}:${focusedLevelId}`
+    if (appliedLevelFocus.current === focusKey) return
+    const level = levels.find((item) => item.id === focusedLevelId && !item.locked)
+    if (!level) return
+    appliedLevelFocus.current = focusKey
+    setSelectedLevelId(level.id)
+    const frame = window.requestAnimationFrame(() => {
+      pathRef.current?.querySelector<HTMLElement>('.story-path-node[data-selected]')?.scrollIntoView?.({ block: 'nearest' })
+    })
+    return () => window.cancelAnimationFrame(frame)
+  }, [chapter.id, chapter.locked, focusedLevelId, levels, loading])
 
   useEffect(() => {
     if (selectedLevelId && !levels.some((level) => level.id === selectedLevelId && !level.locked)) {

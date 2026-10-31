@@ -1,173 +1,147 @@
-/* The end of a drill.
-   ------------------------------------------------------------------
-   Container-less, in the house style: open hairline sections rather
-   than a stack of plaques. The figures are the only numbers the drill
-   ever shows, and they are mono because every quantity in this system
-   is. There is no coin payout here on purpose - the reward is the named
-   list of forms that took more than one look, which is the thing that
-   actually changes the next twenty minutes. */
-
-.drill-summary {
-  display: grid;
-  gap: 0;
-  animation: drill-summary-in 300ms var(--ease-out) both;
+/* Results use the page's natural height: there is no inner scroll pane. */
+.drill-screen.drill-screen--results {
+  display: block;
+  height: auto;
+  min-height: 100dvh;
+  overflow: visible;
 }
-
-@keyframes drill-summary-in {
-  from {
-    opacity: 0;
-    transform: translateY(0.6rem);
-  }
+.drill-screen--flight.drill-screen--results .drill-stage {
+  display: block;
+  overflow: visible;
+  padding: 2rem 1.25rem 2.5rem;
 }
-
-.drill-summary-eyebrow {
-  margin: 0;
-  color: rgba(var(--theme-primary-rgb), 0.92);
-  /* State earns the colour: a session that never topped every ladder
-     reads amber all the way down - eyebrow, runes, and the list heading -
-     instead of announcing itself in the accent reserved for a clear. */
-  font-family: var(--font-mono);
-  font-size: var(--text-2xs);
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  line-height: 1.3;
-  text-transform: uppercase;
+.drill-screen--flight.drill-screen--results .drill-stage > .drill-summary {
+  width: min(100%, 54rem);
+  margin-inline: auto;
 }
-
-.drill-summary-eyebrow[data-tone='unfinished'] {
+.drill-summary { min-width: 0; }
+.drill-summary:focus { outline: none; }
+.drill-summary-state {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin: 0 0 0.65rem;
   color: hsl(var(--warning));
+  font-size: var(--text-sm);
+  font-weight: 600;
 }
-
-.drill-summary h2,
-.drill-empty h2 {
-  margin: 0.35rem 0 0;
+.drill-summary-state[data-cleared='true'] { color: hsl(var(--success)); }
+.drill-summary-state svg { width: 1rem; height: 1rem; }
+.drill-summary h2 {
+  margin: 0;
   color: hsl(var(--foreground));
   font-family: var(--font-display);
-  font-size: clamp(1.5rem, 4vw, 2rem);
+  font-size: 1.85rem;
   font-weight: 700;
-  line-height: 1.12;
+  line-height: 1.2;
   letter-spacing: -0.01em;
   text-wrap: balance;
-}
-
-.drill-summary-lede {
-  max-width: 58ch;
-  margin: 0.5rem 0 0;
-  color: rgba(232, 246, 250, 0.78);
-  font-size: var(--text-base);
-  line-height: 1.55;
-  text-wrap: pretty;
-}
-
-/* The finished track and the surviving figures share one hairline band:
-   the segments say which commands, the figures say how it went. The track
-   takes the full width rather than sharing the row - it is the record of
-   the session, and half a bar beside two numbers reads as a legend. */
-.drill-summary-tally {
-  display: grid;
-  gap: var(--space-4);
-  margin: var(--space-5) 0 0;
-  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.16);
-  border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.16);
-  padding: var(--space-4) 0;
-}
-
-.drill-summary-figures {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-5);
-  margin: 0;
-}
-
-.drill-summary-figures dt {
-  color: hsl(var(--muted-foreground));
-  font-size: var(--text-2xs);
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
-.drill-summary-figures dd {
-  margin: 0.2rem 0 0;
-  color: hsl(var(--foreground));
-  font-family: var(--font-mono);
-  font-size: 1.5rem;
-  font-weight: 800;
-  line-height: 1;
-}
-
-.drill-summary-shaky {
-  margin-top: var(--space-5);
-}
-
-.drill-summary-shaky h3 {
-  margin: 0;
-  color: hsl(var(--warning));
-  font-size: var(--text-sm);
-  font-weight: 800;
-}
-
-.drill-summary-shaky ul {
-  display: grid;
-  gap: 0;
-  margin: 0.6rem 0 0;
-  padding: 0;
-  list-style: none;
-}
-
-.drill-summary-shaky li {
-  display: grid;
-  grid-template-columns: minmax(0, auto) minmax(0, 1fr);
-  align-items: baseline;
-  gap: 0.2rem 0.85rem;
-  padding: 0.55rem 0;
-  border-top: 1px solid rgba(var(--theme-primary-rgb), 0.12);
-}
-
-.drill-summary-shaky li:first-child {
-  border-top: 0;
-}
-
-.drill-summary-shaky code {
-  color: rgb(var(--theme-spark-rgb));
-  font-family: var(--font-mono);
-  font-size: var(--text-base);
-  font-weight: 600;
   overflow-wrap: anywhere;
 }
-
-.drill-summary-shaky span {
-  color: rgba(232, 246, 250, 0.72);
-  font-size: var(--text-sm);
-  line-height: 1.4;
-}
-
-.drill-summary-warning {
-  margin: var(--space-4) 0 0;
-  color: hsl(var(--warning));
+.drill-summary-lede {
+  max-width: 65ch;
+  margin: 0.5rem 0 0;
+  color: hsl(var(--muted-foreground));
   font-size: var(--text-sm);
   line-height: 1.5;
+  text-wrap: pretty;
 }
-
-.drill-summary-actions {
+.drill-summary-tally {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.6rem;
-  margin-top: var(--space-5);
+  align-items: center;
+  gap: 2.5rem;
+  margin: 1.25rem 0 1.5rem;
+  border-block: 1px solid hsl(var(--border));
+  padding: 0.85rem 0;
 }
-
-@media (max-width: 30rem) {
-  .drill-summary-figures {
-    gap: var(--space-4);
-  }
-
-  .drill-summary-shaky li {
-    grid-template-columns: minmax(0, 1fr);
-  }
+.drill-summary-tally > .drill-track { flex: 1; min-width: 0; }
+.drill-summary-figures { display: flex; flex: none; gap: 1.75rem; margin: 0; }
+.drill-summary-figures > div { display: flex; align-items: baseline; gap: 0.65rem; }
+.drill-summary-figures dt { color: hsl(var(--muted-foreground)); font-size: var(--text-xs); }
+.drill-summary-figures dd {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-family: var(--font-mono);
+  font-size: 1.125rem;
+  font-weight: 600;
 }
-
-@media (prefers-reduced-motion: reduce) {
-  .drill-summary {
-    animation: drill-fade-in 160ms ease both;
-  }
+.drill-summary-tabs { display: flex; gap: 1.5rem; border-bottom: 1px solid hsl(var(--border)); }
+.drill-summary-tabs [role='tab'] {
+  display: inline-flex; align-items: center; gap: 0.5rem; min-height: 2.75rem;
+  margin-bottom: -1px; padding: 0.55rem 0.1rem; border-bottom: 2px solid transparent;
+  color: hsl(var(--muted-foreground)); font-size: var(--text-sm); cursor: pointer;
+}
+.drill-summary-tabs [role='tab'] > span { font: 500 var(--text-xs) var(--font-mono); color: hsl(var(--muted-foreground)); }
+.drill-summary-tabs [aria-selected='true'] { border-bottom-color: hsl(var(--primary)); color: hsl(var(--foreground)); font-weight: 600; }
+.drill-summary-tabs [role='tab']:hover { color: hsl(var(--foreground)); }
+.drill-summary-tabs [role='tab']:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; border-radius: var(--radius-sm); }
+.drill-summary [role='tabpanel']:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 4px; }
+.drill-command-list { margin: 0.65rem 0 0; padding: 0; list-style: none; }
+.drill-command-list li + li { border-top: 1px solid hsl(var(--border) / 0.6); }
+.drill-command-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  width: 100%;
+  min-width: 0;
+  min-height: 3.7rem;
+  padding: 0.6rem 0.5rem;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  text-align: left;
+}
+button.drill-command-row { cursor: pointer; }
+button.drill-command-row:hover { background: rgba(var(--theme-primary-rgb), 0.06); }
+button.drill-command-row:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 2px; }
+.drill-command-copy { display: grid; gap: 0.2rem; min-width: 0; }
+.drill-command-copy code { color: hsl(var(--foreground)); font-family: var(--font-mono); font-size: var(--text-sm); font-weight: 600; overflow-wrap: anywhere; }
+.drill-command-copy > span { color: hsl(var(--muted-foreground)); font-size: var(--text-xs); line-height: 1.4; overflow-wrap: anywhere; }
+.drill-command-book { width: 1rem; height: 1rem; flex: none; color: hsl(var(--muted-foreground)); }
+button.drill-command-row:hover .drill-command-book { color: hsl(var(--success)); }
+.drill-practice-link { display: inline-flex; align-items: center; gap: 0.4rem; flex: none; min-height: 2.75rem; color: hsl(var(--success)); font-size: var(--text-xs); text-decoration: none; }
+.drill-practice-link svg { width: 0.9rem; height: 0.9rem; }
+.drill-practice-link:hover { text-decoration: underline; text-underline-offset: 0.25em; }
+.drill-practice-link:focus-visible { outline: 2px solid hsl(var(--primary)); outline-offset: 3px; border-radius: var(--radius-sm); }
+.drill-summary-review { padding-top: 0.4rem; }
+.drill-summary-review ol { margin: 0; padding: 0; list-style: none; }
+.drill-summary-review ol > li { padding: 0.8rem 0 1rem; }
+.drill-summary-review ol > li + li { border-top: 1px solid hsl(var(--border) / 0.6); }
+.drill-mistake-heading { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-bottom: 0.6rem; }
+.drill-summary-review h4 { margin: 0; min-width: 0; font-size: var(--text-sm); line-height: 1.5; overflow-wrap: anywhere; }
+.drill-summary-review h4[data-voice='machine'] { font-family: var(--font-mono); }
+.drill-summary-review dl { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.5rem; margin: 0; }
+.drill-summary-review dl > div { display: grid; align-content: start; gap: 0.4rem; }
+.drill-summary-review dt { color: hsl(var(--muted-foreground)); font-size: var(--text-xs); }
+.drill-summary-review dd { display: grid; gap: 0.2rem; margin: 0; }
+.drill-summary-review code { color: hsl(var(--foreground)); font-family: var(--font-mono); font-size: var(--text-sm); overflow-wrap: anywhere; }
+.drill-summary-review code[data-voice='prose'] { font-family: var(--font-sans); }
+.drill-summary-review [data-result='expected'] code { color: hsl(var(--success)); }
+.drill-summary-review dd span { color: hsl(var(--muted-foreground)); font-size: var(--text-xs); overflow-wrap: anywhere; }
+.drill-summary-clean { display: flex; align-items: center; gap: 0.6rem; padding: 1.5rem 0; color: hsl(var(--muted-foreground)); font-size: var(--text-sm); }
+.drill-summary-clean svg { width: 1.1rem; height: 1.1rem; color: hsl(var(--success)); }
+.drill-summary-warning { margin: 1rem 0 0; color: hsl(var(--warning)); font-size: var(--text-sm); line-height: 1.5; }
+.drill-summary-actions { display: flex; align-items: center; gap: 0.75rem; margin-top: 1.25rem; padding-top: 1rem; border-top: 1px solid hsl(var(--border)); }
+.drill-summary-actions svg { width: 1rem; height: 1rem; }
+@media (max-width: 40rem) {
+  .drill-screen--flight.drill-screen--results .drill-stage { padding: 1.25rem 1rem 1.5rem; }
+  .drill-summary h2 { font-size: 1.5rem; }
+  .drill-summary-tally { gap: 1rem; margin-block: 1rem; }
+  .drill-summary-figures { gap: 1rem; }
+  .drill-summary-figures > div { gap: 0.35rem; }
+  .drill-command-row { gap: 0.5rem; padding-inline: 0; }
+  .drill-summary-tabs { gap: 1.25rem; }
+  .drill-summary-tabs [role='tab'] { font-size: var(--text-xs); }
+  .drill-summary-review dl { grid-template-columns: minmax(0, 1fr); gap: 0.85rem; }
+  .drill-mistake-heading { gap: 0.5rem; }
+  .drill-summary-actions { flex-wrap: wrap; }
+  .drill-summary-actions .ui-button { flex: 1 1 auto; }
+}
+@media (min-width: 40.01rem) and (max-height: 50rem) {
+  .drill-screen--flight.drill-screen--results .drill-stage { padding-block: 1rem; }
+  .drill-summary h2 { font-size: 1.6rem; }
+  .drill-summary-tally { margin-block: 0.85rem 1rem; padding-block: 0.7rem; }
+  .drill-command-row { min-height: 3.1rem; padding-block: 0.4rem; }
+  .drill-summary-actions { margin-top: 0.85rem; padding-top: 0.85rem; }
 }
