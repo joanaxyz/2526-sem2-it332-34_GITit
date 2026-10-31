@@ -130,3 +130,19 @@ def test_recognition_and_generation_share_a_thirty_second_budget():
     ):
         chat(None, "hello", {"surface": "home"})
     assert recognize.call_args.kwargs["deadline"] == provider.call_args.kwargs["deadline"] == 130
+
+
+@pytest.mark.parametrize("reason,status", [("budget_exhausted", 429), ("budget_unavailable", 503)])
+def test_application_budget_stops_rotation_without_poisoning_provider_cooldowns(reason, status):
+    with patch(
+        "tutoring.services.providers.start_json",
+        side_effect=transport_error(ProviderError(status, "25", reason=reason)),
+    ) as start:
+        diagnostics = {}
+        assert generate("system", [], diagnostics=diagnostics) is None
+        assert start.call_count == 1
+        assert generate("system", [], diagnostics=diagnostics) is None
+        assert start.call_count == 2  # Budget can recover without a model cooldown.
+    assert diagnostics["unavailable_reason"] == (
+        "rate_limited" if reason == "budget_exhausted" else "unavailable"
+    )

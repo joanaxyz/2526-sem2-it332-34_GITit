@@ -61,6 +61,8 @@ def _assert_adventure_accessible(player, level: AdventureLevel) -> None:
 
 
 class AdventureLevelTierRunStartAPIView(APIView):
+    throttle_scope = "run_start"
+
     @extend_schema(
         request=AdventureLevelTierRunStartSerializer,
         responses={201: AdventureLevelTierRunResponseSerializer},
@@ -262,6 +264,8 @@ class AdventureLevelTierWorkspaceFileAPIView(APIView):
 
 
 class AdventureLevelTierRetryAPIView(APIView):
+    throttle_scope = "run_start"
+
     @extend_schema(request=None, responses={201: AdventureLevelTierRunResponseSerializer})
     def post(self, request, run_id: int):
         player = get_or_create_player(request.user)

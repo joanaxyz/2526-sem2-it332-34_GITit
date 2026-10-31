@@ -12,6 +12,8 @@ def run_settings_import(
     redis_url: str,
     database_url: str = "sqlite:///:memory:",
     database_sslmode: str = "",
+    extra_env: dict[str, str] | None = None,
+    code: str = "import config.settings",
 ):
     env = os.environ.copy()
     env.update(
@@ -31,8 +33,9 @@ def run_settings_import(
             "SECURE_HSTS_SECONDS": "31536000" if debug == "False" else "0",
         }
     )
+    env.update(extra_env or {})
     return subprocess.run(
-        [sys.executable, "-c", "import config.settings"],
+        [sys.executable, "-c", code],
         cwd=BACKEND_DIR,
         env=env,
         capture_output=True,
@@ -99,3 +102,14 @@ def test_invalid_database_sslmode_is_rejected():
 
     assert result.returncode != 0
     assert "DATABASE_SSLMODE must be" in result.stderr
+
+
+def test_lockout_environment_settings_are_actually_exported():
+    result = run_settings_import(
+        debug="True",
+        redis_url="",
+        extra_env={"AUTH_LOGIN_MAX_ATTEMPTS": "7", "AUTH_LOGIN_LOCKOUT_SECONDS": "420"},
+        code="import config.settings as s; print(s.AUTH_LOGIN_MAX_ATTEMPTS, s.AUTH_LOGIN_LOCKOUT_SECONDS)",
+    )
+    assert result.returncode == 0
+    assert result.stdout.strip() == "7 420"

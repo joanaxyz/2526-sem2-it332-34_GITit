@@ -208,3 +208,8 @@ form, and revert the matching assertions in
 
 Rolling back only the Vercel side is easier: revert the frontend commit and
 redeploy. The Render API is unaffected by Vercel deployments.
+
+## Rate limiting and costs
+
+See [RATE_LIMITING.md](RATE_LIMITING.md) for the backend policy, private API
+cache headers, proxy identity caveat, and exact manual Firewall verification steps.

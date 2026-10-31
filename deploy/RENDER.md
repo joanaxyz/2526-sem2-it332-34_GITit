@@ -273,3 +273,8 @@ Billing page before adding a card.
   commit.
 - **Blueprint does not redeploy**: confirm GitHub CI passed and sync the latest
   Blueprint commit manually.
+
+## Rate limiting and costs
+
+See [RATE_LIMITING.md](RATE_LIMITING.md) for the new configurable request limits,
+optional provider budget, Redis failure policy, and direct-origin protection limits.

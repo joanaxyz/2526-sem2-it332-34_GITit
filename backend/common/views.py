@@ -10,6 +10,8 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from common.throttles import TrustedScopedRateThrottle
+
 logger = logging.getLogger(__name__)
 
 
@@ -34,6 +36,9 @@ class LivenessAPIView(HealthProbeAPIView):
 
 class ReadinessAPIView(HealthProbeAPIView):
     """Traffic-readiness probe for database and shared-cache reachability."""
+
+    throttle_classes = [TrustedScopedRateThrottle]
+    throttle_scope = "health_ready"
 
     @extend_schema(responses={200: OpenApiTypes.OBJECT, 503: OpenApiTypes.OBJECT})
     def get(self, request):

@@ -265,6 +265,15 @@ else:
         }
     }
 
+# Same Redis, separate failure policy: an enabled provider budget must observe
+# write failures. Gameplay/auth keep the existing fail-open cache policy.
+CACHES["provider_budget"] = {
+    **CACHES["default"],
+    "OPTIONS": {**CACHES["default"].get("OPTIONS", {}), "IGNORE_EXCEPTIONS": False}
+    if REDIS_URL
+    else {},
+}
+
 # JSON console logging with request correlation IDs. Container platforms can
 # ship stdout directly to their log collector without parsing human text.
 LOGGING = {
@@ -349,6 +358,10 @@ if DJANGO_TRUST_PROXY_HEADERS:
     USE_X_FORWARDED_HOST = True
 
 ALLOW_DESTRUCTIVE_SEED_RESET = env("ALLOW_DESTRUCTIVE_SEED_RESET")
+AUTH_LOGIN_MAX_ATTEMPTS = env("AUTH_LOGIN_MAX_ATTEMPTS")
+AUTH_LOGIN_LOCKOUT_SECONDS = env("AUTH_LOGIN_LOCKOUT_SECONDS")
+if AUTH_LOGIN_MAX_ATTEMPTS <= 0 or AUTH_LOGIN_LOCKOUT_SECONDS <= 0:
+    raise RuntimeError("Login lockout attempts and duration must be positive.")
 DEPLOYMENT_VERSION = _deployment_version(
     env("DEPLOYMENT_VERSION", default=""),
     env("RENDER_GIT_COMMIT", default=""),
@@ -363,11 +376,19 @@ REST_FRAMEWORK = {
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
     "DEFAULT_RENDERER_CLASSES": ("rest_framework.renderers.JSONRenderer",),
     "EXCEPTION_HANDLER": "common.api.api_exception_handler",
-    # ScopedRateThrottle only limits views that declare a `throttle_scope`.
-    # Anonymous scopes (register/refresh) key on client IP - classrooms share a
-    # NAT IP, so those rates carry headroom for ~30 students behind one address.
-    "DEFAULT_THROTTLE_CLASSES": ("rest_framework.throttling.ScopedRateThrottle",),
+    # Scoped policies retain DRF's history semantics but share the lockout's
+    # trusted client-IP policy. General traffic is limited by user, never NAT.
+    "DEFAULT_THROTTLE_CLASSES": (
+        "common.throttles.AuthenticatedRateThrottle",
+        "common.throttles.TrustedScopedRateThrottle",
+        "common.throttles.TutorDailyRateThrottle",
+    ),
     "DEFAULT_THROTTLE_RATES": {
+        "authenticated": env("THROTTLE_AUTHENTICATED", default="300/min"),
+        "auth_login": env("THROTTLE_AUTH_LOGIN", default="120/min"),
+        "auth_logout": env("THROTTLE_AUTH_LOGOUT", default="120/min"),
+        "auth_password_change": env("THROTTLE_AUTH_PASSWORD_CHANGE", default="10/hour"),
+        "auth_security": env("THROTTLE_AUTH_SECURITY", default="30/hour"),
         "auth_register": env("THROTTLE_AUTH_REGISTER", default="60/hour"),
         "auth_refresh": env("THROTTLE_AUTH_REFRESH", default="600/hour"),
         "auth_password_reset": env("THROTTLE_AUTH_PASSWORD_RESET", default="20/hour"),
@@ -380,7 +401,11 @@ REST_FRAMEWORK = {
         ),
         "auth_oauth": env("THROTTLE_AUTH_OAUTH", default="120/hour"),
         "command_submit": env("THROTTLE_COMMAND_SUBMIT", default="120/min"),
+        "run_start": env("THROTTLE_RUN_START", default="60/min"),
         "tutor_chat": env("THROTTLE_TUTOR_CHAT", default="12/min"),
+        "tutor_chat_daily": env("THROTTLE_TUTOR_CHAT_DAILY", default="200/day"),
+        "health_ready": env("THROTTLE_HEALTH_READY", default="120/min"),
+        "public_metadata": env("THROTTLE_PUBLIC_METADATA", default="60/min"),
     },
 }
 
@@ -400,6 +425,11 @@ TUTOR_GROQ_MODEL = env("TUTOR_GROQ_MODEL", default="openai/gpt-oss-20b:low").str
 TUTOR_PROVIDER_ATTEMPT_SECONDS = env.float("TUTOR_PROVIDER_ATTEMPT_SECONDS", default=10)
 TUTOR_PROVIDER_DEADLINE_SECONDS = env.float("TUTOR_PROVIDER_DEADLINE_SECONDS", default=20)
 TUTOR_PROVIDER_HEDGE_SECONDS = env.float("TUTOR_PROVIDER_HEDGE_SECONDS", default=4)
+# Physical outbound attempts, including embeddings/hedges/retries, per UTC day.
+# Opt in using the actual provider allowance; this is not a currency/token cap.
+TUTOR_PROVIDER_DAILY_LIMIT = env.int("TUTOR_PROVIDER_DAILY_LIMIT", default=0)
+if TUTOR_PROVIDER_DAILY_LIMIT < 0:
+    raise RuntimeError("TUTOR_PROVIDER_DAILY_LIMIT must be zero (disabled) or positive.")
 TUTOR_SCENARIO_INDEX_PATH = env(
     "TUTOR_SCENARIO_INDEX_PATH", default=str(BASE_DIR / "tutoring" / "data" / "scenario-index.json")
 )

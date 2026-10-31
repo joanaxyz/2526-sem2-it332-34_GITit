@@ -141,6 +141,17 @@ def _reply(attempt, future, failures):
             attempt.model,
             exc.status,
         )
+        if exc.reason in {"budget_exhausted", "budget_unavailable"}:
+            # An application budget isn't a provider failure. End rotation
+            # without poisoning model cooldowns (operators may raise the cap).
+            failure = {"reason": "unavailable"}
+            if exc.reason == "budget_exhausted":
+                failure = {
+                    "reason": "rate_limited",
+                    "until": time.time() + retry_seconds(exc.retry_after),
+                }
+            failures.append(failure)
+            raise
         if exc.status == 429:
             seconds = retry_seconds(exc.retry_after)
             failure = {"reason": "rate_limited", "until": time.time() + seconds}

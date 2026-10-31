@@ -4,13 +4,22 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from common.views import LivenessAPIView, ReadinessAPIView
 
+
+class PublicSchemaAPIView(SpectacularAPIView):
+    throttle_scope = "public_metadata"
+
+
+class PublicDocsAPIView(SpectacularSwaggerView):
+    throttle_scope = "public_metadata"
+
+
 urlpatterns = [
     path("admin/", admin.site.urls),
     path("api/health/", ReadinessAPIView.as_view(), name="health"),
     path("api/health/live/", LivenessAPIView.as_view(), name="health-live"),
     path("api/health/ready/", ReadinessAPIView.as_view(), name="health-ready"),
-    path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
-    path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
+    path("api/schema/", PublicSchemaAPIView.as_view(), name="schema"),
+    path("api/docs/", PublicDocsAPIView.as_view(url_name="schema"), name="swagger-ui"),
     path("api/auth/", include("accounts.urls")),
     path("api/player/", include("players.urls")),
     path("api/", include("challenges.urls")),

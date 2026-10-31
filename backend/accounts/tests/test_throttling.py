@@ -43,14 +43,39 @@ def test_refresh_throttled_after_limit(db, api_client, monkeypatch):
     assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
 
 
-def test_login_not_scope_throttled(db, api_client, monkeypatch):
-    # Login relies on the app-level brute-force lockout, not ScopedRateThrottle;
-    # it must not 429 from the throttle layer on repeated requests.
-    monkeypatch.setitem(ScopedRateThrottle.THROTTLE_RATES, "auth_register", "1/hour")
-    for _ in range(3):
+def test_login_scope_bounds_rotating_identifiers(db, api_client, monkeypatch):
+    monkeypatch.setitem(ScopedRateThrottle.THROTTLE_RATES, "auth_login", "2/min")
+    for n in range(2):
         response = api_client.post(
             "/api/auth/login/",
-            {"identifier": "nobody", "password": "wrong-pass"},
+            {"identifier": f"nobody{n}", "password": "wrong-pass"},
             format="json",
         )
         assert response.status_code == status.HTTP_401_UNAUTHORIZED
+    response = api_client.post(
+        "/api/auth/login/", {"identifier": "another", "password": "wrong-pass"}, format="json"
+    )
+    assert response.status_code == 429
+    assert int(response["Retry-After"]) == response.data["retry_after_seconds"]
+
+
+def test_login_lockout_keeps_legacy_field_and_retry_header(db, api_client, settings):
+    settings.AUTH_LOGIN_MAX_ATTEMPTS = 2
+    payload = {"identifier": "missing", "password": "wrong-pass"}
+    assert api_client.post("/api/auth/login/", payload, format="json").status_code == 401
+    response = api_client.post("/api/auth/login/", payload, format="json")
+    assert response.status_code == 429
+    assert response.data["retry_after"] == settings.AUTH_LOGIN_LOCKOUT_SECONDS
+    assert int(response["Retry-After"]) == response.data["retry_after_seconds"]
+
+
+def test_classroom_login_burst_and_lockout_independence(db, api_client, settings, monkeypatch):
+    settings.AUTH_LOGIN_MAX_ATTEMPTS = 2
+    monkeypatch.setitem(ScopedRateThrottle.THROTTLE_RATES, "auth_login", "120/min")
+    for n in range(30):
+        response = api_client.post(
+            "/api/auth/login/",
+            {"identifier": f"student{n}", "password": "wrong-pass"},
+            format="json",
+        )
+        assert response.status_code == 401

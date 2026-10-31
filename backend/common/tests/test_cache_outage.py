@@ -55,7 +55,7 @@ def test_logged_out_session_stays_revoked_without_redis(db):
 
 
 @override_settings(CACHES=REDIS_DOWN)
-def test_rate_limited_gameplay_requests_pass_through_without_redis(db):
+def test_rate_limited_gameplay_requests_pass_through_without_redis(db, caplog):
     user = get_user_model().objects.create_user(username="grace", password=PASSWORD)
     request = APIRequestFactory().post("/api/commands/", {}, format="json")
     force_authenticate(request, user=user)
@@ -63,6 +63,7 @@ def test_rate_limited_gameplay_requests_pass_through_without_redis(db):
     response = CommandScopedView.as_view()(request)
 
     assert response.status_code == 200
+    assert "Exception ignored" in caplog.text
 
 
 @override_settings(CACHES=REDIS_DOWN)
