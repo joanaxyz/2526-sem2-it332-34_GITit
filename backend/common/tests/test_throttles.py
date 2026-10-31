@@ -4,10 +4,10 @@ from unittest.mock import patch
 import pytest
 from django.core.cache import cache
 from django.test import override_settings
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.test import APIClient, APIRequestFactory, force_authenticate
-from rest_framework.throttling import ScopedRateThrottle
+from rest_framework.throttling import ScopedRateThrottle, SimpleRateThrottle
 from rest_framework.views import APIView
 
 from accounts.views import LoginAPIView
@@ -97,6 +97,34 @@ def test_daily_policy_follows_drf_counting_when_another_throttle_rejects(monkeyp
     response = call(TutorView)
     assert response.status_code == 429
     assert int(response["Retry-After"]) > 60  # Daily, despite a fresh burst bucket.
+
+
+def test_daily_window_expires_independently_for_classmates(monkeypatch):
+    rate(monkeypatch, "tutor_chat_daily", "1/day")
+    with patch.object(SimpleRateThrottle, "timer", return_value=100):
+        for student in range(1, 31):
+            assert call(TutorView, user=student).status_code == 200
+        assert call(TutorView).status_code == 429
+    with patch.object(SimpleRateThrottle, "timer", return_value=86499):
+        response = call(TutorView)
+        assert response.status_code == 429
+        assert response["Retry-After"] == "1"
+    with patch.object(SimpleRateThrottle, "timer", return_value=86500):
+        assert call(TutorView).status_code == 200
+
+
+def test_authentication_and_permission_failures_do_not_consume_scoped_counters(monkeypatch):
+    class ProtectedCommandView(CommandView):
+        permission_classes = [IsAuthenticated]
+
+    rate(monkeypatch, "command_submit", "1/min")
+    assert call(ProtectedCommandView, user=None).status_code == 401
+    assert (
+        call(ProtectedCommandView, user=None, HTTP_AUTHORIZATION="Bearer invalid").status_code
+        == 401
+    )
+    assert cache.get("throttle_command_submit_127.0.0.1") is None
+    assert call(ProtectedCommandView).status_code == 200
 
 
 @override_settings(DJANGO_TRUST_PROXY_HEADERS=False)

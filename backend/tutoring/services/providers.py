@@ -144,11 +144,12 @@ def _reply(attempt, future, failures):
         if exc.reason in {"budget_exhausted", "budget_unavailable"}:
             # An application budget isn't a provider failure. End rotation
             # without poisoning model cooldowns (operators may raise the cap).
-            failure = {"reason": "unavailable"}
+            failure = {"reason": "unavailable", "budget": True}
             if exc.reason == "budget_exhausted":
                 failure = {
                     "reason": "rate_limited",
                     "until": time.time() + retry_seconds(exc.retry_after),
+                    "budget": True,
                 }
             failures.append(failure)
             raise
@@ -265,7 +266,16 @@ def generate(system, turns, *, deadline=None, diagnostics=None):
             future.cancel()
     if diagnostics is not None:
         reason = "unavailable"
-        if failures and all(failure["reason"] == "rate_limited" for failure in failures):
+        budget_failure = next((failure for failure in failures if failure.get("budget")), None)
+        if budget_failure is not None:
+            # The shared budget gates every model, even one whose own cooldown
+            # ends sooner. Earlier provider failures cannot shorten its wait.
+            reason = budget_failure["reason"]
+            if reason == "rate_limited":
+                diagnostics["retry_after_seconds"] = max(
+                    1, math.ceil(budget_failure["until"] - time.time())
+                )
+        elif failures and all(failure["reason"] == "rate_limited" for failure in failures):
             reason = "rate_limited"
             diagnostics["retry_after_seconds"] = max(
                 1, math.ceil(min(f["until"] for f in failures) - time.time())

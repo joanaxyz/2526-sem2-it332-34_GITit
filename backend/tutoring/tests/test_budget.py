@@ -76,6 +76,30 @@ def test_budget_accesses_only_the_strict_cache_alias(settings):
     cache_handles.__getitem__.assert_called_once_with("provider_budget")
 
 
+def test_reservation_ttl_ends_at_utc_midnight_and_outage_can_recover(settings):
+    settings.TUTOR_PROVIDER_DAILY_LIMIT = 1
+    with (
+        patch("tutoring.services.budget.time.time", return_value=86399.2),
+        patch("tutoring.services.budget.caches") as cache_handles,
+    ):
+        budget = cache_handles.__getitem__.return_value
+        budget.add.side_effect = [ConnectionError(), True]
+        with pytest.raises(BudgetUnavailable):
+            reserve_provider_call()
+        assert reserve_provider_call() is None
+        budget.add.assert_called_with("tutor:provider-budget:utc:0", 1, timeout=1)
+
+
+def test_counter_disappearing_between_add_and_increment_fails_closed(settings):
+    settings.TUTOR_PROVIDER_DAILY_LIMIT = 1
+    with patch("tutoring.services.budget.caches") as cache_handles:
+        budget = cache_handles.__getitem__.return_value
+        budget.add.return_value = False
+        budget.incr.side_effect = ValueError("Key expired")
+        with pytest.raises(BudgetUnavailable):
+            reserve_provider_call()
+
+
 # Transport-level assertions live here alongside the budget policy. Reuse the
 # established mocked HTTP transport fixture without ever contacting a provider.
 @pytest.fixture
@@ -122,6 +146,66 @@ def test_budget_outage_prevents_http_only(settings, budget_transport):
             post_json("https://example.test", {}, {}, 1)
     assert exc.value.reason == "budget_unavailable"
     assert not calls
+
+
+def test_embedding_and_generation_failover_share_the_physical_budget(settings, budget_transport):
+    from tutoring.services.providers import generate
+    from tutoring.services.scenario_recognition import embed
+
+    settings.TUTOR_PROVIDER_DAILY_LIMIT = 2
+    settings.GOOGLE_AI_STUDIO_API_KEY = "test-google"
+    settings.GROQ_API_KEY = "test-groq"
+    settings.TUTOR_GEMINI_MODELS = ("first",)
+    calls = []
+
+    def handler(request):
+        calls.append(request.url.path)
+        if request.url.path.endswith(":batchEmbedContents"):
+            return httpx.Response(200, json={"embeddings": [{"values": [1.0] + [0.0] * 767}]})
+        return httpx.Response(429, headers={"Retry-After": "25"})
+
+    budget_transport(handler)
+    assert len(embed(["What is staging?"], "RETRIEVAL_QUERY")) == 1
+    diagnostics = {}
+    assert generate("system", [], diagnostics=diagnostics) is None
+    assert len(calls) == 2  # Embedding + Gemini; Groq denied before HTTP.
+    assert diagnostics["unavailable_reason"] == "rate_limited"
+    assert 1 <= diagnostics["retry_after_seconds"] <= 86400
+
+
+def test_overlapping_hedges_each_reserve_before_http(settings, budget_transport):
+    import asyncio
+    import threading
+
+    from tutoring.services.providers import generate
+
+    settings.TUTOR_PROVIDER_DAILY_LIMIT = 2
+    settings.GOOGLE_AI_STUDIO_API_KEY = "test-google"
+    settings.GROQ_API_KEY = "test-groq"
+    settings.TUTOR_GEMINI_MODELS = ("first",)
+    settings.TUTOR_PROVIDER_HEDGE_SECONDS = 0.01
+    settings.TUTOR_PROVIDER_DEADLINE_SECONDS = 1
+    release = threading.Event()
+    calls = []
+
+    async def handler(request):
+        calls.append(request.url.path)
+        if request.url.host == "api.groq.com":
+            release.set()
+            return httpx.Response(200, json={"choices": [{"message": {"content": "Answer"}}]})
+        while not release.is_set():
+            await asyncio.sleep(0.001)
+        return httpx.Response(
+            200, json={"candidates": [{"content": {"parts": [{"text": "Answer"}]}}]}
+        )
+
+    budget_transport(handler)
+    try:
+        assert generate("system", []) == "Answer"
+    finally:
+        release.set()
+    assert len(calls) == 2
+    assert reserve_provider_call() is not None
 
 
 def test_slow_admission_respects_deadline_and_never_sends_after_cancellation(budget_transport):

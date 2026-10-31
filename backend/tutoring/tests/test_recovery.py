@@ -146,3 +146,23 @@ def test_application_budget_stops_rotation_without_poisoning_provider_cooldowns(
     assert diagnostics["unavailable_reason"] == (
         "rate_limited" if reason == "budget_exhausted" else "unavailable"
     )
+
+
+@pytest.mark.parametrize("earlier", [ProviderError(429, "25"), ProviderError(503)])
+@pytest.mark.parametrize("reason,status", [("budget_exhausted", 429), ("budget_unavailable", 503)])
+def test_shared_budget_failure_takes_priority_over_earlier_model_failure(earlier, reason, status):
+    errors = iter([earlier, ProviderError(status, "3600", reason=reason)])
+    diagnostics = {}
+    with (
+        patch("tutoring.services.providers.time.time", return_value=100),
+        patch(
+            "tutoring.services.providers.start_json",
+            side_effect=lambda *args: transport_error(next(errors))(),
+        ) as start,
+    ):
+        assert generate("system", [], diagnostics=diagnostics) is None
+    assert start.call_count == 2
+    if reason == "budget_exhausted":
+        assert diagnostics == {"unavailable_reason": "rate_limited", "retry_after_seconds": 3600}
+    else:
+        assert diagnostics == {"unavailable_reason": "unavailable"}

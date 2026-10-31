@@ -49,7 +49,7 @@ const soundEffectsEnabledListeners = new Set<AudioPreferenceListener>()
 const musicEnabledListeners = new Set<AudioPreferenceListener>()
 let battleSoundEffectsEnabled = readAudioChannelPreference(SOUND_EFFECTS_ENABLED_STORAGE_KEY)
 let battleMusicEnabled = readAudioChannelPreference(MUSIC_ENABLED_STORAGE_KEY)
-let activeBackground: { kind: BattleBackgroundKind; audio: HTMLAudioElement } | null = null
+let activeBackground: { kind: BattleBackgroundKind; audio: HTMLAudioElement | null } | null = null
 let clearPendingBackgroundUnlock: (() => void) | null = null
 let activeRunSound: HTMLAudioElement | null = null
 let clearPendingRunStop: (() => void) | null = null
@@ -62,7 +62,7 @@ export function skillElementForCompanion(companionSlug?: string | null): BattleS
 }
 
 function preloadBattleAudio(): void {
-  if (!canUseAudio()) return
+  if (!canUseAudio() || !battleSoundEffectsEnabled) return
   for (const element of SKILL_ELEMENTS) {
     for (const phase of SKILL_PHASES) {
       loadAudio(skillSrc(element, phase))
@@ -71,8 +71,6 @@ function preloadBattleAudio(): void {
   for (const sound of BUTTON_SOUNDS) {
     loadAudio(buttonSrc(sound))
   }
-  loadAudio(backgroundSrc('outside'))
-  loadAudio(backgroundSrc('inside'))
   for (const slug of COMPANION_SOUND_SLUGS) {
     for (const sound of COMPANION_SOUNDS) {
       loadAudio(companionSrc(slug, sound))
@@ -93,6 +91,7 @@ export function setBattleSoundEnabled(enabled: boolean): void {
   if (battleSoundEffectsEnabled === enabled) return
   battleSoundEffectsEnabled = enabled
   persistAudioChannelPreference(SOUND_EFFECTS_ENABLED_STORAGE_KEY, enabled)
+  if (enabled && activeBackground) preloadBattleAudio()
   if (!enabled) suspendSoundEffects()
   for (const listener of soundEffectsEnabledListeners) {
     listener(enabled)
@@ -220,7 +219,7 @@ export function playRunSound(durationMs = 0): void {
 export function startBackgroundMusic(kind: BattleBackgroundKind): void {
   if (!canUseAudio()) return
   preloadBattleAudio()
-  if (activeBackground?.kind === kind) {
+  if (activeBackground?.kind === kind && activeBackground.audio) {
     activeBackground.audio.loop = true
     activeBackground.audio.volume = BACKGROUND_VOLUMES[kind]
     if (battleMusicEnabled && activeBackground.audio.paused) {
@@ -229,16 +228,18 @@ export function startBackgroundMusic(kind: BattleBackgroundKind): void {
     return
   }
   clearBackgroundUnlock()
-  if (activeBackground) {
+  if (activeBackground?.audio) {
     fadeOut(activeBackground.audio, 260)
   }
 
-  const audio = loadAudio(backgroundSrc(kind))
+  // Remember the current screen while muted without creating a media request.
+  // Enabling music later starts only this screen's loop.
+  const audio = battleMusicEnabled ? loadAudio(backgroundSrc(kind)) : null
+  activeBackground = { kind, audio }
+  if (!audio) return
   audio.loop = true
   audio.volume = BACKGROUND_VOLUMES[kind]
   audio.currentTime = 0
-  activeBackground = { kind, audio }
-  if (!battleMusicEnabled) return
   playBackground(audio)
 }
 
@@ -332,6 +333,10 @@ function playBackground(audio: HTMLAudioElement): void {
 
 function resumeActiveBackground(): void {
   if (!battleMusicEnabled) return
+  if (activeBackground && !activeBackground.audio) {
+    startBackgroundMusic(activeBackground.kind)
+    return
+  }
   const audio = activeBackground?.audio
   if (!audio || !audio.paused) return
   playBackground(audio)

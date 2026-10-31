@@ -4,6 +4,10 @@ Repository audit: 2026-10-31. These are source changes and operating instruction
 no deployment, dashboard inspection, firewall publication or billing change was
 performed. Existing unrelated workspace edits were excluded.
 
+Independent follow-up: [POST_HARDENING_AUDIT.md](POST_HARDENING_AUDIT.md)
+records the subsequent review, focused corrections, executed checks and
+remaining classroom deployment gates.
+
 ## Audit findings and protections
 
 | Priority | Confirmed finding | Consequence and disposition |
@@ -217,9 +221,11 @@ Vercel still receives uncached API requests and initial static loads; cache hits
 at the CDN can still consume edge request allowance and served bytes. Hashed
 bundles keep one-year immutable caching; mutable assets retain one-day browser
 caching with one-week stale revalidation. Images/audio are deduplicated in a
-session. Audio currently warms 42 possible sound assets even when preferences
-are muted; this remains a separate optimization opportunity because changing
-playback/preloading behavior was outside this focused admission change.
+session. The follow-up audit corrected muted audio preloading: effects warm
+only when enabled, and music loads only the current screen's loop when enabled.
+Fully muted screen changes create no audio elements or media requests. Enabled
+effects retain their existing warm-up for battle timing; enabling music later
+resumes the current screen, including navigation performed while muted.
 
 Residual risks include distributed bot/account farms, invalid-auth floods,
 public liveness traffic, Django admin brute force, repeated provider attempts
