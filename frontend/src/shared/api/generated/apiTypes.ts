@@ -250,7 +250,7 @@ export type ApiMethodByPath = {
   "/api/admin/stories/": "GET" | "POST"
   "/api/admin/stories/{story_id}/": "PATCH"
   "/api/admin/users/": "GET"
-  "/api/admin/users/{user_id}/": "GET"
+  "/api/admin/users/{user_id}/": "DELETE" | "GET"
   "/api/admin/users/{user_id}/actions/": "POST"
   "/api/admin/users/{user_id}/kpis/": "GET"
   "/api/adventure-level-tiers/{tier_id}/runs/": "POST"
@@ -320,6 +320,7 @@ export const apiOperations = {
   admin_stories_create: { method: "POST", path: "/api/admin/stories/", operationId: "admin_stories_create", tags: ["admin"] },
   admin_stories_partial_update: { method: "PATCH", path: "/api/admin/stories/{story_id}/", operationId: "admin_stories_partial_update", tags: ["admin"] },
   admin_users_retrieve: { method: "GET", path: "/api/admin/users/", operationId: "admin_users_retrieve", tags: ["admin"] },
+  admin_users_destroy: { method: "DELETE", path: "/api/admin/users/{user_id}/", operationId: "admin_users_destroy", tags: ["admin"] },
   admin_users_retrieve_2: { method: "GET", path: "/api/admin/users/{user_id}/", operationId: "admin_users_retrieve_2", tags: ["admin"] },
   admin_users_actions_create: { method: "POST", path: "/api/admin/users/{user_id}/actions/", operationId: "admin_users_actions_create", tags: ["admin"] },
   admin_users_kpis_retrieve: { method: "GET", path: "/api/admin/users/{user_id}/kpis/", operationId: "admin_users_kpis_retrieve", tags: ["admin"] },
@@ -404,6 +405,7 @@ export type ApiRequestBodyByOperation = {
   admin_stories_create: ApiSchemas["AdminStoryCreateRequest"]
   admin_stories_partial_update: ApiSchemas["PatchedAdminStoryUpdateRequest"]
   admin_users_retrieve: null
+  admin_users_destroy: null
   admin_users_retrieve_2: null
   admin_users_actions_create: ApiSchemas["AdminUserActionRequest"]
   admin_users_kpis_retrieve: null
@@ -485,6 +487,7 @@ export type ApiResponseBodyByOperation = {
   admin_stories_create: ApiSchemas["AdminStory"]
   admin_stories_partial_update: ApiSchemas["AdminStory"]
   admin_users_retrieve: ApiSchemas["AdminUserListResponse"]
+  admin_users_destroy: null
   admin_users_retrieve_2: ApiSchemas["AdminUserDetail"]
   admin_users_actions_create: ApiSchemas["AdminUserDetail"]
   admin_users_kpis_retrieve: ApiSchemas["AdminUserKpisResponse"]

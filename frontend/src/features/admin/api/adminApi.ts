@@ -41,6 +41,9 @@ export const adminApi = {
       body: payload,
     })
   },
+  deleteUser(id: number) {
+    return apiOperationRequest('admin_users_destroy', `/admin/users/${id}/`)
+  },
   transactions(userId?: number) {
     const suffix = userId ? `?user_id=${userId}` : ''
     return apiOperationRequest(

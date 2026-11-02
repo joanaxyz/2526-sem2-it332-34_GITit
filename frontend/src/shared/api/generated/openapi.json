@@ -474,6 +474,27 @@
                         "description": ""
                     }
                 }
+            },
+            "delete": {
+                "operationId": "admin_users_destroy",
+                "parameters": [
+                    {
+                        "in": "path",
+                        "name": "user_id",
+                        "schema": {
+                            "type": "integer"
+                        },
+                        "required": true
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "204": {
+                        "description": "No response body"
+                    }
+                }
             }
         },
         "/api/admin/users/{user_id}/actions/": {
