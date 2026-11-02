@@ -344,8 +344,8 @@ button.shop-price-chip:focus-visible {
 }
 
 @keyframes shop-sparkle-spin-ccw {
-  from { transform: translate(-50%, -50%) rotate(0deg)    translateY(1.55rem) rotate(0deg); }
-  to   { transform: translate(-50%, -50%) rotate(-360deg) translateY(1.55rem) rotate(360deg); }
+  from { transform: translate(-50%, -50%) rotate(0deg)    translateY(1.55rem) rotate(0deg)    scale(0.7); }
+  to   { transform: translate(-50%, -50%) rotate(-360deg) translateY(1.55rem) rotate(360deg) scale(0.7); }
 }
 
 @keyframes shop-sparkle-twinkle {
@@ -371,7 +371,7 @@ button.shop-price-chip:focus-visible {
   left: 50%;
   z-index: 10;
   color: rgb(var(--theme-primary-rgb));
-  font-size: 0.65rem;
+  font-size: 1rem;
   line-height: 1;
   pointer-events: none;
   filter: drop-shadow(0 0 5px rgba(var(--theme-primary-rgb), 1));
@@ -384,7 +384,6 @@ button.shop-price-chip:focus-visible {
 
 .shop-purchase-dock:has([data-onboarding='shop-purchase']:not(:disabled))::after,
 .app-onboarding-banner__actions:has([data-onboarding='shop-back-to-map'])::after {
-  font-size: 0.45rem;
   animation: shop-sparkle-spin-ccw 3s linear infinite;
   filter: drop-shadow(0 0 4px rgba(var(--theme-primary-rgb), 0.8));
 }
