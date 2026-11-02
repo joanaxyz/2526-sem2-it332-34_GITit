@@ -181,36 +181,26 @@ afterEach(() => {
 })
 
 describe('first-visit onboarding journey', () => {
-  it('guides a new player through the map, required companion setup, and both Home views', async () => {
+  it('guides a new player through the map and required companion setup', async () => {
     const userId = 301
     const view = renderJourney(userId)
 
     await screen.findByRole('heading', { name: 'Choose how to learn' })
     fireEvent.click(screen.getByRole('button', { name: 'Go to first chapter' }))
     await screen.findByRole('heading', { name: 'This is your learning map' })
-    await completeTour('Choose a companion', [
-      'Check the chapter guide',
-      'Challenges follow practice',
-      'Open your next level',
-      'Choose a companion before playing',
-    ])
+    // Two-step map tour: learning map → field guide → finish
+    await completeTour('Choose a companion', ['Open the Field Guide'])
 
-    await screen.findByRole('heading', { name: 'Check your GitCoins' })
-    await completeTour('Choose a companion', ['Preview a companion', 'Purchase your companion'])
-    expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('purchase')
+    // Shop phase: banner prompts purchase, no shop tour steps
+    expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('shop')
+    expect(screen.queryByRole('heading', { name: 'Check your GitCoins' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Skip shop tour' })).not.toBeInTheDocument()
+
+    fireEvent.click(await screen.findByRole('button', { name: 'Purchase' }))
+
+    // After purchase: hasCompanion=true → banner shows "Back to map", no home detour
     expect(screen.queryByRole('button', { name: 'Explore Home' })).not.toBeInTheDocument()
-
-    fireEvent.click(screen.getByRole('button', { name: 'Purchase' }))
-    fireEvent.click(await screen.findByRole('button', { name: 'Explore Home' }))
-
-    await screen.findByRole('heading', { name: 'Switch Home views here' })
-    await completeTour('Show Profile', ['Track your progress'])
-    await screen.findByRole('heading', { name: 'See the rank ladder' })
-    await completeTour('Return to map', [
-      'Follow your rank progress',
-      'Manage your companions',
-      'Review learned commands',
-    ])
+    fireEvent.click(await screen.findByRole('button', { name: 'Back to map' }))
 
     expect(await screen.findByRole('heading', { name: 'Story map' })).toBeInTheDocument()
     expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('done')
@@ -223,29 +213,28 @@ describe('first-visit onboarding journey', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
   }, 20_000)
 
-  it('lets players skip explanations but never the companion requirement', async () => {
+  it('lets players skip the map tour but still requires a companion purchase', async () => {
     servePhase('stories')
     writeOnboardingPhase(302, 'stories')
     renderJourney(302)
 
     await screen.findByRole('heading', { name: 'This is your learning map' })
     fireEvent.click(screen.getByRole('button', { name: 'Skip tour' }))
-    expect(await screen.findByRole('heading', { name: 'Check your GitCoins' })).toBeInTheDocument()
+
+    // Should go straight to shop phase, no shop tour steps
     expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('shop')
+    expect(screen.queryByRole('heading', { name: 'Check your GitCoins' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Skip shop tour' })).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Skip shop tour' }))
-    await waitFor(() => expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('purchase'))
+    fireEvent.click(await screen.findByRole('button', { name: 'Purchase' }))
+
+    // After purchase companion is active → banner shows "Back to map", phase stays shop until Back to map
     expect(screen.queryByRole('button', { name: 'Explore on my own' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Explore Home' })).not.toBeInTheDocument()
+    fireEvent.click(await screen.findByRole('button', { name: 'Back to map' }))
 
-    fireEvent.click(screen.getByRole('link', { name: 'Home tab' }))
-    expect(await screen.findByRole('heading', { name: 'Switch Home views here' })).toBeInTheDocument()
-    fireEvent.click(screen.getByRole('button', { name: 'Skip Home tour' }))
-    await waitFor(() => expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('equip'))
-    expect(screen.queryByRole('button', { name: 'Return to map' })).not.toBeInTheDocument()
-
-    fireEvent.click(await screen.findByRole('link', { name: 'Choose a companion' }))
-    await waitFor(() => expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('purchase'))
-    expect(await screen.findByText('Step 2 of 3 · Choose a companion')).toBeInTheDocument()
+    expect(await screen.findByRole('heading', { name: 'Story map' })).toBeInTheDocument()
+    expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('done')
   })
 
   it('keeps the required companion step active when a purchase fails', async () => {
@@ -260,7 +249,7 @@ describe('first-visit onboarding journey', () => {
     expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('purchase')
   })
 
-  it('takes an already-equipped player through Home without detouring through the Shop', async () => {
+  it('takes an already-equipped player straight to done when they skip the map tour', async () => {
     servePhase('stories')
     writeOnboardingPhase(304, 'stories')
     vi.mocked(shopApi.catalog).mockResolvedValue(catalog(true, true))
@@ -268,55 +257,40 @@ describe('first-visit onboarding journey', () => {
 
     await screen.findByRole('heading', { name: 'This is your learning map' })
     fireEvent.click(screen.getByRole('button', { name: 'Skip tour' }))
-    expect(await screen.findByRole('heading', { name: 'Switch Home views here' })).toBeInTheDocument()
-    expect(screen.queryByRole('heading', { name: 'Armory' })).not.toBeInTheDocument()
 
-    fireEvent.click(screen.getByRole('button', { name: 'Skip Home tour' }))
+    // Has companion → finishLabel is 'Start playing', onClose sets phase to done directly
     expect(await screen.findByRole('heading', { name: 'Story map' })).toBeInTheDocument()
     expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('done')
+    expect(screen.queryByRole('heading', { name: 'Switch Home views here' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Back to map' })).not.toBeInTheDocument()
   })
 
-  it('uses the Home walkthrough to equip an owned companion before finishing', async () => {
+  it('shows Back to map for a player who owns but has not equipped a companion', async () => {
     servePhase('shop')
     writeOnboardingPhase(305, 'shop')
     vi.mocked(shopApi.catalog).mockResolvedValue(catalog(true, false))
     renderJourney(305, { entry: '/shop' })
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Open Home' }))
-    await screen.findByRole('heading', { name: 'Switch Home views here' })
-    await completeTour('Show Profile', ['Track your progress'])
-    await screen.findByRole('heading', { name: 'See the rank ladder' })
-    await completeTour('Set up companion', [
-      'Follow your rank progress',
-      'Manage your companions',
-      'Review learned commands',
-    ])
-
-    expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('equip')
-    fireEvent.click(screen.getByRole('button', { name: 'Equip companion' }))
-    expect(await screen.findByRole('button', { name: 'Return to map' })).toBeEnabled()
-    expect(playerLoadoutApi.equipCompanion).toHaveBeenCalledOnce()
-    expect(vi.mocked(playerLoadoutApi.equipCompanion).mock.calls[0][0]).toBe('blue')
+    // Owned but not active → banner prompts equipping, offers Back to map
+    expect(await screen.findByRole('button', { name: 'Back to map' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Open Home' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Equip companion' })).not.toBeInTheDocument()
     expect(shopApi.purchase).not.toHaveBeenCalled()
   })
 
   it.each([
     [306, 0, true],
     [307, 150, false],
-  ])('keeps setup unfinished when no companion can be bought (%s)', async (userId, balance, purchasesEnabled) => {
+  ])('shows Back to map when no companion can be bought (%s)', async (userId, balance, purchasesEnabled) => {
     servePhase('purchase')
     writeOnboardingPhase(userId, 'purchase')
     vi.mocked(walletApi.summary).mockResolvedValue({ balance })
     vi.mocked(shopApi.catalog).mockResolvedValue({ ...catalog(), purchases_enabled: purchasesEnabled })
     renderJourney(userId, { entry: '/shop' })
 
-    fireEvent.click(await screen.findByRole('button', { name: 'Explore Home' }))
-    await screen.findByRole('heading', { name: 'Switch Home views here' })
-    fireEvent.click(screen.getByRole('button', { name: 'Skip Home tour' }))
-
-    await waitFor(() => expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('equip'))
-    expect(localStorage.getItem(onboardingStorageKey(userId))).toBe('equip')
-    expect(screen.queryByRole('button', { name: 'Return to map' })).not.toBeInTheDocument()
+    // Cannot purchase → banner with Back to map (outline variant), no home nav
+    expect(await screen.findByRole('button', { name: 'Back to map' })).toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Explore Home' })).not.toBeInTheDocument()
     expect(shopApi.purchase).not.toHaveBeenCalled()
   })
 
@@ -394,7 +368,8 @@ describe('first-visit onboarding journey', () => {
     fireEvent.click(await screen.findByRole('button', { name: 'Go to first chapter' }))
     await screen.findByRole('heading', { name: 'This is your learning map' })
     fireEvent.click(screen.getByRole('button', { name: 'Skip tour' }))
-    await screen.findByRole('heading', { name: 'Check your GitCoins' })
+    // Shop phase with no tour headings
+    expect(screen.queryByRole('heading', { name: 'Check your GitCoins' })).not.toBeInTheDocument()
     first.unmount()
 
     renderJourney(312, { entry: '/shop' })
@@ -429,14 +404,13 @@ describe('first-visit onboarding journey', () => {
     expect(localStorage.getItem(onboardingStorageKey(315))).toBe('stories')
   })
 
-  it('resumes a saved Home walkthrough instead of discarding it', async () => {
+  it('treats legacy home and equip phases as done immediately', async () => {
     servePhase('home')
     writeOnboardingPhase(316, 'home')
     vi.mocked(shopApi.catalog).mockResolvedValue(catalog(true, true))
     renderJourney(316, { entry: '/home' })
 
-    expect(await screen.findByRole('heading', { name: 'Switch Home views here' })).toBeInTheDocument()
-    expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('home')
-    expect(localStorage.getItem(onboardingStorageKey(316))).toBe('home')
+    await waitFor(() => expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('done'))
+    expect(screen.queryByRole('heading', { name: 'Switch Home views here' })).not.toBeInTheDocument()
   })
 })
