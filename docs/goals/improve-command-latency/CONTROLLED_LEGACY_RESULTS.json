@@ -1,0 +1,13 @@
+{
+  "captured_at": "2026-08-28T18:31:32Z",
+  "implementation": "exact displaced Adventure selector and payload reads",
+  "command": "$env:COMMAND_LATENCY_SAMPLES='20'; Remove-Item Env:COMMAND_LATENCY_REVERSE_LANES -ErrorAction SilentlyContinue; python -m pytest scripts/profile_command_latency.py::test_profile_steady_state -q -s",
+  "pytest_result": "1 passed in 16.87s",
+  "results": [
+    {"cold": false, "lane": "adventure_diagnostic", "precondition_fingerprint": "d3d5c574643bb7abba7cf84d5586b03d6472043705572f3901d7107e4385d8a8", "queries": {"max": 8, "p50": 8.0, "p95": 8.0}, "request_ms": {"max": 35.93, "p50": 19.09, "p95": 29.86}, "response_bytes": {"max": 1431, "p50": 1431.0, "p95": 1431.0}, "samples": 20},
+    {"cold": false, "lane": "adventure_wave_advance", "precondition_fingerprint": "d2ec89182f164903aae533597016c213cc9ac76f2abde5783661b3464ec6a64d", "queries": {"max": 29, "p50": 29.0, "p95": 29.0}, "request_ms": {"max": 114.56, "p50": 73.24, "p95": 99.76}, "response_bytes": {"max": 2816, "p50": 2816.0, "p95": 2816.0}, "samples": 20},
+    {"cold": false, "lane": "adventure_completion", "precondition_fingerprint": "95aad9725997ed669cec136eccb38f9b6f48ff90acbacd37146cbec005e24d95", "queries": {"max": 33, "p50": 33.0, "p95": 33.0}, "request_ms": {"max": 114.18, "p50": 80.01, "p95": 107.59}, "response_bytes": {"max": 1350, "p50": 1350.0, "p95": 1350.0}, "samples": 20},
+    {"cold": false, "lane": "challenge_diagnostic", "precondition_fingerprint": "aa4c3c9ef3eb8ab1a704d09649bcf5434163a3d1a77ac5a8ed6110873cb08e0c", "queries": {"max": 5, "p50": 5.0, "p95": 5.0}, "request_ms": {"max": 20.44, "p50": 12.73, "p95": 18.63}, "response_bytes": {"max": 2083, "p50": 2083.0, "p95": 2083.0}, "samples": 20},
+    {"cold": false, "lane": "challenge_completion", "precondition_fingerprint": "e7c94051191fe206b1fce66dd646ed2e1acb9c07b08e7af0bba92d84b2034196", "queries": {"max": 38, "p50": 38.0, "p95": 38.0}, "request_ms": {"max": 68.58, "p50": 41.32, "p95": 68.44}, "response_bytes": {"max": 2897, "p50": 2896.0, "p95": 2897.0}, "samples": 20}
+  ]
+}

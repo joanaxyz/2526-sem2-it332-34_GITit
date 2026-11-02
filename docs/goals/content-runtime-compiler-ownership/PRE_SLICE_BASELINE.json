@@ -1,0 +1,164 @@
+{
+  "baseline_gates": {
+    "architecture_guard": "Architecture boundaries look clean.",
+    "focused_consumers": {
+      "command": "python -m pytest authoring/tests/test_compiler_direct_runtime.py authoring/tests/test_chapter_settings.py common/tests/test_model_integrity_constraints.py curriculum/tests/test_seed_curriculum_idempotency.py authoring/tests/test_authoring_api.py -q",
+      "result": "26 passed",
+      "seconds": 87.55
+    },
+    "ruff": "All checks passed!"
+  },
+  "class": {
+    "methods": [
+      {
+        "decorators": [],
+        "end": 39,
+        "lines": 2,
+        "name": "__init__",
+        "start": 38
+      },
+      {
+        "decorators": [
+          "transaction.atomic"
+        ],
+        "end": 76,
+        "lines": 35,
+        "name": "compile",
+        "start": 42
+      },
+      {
+        "decorators": [],
+        "end": 122,
+        "lines": 45,
+        "name": "_assert_official_runtime_slugs_available",
+        "start": 78
+      },
+      {
+        "decorators": [],
+        "end": 152,
+        "lines": 29,
+        "name": "_runtime_chapter",
+        "start": 124
+      },
+      {
+        "decorators": [],
+        "end": 215,
+        "lines": 62,
+        "name": "_compile_adventure",
+        "start": 154
+      },
+      {
+        "decorators": [],
+        "end": 312,
+        "lines": 96,
+        "name": "_compile_challenge",
+        "start": 217
+      },
+      {
+        "decorators": [],
+        "end": 327,
+        "lines": 14,
+        "name": "_compile_lesson",
+        "start": 314
+      },
+      {
+        "decorators": [],
+        "end": 367,
+        "lines": 39,
+        "name": "_command_form_for_content",
+        "start": 329
+      },
+      {
+        "decorators": [],
+        "end": 388,
+        "lines": 20,
+        "name": "_resolve_level_forms",
+        "start": 369
+      },
+      {
+        "decorators": [],
+        "end": 432,
+        "lines": 43,
+        "name": "_replace_variants",
+        "start": 390
+      },
+      {
+        "decorators": [],
+        "end": 471,
+        "lines": 38,
+        "name": "_upsert_variant",
+        "start": 434
+      },
+      {
+        "decorators": [
+          "staticmethod"
+        ],
+        "end": 489,
+        "lines": 16,
+        "name": "_parent_key",
+        "start": 474
+      },
+      {
+        "decorators": [
+          "staticmethod"
+        ],
+        "end": 496,
+        "lines": 5,
+        "name": "_authored_variants",
+        "start": 492
+      },
+      {
+        "decorators": [
+          "staticmethod"
+        ],
+        "end": 506,
+        "lines": 8,
+        "name": "_unique_variant_slug",
+        "start": 499
+      },
+      {
+        "decorators": [],
+        "end": 512,
+        "lines": 5,
+        "name": "_target_state",
+        "start": 508
+      },
+      {
+        "decorators": [],
+        "end": 530,
+        "lines": 17,
+        "name": "_signature",
+        "start": 514
+      },
+      {
+        "decorators": [],
+        "end": 537,
+        "lines": 6,
+        "name": "_semantic_key",
+        "start": 532
+      }
+    ],
+    "name": "ContentRuntimeCompiler"
+  },
+  "external_importers": [
+    "backend/authoring/services/core.py",
+    "backend/authoring/tests/test_chapter_settings.py",
+    "backend/authoring/tests/test_compiler_direct_runtime.py",
+    "backend/common/tests/test_model_integrity_constraints.py",
+    "backend/curriculum/tests/test_seed_curriculum_idempotency.py"
+  ],
+  "format_version": 1,
+  "private_method_external_calls": [],
+  "public_contract": {
+    "atomic_decorator": "transaction.atomic",
+    "compile_signature": "compile(self, *, content: ContentDefinition) -> PublishedContentRuntime",
+    "constructor": "ContentRuntimeCompiler()",
+    "import": "from authoring.compiler import ContentRuntimeCompiler"
+  },
+  "source": {
+    "bytes": 21635,
+    "lines": 537,
+    "path": "backend/authoring/compiler.py",
+    "sha256": "F21A78C2963F4DCC38A2C0587BB4C1686BEF1A19EDBC362253C2557749EBE428"
+  }
+}

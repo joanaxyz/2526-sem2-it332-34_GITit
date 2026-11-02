@@ -1,0 +1,206 @@
+.story-switcher {
+  position: fixed;
+  left: 1.25rem;
+  bottom: 1rem;
+  z-index: 24;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  max-width: min(28rem, calc(100vw - 2rem));
+  padding: 0.55rem 0.7rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.22);
+  border-radius: 0.5rem;
+  background: rgba(4, 12, 24, 0.78);
+  color: rgba(224, 251, 255, 0.88);
+  font-size: 0.8rem;
+  backdrop-filter: blur(10px);
+}
+
+.story-link {
+  color: rgba(var(--theme-primary-rgb), 0.92);
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.story-link:hover {
+  color: white;
+}
+
+.story-select-page {
+  position: relative;
+  min-height: calc(100vh - 3rem);
+  padding: clamp(4rem, 8vh, 6rem) 0 3rem;
+}
+
+.story-select-header {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 1rem;
+  max-width: 66rem;
+  margin: 0 auto 1.5rem;
+}
+
+.story-select-sigil {
+  display: grid;
+  width: 2.75rem;
+  height: 2.75rem;
+  place-items: center;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.34);
+  border-radius: 0.5rem;
+  background: rgba(var(--theme-primary-rgb), 0.1);
+  color: rgba(var(--theme-primary-rgb), 0.95);
+}
+
+.story-select-header h1 {
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: 2rem;
+  line-height: 1.1;
+  text-wrap: balance;
+}
+
+.story-select-header p {
+  max-width: 64ch;
+  margin: 0.45rem 0 0;
+  color: hsl(var(--muted-foreground));
+  line-height: 1.65;
+}
+
+.story-select-tier {
+  text-transform: capitalize;
+}
+
+.story-select-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+  gap: 0.9rem;
+  max-width: 66rem;
+  margin: 0 auto;
+}
+
+.story-select-card {
+  position: relative;
+  display: grid;
+  min-height: 17rem;
+  align-content: space-between;
+  gap: 1.25rem;
+  overflow: hidden;
+  padding: 1rem;
+  border: 1px solid rgba(var(--theme-primary-rgb), 0.22);
+  border-radius: 0.5rem;
+  background:
+    linear-gradient(180deg, rgba(8, 28, 50, 0.92), rgba(4, 12, 24, 0.92)),
+    hsl(var(--card));
+}
+
+.story-select-card.is-locked {
+  border-color: rgba(148, 163, 184, 0.22);
+}
+
+.story-select-card-glow {
+  position: absolute;
+  inset: auto 1rem 0.75rem 1rem;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(var(--theme-primary-rgb), 0.58), transparent);
+  pointer-events: none;
+}
+
+.story-select-card.is-locked .story-select-card-glow {
+  opacity: 0.25;
+}
+
+.story-select-card-header,
+.story-select-card-actions,
+.story-select-state {
+  display: flex;
+  align-items: center;
+}
+
+.story-select-card-header {
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.story-select-state {
+  gap: 0.35rem;
+  color: hsl(var(--muted-foreground));
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.story-select-state.is-open,
+.story-select-state.is-complete {
+  color: rgba(var(--theme-primary-rgb), 0.9);
+}
+
+.story-select-state.is-locked {
+  color: rgba(148, 163, 184, 0.75);
+}
+
+.story-select-card h2 {
+  position: relative;
+  margin: 0;
+  color: hsl(var(--foreground));
+  font-size: 1.2rem;
+  line-height: 1.2;
+  text-wrap: balance;
+}
+
+.story-select-card p {
+  position: relative;
+  margin: 0.65rem 0 0;
+  color: rgba(203, 224, 230, 0.78);
+  line-height: 1.6;
+}
+
+.story-select-card-actions {
+  position: relative;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+@media (max-width: 700px) {
+  .story-select-header {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .story-select-tier {
+    grid-column: 2;
+    width: fit-content;
+  }
+
+  .story-switcher {
+    left: 0.75rem;
+    right: 0.75rem;
+    bottom: 0.75rem;
+    justify-content: center;
+  }
+}
+
+
+/* Lead with one featured story rather than giving every card equal weight. */
+.story-select-grid > .story-select-card:first-child {
+  grid-column: 1 / -1;
+  min-height: 21rem;
+  padding: clamp(1.25rem, 2vw, 2rem);
+  background:
+    linear-gradient(90deg, rgba(2, 10, 24, 0.96), rgba(2, 10, 24, 0.48)),
+    radial-gradient(circle at 78% 35%, rgba(var(--theme-primary-rgb), 0.22), transparent 24rem),
+    linear-gradient(180deg, rgba(8, 28, 50, 0.9), rgba(4, 12, 24, 0.94));
+}
+
+.story-select-grid > .story-select-card:first-child h2 {
+  max-width: 18ch;
+  font-family: var(--font-display);
+  font-size: clamp(var(--text-xl), 3vw, var(--text-3xl));
+}
+
+.story-select-grid > .story-select-card:first-child p {
+  max-width: 58ch;
+  font-size: var(--text-base);
+}
+
+.story-select-grid > .story-select-card:first-child .story-select-card-actions {
+  justify-content: flex-start;
+}

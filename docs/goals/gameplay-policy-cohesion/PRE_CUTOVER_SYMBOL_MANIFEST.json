@@ -1,0 +1,302 @@
+{
+  "fixed_response_name_map": {
+    "GAMEPLAY_RESPONSE_BACKEND_VIEWS": "GAMEPLAY_BACKEND_VIEWS",
+    "GAMEPLAY_RESPONSE_FRONTEND_APIS": "GAMEPLAY_FRONTEND_APIS",
+    "GAMEPLAY_RESPONSE_GENERATED_OPENAPI": "GAMEPLAY_GENERATED_OPENAPI",
+    "GAMEPLAY_RESPONSE_SHARED_COMMAND_TYPES": "GAMEPLAY_SHARED_COMMAND_TYPES"
+  },
+  "name_normalized_response_functions": [
+    "check_gameplay_response_contract_ownership",
+    "gameplay_response_backend_violations",
+    "gameplay_response_frontend_violations",
+    "gameplay_response_openapi_violations"
+  ],
+  "schema_version": 1,
+  "source_path": "scripts/checks/architecture_guard/contracts/gameplay.py",
+  "source_sha256": "9331015611D7742A0074BA1E4B5FB2710374DE3DE02B6516858D18E2B5A29BF2",
+  "symbol_count": 38,
+  "symbols": {
+    "GAMEPLAY_ADVENTURE_OPENAPI": {
+      "kind": "constant",
+      "lineno": 58,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "backend/adventures/openapi.py",
+      "resolved_value_sha256": "09D7B86D69816FF54B2F277DD3DE9D221E93B026EE84033F8EE639EFE60FA0C7"
+    },
+    "GAMEPLAY_ADVENTURE_SERIALIZERS": {
+      "kind": "constant",
+      "lineno": 46,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "backend/adventures/serializers.py",
+      "resolved_value_sha256": "CF27F10F575385D9DEE25DB49639A3740C8B29EB0553D97763A2AACC4518A13E"
+    },
+    "GAMEPLAY_ADVENTURE_TYPES": {
+      "kind": "constant",
+      "lineno": 64,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "frontend/src/features/adventures/types.ts",
+      "resolved_value_sha256": "09D113F667D2AFBEF5CB335F144E0E618F27CAD6F5F3C1279E433316B611E6BA"
+    },
+    "GAMEPLAY_BACKEND_VIEWS": {
+      "kind": "constant",
+      "lineno": 82,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": {
+        "__tuple__": [
+          "backend/adventures/views.py",
+          "backend/challenges/views.py"
+        ]
+      },
+      "resolved_value_sha256": "EE703A2D475C9353E5D9B49075C563BEA3F4B82EDD4DD1FC3531F60117FFB262"
+    },
+    "GAMEPLAY_CHALLENGE_ENTRY_API": {
+      "kind": "constant",
+      "lineno": 70,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "frontend/src/features/challenges/api/challengesApi.ts",
+      "resolved_value_sha256": "634866C5693DC54C07FF7C300378C99E3E0906171F79DAAEBF96450CDC6100D5"
+    },
+    "GAMEPLAY_CHALLENGE_OPENAPI": {
+      "kind": "constant",
+      "lineno": 61,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "backend/challenges/openapi.py",
+      "resolved_value_sha256": "47B98BA1F9CA638F49584149A11E0D8CD8DB4EAD5758956BB7EBF3C087102191"
+    },
+    "GAMEPLAY_CHALLENGE_SERIALIZERS": {
+      "kind": "constant",
+      "lineno": 49,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "backend/challenges/serializers.py",
+      "resolved_value_sha256": "D9D0C414CEE549E02D63DC6B95CD4C360CF81914043B8469C9626FFDEBA54468"
+    },
+    "GAMEPLAY_CHALLENGE_TYPES": {
+      "kind": "constant",
+      "lineno": 67,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "frontend/src/features/challenges/types.ts",
+      "resolved_value_sha256": "9996955128E892503BDDA430475C40B9F7C58DD2FC5C6387531363370405CB48"
+    },
+    "GAMEPLAY_COMMON_OPENAPI": {
+      "kind": "constant",
+      "lineno": 55,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "backend/common/openapi.py",
+      "resolved_value_sha256": "B39CEFA7B213A5C36C56D988C653F916A36B13971419FF243F4A804BE7460B1F"
+    },
+    "GAMEPLAY_COMMON_SERIALIZERS": {
+      "kind": "constant",
+      "lineno": 43,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "backend/common/serializers.py",
+      "resolved_value_sha256": "32390E710C831AFB349D68DD358D590899BB634380F0B482F9D8CA9C2B2CD2AE"
+    },
+    "GAMEPLAY_FRONTEND_APIS": {
+      "kind": "constant",
+      "lineno": 88,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": {
+        "__tuple__": [
+          "frontend/src/features/adventures/api/adventuresApi.ts",
+          "frontend/src/features/challenges/api/challengeRunsApi.ts"
+        ]
+      },
+      "resolved_value_sha256": "BAE4AEF983CD0943F95489F3C8564C4B7D8CD900DDDC8946B33E7074E650D235"
+    },
+    "GAMEPLAY_FRONTEND_CONTRACT_NAMES": {
+      "kind": "constant",
+      "lineno": 112,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": {
+        "__set__": [
+          "CommandExecutionPayload",
+          "CreateFileInput",
+          "RenameFileInput",
+          "WorkspaceFileInput",
+          "WorkspaceFileRenameInput",
+          "WorkspaceFileRenameRequest",
+          "WorkspaceFileRequest"
+        ]
+      },
+      "resolved_value_sha256": "743C6F933DCC147D09B8E98E062EBF579C2A9A8B86ADAA4262F06B1F46DD7956"
+    },
+    "GAMEPLAY_GENERATED_OPENAPI": {
+      "kind": "constant",
+      "lineno": 52,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "frontend/src/shared/api/generated/openapi.json",
+      "resolved_value_sha256": "850F65E148ABBF10F24BCB4A65E93E1621389C32C8F261833DB19BAC9B871E83"
+    },
+    "GAMEPLAY_SHARED_BODY_ADAPTER": {
+      "kind": "constant",
+      "lineno": 79,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "frontend/src/shared/level-runtime/runMutationInputs.ts",
+      "resolved_value_sha256": "40309F620C2439FF9316FCDF5FB8ED8BE6E4A7F20CC07E6611FA8420D1EC9C32"
+    },
+    "GAMEPLAY_SHARED_COMMAND_TYPES": {
+      "kind": "constant",
+      "lineno": 76,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "frontend/src/shared/level/types.ts",
+      "resolved_value_sha256": "10999C4E4A4F1100A565051322CF8FC7D840C72C56F309EB127FA09630E0A2E7"
+    },
+    "GAMEPLAY_SHARED_SERIALIZERS": {
+      "kind": "constant",
+      "lineno": 94,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": {
+        "__set__": [
+          "CommandSubmitSerializer",
+          "WorkspaceFilePathSerializer",
+          "WorkspaceFileRenameSerializer",
+          "WorkspaceFileSerializer"
+        ]
+      },
+      "resolved_value_sha256": "35990622D39D3106A0D863D9E3F56A6F8210DE83077C1620D4507ECC33B94BD7"
+    },
+    "GAMEPLAY_SHARED_WORKSPACE_TYPES": {
+      "kind": "constant",
+      "lineno": 73,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": "frontend/src/shared/level/workspaceFileTypes.ts",
+      "resolved_value_sha256": "478F75E2E43FFB261A35FB247D51786DC71AA381DD44021776127C17B45175E7"
+    },
+    "GAMEPLAY_WORKSPACE_TYPE_NAMES": {
+      "kind": "constant",
+      "lineno": 102,
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay",
+      "resolved_value": {
+        "__set__": [
+          "CreateFileInput",
+          "RenameFileInput",
+          "WorkspaceFileInput",
+          "WorkspaceFileRenameInput",
+          "WorkspaceFileRenameRequest",
+          "WorkspaceFileRequest"
+        ]
+      },
+      "resolved_value_sha256": "10E376ABE134922DC2E6BF9B8C21E043C4BBC905E290DF6F345F6E4F8A5FD274"
+    },
+    "_response_schema_fields": {
+      "kind": "function",
+      "lineno": 606,
+      "normalized_ast_sha256": "FED82D5B885DB859B9FC8AAA52CC53C4CDD63FA3CFB3B1CD1348EF24268911C3",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "_typescript_alias_source": {
+      "kind": "function",
+      "lineno": 914,
+      "normalized_ast_sha256": "9EDAF78695C71A981C2FE63B4FDB1C63DBEDC842E1B568288D5C52999AE3FB7D",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "_typescript_api_binding_mutation_pattern": {
+      "kind": "function",
+      "lineno": 1113,
+      "normalized_ast_sha256": "C91388238532E7D694E5A42CFE663806F7E09ED8C77849AE26E851711E8E0672",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "_typescript_balanced_call_end": {
+      "kind": "function",
+      "lineno": 1070,
+      "normalized_ast_sha256": "1547D8DD3B9CF4807B694D716ADD9F82F36D24A038EC7A1A23B65E0C9B049912",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "_typescript_exported_object_body": {
+      "kind": "function",
+      "lineno": 984,
+      "normalized_ast_sha256": "ECA48E6FF281C53AD8F6010971AE49C17C26478399D74D46085527EEE199310C",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "_typescript_is_exact_operation_return": {
+      "kind": "function",
+      "lineno": 1097,
+      "normalized_ast_sha256": "0BE8E8D142011974D215CE42F38631111408D76D484506A9B9BD0372B0BEFC67",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "_typescript_local_api_bindings": {
+      "kind": "function",
+      "lineno": 1130,
+      "normalized_ast_sha256": "7E1CA4CB97FE52C7B09ECC8B074F52CE2A079F3E9CB0844DAA98C7447798082E",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "_typescript_object_method_bodies": {
+      "kind": "function",
+      "lineno": 994,
+      "normalized_ast_sha256": "35CF5FBAD41579DAAC33672D105829F743ADCDB3BFB4F8E1513ED78675BA9023",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "_typescript_omit_overlay_fields": {
+      "kind": "function",
+      "lineno": 964,
+      "normalized_ast_sha256": "AFEFF83DB6452567689C218F113CE6D4112893C4AA98D473F7CF9B946334020A",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "_typescript_omit_signature": {
+      "kind": "function",
+      "lineno": 925,
+      "normalized_ast_sha256": "2FB69B2985D0A306EE3222F7FACDB24E3A936AD75B8D7A503805AF15203140B5",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "_typescript_top_level_object_members": {
+      "kind": "function",
+      "lineno": 1010,
+      "normalized_ast_sha256": "F6842066D7AE32916E655B3428D5653154A7EBA0E0DA44F3C639C1C2D7E68912",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "_typescript_unsafe_api_object_members": {
+      "kind": "function",
+      "lineno": 1050,
+      "normalized_ast_sha256": "88FF381DAC32658D6FF1ECE88EE0F326FB53A081039D14879576C8ECCFC7C784",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "check_gameplay_mutation_contract_ownership": {
+      "kind": "function",
+      "lineno": 1641,
+      "normalized_ast_sha256": "C7C126F627F627927C4D2371B0858AA0E38C1E518D271012A8A042E62FB40DED",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "check_gameplay_response_contract_ownership": {
+      "kind": "function",
+      "lineno": 1670,
+      "normalized_ast_sha256": "41CD9531BBDFC9FFA43B6A9F3640D4DC250F3C3FA14E7319403B73D30DDCB37A",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "gameplay_mutation_backend_violations": {
+      "kind": "function",
+      "lineno": 345,
+      "normalized_ast_sha256": "FDFDFA132185A9F67EAD14E653CAD9CC4858A84C7509A9BBBBA95F36AE27A77D",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "gameplay_mutation_frontend_violations": {
+      "kind": "function",
+      "lineno": 118,
+      "normalized_ast_sha256": "4FEF2EAE5246A3B6F4F149B6AABB29E1DB04606171EE73F1DD564205F02F8CB1",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "gameplay_mutation_openapi_violations": {
+      "kind": "function",
+      "lineno": 250,
+      "normalized_ast_sha256": "A1E3DD26CAD20BEA15174D5E7119E0D08B9D1D9DBA9C63EC7517B2F377B1D819",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "gameplay_response_backend_violations": {
+      "kind": "function",
+      "lineno": 477,
+      "normalized_ast_sha256": "BF518166A3FD92693629F7C1FB13BD5822BC85818E2821F1E9414B4F01581424",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "gameplay_response_frontend_violations": {
+      "kind": "function",
+      "lineno": 1153,
+      "normalized_ast_sha256": "BC13CD0E5E11CBEDD4455B4D41C693D64CBE5A76CF5EBF989E158ACE6273CA9D",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    },
+    "gameplay_response_openapi_violations": {
+      "kind": "function",
+      "lineno": 615,
+      "normalized_ast_sha256": "E919B0810C3D179F4B6490FEC8014D7813289405C31ACD21D8B02061ED490AC2",
+      "owner": "scripts.checks.architecture_guard.contracts.gameplay"
+    }
+  }
+}

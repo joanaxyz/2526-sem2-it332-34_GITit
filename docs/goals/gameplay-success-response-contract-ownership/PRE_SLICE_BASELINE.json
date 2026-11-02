@@ -1,0 +1,3535 @@
+{
+  "schema_version": 1,
+  "slice": "gameplay-success-response-contract-ownership",
+  "captured_at_utc": "2026-08-14T14:34:09Z",
+  "dirty_manifest_count": 221,
+  "dirty_manifest": [
+    [
+      " M",
+      "ARCHITECTURE.md",
+      true,
+      14847,
+      "66BD2611B52EAA6C383B344765DD04AC06DFC06EECF75162E51CE22D75AE061A"
+    ],
+    [
+      " M",
+      "backend/accounts/serializers.py",
+      true,
+      3669,
+      "4C0992166F52CDAB966461ECCC3BB5D287C926C6C10DFA33E1DF43A68015480E"
+    ],
+    [
+      " M",
+      "backend/accounts/views.py",
+      true,
+      8707,
+      "67C8782706E7A774F4DCD3F09FD5BFB98AECBE137680EF9418F7065A65CE6517"
+    ],
+    [
+      " M",
+      "backend/adminconsole/flags.py",
+      true,
+      652,
+      "D8CE573ABC5ADC1937CE8E88738128C9A0B2929CC69262F3987EEAB9BBAF47AD"
+    ],
+    [
+      " M",
+      "backend/adminconsole/selectors/__init__.py",
+      true,
+      1372,
+      "5D37AE3B8FC3F02E805A7F9FF8B655C268987005F1BCFE3421DF961EC6338825"
+    ],
+    [
+      " M",
+      "backend/adminconsole/selectors/content.py",
+      true,
+      2401,
+      "2CE279231AE6F7AADA4F31FA15215F20487448DEAC737F0A2F8042392E92AD7E"
+    ],
+    [
+      " M",
+      "backend/adminconsole/selectors/curriculum.py",
+      true,
+      2664,
+      "9A70B23A9EAE0E9DFFEFB9CA442C81970B4299266248F739FC8D686BD6C70685"
+    ],
+    [
+      " M",
+      "backend/adminconsole/selectors/users.py",
+      true,
+      1497,
+      "9C8F4789719F218758E701551AB10FF5C8FAEE0426796D4C8256A379038557DB"
+    ],
+    [
+      " M",
+      "backend/adminconsole/services/__init__.py",
+      true,
+      575,
+      "090B9B09BFA5362B97C07B98F899F3C5CA7E292E374802ABBFCBD08DF4124179"
+    ],
+    [
+      " M",
+      "backend/adminconsole/services/curriculum.py",
+      true,
+      9055,
+      "4F5176CE4C42A6914D4585AEDE064A710CA76585C32A2A40B18EDCCBB7B292AC"
+    ],
+    [
+      " M",
+      "backend/adminconsole/tests/test_admin_api.py",
+      true,
+      21785,
+      "FBA9B549BDAC702FDCF24153D835113FC4FAB2C1D4F1CA59E14A73EA82F8F536"
+    ],
+    [
+      " D",
+      "backend/adminconsole/views.py",
+      false,
+      null,
+      null
+    ],
+    [
+      " D",
+      "backend/adventures/serializers.py",
+      false,
+      null,
+      null
+    ],
+    [
+      " M",
+      "backend/adventures/views.py",
+      true,
+      11629,
+      "FBF8ABB1B34E6267DA5F1798911D12143A91EA3319CAB005A9ED00380C044A7C"
+    ],
+    [
+      " M",
+      "backend/authoring/services/core.py",
+      true,
+      13900,
+      "47749F4758ABEEA6021DA3431E2525113564312E1890186EB6745F21CA4708ED"
+    ],
+    [
+      " M",
+      "backend/authoring/tests/test_authoring_api.py",
+      true,
+      14068,
+      "CC0B70899957BD36CCE1D49A890A23C23692EA2F5A842C1577334BADD2729BEC"
+    ],
+    [
+      " M",
+      "backend/challenges/serializers.py",
+      true,
+      509,
+      "E5580483C3E9223B477641A5C784E10A53BDA038F2BA1E148B66D04B6F969F4B"
+    ],
+    [
+      " M",
+      "backend/challenges/views.py",
+      true,
+      11330,
+      "F05B63C1EA6E7B497D4D150FCB3469940907C661FFE0C71B252FBAC73996C110"
+    ],
+    [
+      " M",
+      "backend/common/openapi.py",
+      true,
+      6546,
+      "13E7DE38857BEB39194140BEA54D69A9B60EF21B98972398683369651557A93C"
+    ],
+    [
+      " M",
+      "backend/common/serializers.py",
+      true,
+      2760,
+      "CBD96AC92760BEB3321339C74065DAABB815FA9F1BD80843CB8E23CB5CF29AC9"
+    ],
+    [
+      " M",
+      "backend/common/tests/test_architecture_guard_algorithms.py",
+      true,
+      22418,
+      "8C46AC3939B6418A519EB4D7FD11F374FCD60D4B521462695925255F79371879"
+    ],
+    [
+      " M",
+      "backend/common/tests/test_bug_regressions.py",
+      true,
+      6923,
+      "4210AAE6261B36EE0C7BF6EA6422DBACE9B88FF431EE0897E5F4900A0AA21ACE"
+    ],
+    [
+      " M",
+      "backend/curriculum/seed_data/source/adventure_level_specs/v3_advanced_workflows.py",
+      true,
+      17717,
+      "6B5A2A5AD0B5B7FCBF51485A92FB1EFEA0AD3ACC8C38D420D068DE8D50115935"
+    ],
+    [
+      " M",
+      "backend/curriculum/seed_data/source/adventure_level_specs/v3_frost_form_drills.py",
+      true,
+      132710,
+      "C4F7F8D31A4D3CD0F6ABA50BB1D2E3847BB8AA927D04499F6A4658181BA14C7F"
+    ],
+    [
+      " M",
+      "backend/curriculum/seed_data/source/adventure_level_specs/v3_skyline_form_drills.py",
+      true,
+      39224,
+      "B7FD4B22D941CF80CC9B4E8801942C988D9CDA4A8D828D475EB7343FB3132F62"
+    ],
+    [
+      " M",
+      "backend/curriculum/seed_data/source/challenge_specs/v3_chapter_form_challenges.py",
+      true,
+      8462,
+      "E26CE3B95BC2B570D47F361738F64B86415C2B3ACB33C4CA82678E4E1B669332"
+    ],
+    [
+      " M",
+      "backend/curriculum/seed_data/source/challenge_specs/v3_story_challenges.py",
+      true,
+      9842,
+      "077FEBC5852BFBA6B42AFEBA7DA72F187C0642625EAED03F53EA6E224D8785A2"
+    ],
+    [
+      " M",
+      "backend/curriculum/serializers.py",
+      true,
+      5780,
+      "58153FD96108F8C40C02E6521CCB192C2AA5D1B7EA2C84CA5BFA07A068F3E0C8"
+    ],
+    [
+      " M",
+      "backend/curriculum/tests/test_seed_data_source_layout.py",
+      true,
+      6322,
+      "20ED4FE14B2AE2DD5B3D0D348779A10369CB61D88F04C9A33B8E15DE16FF3483"
+    ],
+    [
+      " M",
+      "backend/players/views.py",
+      true,
+      1939,
+      "CC86C33E7EB970B1AE3A33D94220271493C99F6AD3B8FF513C8B6F580EC2D40E"
+    ],
+    [
+      " M",
+      "backend/progress/serializers.py",
+      true,
+      2921,
+      "5147607F3754CBE35B0004E2140409652F4ACD7D2E0079AC708476098231D7E8"
+    ],
+    [
+      " M",
+      "backend/progress/views.py",
+      true,
+      1222,
+      "B47DFA61F7EB58C5D4D7BB1EFB4A862B041631C723FEFC3A7DC1D303A1EE648F"
+    ],
+    [
+      " M",
+      "backend/shop/catalog.py",
+      true,
+      1887,
+      "21CF4A8B28FEBBC7F2F04D639AA439790F4A9FE3E202AAE051541E79D0F13CB3"
+    ],
+    [
+      " M",
+      "backend/shop/tests/test_shop_catalog.py",
+      true,
+      10751,
+      "8F2E5364F3EEE822994C1600A5586DE62E009831DB5B9B5A3AC3E832F048FBB6"
+    ],
+    [
+      " M",
+      "backend/shop/views.py",
+      true,
+      1637,
+      "7E20E33E019D46B3AEC435530B91525AF1C7136B676CE16C49DA74E8114E1016"
+    ],
+    [
+      " M",
+      "frontend/src/app/Protected.tsx",
+      true,
+      1427,
+      "095A6B4EE87F6B228AD36474C8165FE8D3979C65055DA78D2788A64863BAE16C"
+    ],
+    [
+      " M",
+      "frontend/src/features/adventures/api/adventuresApi.ts",
+      true,
+      2778,
+      "2C79A31AECFC896097AD495D1FBF20D2A650A97C108504EF86788B25896A3F30"
+    ],
+    [
+      " M",
+      "frontend/src/features/adventures/components/AdventureWorkspaceMain.tsx",
+      true,
+      4212,
+      "F34597CB56F7F625742CC27E7CEB50D68B967F3B37686A8C1F65C7E0C1FEDE03"
+    ],
+    [
+      " M",
+      "frontend/src/features/adventures/hooks/useAdventureRun.ts",
+      true,
+      3822,
+      "DEAB77C4949A747B821EE5F601C9A028BA8C8D0B9887A7C28973EA5269B084CA"
+    ],
+    [
+      " M",
+      "frontend/src/features/authoring/hooks/useUnsavedChangesGuard.ts",
+      true,
+      1370,
+      "47E63675CB3C3978AB21D5EFEE021A0F3C56ED4F047D2111A103DBCFE8162990"
+    ],
+    [
+      " M",
+      "frontend/src/features/authoring/pages/ContentEditorPage.tsx",
+      true,
+      3938,
+      "19185C6042D968CA88142C6D6DC42CBC86C679DB5FE7DD524F2691A6DBB85052"
+    ],
+    [
+      " M",
+      "frontend/src/features/challenges/api/challengeRunsApi.ts",
+      true,
+      2064,
+      "F0952F279B7DECB90EFE959A087612E7AF7B931606C7918EEA4D4E13F294BD07"
+    ],
+    [
+      " M",
+      "frontend/src/features/challenges/components/ChallengeWorkspaceMain.tsx",
+      true,
+      5196,
+      "C7C6AFC7BD7D5F0F825930F4A84519AFAD9A9C7AED8563D2E642F322BCCD0490"
+    ],
+    [
+      " M",
+      "frontend/src/features/challenges/components/ChallengeWorkspacePanels.tsx",
+      true,
+      6557,
+      "5910CC567E0C4E20FBEFCAB058ACED2B2D3508753C4A2EF4C5425196B39B36BD"
+    ],
+    [
+      " M",
+      "frontend/src/features/challenges/hooks/useChallengeWorkspaceMutations.ts",
+      true,
+      7403,
+      "1B8B6361D69B7D02BBBE10E571E29A800AD32BF6D284D9177CA85D363EB9965E"
+    ],
+    [
+      " M",
+      "frontend/src/features/home/components/HomeHubView.tsx",
+      true,
+      3150,
+      "7555D28CC021504FC1AB375FD0A2F10511038878DC38370A9F16C4CB5649AC14"
+    ],
+    [
+      " M",
+      "frontend/src/features/home/components/HomeLoadoutView.tsx",
+      true,
+      9699,
+      "92CBA318DB3BAB6405F9241EFC44774FBD5B63F311E80307068F7D820A86AB3C"
+    ],
+    [
+      " M",
+      "frontend/src/features/home/components/HomeStatsView.tsx",
+      true,
+      1339,
+      "A861F34C13841D805DC48D745AF94651543719D44BACEDE3CB1F176A108516FA"
+    ],
+    [
+      " M",
+      "frontend/src/features/home/preview/fixtures.ts",
+      true,
+      3412,
+      "8A2BE32FD9DB2E7E1AF66D68F531442DB20458D74D207F5EF9BBF10FB2195AC0"
+    ],
+    [
+      " M",
+      "frontend/src/features/home/utils/achievements.test.ts",
+      true,
+      2279,
+      "690D9C0B67FC08A67B02216336E4505EB2BEF4FE8DAB71658BA21C91A28DBAC5"
+    ],
+    [
+      " M",
+      "frontend/src/features/home/utils/achievements.ts",
+      true,
+      4566,
+      "7F7227B65E7C6AC631436459E889E92E0A044A9365C0730EA77D04A154ADC3BC"
+    ],
+    [
+      " D",
+      "frontend/src/features/shop/api/shopApi.test.ts",
+      false,
+      null,
+      null
+    ],
+    [
+      " D",
+      "frontend/src/features/shop/api/shopApi.ts",
+      false,
+      null,
+      null
+    ],
+    [
+      " M",
+      "frontend/src/features/shop/components/CompanionShop.tsx",
+      true,
+      4546,
+      "DE62D3D9E48DF741A8A6E1900221F49654AF17F003A2C984B07DEF8B1110B30A"
+    ],
+    [
+      " M",
+      "frontend/src/features/shop/components/StoryShop.tsx",
+      true,
+      7479,
+      "3B27B4B512696671CB9FB37536012A78C5FF10B749F66875925989C59A00F52D"
+    ],
+    [
+      " M",
+      "frontend/src/features/shop/pages/ShopPage.tsx",
+      true,
+      6035,
+      "9D6F511DEFFC08CADA33B541B3061FDD2D82F73D6F39B3A09CB22D57E83BE060"
+    ],
+    [
+      " D",
+      "frontend/src/features/shop/types.ts",
+      false,
+      null,
+      null
+    ],
+    [
+      " M",
+      "frontend/src/features/shop/utils/shopDisplay.test.ts",
+      true,
+      1382,
+      "2AB638715FCECFD7578EDF304C4B85F76418C2024B3B544A3C5F2AD968DA980D"
+    ],
+    [
+      " M",
+      "frontend/src/features/shop/utils/shopDisplay.ts",
+      true,
+      1955,
+      "C2A57EE9E92BB9F18E8FEE5A1FD39B47129F8E16251A4F7FB34E3ADEE8CF2648"
+    ],
+    [
+      " M",
+      "frontend/src/features/stats/api/statsApi.ts",
+      true,
+      188,
+      "03032F98394096617A57834BADCEB6348BE42F54E80BBAA360270040A058DD94"
+    ],
+    [
+      " M",
+      "frontend/src/features/stats/types.ts",
+      true,
+      255,
+      "1AB6D119FC5E3A31D1B9492DA4803776B2220B8689EF963643E596F22EDF70BB"
+    ],
+    [
+      " M",
+      "frontend/src/features/story-map/api/storyMapApi.ts",
+      true,
+      935,
+      "1C20E9F67925C3ADA9076989C2646A6B004B7065AA4568CDB60FC729460617E8"
+    ],
+    [
+      " M",
+      "frontend/src/features/story-map/types.ts",
+      true,
+      1494,
+      "49A0E195772D0617B064E086465C97D34F7581C9B737BCC51A0D0AA64739F0E1"
+    ],
+    [
+      " M",
+      "frontend/src/shared/api/generated/apiTypes.ts",
+      true,
+      43930,
+      "658865C60EDB02458179FC8F510DE2BE39B0ED6B1C6E7B6E95416BBED17B806E"
+    ],
+    [
+      " M",
+      "frontend/src/shared/api/generated/openapi.json",
+      true,
+      198553,
+      "EAB01F4B773612D90EC421011AA5A00DCABB322DB96240D1F1E3DFC2CCB1A26B"
+    ],
+    [
+      " M",
+      "frontend/src/shared/api/httpClient.test.ts",
+      true,
+      6361,
+      "3790425184463DB9BC7CB344C4487BFAC48364271EF7521A6CFCF2B78B01C00A"
+    ],
+    [
+      " M",
+      "frontend/src/shared/api/httpClient.ts",
+      true,
+      5453,
+      "EA0CC2B4BBBBB7ADA9E6D3AFDAF4564769CE428A6F7F8C239D69838FBD16702C"
+    ],
+    [
+      " M",
+      "frontend/src/shared/auth/authApi.ts",
+      true,
+      2103,
+      "A8B39E86686A0281291AD81B3C058CB9B2A93742A63F5C39DADA9CCC1B6D97A8"
+    ],
+    [
+      " M",
+      "frontend/src/shared/auth/types.ts",
+      true,
+      105,
+      "AB1711BF58E58130560D7775EA720B96743B4B02B33132CFFED5C0EFEFE2DAD4"
+    ],
+    [
+      " M",
+      "frontend/src/shared/auth/useAuth.ts",
+      true,
+      2662,
+      "BBC136D1629496E45697393E39AA7D5CAF070D7D76D99710DE5EB19F63EA0BE5"
+    ],
+    [
+      " M",
+      "frontend/src/shared/git/simulator/engine.ts",
+      true,
+      8748,
+      "601887796BC84A3E19B071EECA93D13E218D87BA24E481A25F3E6E9F32BDB289"
+    ],
+    [
+      " M",
+      "frontend/src/shared/git/simulator/types.ts",
+      true,
+      1549,
+      "4AAD2842E42059A769802B60BE40397331657D666B4247BDCD60D7B274B3323E"
+    ],
+    [
+      " M",
+      "frontend/src/shared/git/simulator/workspaceFiles.ts",
+      true,
+      10124,
+      "48EEFF3705DC2982017F97FF488238B67D78B5D776C3EE4CD4D243CEC5F8D8AC"
+    ],
+    [
+      " M",
+      "frontend/src/shared/level/components/ProjectStructurePanel.tsx",
+      true,
+      12410,
+      "36F5EC151C58C200520C248959B592D9A3F7DFADAE77F2BB9002459E9431C199"
+    ],
+    [
+      " M",
+      "frontend/src/shared/level/components/WorkspaceEditorOverlay.tsx",
+      true,
+      13117,
+      "C385103509CECBA65A788CE1150B2C344284CA0E107FDA9B518A709B6BA33DE3"
+    ],
+    [
+      " M",
+      "frontend/src/shared/level/types.ts",
+      true,
+      3672,
+      "DF30E6CD3DF9B6BC89487D1BEF1A42F4DBBF91072459A9FB38CAD2A70776A5EC"
+    ],
+    [
+      " M",
+      "frontend/src/shared/level/utils/projectFiles.ts",
+      true,
+      4439,
+      "44EF06BF97377B2FF924356FF3D84333C87389DF2B78935382FC0918066E8AC8"
+    ],
+    [
+      " M",
+      "frontend/src/shared/player-loadout/usePlayerLoadout.ts",
+      true,
+      1514,
+      "4F48A674FCDE3270AC2B4125D4A51C46B3BE2A7E902863AA905BE03D30E7096E"
+    ],
+    [
+      " M",
+      "frontend/src/shared/progress/homeSummaryApi.ts",
+      true,
+      311,
+      "696A5219C3E4881173A90C9680EA18F34797214D30B9340E1AB9AC158A810CBC"
+    ],
+    [
+      " M",
+      "frontend/src/shared/progress/types.ts",
+      true,
+      132,
+      "0DF902817A0C3FBBA46670D34A9B151E8E867BD601BDE9F663CDCA4B311F983B"
+    ],
+    [
+      " M",
+      "frontend/src/styles/features/authoring/editor-shell.css",
+      true,
+      3680,
+      "D773E2234835894CD2B3618B3966DA22C7A632750A3B3C1DA0CCBA9DCA4EDA8E"
+    ],
+    [
+      " M",
+      "frontend/src/styles/features/home.css",
+      true,
+      127,
+      "23DBB5423B746FCC740932B4392E756A28E0622E90984B8EEEAB4DC817B6286E"
+    ],
+    [
+      " D",
+      "frontend/src/styles/features/home/achievements.css",
+      false,
+      null,
+      null
+    ],
+    [
+      " M",
+      "frontend/src/styles/features/home/stats-achievements.css",
+      true,
+      4277,
+      "5A5810592FF0F4D0A84107810C43004BC85BB814C6BC1F8A0752318195A82819"
+    ],
+    [
+      " D",
+      "frontend/src/styles/features/home/stats-actions.css",
+      false,
+      null,
+      null
+    ],
+    [
+      " M",
+      "frontend/src/styles/features/home/stats-responsive.css",
+      true,
+      3012,
+      "D1B53888A3C08EF617DABD9995E02C53A2735E5D5F13FFCDA802ECBE0420A6FC"
+    ],
+    [
+      " M",
+      "frontend/src/styles/features/home/stats.css",
+      true,
+      132,
+      "48574E4043A90DD6A96CDFFC8DFDA25FDAC29410FB2C5997581B428F177230E0"
+    ],
+    [
+      " M",
+      "scripts/README.md",
+      true,
+      601,
+      "6CE76836F41431CCCBE5C9F3F8BBB477BA403EA46A61DBB22EA8DC16FF25C33A"
+    ],
+    [
+      " M",
+      "scripts/checks/check_api_type_adoption.py",
+      true,
+      3441,
+      "EFDC33789266466A565663C7E6F823AB346CD306D9E148966B198C998EA7CEB5"
+    ],
+    [
+      " M",
+      "scripts/checks/check_architecture_boundaries.py",
+      true,
+      60632,
+      "5D2A378D53CEB8FDE4BBE2CCEE96FD685CD36D6D7F919243A9AE9506D0DD769F"
+    ],
+    [
+      " M",
+      "scripts/checks/check_frontend_api_usage.py",
+      true,
+      2929,
+      "5DF0F9A639BEB7566DEFDA9A405E036E98F0E21BB4A116A39EF8DFC7D544F153"
+    ],
+    [
+      "??",
+      "backend/accounts/tests/test_auth_contract_api.py",
+      true,
+      7669,
+      "079C3CEAACD9DAC4880769D82C21650868714C376430E16511D81E53F5A21739"
+    ],
+    [
+      "??",
+      "backend/adminconsole/curriculum_options.py",
+      true,
+      247,
+      "1736545581CB7DD5E87C17027A5EEF9DC9F8C503DE4CF5CA05FAB776C8370150"
+    ],
+    [
+      "??",
+      "backend/adminconsole/selectors/analytics.py",
+      true,
+      4364,
+      "BBDCAEF2C0F976DD282C85C5B54B8C690D907A2D8B00F429410459AA6C89784C"
+    ],
+    [
+      "??",
+      "backend/adminconsole/selectors/economy.py",
+      true,
+      1057,
+      "EBDB8B4CA6C6C5BD4696294C8356B91FC7AFCBB2F3549039464533AF05BC0051"
+    ],
+    [
+      "??",
+      "backend/adminconsole/selectors/overview.py",
+      true,
+      2306,
+      "20FB3C07991B0B88549B68740FA4649872DB8A7BA01B1DAEFC42700570786516"
+    ],
+    [
+      "??",
+      "backend/adminconsole/selectors/settings.py",
+      true,
+      906,
+      "BBE56F5CD7FB61064EAE86FC99E4E6230933B466D68BFDF4EDD2111517D4A254"
+    ],
+    [
+      "??",
+      "backend/adminconsole/tests/helpers.py",
+      true,
+      312,
+      "FD8178093055FF4C545511C45DA6D5AC287CCF2E7A7322FDA7E1DBC4F307F828"
+    ],
+    [
+      "??",
+      "backend/adminconsole/tests/test_admin_read_api.py",
+      true,
+      11502,
+      "85276D0CA398FF463E7A0B6CBA33C0F02062A39073167AC8088075A8C8977D42"
+    ],
+    [
+      "??",
+      "backend/adminconsole/views/__init__.py",
+      true,
+      1101,
+      "A986221D8E08A834FCB7F1CD8AAF163452DBE09229C518C83EDB0EA7773C7F16"
+    ],
+    [
+      "??",
+      "backend/adminconsole/views/content.py",
+      true,
+      2454,
+      "3C7D709498131F3CA583AE0D3BA70C7C5A3760304E1E5A881C7CFC6C79C0BD1D"
+    ],
+    [
+      "??",
+      "backend/adminconsole/views/curriculum.py",
+      true,
+      4152,
+      "875686586BCC731E59DCA19717D35547DAD4F65D5841CDF39ABB92EDC023F9F6"
+    ],
+    [
+      "??",
+      "backend/adminconsole/views/dashboard.py",
+      true,
+      887,
+      "5A10E4D519C5C22D9996DBE2E0FE9FE04D78DE568F52B69CBAC37AB7B366B316"
+    ],
+    [
+      "??",
+      "backend/adminconsole/views/economy.py",
+      true,
+      2266,
+      "9399CE1E89A7D51B0AB912C67C936AC2617EAE8F76280D06B5F001DAEF995417"
+    ],
+    [
+      "??",
+      "backend/adminconsole/views/settings.py",
+      true,
+      1258,
+      "2B76979DF6E0F438D843638DBA730A3B33B90B20048EBD87D77D9E313817E9F5"
+    ],
+    [
+      "??",
+      "backend/adminconsole/views/users.py",
+      true,
+      3037,
+      "A7D97E71FEFA25E44968F45E207BE08CB8B5ECC67B58D0AC36B0224602AC7C2D"
+    ],
+    [
+      "??",
+      "backend/common/schemas/openapi.py",
+      true,
+      585,
+      "C6C13D32668CEAE980557474D07C049BF5BA4613488A233563C851DC0F40AC6F"
+    ],
+    [
+      "??",
+      "backend/common/tests/architecture_guard/__init__.py",
+      true,
+      47,
+      "BF07BDAB1BA51816EBA2980B1E061298A5B416B36B924181E8E3939B92143667"
+    ],
+    [
+      "??",
+      "backend/common/tests/architecture_guard/policy_equivalence_cases.py",
+      true,
+      6558,
+      "F4E6691DB5D3D47DBFE719E728E8A29BEDA5701B781687ACF3ED843326595324"
+    ],
+    [
+      "??",
+      "backend/common/tests/architecture_guard/test_auth_policy.py",
+      true,
+      10842,
+      "215CE9B4383F0A04059274337B2492E027C9B1A37EABE00C3A3353CD144B63B6"
+    ],
+    [
+      "??",
+      "backend/common/tests/architecture_guard/test_catalog_policy.py",
+      true,
+      12693,
+      "1B72F6B38CA33A9B1B8C2F21FE578C231271352D02733B1C83027BF092CEC26F"
+    ],
+    [
+      "??",
+      "backend/common/tests/architecture_guard/test_gameplay_policy.py",
+      true,
+      6720,
+      "BD302A2D3FF0186BE5EB27BEF0C1DB2ED037DB601BB8129899F8C326E3D19FD7"
+    ],
+    [
+      "??",
+      "backend/common/tests/architecture_guard/test_policy_equivalence.py",
+      true,
+      1653,
+      "A1506CA3F27CB8CA0E38296D75F8A3F9506DFD35357C1BF0CE63A7C6166683A8"
+    ],
+    [
+      "??",
+      "backend/common/tests/architecture_guard/test_progress_policy.py",
+      true,
+      21278,
+      "50DB0108DE5631789DA8E4C76A1A95F6EF0E36A7ED672C54C2DEF24EB299E700"
+    ],
+    [
+      "??",
+      "backend/common/tests/architecture_guard/test_python_analysis.py",
+      true,
+      3977,
+      "EBCF0D77217CECCD49ACA2F99EFD5A54F04B94273FBA1979A9CA099A6688B74C"
+    ],
+    [
+      "??",
+      "backend/common/tests/architecture_guard/test_symbol_manifest_equivalence.py",
+      true,
+      7583,
+      "20449F1A6245E1FF905FBBD4F135DD1F7EEB45506AFFD4AF406BBBEA92344DE5"
+    ],
+    [
+      "??",
+      "backend/common/tests/architecture_guard/test_typescript_analysis.py",
+      true,
+      8881,
+      "10D658807AFC19CD9866912BEB403325C5C037384AA9A2574061B37601A26A83"
+    ],
+    [
+      "??",
+      "backend/common/tests/test_gameplay_mutation_contract.py",
+      true,
+      5755,
+      "09D8D5DF88A5177549830B3C72ED9BA83406927491007F14024DF7B859CAC036"
+    ],
+    [
+      "??",
+      "backend/curriculum/seed_data/source/advanced_story_support.py",
+      true,
+      5243,
+      "C3884538AF5ABC1D41EA7FB933EE599CABC2AD82EFBFEB8ACC6ECB5D6087E734"
+    ],
+    [
+      "??",
+      "backend/curriculum/seed_data/source/adventure_level_specs/form_drill_support.py",
+      true,
+      3442,
+      "C083CC4DEF6174BF12A79B8445DCEA616C11490092F7B8B00E6D0834C4635CB9"
+    ],
+    [
+      "??",
+      "backend/curriculum/seed_data/source/challenge_specs/advanced_challenge_support.py",
+      true,
+      9533,
+      "7E9BA3510FFA065D8C43A8633B6CE1554CCDB1A06347203AE9BA78A18E7AD58F"
+    ],
+    [
+      "??",
+      "backend/curriculum/tests/test_catalog_contract_api.py",
+      true,
+      5208,
+      "62B1F58A81389DAE7EE3FF0D62E316002630CA55B7F631DB2AA2A8ABCE9AE2C7"
+    ],
+    [
+      "??",
+      "backend/progress/tests/test_dashboard_summary_api.py",
+      true,
+      6112,
+      "6C790D25E7A825AD4313C419843DEC5AB700CE393F8D3B2BFDCC829891344256"
+    ],
+    [
+      "??",
+      "backend/progress/tests/test_stats_summary_api.py",
+      true,
+      3898,
+      "E8EF52C4686AC62FD9A65DCCC252A65826198A758B35B95B62C36DEC26A75EDE"
+    ],
+    [
+      "??",
+      "backend/shop/serializers.py",
+      true,
+      2120,
+      "06016A0A034AA5DA9820E1D4BBCD539681DE0A7C4E1DF5D9EFDAFBF318172982"
+    ],
+    [
+      "??",
+      "docs/goals/admin-console-http-read-model-ownership/EVIDENCE.md",
+      true,
+      9580,
+      "E81F8C015F79F3064B29491D6DD0A76661611E3D3ED100C5A81E8E7142AEB0FC"
+    ],
+    [
+      "??",
+      "docs/goals/admin-console-http-read-model-ownership/GOAL.md",
+      true,
+      639,
+      "125C9EFD327AB9B48DF65A23DFD1EE066CADCF86B1476B04AA11F7129E282BEA"
+    ],
+    [
+      "??",
+      "docs/goals/admin-console-http-read-model-ownership/PLAN.md",
+      true,
+      20650,
+      "441B86D5F23FCC0F6449386F22FAE4132BF6DFED35A0C52F6105CE2E01602B99"
+    ],
+    [
+      "??",
+      "docs/goals/architecture-guard-policy-modularization/EVIDENCE.md",
+      true,
+      9945,
+      "5C9A1E25BA444515822168A393BDA82DDD3CB262B6968BE129AF1385012C2E19"
+    ],
+    [
+      "??",
+      "docs/goals/architecture-guard-policy-modularization/GOAL.md",
+      true,
+      922,
+      "137D94433C250919944266F1F8DC03C3D859F44D9732D3048443065EEEA418AF"
+    ],
+    [
+      "??",
+      "docs/goals/architecture-guard-policy-modularization/PLAN.md",
+      true,
+      21015,
+      "BDF1991C43A5948C1C4A607382F62BA25F10AAABA87CBDE0F96FF91F33DD42DB"
+    ],
+    [
+      "??",
+      "docs/goals/architecture-guard-policy-modularization/PRE_CUTOVER_SYMBOL_MANIFEST.json",
+      true,
+      39879,
+      "DB011E7F421A53F5D7BF1E83D2C00AA702027E35F07EE938E3C9DAF43CA4E29A"
+    ],
+    [
+      "??",
+      "docs/goals/architecture-guard-policy-modularization/PRE_CUTOVER_TEST_MANIFEST.json",
+      true,
+      30397,
+      "A53186207F52BFE6C5C197165140AE3E804212F502A770205CCD9F84B8058B9B"
+    ],
+    [
+      "??",
+      "docs/goals/architecture-guard-policy-modularization/PRE_SLICE_BASELINE.md",
+      true,
+      35875,
+      "965145C5FE8BAAA409C293EBCEEF4F0FC1822C37F35DDB387BB34B4CB265B20E"
+    ],
+    [
+      "??",
+      "docs/goals/auth-browser-state-boundary/EVIDENCE.md",
+      true,
+      12480,
+      "694F28897AF2AD2ED6C117A3A39121505C594921742232A3B1975305A748A89D"
+    ],
+    [
+      "??",
+      "docs/goals/auth-browser-state-boundary/PLAN.md",
+      true,
+      17791,
+      "A4DD457387A7C4F4E554CF6CD7DD724803BDC16EB0A0D8D0809AD4994E878996"
+    ],
+    [
+      "??",
+      "docs/goals/auth-browser-state-boundary/PRE_SLICE_BASELINE.md",
+      true,
+      23046,
+      "D0ACB24F89AAA59C2CEF56D0320D313B6E177AE52289206611D6F4CA095814FA"
+    ],
+    [
+      "??",
+      "docs/goals/auth-session-success-contract-ownership/EVIDENCE.md",
+      true,
+      12030,
+      "EF3599BF16470F2DD6FDC862754BBA537EAC2FB718E9340A572385EE00490318"
+    ],
+    [
+      "??",
+      "docs/goals/auth-session-success-contract-ownership/GOAL.md",
+      true,
+      661,
+      "D9851C6BD062CCACAE4F094907D578A7999476C2B1E8825E9E8F076B56FA0C17"
+    ],
+    [
+      "??",
+      "docs/goals/auth-session-success-contract-ownership/PLAN.md",
+      true,
+      13407,
+      "1102C127B3002D6BF83B98154CC9CCC4E7ED234308B57687AD4D3EA80DCBFEE2"
+    ],
+    [
+      "??",
+      "docs/goals/auth-session-success-contract-ownership/PRE_SLICE_BASELINE.md",
+      true,
+      23226,
+      "D017FE76CC9E75A5324FEAC36829B8449497501287932F5753A35FEB75FEAD6F"
+    ],
+    [
+      "??",
+      "docs/goals/codebase-maintainability-modernization/EVIDENCE.md",
+      true,
+      7815,
+      "155FF457F6781A33BE1D9FA27261679961F92D9858CBB01AF6DC6E563B435919"
+    ],
+    [
+      "??",
+      "docs/goals/codebase-maintainability-modernization/GOAL.md",
+      true,
+      516,
+      "044CD7E2BF35DD180F072E28A1362E64EDE7C5085F945A214B3A4450B8A004EB"
+    ],
+    [
+      "??",
+      "docs/goals/codebase-maintainability-modernization/PLAN.md",
+      true,
+      17302,
+      "D2B0085F30167E3065298E06D3E9C504D29248B27D5EA8D0A4DC7C0EB43FAEC1"
+    ],
+    [
+      "??",
+      "docs/goals/content-editor-workflow-ownership/EVIDENCE.md",
+      true,
+      9574,
+      "1333552ACEEF649472A65B73FBFD86AE9CB40A0F53551C7E553432A964D05488"
+    ],
+    [
+      "??",
+      "docs/goals/content-editor-workflow-ownership/GOAL.md",
+      true,
+      1539,
+      "62C74C74B40B1A60DF54B35FA351B538005A63F379A3E76356A9D225273A8FFC"
+    ],
+    [
+      "??",
+      "docs/goals/content-editor-workflow-ownership/PLAN.md",
+      true,
+      38613,
+      "6EDE146133A8D59605F422D485087F5DDB57E3870B57DCDE1E4541C56682C0D6"
+    ],
+    [
+      "??",
+      "docs/goals/content-editor-workflow-ownership/PRE_SLICE_BASELINE.md",
+      true,
+      7967,
+      "DBBC37B6B8295F0848DBDD2CF10ADC38E6E73F1CA90106E4F255840F124464C9"
+    ],
+    [
+      "??",
+      "docs/goals/content-editor-workflow-ownership/evidence/content-editor-desktop.png",
+      true,
+      170634,
+      "996767C8DC6D127C9FAB5E19F61341490065EC063C7ADFFFD6F78B877153C00B"
+    ],
+    [
+      "??",
+      "docs/goals/content-editor-workflow-ownership/evidence/content-editor-mobile.png",
+      true,
+      89213,
+      "B403715D8C51FEF6F45F9B3B58ED2ACF4E8747EF6F7DA1EF85B974B8085BC29D"
+    ],
+    [
+      "??",
+      "docs/goals/dashboard-summary-contract-ownership/EVIDENCE.md",
+      true,
+      16013,
+      "471B59110119CFE38190F3CD6559655ACD43C4B616B112B4EC74B9A6F74DC31C"
+    ],
+    [
+      "??",
+      "docs/goals/dashboard-summary-contract-ownership/GOAL.md",
+      true,
+      861,
+      "F300D132A402D36F26F138A798A3C39F8B00B1C4146D33BCACA6DEB132D04F2E"
+    ],
+    [
+      "??",
+      "docs/goals/dashboard-summary-contract-ownership/PLAN.md",
+      true,
+      18369,
+      "A10EFBFE795777C0AD61D9D07EAA02D57D8A463CE23A541F978D6AD2FAB11409"
+    ],
+    [
+      "??",
+      "docs/goals/dashboard-summary-contract-ownership/PRE_SLICE_BASELINE.md",
+      true,
+      20093,
+      "7ACFA18A91FACFED49B9D04485A17ADE1218EFCE565CB8F46A25EF88B9902899"
+    ],
+    [
+      "??",
+      "docs/goals/gameplay-success-response-contract-ownership/GOAL.md",
+      true,
+      518,
+      "5211FD6A92739EEC5FBF04DC43447460E680E2C2094181510A6C366953D4F9FE"
+    ],
+    [
+      "??",
+      "docs/goals/gameplay-success-response-contract-ownership/PLAN.md",
+      true,
+      30294,
+      "F70311876EF9559CB3923AF57417FF743C8E7B963F6A83176E9C8236AE0B3212"
+    ],
+    [
+      "??",
+      "docs/goals/home-hub-profile-workspace-ownership/EVIDENCE.md",
+      true,
+      5809,
+      "E905D08062CC0CE831B45497A1D3419773F5B87122CA0DB035C8E7B164282E45"
+    ],
+    [
+      "??",
+      "docs/goals/home-hub-profile-workspace-ownership/GOAL.md",
+      true,
+      953,
+      "4BB53EAFE381E67D4DF2F10C0B5E3EBEDCD1E643BDC70944D1DBB2C8F6727B69"
+    ],
+    [
+      "??",
+      "docs/goals/home-hub-profile-workspace-ownership/PLAN.md",
+      true,
+      23295,
+      "FE4F75CE0BF20A916D09FF256A791E9736553E7D89035CCA0A271F93A3FCF7C2"
+    ],
+    [
+      "??",
+      "docs/goals/home-hub-profile-workspace-ownership/PRE_SLICE_BASELINE.md",
+      true,
+      14783,
+      "3DA3ADB6F5B747F94CDE73D7E0226F365B4E7319DDB32D1E686CAF4BEFEACD55"
+    ],
+    [
+      "??",
+      "docs/goals/home-hub-profile-workspace-ownership/evidence/home-profile-desktop.png",
+      true,
+      640423,
+      "AF83AD144CE9F8BB13843C2C42DAC17F495AB94E6D82AA9747E596588615B717"
+    ],
+    [
+      "??",
+      "docs/goals/home-hub-profile-workspace-ownership/evidence/home-profile-mobile.png",
+      true,
+      254082,
+      "166B59B24F900DBD082D54BF24D1061BD28FA1CD127CABA28337F6948783FFC9"
+    ],
+    [
+      "??",
+      "docs/goals/home-overview-ownership/EVIDENCE.md",
+      true,
+      10525,
+      "C809CE2879B9B89CDC3BC3D55AF0A37329B6CADDCF0650A6816640669E6811D2"
+    ],
+    [
+      "??",
+      "docs/goals/home-overview-ownership/GOAL.md",
+      true,
+      1114,
+      "F5A3D201FA7B00910EF7D35160B51BAFF5275BA78C0FF334B44ED86A20B8B80E"
+    ],
+    [
+      "??",
+      "docs/goals/home-overview-ownership/PLAN.md",
+      true,
+      20857,
+      "183B5B1FC10717C022D897112FB367FA113718DD25DACA106BCBD049F800D1C5"
+    ],
+    [
+      "??",
+      "docs/goals/home-overview-ownership/PRE_SLICE_BASELINE.md",
+      true,
+      19080,
+      "B3B42D79F9A05909353A3E2FBC8B52D0C87379BDD71D461003898F156D43F871"
+    ],
+    [
+      "??",
+      "docs/goals/home-overview-ownership/evidence/home-overview-desktop.png",
+      true,
+      464106,
+      "6ACFD8681FCB7ADD10E9D0AF5D53E5C4D72E66492355339841984C6E6CC94DDF"
+    ],
+    [
+      "??",
+      "docs/goals/home-overview-ownership/evidence/home-overview-mobile.png",
+      true,
+      142746,
+      "49C820AE45906A969DE142103EA5594700210A57B96888FBB98EB99BBCF7A0BA"
+    ],
+    [
+      "??",
+      "docs/goals/shared-gameplay-mutation-contract-ownership/EVIDENCE.md",
+      true,
+      9297,
+      "31E4AE52706E8292C3F45E5658F521AB1D5E4434AAA125FE7BEC7E4378B3B75E"
+    ],
+    [
+      "??",
+      "docs/goals/shared-gameplay-mutation-contract-ownership/GOAL.md",
+      true,
+      935,
+      "B5921D0621971D517C6C5E919DC59168F1CF1A222F3575D7D04F4FDF46356A0A"
+    ],
+    [
+      "??",
+      "docs/goals/shared-gameplay-mutation-contract-ownership/PLAN.md",
+      true,
+      17830,
+      "BB5CBDF87EB3938D46C2699295E1ADE29FFC6AC9C3D55BAEC2AE54DCDD29EB34"
+    ],
+    [
+      "??",
+      "docs/goals/shared-gameplay-mutation-contract-ownership/PRE_SLICE_BASELINE.md",
+      true,
+      31586,
+      "E70656FF8E4865C9E48A8D9BF4F26DD438879FFCDC68D5CA34F64ED337B880EC"
+    ],
+    [
+      "??",
+      "docs/goals/shop-contract-cache-ownership/EVIDENCE.md",
+      true,
+      10988,
+      "D36D9DD384A92A970AF8E9EBB3A2F89C2880048ED4AFA4F44D23950BC21BF664"
+    ],
+    [
+      "??",
+      "docs/goals/shop-contract-cache-ownership/GOAL.md",
+      true,
+      552,
+      "39DEE889CBEBF1B6E54397F27F6146F1B61850A589E4D9FE8D6690AFFE9F09A4"
+    ],
+    [
+      "??",
+      "docs/goals/shop-contract-cache-ownership/PLAN.md",
+      true,
+      20335,
+      "3DFED767CC653459A0C0560AB625A815A37AA6D3222960252B16C18F61A5894E"
+    ],
+    [
+      "??",
+      "docs/goals/shop-contract-cache-ownership/PRE_SLICE_BASELINE.md",
+      true,
+      27141,
+      "F320BAFFDADE73EBC8F771E5ED1DA68CFD02C2A34F0A304F4FDDFEE56E71DB46"
+    ],
+    [
+      "??",
+      "docs/goals/stats-summary-contract-ownership/EVIDENCE.md",
+      true,
+      11968,
+      "8AD75AF9ECEBF0E59550C22DAD0C6CF0652566E78929EF1E707A3577D79CD03B"
+    ],
+    [
+      "??",
+      "docs/goals/stats-summary-contract-ownership/GOAL.md",
+      true,
+      911,
+      "37436338A76FF11344D8FC3CBDF13E91E8929334A4E08243C6BCD6EFC521F8AE"
+    ],
+    [
+      "??",
+      "docs/goals/stats-summary-contract-ownership/PLAN.md",
+      true,
+      19663,
+      "2F58F9FA089BFF4FC2DEC017729699376F6FF851F74C80552027C537184388FA"
+    ],
+    [
+      "??",
+      "docs/goals/stats-summary-contract-ownership/PRE_SLICE_BASELINE.md",
+      true,
+      17662,
+      "931F206C87E7D3BF6117DFF7301BE075D5BC64FBA2054AC04FD1FFB5062F6908"
+    ],
+    [
+      "??",
+      "docs/goals/story-chapter-catalog-contract-ownership/EVIDENCE.md",
+      true,
+      11403,
+      "E1C5AFF44EE6867B4C5BE89DE07B07C40C16F7C22F10725072C96AB6698BFD5B"
+    ],
+    [
+      "??",
+      "docs/goals/story-chapter-catalog-contract-ownership/GOAL.md",
+      true,
+      1076,
+      "7D24A8A7D4D5EDA4424B7D1F4E9E56CB9D0691702CEF94DB2D6DEF5CBEF6E94F"
+    ],
+    [
+      "??",
+      "docs/goals/story-chapter-catalog-contract-ownership/PLAN.md",
+      true,
+      16084,
+      "16F7C3FC6029E9E90215D1A5DFF3E69441168D1FB4525D098276C804CA614E3A"
+    ],
+    [
+      "??",
+      "docs/goals/story-chapter-catalog-contract-ownership/PRE_SLICE_BASELINE.md",
+      true,
+      20472,
+      "CEA7C8168E719F5B32C85F0C2D791E2809051D6C0FCC6B5EFD641D7A36D8CDA6"
+    ],
+    [
+      "??",
+      "frontend/src/app/Protected.test.tsx",
+      true,
+      2581,
+      "196D0F669570D3F171CF48A024CA3E37C19A4A5158A1002CF13B07BB9774CC36"
+    ],
+    [
+      "??",
+      "frontend/src/features/authoring/components/content-editor/ContentDestinationSection.tsx",
+      true,
+      3132,
+      "59044C5C5AABC34FA418F38B61590D160A2BFD54AFD834C90F8D3D63656DEEFA"
+    ],
+    [
+      "??",
+      "frontend/src/features/authoring/components/content-editor/ContentEditorDiagnostics.tsx",
+      true,
+      1928,
+      "DEF4CC1436E1CEA182E5A233DA61ED460949B57E2F4EF5F648611702DB961B8C"
+    ],
+    [
+      "??",
+      "frontend/src/features/authoring/components/content-editor/ContentEditorHeader.tsx",
+      true,
+      1930,
+      "0C75288F680741AA0B4798753D88288E7BBA435D4EB4FE16551AC3DF30976EF5"
+    ],
+    [
+      "??",
+      "frontend/src/features/authoring/components/content-editor/ContentMetadataSection.tsx",
+      true,
+      3443,
+      "95E28176D9BD979B8C5F2813BD8F05D5C5E21F24F35845D9EBE7845CBD5614CA"
+    ],
+    [
+      "??",
+      "frontend/src/features/authoring/hooks/contentEditorDraftState.ts",
+      true,
+      1174,
+      "27FE1FA39BCBD006A85D854530DE171F8B867AECE73715CA9CFBCF0B7176792C"
+    ],
+    [
+      "??",
+      "frontend/src/features/authoring/hooks/useContentEditorController.ts",
+      true,
+      12327,
+      "F7002971DC8F6C79583B1EAFF6BA88DE178D849E93462F6F2339B43136E99F64"
+    ],
+    [
+      "??",
+      "frontend/src/features/authoring/pages/ContentEditorPage.test.tsx",
+      true,
+      26557,
+      "7CBCA1A3355A240107A0E72FB6F866683A2A5BA1BF6E69B69BE30FC34A04EC13"
+    ],
+    [
+      "??",
+      "frontend/src/features/home/components/HomeHubView.test.tsx",
+      true,
+      11120,
+      "B84B43D250A819CCF68A8951223B490222629265CD6A5B29406975813F1B828F"
+    ],
+    [
+      "??",
+      "frontend/src/features/home/components/HomeStatsView.test.tsx",
+      true,
+      7766,
+      "0ACE15912E4DA902CECEE3813C4F21189AFC6FFC8D84395B53682046ECB398A5"
+    ],
+    [
+      "??",
+      "frontend/src/features/home/components/home-hub/HomeCombatShowcase.tsx",
+      true,
+      8793,
+      "1D150278D111C3C5543E118AA8A2C91356A9DAA17EEEDECD4DFED7577999C941"
+    ],
+    [
+      "??",
+      "frontend/src/features/home/components/home-hub/HomeProfilePanel.tsx",
+      true,
+      5974,
+      "1AF2565858821226EED9D0203668CBD7B133CF40141790B77E02C4E739AD26D9"
+    ],
+    [
+      "??",
+      "frontend/src/features/home/components/home-hub/HomeProfileWorkspace.tsx",
+      true,
+      1358,
+      "58355B21119DE1B5B177A153A226414B22138F9276C9B954F0D89653B10F14F9"
+    ],
+    [
+      "??",
+      "frontend/src/features/home/components/home-stats/HomeAchievementGallery.tsx",
+      true,
+      3700,
+      "49658F9515797BBAF82304B60548AE365D180165C87FD58BA9A3D97D1BCDCA03"
+    ],
+    [
+      "??",
+      "frontend/src/features/home/components/home-stats/HomeStatsDashboard.tsx",
+      true,
+      6428,
+      "8D1D1BCE29FA6908052A96B1159F8CABEA4FAF5B915AD64CEB62EBF51BE2AA3F"
+    ],
+    [
+      "??",
+      "frontend/src/features/home/components/home-stats/homeStatsModel.test.ts",
+      true,
+      4799,
+      "0A138E734CE7EBF06E5471678E80CC50F126AB3F4FBE5B992B4C8DC3C243FE97"
+    ],
+    [
+      "??",
+      "frontend/src/features/home/components/home-stats/homeStatsModel.ts",
+      true,
+      3139,
+      "D234BA4A38E2E2BCF886ACA81E81E3A1C07EFA3A80B9BEB8D5F0C1C365AD7FF9"
+    ],
+    [
+      "??",
+      "frontend/src/features/shop/pages/ShopPage.test.tsx",
+      true,
+      7831,
+      "7EE83F6817F7D793482523635C7EA6C4DE75A351E8928661CE5E975316957255"
+    ],
+    [
+      "??",
+      "frontend/src/shared/auth/authSessionBoundary.test.ts",
+      true,
+      7255,
+      "67BC57C8F5F9C224A9AD9FECE25B7B6DC3F0FD985A097AA05FB3D0C046318DEF"
+    ],
+    [
+      "??",
+      "frontend/src/shared/auth/authSessionBoundary.ts",
+      true,
+      5902,
+      "80790432D76A92FC9B32A272DD4BA17A1AF7356145C40595E80BB7A2CBDB9E86"
+    ],
+    [
+      "??",
+      "frontend/src/shared/auth/useAuth.test.ts",
+      true,
+      7680,
+      "A616855587CA3E7F926B7648D49D417B7C4FF1D27E8B3B9D7A3C9F4DDD5D4793"
+    ],
+    [
+      "??",
+      "frontend/src/shared/level-runtime/runMutationInputs.test.ts",
+      true,
+      1168,
+      "69619F77EC08ED7D0D796B8A8678E78BF69B0847B243439DA3D35287BB265EB4"
+    ],
+    [
+      "??",
+      "frontend/src/shared/level-runtime/runMutationInputs.ts",
+      true,
+      684,
+      "13D7579B5716A268E61722C424DB0997D4B2CE79F88ADE992EE44B93F9F7B72B"
+    ],
+    [
+      "??",
+      "frontend/src/shared/level/workspaceFileTypes.ts",
+      true,
+      417,
+      "06655B92F12BC9ABD081436B188ECE0FE1F574C6E4BFA6F1309501B0B8685A09"
+    ],
+    [
+      "??",
+      "frontend/src/shared/shop/api/shopApi.test.ts",
+      true,
+      1471,
+      "60F87AA921E6B2F443E92B9F896ABA1EC5EC152AA1F73C77CB51B2DE11553E12"
+    ],
+    [
+      "??",
+      "frontend/src/shared/shop/api/shopApi.ts",
+      true,
+      1133,
+      "1B5DE86AA7D7D31AA6CE3B0602135BAEAE043D099EA91A9540C022F0235FB0E0"
+    ],
+    [
+      "??",
+      "frontend/src/shared/shop/model/shopPresentation.test.ts",
+      true,
+      1790,
+      "D7B7AD00EF48B898430B26B9E3C0D3DFFC1F4BD9D31D75E173E266E445F24912"
+    ],
+    [
+      "??",
+      "frontend/src/shared/shop/model/shopPresentation.ts",
+      true,
+      1496,
+      "6E17B177FDB0DC1AC7420D5CE8A013CF26D16692C468D7BBC3144398785ED94D"
+    ],
+    [
+      "??",
+      "scripts/checks/architecture_guard/__init__.py",
+      true,
+      68,
+      "1EE43ECAF9DE4D0411782F679E998C0FE4BBFFE37D1FA2EBF20E20D923C54662"
+    ],
+    [
+      "??",
+      "scripts/checks/architecture_guard/contracts/__init__.py",
+      true,
+      69,
+      "7BF089569CA0517DDB1DB320AC1CD975A92044B0C1F5CCB5E5CB88F762D95959"
+    ],
+    [
+      "??",
+      "scripts/checks/architecture_guard/contracts/auth.py",
+      true,
+      31233,
+      "DEC08B05C409E1D12CEDEF7970CAF4F5EBE950304674C3BF3DA04130FEE66DBF"
+    ],
+    [
+      "??",
+      "scripts/checks/architecture_guard/contracts/catalog.py",
+      true,
+      30004,
+      "1B79482B9D0C3D912FF59C44DF8FF4DAEC6ADAB3A559C3D87E9BBBEE58AD4515"
+    ],
+    [
+      "??",
+      "scripts/checks/architecture_guard/contracts/gameplay.py",
+      true,
+      18474,
+      "11BC0068865142C4F5130E9D7EF40CB4081AD158591C6E3FDA24D1287310E07C"
+    ],
+    [
+      "??",
+      "scripts/checks/architecture_guard/contracts/progress.py",
+      true,
+      32358,
+      "8746AA7C3DA6934DC0F8E8FC566E236BF890E68A45E2F7588AB4D4DC5E51D66D"
+    ],
+    [
+      "??",
+      "scripts/checks/architecture_guard/python_analysis.py",
+      true,
+      6819,
+      "BC5F763165C303C6A781912A4169756BC550D81F5995919058BF1B7E6D8E867A"
+    ],
+    [
+      "??",
+      "scripts/checks/architecture_guard/repository.py",
+      true,
+      841,
+      "49C574BCD49E5490AB8F62635B6FAD258127150744AB2804E379018C26D0487D"
+    ],
+    [
+      "??",
+      "scripts/checks/architecture_guard/typescript_analysis.py",
+      true,
+      32184,
+      "6A90C3F477F30B242389D422A8038391502C0D043D3A73FEC687D3BDF554D547"
+    ]
+  ],
+  "strict_dirty_paths": [
+    "backend/accounts/serializers.py",
+    "backend/accounts/views.py",
+    "backend/adminconsole/flags.py",
+    "backend/adminconsole/selectors/__init__.py",
+    "backend/adminconsole/selectors/content.py",
+    "backend/adminconsole/selectors/curriculum.py",
+    "backend/adminconsole/selectors/users.py",
+    "backend/adminconsole/services/__init__.py",
+    "backend/adminconsole/services/curriculum.py",
+    "backend/adminconsole/tests/test_admin_api.py",
+    "backend/adminconsole/views.py",
+    "backend/adventures/serializers.py",
+    "backend/authoring/services/core.py",
+    "backend/authoring/tests/test_authoring_api.py",
+    "backend/challenges/serializers.py",
+    "backend/common/serializers.py",
+    "backend/common/tests/test_architecture_guard_algorithms.py",
+    "backend/common/tests/test_bug_regressions.py",
+    "backend/curriculum/seed_data/source/adventure_level_specs/v3_advanced_workflows.py",
+    "backend/curriculum/seed_data/source/adventure_level_specs/v3_frost_form_drills.py",
+    "backend/curriculum/seed_data/source/adventure_level_specs/v3_skyline_form_drills.py",
+    "backend/curriculum/seed_data/source/challenge_specs/v3_chapter_form_challenges.py",
+    "backend/curriculum/seed_data/source/challenge_specs/v3_story_challenges.py",
+    "backend/curriculum/serializers.py",
+    "backend/curriculum/tests/test_seed_data_source_layout.py",
+    "backend/players/views.py",
+    "backend/progress/serializers.py",
+    "backend/progress/views.py",
+    "backend/shop/catalog.py",
+    "backend/shop/tests/test_shop_catalog.py",
+    "backend/shop/views.py",
+    "frontend/src/app/Protected.tsx",
+    "frontend/src/features/adventures/components/AdventureWorkspaceMain.tsx",
+    "frontend/src/features/adventures/hooks/useAdventureRun.ts",
+    "frontend/src/features/authoring/hooks/useUnsavedChangesGuard.ts",
+    "frontend/src/features/authoring/pages/ContentEditorPage.tsx",
+    "frontend/src/features/challenges/components/ChallengeWorkspaceMain.tsx",
+    "frontend/src/features/challenges/components/ChallengeWorkspacePanels.tsx",
+    "frontend/src/features/challenges/hooks/useChallengeWorkspaceMutations.ts",
+    "frontend/src/features/home/components/HomeHubView.tsx",
+    "frontend/src/features/home/components/HomeLoadoutView.tsx",
+    "frontend/src/features/home/components/HomeStatsView.tsx",
+    "frontend/src/features/home/preview/fixtures.ts",
+    "frontend/src/features/home/utils/achievements.test.ts",
+    "frontend/src/features/home/utils/achievements.ts",
+    "frontend/src/features/shop/api/shopApi.test.ts",
+    "frontend/src/features/shop/api/shopApi.ts",
+    "frontend/src/features/shop/components/CompanionShop.tsx",
+    "frontend/src/features/shop/components/StoryShop.tsx",
+    "frontend/src/features/shop/pages/ShopPage.tsx",
+    "frontend/src/features/shop/types.ts",
+    "frontend/src/features/shop/utils/shopDisplay.test.ts",
+    "frontend/src/features/shop/utils/shopDisplay.ts",
+    "frontend/src/features/stats/api/statsApi.ts",
+    "frontend/src/features/stats/types.ts",
+    "frontend/src/features/story-map/api/storyMapApi.ts",
+    "frontend/src/features/story-map/types.ts",
+    "frontend/src/shared/api/httpClient.test.ts",
+    "frontend/src/shared/api/httpClient.ts",
+    "frontend/src/shared/auth/authApi.ts",
+    "frontend/src/shared/auth/types.ts",
+    "frontend/src/shared/auth/useAuth.ts",
+    "frontend/src/shared/git/simulator/engine.ts",
+    "frontend/src/shared/git/simulator/types.ts",
+    "frontend/src/shared/git/simulator/workspaceFiles.ts",
+    "frontend/src/shared/level/components/ProjectStructurePanel.tsx",
+    "frontend/src/shared/level/components/WorkspaceEditorOverlay.tsx",
+    "frontend/src/shared/level/utils/projectFiles.ts",
+    "frontend/src/shared/player-loadout/usePlayerLoadout.ts",
+    "frontend/src/shared/progress/homeSummaryApi.ts",
+    "frontend/src/shared/progress/types.ts",
+    "frontend/src/styles/features/authoring/editor-shell.css",
+    "frontend/src/styles/features/home.css",
+    "frontend/src/styles/features/home/achievements.css",
+    "frontend/src/styles/features/home/stats-achievements.css",
+    "frontend/src/styles/features/home/stats-actions.css",
+    "frontend/src/styles/features/home/stats-responsive.css",
+    "frontend/src/styles/features/home/stats.css",
+    "scripts/checks/check_api_type_adoption.py",
+    "scripts/checks/check_architecture_boundaries.py",
+    "scripts/checks/check_frontend_api_usage.py",
+    "backend/accounts/tests/test_auth_contract_api.py",
+    "backend/adminconsole/curriculum_options.py",
+    "backend/adminconsole/selectors/analytics.py",
+    "backend/adminconsole/selectors/economy.py",
+    "backend/adminconsole/selectors/overview.py",
+    "backend/adminconsole/selectors/settings.py",
+    "backend/adminconsole/tests/helpers.py",
+    "backend/adminconsole/tests/test_admin_read_api.py",
+    "backend/adminconsole/views/__init__.py",
+    "backend/adminconsole/views/content.py",
+    "backend/adminconsole/views/curriculum.py",
+    "backend/adminconsole/views/dashboard.py",
+    "backend/adminconsole/views/economy.py",
+    "backend/adminconsole/views/settings.py",
+    "backend/adminconsole/views/users.py",
+    "backend/common/schemas/openapi.py",
+    "backend/common/tests/architecture_guard/__init__.py",
+    "backend/common/tests/architecture_guard/policy_equivalence_cases.py",
+    "backend/common/tests/architecture_guard/test_auth_policy.py",
+    "backend/common/tests/architecture_guard/test_catalog_policy.py",
+    "backend/common/tests/architecture_guard/test_policy_equivalence.py",
+    "backend/common/tests/architecture_guard/test_progress_policy.py",
+    "backend/common/tests/architecture_guard/test_python_analysis.py",
+    "backend/common/tests/architecture_guard/test_symbol_manifest_equivalence.py",
+    "backend/common/tests/architecture_guard/test_typescript_analysis.py",
+    "backend/common/tests/test_gameplay_mutation_contract.py",
+    "backend/curriculum/seed_data/source/advanced_story_support.py",
+    "backend/curriculum/seed_data/source/adventure_level_specs/form_drill_support.py",
+    "backend/curriculum/seed_data/source/challenge_specs/advanced_challenge_support.py",
+    "backend/curriculum/tests/test_catalog_contract_api.py",
+    "backend/progress/tests/test_dashboard_summary_api.py",
+    "backend/progress/tests/test_stats_summary_api.py",
+    "backend/shop/serializers.py",
+    "docs/goals/admin-console-http-read-model-ownership/EVIDENCE.md",
+    "docs/goals/admin-console-http-read-model-ownership/GOAL.md",
+    "docs/goals/admin-console-http-read-model-ownership/PLAN.md",
+    "docs/goals/architecture-guard-policy-modularization/EVIDENCE.md",
+    "docs/goals/architecture-guard-policy-modularization/GOAL.md",
+    "docs/goals/architecture-guard-policy-modularization/PLAN.md",
+    "docs/goals/architecture-guard-policy-modularization/PRE_CUTOVER_SYMBOL_MANIFEST.json",
+    "docs/goals/architecture-guard-policy-modularization/PRE_CUTOVER_TEST_MANIFEST.json",
+    "docs/goals/architecture-guard-policy-modularization/PRE_SLICE_BASELINE.md",
+    "docs/goals/auth-browser-state-boundary/EVIDENCE.md",
+    "docs/goals/auth-browser-state-boundary/PLAN.md",
+    "docs/goals/auth-browser-state-boundary/PRE_SLICE_BASELINE.md",
+    "docs/goals/auth-session-success-contract-ownership/EVIDENCE.md",
+    "docs/goals/auth-session-success-contract-ownership/GOAL.md",
+    "docs/goals/auth-session-success-contract-ownership/PLAN.md",
+    "docs/goals/auth-session-success-contract-ownership/PRE_SLICE_BASELINE.md",
+    "docs/goals/codebase-maintainability-modernization/EVIDENCE.md",
+    "docs/goals/codebase-maintainability-modernization/GOAL.md",
+    "docs/goals/codebase-maintainability-modernization/PLAN.md",
+    "docs/goals/content-editor-workflow-ownership/EVIDENCE.md",
+    "docs/goals/content-editor-workflow-ownership/GOAL.md",
+    "docs/goals/content-editor-workflow-ownership/PLAN.md",
+    "docs/goals/content-editor-workflow-ownership/PRE_SLICE_BASELINE.md",
+    "docs/goals/content-editor-workflow-ownership/evidence/content-editor-desktop.png",
+    "docs/goals/content-editor-workflow-ownership/evidence/content-editor-mobile.png",
+    "docs/goals/dashboard-summary-contract-ownership/EVIDENCE.md",
+    "docs/goals/dashboard-summary-contract-ownership/GOAL.md",
+    "docs/goals/dashboard-summary-contract-ownership/PLAN.md",
+    "docs/goals/dashboard-summary-contract-ownership/PRE_SLICE_BASELINE.md",
+    "docs/goals/home-hub-profile-workspace-ownership/EVIDENCE.md",
+    "docs/goals/home-hub-profile-workspace-ownership/GOAL.md",
+    "docs/goals/home-hub-profile-workspace-ownership/PLAN.md",
+    "docs/goals/home-hub-profile-workspace-ownership/PRE_SLICE_BASELINE.md",
+    "docs/goals/home-hub-profile-workspace-ownership/evidence/home-profile-desktop.png",
+    "docs/goals/home-hub-profile-workspace-ownership/evidence/home-profile-mobile.png",
+    "docs/goals/home-overview-ownership/EVIDENCE.md",
+    "docs/goals/home-overview-ownership/GOAL.md",
+    "docs/goals/home-overview-ownership/PLAN.md",
+    "docs/goals/home-overview-ownership/PRE_SLICE_BASELINE.md",
+    "docs/goals/home-overview-ownership/evidence/home-overview-desktop.png",
+    "docs/goals/home-overview-ownership/evidence/home-overview-mobile.png",
+    "docs/goals/shared-gameplay-mutation-contract-ownership/EVIDENCE.md",
+    "docs/goals/shared-gameplay-mutation-contract-ownership/GOAL.md",
+    "docs/goals/shared-gameplay-mutation-contract-ownership/PLAN.md",
+    "docs/goals/shared-gameplay-mutation-contract-ownership/PRE_SLICE_BASELINE.md",
+    "docs/goals/shop-contract-cache-ownership/EVIDENCE.md",
+    "docs/goals/shop-contract-cache-ownership/GOAL.md",
+    "docs/goals/shop-contract-cache-ownership/PLAN.md",
+    "docs/goals/shop-contract-cache-ownership/PRE_SLICE_BASELINE.md",
+    "docs/goals/stats-summary-contract-ownership/EVIDENCE.md",
+    "docs/goals/stats-summary-contract-ownership/GOAL.md",
+    "docs/goals/stats-summary-contract-ownership/PLAN.md",
+    "docs/goals/stats-summary-contract-ownership/PRE_SLICE_BASELINE.md",
+    "docs/goals/story-chapter-catalog-contract-ownership/EVIDENCE.md",
+    "docs/goals/story-chapter-catalog-contract-ownership/GOAL.md",
+    "docs/goals/story-chapter-catalog-contract-ownership/PLAN.md",
+    "docs/goals/story-chapter-catalog-contract-ownership/PRE_SLICE_BASELINE.md",
+    "frontend/src/app/Protected.test.tsx",
+    "frontend/src/features/authoring/components/content-editor/ContentDestinationSection.tsx",
+    "frontend/src/features/authoring/components/content-editor/ContentEditorDiagnostics.tsx",
+    "frontend/src/features/authoring/components/content-editor/ContentEditorHeader.tsx",
+    "frontend/src/features/authoring/components/content-editor/ContentMetadataSection.tsx",
+    "frontend/src/features/authoring/hooks/contentEditorDraftState.ts",
+    "frontend/src/features/authoring/hooks/useContentEditorController.ts",
+    "frontend/src/features/authoring/pages/ContentEditorPage.test.tsx",
+    "frontend/src/features/home/components/HomeHubView.test.tsx",
+    "frontend/src/features/home/components/HomeStatsView.test.tsx",
+    "frontend/src/features/home/components/home-hub/HomeCombatShowcase.tsx",
+    "frontend/src/features/home/components/home-hub/HomeProfilePanel.tsx",
+    "frontend/src/features/home/components/home-hub/HomeProfileWorkspace.tsx",
+    "frontend/src/features/home/components/home-stats/HomeAchievementGallery.tsx",
+    "frontend/src/features/home/components/home-stats/HomeStatsDashboard.tsx",
+    "frontend/src/features/home/components/home-stats/homeStatsModel.test.ts",
+    "frontend/src/features/home/components/home-stats/homeStatsModel.ts",
+    "frontend/src/features/shop/pages/ShopPage.test.tsx",
+    "frontend/src/shared/auth/authSessionBoundary.test.ts",
+    "frontend/src/shared/auth/authSessionBoundary.ts",
+    "frontend/src/shared/auth/useAuth.test.ts",
+    "frontend/src/shared/level-runtime/runMutationInputs.test.ts",
+    "frontend/src/shared/level-runtime/runMutationInputs.ts",
+    "frontend/src/shared/level/workspaceFileTypes.ts",
+    "frontend/src/shared/shop/api/shopApi.test.ts",
+    "frontend/src/shared/shop/api/shopApi.ts",
+    "frontend/src/shared/shop/model/shopPresentation.test.ts",
+    "frontend/src/shared/shop/model/shopPresentation.ts",
+    "scripts/checks/architecture_guard/__init__.py",
+    "scripts/checks/architecture_guard/contracts/__init__.py",
+    "scripts/checks/architecture_guard/contracts/auth.py",
+    "scripts/checks/architecture_guard/contracts/catalog.py",
+    "scripts/checks/architecture_guard/contracts/progress.py",
+    "scripts/checks/architecture_guard/python_analysis.py",
+    "scripts/checks/architecture_guard/repository.py",
+    "scripts/checks/architecture_guard/typescript_analysis.py"
+  ],
+  "mutable_targets": [
+    [
+      " M",
+      "backend/common/openapi.py",
+      true,
+      6546,
+      "13E7DE38857BEB39194140BEA54D69A9B60EF21B98972398683369651557A93C"
+    ],
+    [
+      " M",
+      "backend/adventures/views.py",
+      true,
+      11629,
+      "FBF8ABB1B34E6267DA5F1798911D12143A91EA3319CAB005A9ED00380C044A7C"
+    ],
+    [
+      " M",
+      "backend/challenges/views.py",
+      true,
+      11330,
+      "F05B63C1EA6E7B497D4D150FCB3469940907C661FFE0C71B252FBAC73996C110"
+    ],
+    [
+      " M",
+      "frontend/src/shared/api/generated/openapi.json",
+      true,
+      198553,
+      "EAB01F4B773612D90EC421011AA5A00DCABB322DB96240D1F1E3DFC2CCB1A26B"
+    ],
+    [
+      " M",
+      "frontend/src/shared/api/generated/apiTypes.ts",
+      true,
+      43930,
+      "658865C60EDB02458179FC8F510DE2BE39B0ED6B1C6E7B6E95416BBED17B806E"
+    ],
+    [
+      " M",
+      "frontend/src/shared/level/types.ts",
+      true,
+      3672,
+      "DF30E6CD3DF9B6BC89487D1BEF1A42F4DBBF91072459A9FB38CAD2A70776A5EC"
+    ],
+    [
+      "CLEAN",
+      "frontend/src/features/adventures/types.ts",
+      true,
+      5068,
+      "2EB6F71846E0C9759927E4E43B819A8FFE1D26710C41E4521D422E927373E89F"
+    ],
+    [
+      "CLEAN",
+      "frontend/src/features/challenges/types.ts",
+      true,
+      5648,
+      "981F3B9E342142DD3D839D5913F84B60EE765917D2F24EEE77AB0067830CB645"
+    ],
+    [
+      " M",
+      "frontend/src/features/adventures/api/adventuresApi.ts",
+      true,
+      2778,
+      "2C79A31AECFC896097AD495D1FBF20D2A650A97C108504EF86788B25896A3F30"
+    ],
+    [
+      " M",
+      "frontend/src/features/challenges/api/challengeRunsApi.ts",
+      true,
+      2064,
+      "F0952F279B7DECB90EFE959A087612E7AF7B931606C7918EEA4D4E13F294BD07"
+    ],
+    [
+      "??",
+      "scripts/checks/architecture_guard/contracts/gameplay.py",
+      true,
+      18474,
+      "11BC0068865142C4F5130E9D7EF40CB4081AD158591C6E3FDA24D1287310E07C"
+    ],
+    [
+      "??",
+      "backend/common/tests/architecture_guard/test_gameplay_policy.py",
+      true,
+      6720,
+      "BD302A2D3FF0186BE5EB27BEF0C1DB2ED037DB601BB8129899F8C326E3D19FD7"
+    ],
+    [
+      " M",
+      "ARCHITECTURE.md",
+      true,
+      14847,
+      "66BD2611B52EAA6C383B344765DD04AC06DFC06EECF75162E51CE22D75AE061A"
+    ],
+    [
+      " M",
+      "scripts/README.md",
+      true,
+      601,
+      "6CE76836F41431CCCBE5C9F3F8BBB477BA403EA46A61DBB22EA8DC16FF25C33A"
+    ]
+  ],
+  "strict_protected": [
+    [
+      "backend/adventures/payloads.py",
+      true,
+      13921,
+      "E7BD7D8D130CD3290C218562F7168D54785DAE07129BCB878C5F55C3AF74667D"
+    ],
+    [
+      "backend/challenges/payloads.py",
+      true,
+      9387,
+      "7C72D7696EBF8520069A9BF84554A8297BBA076EC68A936B4FEE1F89FD51B8C9"
+    ],
+    [
+      "backend/adventures/models.py",
+      true,
+      8698,
+      "EE7556C69C80B66AEBF6AE778686B9357B9F8F53A85E70921F48B6574A1A5CAE"
+    ],
+    [
+      "backend/challenges/models.py",
+      true,
+      7012,
+      "4DC4B3C036AD54342E7D9B7D030B1E09C8B5BE9EFEA8751B3D232F7A5355F3E5"
+    ],
+    [
+      "backend/adventures/urls.py",
+      true,
+      1214,
+      "C741AA04D72AC55819D983BECAFAD6721A71368B5821BC58370A1E93C65D50A7"
+    ],
+    [
+      "backend/challenges/urls.py",
+      true,
+      979,
+      "464DDA993CC038FF9202038B3E6F4CC410C453FC714E0477AAFAF01842B7B9F5"
+    ],
+    [
+      "backend/adventures/serializers.py",
+      false,
+      null,
+      null
+    ],
+    [
+      "backend/challenges/serializers.py",
+      true,
+      509,
+      "E5580483C3E9223B477641A5C784E10A53BDA038F2BA1E148B66D04B6F969F4B"
+    ],
+    [
+      "backend/common/serializers.py",
+      true,
+      2760,
+      "CBD96AC92760BEB3321339C74065DAABB815FA9F1BD80843CB8E23CB5CF29AC9"
+    ],
+    [
+      "backend/common/services/run_workspace.py",
+      true,
+      3389,
+      "7E5D7BEBA5D9DE49F599EDE1F94BE184983D7E078D922A33FB5CF33F7039BFAD"
+    ],
+    [
+      "backend/adventures/services/__init__.py",
+      true,
+      721,
+      "FA0FD9C3DC211CF36919758320B34691F6E53DC54A76A12EF2EB1C0F6A6AEFB9"
+    ],
+    [
+      "backend/adventures/services/commands.py",
+      true,
+      9127,
+      "72B25A95D8BEC4B6DE7AFDC2BA8E165037BECBD6F75C93B433F3900D5BB715AC"
+    ],
+    [
+      "backend/adventures/services/history.py",
+      true,
+      1753,
+      "520AA8B6E2890DCF6AB9597595E4A953DECC04837504FC1F4D0EEF9DA39F0A66"
+    ],
+    [
+      "backend/adventures/services/runs.py",
+      true,
+      13523,
+      "27003DDB704C592CB9B10FEEEADEE07FC6D02AB96026FC09A13C299DBEFE2860"
+    ],
+    [
+      "backend/challenges/services/__init__.py",
+      true,
+      332,
+      "C96660D5EEE3655774B3053C76BE0A06D0075CB26F85B32CAFA4F8ABDD113408"
+    ],
+    [
+      "backend/challenges/services/command_processing.py",
+      true,
+      14566,
+      "881D3BAE316DD30BFD8348547FF29921D335954DECBE287E2329E07E1D7BE52F"
+    ],
+    [
+      "backend/challenges/services/history.py",
+      true,
+      1456,
+      "CFCAA43D0CAD2E8DE5F80DA6C250C59BF392652AD71385C92F1B9FFBD03491A8"
+    ],
+    [
+      "backend/challenges/services/runs.py",
+      true,
+      7956,
+      "6AB52EB609B0326576C595780C758AB6DCD7E2D1721740F3B2EDA1FCD9ADBA5D"
+    ],
+    [
+      "backend/practice/models.py",
+      true,
+      3548,
+      "DC7681C686F1D9E762787533EC68656EB39B9D3D4C9CCBBEC6B5092112F818C4"
+    ],
+    [
+      "backend/progress/models.py",
+      true,
+      4703,
+      "FB3E993E647AC975685254EED9EA8E18F15E9AD4FDCC0C10882172EA482D53C1"
+    ],
+    [
+      "backend/shop/models.py",
+      true,
+      1526,
+      "186CD6ED2B9AC26A00B05604116179E3033F823069256CA6BF3BF79D7A8D8BD4"
+    ],
+    [
+      "frontend/src/shared/api/httpClient.ts",
+      true,
+      5453,
+      "EA0CC2B4BBBBB7ADA9E6D3AFDAF4564769CE428A6F7F8C239D69838FBD16702C"
+    ],
+    [
+      "scripts/api/api_contract.py",
+      true,
+      19497,
+      "FCF41D695D712401E5F98BC347995E89079E3DDCF132DAC6C29FBD1618B14D23"
+    ]
+  ],
+  "approved_plan_files": [
+    [
+      "docs/goals/gameplay-success-response-contract-ownership/GOAL.md",
+      true,
+      518,
+      "5211FD6A92739EEC5FBF04DC43447460E680E2C2094181510A6C366953D4F9FE"
+    ],
+    [
+      "docs/goals/gameplay-success-response-contract-ownership/PLAN.md",
+      true,
+      30294,
+      "F70311876EF9559CB3923AF57417FF743C8E7B963F6A83176E9C8236AE0B3212"
+    ]
+  ],
+  "planned_absences": [
+    [
+      "backend/adventures/openapi.py",
+      false,
+      null,
+      null
+    ],
+    [
+      "backend/challenges/openapi.py",
+      false,
+      null,
+      null
+    ],
+    [
+      "backend/common/tests/test_gameplay_response_contract.py",
+      false,
+      null,
+      null
+    ],
+    [
+      "docs/goals/gameplay-success-response-contract-ownership/PRE_SLICE_BASELINE.md",
+      false,
+      null,
+      null
+    ],
+    [
+      "docs/goals/gameplay-success-response-contract-ownership/PRE_SLICE_BASELINE.json",
+      false,
+      null,
+      null
+    ],
+    [
+      "docs/goals/gameplay-success-response-contract-ownership/EVIDENCE.md",
+      false,
+      null,
+      null
+    ]
+  ],
+  "protected_regions": [
+    {
+      "path": "backend/common/openapi.py",
+      "kind": "py",
+      "regions": [
+        [
+          "Expr@1",
+          "Expr",
+          "9127893EE2FE08A88FAD71814BED7E1290D1F981B19605E757E25E721EF808D9",
+          "65587D0FAE9C500070E87C5E2C72D120C43E63CE6CF5C1281F50AC8300C10485"
+        ],
+        [
+          "EmptyRequestSerializer",
+          "ClassDef",
+          "8FC33DD9FF2BD7B3BE1F17EDEE5E89D339776162B86F4FE5663618CC3BB32319",
+          "433A5719289BA1AFB3277415A1D1010881D968227950339D4C524F99D5EF0380"
+        ],
+        [
+          "AnyObjectResponseSerializer",
+          "ClassDef",
+          "AAA6ADFFD2A92250C70B403911EA87E4118476E8B3A059311578972053C794FF",
+          "E26B94058E442B3F022D0DF62FEF437332B81F62047DCAE25F30AF8219FB1A69"
+        ],
+        [
+          "WalletResponseSerializer",
+          "ClassDef",
+          "1CEB43BFDB49145E0ED4853F42B5422F9F7A4BED380947D97D19D526623339D1",
+          "A7E87E7576B2E8E7FECD2B3A87654FBDB959E4EDB6F8CB987B2E674D9B1DCA67"
+        ],
+        [
+          "OpenDictSerializer",
+          "ClassDef",
+          "7FE591D0373941A3F949874D67097F1FFBA30DC0E8B1759BF835CB7F2643FD79",
+          "5E1DC1F7EB60516CA0E2D88C05FF7039DA26969892B4BCF2909A4DEF37FD20F5"
+        ],
+        [
+          "WalletSummaryResponseSerializer",
+          "ClassDef",
+          "4CF27575AFAA4662B75095A08608409FD4DF4E96F705AB7D9F4E71D130639034",
+          "0F6F2EF2F0FCBB3EA23F66336D50803B60CF47C6E4A349A855CCD8A1B62BDB0E"
+        ],
+        [
+          "LearnedSkillResponseSerializer",
+          "ClassDef",
+          "17027A6B8E20B0F110EF2448E8474E6ABA64F917DC76E40D72900EEE98D69032",
+          "61DB1A3EF33D2438FBEE3BDF2C567BF8A1B55CB541823F39733B39892A8DA25A"
+        ],
+        [
+          "LearnedSkillsResponseSerializer",
+          "ClassDef",
+          "B6C42901905B37FC4E69CFF6B8162A428DE364A1081F8EFC0700D30BED647488",
+          "2D07F560B05EE68173D6E10E841E98294DE919B9C5ED134C760C529FDA8720B3"
+        ],
+        [
+          "CommandFormPreviewSkillResponseSerializer",
+          "ClassDef",
+          "14266A962F97A9836700F1CF21FB5193D06A7D5AC30A538E9B9054CD4C6074B8",
+          "81C0D200F34F41FF4BD951DD04CAF8E349D1B259E513530029766A7267056DC5"
+        ],
+        [
+          "CommandFormPreviewResponseSerializer",
+          "ClassDef",
+          "A736C8F48B288E257BEA4BB06B06823EE000448E09CB4D3014719B43A0D7B00D",
+          "314C6EA40D5154C26A8EC94EA56251AFBE1DEC2A7C31572715D9BC855AAB984A"
+        ]
+      ]
+    },
+    {
+      "path": "backend/adventures/views.py",
+      "kind": "py",
+      "regions": [
+        [
+          "Assign@35",
+          "Assign",
+          "CEDFDFB45E44BA56B8761C2B9FCA6908ED714DDFBF9AFEB3A37AA91F7CE01A2B",
+          "B4210475A1BC49B0D817CF3A24CCF790ECDF1E01E96531C36CE8384EE7D2CBAA"
+        ],
+        [
+          "_get_run",
+          "FunctionDef",
+          "B1D867590E2453FEDA853AEBD7BFD4B406490EDAC012319BF6AC60701F480F41",
+          "A1BD898A00D37535D59A35304B6687FE1BA02F1FCCAA6710E95F0C9C1151EAC5"
+        ],
+        [
+          "_run_with_active_attempt",
+          "FunctionDef",
+          "9078CC08343E7E195DD1C3DC130F3B53E9147F8BC5C6998F39350C706901C40A",
+          "221DA691D5B97424035359A72651DFCBC7A42880EF5F1A7D14D09A5E684A28EC"
+        ],
+        [
+          "_assert_level_unlocked",
+          "FunctionDef",
+          "320AAB2BF68129D0DA091DCCF03EFEC8021D90CE579024EF96932E30B0078D44",
+          "BF266222B6E4F60B37E29F994F39ABF95E4AC3C132D5E8CBE4EEA4D6E0334A56"
+        ],
+        [
+          "AdventureLevelRunStartAPIView",
+          "ClassDef",
+          "5D6ECC0981DD2BCDEAC87BE938F9F1C5D34CED2C5CB8CFE3470FA194F10777A9",
+          "89A230CD8D1BDD0027225863C09469996AC6EBC8693239AF9D91F04389FE3583"
+        ],
+        [
+          "AdventureRunStartAPIView",
+          "ClassDef",
+          "65FF5C6958048E939CF42D7DC6EB1B965B304B32B9021694FB4396AEEE4CA898",
+          "D725E5472F73440199600169B1A1CABB9F789C8C794A3E042D2F739DC2DA1651"
+        ],
+        [
+          "AdventureRunDetailAPIView",
+          "ClassDef",
+          "F7E02ACF4C28616FF3DE6DBCD68B3EEB53A880BA60764EA2DAF0B1A74455673D",
+          "036DB98A57A420AF0F107EF77E6167C41EA36F67D10A7DAB88A40BB85B0D5DD8"
+        ],
+        [
+          "AdventureRunSubmitCommandAPIView",
+          "ClassDef",
+          "A9D9174BEFB887C08FD4EC4200D3FD4D81E7D65510DA77382E7C491B29A6B073",
+          "B57B9C305F20D6859CC7B8B55075E052E4167E1B26D133C69243B2AA6CACB8FB"
+        ],
+        [
+          "AdventureRunLevelLibraryAPIView",
+          "ClassDef",
+          "81E529D194CE91DDFE56AE8D997330D9E581339079DF272ED3452F593FCF84CD",
+          "C44453C8E1852574F2F6583F92E205B5E112332924BD73E4D7D0D48E2D142027"
+        ],
+        [
+          "AdventureWorkspaceFileAPIView",
+          "ClassDef",
+          "3178CBEF01700376B2A2787D05EB341130A266BA728D7CB64900E86AC0CB1A08",
+          "863DA9B503F54E392276B3FD5ED0D4C54818D3AE43A7C10A883070F82B7C4509"
+        ]
+      ]
+    },
+    {
+      "path": "backend/challenges/views.py",
+      "kind": "py",
+      "regions": [
+        [
+          "Assign@32",
+          "Assign",
+          "7253902465E141637EB814EDFC102BCE708569241A5A7D14D453CDFB7EBAD42C",
+          "AE83F2E3833A3C09B13256B2B275AEF33D349B2C52EBEC2588755ECD97EA4E09"
+        ],
+        [
+          "ChallengeRunStartAPIView",
+          "ClassDef",
+          "D0C731F6DD407EC32B26B6FEB91E9D61C4143354D5348ECCD2ED490DAB5A6210",
+          "E738BEE89574B6E3E844DA0C739F6501A3FC1E5BD7A4A07411FE65879CBF5924"
+        ],
+        [
+          "ChallengeRunDetailAPIView",
+          "ClassDef",
+          "C8AD139713A50EA03E43AF81A63E9A185C2D7955B973F83E3F266C463AB1ADFB",
+          "AB1285C02DC04DB77149FE651390E9012245E3A7FD7B1AB833ABCF98F5B5C13C"
+        ],
+        [
+          "ChallengeCommandSubmitAPIView",
+          "ClassDef",
+          "4B1F9788CCBFB0C583BCF24F05BF3D8B2C7B36C49833019776B42751D709192E",
+          "1B4228F5508218F26F72909342872847DFA0EEEDADEDB165A3959D771F27B279"
+        ],
+        [
+          "ChallengeWorkspaceFileAPIView",
+          "ClassDef",
+          "1E157D769AC86B512D93A8CFFA91A33F4279C7197A8E940FE4CD764F5F35471F",
+          "3214E168314FAD59499207428A0456CB19EAC8D1E9CAB10F5762495895CCADA3"
+        ],
+        [
+          "ChallengeRetryAPIView",
+          "ClassDef",
+          "87963DC8F637045D02F4BB5EEABB99514833ADBE0DE32240AA3B2F286EB68DA9",
+          "B47A3BAFDCFB83F260A5930D2CB565593D8E2590221EED9D09994F2817D6D695"
+        ],
+        [
+          "_get_workspace_run",
+          "FunctionDef",
+          "E0B9C36CCB685A975D85EEBDA29DBD8D1E499E234A2825A6E5EBAA5308DC9F6A",
+          "D12F801F53E6FB36FE10255F8FCE9E83A4ABF4601B9068A4E4FF35FDF29066E1"
+        ]
+      ]
+    },
+    {
+      "path": "frontend/src/shared/level/types.ts",
+      "kind": "ts",
+      "regions": [
+        [
+          "RepositoryValue",
+          "9983CC8D3AC3C56D735A0A0DD75D7D00E59726664679E272453B2450A79F0FC2"
+        ],
+        [
+          "RepositoryCommit",
+          "CCE069995DAA9EA9F070858BD28ED43B8BA22E9D2D298876430842B6E07E8A82"
+        ],
+        [
+          "ConflictDetail",
+          "925EFF8122F2634ABBFAB6E8F4F00B372950F27873BB8BEF3FCADCF0A42DEC93"
+        ],
+        [
+          "RepositorySnapshot",
+          "4FDA745D03004B7F9B948A57193BCBE2411E262669D18912FCAD5F6543B2F885"
+        ],
+        [
+          "CopyDetail",
+          "734DAE191FFB138202AA5665146DEF9B8C3C26C6CC03FE66008513BE56B0F47F"
+        ],
+        [
+          "LevelScenarioContext",
+          "6573472CE3794BBEA522E8542A89ECFD77597C2C9E0C48CB4E59F32CC23FAAC9"
+        ],
+        [
+          "RepositoryVisualization",
+          "D93810830C7EC7F57785E2C517DA6DA856F9F9D096A6DCD0A0036F75938D409E"
+        ],
+        [
+          "RepositoryCommandState",
+          "213553252A7BB66E3C82FF37BE51BEF09054D7D3438679479DCF0F2C3E845522"
+        ],
+        [
+          "CommandExecutionPayload",
+          "1C5DC24B29C95E1B51D4975D1441CB78C93F770D9CF095F337C19238F3D9ECF9"
+        ],
+        [
+          "TerminalLine",
+          "863FAB403FCBB430B9CA8D1BA1374FA8881DA1DA503548286526A54726A01FD6"
+        ]
+      ]
+    },
+    {
+      "path": "frontend/src/features/adventures/types.ts",
+      "kind": "ts",
+      "regions": [
+        [
+          "AdventureRunStatus",
+          "071AC896F509B74F1C4040FA22582F6062F5298F0748D56041EF826517012F19"
+        ],
+        [
+          "AttemptStatus",
+          "FBC9B03CC45B3D488577C6CE929273CA68B9A50073820E139F7439234339C42F"
+        ],
+        [
+          "AdventureScaffolding",
+          "E835E7D293767AA770E66D5A0F8C847ED4C45C233FD954EC9F79F4CA66C80528"
+        ],
+        [
+          "AdventureCommandBudget",
+          "6548CF245C7A658BBCFF61CFCBBA81851BC578B8013482E686D1B0A1B2C62A1C"
+        ],
+        [
+          "AdventureAttemptCounts",
+          "31B7F4233A2F16C657D2C8CA8CAC212DF72857F91004C3972BBBE38B2815E018"
+        ],
+        [
+          "AdventureLevelRef",
+          "AC16C7CFEC8D187B42CFC941723773D420A47B1D3CAD558B6E2A32FAF495073E"
+        ],
+        [
+          "AdventureScenarioContext",
+          "4E0F4C4FA958FBD6A7DD8E2F1597E6CAFF2B8345A08975BE29598C764BE11A2A"
+        ],
+        [
+          "AdventureAttempt",
+          "0AE74EB3D1D37669EC2E470FC614A65B0783CFE81E25544D5453EA652FCB2BCD"
+        ],
+        [
+          "AdventureAttemptResult",
+          "2B755808C0BE4AD70AB2757B86A85208159BD24D4A73AF977F833FF9215A5B4C"
+        ],
+        [
+          "AdventureMasteryCommand",
+          "5AA833BF4472F12FD04412D02B2BC7CF25A3D2CF9B0F14F56CA03BF77C2369FC"
+        ],
+        [
+          "AdventureMastery",
+          "B94982F6B9B92B06A60A7B0B10B18AB53F6E2AE62E1C7B7D584AEAD5020727AE"
+        ]
+      ]
+    },
+    {
+      "path": "frontend/src/features/challenges/types.ts",
+      "kind": "ts",
+      "regions": [
+        [
+          "Difficulty",
+          "40E4F25760F8E1768B0DF23F1D19D41BD32ABE3F67C730D88C83C9B346AD03AE"
+        ],
+        [
+          "ChallengeStatus",
+          "060FFD8FC2490A8B9BCE11B493F8116EC45C04B79B5F9C58F98A618713051BB0"
+        ],
+        [
+          "AttemptStatus",
+          "17DD5B888C260233D9E9FF9830139AEB1F5E714E8E83704A5DC6F71296783846"
+        ],
+        [
+          "ChallengeActionIntent",
+          "85DC792485204DF1B5F6BF47404ACD3360FC8515E70A43BFF367734969C2EA79"
+        ],
+        [
+          "CommandBudget",
+          "40C1500950B869BC881860D415D6451B3193B4A32C1BBC27172894C3F92D79A5"
+        ],
+        [
+          "LatestAttemptStats",
+          "39530F0E3A5F40E7333B7CA278906A917D32F15C396F1BB5B9AC50E049144225"
+        ],
+        [
+          "LevelRunCompletion",
+          "AD128FF714E015B7F5B3A5FB5DE9985553282C0D6EF73FB4075D0FA357694A22"
+        ],
+        [
+          "ChallengeTrialAccess",
+          "B73A1247DCA7643FAB324BC5159C9D2731FDA857BC33DF337F49A4670F8B110D"
+        ],
+        [
+          "CommandPreviewBlock",
+          "A4986BF513E61718F75C11D8D39F171297CBD91F63405D37082F4E04555FCABA"
+        ],
+        [
+          "CommandPreviewPage",
+          "8F2FB0E87598E0A3F5FFF92865C613DF88E3960C335150C30B773AE4C8E369CA"
+        ],
+        [
+          "CommandPreviewMetadata",
+          "9122829DEBAA1F3D242AF16DD552DDBDBC0D365A6CAF55250230E399E217F416"
+        ],
+        [
+          "CommandFormPreview",
+          "06F897A7A1C8CA9C59A45AC3BB024547330F46C4C3E245E6B5C236DC03B2722B"
+        ],
+        [
+          "ChallengeRef",
+          "9948F85226360DE28288225E55FB0117B0718EFC366C98766210D2BCF6E91CD5"
+        ],
+        [
+          "RESULT_TARGET_MATCHED",
+          "8AD86621FAAAFBCD1ED22DF91A5C961F6AD2D1E7DDEA5BD334BB1D4940B3E0D7"
+        ]
+      ]
+    },
+    {
+      "path": "frontend/src/features/adventures/api/adventuresApi.ts",
+      "kind": "api",
+      "imports": [
+        [
+          "@/shared/api/httpClient",
+          "DBDDFD2F20D2E4F34A0A28787A0D4D5E54D1DCD50B7CF18517A3C6C2ABE218CE"
+        ],
+        [
+          "@/shared/level/types",
+          "3197D5435462E3626F721C11C7976F8C621DCA1EFAEFC955ED1815520762BF17"
+        ],
+        [
+          "@/shared/level-runtime/runMutationInputs",
+          "0FB0905274753D25B40267CF8DFFA8D4EA07FFCAF431D9733A7D0FB129F3D955"
+        ],
+        [
+          "@/shared/level/workspaceFileTypes",
+          "E10263611F451AF9A3CAB0D14AFAB338A601C1CC4F75C75B6C482D017EC4E527"
+        ]
+      ],
+      "normalized_sha256": "4E9BF2135E982E0DA41B8A5357D10D291AB57C0D7349B44F5D73C4865C78E1C2",
+      "operations": [
+        "adventure_levels_runs_create",
+        "adventure_runs_retrieve",
+        "adventure_runs_level_library_create",
+        "adventure_runs_submit_command_create",
+        "adventure_runs_files_create",
+        "adventure_runs_files_partial_update",
+        "adventure_runs_files_update",
+        "adventure_runs_files_destroy",
+        "adventure_runs_destroy"
+      ]
+    },
+    {
+      "path": "frontend/src/features/challenges/api/challengeRunsApi.ts",
+      "kind": "api",
+      "imports": [
+        [
+          "@/shared/api/httpClient",
+          "DBDDFD2F20D2E4F34A0A28787A0D4D5E54D1DCD50B7CF18517A3C6C2ABE218CE"
+        ],
+        [
+          "@/shared/level/types",
+          "3197D5435462E3626F721C11C7976F8C621DCA1EFAEFC955ED1815520762BF17"
+        ],
+        [
+          "@/shared/level-runtime/runMutationInputs",
+          "0FB0905274753D25B40267CF8DFFA8D4EA07FFCAF431D9733A7D0FB129F3D955"
+        ],
+        [
+          "@/shared/level/workspaceFileTypes",
+          "E10263611F451AF9A3CAB0D14AFAB338A601C1CC4F75C75B6C482D017EC4E527"
+        ]
+      ],
+      "normalized_sha256": "501D77ABC56DDE4CFE0455B4667D543A1CD9F586DAEBA2520F0CC620D3EA2A87",
+      "operations": [
+        "challenge_runs_retrieve",
+        "challenge_runs_submit_command_create",
+        "challenge_runs_files_create",
+        "challenge_runs_files_partial_update",
+        "challenge_runs_files_update",
+        "challenge_runs_files_destroy"
+      ]
+    },
+    {
+      "path": "scripts/checks/architecture_guard/contracts/gameplay.py",
+      "kind": "py",
+      "regions": [
+        [
+          "Expr@1",
+          "Expr",
+          "9176CD30A682F4943AA65726F33859C0669C4B774D46C931E9B67B548733B121",
+          "248DB0EDD8AEDAA59CAA1E46763CFC70794E160CE237D2A79274D8E28D833E5B"
+        ],
+        [
+          "Assign@35",
+          "Assign",
+          "485505FFBCB16D4DE1C76E5CC53C9D010608DE664B6A68A898F287C06759BB97",
+          "ACA9F54578C11832A5BD1DD9414553A975E4B76A6728AADB5FF14263332F20F6"
+        ],
+        [
+          "Assign@38",
+          "Assign",
+          "3923F1FDD02F98765E23EAF191677CCDF33015D53AC3DB7B615A0121FB10F33F",
+          "83BEACFE64CDA549A03627A9ACD44E994061687D033748CB0B8831E44A098055"
+        ],
+        [
+          "Assign@41",
+          "Assign",
+          "272568C20CE53C2C9C5CFDCE7A418C54B1686C31098B0B1A4909ECDD8AE363B0",
+          "10E8C7254AEBA16BEF7A29E0623B10BA8985DD48CE7D9C83298699DE551CE3D6"
+        ],
+        [
+          "Assign@44",
+          "Assign",
+          "5469D0521FBDD85B94537826AEBD75EED5D90C51873F4214F429EC40D7958091",
+          "A9C5711D1F1812E4052E8F8CEC4474B9690CFCF9E44143FE1DA82A9C6A6DE340"
+        ],
+        [
+          "Assign@47",
+          "Assign",
+          "9EF39B5042F12A2CD3CED383B26C2AD2312C1ED7369C83454089A0182B6335B9",
+          "6A4ADAA80AE17763378EE4CD586DA04743A64887E3C82332C2199176F3387070"
+        ],
+        [
+          "Assign@50",
+          "Assign",
+          "8B2993500699A3C173531CF663E0744081B9349BC30E35EB31230B8889B1AB29",
+          "06C9CDD2D0F033FBC4AE5DCE5146385EECE19BDF119D76DFEB6D0F6EB3768276"
+        ],
+        [
+          "Assign@53",
+          "Assign",
+          "5950CE8A99C93E98589474663AC057B816DC0816B64C0BF6C6AB51C47787A89B",
+          "8FB6E9798D66EF789288447BB1BE5FBA71D19F6D041337E568058FC4F9981E0F"
+        ],
+        [
+          "Assign@56",
+          "Assign",
+          "256A44C26D217F7C96507DB28C7B74D23C4FB103E28E864645F9EC1BA9C70326",
+          "0CE3BA9F81539F5DB78AF2731882F53C87AA29DB7FEF2EEC15CDB875A8B49B27"
+        ],
+        [
+          "Assign@62",
+          "Assign",
+          "1667724587514E3419D5930884C49A8064A73026D97387F4EE917DF151099B51",
+          "E49DC7C3E0D3AC7342BF0EA487B4981069C7575F3EC66D02729CFFF2C6513520"
+        ],
+        [
+          "Assign@68",
+          "Assign",
+          "2D4607A597A7A13DD12D5FC4CB13E7B6006A992ABFB4B552001823947BDBF86C",
+          "B1014BF0BF647015D5D5FC017F6073F972E207867CC4E7727F75CBD8264FBC1F"
+        ],
+        [
+          "Assign@76",
+          "Assign",
+          "1A08B8674E4EC8EC9376FF445DEB866195B9B9BC02CA6B0495008DB671B99199",
+          "7CA769D36A3E6A36C52FE2A0160266A78081354E3A1E29F0D2B709AE069A472F"
+        ],
+        [
+          "Assign@86",
+          "Assign",
+          "95D5462957E3B6B22BE2611A23282D95E4F508E9C278F928B8BF27D7530F6043",
+          "E4A1300838F38B43FC865DF4A6A418E82FFAD94812C9915DA4AEDA9D8BF8C957"
+        ],
+        [
+          "gameplay_mutation_frontend_violations",
+          "FunctionDef",
+          "4042858D5EB551571088F359DB3239EB9A9DD71DED162A2384A07373380A905E",
+          "4FEF2EAE5246A3B6F4F149B6AABB29E1DB04606171EE73F1DD564205F02F8CB1"
+        ],
+        [
+          "gameplay_mutation_openapi_violations",
+          "FunctionDef",
+          "0C557F24D75AB29FC6058221D9B96812B075548F94216F029B2C4D582025024B",
+          "A1E3DD26CAD20BEA15174D5E7119E0D08B9D1D9DBA9C63EC7517B2F377B1D819"
+        ],
+        [
+          "gameplay_mutation_backend_violations",
+          "FunctionDef",
+          "F243E719009B7742035588F8FEE748E816E16A200F0DE8E7C2D515D452706020",
+          "FDFDFA132185A9F67EAD14E653CAD9CC4858A84C7509A9BBBBA95F36AE27A77D"
+        ],
+        [
+          "check_gameplay_mutation_contract_ownership",
+          "FunctionDef",
+          "E82E9C5BA4D6AD8DEA2A2E4136DBD0174521BDF836FD81B60C09FB0033D020B3",
+          "C7C126F627F627927C4D2371B0858AA0E38C1E518D271012A8A042E62FB40DED",
+          [
+            "C2340E005D6BFB66EB26545BBF1D3B495BCFB176E183C2233C73749D8EFA44A3",
+            "4F44E9FE34B8F4D6474F94A6669A776540FC2585B435FA2451DBA7A45A87C578",
+            "F09332FDEE84484D5C6B44B9AA25F86EFEF327DDFFCC904971C8F65842EA9E13",
+            "FC48382651B75B7D6F5CA2630DAEF0F1CB4E291256092EF8092A2CB6602FC31C",
+            "FB2175C75F8D77BC1276ACC877644ADBDBC573707753C1EDF6FB448D5885D97B",
+            "AFDEEF9051B8F1DF466573BC053E3D303A6E0D6544417051EEB979139D305723",
+            "BB23D6044806E030EE1DC49C3F19C6620158F22A4AEA622ED893D9200EABC6D2"
+          ]
+        ]
+      ]
+    },
+    {
+      "path": "backend/common/tests/architecture_guard/test_gameplay_policy.py",
+      "kind": "py",
+      "regions": [
+        [
+          "Expr@1",
+          "Expr",
+          "8EE3D5656175C8639F0F06FBC1166C00340E4186FDC5CDA3294969B61273C811",
+          "2A807527E9A6EDA270F8428DF2008C5282CEFAA292A1D075185EF2F311F01B14"
+        ],
+        [
+          "Assign@7",
+          "Assign",
+          "C3B79CC0FC0ABF7E754FE12453B07A3FF989AC6EE79C33FE82DEC38461EE1E84",
+          "13F8E4D948ACDEA94C73139E6E479319AB8E533C5179BF65F857D9585C8107C8"
+        ],
+        [
+          "If@8",
+          "If",
+          "16EE88DD635014DA2046F166201F0054377E2C1A4264FBBD9B922F34023F8032",
+          "93346F38AC411148F3E1C19723B3C5E05C7AF05B70CECD2EBBBCDFBEF0F1AB9A"
+        ],
+        [
+          "Delete@29",
+          "Delete",
+          "1801D352069AA0E62403936A503AE9CDC8B18575055883EAA5B27E722F723EFE",
+          "1D63458485E049F2CD170D2CB44193E9A4DCC3ABC7CDF4F618E09B278C32FE9F"
+        ],
+        [
+          "Assign@31",
+          "Assign",
+          "E343E3130D447F8712C3132BB26E820DEDB72320BCAD18CA0D8F256006414489",
+          "FD0490C29749316517E3288102270B09651B2CE247A4815101515CFEB0A52E30"
+        ],
+        [
+          "test_gameplay_mutation_guard_rejects_frontend_contract_shadows_and_casts",
+          "FunctionDef",
+          "5D912E541351F4189E2497777AFA46825C161729BBC714FF7CE8E0A1CF1FB039",
+          "876A2AAE49D208ECA3C77D72BBCDAD79F71AFCC647DE2454B8092E83BFE8A0E1"
+        ],
+        [
+          "test_gameplay_mutation_frontend_guard_allows_unrelated_structural_types",
+          "FunctionDef",
+          "70A1C49D3DCF636150AD6F849F484D722F38C41C83CB053D2E2832C9E2467920",
+          "B03A4F126FC5860CEB31FE18BC3E928D4E6E09214E455622126694928A2F55E0"
+        ],
+        [
+          "test_gameplay_mutation_frontend_guard_rejects_partial_adapter_delegation",
+          "FunctionDef",
+          "AB86E4171A3431B6422F0340A9099EA881D837BAB8F9CF405CC56E52F0B04F9D",
+          "EE4041FCD4EF908A24EA5904E7356DA2986027EF500992D252B9649E4A7A4DC0"
+        ],
+        [
+          "test_gameplay_mutation_backend_guard_rejects_alternate_owners_and_runtime_use",
+          "FunctionDef",
+          "1F2A0AB2BC04F7F0B655C8C7EEDC6B3FE2A93536D3CDEAACA7D3FA2C09B522C7",
+          "864ECE060DF1318B2A80E1CC4D9B2BAC01704E2D536D82A848DAF9C6F5281FDD"
+        ],
+        [
+          "test_gameplay_mutation_openapi_guard_rejects_schema_forks_and_http_drift",
+          "FunctionDef",
+          "AD71762535AE55090BFE9B977BF14CED6E2E802E3F2384D78DCF92B484C0D70B",
+          "1E617B08622B6F1551E2E22B8619B4B73A67648B0FCE21FFFB144C61A376F69C"
+        ],
+        [
+          "test_gameplay_mutation_contract_runtime_obeys_shared_generated_owners",
+          "FunctionDef",
+          "71F256E9B1E673E716C4AAE2250C09D4D85AF59A1C1C41747A9500AD0C2660B5",
+          "D8B1DB68097300D7E8DE1BE2311705E92470E214C7CC8DC15EDA140FC5C0D708"
+        ]
+      ]
+    }
+  ],
+  "append_only": [
+    [
+      "ARCHITECTURE.md",
+      true,
+      14847,
+      "66BD2611B52EAA6C383B344765DD04AC06DFC06EECF75162E51CE22D75AE061A",
+      "original_prefix_must_remain_byte_exact"
+    ],
+    [
+      "scripts/README.md",
+      true,
+      601,
+      "6CE76836F41431CCCBE5C9F3F8BBB477BA403EA46A61DBB22EA8DC16FF25C33A",
+      "original_prefix_must_remain_byte_exact"
+    ]
+  ],
+  "generated_semantics": {
+    "components": {
+      "RuntimeStepResponse": {
+        "properties": [
+          "id",
+          "command_text",
+          "terminal_output",
+          "result_category",
+          "command_classification",
+          "contextual_feedback",
+          "visualization_snapshot",
+          "created_at"
+        ],
+        "required": [
+          "command_text",
+          "id"
+        ],
+        "additionalProperties": "ABSENT",
+        "sha256": "2D253C505A4E3EE1957856CA15ACD73B64FB5CA3AA93954D7F2717E5C438915B"
+      },
+      "AdventureRunResponse": {
+        "properties": [
+          "id",
+          "status",
+          "replay",
+          "stars",
+          "library_opened",
+          "is_passed",
+          "selected_level",
+          "next_level",
+          "story",
+          "chapter_id",
+          "battle_stage",
+          "current_level_index",
+          "total_levels",
+          "current_wave",
+          "total_waves",
+          "mastery",
+          "completed_at",
+          "current_attempt",
+          "results",
+          "progress"
+        ],
+        "required": [
+          "current_level_index",
+          "current_wave",
+          "id",
+          "is_passed",
+          "library_opened",
+          "mastery",
+          "progress",
+          "replay",
+          "results",
+          "stars",
+          "status",
+          "total_levels",
+          "total_waves"
+        ],
+        "additionalProperties": "ABSENT",
+        "sha256": "1A15C1DA239825A64B95FAC18307711A507B2E83E91D3649E477A2343786321C"
+      },
+      "AdventureLevelLibraryResponse": {
+        "properties": [
+          "book",
+          "run"
+        ],
+        "required": [
+          "book",
+          "run"
+        ],
+        "additionalProperties": "ABSENT",
+        "sha256": "A06A84467DE1B5DE3BD6DB5BEB79E524D9801BBA7C4E94DA43DF1E30B7D2C5E8"
+      },
+      "AdventureCommandResponse": {
+        "properties": [
+          "run",
+          "solved",
+          "stdout",
+          "stderr",
+          "exit_code",
+          "terminal_output",
+          "command_classification",
+          "step",
+          "command_outcome"
+        ],
+        "required": [
+          "command_classification",
+          "command_outcome",
+          "exit_code",
+          "run",
+          "solved",
+          "stderr",
+          "stdout",
+          "step",
+          "terminal_output"
+        ],
+        "additionalProperties": "ABSENT",
+        "sha256": "30AA77AC9147B44D5BC2AD2193B376D6118792EA106B8DC3B5CEB71A651B6F6F"
+      },
+      "ChallengeRunResponse": {
+        "properties": [
+          "id",
+          "replay",
+          "stars",
+          "status",
+          "failure_reason",
+          "completed_at",
+          "challenge",
+          "scenario_context",
+          "chapter",
+          "battle_stage",
+          "difficulty",
+          "reward_coins",
+          "variant",
+          "mastery_progress",
+          "policy",
+          "counts",
+          "scaffolding",
+          "repository_state",
+          "visualization",
+          "expected_state",
+          "steps",
+          "next_difficulty",
+          "sibling_levels",
+          "completion"
+        ],
+        "required": [
+          "challenge",
+          "chapter",
+          "counts",
+          "id",
+          "mastery_progress",
+          "policy",
+          "replay",
+          "repository_state",
+          "scaffolding",
+          "stars",
+          "status",
+          "steps",
+          "variant",
+          "visualization"
+        ],
+        "additionalProperties": "ABSENT",
+        "sha256": "A0ACDD298EF21843C0C245EFE09ACA23514E7DE4479C7216217A7C6C099C4979"
+      },
+      "ChallengeCommandResponse": {
+        "properties": [
+          "run",
+          "command_outcome",
+          "stdout",
+          "stderr",
+          "exit_code",
+          "command_family",
+          "diagnostic_metadata",
+          "step"
+        ],
+        "required": [
+          "command_outcome",
+          "run",
+          "step"
+        ],
+        "additionalProperties": "ABSENT",
+        "sha256": "C2871C7B98E2A8FE834715AEB86B08C87AB0B70A0860D8982B7B9F0AF84154BB"
+      }
+    },
+    "operations": {
+      "adventure_levels_runs_create": {
+        "path": "/api/adventure-levels/{level_id}/runs/",
+        "method": "POST",
+        "responses": {
+          "201": {
+            "application/json": {
+              "$ref": "#/components/schemas/AdventureRunResponse"
+            }
+          }
+        }
+      },
+      "adventure_runs_retrieve": {
+        "path": "/api/adventure-runs/{run_id}/",
+        "method": "GET",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/AdventureRunResponse"
+            }
+          }
+        }
+      },
+      "adventure_runs_files_create": {
+        "path": "/api/adventure-runs/{run_id}/files/",
+        "method": "POST",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/AdventureRunResponse"
+            }
+          }
+        }
+      },
+      "adventure_runs_files_update": {
+        "path": "/api/adventure-runs/{run_id}/files/",
+        "method": "PUT",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/AdventureRunResponse"
+            }
+          }
+        }
+      },
+      "adventure_runs_files_partial_update": {
+        "path": "/api/adventure-runs/{run_id}/files/",
+        "method": "PATCH",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/AdventureRunResponse"
+            }
+          }
+        }
+      },
+      "adventure_runs_files_destroy": {
+        "path": "/api/adventure-runs/{run_id}/files/",
+        "method": "DELETE",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/AdventureRunResponse"
+            }
+          }
+        }
+      },
+      "adventure_runs_level_library_create": {
+        "path": "/api/adventure-runs/{run_id}/level-library/",
+        "method": "POST",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/AdventureLevelLibraryResponse"
+            }
+          }
+        }
+      },
+      "adventure_runs_submit_command_create": {
+        "path": "/api/adventure-runs/{run_id}/submit-command/",
+        "method": "POST",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/AdventureCommandResponse"
+            }
+          }
+        }
+      },
+      "challenge_runs_retrieve": {
+        "path": "/api/challenge-runs/{run_id}/",
+        "method": "GET",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/ChallengeRunResponse"
+            }
+          }
+        }
+      },
+      "challenge_runs_files_create": {
+        "path": "/api/challenge-runs/{run_id}/files/",
+        "method": "POST",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/ChallengeRunResponse"
+            }
+          }
+        }
+      },
+      "challenge_runs_files_update": {
+        "path": "/api/challenge-runs/{run_id}/files/",
+        "method": "PUT",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/ChallengeRunResponse"
+            }
+          }
+        }
+      },
+      "challenge_runs_files_partial_update": {
+        "path": "/api/challenge-runs/{run_id}/files/",
+        "method": "PATCH",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/ChallengeRunResponse"
+            }
+          }
+        }
+      },
+      "challenge_runs_files_destroy": {
+        "path": "/api/challenge-runs/{run_id}/files/",
+        "method": "DELETE",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/ChallengeRunResponse"
+            }
+          }
+        }
+      },
+      "challenge_runs_retry_create": {
+        "path": "/api/challenge-runs/{run_id}/retry/",
+        "method": "POST",
+        "responses": {
+          "201": {
+            "application/json": {
+              "$ref": "#/components/schemas/ChallengeRunResponse"
+            }
+          }
+        }
+      },
+      "challenge_runs_submit_command_create": {
+        "path": "/api/challenge-runs/{run_id}/submit-command/",
+        "method": "POST",
+        "responses": {
+          "200": {
+            "application/json": {
+              "$ref": "#/components/schemas/ChallengeCommandResponse"
+            }
+          }
+        }
+      },
+      "challenge_trials_runs_create": {
+        "path": "/api/challenge-trials/{trial_id}/runs/",
+        "method": "POST",
+        "responses": {
+          "201": {
+            "application/json": {
+              "$ref": "#/components/schemas/ChallengeRunResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "generator_owner": [
+    "scripts/api/api_contract.py",
+    true,
+    19497,
+    "FCF41D695D712401E5F98BC347995E89079E3DDCF132DAC6C29FBD1618B14D23"
+  ],
+  "behavior": {
+    "adventure_full_endpoints": {
+      "start_status": 201,
+      "detail_status": 200,
+      "file_status": 200,
+      "start_keys": [
+        "battle_stage",
+        "chapter_id",
+        "completed_at",
+        "current_attempt",
+        "current_level_index",
+        "current_wave",
+        "id",
+        "is_passed",
+        "library_opened",
+        "mastery",
+        "next_level",
+        "passed",
+        "progress",
+        "replay",
+        "results",
+        "selected_level",
+        "stars",
+        "status",
+        "story",
+        "total_levels",
+        "total_waves"
+      ],
+      "detail_keys": [
+        "battle_stage",
+        "chapter_id",
+        "completed_at",
+        "current_attempt",
+        "current_level_index",
+        "current_wave",
+        "id",
+        "is_passed",
+        "library_opened",
+        "mastery",
+        "next_level",
+        "passed",
+        "progress",
+        "replay",
+        "results",
+        "selected_level",
+        "stars",
+        "status",
+        "story",
+        "total_levels",
+        "total_waves"
+      ],
+      "file_keys": [
+        "battle_stage",
+        "chapter_id",
+        "completed_at",
+        "current_attempt",
+        "current_level_index",
+        "current_wave",
+        "id",
+        "is_passed",
+        "library_opened",
+        "mastery",
+        "next_level",
+        "passed",
+        "progress",
+        "replay",
+        "results",
+        "selected_level",
+        "stars",
+        "status",
+        "story",
+        "total_levels",
+        "total_waves"
+      ],
+      "file_repository_changed": true,
+      "file_present_after": true
+    },
+    "adventure_partial_command": {
+      "status_code": 200,
+      "envelope_keys": [
+        "command_classification",
+        "command_outcome",
+        "exit_code",
+        "run",
+        "solved",
+        "stderr",
+        "stdout",
+        "step",
+        "terminal_output"
+      ],
+      "run_keys": [
+        "current_attempt",
+        "id",
+        "partial",
+        "status"
+      ],
+      "step_keys": [
+        "command_text",
+        "id",
+        "result_category",
+        "terminal_output"
+      ],
+      "partial_literal": true,
+      "current_attempt_is_object": true,
+      "state_before": {
+        "status": "started",
+        "command_count": 0,
+        "counted_command_count": 0,
+        "current_wave_changed_from_fixture": false,
+        "step_count": 0,
+        "level_completion_count": 0,
+        "coin_transaction_count": 0,
+        "wallet_balance": 0,
+        "run_wave_statuses": [
+          "started"
+        ]
+      },
+      "state_delta": {
+        "status": "started",
+        "command_count": 1,
+        "counted_command_count": 0,
+        "current_wave_changed_from_fixture": 0,
+        "repository_changed": false,
+        "step_count": 1,
+        "level_completion_count": 0,
+        "coin_transaction_count": 0,
+        "wallet_balance": 0,
+        "run_wave_statuses": [
+          "started"
+        ]
+      }
+    },
+    "adventure_wave_transition_command": {
+      "status_code": 200,
+      "envelope_keys": [
+        "command_classification",
+        "command_outcome",
+        "exit_code",
+        "run",
+        "solved",
+        "stderr",
+        "stdout",
+        "step",
+        "terminal_output"
+      ],
+      "run_keys": [
+        "battle_stage",
+        "chapter_id",
+        "completed_at",
+        "current_attempt",
+        "current_level_index",
+        "current_wave",
+        "id",
+        "is_passed",
+        "library_opened",
+        "mastery",
+        "next_level",
+        "passed",
+        "progress",
+        "replay",
+        "results",
+        "selected_level",
+        "stars",
+        "status",
+        "story",
+        "total_levels",
+        "total_waves"
+      ],
+      "step_keys": [
+        "command_text",
+        "id",
+        "result_category",
+        "terminal_output"
+      ],
+      "partial_absent": true,
+      "state_before": {
+        "status": "started",
+        "command_count": 0,
+        "counted_command_count": 0,
+        "current_wave_changed_from_fixture": false,
+        "step_count": 0,
+        "level_completion_count": 0,
+        "coin_transaction_count": 0,
+        "wallet_balance": 0,
+        "run_wave_statuses": [
+          "started"
+        ]
+      },
+      "state_delta": {
+        "status": "started",
+        "command_count": 0,
+        "counted_command_count": 0,
+        "current_wave_changed_from_fixture": 1,
+        "repository_changed": false,
+        "step_count": 1,
+        "level_completion_count": 0,
+        "coin_transaction_count": 0,
+        "wallet_balance": 0,
+        "run_wave_statuses": [
+          "completed",
+          "started"
+        ]
+      }
+    },
+    "adventure_terminal_command": {
+      "status_code": 200,
+      "envelope_keys": [
+        "command_classification",
+        "command_outcome",
+        "exit_code",
+        "run",
+        "solved",
+        "stderr",
+        "stdout",
+        "step",
+        "terminal_output"
+      ],
+      "run_keys": [
+        "battle_stage",
+        "chapter_id",
+        "completed_at",
+        "current_attempt",
+        "current_level_index",
+        "current_wave",
+        "id",
+        "is_passed",
+        "library_opened",
+        "mastery",
+        "next_level",
+        "passed",
+        "progress",
+        "replay",
+        "results",
+        "selected_level",
+        "stars",
+        "status",
+        "story",
+        "total_levels",
+        "total_waves"
+      ],
+      "step_keys": [
+        "command_text",
+        "id",
+        "result_category",
+        "terminal_output"
+      ],
+      "partial_absent": true,
+      "state_before": {
+        "status": "started",
+        "command_count": 0,
+        "counted_command_count": 0,
+        "current_wave_changed_from_fixture": false,
+        "step_count": 0,
+        "level_completion_count": 0,
+        "coin_transaction_count": 0,
+        "wallet_balance": 0,
+        "run_wave_statuses": [
+          "started"
+        ]
+      },
+      "state_delta": {
+        "status": "completed",
+        "command_count": 1,
+        "counted_command_count": 1,
+        "current_wave_changed_from_fixture": 0,
+        "repository_changed": true,
+        "step_count": 1,
+        "level_completion_count": 1,
+        "coin_transaction_count": 5,
+        "wallet_balance": 342,
+        "run_wave_statuses": [
+          "completed"
+        ]
+      }
+    },
+    "challenge_full_endpoints": {
+      "start_status": 201,
+      "detail_status": 200,
+      "file_status": 200,
+      "retry_status": 201,
+      "start_keys": [
+        "battle_stage",
+        "challenge",
+        "chapter",
+        "completed_at",
+        "completion",
+        "counts",
+        "difficulty",
+        "expected_state",
+        "failure_reason",
+        "id",
+        "mastery_progress",
+        "next_difficulty",
+        "policy",
+        "replay",
+        "repository_state",
+        "reward_coins",
+        "scaffolding",
+        "scenario_context",
+        "sibling_levels",
+        "stars",
+        "status",
+        "steps",
+        "story",
+        "variant",
+        "visualization"
+      ],
+      "detail_keys": [
+        "battle_stage",
+        "challenge",
+        "chapter",
+        "completed_at",
+        "completion",
+        "counts",
+        "difficulty",
+        "expected_state",
+        "failure_reason",
+        "id",
+        "mastery_progress",
+        "next_difficulty",
+        "policy",
+        "replay",
+        "repository_state",
+        "reward_coins",
+        "scaffolding",
+        "scenario_context",
+        "sibling_levels",
+        "stars",
+        "status",
+        "steps",
+        "story",
+        "variant",
+        "visualization"
+      ],
+      "file_keys": [
+        "battle_stage",
+        "challenge",
+        "chapter",
+        "completed_at",
+        "completion",
+        "counts",
+        "difficulty",
+        "expected_state",
+        "failure_reason",
+        "id",
+        "mastery_progress",
+        "next_difficulty",
+        "policy",
+        "replay",
+        "repository_state",
+        "reward_coins",
+        "scaffolding",
+        "scenario_context",
+        "sibling_levels",
+        "stars",
+        "status",
+        "steps",
+        "story",
+        "variant",
+        "visualization"
+      ],
+      "retry_keys": [
+        "battle_stage",
+        "challenge",
+        "chapter",
+        "completed_at",
+        "completion",
+        "counts",
+        "difficulty",
+        "expected_state",
+        "failure_reason",
+        "id",
+        "mastery_progress",
+        "next_difficulty",
+        "policy",
+        "replay",
+        "repository_state",
+        "reward_coins",
+        "scaffolding",
+        "scenario_context",
+        "sibling_levels",
+        "stars",
+        "status",
+        "steps",
+        "story",
+        "variant",
+        "visualization"
+      ],
+      "file_repository_changed": true,
+      "file_present_after": true
+    },
+    "challenge_started_command": {
+      "status_code": 200,
+      "envelope_keys": [
+        "command_family",
+        "command_outcome",
+        "diagnostic_metadata",
+        "exit_code",
+        "run",
+        "stderr",
+        "stdout",
+        "step"
+      ],
+      "run_keys": [
+        "completed_at",
+        "counts",
+        "failure_reason",
+        "id",
+        "replay",
+        "repository_state",
+        "stars",
+        "status",
+        "visualization"
+      ],
+      "step_keys": [
+        "command_classification",
+        "command_text",
+        "contextual_feedback",
+        "created_at",
+        "evaluation_result",
+        "id",
+        "result_category",
+        "terminal_output",
+        "visualization_snapshot"
+      ],
+      "transition_only_absent": true,
+      "state_before": {
+        "status": "started",
+        "counted_action_total": 0,
+        "non_counted_diagnostic_total": 0,
+        "total_attempts": 0,
+        "step_count": 0,
+        "trial_completion_count": 0,
+        "level_completion_count": 0,
+        "coin_transaction_count": 0,
+        "wallet_balance": 0
+      },
+      "state_delta": {
+        "status": "started",
+        "counted_action_total": 0,
+        "non_counted_diagnostic_total": 1,
+        "total_attempts": 1,
+        "repository_changed": false,
+        "step_count": 1,
+        "trial_completion_count": 0,
+        "level_completion_count": 0,
+        "coin_transaction_count": 0,
+        "wallet_balance": 0
+      }
+    },
+    "challenge_terminal_command": {
+      "status_code": 200,
+      "envelope_keys": [
+        "command_family",
+        "command_outcome",
+        "diagnostic_metadata",
+        "exit_code",
+        "run",
+        "stderr",
+        "stdout",
+        "step"
+      ],
+      "run_keys": [
+        "completed_at",
+        "completion",
+        "counts",
+        "failure_reason",
+        "id",
+        "mastery_progress",
+        "next_difficulty",
+        "replay",
+        "repository_state",
+        "sibling_levels",
+        "stars",
+        "status",
+        "visualization"
+      ],
+      "step_keys": [
+        "command_classification",
+        "command_text",
+        "contextual_feedback",
+        "created_at",
+        "evaluation_result",
+        "id",
+        "result_category",
+        "terminal_output",
+        "visualization_snapshot"
+      ],
+      "mastery_progress_non_null": true,
+      "sibling_levels_non_null_list": true,
+      "completion_present": true,
+      "completion_nullable": true,
+      "next_difficulty_present": true,
+      "next_difficulty_nullable": true,
+      "state_before": {
+        "status": "started",
+        "counted_action_total": 0,
+        "non_counted_diagnostic_total": 0,
+        "total_attempts": 0,
+        "step_count": 0,
+        "trial_completion_count": 0,
+        "level_completion_count": 0,
+        "coin_transaction_count": 0,
+        "wallet_balance": 0
+      },
+      "state_delta": {
+        "status": "completed",
+        "counted_action_total": 1,
+        "non_counted_diagnostic_total": 0,
+        "total_attempts": 1,
+        "repository_changed": true,
+        "step_count": 1,
+        "trial_completion_count": 1,
+        "level_completion_count": 1,
+        "coin_transaction_count": 5,
+        "wallet_balance": 340
+      }
+    }
+  }
+}

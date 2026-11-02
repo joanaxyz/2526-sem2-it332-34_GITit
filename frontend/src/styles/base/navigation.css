@@ -86,7 +86,7 @@
   align-items: center;
   align-self: stretch;
   width: fit-content;
-  min-width: 13.5rem;
+  min-width: 0;
   padding: 0 1.1rem;
   border-right: 1px solid rgba(var(--theme-primary-rgb), 0.16);
   color: var(--text-primary);
@@ -96,8 +96,9 @@
 .app-brand-logo {
   display: block;
   flex: 0 0 auto;
-  width: 9rem;
-  height: auto;
+  width: auto;
+  height: 3rem;
+  max-width: 14rem;
   object-fit: contain;
 }
 

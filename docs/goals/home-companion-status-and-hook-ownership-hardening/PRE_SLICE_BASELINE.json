@@ -1,0 +1,96 @@
+{
+  "version": 1,
+  "captured_on": "2026-08-25",
+  "focused_home_baseline": {
+    "command": "npm test -- --run src/features/home/components/HomeHubView.test.tsx src/features/home/components/HomeStatsView.test.tsx --reporter=dot",
+    "working_directory": "frontend",
+    "exit_code": 0,
+    "result": "2 files / 17 tests passed"
+  },
+  "architecture_baseline": {
+    "algorithm_result": "14 tests passed",
+    "live_result": "Architecture boundaries look clean."
+  },
+  "review_findings": [
+    "Profile renders confirmed-empty output while the loadout read is loading or errored.",
+    "Home hook-owner census can be bypassed by aliased imports."
+  ],
+  "files": {
+    "frontend/src/features/home/components/HomeHubView.tsx": {
+      "bytes": 3698,
+      "lines": 117,
+      "sha256": "A3F8CABDF935F2E8E9D11ECD9DBEBBAC59278062710016A0C87A9D32442F279A",
+      "status": " M"
+    },
+    "frontend/src/features/home/components/HomeHubView.test.tsx": {
+      "bytes": 12293,
+      "lines": 315,
+      "sha256": "AC30831BE7013A15E085A4A82DAAEECC45709385224589ACD7C38585AF74EC0F",
+      "status": "??"
+    },
+    "frontend/src/features/home/components/home-hub/HomeProfileWorkspace.tsx": {
+      "bytes": 1371,
+      "lines": 47,
+      "sha256": "FFC3125775E3740EE590FE9D33C2761C57D668711D50B5F14FC8E3CEA53344BB",
+      "status": "??"
+    },
+    "frontend/src/features/home/components/home-hub/HomeProfilePanel.tsx": {
+      "bytes": 6486,
+      "lines": 160,
+      "sha256": "AB336D23C9DC238F2590723D6F66A5200364A4E49EA7446DBCD842BBDF5F73E4",
+      "status": "??"
+    },
+    "frontend/src/features/home/components/home-hub/HomeCombatShowcase.tsx": {
+      "bytes": 9981,
+      "lines": 244,
+      "sha256": "617529C69E9F05FE504C65AC3F02274B0F4E56D19AB5670709EA3B9C508379C7",
+      "status": "??"
+    },
+    "frontend/src/styles/features/home/hub-empty-states.css": {
+      "bytes": 1479,
+      "lines": 67,
+      "sha256": "6B97814F9D01D6B31764A273DA27418A17AAB5B837ACAA346E87CA4BA05CAB07",
+      "status": "??"
+    },
+    "scripts/checks/check_architecture_boundaries.py": {
+      "bytes": 64599,
+      "lines": 1790,
+      "sha256": "D4B149E3E04E7CA7DD42C44B5A327AD5600A4148F77508B3614DB50F5CB3703B",
+      "status": " M"
+    },
+    "backend/common/tests/test_architecture_guard_algorithms.py": {
+      "bytes": 24510,
+      "lines": 428,
+      "sha256": "4F7FF367AE3D8D8F27E970E3E1BB7112B4E969F59FA75E096CDB7BC7669537B5",
+      "status": " M"
+    },
+    "frontend/src/shared/player-loadout/usePlayerLoadout.ts": {
+      "bytes": 1514,
+      "lines": 44,
+      "sha256": "4F48A674FCDE3270AC2B4125D4A51C46B3BE2A7E902863AA905BE03D30E7096E",
+      "status": " M",
+      "protected": true
+    },
+    "frontend/src/features/home/components/HomeStatsView.tsx": {
+      "bytes": 1785,
+      "lines": 48,
+      "sha256": "60BB5365B0889806925C11B4B762DE8F12BDF0BD64E719D804E513A6DBF8D055",
+      "status": " M",
+      "protected": true
+    },
+    "frontend/src/features/home/components/HomeLoadoutView.tsx": {
+      "bytes": 9699,
+      "lines": 218,
+      "sha256": "92CBA318DB3BAB6405F9241EFC44774FBD5B63F311E80307068F7D820A86AB3C",
+      "status": " M",
+      "protected": true
+    },
+    "frontend/src/shared/navigation/routes.ts": {
+      "bytes": 1121,
+      "lines": 34,
+      "sha256": "637117B44DE66D4D0FA5CC49B6BD9090187D6B26063E8CFAC581A52872D3A02D",
+      "status": "",
+      "protected": true
+    }
+  }
+}

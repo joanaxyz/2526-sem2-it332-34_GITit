@@ -77,7 +77,8 @@
   }
 
   .app-brand-logo {
-    width: 7.5rem;
+    height: 2.6rem;
+    max-width: 12rem;
   }
 
   .app-audio-control {
@@ -110,7 +111,8 @@
 
 @media (max-width: 430px) {
   .app-brand-logo {
-    width: 6.5rem;
+    height: 2.3rem;
+    max-width: 10rem;
   }
 
   .app-audio-control {
@@ -125,7 +127,8 @@
   }
 
   .app-brand-logo {
-    width: 5rem;
+    height: 2rem;
+    max-width: 8.5rem;
   }
 
   .app-wallet {
