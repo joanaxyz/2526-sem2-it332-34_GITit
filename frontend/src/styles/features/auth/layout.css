@@ -1,6 +1,6 @@
 .auth-shell {
   position: relative;
-  min-height: 100vh;
+  min-height: 100svh;
   overflow: auto;
   color: var(--text-primary);
   background: hsl(var(--background));

@@ -15,7 +15,7 @@ export function BrandMark({ size = 'lg', className }: BrandMarkProps) {
       aria-label="GIT it! home"
       className={cn('auth-brand', size === 'sm' && 'auth-brand--sm', className)}
     >
-      <img src={gitLogoImage} alt="" width={900} height={305} />
+      <img src={gitLogoImage} alt="" width={1431} height={623} />
     </Link>
   )
 }
