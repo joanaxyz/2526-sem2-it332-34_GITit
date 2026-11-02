@@ -325,3 +325,90 @@ button.shop-price-chip:focus-visible {
   box-shadow: 0 0 8px rgba(var(--theme-primary-rgb), 0.75);
   transform: scaleX(2.7);
 }
+
+/* ── Onboarding sparkle emphasis ──────────────────────────────────────────
+   Applied to the purchase button and back-to-map button while onboarding
+   is active, so the user knows exactly what to click next.
+   Sparkle pseudo-elements sit on the parent containers (.shop-purchase-dock
+   and .app-onboarding-banner__actions) so they don't conflict with
+   .ui-drawn-plate which owns ::before/::after on the button itself. */
+
+@keyframes shop-onboarding-glow {
+  0%, 100% { --ui-plate-glow: 0 0 10px rgba(var(--theme-primary-rgb), 0.35); filter: drop-shadow(0 0 5px rgba(var(--theme-primary-rgb), 0.4)); }
+  50%       { --ui-plate-glow: 0 0 22px rgba(var(--theme-primary-rgb), 0.75); filter: drop-shadow(0 0 12px rgba(var(--theme-primary-rgb), 0.75)); }
+}
+
+@keyframes shop-sparkle-spin-cw {
+  from { transform: translate(-50%, -50%) rotate(0deg)   translateY(-1.55rem) rotate(0deg); }
+  to   { transform: translate(-50%, -50%) rotate(360deg) translateY(-1.55rem) rotate(-360deg); }
+}
+
+@keyframes shop-sparkle-spin-ccw {
+  from { transform: translate(-50%, -50%) rotate(0deg)    translateY(1.55rem) rotate(0deg)    scale(0.7); }
+  to   { transform: translate(-50%, -50%) rotate(-360deg) translateY(1.55rem) rotate(360deg) scale(0.7); }
+}
+
+@keyframes shop-sparkle-twinkle {
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  40%       { opacity: 0.4; transform: scale(0.7); }
+  70%       { opacity: 0.9; transform: scale(1.1); }
+}
+
+/* Glow pulse on the buttons themselves */
+[data-onboarding='shop-purchase']:not(:disabled),
+[data-onboarding='shop-back-to-map'] {
+  animation: shop-onboarding-glow 1.8s ease-in-out infinite;
+}
+
+/* Sparkle dots on the parent containers */
+.shop-purchase-dock:has([data-onboarding='shop-purchase']:not(:disabled))::before,
+.app-onboarding-banner__actions:has([data-onboarding='shop-back-to-map'])::before,
+.shop-purchase-dock:has([data-onboarding='shop-purchase']:not(:disabled))::after,
+.app-onboarding-banner__actions:has([data-onboarding='shop-back-to-map'])::after {
+  content: '✦';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 10;
+  color: rgb(var(--theme-primary-rgb));
+  font-size: 1rem;
+  line-height: 1;
+  pointer-events: none;
+  filter: drop-shadow(0 0 5px rgba(var(--theme-primary-rgb), 1));
+}
+
+.shop-purchase-dock:has([data-onboarding='shop-purchase']:not(:disabled))::before,
+.app-onboarding-banner__actions:has([data-onboarding='shop-back-to-map'])::before {
+  animation: shop-sparkle-spin-cw 2.4s linear infinite;
+}
+
+.shop-purchase-dock:has([data-onboarding='shop-purchase']:not(:disabled))::after,
+.app-onboarding-banner__actions:has([data-onboarding='shop-back-to-map'])::after {
+  animation: shop-sparkle-spin-ccw 3s linear infinite;
+  filter: drop-shadow(0 0 4px rgba(var(--theme-primary-rgb), 0.8));
+}
+
+/* Ensure the parent containers can show sparkle pseudo-elements outside their bounds */
+.shop-purchase-dock {
+  overflow: visible;
+}
+
+.app-onboarding-banner__actions {
+  position: relative;
+  overflow: visible;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-onboarding='shop-purchase']:not(:disabled),
+  [data-onboarding='shop-back-to-map'] {
+    animation: none;
+    filter: drop-shadow(0 0 8px rgba(var(--theme-primary-rgb), 0.7));
+  }
+
+  .shop-purchase-dock:has([data-onboarding='shop-purchase']:not(:disabled))::before,
+  .shop-purchase-dock:has([data-onboarding='shop-purchase']:not(:disabled))::after,
+  .app-onboarding-banner__actions:has([data-onboarding='shop-back-to-map'])::before,
+  .app-onboarding-banner__actions:has([data-onboarding='shop-back-to-map'])::after {
+    display: none;
+  }
+}

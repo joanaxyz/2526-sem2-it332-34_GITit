@@ -78,13 +78,19 @@ export function OnboardingProvider({ userId, children }: { userId?: number; chil
     if (!preferencesSettled) return
     if (pathname === SHOP_ROUTE) {
       if (['welcome', 'orientation', 'stories'].includes(routePhase)) setPhase('shop')
-      else if (['home', 'equip'].includes(routePhase)) setPhase('purchase')
     }
+    // Visiting /home while the journey is still active advances the player
+    // past any remaining shop steps. The home tour is retired, so go straight
+    // to done rather than through the old `home` phase.
     if (
       pathname === HOME_ROUTE
       && ['welcome', 'orientation', 'stories', 'shop', 'purchase'].includes(routePhase)
-    ) setPhase('home')
+    ) setPhase('done')
   }, [pathname, preferencesSettled, routePhase, setPhase])
-  const value = useMemo(() => ({ phase, setPhase }), [phase, setPhase])
+  // Legacy phases `home` and `equip` are retired. Existing accounts that
+  // stalled there are treated as done immediately — no banner, no home tour.
+  const effectivePhase: OnboardingPhase =
+    phase === 'home' || phase === 'equip' ? 'done' : phase
+  const value = useMemo(() => ({ phase: effectivePhase, setPhase }), [effectivePhase, setPhase])
   return <OnboardingContext.Provider value={value}>{children}</OnboardingContext.Provider>
 }

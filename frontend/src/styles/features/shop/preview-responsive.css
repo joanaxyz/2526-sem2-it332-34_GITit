@@ -3,15 +3,12 @@
   min-height: 0;
 }
 
-.shop-companion-preview-suite {
-  overflow-y: visible;
-}
-
 @media (max-width: 1200px) {
   .shop-ref-page {
     height: auto;
     min-height: var(--app-content-height);
-    overflow: visible;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .shop-ref-layout {

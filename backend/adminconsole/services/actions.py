@@ -40,6 +40,25 @@ def record_admin_action(
 
 class AdminUserActionService:
     @transaction.atomic
+    def delete_user(self, *, actor, target):
+        from rest_framework.exceptions import ValidationError
+
+        if actor.pk == target.pk:
+            raise ValidationError({"detail": "You cannot delete your own account."})
+        username = str(target)
+        user_id = target.pk
+        record_admin_action(
+            actor=actor,
+            action="user.delete",
+            target_type="auth.user",
+            target_id=user_id,
+            target_label=username,
+            before={"username": target.username, "email": target.email},
+            after={},
+        )
+        target.delete()
+
+    @transaction.atomic
     def set_staff(self, *, actor, target, value: bool):
         if actor.pk == target.pk and not value:
             raise ValidationError({"value": "You cannot revoke your own admin access."})

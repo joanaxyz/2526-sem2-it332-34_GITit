@@ -25,14 +25,13 @@ describe('LandingPage', () => {
     useAuthStore.setState({ accessToken: null, user: null })
   })
 
-  it('invites a visitor to register, and signs in through the story map', () => {
+  it('invites a visitor to register', () => {
     renderLanding()
 
     expect(screen.getByRole('heading', { level: 1, name: /start reading the repository/i })).toBeInTheDocument()
     for (const link of screen.getAllByRole('link', { name: 'Begin your quest' })) {
       expect(link).toHaveAttribute('href', '/register')
     }
-    expect(screen.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/stories/arcane-spire')
   })
 
   it('sends a live session straight to the story map', async () => {

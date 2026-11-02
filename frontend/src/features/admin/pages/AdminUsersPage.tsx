@@ -151,6 +151,10 @@ export function AdminUsersPage() {
             <LearnerDetail
               userId={selected}
               onChanged={() => qc.invalidateQueries({ queryKey: queryKeys.adminUsers(search) })}
+              onDeleted={() => {
+                setSelected(null)
+                void qc.invalidateQueries({ queryKey: queryKeys.adminUsers(search) })
+              }}
             />
           </aside>
         )}
@@ -160,7 +164,7 @@ export function AdminUsersPage() {
 }
 
 // ─── learner detail drawer ───────────────────────────────────────────────────
-function LearnerDetail({ userId, onChanged }: { userId: number; onChanged: () => void }) {
+function LearnerDetail({ userId, onChanged, onDeleted }: { userId: number; onChanged: () => void; onDeleted: () => void }) {
   const qc = useQueryClient()
   const [coinAmt,  setCoinAmt]  = useState('')
   const [coinNote, setCoinNote] = useState('')
@@ -182,6 +186,10 @@ function LearnerDetail({ userId, onChanged }: { userId: number; onChanged: () =>
       if (vars.action === 'grant_coins') { setCoinAmt(''); setCoinNote(''); setReqId(null) }
       onChanged()
     },
+  })
+  const deleteUser = useMutation({
+    mutationFn: () => adminApi.deleteUser(userId),
+    onSuccess: () => onDeleted(),
   })
 
   if (detail.isPending) return <LoadingState label="Loading" variant="panel" />
@@ -292,9 +300,31 @@ function LearnerDetail({ userId, onChanged }: { userId: number; onChanged: () =>
               </Button>
             </div>
 
+            <div className="ld-btn-row">
+              <Button
+                size="sm"
+                variant="destructive"
+                className="flex-1"
+                disabled={action.isPending || deleteUser.isPending}
+                onClick={() => {
+                  if (!window.confirm(
+                    `Permanently delete "${user.username}"?\n\nThis removes all their data and cannot be undone.`
+                  )) return
+                  deleteUser.mutate()
+                }}
+              >
+                Delete account
+              </Button>
+            </div>
+
             {action.isError && (
               <p className="ld-action-err">
                 {adminErrorMessage(action.error, 'Action failed.')}
+              </p>
+            )}
+            {deleteUser.isError && (
+              <p className="ld-action-err">
+                {adminErrorMessage(deleteUser.error, 'Could not delete account.')}
               </p>
             )}
           </div>

@@ -18,16 +18,18 @@ import {
 } from '@/features/story-map/api/storyMapApi'
 import { useStories } from '@/features/story-map/hooks/useStories'
 import { chapterTitle, firstOpenChapter, mascotKnowledgeFocusLevelId } from '@/features/story-map/utils/storyMapChapter'
+import { useStoryMapCoachmarks } from '@/features/story-map/hooks/useStoryMapCoachmarks'
+import { useMascotKnowledge } from '@/features/skills/hooks/useMascotKnowledge'
 import { queryKeys } from '@/shared/api/queryKeys'
+import { useAuthStore } from '@/shared/auth/useAuth'
+import { AnchoredCoachmark } from '@/shared/components/AnchoredCoachmark'
 import { EmptyState } from '@/shared/components/EmptyState'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
+import { WorldMascot } from '@/shared/mascot/WorldMascot'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
-import { useAuthStore } from '@/shared/auth/useAuth'
 import { getStoryWorld } from '@/shared/story-worlds/registry'
 import { storyWorldStyle } from '@/shared/story-worlds/theme'
-import { WorldMascot } from '@/shared/mascot/WorldMascot'
-import { useMascotKnowledge } from '@/features/skills/hooks/useMascotKnowledge'
 
 const COMPACT_STORY_MAP_QUERY = '(max-width: 1120px)'
 
@@ -95,10 +97,15 @@ export function StoryMapPage() {
   } as CSSProperties
   const [activeChapterId, setActiveChapterId] = useState<number | null>(null)
   const userSelectedChapterId = useRef<number | null>(null)
+  // A story only runs orientation if it actually has a Module 0. Without this
+  // guard the disabled lessons query stays `isPending` forever, and the map
+  // below never leaves its loading state.
+  const orientationRequested =
+    orientationPhaseActive && Boolean(orientationChapter) && !orientationComplete
+
   const [leftRailOpen, setLeftRailOpen] = useState(false)
   const [rightRailOpen, setRightRailOpen] = useState(false)
   const compactStoryMap = useCompactStoryMap()
-
   useEffect(() => {
     if (companionRequiredFromRoute && !hasCompanion && !loadoutLoading) {
       setCompanionPromptOpen(true)
@@ -112,11 +119,6 @@ export function StoryMapPage() {
     setSearchParams(next, { replace: true })
     setCompanionPromptOpen(false)
   }, [companionRequiredFromRoute, hasCompanion, searchParams, setSearchParams])
-  // A story only runs orientation if it actually has a Module 0. Without this
-  // guard the disabled lessons query stays `isPending` forever, and the map
-  // below never leaves its loading state.
-  const orientationRequested =
-    orientationPhaseActive && Boolean(orientationChapter) && !orientationComplete
 
   useEffect(() => {
     if (!chapters.length || (orientationRequested && orientationLessonsQuery.isPending)) return
@@ -194,6 +196,10 @@ export function StoryMapPage() {
     ? { currentLevelId, levels: mapLevels }
     : undefined)
 
+  // mascot suppression is derived before early returns so hook order stays stable
+  const mascotSuppressedEarly = orientationPhaseActive || onboarding?.phase === 'stories'
+  const coachmarks = useStoryMapCoachmarks({ userId, orientationRequested, mascotSuppressed: mascotSuppressedEarly, hasCompanion, loadoutLoading })
+
   if (chaptersQuery.isLoading || (orientationRequested && orientationLessonsQuery.isPending)) {
     return <LoadingScreen description="Preparing the story map." label="Loading map" />
   }
@@ -213,6 +219,10 @@ export function StoryMapPage() {
   const leftRailHidden = compactStoryMap && !leftRailOpen
   const rightRailHidden = compactStoryMap && !rightRailOpen
   const showingOrientation = activeChapter.is_orientation
+  // Suppress the WorldMascot while onboarding tours are active so it doesn't
+  // overlap tour spotlights. Also suppressed inside orientation (existing behaviour).
+  const suppressMascot = showingOrientation || onboarding?.phase === 'stories'
+
   const selectChapter = (chapterId: number) => {
     userSelectedChapterId.current = chapterId
     setActiveChapterId(chapterId)
@@ -248,11 +258,20 @@ export function StoryMapPage() {
       style={storyWorldStyle(storyWorld)}
     >
       <div className="story-map-backdrop" style={storyMapStyle} aria-hidden="true" />
-      {!showingOrientation ? <WorldMascot
+      {!suppressMascot ? <WorldMascot
         surface="track"
         knowledge={mascotKnowledge}
         contextKey={`${storySlug}:${activeChapter.id}:${currentLevelId ?? 'complete'}`}
       /> : null}
+
+      {coachmarks.worldMascotCoachmarkVisible ? (
+        <AnchoredCoachmark
+          targetSelector=".world-mascot-actor"
+          title="Meet your little guide!"
+          body="This little companion has Git tips to share. Click it whenever you need a quick reminder!"
+          onDismiss={coachmarks.dismissWorldMascotCoachmark}
+        />
+      ) : null}
 
       <CompanionRequiredOverlay
         open={companionPromptOpen && !hasCompanion && !loadoutLoading}
@@ -361,6 +380,9 @@ export function StoryMapPage() {
                 chapters={chapters}
                 activeChapterId={activeChapter.id}
                 onSelectChapter={selectChapter}
+                showCoachmark={coachmarks.chapterCoachmarkVisible}
+                onCoachmarkDismiss={coachmarks.dismissChapterCoachmark}
+                inOrientation={showingOrientation}
               />
               {!showingOrientation ? <StorySkillFocusPanel
                 levels={levels}

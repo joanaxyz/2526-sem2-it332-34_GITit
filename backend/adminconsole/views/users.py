@@ -1,6 +1,7 @@
 """User-management HTTP adapters for the admin console."""
 
 from drf_spectacular.utils import extend_schema
+from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -54,6 +55,12 @@ class AdminUserDetailAPIView(APIView):
     @extend_schema(responses={200: AdminUserDetailSerializer})
     def get(self, request, user_id: int):
         return Response(user_detail(_require_user(user_id)))
+
+    @extend_schema(responses={204: None})
+    def delete(self, request, user_id: int):
+        target = _require_user(user_id)
+        AdminUserActionService().delete_user(actor=request.user, target=target)
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class AdminUserActionAPIView(APIView):

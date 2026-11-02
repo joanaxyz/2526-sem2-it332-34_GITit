@@ -13,14 +13,21 @@ const PHONE_WIDTH = 720
 /**
  * General help on Home, the map, and the shop, voiced by the equipped companion.
  * It remembers whether the learner left it open or closed.
+ *
+ * @param suppressOpen - When true the window stays hidden without writing to storage,
+ *   so the saved preference is preserved and takes over once suppression lifts.
+ *   Used by the caller during early onboarding phases to avoid competing with tours.
  */
-export function HomeTutor() {
+export function HomeTutor({ suppressOpen = false }: { suppressOpen?: boolean }) {
   const { companion } = usePlayerLoadout()
   const [open, setOpen] = usePersistentState<boolean>(
     'tutor-window:home-open',
     window.innerWidth > PHONE_WIDTH,
     (saved) => saved === true,
   )
+  // During early phases the window is hidden without writing to storage — the
+  // student's saved preference is preserved and takes effect once suppression lifts.
+  const effectiveOpen = open && !suppressOpen
   const launcher = useRef<HTMLButtonElement>(null)
   const refocusLauncher = useRef(false)
 
@@ -44,11 +51,11 @@ export function HomeTutor() {
         label={`Ask ${companion.label}`}
         caption={`Ask ${companion.label}`}
         portrait={<TutorCompanionPortrait companion={companion} className="tutor-companion--launcher" />}
-        open={open}
+        open={effectiveOpen}
         buttonRef={launcher}
         onOpen={() => setOpen(true)}
       />
-      {open ? <TutorWindow companion={companion} context={HOME_CONTEXT} onDismiss={dismiss} /> : null}
+      {effectiveOpen ? <TutorWindow companion={companion} context={HOME_CONTEXT} onDismiss={dismiss} /> : null}
     </>
   )
 }

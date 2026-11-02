@@ -2,7 +2,7 @@ export type LevelTourMode = 'adventure' | 'challenge' | 'tier'
 
 // Versioned per mode so a tour change replays only the affected onboarding.
 const LEVEL_TOUR_VERSIONS: Record<LevelTourMode, string> = {
-  adventure: 'v5',
+  adventure: 'v6',
   challenge: 'v6',
   tier: 'v6',
 }

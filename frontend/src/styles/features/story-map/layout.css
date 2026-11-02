@@ -64,11 +64,9 @@
 }
 
 .story-map-left {
-  height: clamp(42rem, calc(var(--story-map-page-height) - 1.85rem), 51rem);
-  /* Shorter viewports: scroll inside the pinned rail instead of letting its
-     panels spill over the content that follows the stage. */
+  height: calc(var(--story-map-page-height) - 1.85rem);
   max-height: calc(var(--story-map-page-height) - 1.7rem);
-  overflow-y: auto;
+  overflow-y: hidden;
 }
 
 .story-map-right {
@@ -78,7 +76,7 @@
 
 .chapter-overview {
   height: 100%;
-  grid-template-rows: minmax(17rem, 1fr) auto minmax(14rem, 0.85fr);
+  grid-template-rows: minmax(0, 1fr) auto minmax(0, 0.85fr);
 }
 
 .chapter-overview > .game-panel {
