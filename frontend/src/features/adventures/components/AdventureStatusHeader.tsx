@@ -1,6 +1,6 @@
 import { BookOpen, RefreshCcw, X } from 'lucide-react'
 
-import gitLogoImage from '@/assets/images/GIT_logo.webp'
+import gitLogoImage from '@/assets/images/git-it-logo-new.png'
 import type { AdventureRun } from '@/features/adventures/types'
 import { AudioControls } from '@/shared/audio/AudioControls'
 import { WorkspaceHeaderAccount } from '@/shared/level/components/WorkspaceHeaderAccount'
@@ -49,7 +49,6 @@ export function AdventureStatusHeader({
 
       <a className="gameplay-header-brand" href="/home" aria-label="GIT it! home">
         <img src={gitLogoImage} alt="" />
-        <span>GIT it!</span>
       </a>
 
       <div className="gameplay-header-mission" aria-label="Current adventure">

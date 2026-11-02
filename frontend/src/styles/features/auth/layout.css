@@ -80,10 +80,10 @@
 
 .auth-brand img {
   display: block;
-  width: 19.5rem;
+  width: 22rem;
   max-width: 100%;
   height: auto;
   object-fit: contain;
 }
 
-.auth-brand--sm img { width: 12rem; }
+.auth-brand--sm img { width: 14rem; }

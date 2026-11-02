@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 import { isRouteErrorResponse, useRouteError } from 'react-router-dom'
 
-import gitLogoImage from '@/assets/images/git-it-logo-arcane.webp'
+import gitLogoImage from '@/assets/images/git-it-logo-new.png'
 import { Button } from '@/shared/components/Button'
 
 import './route-error.css'
