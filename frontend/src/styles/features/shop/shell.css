@@ -1,9 +1,8 @@
 /* Shop command deck: compact navigation over a focused storefront stage. */
 .shop-ref-page {
   position: relative;
-  min-height: var(--app-content-height);
-  overflow-x: hidden;
-  overflow-y: auto;
+  height: var(--app-content-height);
+  overflow: hidden;
   isolation: isolate;
   background: #010610;
   color: var(--text-primary);
@@ -34,7 +33,7 @@
 .shop-ref-layout {
   display: flex;
   width: min(100%, 110rem);
-  min-height: var(--app-content-height);
+  height: 100%;
   margin: 0 auto;
   flex-direction: column;
   gap: 0.68rem;
@@ -75,7 +74,8 @@
 .shop-view {
   min-width: 0;
   min-height: 0;
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  overflow: hidden;
 }
 
 .shop-error-panel,

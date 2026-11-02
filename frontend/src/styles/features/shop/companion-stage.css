@@ -1,8 +1,9 @@
 /* Primary storefront composition ----------------------------------------- */
 .shop-view--companions {
   display: grid;
+  height: 100%;
   grid-template-columns: minmax(34rem, 1fr) clamp(30rem, 38vw, 36rem);
-  grid-template-rows: minmax(34rem, 1fr);
+  grid-template-rows: minmax(0, 1fr);
   gap: 0.72rem;
 }
 

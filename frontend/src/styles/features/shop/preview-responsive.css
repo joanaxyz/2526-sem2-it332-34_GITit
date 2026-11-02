@@ -11,7 +11,8 @@
   .shop-ref-page {
     height: auto;
     min-height: var(--app-content-height);
-    overflow: visible;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .shop-ref-layout {
