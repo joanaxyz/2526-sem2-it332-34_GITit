@@ -14,13 +14,15 @@ export function AuthLayout() {
   const { pathname } = useLocation()
   const label = pathname.startsWith('/reset-password/') ? 'Choose a new password' : pageLabels[pathname] ?? 'Account'
 
+  const isRegister = pathname === '/register'
+
   return (
     <main className="auth-shell">
       <div className="auth-reference-bg" aria-hidden="true" />
-      <section className="auth-content" aria-label={label}>
+      <section className="auth-content" aria-label={label} data-page={isRegister ? 'register' : undefined}>
         <header className="auth-page-brand">
-          <BrandMark size="lg" />
-          <p>Learn Git through stories, battles, and a live repository graph.</p>
+          <BrandMark size={isRegister ? 'sm' : 'lg'} />
+          {!isRegister && <p>Learn Git through stories, battles, and a live repository graph.</p>}
         </header>
         <div className="auth-card auth-card--primary">
           <Outlet />
