@@ -27,6 +27,19 @@ function selectModule(number: number) {
 }
 
 describe('learner learning objectives', () => {
+  it('shows CAR against its starting point only once that point is measured', () => {
+    renderRecord(richPerformanceFixture)
+    const overall = within(screen.getByRole('group', { name: 'Overall KPIs' }))
+    const car = overall.getByText('Command Accuracy Rate').closest<HTMLElement>('.objective-metric')!
+    expect(car).toHaveTextContent('91%')
+    expect(car).toHaveTextContent('Started at 78%')
+    expect(moduleMetric(1, 'Command Accuracy Rate')).toHaveTextContent('Started at 76%')
+    expect(overall.getByText('Scenario Completion Rate').closest('.objective-metric')).not.toHaveTextContent('Started at')
+    cleanup()
+    renderRecord(emptyPerformanceFixture)
+    expect(screen.queryByText(/Started at/)).not.toBeInTheDocument()
+  })
+
   it('keeps overall readings independent of the selected module and objective', () => {
     const data = structuredClone(richPerformanceFixture)
     data.kpis.car = { value: 95, numerator: 95, denominator: 1 }
@@ -141,8 +154,8 @@ describe('learner learning objectives', () => {
     const evidence = within(row).getByText('Evidence').closest('details')!
     expect(evidence).not.toHaveAttribute('open')
     fireEvent.click(within(row).getByText('Evidence'))
-    expect(evidence).toHaveTextContent('91 score points across 1 assessed tier')
-    expect(evidence).toHaveTextContent('This objective’s first-mastery assessments')
+    expect(evidence).toHaveTextContent('91 score points across 1 scored scenario')
+    expect(evidence).toHaveTextContent('This objective’s scored scenarios')
   })
 
   it('honors a linked module and supports keyboard selection without losing query parameters', () => {
@@ -206,7 +219,7 @@ describe('learner learning objectives', () => {
     expect(objective('SO 1.2')).toHaveAttribute('data-state', 'miss')
     expect(objective('SO 1.3')).toHaveAttribute('data-state', 'none')
     expect(objective('SO 1.3')).not.toHaveTextContent('91%')
-    expect(objective('SO 1.1')).toHaveTextContent('70 score points across 1 assessed tier')
+    expect(objective('SO 1.1')).toHaveTextContent('70 score points across 1 scored scenario')
   })
 
   it('uses module-specific targets including inclusive Module 4 thresholds', () => {
@@ -272,7 +285,7 @@ describe('learner learning objectives', () => {
     renderRecord(richPerformanceFixture)
     const disclosure = screen.getByText('How these KPIs are measured').closest('details')!
     fireEvent.click(within(disclosure).getByText('How these KPIs are measured'))
-    expect(disclosure).toHaveTextContent('Mean of 100 × S × min(1, T ÷ max(1, A))')
+    expect(disclosure).toHaveTextContent('Mean over scenarios of 100 × min(1, T ÷ max(1, A))')
     const recovery = screen.getByText('Module 1 retry recovery · supplementary').closest('details')!
     fireEvent.click(within(recovery).getByText('Module 1 retry recovery · supplementary'))
     expect(recovery).toHaveTextContent('83.3%')

@@ -26,6 +26,7 @@ const performanceFixture: PerformanceSummary = {
   kpis: {
     scr: { value: 40, numerator: 14, denominator: 35 },
     car: { value: 95, numerator: 40, denominator: 42 },
+    car_first: { value: 95, numerator: 40, denominator: 42 },
     hlcr: { value: 0, numerator: 0, denominator: 3 },
     rta: { value: null, numerator: 0, denominator: 0 },
     retry_success_rate: { value: 40, numerator: 2, denominator: 5 },
@@ -34,6 +35,7 @@ const performanceFixture: PerformanceSummary = {
   modules: [
     {
       car: { value: null, numerator: 0, denominator: 0 },
+      car_first: { value: null, numerator: 0, denominator: 0 },
     number: 0,
       title: 'Module 0',
       scr: { value: 100, numerator: 2, denominator: 2 },
@@ -44,6 +46,7 @@ const performanceFixture: PerformanceSummary = {
     },
     {
       car: { value: 82, numerator: 82, denominator: 1 },
+      car_first: { value: 82, numerator: 82, denominator: 1 },
     number: 1,
       title: 'Repository Foundations',
       scr: { value: 50, numerator: 1, denominator: 2 },
@@ -54,6 +57,7 @@ const performanceFixture: PerformanceSummary = {
     },
     {
       car: { value: null, numerator: 0, denominator: 0 },
+      car_first: { value: null, numerator: 0, denominator: 0 },
     number: 2,
       title: 'Module 2',
       scr: { value: null, numerator: 0, denominator: 0 },

@@ -1,16 +1,33 @@
+import logging
+
 from django.core.exceptions import ObjectDoesNotExist
 from django.http import JsonResponse
 from django.views import defaults
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, Throttled
 from rest_framework.views import exception_handler as drf_exception_handler
 
 SERVER_ERROR_DETAIL = "Something went wrong on our side. Please try again."
+logger = logging.getLogger(__name__)
 
 
 def api_exception_handler(exc, context):
     if isinstance(exc, ObjectDoesNotExist):
         exc = NotFound()
-    return drf_exception_handler(exc, context)
+    response = drf_exception_handler(exc, context)
+    if response is not None and isinstance(exc, Throttled):
+        # DRF rounds wait up; use the identical value for JSON and HTTP clients.
+        seconds = int(exc.wait or 1)
+        response["Retry-After"] = str(seconds)
+        response.data["retry_after_seconds"] = seconds
+        logger.info(
+            "api_request_throttled",
+            extra={
+                "retry_after_seconds": seconds,
+                "path": getattr(context.get("request"), "path", ""),
+                "view": type(context.get("view")).__name__,
+            },
+        )
+    return response
 
 
 def _is_api_request(request) -> bool:

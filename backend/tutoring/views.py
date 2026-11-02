@@ -1,5 +1,3 @@
-import math
-
 from django.db import transaction
 from django.shortcuts import get_object_or_404
 from drf_spectacular.utils import extend_schema
@@ -55,9 +53,7 @@ class TutorChatAPIView(APIView):
         if response.status_code == 429:
             response.data = {
                 "detail": "Git-It needs a short break. Your question is still here.",
-                "retry_after_seconds": max(
-                    1, min(86400, math.ceil(getattr(exc, "wait", None) or 60))
-                ),
+                "retry_after_seconds": int(response["Retry-After"]),
             }
         return response
 

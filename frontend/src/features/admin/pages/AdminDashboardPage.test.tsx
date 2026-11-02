@@ -26,6 +26,7 @@ function moduleRow(number: number, overrides: Partial<ApiSchemas['PerformanceMod
     title: `Module ${number}`,
     scr: NONE,
     car: NONE,
+    car_first: NONE,
     hlcr: NONE,
     rta: NONE,
     retry_success_rate: NONE,
@@ -51,6 +52,7 @@ function analyticsFixture(
       kpis: {
         scr: { value: 50, numerator: 2, denominator: 4 },
         car: NONE,
+        car_first: NONE,
         hlcr: NONE,
         rta: NONE,
         retry_success_rate: NONE,
@@ -438,6 +440,7 @@ describe('AdminDashboardPage denominator labels', () => {
         kpis: {
           ...base.runebound_performance.kpis,
           car: { value: 17.6, numerator: 22, denominator: 125 },
+          car_first: { value: 17.6, numerator: 22, denominator: 125 },
           hlcr: { value: 25, numerator: 1, denominator: 4 },
           arc: { value: 0.1, numerator: 1, denominator: 10 },
           rta: { value: 50, numerator: 1, denominator: 2 },
@@ -447,7 +450,7 @@ describe('AdminDashboardPage denominator labels', () => {
     await screen.findByText('KPI Overview')
 
     expect(kpiCard('SCR')).toHaveTextContent('2 of 4 required tiers mastered')
-    expect(kpiCard('CAR')).toHaveTextContent('22 score points across 125 assessed tiers')
+    expect(kpiCard('CAR')).toHaveTextContent('22 score points across 125 scored scenarios')
     expect(kpiCard('HLCR')).toHaveTextContent('1 of 4 hard tiers mastered')
     expect(kpiCard('ARC')).toHaveTextContent('1 unsuccessful attempt across 10 mastered tiers')
     expect(kpiCard('RTA')).toHaveTextContent('1 of 2 transfer checkpoints cleared first time')

@@ -108,9 +108,11 @@ git init -b main
 
 **Objective**
 
-Initialize the current directory as a Git repository with `main` as its initial branch.
+Initialize the current directory as a Git repository, explicitly choosing `main` as its initial branch during initialization.
 
 **Do not stage files or create a commit.**
+
+**Required technique:** `git init -b main` (or `--initial-branch`) when the repository is created. Plain `git init`, renaming the branch afterwards, or reinitializing does not complete this variant.
 
 **Taught / authored example — 1 counted command**
 
@@ -127,7 +129,7 @@ git init --initial-branch main
 **Accepted alternative 2 (syntax) — 1 counted command**
 
 ```sh
-git init
+git init --initial-branch=main
 ```
 
 ### init-easy-trunk-branch

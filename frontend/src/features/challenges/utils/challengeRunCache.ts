@@ -40,7 +40,7 @@ export function syncChallengeRunInCache(
   const owner = cacheOwner(queryClient)
   if (!isCurrentOwner(owner) || owner.userId === null) return
   updateChallengeRunCache(queryClient, run)
-  if (options.broadcast !== false && !run.replay) {
+  if (options.broadcast !== false && (!run.replay || run.status === 'completed')) {
     broadcastChallengeRunSync(run, owner.userId)
   }
 

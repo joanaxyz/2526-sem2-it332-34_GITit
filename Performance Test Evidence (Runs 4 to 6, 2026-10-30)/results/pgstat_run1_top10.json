@@ -1,0 +1,72 @@
+[
+ {
+  "rank": 1,
+  "total_ms": 69.0,
+  "calls": 218,
+  "mean_ms": 0.316,
+  "query": "SELECT \"adventures_adventureleveltierrun\".\"id\", \"adventures_adventureleveltierrun\".\"player_id\", \"adventures_adventureleveltierrun\".\"tier_id\", \"adventures_adventureleveltierrun\".\"current_scenario_id\", \"adventures_adventureleveltierrun\".\"selected_variant_id\", \"adventures_adventureleveltierrun\".\"prior_"
+ },
+ {
+  "rank": 2,
+  "total_ms": 64.2,
+  "calls": 38,
+  "mean_ms": 1.689,
+  "query": "SELECT DISTINCT \"curriculum_commandform\".\"id\", \"curriculum_commandform\".\"command_skill_id\", \"curriculum_commandskill\".\"sort_order\", \"curriculum_commandform\".\"sort_order\", \"curriculum_commandform\".\"usage_form\" FROM \"curriculum_commandform\" INNER JOIN \"curriculum_commandskill\" ON (\"curriculum_commandf"
+ },
+ {
+  "rank": 3,
+  "total_ms": 42.2,
+  "calls": 218,
+  "mean_ms": 0.194,
+  "query": "INSERT INTO \"practice_commandstep\" (\"challenge_run_id\", \"adventure_tier_run_id\", \"player_id\", \"command_text\", \"terminal_output\", \"result_category\", \"command_classification\", \"normalized_command\", \"was_processable\", \"counted_increment\", \"attempt_number\", \"counted_total_after\", \"state_hash\", \"expected"
+ },
+ {
+  "rank": 4,
+  "total_ms": 34.0,
+  "calls": 219,
+  "mean_ms": 0.155,
+  "query": "SELECT $2 FROM ONLY \"public\".\"players_player\" x WHERE \"id\" OPERATOR(pg_catalog.=) $1 FOR KEY SHARE OF x"
+ },
+ {
+  "rank": 5,
+  "total_ms": 23.9,
+  "calls": 218,
+  "mean_ms": 0.11,
+  "query": "UPDATE \"adventures_adventureleveltierrun\" SET \"total_attempts\" = $1, \"non_counted_diagnostic_total\" = $2 WHERE \"adventures_adventureleveltierrun\".\"id\" = $3"
+ },
+ {
+  "rank": 6,
+  "total_ms": 22.7,
+  "calls": 218,
+  "mean_ms": 0.104,
+  "query": "SELECT \"curriculum_commandform\".\"id\", \"curriculum_commandform\".\"command_skill_id\", \"curriculum_commandform\".\"chapter_id\", \"curriculum_commandform\".\"slug\", \"curriculum_commandform\".\"usage_form\", \"curriculum_commandform\".\"label\", \"curriculum_commandform\".\"summary\", \"curriculum_commandform\".\"command_pr"
+ },
+ {
+  "rank": 7,
+  "total_ms": 19.2,
+  "calls": 38,
+  "mean_ms": 0.506,
+  "query": "SELECT \"adventures_adventureleveltierscenario_command_forms\".\"commandform_id\" AS \"command_forms\", COUNT(DISTINCT \"adventures_adventureleveltierscenario\".\"id\") AS \"n\" FROM \"adventures_adventureleveltierscenario\" INNER JOIN \"adventures_adventureleveltierscenario_command_forms\" ON (\"adventures_adventur"
+ },
+ {
+  "rank": 8,
+  "total_ms": 18.1,
+  "calls": 218,
+  "mean_ms": 0.083,
+  "query": "SELECT \"tutoring_commandguidehome\".\"id\", \"tutoring_commandguidehome\".\"teaching_key\", \"tutoring_commandguidehome\".\"scenario_id\", \"adventures_adventureleveltierscenario\".\"id\", \"adventures_adventureleveltierscenario\".\"tier_id\", \"adventures_adventureleveltierscenario\".\"slug\", \"adventures_adventurelevelt"
+ },
+ {
+  "rank": 9,
+  "total_ms": 18.0,
+  "calls": 294,
+  "mean_ms": 0.061,
+  "query": "SELECT \"auth_user\".\"id\", \"auth_user\".\"password\", \"auth_user\".\"last_login\", \"auth_user\".\"is_superuser\", \"auth_user\".\"username\", \"auth_user\".\"first_name\", \"auth_user\".\"last_name\", \"auth_user\".\"email\", \"auth_user\".\"is_staff\", \"auth_user\".\"is_active\", \"auth_user\".\"date_joined\", \"accounts_accountsecurity"
+ },
+ {
+  "rank": 10,
+  "total_ms": 14.8,
+  "calls": 38,
+  "mean_ms": 0.389,
+  "query": "SELECT \"adventures_adventureleveltierrun\".\"id\" AS \"id\", \"adventures_adventureleveltierrun\".\"player_id\" AS \"player_id\", \"adventures_adventureleveltierrun\".\"tier_id\" AS \"tier_id\", \"adventures_adventureleveltierrun\".\"status\" AS \"status\", \"adventures_adventureleveltierrun\".\"started_at\" AS \"started_at\", "
+ }
+]

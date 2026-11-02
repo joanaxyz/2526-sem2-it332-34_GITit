@@ -21,12 +21,12 @@ export const KPIS = [
   },
   {
     key: 'car', label: 'Command efficiency',
-    explanation: 'Command use on your first mastery run compared with a validated solution. Incorrect commands consume the same budget; optional diagnostics are free.',
-    scope: 'Modules 1–4 · first mastery assessment per tier',
-    emptyHint: 'Master a tier with a validated command reference. Older runs without reference evidence remain unscored.',
+    explanation: 'Command use compared with a validated solution, from your latest clear of each scenario on a variant you had not solved before. Replays that meet new variants can raise it; repeating a solved variant never counts. Incorrect commands consume the same budget; optional diagnostics are free.',
+    scope: 'Modules 1–4 · latest fresh clear per scenario',
+    emptyHint: 'Clear a scenario with a validated command reference. Older runs without reference evidence remain unscored.',
     abbr: 'CAR', name: 'Command Accuracy Rate', target: 70, up: true, pct: true,
-    formula: 'Mean of 100 × S × min(1, T ÷ max(1, A))',
-    why: 'Let T = validated reference commands, A = assessed commands, S = 1 for success and 0 otherwise. This official KPI measures reference-relative efficiency. Scores are capped at 100%.',
+    formula: 'Mean over scenarios of 100 × min(1, T ÷ max(1, A))',
+    why: 'Let T = validated reference commands and A = commands used on the scenario’s latest clear of content you had not cleared before. This official KPI measures reference-relative efficiency on new problems, so practice shows without rewarding memorized answers. Scores are capped at 100%.',
   },
   {
     key: 'hlcr', label: 'Hard tiers mastered',
@@ -103,8 +103,8 @@ const EVIDENCE: Record<EvidenceKey, { some: (n: number, d: number) => string; no
     none: 'No attempted required tiers yet',
   },
   car: {
-    some: (n, d) => `${n.toLocaleString()} score points across ${counted(d, 'assessed tier', 'assessed tiers')}`,
-    none: 'No validated command assessments yet',
+    some: (n, d) => `${n.toLocaleString()} score points across ${counted(d, 'scored scenario', 'scored scenarios')}`,
+    none: 'No scored scenarios yet',
   },
   hlcr: {
     some: (n, d) => `${n.toLocaleString()} of ${counted(d, 'hard tier', 'hard tiers')} mastered`,
@@ -146,6 +146,12 @@ export function metricTargetStatus(rate: Rate, target: number, up: boolean): Sta
 export function formatMetricValue(value: number | null, percent: boolean, empty = '—'): string {
   if (value === null) return empty
   return percent ? `${value}%` : value.toFixed(2)
+}
+
+/** CAR's starting point, from each scenario's first fresh clear; null until measured. */
+export function carStartingPoint(first: Rate | undefined): string | null {
+  if (!first || first.value === null || first.denominator === 0) return null
+  return `Started at ${formatMetricValue(first.value, true)}`
 }
 
 export function formatKpi(key: EvidenceKey, rate: Rate): string {

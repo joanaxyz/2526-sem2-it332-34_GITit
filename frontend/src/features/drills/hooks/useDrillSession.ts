@@ -5,7 +5,7 @@ import { drillsApi } from '@/features/drills/api/drillsApi'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { drillRunMutationKey } from '@/features/drills/utils/drillRunCache'
 import { assertAuthSession, useAuthStore } from '@/shared/auth/useAuth'
-import type { DrillAnswer, DrillPlan, DrillVerdict } from '@/features/drills/types'
+import type { DrillAnswer, DrillMistake, DrillPlan, DrillVerdict } from '@/features/drills/types'
 import type { DrillQueueState } from '@/features/drills/utils/drillQueue'
 import { gradeCard, gradeSequence } from '@/features/drills/utils/drillGrading'
 import {
@@ -56,13 +56,9 @@ function highWater(
 /**
  * One drill session: the queue, the answer in hand, and the verdict.
  *
- * Two deliberate shapes here. The verdict is separate state rather than
- * derived, because the loop is answer -> check -> read the outcome ->
- * continue, and collapsing check and continue into one press removes the
- * only moment a miss is actually taught. And `round` increments once per
- * ask so option shuffles are stable through re-renders (a resize must not
- * reorder the answers someone is reading) while still varying the next
- * time the same card comes round.
+ * A verdict holds the hit response before the next wave. Misses are kept
+ * for the results, so teaching does not interrupt flight. `round` keeps
+ * shuffles stable while answering and varies the next encounter.
  */
 export function useDrillSession(plan: DrillPlan) {
   const queryClient = useQueryClient()
@@ -81,6 +77,7 @@ export function useDrillSession(plan: DrillPlan) {
   const [finaleMissed, setFinaleMissed] = useState(false)
   const [answer, setAnswer] = useState<DrillAnswer | null>(null)
   const [verdict, setVerdict] = useState<DrillVerdict | null>(null)
+  const [mistakes, setMistakes] = useState<DrillMistake[]>([])
   const [round, setRound] = useState(0)
   const [fell, setFell] = useState(false)
   const reportedRef = useRef(false)
@@ -92,7 +89,7 @@ export function useDrillSession(plan: DrillPlan) {
   const ask = currentAsk(queue)
   const card = ask?.kind === 'card' ? (cardsByKey[ask.cardKey] ?? null) : null
   // Misses are already checkpointed, so lives survive leaving and resuming.
-  // Keep the fallen checkpoint visible until View results commits its answer.
+  // Keep the fallen checkpoint visible during its hit response.
   const gameOver = queue.answered - queue.correct >= 3 || (fell && !verdict)
   const lives = fell ? 0 : Math.max(0, 3 - (queue.answered - queue.correct) - (verdict && !verdict.correct ? 1 : 0))
   const finished = isFinished(queue) || gameOver
@@ -203,6 +200,12 @@ export function useDrillSession(plan: DrillPlan) {
     setVerdict(gradeCard(cardsByKey[ask.cardKey], ask.rung, picked))
   }, [ask, cardsByKey, finished, verdict])
 
+  const miss = useCallback(() => {
+    if (ask?.kind !== 'card' || verdict || finished) return
+    setAnswer(null)
+    setVerdict({ correct: false, picked: null, pickedGloss: null, reason: 'passed' })
+  }, [ask, finished, verdict])
+
   const resolveCheckpoint = useCallback((picked: DrillAnswer | null, didFall: boolean) => {
     if (!ask || verdict || finished) return
     const result = ask.kind === 'sequence'
@@ -215,6 +218,21 @@ export function useDrillSession(plan: DrillPlan) {
 
   const advance = useCallback(() => {
     if (!verdict) return
+    if (!verdict.correct) {
+      const reading = ask?.kind === 'card' && ask.rung === 'read'
+      const completing = ask?.kind === 'card' && ask.rung === 'complete'
+      const mistake: DrillMistake = {
+        cardKey: card?.key ?? null,
+        round,
+        subject: card ? reading ? card.command : card.intent : plan.sequence?.task || plan.sequence?.label || 'Order the moves',
+        picked: verdict.picked,
+        pickedGloss: verdict.pickedGloss,
+        expected: card ? reading ? card.intent : completing ? card.blank?.answer ?? '' : card.command : plan.sequence?.steps.join(' → ') ?? '',
+        expectedGloss: card ? reading ? card.command : completing ? card.command : card.intent : plan.sequence?.label ?? '',
+        voice: reading ? 'prose' : 'machine',
+      }
+      setMistakes((current) => [...current, mistake])
+    }
     if (ask?.kind === 'sequence' && !verdict.correct) setFinaleMissed(true)
     const next = answerCurrent(queue, verdict.correct)
     setQueue(next)
@@ -223,7 +241,7 @@ export function useDrillSession(plan: DrillPlan) {
     setAnswer(null)
     setVerdict(null)
     setRound((value) => value + 1)
-  }, [ask, checkpoint, queue, verdict])
+  }, [ask, card, checkpoint, plan.sequence, queue, round, verdict])
 
   const restart = useCallback(() => {
     reportedRef.current = false
@@ -237,6 +255,7 @@ export function useDrillSession(plan: DrillPlan) {
     setAnswer(null)
     setVerdict(null)
     setRound(0)
+    setMistakes([])
     setFell(false)
   }, [discard, plan.cards, plan.sequence, report])
 
@@ -290,6 +309,7 @@ export function useDrillSession(plan: DrillPlan) {
     verdict,
     check,
     collide,
+    miss,
     resolveCheckpoint,
     advance,
     restart,
@@ -302,6 +322,7 @@ export function useDrillSession(plan: DrillPlan) {
     accuracy: accuracy(queue),
     answered: queue.answered,
     shaky: shakyKeys(queue),
+    mistakes,
     savedProgress: report.data?.progress ?? null,
     saveFailed: report.isError,
     resumed,

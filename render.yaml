@@ -133,6 +133,30 @@ services:
         value: 60/hour
       - key: THROTTLE_COMMAND_SUBMIT
         value: 120/min
+      # Per-user headroom for learning; login stays a high source-IP bucket.
+      # Scope rationale and dashboard checks: deploy/RATE_LIMITING.md.
+      - key: THROTTLE_AUTHENTICATED
+        value: 300/min
+      - key: THROTTLE_AUTH_LOGIN
+        value: 120/min
+      - key: THROTTLE_AUTH_LOGOUT
+        value: 120/min
+      - key: THROTTLE_AUTH_PASSWORD_CHANGE
+        value: 10/hour
+      - key: THROTTLE_AUTH_SECURITY
+        value: 30/hour
+      - key: THROTTLE_RUN_START
+        value: 60/min
+      - key: THROTTLE_HEALTH_READY
+        value: 120/min
+      - key: THROTTLE_PUBLIC_METADATA
+        value: 60/min
+      - key: THROTTLE_TUTOR_CHAT
+        value: 12/min
+      - key: THROTTLE_TUTOR_CHAT_DAILY
+        value: 200/day
+      # Provider quota is opt-in through the dashboard; no arbitrary budget
+      # chosen here. TUTOR_PROVIDER_DAILY_LIMIT defaults to 0 (disabled).
 
       - key: JWT_ACCESS_TOKEN_LIFETIME_MINUTES
         value: "15"

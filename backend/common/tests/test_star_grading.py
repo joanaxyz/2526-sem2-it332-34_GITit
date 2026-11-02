@@ -1,6 +1,7 @@
 from types import SimpleNamespace
 
 import pytest
+
 from adventures.models import AdventureLevelTierProgress
 from adventures.scoring import star_breakdown, stars
 from adventures.services import AdventureLevelTierRunService

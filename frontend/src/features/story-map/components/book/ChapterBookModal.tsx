@@ -17,10 +17,12 @@ import { cn } from '@/shared/utils/cn'
 export function ChapterBookModal({
   chapterId,
   chapterTitle,
+  initialCommand,
   onClose,
 }: {
   chapterId: number
   chapterTitle: string
+  initialCommand?: string
   onClose: () => void
 }) {
   useHideWorldMascot()
@@ -50,7 +52,7 @@ export function ChapterBookModal({
     )
   }
 
-  return <ChapterBookReader book={bookQuery.data} title={title} onClose={onClose} />
+  return <ChapterBookReader book={bookQuery.data} title={title} initialCommand={initialCommand} onClose={onClose} />
 }
 
 type BookNavEntry =
@@ -113,13 +115,15 @@ function railKicker(book: ChapterBook) {
   return labels.join(' / ')
 }
 
-function ChapterBookReader({ book, title, onClose }: { book: ChapterBook; title: string; onClose: () => void }) {
+function ChapterBookReader({ book, title, initialCommand, onClose }: { book: ChapterBook; title: string; initialCommand?: string; onClose: () => void }) {
   const entries = useMemo(() => navEntriesForBook(book), [book])
-  const [requestedActiveIndex, setRequestedActiveIndex] = useState(0)
+  const [requestedActiveIndex, setRequestedActiveIndex] = useState(() => Math.max(0,
+    entries.findIndex((entry) => entry.kind === 'command' && entry.command.base_command === initialCommand),
+  ))
   // {entryIndex, pageId | 'top', nonce}: the pending scroll target. 'top' is
   // used when switching entries; a page id when jumping to an option/argument.
   const [pendingScroll, setPendingScroll] = useState<{ index: number; pageId: string; nonce: number }>({
-    index: 0,
+    index: requestedActiveIndex,
     pageId: 'top',
     nonce: 0,
   })

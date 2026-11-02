@@ -610,7 +610,7 @@ def test_staff_analytics_returns_shape(django_user_model):
     # Cohort rates are means of learner scores, so each carries its unit.
     empty_mean = {"value": None, "numerator": 0, "denominator": 0, "unit": "participants"}
     assert body["runebound_performance"]["kpis"] == dict.fromkeys(
-        ("scr", "car", "hlcr", "rta", "retry_success_rate", "rtr", "arc"), empty_mean
+        ("scr", "car", "car_first", "hlcr", "rta", "retry_success_rate", "rtr", "arc"), empty_mean
     )
     assert body["runs"]["total"] == 2
     assert body["runs"]["passed"] == 2

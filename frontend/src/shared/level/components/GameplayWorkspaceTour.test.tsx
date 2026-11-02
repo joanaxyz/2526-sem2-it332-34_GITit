@@ -91,6 +91,29 @@ describe('GameplayWorkspaceTour', () => {
     vi.restoreAllMocks()
   })
 
+  it('connects to the visible speech bubble below the terminal, clearing the portrait gutter', async () => {
+    addTarget('terminal', () => rect({ left: 300, top: 100, width: 500, height: 40 }))
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      if (this.classList.contains('mascot-message__bubble')) {
+        return rect({ left: 144, top: 100, width: 464, height: 236 })
+      }
+      return rect({ left: 80, top: 100, width: 528, height: 236 })
+    })
+    render(<GameplayWorkspaceTour label="Command guide" steps={[step('terminal')]}
+      showSpeaker controlsWithSpeaker cardWidth={528} transformable onClose={vi.fn()} />)
+    const card = await screen.findByRole('dialog', { name: 'terminal title' })
+    await waitFor(() => {
+      const path = document.querySelector('.workspace-tour__connector-line')?.getAttribute('d') ?? ''
+      const start = path.match(/^M ([\d.]+) ([\d.]+)/)
+      expect(start).not.toBeNull()
+      expect(card).toHaveStyle({ width: '528px' })
+      expect(Number(start![1])).toBe(parseFloat(card.style.left) + 64 + (528 - 64) / 2)
+      expect(Number(start![1])).toBe(550)
+      expect(Number(start![2])).toBe(parseFloat(card.style.top))
+      expect(parseFloat(card.style.top)).toBeGreaterThan(140)
+    })
+  })
+
   it('shows one step at a time and supports Back, Next, and Finish', async () => {
     addTarget('first')
     addTarget('second', () => rect({ left: 540, top: 160 }))

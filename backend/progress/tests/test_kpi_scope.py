@@ -183,7 +183,12 @@ def test_range_selects_starts_but_excludes_assessments_ending_after_cutoff(tier,
     from progress.models import AdventureLevelTierCompletion, KpiCheckpoint
 
     _, player = _player(django_user_model, "date")
+    # A failure concludes inside the range; the scored clear ends after it.
+    _run(player, tier, "a", SESSION_STATUS_FAILED, started_at=utc(2026, 10, 1))
     run = _run(player, tier, "a", SESSION_STATUS_COMPLETED, started_at=utc(2026, 10, 1))
+    type(run).objects.filter(pk=run.pk).update(
+        ended_at=utc(2026, 10, 11), ref_count=3, counted_action_total=4
+    )
     completion = AdventureLevelTierCompletion.objects.create(
         player=player, tier=tier[0], tier_run=run
     )

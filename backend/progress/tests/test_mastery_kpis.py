@@ -21,7 +21,7 @@ from progress.services import MetricsService
 from progress.services.kpi_range import KPI_TIMEZONE, KpiRange
 from progress.services.mastery_metrics import car_score
 from testing.frontend_execution import frontend_execution_payload
-from testing.kpi_fixtures import bundle, end, routes, start
+from testing.kpi_fixtures import bundle, end, routes, start, variant
 
 
 @pytest.mark.django_db
@@ -82,13 +82,16 @@ def test_five_kpis_use_one_mastery_record_and_preserve_first_transfer(django_use
         "next_scenario": None,
     }
     report = MetricsService().performance_summary(player=player)
+    # CAR averages every scenario's clear: 3/3, 3/3 and 3/4 commands.
     assert {key: report["kpis"][key]["value"] for key in ("scr", "car", "hlcr", "arc", "rta")} == {
         "scr": 100,
-        "car": 75,
+        "car": 91.67,
         "hlcr": 100,
         "arc": 2,
         "rta": 100,
     }
+    assert report["kpis"]["car_first"] == report["kpis"]["car"]
+    assert report["samples"]["car_scored"] == 3
     assert report["kpis"]["arc"]["denominator"] == 1
     assert report["kpis"]["scr"]["denominator"] == 1
     assert AdventureLevelTierProgress.objects.get(player=player, tier=tier).successful_clears == 3
@@ -118,6 +121,34 @@ def test_five_kpis_use_one_mastery_record_and_preserve_first_transfer(django_use
             ),
             encoding="utf-8",
         )
+
+
+@pytest.mark.django_db
+def test_car_follows_fresh_clears_while_repeated_content_never_counts(django_user_model):
+    player, tier, scenario, _ = bundle(django_user_model, required=1)
+    variant(scenario, "kpi-practice-b")
+    variant(scenario, "kpi-practice-c")
+    service = MetricsService()
+
+    def car():
+        kpis = service.performance_summary(player=player)["kpis"]
+        return kpis["car"]["value"], kpis["car_first"]["value"]
+
+    first = end(start(player, tier), count=4)
+    assert car() == (75, 75)
+    better = end(start(player, tier), count=3)  # Replay meets unsolved variant b.
+    assert better.is_replay and better.selected_variant_id != first.selected_variant_id
+    assert car() == (100, 75)
+    sloppier = end(start(player, tier), count=6)  # Unsolved variant c: CAR can fall.
+    assert sloppier.selected_variant_id not in {
+        first.selected_variant_id,
+        better.selected_variant_id,
+    }
+    assert car() == (50, 75)
+    repeat = end(start(player, tier), count=3)  # Solved content: no change either way.
+    assert repeat.selected_variant_id == first.selected_variant_id
+    assert car() == (50, 75)
+    assert service.performance_summary(player=player)["samples"]["car_scored"] == 1
 
 
 @pytest.mark.django_db

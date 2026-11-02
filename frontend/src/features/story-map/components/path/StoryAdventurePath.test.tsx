@@ -351,3 +351,50 @@ describe('StoryAdventurePath level callout', () => {
     expect(mocks.onCompanionRequired).not.toHaveBeenCalled()
   })
 })
+
+describe('StoryAdventurePath practice deep links', () => {
+  afterEach(() => { cleanup(); vi.clearAllMocks() })
+
+  function linkedPath(overrides: { level?: AdventureLevelSummary; focusedId?: number; lockedChapter?: boolean } = {}) {
+    return <StoryAdventurePath chapter={{ ...chapter, locked: overrides.lockedChapter ?? false }}
+      levels={[overrides.level ?? tieredLevel]} challenges={[]} challengesLocked={false}
+      loading={false} hasCompanion={false} onCompanionRequired={mocks.onCompanionRequired}
+      focusedLevelId={overrides.focusedId ?? tieredLevel.id} />
+  }
+
+  it('opens the linked level without starting a run or bypassing companion requirements', () => {
+    renderPath(linkedPath())
+    const panel = screen.getByRole('region', { name: tieredLevel.title })
+    expect(screen.getByRole('button', { name: /^Level 1: Stage and Commit\./ })).toHaveAttribute('aria-expanded', 'true')
+    expect(mocks.navigate).not.toHaveBeenCalled()
+    fireEvent.click(within(panel).getByRole('button', { name: 'Stage and Commit, Medium tier: Continue' }))
+    expect(mocks.onCompanionRequired).toHaveBeenCalledOnce()
+    expect(mocks.navigate).not.toHaveBeenCalled()
+  })
+
+  it.each([
+    { focusedId: 999 },
+    { level: { ...tieredLevel, locked: true } },
+    { lockedChapter: true },
+  ])('does not force open an invalid or locked destination: %j', (overrides) => {
+    renderPath(linkedPath(overrides))
+    expect(screen.queryByRole('region', { name: tieredLevel.title })).not.toBeInTheDocument()
+    expect(mocks.navigate).not.toHaveBeenCalled()
+  })
+
+  it('waits for loaded content and does not reopen a manually closed destination after refresh', () => {
+    const queryClient = new QueryClient()
+    const wrap = (loading: boolean, levels: AdventureLevelSummary[]) => <QueryClientProvider client={queryClient}><MemoryRouter>
+      <StoryAdventurePath chapter={chapter} levels={levels} challenges={[]} challengesLocked={false}
+        loading={loading} hasCompanion onCompanionRequired={mocks.onCompanionRequired} focusedLevelId={tieredLevel.id} />
+    </MemoryRouter></QueryClientProvider>
+    const view = render(wrap(true, []))
+    expect(screen.queryByRole('region', { name: tieredLevel.title })).not.toBeInTheDocument()
+    view.rerender(wrap(false, [tieredLevel]))
+    expect(screen.getByRole('region', { name: tieredLevel.title })).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Close Stage and Commit details' }))
+    view.rerender(wrap(false, [{ ...tieredLevel }]))
+    expect(screen.queryByRole('region', { name: tieredLevel.title })).not.toBeInTheDocument()
+    queryClient.clear()
+  })
+})

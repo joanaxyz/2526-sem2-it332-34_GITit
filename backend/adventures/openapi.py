@@ -4,6 +4,8 @@ Runtime values stay in :mod:`adventures.tier_payloads`; these serializers
 document and validate that presenter output for OpenAPI generation.
 """
 
+from rest_framework import serializers
+
 from common.openapi import (
     CommandComparisonResponseSerializer,
     GameplayRunStatusField,
@@ -11,7 +13,6 @@ from common.openapi import (
     RuntimeStepResponseSerializer,
     StarBreakdownResponseSerializer,
 )
-from rest_framework import serializers
 from tutoring.openapi import TeachingResponseSerializer
 
 # ---------------------------------------------------------------------------

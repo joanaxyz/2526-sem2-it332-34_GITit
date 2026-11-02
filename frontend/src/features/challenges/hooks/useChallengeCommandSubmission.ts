@@ -24,7 +24,7 @@ function replaceSteps(run: ChallengeRun, steps: ChallengeStepLog[]): ChallengeRu
 function applyResponse(queryClient: QueryClient, response: ChallengeCommandResponse) {
   const updatedRun = mergeCommandStepIntoRun(queryClient, response)
   updateChallengeRunCache(queryClient, updatedRun)
-  if (!response.run.replay && response.run.status !== 'started') {
+  if (response.run.status !== 'started' && (!response.run.replay || response.run.status === 'completed')) {
     syncChallengeRunInCache(queryClient, updatedRun)
     invalidateLevelProgressQueries(queryClient)
   }

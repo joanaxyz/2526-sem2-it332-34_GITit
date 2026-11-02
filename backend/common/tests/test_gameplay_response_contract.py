@@ -29,6 +29,7 @@ from testing.runtime_factories import (
 CHALLENGE_RUN_KEYS = {
     "challenge",
     "chapter",
+    "command_comparison",
     "completed_at",
     "completion",
     "counts",
@@ -64,6 +65,7 @@ CHALLENGE_COMMAND_KEYS = {
     "step",
 }
 CHALLENGE_COMMAND_BASE_RUN_KEYS = {
+    "command_comparison",
     "completed_at",
     "counts",
     "failure_reason",

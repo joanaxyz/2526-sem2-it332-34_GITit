@@ -38,7 +38,8 @@ def test_legacy_health_route_remains_readiness(db):
 
 
 def test_readiness_reports_cache_outage(db):
-    with mock.patch("common.views.cache.set", side_effect=ConnectionError):
+    with mock.patch("common.views.cache") as readiness_cache:
+        readiness_cache.set.side_effect = ConnectionError
         response = APIClient().get("/api/health/ready/")
     assert response.status_code == 503
     assert response.data["cache"] == "error"

@@ -13,6 +13,7 @@ const rate = (value: number, numerator: number, denominator: number) => ({ value
 const KPIS: Kpis = {
   scr: rate(90, 9, 10), // met (>= 80)
   car: rate(17.6, 22, 125), // missed (< 70)
+  car_first: rate(17.6, 22, 125),
   hlcr: rate(75, 3, 4), // met
   arc: rate(0.1, 1, 10), // met (<= 2)
   rta: rate(50, 1, 2), // missed (< 65)
@@ -22,6 +23,7 @@ const KPIS: Kpis = {
 const MODULES: UserKpisResponse['modules'] = [
   {
     car: { value: null, numerator: 0, denominator: 0 },
+    car_first: { value: null, numerator: 0, denominator: 0 },
     number: 3,
     title: 'Conflict Resolution',
     scr: rate(50, 1, 2),
@@ -69,7 +71,7 @@ describe('LearnerKpiPanel', () => {
     render(<LearnerKpiPanel kpis={KPIS} modules={MODULES} />)
 
     expect(tile('SCR')).toHaveTextContent('9 of 10 required tiers mastered')
-    expect(tile('CAR')).toHaveTextContent('22 score points across 125 assessed tiers')
+    expect(tile('CAR')).toHaveTextContent('22 score points across 125 scored scenarios')
     expect(tile('HLCR')).toHaveTextContent('3 of 4 hard tiers mastered')
     expect(tile('ARC')).toHaveTextContent('1 unsuccessful attempt across 10 mastered tiers')
     expect(tile('RTA')).toHaveTextContent('1 of 2 transfer checkpoints cleared first time')

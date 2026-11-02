@@ -260,12 +260,15 @@ python scripts/check_api_type_adoption.py
 `MetricsService._performance_summary_for_runs()` is the response owner and delegates
 arithmetic to `progress/services/mastery_metrics.py`. Dashboard KPI fields use the
 same owner. Ordinary run/session totals and the Stats finish-rate diagnostic remain
-activity measures. Replay and transfer runs do not create practice mastery credit.
+activity measures. Replay and transfer runs do not create practice mastery credit;
+CAR alone reads replays.
 
 The five official KPIs, targets, formulas, Let definitions, reference-validation
 commands and fixed-cohort evaluation workflow are documented in
 [KPI_METHODOLOGY.md](KPI_METHODOLOGY.md). SCR/HLCR count unique required tiers;
-CAR assesses successful command efficiency against a validated reference; ARC
+CAR averages each scenario's command efficiency against a validated reference on
+the learner's latest clear of content they had not cleared before (replays
+included), with `car_first` from each scenario's first such clear as its learner-facing starting point; ARC
 counts unsuccessful attempts before mastery; RTA preserves the first result on
 reserved unseen transfer checkpoints in Modules 3–4. The supplementary Retry
 Success Rate counts concluded recovery retries after actual unsuccessful attempts.
@@ -399,7 +402,7 @@ Rules:
 - Humans edit `MODULE_LEVELS` in `seed_curriculum`, the scenario Markdown compiled by `scripts/curriculum/import_revised_scenarios.py`, and the scenario plan, fixtures and gate composition under `backend/curriculum/seed_data/source/`.
 - `generate_targets` replays every module case and extension scenario, and fails unless the backend transition verifier accepts each replayed command (`solution_replay.verify_backend_transitions`), so a published answer key can always be submitted live.
 - Humans do not edit files under `backend/curriculum/seed_data/generated/` directly.
-- After changing a variant initial state, solution commands, or workspace-file edits, run `cd backend && python manage.py generate_targets`. It rewrites both generated targets and trajectories.
+- After changing a variant initial state, solution commands, or workspace-file edits, run `cd backend && python manage.py generate_targets`. It rewrites both generated targets and trajectories. Seeding counts each published tier variant's KPI command reference from its trajectory, so references never go stale after a reseed.
 - `scripts/check_seed_targets.py` is the cheap structural guard.
 - `scripts/check_generated_targets_current.py` is the full replay guard and requires `frontend/node_modules`. CI runs it in a dedicated Python + Node job.
 

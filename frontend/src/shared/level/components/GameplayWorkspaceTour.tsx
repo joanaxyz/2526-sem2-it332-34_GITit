@@ -64,10 +64,12 @@ export function GameplayWorkspaceTour({
   skipIconOnly = false,
   showProgress = true,
   showSpeaker = true,
+  controlsWithSpeaker = false,
   showActions = true,
   focusCard = true,
   finishDisabled = false,
   cardClassName,
+  cardWidth = DESKTOP_CARD_WIDTH,
   reveal,
   aside,
   asideWidth = 336,
@@ -89,12 +91,16 @@ export function GameplayWorkspaceTour({
   skipIconOnly?: boolean
   showProgress?: boolean
   showSpeaker?: boolean
+  /** Omit the header and place controls below the clickable speaker portrait. */
+  controlsWithSpeaker?: boolean
   /** Hide the footer for cards that update themselves instead of being stepped through. */
   showActions?: boolean
   /** Move focus into the card when it opens. Off for cards that sit beside an active input. */
   focusCard?: boolean
   finishDisabled?: boolean
   cardClassName?: string
+  /** Preferred outer width, including the speaker; shrinks to fit narrow viewports. */
+  cardWidth?: number
   /** Selectors of regions to keep undimmed (the scenario, project files...). */
   reveal?: readonly string[]
   /** A second card shown beside the main one on wide screens. */
@@ -241,6 +247,8 @@ export function GameplayWorkspaceTour({
         ? [...(cardElement?.querySelectorAll<HTMLElement>('[data-tour-pane]') ?? [])]
         : []
       const mainPane = panes.find((pane) => pane.dataset.tourPane === 'main')?.getBoundingClientRect()
+      const bubble = cardElement?.querySelector<HTMLElement>('.mascot-message__bubble')?.getBoundingClientRect()
+      const mainRect = mainPane ?? cardElement?.getBoundingClientRect()
       const cardHeight = (aside
         ? Math.max(0, ...panes.map((pane) => pane.getBoundingClientRect().height))
         : cardElement?.getBoundingClientRect().height) || DEFAULT_CARD_HEIGHT
@@ -261,7 +269,8 @@ export function GameplayWorkspaceTour({
         return
       }
 
-      const width = aside ? DESKTOP_CARD_WIDTH + ASIDE_GAP + asideWidth : DESKTOP_CARD_WIDTH
+      const width = aside ? DESKTOP_CARD_WIDTH + ASIDE_GAP + asideWidth : cardWidth
+      const bubbleInset = bubble && mainRect ? Math.max(0, bubble.left - mainRect.left) : 0
       const reveals = (reveal ?? [])
         .map((selector) => document.querySelector<HTMLElement>(selector))
         .flatMap((element) => (element && isVisible(element) ? [element.getBoundingClientRect()] : []))
@@ -271,9 +280,11 @@ export function GameplayWorkspaceTour({
       setLayout({
         ...(aside && paneLayout
           ? layoutForPanes(rect, paneLayout)
-          : layoutFor(rect, activeStep.placement ?? 'bottom', cardHeight, width)),
+          : layoutFor(rect, activeStep.placement ?? 'bottom', cardHeight, width,
+            controlsWithSpeaker && showSpeaker ? bubbleInset : 0)),
         reveals,
         ...(mainPane ? { mainSize: { width: mainPane.width, height: mainPane.height } } : {}),
+        bubbleInset,
       })
     }
 
@@ -307,7 +318,7 @@ export function GameplayWorkspaceTour({
       window.removeEventListener('resize', measure)
       window.removeEventListener('scroll', measure, true)
     }
-  }, [activeStep, activeTarget, aside, asideWidth, cardElement, paneLayout, reveal])
+  }, [activeStep, activeTarget, aside, asideWidth, cardElement, cardWidth, controlsWithSpeaker, showSpeaker, paneLayout, reveal])
 
   useEffect(() => {
     if (!focusCard || !activeStep || !layoutReady) return
@@ -365,6 +376,7 @@ export function GameplayWorkspaceTour({
       skipIconOnly={skipIconOnly}
       showProgress={showProgress}
       showSpeaker={showSpeaker}
+      controlsWithSpeaker={controlsWithSpeaker}
       showActions={showActions}
       finishDisabled={finishDisabled}
       cardClassName={cardClassName}

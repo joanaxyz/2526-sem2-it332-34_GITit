@@ -1,0 +1,62 @@
+[
+ {
+  "calls": 1,
+  "total_ms": 9.93,
+  "mean_ms": 9.931,
+  "query": "select s.queryid::text, s.calls, s.total_exec_time, s.rows, left(s.query, $1) from pg_stat_statements s join pg_database d on d.oid = s.dbid where d.datname = c"
+ },
+ {
+  "calls": 21,
+  "total_ms": 9.4,
+  "mean_ms": 0.448,
+  "query": "INSERT INTO \"accounts_sessionrecord\" (\"user_id\", \"refresh_jti\", \"created_at\", \"revoked_at\", \"expires_at\", \"user_agent\", \"ip_address\") VALUES ($1, $2, $3::timest"
+ },
+ {
+  "calls": 17,
+  "total_ms": 5.19,
+  "mean_ms": 0.305,
+  "query": "SELECT \"adventures_adventureleveltier\".\"id\", \"adventures_adventureleveltier\".\"adventure_level_id\", \"adventures_adventureleveltier\".\"difficulty\", \"adventures_adv"
+ },
+ {
+  "calls": 4,
+  "total_ms": 4.71,
+  "mean_ms": 1.177,
+  "query": "SELECT \"adventures_adventureleveltierscenariovariant\".\"id\", \"adventures_adventureleveltierscenariovariant\".\"slug\", \"adventures_adventureleveltierscenariovariant"
+ },
+ {
+  "calls": 4,
+  "total_ms": 2.94,
+  "mean_ms": 0.735,
+  "query": "SELECT \"adventures_adventureleveltierrun\".\"id\", \"adventures_adventureleveltierrun\".\"player_id\", \"adventures_adventureleveltierrun\".\"tier_id\", \"adventures_advent"
+ },
+ {
+  "calls": 3,
+  "total_ms": 2.72,
+  "mean_ms": 0.907,
+  "query": "SELECT * FROM pgbouncer.get_auth($1)"
+ },
+ {
+  "calls": 21,
+  "total_ms": 2.28,
+  "mean_ms": 0.109,
+  "query": "UPDATE \"auth_user\" SET \"last_login\" = $1::timestamptz WHERE \"auth_user\".\"id\" = $2"
+ },
+ {
+  "calls": 6,
+  "total_ms": 2.14,
+  "mean_ms": 0.357,
+  "query": "SELECT \"curriculum_commandform\".\"id\", \"curriculum_commandform\".\"command_skill_id\", \"curriculum_commandform\".\"chapter_id\", \"curriculum_commandform\".\"slug\", \"curr"
+ },
+ {
+  "calls": 4,
+  "total_ms": 2.01,
+  "mean_ms": 0.504,
+  "query": "INSERT INTO \"adventures_adventureleveltierprogress\" (\"player_id\", \"tier_id\", \"successful_clears\", \"cleared_scenario_slugs\", \"exposure_complete\", \"last_shown_var"
+ },
+ {
+  "calls": 2,
+  "total_ms": 1.86,
+  "mean_ms": 0.929,
+  "query": "INSERT INTO \"practice_commandstep\" (\"challenge_run_id\", \"adventure_tier_run_id\", \"player_id\", \"command_text\", \"terminal_output\", \"result_category\", \"command_cla"
+ }
+]

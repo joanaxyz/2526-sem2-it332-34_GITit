@@ -71,14 +71,9 @@ module; the content and checks are complete for all four, so they ship together.
    python manage.py award_missing_tier_rewards
    ```
 
-6. **Refresh the KPI command references.** A reseed rewrites every variant's
-   states and solutions, which invalidates `ref_hash` by design.
-
-   ```bash
-   python manage.py kpi_refs
-   ```
-
-   Transfer reservations live on variant rows. The new scenarios are new rows, so
+6. **Re-reserve transfer cases.** The seed already refreshed every KPI command
+   reference from the committed replay. Transfer reservations live on variant
+   rows. The new scenarios are new rows, so
    re-reserve each transfer case with
    `python manage.py kpi_refs --cases <slug> --reserve --reason "<what differs>"`.
    The shared dev database had none on 2026-10-20.

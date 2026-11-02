@@ -1,3 +1,8 @@
+from django.db import IntegrityError, transaction
+from django.utils import timezone
+
+from adventures.models import AdventureLevelTier, AdventureLevelTierProgress, AdventureLevelTierRun
+from adventures.tier_scenarios import next_scenario, published_scenarios, replay_scenario
 from common.constants import (
     DIFFICULTY_EASY,
     DIFFICULTY_MEDIUM,
@@ -9,12 +14,7 @@ from common.constants import (
 from common.exceptions import Conflict, Locked
 from common.runtime import discard_started_run
 from common.runtime.scoring_policy import run_scoring_snapshot
-from django.db import IntegrityError, transaction
-from django.utils import timezone
 from progress.models import AdventureLevelTierCompletion
-
-from adventures.models import AdventureLevelTier, AdventureLevelTierProgress, AdventureLevelTierRun
-from adventures.tier_scenarios import next_scenario, published_scenarios, replay_scenario
 
 from .tier_budget import command_budget
 from .tier_variants import TierVariantSelectionService
@@ -40,6 +40,7 @@ class AdventureLevelTierRunService:
     @staticmethod
     def hydrate_run(run: AdventureLevelTierRun | int, *, player=None) -> AdventureLevelTierRun:
         from django.db.models import Prefetch
+
         from practice.models import CommandStep
 
         queryset = AdventureLevelTierRun.objects.select_related(

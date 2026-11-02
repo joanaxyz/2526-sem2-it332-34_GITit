@@ -1,0 +1,72 @@
+[
+ {
+  "rank": 1,
+  "total_ms": 125.7,
+  "calls": 1,
+  "mean_ms": 125.72,
+  "query": "SELECT case when pg_is_in_recovery() then $2 else (pg_walfile_name_offset(lsn)).file_name end, lsn::text, pg_is_in_recovery() FROM pg_backup_start($1, $3) lsn"
+ },
+ {
+  "rank": 2,
+  "total_ms": 119.0,
+  "calls": 70,
+  "mean_ms": 1.7,
+  "query": "SELECT DISTINCT \"curriculum_commandform\".\"id\", \"curriculum_commandform\".\"command_skill_id\", \"curriculum_commandskill\".\"sort_order\", \"curriculum_commandform\".\"sort_order\", \"curriculum_commandform\".\"usage_form\" FROM \"curriculum_commandform\" INNER JOIN \"curriculum_commandskill\" ON (\"curriculum_commandf"
+ },
+ {
+  "rank": 3,
+  "total_ms": 104.3,
+  "calls": 353,
+  "mean_ms": 0.295,
+  "query": "SELECT \"adventures_adventureleveltierrun\".\"id\", \"adventures_adventureleveltierrun\".\"player_id\", \"adventures_adventureleveltierrun\".\"tier_id\", \"adventures_adventureleveltierrun\".\"current_scenario_id\", \"adventures_adventureleveltierrun\".\"selected_variant_id\", \"adventures_adventureleveltierrun\".\"prior_"
+ },
+ {
+  "rank": 4,
+  "total_ms": 52.2,
+  "calls": 353,
+  "mean_ms": 0.148,
+  "query": "UPDATE \"adventures_adventureleveltierrun\" SET \"total_attempts\" = $1, \"non_counted_diagnostic_total\" = $2 WHERE \"adventures_adventureleveltierrun\".\"id\" = $3"
+ },
+ {
+  "rank": 5,
+  "total_ms": 50.4,
+  "calls": 353,
+  "mean_ms": 0.143,
+  "query": "INSERT INTO \"practice_commandstep\" (\"challenge_run_id\", \"adventure_tier_run_id\", \"player_id\", \"command_text\", \"terminal_output\", \"result_category\", \"command_classification\", \"normalized_command\", \"was_processable\", \"counted_increment\", \"attempt_number\", \"counted_total_after\", \"state_hash\", \"expected"
+ },
+ {
+  "rank": 6,
+  "total_ms": 44.5,
+  "calls": 1,
+  "mean_ms": 44.491,
+  "query": "SELECT labelfile, spcmapfile, lsn FROM pg_backup_stop($1)"
+ },
+ {
+  "rank": 7,
+  "total_ms": 40.7,
+  "calls": 379,
+  "mean_ms": 0.107,
+  "query": "SELECT \"curriculum_commandform\".\"id\", \"curriculum_commandform\".\"command_skill_id\", \"curriculum_commandform\".\"chapter_id\", \"curriculum_commandform\".\"slug\", \"curriculum_commandform\".\"usage_form\", \"curriculum_commandform\".\"label\", \"curriculum_commandform\".\"summary\", \"curriculum_commandform\".\"command_pr"
+ },
+ {
+  "rank": 8,
+  "total_ms": 36.1,
+  "calls": 379,
+  "mean_ms": 0.095,
+  "query": "SELECT \"tutoring_commandguidehome\".\"id\", \"tutoring_commandguidehome\".\"teaching_key\", \"tutoring_commandguidehome\".\"scenario_id\", \"adventures_adventureleveltierscenario\".\"id\", \"adventures_adventureleveltierscenario\".\"tier_id\", \"adventures_adventureleveltierscenario\".\"slug\", \"adventures_adventurelevelt"
+ },
+ {
+  "rank": 9,
+  "total_ms": 34.4,
+  "calls": 70,
+  "mean_ms": 0.491,
+  "query": "SELECT \"adventures_adventureleveltierscenario_command_forms\".\"commandform_id\" AS \"command_forms\", COUNT(DISTINCT \"adventures_adventureleveltierscenario\".\"id\") AS \"n\" FROM \"adventures_adventureleveltierscenario\" INNER JOIN \"adventures_adventureleveltierscenario_command_forms\" ON (\"adventures_adventur"
+ },
+ {
+  "rank": 10,
+  "total_ms": 34.1,
+  "calls": 563,
+  "mean_ms": 0.061,
+  "query": "SELECT \"auth_user\".\"id\", \"auth_user\".\"password\", \"auth_user\".\"last_login\", \"auth_user\".\"is_superuser\", \"auth_user\".\"username\", \"auth_user\".\"first_name\", \"auth_user\".\"last_name\", \"auth_user\".\"email\", \"auth_user\".\"is_staff\", \"auth_user\".\"is_active\", \"auth_user\".\"date_joined\", \"accounts_accountsecurity"
+ }
+]

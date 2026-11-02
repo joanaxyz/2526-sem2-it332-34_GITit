@@ -6,11 +6,11 @@
     "story": "Your team has finally started its first project together. Raven, your group leader, has created the project folder, assigned the work, and confidently announced that everyone should “*stay organized.*”\n\nTen minutes later, someone asks whether they should make a backup before editing, and another teammate suggests copying the folder every afternoon. Raven pauses. “*Let’s avoid creating a museum of backup folders.*”\n\nNothing has been recorded yet, and the current folder has no version control. Before anyone starts changing files, the team needs a way to keep track of its work. You have been given the setup job; the first actual snapshot will come later.",
     "starting_point": "You are in an empty project folder. It is not a repository yet.",
     "real_world_context": "Teams often begin with an ordinary folder. Initializing it gives Git a place to record future snapshots, while the files remain unstaged until someone deliberately adds them.",
-    "task": "Initialize the current directory as a Git repository with `main` as its initial branch.\n\n**Do not stage files or create a commit.**",
+    "task": "Initialize the current directory as a Git repository, explicitly choosing `main` as its initial branch during initialization.\n\n**Do not stage files or create a commit.**",
     "required_files": [],
     "objective_checks": [
       "A Git repository exists in the current folder.",
-      "The first branch is main.",
+      "The first branch was explicitly set to main during initialization.",
       "Nothing is staged and no commit exists."
     ],
     "expected_result": "The current folder is now a repository on `main`. It has no commits and nothing is staged.",
@@ -25,13 +25,15 @@
     ],
     "solution_workspace_files": [],
     "accepted_alternatives": [
-      "Pattern: `git init -b main`. Option order does not matter; `-b main` = `-bmain` = `--initial-branch=main` = `--initial-branch main`; the folder may be written `dir`, `./dir`, `dir/` or as an absolute path. Not accepted: `git init --bare`, a different branch name or capitalization (`Main`), initializing the parent folder, staging or committing files.",
-      "Bare `git init` is accepted when the simulator's default first branch is `main` (the end state is identical). A hint should tell the learner that real Git may start on another name and that `-b main` removes the doubt.",
+      "Pattern: `git init -b main`. Equivalent syntax: `git init --initial-branch=main` or `git init --initial-branch main`. Option order does not matter; the current folder may be written explicitly as `.`. Not accepted: `git init --bare`, a different branch name or capitalization (`Main`), initializing another folder, staging or committing files.",
+      "Explicit initial-branch selection is required when creating this repository. Not accepted: `git init` alone, initializing on another branch and renaming it to main, or reinitializing an existing repository with an initial-branch option.",
       "Common patterns that apply: P19."
     ],
-    "not_accepted": [],
+    "not_accepted": [
+      "Plain `git init` creates a valid repository but does not demonstrate choosing its initial branch. Start a fresh attempt and explicitly choose main during initialization."
+    ],
     "evaluation": [
-      "Repository at `.`; HEAD on `main`; 0 commits; nothing staged."
+      "Repository at `.`; HEAD on `main`; 0 commits; nothing staged; backend-verified repository creation explicitly selected main as the initial branch."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 12,

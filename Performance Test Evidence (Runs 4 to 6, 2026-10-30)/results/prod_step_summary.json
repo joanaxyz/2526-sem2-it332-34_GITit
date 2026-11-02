@@ -1,0 +1,108 @@
+{
+  "base": "https://git-it-34.vercel.app",
+  "virtual_learners": 40,
+  "tier_id": 43,
+  "think_seconds": 10.0,
+  "home_every_seconds": 60.0,
+  "ramp_seconds": 600.0,
+  "steady_seconds": 120.0,
+  "started_utc": "2026-10-29T19:40:41Z",
+  "login_failures": 1,
+  "start_failures": 1,
+  "steady_state": {
+    "window_seconds": 120.0,
+    "requests": 0,
+    "server_error_rate_pct": null,
+    "error_rate_pct": null,
+    "throughput_rps": 0,
+    "endpoints": {}
+  },
+  "whole_run": {
+    "window_seconds": 780.0,
+    "requests": 621,
+    "server_error_rate_pct": 0.483,
+    "error_rate_pct": 8.213,
+    "throughput_rps": 0.8,
+    "endpoints": {
+      "home_dashboard": {
+        "count": 77,
+        "statuses": {
+          "200": 70,
+          "429": 7
+        },
+        "p50_ms": 2850.3,
+        "p90_ms": 6570.6,
+        "p95_ms": 7294.7,
+        "p99_ms": 8765.1,
+        "mean_ms": 3376.0,
+        "max_ms": 9206.2
+      },
+      "home_me": {
+        "count": 77,
+        "statuses": {
+          "200": 74,
+          "429": 3
+        },
+        "p50_ms": 2681.1,
+        "p90_ms": 6445.2,
+        "p95_ms": 6657.2,
+        "p99_ms": 7662.0,
+        "mean_ms": 3063.7,
+        "max_ms": 7984.0
+      },
+      "login": {
+        "count": 28,
+        "statuses": {
+          "200": 27,
+          "429": 1
+        },
+        "p50_ms": 2903.6,
+        "p90_ms": 7067.9,
+        "p95_ms": 7149.4,
+        "p99_ms": 9000.3,
+        "mean_ms": 4037.2,
+        "max_ms": 9669.0
+      },
+      "setup_purchase": {
+        "count": 20,
+        "statuses": {
+          "201": 20
+        },
+        "p50_ms": 2900.0,
+        "p90_ms": 6211.6,
+        "p95_ms": 6709.9,
+        "p99_ms": 7439.8,
+        "mean_ms": 3605.1,
+        "max_ms": 7622.2
+      },
+      "start_tier": {
+        "count": 47,
+        "statuses": {
+          "201": 26,
+          "423": 20,
+          "429": 1
+        },
+        "p50_ms": 3443.6,
+        "p90_ms": 7564.6,
+        "p95_ms": 8924.0,
+        "p99_ms": 9286.5,
+        "mean_ms": 3819.8,
+        "max_ms": 9356.4
+      },
+      "submit_command": {
+        "count": 372,
+        "statuses": {
+          "200": 353,
+          "503": 3,
+          "429": 16
+        },
+        "p50_ms": 2839.9,
+        "p90_ms": 6267.7,
+        "p95_ms": 6884.1,
+        "p99_ms": 7648.2,
+        "mean_ms": 3238.8,
+        "max_ms": 8968.9
+      }
+    }
+  }
+}

@@ -83,6 +83,8 @@ def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
     AdventureLevelTierRun.objects.filter(pk__in=[first.id, retry.id]).update(
         ended_at=timezone.now()
     )
+    # The cleared run carries its launch reference; the invalid command counts.
+    AdventureLevelTierRun.objects.filter(pk=retry.id).update(ref_count=3, counted_action_total=4)
     client = APIClient()
     client.force_authenticate(user=user)
     response = client.get("/api/progress/performance/")
@@ -93,6 +95,7 @@ def test_performance_summary_uses_runebound_attempts_and_server_side_formulas(
     assert payload["kpis"] == {
         "scr": {"value": 100.0, "numerator": 1, "denominator": 1},
         "car": {"value": 75.0, "numerator": 75, "denominator": 1},
+        "car_first": {"value": 75.0, "numerator": 75, "denominator": 1},
         "hlcr": {"value": 100.0, "numerator": 1, "denominator": 1},
         # Module 1 same-variant retry: outside RTA scope, so RTA has no data,
         # while the learner retry success rate keeps its previous value.

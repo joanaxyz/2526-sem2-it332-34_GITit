@@ -31,6 +31,30 @@ def routes():
     return data["cases"], data["targets"], data["replays"]
 
 
+def variant(scenario, slug, key="practice"):
+    """A published variant on a real KPI route with a validated reference of 3."""
+    cases, targets, _ = routes()
+    created = AdventureLevelTierScenarioVariant.objects.create(
+        scenario=scenario,
+        slug=slug,
+        label=key,
+        # One case per variant, as in the curriculum, though scenarios share routes.
+        semantic_key=slug,
+        initial_state=cases[key]["initial_state"],
+        target_state=targets[key],
+        evaluation_spec={"completion_policy": {"mode": "state_hash"}},
+        solution_commands=cases[key]["solution_commands"],
+        ref_count=3,
+        is_transfer=key == "transfer",
+        transfer_note="Apply the workflow to multiple files instead of one."
+        if key == "transfer"
+        else "",
+    )
+    created.ref_hash = ref_hash(created)
+    created.save(update_fields=["ref_hash"])
+    return created
+
+
 def bundle(user_model, *, username="kpi", required=3, module=3):
     """A Hard tier of ``required`` single-clear scenarios, with real KPI routes.
 
@@ -64,28 +88,6 @@ def bundle(user_model, *, username="kpi", required=3, module=3):
         )
         for index in range(required)
     ]
-    cases, targets, _ = routes()
-
-    def variant(scenario, slug, key):
-        created = AdventureLevelTierScenarioVariant.objects.create(
-            scenario=scenario,
-            slug=slug,
-            label=key,
-            semantic_key=key,
-            initial_state=cases[key]["initial_state"],
-            target_state=targets[key],
-            evaluation_spec={"completion_policy": {"mode": "state_hash"}},
-            solution_commands=cases[key]["solution_commands"],
-            ref_count=3,
-            is_transfer=key == "transfer",
-            transfer_note="Apply the workflow to multiple files instead of one."
-            if key == "transfer"
-            else "",
-        )
-        created.ref_hash = ref_hash(created)
-        created.save(update_fields=["ref_hash"])
-        return created
-
     variants = [variant(scenarios[0], f"{username}-{key}", key) for key in ("practice", "transfer")]
     for index, scenario in enumerate(scenarios[1:], start=2):
         variant(scenario, f"{username}-practice-{index}", "practice")

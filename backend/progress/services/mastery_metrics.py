@@ -3,17 +3,20 @@
 from collections import defaultdict
 from datetime import timedelta
 
-from django.db.models import Max
+from django.db.models import Count, Max, Q
 from django.utils import timezone
 
+from adventures.models import AdventureLevelTierRun
 from common.constants import (
+    COMMAND_DIAGNOSTIC,
     SESSION_STATUS_ABANDONED,
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
 )
 from progress.models import AdventureLevelTierCompletion, KpiCheckpoint, KpiExposure
 
-KEYS = ("scr", "car", "hlcr", "arc", "rta", "retry_success_rate")
+# car_first is CAR's starting point for learners, not an evaluated KPI.
+KEYS = ("scr", "car", "car_first", "hlcr", "arc", "rta", "retry_success_rate")
 TERMINAL = (SESSION_STATUS_COMPLETED, SESSION_STATUS_FAILED, SESSION_STATUS_ABANDONED)
 # An open run whose last command is this old counts as left, like an abandonment.
 STALE_AFTER = timedelta(days=7)
@@ -44,12 +47,14 @@ def rates(records):
     ]
     hard = [r for r in observed if r["difficulty"] == "hard"]
     mastered = [r for r in observed if r["mastered"]]
-    car = [r["car"] for r in records if r["car"] is not None]
+    car = [s for r in records for s in r["car_scores"]]
+    car_first = [s for r in records for s in r["car_first_scores"]]
     transfer = [r["transfer"] for r in records if r["transfer"] is not None]
     retry_total = sum(r.get("retry_total", 0) for r in records)
     result = {
         "scr": rate(len(mastered), len(observed)),
         "car": rate(sum(car), len(car), average=True),
+        "car_first": rate(sum(car_first), len(car_first), average=True),
         "hlcr": rate(sum(r["mastered"] for r in hard), len(hard)),
         "arc": rate(sum(r["failures"] for r in mastered), len(mastered), average=True),
         "rta": rate(sum(transfer), len(transfer)),
@@ -74,9 +79,92 @@ def balanced(records, *, cohort=False):
     return result
 
 
+def content_key(semantic_key, variant_id):
+    return semantic_key or f"id:{variant_id}"
+
+
+def scenario_car(clears):
+    """Each scenario's first and latest score, plus its count of unscored ones.
+
+    ``clears`` maps a scenario to the scores (``None`` without a reference) of the
+    learner's clears of content they had not cleared before, oldest first.
+    """
+    first, latest, missing = [], [], 0
+    for scores in clears.values():
+        scored = [s for s in scores if s is not None]
+        if scored:
+            first.append(scored[0])
+            latest.append(scored[-1])
+        else:
+            missing += 1
+    return first, latest, missing
+
+
+def fresh_clears(runs, *, players, end_before=None):
+    """Scores of clears of content each learner had not cleared before.
+
+    Replays count, so a learner who replays a tier and meets an unsolved variant
+    can raise or lower that scenario's CAR. Repeating solved content never
+    counts. Novelty reads the learner's whole history; scores come from ``runs``.
+    """
+    history = AdventureLevelTierRun.objects.filter(
+        player_id__in=players,
+        is_transfer=False,
+        status=SESSION_STATUS_COMPLETED,
+        ended_at__isnull=False,
+    )
+    if end_before:
+        history = history.filter(ended_at__lt=end_before)
+    scoped = set(
+        runs.filter(
+            tier__adventure_level__is_required=True,
+            is_transfer=False,
+            status=SESSION_STATUS_COMPLETED,
+        ).values_list("id", flat=True)
+    )
+    rows = (
+        history.annotate(
+            diagnostics=Count(
+                "steps",
+                filter=Q(
+                    steps__command_classification=COMMAND_DIAGNOSTIC,
+                    steps__normalized_command__startswith="git ",
+                ),
+            )
+        )
+        .order_by("ended_at", "id")
+        .values(
+            "id",
+            "player_id",
+            "tier_id",
+            "selected_variant_id",
+            "selected_variant__semantic_key",
+            "selected_variant__scenario_id",
+            "ref_count",
+            "counted_action_total",
+            "assess_diag",
+            "diagnostics",
+        )
+    )
+    cleared = defaultdict(set)
+    clears = defaultdict(lambda: defaultdict(list))
+    for r in rows:
+        key = content_key(r["selected_variant__semantic_key"], r["selected_variant_id"])
+        if key in cleared[r["player_id"]]:
+            continue
+        cleared[r["player_id"]].add(key)
+        if r["id"] in scoped:
+            actual = r["counted_action_total"] + (r["diagnostics"] if r["assess_diag"] else 0)
+            clears[r["player_id"], r["tier_id"]][r["selected_variant__scenario_id"]].append(
+                car_score(passed=True, target=r["ref_count"], actual=actual)
+            )
+    return clears
+
+
 def live_records(runs, *, end_before=None):
     """Read each learner/tier once; mastery is dated by its first clear.
 
+    ``runs`` may include replays: only CAR reads them (see ``fresh_clears``).
     A better replay moves ``completed_at`` forward, so it cannot date mastery.
     A tier enters SCR/HLCR once it has an outcome: mastery, a concluded run, or
     an open run with commands idle for ``STALE_AFTER``. Opening a tier without
@@ -102,6 +190,7 @@ def live_records(runs, *, end_before=None):
     )
     players = {r["player_id"] for r in rows}
     tiers = {r["tier_id"] for r in rows}
+    clears = fresh_clears(runs, players=players, end_before=end_before)
     completions = AdventureLevelTierCompletion.objects.filter(
         player_id__in=players, tier_id__in=tiers
     )
@@ -161,6 +250,7 @@ def live_records(runs, *, end_before=None):
             or (r["last_step_at"] and r["last_step_at"] <= as_of - STALE_AFTER)
             for r in attempts
         )
+        car_first, car_latest, car_missing = scenario_car(clears[player_id, tier_id])
         records.append(
             {
                 "player_id": player_id,
@@ -186,9 +276,9 @@ def live_records(runs, *, end_before=None):
                 )
                 if at
                 else 0,
-                "car": car_score(passed=car.passed, target=car.ref_count, actual=car.actual)
-                if car_ready
-                else None,
+                "car_scores": car_latest,
+                "car_first_scores": car_first,
+                "car_missing": car_missing,
                 "transfer": int(transfer.passed)
                 if transfer_ready and transfer.passed is not None
                 else None,
@@ -218,13 +308,8 @@ def samples(records):
         "in_progress_tiers": sum(r.get("in_progress", False) for r in records),
         "mastered_tiers": sum(r["mastered"] for r in records),
         "mastery_missing": sum(r.get("mastery_missing", False) for r in records),
-        "car_scored": sum(r["car"] is not None for r in records),
-        "car_missing": sum(
-            r.get(
-                "car_missing", (r["mastered"] or r.get("invalid_runs", 0) > 0) and r["car"] is None
-            )
-            for r in records
-        ),
+        "car_scored": sum(len(r["car_scores"]) for r in records),
+        "car_missing": sum(r["car_missing"] for r in records),
         "transfer_assigned": sum(r.get("transfer_assigned", False) for r in records),
         "transfer_pending": sum(
             r.get("transfer_assigned", False)

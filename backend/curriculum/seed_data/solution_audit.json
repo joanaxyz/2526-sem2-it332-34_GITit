@@ -146,13 +146,15 @@
       "level": "initializing-a-local-repository",
       "difficulty": "easy",
       "scenario": "track-this-folder",
-      "objective": "Initialize the current directory as a Git repository with `main` as its initial branch.\n\n**Do not stage files or create a commit.**",
+      "objective": "Initialize the current directory as a Git repository, explicitly choosing `main` as its initial branch during initialization.\n\n**Do not stage files or create a commit.**",
       "documented_alternatives": [
-        "Pattern: `git init -b main`. Option order does not matter; `-b main` = `-bmain` = `--initial-branch=main` = `--initial-branch main`; the folder may be written `dir`, `./dir`, `dir/` or as an absolute path. Not accepted: `git init --bare`, a different branch name or capitalization (`Main`), initializing the parent folder, staging or committing files.",
-        "Bare `git init` is accepted when the simulator's default first branch is `main` (the end state is identical). A hint should tell the learner that real Git may start on another name and that `-b main` removes the doubt.",
+        "Pattern: `git init -b main`. Equivalent syntax: `git init --initial-branch=main` or `git init --initial-branch main`. Option order does not matter; the current folder may be written explicitly as `.`. Not accepted: `git init --bare`, a different branch name or capitalization (`Main`), initializing another folder, staging or committing files.",
+        "Explicit initial-branch selection is required when creating this repository. Not accepted: `git init` alone, initializing on another branch and renaming it to main, or reinitializing an existing repository with an initial-branch option.",
         "Common patterns that apply: P19."
       ],
-      "required_techniques": [],
+      "required_techniques": [
+        "init:initial-branch:main"
+      ],
       "routes": [
         {
           "name": "authored",
@@ -182,7 +184,7 @@
           "name": "documented-1-3",
           "kind": "syntax",
           "commands": [
-            "git init"
+            "git init --initial-branch=main"
           ],
           "files": [],
           "counted_commands": 1,

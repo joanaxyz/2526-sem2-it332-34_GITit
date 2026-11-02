@@ -1,0 +1,307 @@
+[
+ {
+  "minute": 1,
+  "learners_joined": 4,
+  "requests": 36,
+  "seconds": 60,
+  "rps": 0.6,
+  "submits_ok": 16,
+  "submit_p50_ms": 240,
+  "submit_p95_ms": 722,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 2,
+  "learners_joined": 8,
+  "requests": 67,
+  "seconds": 60,
+  "rps": 1.12,
+  "submits_ok": 39,
+  "submit_p50_ms": 241,
+  "submit_p95_ms": 525,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 3,
+  "learners_joined": 12,
+  "requests": 92,
+  "seconds": 60,
+  "rps": 1.53,
+  "submits_ok": 58,
+  "submit_p50_ms": 237,
+  "submit_p95_ms": 562,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 4,
+  "learners_joined": 16,
+  "requests": 124,
+  "seconds": 60,
+  "rps": 2.07,
+  "submits_ok": 84,
+  "submit_p50_ms": 257,
+  "submit_p95_ms": 1155,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 5,
+  "learners_joined": 20,
+  "requests": 158,
+  "seconds": 60,
+  "rps": 2.63,
+  "submits_ok": 110,
+  "submit_p50_ms": 301,
+  "submit_p95_ms": 1239,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 6,
+  "learners_joined": 24,
+  "requests": 191,
+  "seconds": 60,
+  "rps": 3.18,
+  "submits_ok": 133,
+  "submit_p50_ms": 391,
+  "submit_p95_ms": 1622,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 7,
+  "learners_joined": 28,
+  "requests": 206,
+  "seconds": 60,
+  "rps": 3.43,
+  "submits_ok": 142,
+  "submit_p50_ms": 509,
+  "submit_p95_ms": 1547,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 8,
+  "learners_joined": 32,
+  "requests": 219,
+  "seconds": 60,
+  "rps": 3.65,
+  "submits_ok": 151,
+  "submit_p50_ms": 1179,
+  "submit_p95_ms": 3050,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 9,
+  "learners_joined": 36,
+  "requests": 250,
+  "seconds": 60,
+  "rps": 4.17,
+  "submits_ok": 176,
+  "submit_p50_ms": 1501,
+  "submit_p95_ms": 3265,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 10,
+  "learners_joined": 40,
+  "requests": 282,
+  "seconds": 60,
+  "rps": 4.7,
+  "submits_ok": 199,
+  "submit_p50_ms": 930,
+  "submit_p95_ms": 2522,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 11,
+  "learners_joined": 40,
+  "requests": 291,
+  "seconds": 60,
+  "rps": 4.85,
+  "submits_ok": 218,
+  "submit_p50_ms": 677,
+  "submit_p95_ms": 1844,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 12,
+  "learners_joined": 40,
+  "requests": 300,
+  "seconds": 60,
+  "rps": 5.0,
+  "submits_ok": 224,
+  "submit_p50_ms": 482,
+  "submit_p95_ms": 1376,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 13,
+  "learners_joined": 40,
+  "requests": 290,
+  "seconds": 60,
+  "rps": 4.83,
+  "submits_ok": 218,
+  "submit_p50_ms": 503,
+  "submit_p95_ms": 2396,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 14,
+  "learners_joined": 40,
+  "requests": 290,
+  "seconds": 60,
+  "rps": 4.83,
+  "submits_ok": 218,
+  "submit_p50_ms": 506,
+  "submit_p95_ms": 2000,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 15,
+  "learners_joined": 40,
+  "requests": 287,
+  "seconds": 60,
+  "rps": 4.78,
+  "submits_ok": 217,
+  "submit_p50_ms": 554,
+  "submit_p95_ms": 1530,
+  "errors": 0,
+  "error_kinds": []
+ },
+ {
+  "minute": 16,
+  "learners_joined": 40,
+  "requests": 305,
+  "seconds": 60,
+  "rps": 5.08,
+  "submits_ok": 216,
+  "submit_p50_ms": 403,
+  "submit_p95_ms": 1819,
+  "errors": 19,
+  "error_kinds": [
+   [
+    "home_dashboard",
+    401
+   ],
+   [
+    "home_me",
+    401
+   ],
+   [
+    "submit_command",
+    401
+   ]
+  ]
+ },
+ {
+  "minute": 17,
+  "learners_joined": 40,
+  "requests": 296,
+  "seconds": 60,
+  "rps": 4.93,
+  "submits_ok": 193,
+  "submit_p50_ms": 326,
+  "submit_p95_ms": 899,
+  "errors": 45,
+  "error_kinds": [
+   [
+    "home_dashboard",
+    401
+   ],
+   [
+    "home_me",
+    401
+   ],
+   [
+    "submit_command",
+    401
+   ]
+  ]
+ },
+ {
+  "minute": 18,
+  "learners_joined": 40,
+  "requests": 315,
+  "seconds": 60,
+  "rps": 5.25,
+  "submits_ok": 176,
+  "submit_p50_ms": 366,
+  "submit_p95_ms": 808,
+  "errors": 79,
+  "error_kinds": [
+   [
+    "home_dashboard",
+    401
+   ],
+   [
+    "home_me",
+    401
+   ],
+   [
+    "submit_command",
+    401
+   ]
+  ]
+ },
+ {
+  "minute": 19,
+  "learners_joined": 40,
+  "requests": 302,
+  "seconds": 60,
+  "rps": 5.03,
+  "submits_ok": 149,
+  "submit_p50_ms": 299,
+  "submit_p95_ms": 848,
+  "errors": 113,
+  "error_kinds": [
+   [
+    "home_dashboard",
+    401
+   ],
+   [
+    "home_me",
+    401
+   ],
+   [
+    "submit_command",
+    401
+   ]
+  ]
+ },
+ {
+  "minute": 20,
+  "learners_joined": 40,
+  "requests": 314,
+  "seconds": 60,
+  "rps": 5.23,
+  "submits_ok": 126,
+  "submit_p50_ms": 243,
+  "submit_p95_ms": 483,
+  "errors": 148,
+  "error_kinds": [
+   [
+    "home_dashboard",
+    401
+   ],
+   [
+    "home_me",
+    401
+   ],
+   [
+    "submit_command",
+    401
+   ]
+  ]
+ }
+]

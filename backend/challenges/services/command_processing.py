@@ -1,3 +1,7 @@
+from django.db import transaction
+from django.utils import timezone
+
+from challenges.models import ChallengeRun
 from common.constants import (
     COMMAND_COUNTED,
     RESULT_INVALID,
@@ -21,8 +25,6 @@ from common.runtime import (
 from common.services.performance import timing
 from curriculum.services import ChapterChestService
 from curriculum.services.techniques import record_verified_techniques
-from django.db import transaction
-from django.utils import timezone
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from practice.models import CommandStep
 from practice.services.scaffolding import FeedbackGenerationService, ScaffoldingService
@@ -34,8 +36,6 @@ from simulator.services import (
     RepositorySnapshotService,
     RepositoryStateSimulator,
 )
-
-from challenges.models import ChallengeRun
 
 from .history import CommandHistoryCache
 

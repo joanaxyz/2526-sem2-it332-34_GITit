@@ -18,13 +18,6 @@ from contextlib import nullcontext
 from dataclasses import dataclass, replace
 from typing import Any
 
-from simulator.services import (
-    RepositoryStateSimulator,
-    is_diagnostic_command,
-    normalize_command,
-    parse_git_command,
-)
-
 from common.constants import COMMAND_COUNTED, COMMAND_DIAGNOSTIC, COMMAND_UNPROCESSABLE
 from common.exceptions import BadRequest, PayloadTooLarge
 from common.git.command_transition_verifier import ClientTransitionVerifier
@@ -38,6 +31,12 @@ from common.git.shell_commands import (
 )
 from common.schemas.schema_validation import validate_repository_state_payload
 from common.services.performance import timing
+from simulator.services import (
+    RepositoryStateSimulator,
+    is_diagnostic_command,
+    normalize_command,
+    parse_git_command,
+)
 
 # Cap for the serialized repository_state JSON. Stored states are typically a
 # few KB; anything near this size means a runaway command sequence, and letting
@@ -244,13 +243,19 @@ class ClientCommandExecutionService:
                     "Retry the run to start from a clean state."
                 )
 
+        # These read-only queries use exit 1 for a normal negative answer, such
+        # as no matching text, ignore rule, common ancestor, or config value.
+        inspection_succeeded = result.exit_code == 0 or (
+            result.exit_code == 1
+            and result.command_family in {"check-ignore", "grep", "merge-base", "config"}
+        )
         classification, increment = CommandCountClassifier().classify(
             command=command,
             processed=result.processed,
             # Shell commands never spend the git command budget, including the
             # file-changing ones, which match free Project Files edits.
             diagnostic=(result.diagnostic or is_shell)
-            and (scoring_policy_version < 2 or result.exit_code == 0),
+            and (scoring_policy_version < 2 or inspection_succeeded),
         )
         return ExecutedCommand(
             previous_state=previous_state,

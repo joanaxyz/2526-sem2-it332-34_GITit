@@ -1,0 +1,62 @@
+[
+ {
+  "calls": 3330,
+  "total_ms": 903.55,
+  "mean_ms": 0.271,
+  "query": "SELECT \"adventures_adventureleveltierrun\".\"id\", \"adventures_adventureleveltierrun\".\"player_id\", \"adventures_adventureleveltierrun\".\"tier_id\", \"adventures_adventureleveltierrun\".\"current_scenario_id\", "
+ },
+ {
+  "calls": 547,
+  "total_ms": 694.01,
+  "mean_ms": 1.269,
+  "query": "SELECT DISTINCT \"curriculum_commandform\".\"id\", \"curriculum_commandform\".\"command_skill_id\", \"curriculum_commandskill\".\"sort_order\", \"curriculum_commandform\".\"sort_order\", \"curriculum_commandform\".\"usa"
+ },
+ {
+  "calls": 3330,
+  "total_ms": 481.23,
+  "mean_ms": 0.145,
+  "query": "INSERT INTO \"practice_commandstep\" (\"challenge_run_id\", \"adventure_tier_run_id\", \"player_id\", \"command_text\", \"terminal_output\", \"result_category\", \"command_classification\", \"normalized_command\", \"was"
+ },
+ {
+  "calls": 547,
+  "total_ms": 462.35,
+  "mean_ms": 0.845,
+  "query": "SELECT \"adventures_adventureleveltierscenario_command_forms\".\"commandform_id\" AS \"command_forms\", COUNT(DISTINCT \"adventures_adventureleveltierscenario\".\"id\") AS \"n\" FROM \"adventures_adventureleveltie"
+ },
+ {
+  "calls": 3330,
+  "total_ms": 403.12,
+  "mean_ms": 0.121,
+  "query": "UPDATE \"adventures_adventureleveltierrun\" SET \"verified_techniques\" = $1::jsonb, \"total_attempts\" = $2, \"non_counted_diagnostic_total\" = $3 WHERE \"adventures_adventureleveltierrun\".\"id\" = $4"
+ },
+ {
+  "calls": 547,
+  "total_ms": 278.31,
+  "mean_ms": 0.509,
+  "query": "SELECT \"adventures_adventureleveltierrun\".\"id\" AS \"id\", \"adventures_adventureleveltierrun\".\"player_id\" AS \"player_id\", \"adventures_adventureleveltierrun\".\"tier_id\" AS \"tier_id\", \"adventures_adventurel"
+ },
+ {
+  "calls": 3370,
+  "total_ms": 270.09,
+  "mean_ms": 0.08,
+  "query": "SELECT \"curriculum_commandform\".\"id\", \"curriculum_commandform\".\"command_skill_id\", \"curriculum_commandform\".\"chapter_id\", \"curriculum_commandform\".\"slug\", \"curriculum_commandform\".\"usage_form\", \"curri"
+ },
+ {
+  "calls": 4481,
+  "total_ms": 239.59,
+  "mean_ms": 0.053,
+  "query": "SELECT \"auth_user\".\"id\", \"auth_user\".\"password\", \"auth_user\".\"last_login\", \"auth_user\".\"is_superuser\", \"auth_user\".\"username\", \"auth_user\".\"first_name\", \"auth_user\".\"last_name\", \"auth_user\".\"email\", \""
+ },
+ {
+  "calls": 3370,
+  "total_ms": 231.44,
+  "mean_ms": 0.069,
+  "query": "SELECT \"tutoring_commandguidehome\".\"id\", \"tutoring_commandguidehome\".\"teaching_key\", \"tutoring_commandguidehome\".\"scenario_id\", \"adventures_adventureleveltierscenario\".\"id\", \"adventures_adventurelevel"
+ },
+ {
+  "calls": 152,
+  "total_ms": 171.87,
+  "mean_ms": 1.131,
+  "query": "DISCARD ALL"
+ }
+]

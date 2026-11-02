@@ -10,9 +10,8 @@ from __future__ import annotations
 
 import copy
 
-from simulator.services import parse_git_command
-
 from common.exceptions import BadRequest
+from simulator.services import parse_git_command
 
 
 class RefVerificationMixin:

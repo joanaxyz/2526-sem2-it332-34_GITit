@@ -7,6 +7,7 @@ from django.http import Http404, HttpResponseRedirect
 from django.utils.crypto import constant_time_compare
 from drf_spectacular.utils import OpenApiResponse, extend_schema
 from rest_framework import status
+from rest_framework.exceptions import Throttled
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -62,6 +63,8 @@ class RegisterAPIView(APIView):
 
 class LoginAPIView(APIView):
     permission_classes = [AllowAny, HasTrustedWebClientHeader]
+    throttle_scope = "auth_login"
+    throttle_by_ip = True
 
     @extend_schema(
         request=LoginSerializer,
@@ -78,13 +81,7 @@ class LoginAPIView(APIView):
             ip_address=ip_address,
         )
         if lockout_remaining > 0:
-            return Response(
-                {
-                    "detail": "Too many failed attempts. Try again later.",
-                    "retry_after": lockout_remaining,
-                },
-                status=status.HTTP_429_TOO_MANY_REQUESTS,
-            )
+            return self.lockout_response(lockout_remaining)
 
         user = token_service.authenticate_account(
             identifier=identifier,
@@ -97,13 +94,7 @@ class LoginAPIView(APIView):
                 ip_address=ip_address,
             )
             if lockout_remaining > 0:
-                return Response(
-                    {
-                        "detail": "Too many failed attempts. Try again later.",
-                        "retry_after": lockout_remaining,
-                    },
-                    status=status.HTTP_429_TOO_MANY_REQUESTS,
-                )
+                return self.lockout_response(lockout_remaining)
             return Response(
                 {"detail": "Incorrect username/email or password"},
                 status=status.HTTP_401_UNAUTHORIZED,
@@ -128,6 +119,13 @@ class LoginAPIView(APIView):
         set_refresh_cookie(response, tokens.refresh)
         return response
 
+    def lockout_response(self, seconds):
+        response = self.handle_exception(
+            Throttled(wait=seconds, detail="Too many failed attempts. Try again later.")
+        )
+        response.data["retry_after"] = seconds  # Existing login clients.
+        return response
+
 
 class RefreshAPIView(APIView):
     authentication_classes = []
@@ -149,6 +147,7 @@ class RefreshAPIView(APIView):
 class LogoutAPIView(APIView):
     authentication_classes = []
     permission_classes = [AllowAny, HasTrustedWebClientHeader]
+    throttle_scope = "auth_logout"
 
     @extend_schema(request=None, responses={204: None})
     def post(self, request):
@@ -361,6 +360,7 @@ class OAuthExchangeAPIView(APIView):
 
 class PasswordChangeAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_scope = "auth_password_change"
 
     @extend_schema(request=PasswordChangeSerializer, responses={200: SessionResponseSerializer})
     def post(self, request):
@@ -379,6 +379,7 @@ class PasswordChangeAPIView(APIView):
 
 class RevokeOtherSessionsAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_scope = "auth_security"
 
     @extend_schema(request=None, responses={200: DetailResponseSerializer})
     def post(self, request):
@@ -395,6 +396,7 @@ class RevokeOtherSessionsAPIView(APIView):
 
 class RevokeAllSessionsAPIView(APIView):
     permission_classes = [IsAuthenticated]
+    throttle_scope = "auth_security"
 
     @extend_schema(request=None, responses={204: None})
     def post(self, request):

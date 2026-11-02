@@ -1,0 +1,155 @@
+{
+  "base": "https://git-it-34.vercel.app",
+  "virtual_learners": 40,
+  "tier_id": 1,
+  "think_seconds": 10.0,
+  "home_every_seconds": 60.0,
+  "ramp_seconds": 600.0,
+  "steady_seconds": 600.0,
+  "started_utc": "2026-10-30T04:53:58Z",
+  "login_failures": 0,
+  "start_failures": 0,
+  "steady_state": {
+    "window_seconds": 600.0,
+    "requests": 2984,
+    "server_error_rate_pct": 0.0,
+    "error_rate_pct": 0.67,
+    "throughput_rps": 4.97,
+    "endpoints": {
+      "home_dashboard": {
+        "count": 364,
+        "statuses": {
+          "200": 364
+        },
+        "p50_ms": 512.8,
+        "p90_ms": 1794.4,
+        "p95_ms": 2003.2,
+        "p99_ms": 2533.4,
+        "mean_ms": 798.5,
+        "max_ms": 2703.0
+      },
+      "home_me": {
+        "count": 369,
+        "statuses": {
+          "200": 364,
+          "401": 5
+        },
+        "p50_ms": 156.2,
+        "p90_ms": 412.9,
+        "p95_ms": 551.1,
+        "p99_ms": 1058.0,
+        "mean_ms": 227.4,
+        "max_ms": 1197.2
+      },
+      "refresh": {
+        "count": 20,
+        "statuses": {
+          "200": 20
+        },
+        "p50_ms": 271.5,
+        "p90_ms": 1034.5,
+        "p95_ms": 1295.6,
+        "p99_ms": 1299.6,
+        "mean_ms": 515.9,
+        "max_ms": 1300.5
+      },
+      "submit_command": {
+        "count": 2231,
+        "statuses": {
+          "200": 2216,
+          "401": 15
+        },
+        "p50_ms": 478.0,
+        "p90_ms": 1542.3,
+        "p95_ms": 1829.4,
+        "p99_ms": 2336.6,
+        "mean_ms": 683.5,
+        "max_ms": 2934.1
+      }
+    }
+  },
+  "whole_run": {
+    "window_seconds": 1260.0,
+    "requests": 4541,
+    "server_error_rate_pct": 0.022,
+    "error_rate_pct": 0.462,
+    "throughput_rps": 3.6,
+    "endpoints": {
+      "home_dashboard": {
+        "count": 545,
+        "statuses": {
+          "200": 545
+        },
+        "p50_ms": 517.5,
+        "p90_ms": 1950.1,
+        "p95_ms": 2381.3,
+        "p99_ms": 2899.3,
+        "mean_ms": 864.7,
+        "max_ms": 3312.3
+      },
+      "home_me": {
+        "count": 550,
+        "statuses": {
+          "200": 545,
+          "401": 5
+        },
+        "p50_ms": 159.4,
+        "p90_ms": 525.6,
+        "p95_ms": 863.6,
+        "p99_ms": 1501.8,
+        "mean_ms": 267.6,
+        "max_ms": 2234.5
+      },
+      "login": {
+        "count": 40,
+        "statuses": {
+          "200": 40
+        },
+        "p50_ms": 2594.6,
+        "p90_ms": 4826.0,
+        "p95_ms": 4933.1,
+        "p99_ms": 5018.1,
+        "mean_ms": 3109.1,
+        "max_ms": 5019.4
+      },
+      "refresh": {
+        "count": 20,
+        "statuses": {
+          "200": 20
+        },
+        "p50_ms": 271.5,
+        "p90_ms": 1034.5,
+        "p95_ms": 1295.6,
+        "p99_ms": 1299.6,
+        "mean_ms": 515.9,
+        "max_ms": 1300.5
+      },
+      "start_tier": {
+        "count": 40,
+        "statuses": {
+          "201": 40
+        },
+        "p50_ms": 587.1,
+        "p90_ms": 4616.0,
+        "p95_ms": 4738.9,
+        "p99_ms": 5685.2,
+        "mean_ms": 1520.4,
+        "max_ms": 5800.5
+      },
+      "submit_command": {
+        "count": 3346,
+        "statuses": {
+          "200": 3330,
+          "502": 1,
+          "401": 15
+        },
+        "p50_ms": 469.3,
+        "p90_ms": 1719.7,
+        "p95_ms": 2083.9,
+        "p99_ms": 2644.4,
+        "mean_ms": 735.0,
+        "max_ms": 3833.3
+      }
+    }
+  }
+}

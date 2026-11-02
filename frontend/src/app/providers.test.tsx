@@ -53,6 +53,7 @@ describe('AppProviders', () => {
     expect(queryDefaults?.refetchOnWindowFocus).toBe(false)
     expect(typeof retry).toBe('function')
     expect(typeof retry === 'function' ? retry(0, new ApiError('Nope', 404, null)) : null).toBe(false)
+    expect(typeof retry === 'function' ? retry(0, new ApiError('Slow down', 429, null)) : null).toBe(false)
     expect(typeof retry === 'function' ? retry(0, new Error('Temporary failure')) : null).toBe(true)
     expect(typeof retry === 'function' ? retry(1, new Error('Temporary failure')) : null).toBe(false)
     expect(typeof retry === 'function' ? retry(0, new AuthSessionChangedError()) : null).toBe(false)

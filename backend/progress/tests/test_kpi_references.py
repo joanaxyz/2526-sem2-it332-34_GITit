@@ -6,8 +6,9 @@ from django.core.exceptions import ValidationError
 from django.core.management import call_command
 from django.core.management.base import CommandError
 
+from adventures.models import AdventureLevelTierScenarioVariant
 from curriculum.services.solution_replay import FRONTEND
-from progress.services.references import ref_hash, valid_ref, validate_refs
+from progress.services.references import ref_hash, seed_refs, valid_ref, validate_refs
 from testing.kpi_fixtures import bundle, routes
 
 needs_simulator = pytest.mark.skipif(
@@ -87,3 +88,30 @@ def test_reference_hash_covers_goal_workspace_and_diagnostic_policy(django_user_
     variant.assess_diag = False
     variant.solution_workspace_files = [{"path": "note.txt", "content": "changed"}]
     assert ref_hash(variant) != original
+
+
+@pytest.mark.django_db
+def test_seeding_counts_references_from_the_committed_trajectory(django_user_model):
+    _, _, _, variants = bundle(django_user_model)
+    practice, transfer = variants
+    practice.solution_trajectory = {"steps": routes()[2]["practice"]["steps"]}
+    practice.ref_count, practice.ref_hash = None, ""
+    practice.save()
+
+    assert seed_refs([practice, transfer]) == {practice.id: 3}
+    practice.refresh_from_db()
+    transfer.refresh_from_db()
+    assert valid_ref(practice) == 3
+    # No stored route leaves the variant unscored rather than guessing a count.
+    assert transfer.ref_count is None and transfer.ref_hash == ""
+
+
+@pytest.mark.django_db
+def test_seed_gives_every_published_tier_variant_a_valid_reference():
+    call_command("seed_curriculum", verbosity=0)
+
+    variants = AdventureLevelTierScenarioVariant.objects.filter(
+        is_published=True, scenario__is_published=True, scenario__tier__is_published=True
+    ).select_related("scenario")
+    assert variants
+    assert [v.slug for v in variants if valid_ref(v) is None] == []

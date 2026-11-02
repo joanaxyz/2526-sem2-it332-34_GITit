@@ -16,13 +16,6 @@ import { choicePoolFor } from '@/features/drills/utils/drillChoices'
 import { prefersReducedMotion } from '@/features/drills/utils/flyToSlot'
 import { seededShuffle, shuffleAway } from '@/features/drills/utils/drillShuffle'
 
-const RUNG_LABEL: Record<DrillRung, string> = {
-  recognise: 'Recognise',
-  read: 'Read',
-  complete: 'Complete',
-  forge: 'Forge',
-}
-
 const RUNG_QUESTION: Record<DrillRung, string> = {
   recognise: 'Which command does this?',
   read: 'What does this command do?',
@@ -65,11 +58,7 @@ export function DrillQuestion({
   const sectionRef = useRef<HTMLElement | null>(null)
   const askId = useId()
 
-  // Each question is a fresh mount, so without this the Continue button
-  // unmounts and focus falls to the document: a keyboard user would tab
-  // from the top of the page for every question, and a screen reader
-  // would never be told the question changed. Focusing the labelled
-  // section announces it once and puts Tab one step from the first answer.
+  // Announce each new question and put Tab one step from its answers.
   useEffect(() => {
     sectionRef.current?.focus({ preventScroll: true })
   }, [])
@@ -126,7 +115,6 @@ export function DrillQuestion({
         tabIndex={-1}
         aria-labelledby={askId}
       >
-        <p className="drill-rung">Order the moves</p>
         <h2 className="drill-ask" id={askId}>
           Put this run in the order it happens.
         </h2>
@@ -151,19 +139,6 @@ export function DrillQuestion({
 
   return (
     <section className="drill-question" ref={sectionRef} tabIndex={-1} aria-labelledby={askId}>
-      <p className="drill-rung">
-        {RUNG_LABEL[rung]}
-        {/* Only Read may name the command, because Read already shows it in
-            full. Every other rung hides some part of it - the whole line on
-            Recognise and Forge, one token on Complete - and printing the
-            base command here would hand that part straight back. */}
-        {rung !== 'read' ? null : (
-          <>
-            <span aria-hidden="true"> · </span>
-            <span className="drill-rung-command">{card.base_command}</span>
-          </>
-        )}
-      </p>
       <h2 className="drill-ask" id={askId}>
         {RUNG_QUESTION[rung]}
       </h2>

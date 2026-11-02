@@ -4,13 +4,14 @@ Runtime values stay in :mod:`challenges.payloads`; these serializers document
 and validate that presenter output for OpenAPI generation.
 """
 
+from rest_framework import serializers
+
 from common.openapi import (
     CommandComparisonResponseSerializer,
     GameplayRunStatusField,
     RuntimeStepResponseSerializer,
     StarBreakdownResponseSerializer,
 )
-from rest_framework import serializers
 
 
 class ChallengeRunStepResponseSerializer(RuntimeStepResponseSerializer):

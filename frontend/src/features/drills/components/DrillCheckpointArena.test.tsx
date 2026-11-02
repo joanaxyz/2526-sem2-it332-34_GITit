@@ -18,6 +18,9 @@ function mount(variant: 'tokens' | 'steps' = 'tokens', blocks = expected) {
 function place(values: string[]) {
   for (const name of values) fireEvent.click(screen.getByRole('button', { name }))
 }
+function type(value: string, target: Window | Document | Node = window) {
+  for (const key of value) fireEvent.keyDown(target, { key })
+}
 async function advance(ms: number) {
   await act(async () => { await vi.advanceTimersByTimeAsync(ms) })
 }
@@ -132,17 +135,124 @@ describe('walking checkpoint', () => {
     expect(onResolve).toHaveBeenCalledExactlyOnceWith({ kind: 'tokens', values: ['git add .', 'git init'] }, true)
   })
 
-  it('waits for a typed command to be placed instead of grading an unfinished last word', async () => {
+  it('places a completed piece immediately while an unfinished prefix stays off the path', async () => {
     mount()
-    fireEvent.click(screen.getByRole('button', { name: 'Type it instead' }))
-    fireEvent.change(screen.getByRole('textbox', { name: 'Type the command' }), { target: { value: 'git init -b m' } })
-    await advance(500)
-    expect(screen.getByRole('textbox')).toBeEnabled()
-    expect(document.querySelector('[data-collapsed]')).toBeNull()
-    fireEvent.change(screen.getByRole('textbox'), { target: { value: 'git init -b main' } })
-    fireEvent.click(screen.getByRole('button', { name: 'Place command' }))
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument()
+    expect(screen.queryByRole('button', { name: 'Type it instead' })).not.toBeInTheDocument()
+    type('gi')
+    expect(onAnswer).not.toHaveBeenCalled()
+    expect(document.querySelector('.drill-path-keystrokes')).toHaveTextContent('gi')
+    type('t')
+    expect(screen.getByRole('button', { name: 'Remove git from position 1' })).toBeInTheDocument()
+    expect(onAnswer).toHaveBeenLastCalledWith({ kind: 'tokens', values: ['git'] })
+    expect(document.querySelector('.drill-path-keystrokes')).toBeEmptyDOMElement()
+    type(' init -b main')
     await advance(31000)
     expect(onResolve).toHaveBeenCalledExactlyOnceWith({ kind: 'tokens', values: expected }, false)
+  })
+
+  it('mixes mouse placement with immediate typing from a focused bank button', async () => {
+    mount()
+    place(['git'])
+    const init = screen.getByRole('button', { name: 'init' })
+    init.focus()
+    type('init', init)
+    place(['-b'])
+    type('main')
+    expect(onAnswer).toHaveBeenLastCalledWith({ kind: 'tokens', values: expected })
+    await advance(31000)
+    expect(onResolve).toHaveBeenCalledExactlyOnceWith({ kind: 'tokens', values: expected }, false)
+  })
+
+  it('corrects a mistyped prefix and removes the last block with Backspace', () => {
+    mount()
+    type('gti')
+    expect(document.querySelector('.drill-path-keystrokes')).toHaveAttribute('data-invalid')
+    fireEvent.keyDown(window, { key: 'Backspace' })
+    fireEvent.keyDown(window, { key: 'Backspace' })
+    type('it')
+    expect(onAnswer).toHaveBeenLastCalledWith({ kind: 'tokens', values: ['git'] })
+    fireEvent.keyDown(window, { key: 'Backspace' })
+    expect(onAnswer).toHaveBeenLastCalledWith(null)
+    expect(screen.getByRole('button', { name: 'git' })).toBeInTheDocument()
+  })
+
+  it('moves focus off an older slab after typing so a following Space cannot remove it', () => {
+    mount()
+    place(['git'])
+    const olderBlock = screen.getByRole('button', { name: 'Remove git from position 1' })
+    olderBlock.focus()
+    type('init', olderBlock)
+    const course = screen.getByRole('region', { name: 'Command pavement' })
+    expect(course).toHaveFocus()
+    expect(fireEvent.keyDown(document.activeElement!, { key: ' ' })).toBe(false)
+    fireEvent.keyUp(document.activeElement!, { key: ' ' })
+    expect(screen.getByRole('button', { name: 'Remove git from position 1' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Remove init from position 2' })).toBeInTheDocument()
+    expect(onAnswer).toHaveBeenLastCalledWith({ kind: 'tokens', values: ['git', 'init'] })
+  })
+
+  it('waits for a delimiter when a complete piece is also a longer piece prefix', () => {
+    mount('tokens', ['git', 'gitk'])
+    type('git')
+    expect(onAnswer).not.toHaveBeenCalled()
+    fireEvent.keyDown(window, { key: 'Enter' })
+    expect(onAnswer).toHaveBeenLastCalledWith({ kind: 'tokens', values: ['git'] })
+    type('gitk')
+    expect(onAnswer).toHaveBeenLastCalledWith({ kind: 'tokens', values: ['git', 'gitk'] })
+  })
+
+  it('uses a separate available piece for each repeated value', () => {
+    mount('tokens', ['git', 'git'])
+    type('gitgit')
+    expect(onAnswer).toHaveBeenLastCalledWith({ kind: 'tokens', values: ['git', 'git'] })
+    expect(screen.getByRole('button', { name: 'Remove git from position 1' })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Remove git from position 2' })).toBeInTheDocument()
+  })
+
+  it('accepts complete multi-word steps without changing input modes', () => {
+    mount('steps', ['git init', 'git add .'])
+    type('git init')
+    expect(onAnswer).toHaveBeenLastCalledWith({ kind: 'tokens', values: ['git init'] })
+    type('git add .')
+    expect(onAnswer).toHaveBeenLastCalledWith({ kind: 'tokens', values: ['git init', 'git add .'] })
+  })
+
+  it('does not consume shortcuts, Escape, native piece activation, or typing in another field', () => {
+    mount()
+    for (const modifier of ['ctrlKey', 'metaKey', 'altKey']) {
+      fireEvent.keyDown(window, { key: 'g', [modifier]: true })
+    }
+    fireEvent.keyDown(window, { key: 'g', repeat: true })
+    fireEvent.keyDown(window, { key: 'g', isComposing: true })
+    expect(fireEvent.keyDown(window, { key: 'Escape' })).toBe(true)
+    const git = screen.getByRole('button', { name: 'git' })
+    git.focus()
+    expect(fireEvent.keyDown(git, { key: ' ' })).toBe(true)
+    expect(fireEvent.keyDown(git, { key: 'Enter' })).toBe(true)
+    const input = document.createElement('input')
+    document.body.append(input)
+    type('git', input)
+    input.remove()
+    const pause = screen.getByRole('button', { name: 'Pause crossing' })
+    type('git', pause)
+    expect(onAnswer).not.toHaveBeenCalled()
+    expect(document.querySelector('.drill-path-keystrokes')).toBeEmptyDOMElement()
+  })
+
+  it('does not place pieces while paused or after the answer has locked', () => {
+    const view = render(<DrillCheckpointArena values={expected} expected={expected} variant="tokens"
+      onAnswer={onAnswer} onResolve={onResolve} verdict={null} paused />)
+    type('git')
+    expect(onAnswer).not.toHaveBeenCalled()
+    view.rerender(<DrillCheckpointArena values={expected} expected={expected} variant="tokens"
+      onAnswer={onAnswer} onResolve={onResolve} verdict={null} paused={false} />)
+    type('git')
+    expect(onAnswer).toHaveBeenCalledTimes(1)
+    view.rerender(<DrillCheckpointArena values={expected} expected={expected} variant="tokens"
+      onAnswer={onAnswer} onResolve={onResolve} verdict={{ correct: false, picked: 'git', pickedGloss: null }} />)
+    type('init')
+    expect(onAnswer).toHaveBeenCalledTimes(1)
   })
 
   it('cancels an in-progress fall when the round unmounts', async () => {

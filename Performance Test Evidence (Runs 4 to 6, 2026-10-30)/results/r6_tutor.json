@@ -1,0 +1,44 @@
+[
+  {
+    "question": "When should I use git stash instead of making a temporary commit?",
+    "status": 200,
+    "ms": 4600,
+    "response_kind": "guarded",
+    "reply_chars": 1059
+  },
+  {
+    "question": "What does a detached HEAD mean and how do I get out of it safely?",
+    "status": 200,
+    "ms": 2178,
+    "response_kind": "guarded",
+    "reply_chars": 1248
+  },
+  {
+    "question": "How is git revert different from git reset for a commit I already pushed?",
+    "status": 200,
+    "ms": 1548,
+    "response_kind": "guarded",
+    "reply_chars": 1105
+  },
+  {
+    "question": "Why would git push be rejected as non-fast-forward, and what should I do?",
+    "status": 200,
+    "ms": 2492,
+    "response_kind": "guarded",
+    "reply_chars": 1089
+  },
+  {
+    "question": "What is the difference between git diff and git diff --staged?",
+    "status": 200,
+    "ms": 1463,
+    "response_kind": "guarded",
+    "reply_chars": 565
+  },
+  {
+    "question": "How do tags differ from branches in Git?",
+    "status": 200,
+    "ms": 1916,
+    "response_kind": "guarded",
+    "reply_chars": 850
+  }
+]

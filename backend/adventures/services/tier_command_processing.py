@@ -1,3 +1,10 @@
+from django.db import transaction
+from django.db.models import Max
+from django.utils import timezone
+
+from adventures.models import AdventureLevelTierProgress, AdventureLevelTierRun, SkillMastery
+from adventures.rewards import award_tier_reward
+from adventures.tier_scenarios import cleared_slugs, next_scenario, published_scenarios
 from common.constants import (
     COMMAND_COUNTED,
     DIFFICULTY_EASY,
@@ -22,9 +29,6 @@ from common.runtime import (
 from common.services.performance import timing
 from curriculum.services import ChapterChestService
 from curriculum.services.techniques import record_verified_techniques
-from django.db import transaction
-from django.db.models import Max
-from django.utils import timezone
 from evaluation.completion import CompletionEvaluationContext, PracticeCompletionEvaluator
 from practice.models import CommandStep
 from practice.services.scaffolding import FeedbackGenerationService, ScaffoldingService
@@ -42,10 +46,6 @@ from tutoring.services.commands import (
 )
 from tutoring.services.forms import forms_used_by
 from tutoring.services.planner import PlannerReads, plan_introduction
-
-from adventures.models import AdventureLevelTierProgress, AdventureLevelTierRun, SkillMastery
-from adventures.rewards import award_tier_reward
-from adventures.tier_scenarios import cleared_slugs, next_scenario, published_scenarios
 
 from .selectors import form_solve_targets
 from .skill_learning import learn_from_command
@@ -168,6 +168,12 @@ class AdventureLevelTierCommandProcessingService:
                 )
                 if _uses_contextual_feedback(run) and classification == COMMAND_COUNTED:
                     feedback = FeedbackGenerationService().describe(previous_state, next_state)
+                    missing_techniques = [
+                        rule["reason"]
+                        for rule in evaluation.failed_rules
+                        if rule.get("type") == "required_technique"
+                    ]
+                    feedback = " ".join(part for part in [feedback, *missing_techniques] if part)
         else:
             result_category = (
                 RESULT_INVALID

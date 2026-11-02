@@ -24,6 +24,11 @@ class RequestContextMiddleware:
         try:
             response = self.get_response(request)
             response["X-Request-ID"] = request_id
+            if request.path.startswith("/api/"):
+                # Also protects direct Render access, redirects and API errors.
+                response["Cache-Control"] = "private, no-store"
+                response["CDN-Cache-Control"] = "no-store"
+                response["Vercel-CDN-Cache-Control"] = "no-store"
             logger.info(
                 "request_completed",
                 extra={

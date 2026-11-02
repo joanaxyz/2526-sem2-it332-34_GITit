@@ -44,7 +44,9 @@ def background_masters() -> list[Path]:
     """Lossless masters, moving any runtime PNG that has none yet into raw/."""
     masters = []
     for battle in sorted(PUBLIC.glob("story-worlds/*/backgrounds/battle")):
-        names = {p.name for p in battle.glob("chapter-*.png")} | {p.name for p in battle.glob("raw/chapter-*.png")}
+        names = {p.name for p in battle.glob("chapter-*.png")} | {
+            p.name for p in battle.glob("raw/chapter-*.png")
+        }
         masters.extend(battle / "raw" / name for name in sorted(names))
     return masters
 
@@ -52,7 +54,9 @@ def background_masters() -> list[Path]:
 def effect_sheets() -> list[Path]:
     patterns = ("companion/*/effects/*/*.png", "story-worlds/*/monsters/*/effects/*.png")
     sheets = [p for pattern in patterns for p in PUBLIC.glob(pattern)]
-    return sorted(p for p in sheets if not p.name.startswith("_") and not SKIPPED_DIRS & set(p.parts))
+    return sorted(
+        p for p in sheets if not p.name.startswith("_") and not SKIPPED_DIRS & set(p.parts)
+    )
 
 
 def webp_background(source: Path) -> bytes:
@@ -97,7 +101,9 @@ def main() -> int:
         old = current.stat().st_size if current.exists() else 0
         before += old
         after += len(payload)
-        print(f"{master.relative_to(PUBLIC).as_posix()}: {old // 1024} KB -> {len(payload) // 1024} KB WebP")
+        print(
+            f"{master.relative_to(PUBLIC).as_posix()}: {old // 1024} KB -> {len(payload) // 1024} KB WebP"
+        )
         if args.apply:
             if not master.exists():
                 master.parent.mkdir(exist_ok=True)
@@ -111,11 +117,16 @@ def main() -> int:
         old = sheet.stat().st_size
         before += old
         after += len(payload)
-        print(f"{sheet.relative_to(PUBLIC).as_posix()}: {old // 1024} KB -> {len(payload) // 1024} KB")
+        print(
+            f"{sheet.relative_to(PUBLIC).as_posix()}: {old // 1024} KB -> {len(payload) // 1024} KB"
+        )
         if args.apply:
             write_atomic(sheet, payload)
 
-    print(f"total: {before / 1048576:.1f} MB -> {after / 1048576:.1f} MB" + ("" if args.apply else " (dry run)"))
+    print(
+        f"total: {before / 1048576:.1f} MB -> {after / 1048576:.1f} MB"
+        + ("" if args.apply else " (dry run)")
+    )
     return 0
 
 

@@ -12,6 +12,8 @@ import threading
 
 import httpx
 
+from tutoring.services.budget import BudgetUnavailable, reserve_provider_call
+
 # httpx closes idle connections after 5s by default, which would re-handshake
 # on nearly every chat message.
 _LIMITS = httpx.Limits(max_connections=32, max_keepalive_connections=8, keepalive_expiry=60)
@@ -48,6 +50,15 @@ async def _post_json(client, url, headers, body, timeout):
     async with asyncio.timeout(max(0.1, timeout)):
         for attempt in range(2):
             try:
+                # Keep synchronous Redis IO off the pooled provider event loop.
+                # The wall deadline covers admission too; a cancelled thread
+                # may consume a reservation, but cannot proceed to HTTP here.
+                try:
+                    retry_after = await asyncio.to_thread(reserve_provider_call)
+                except BudgetUnavailable:
+                    raise ProviderError(503, reason="budget_unavailable") from None
+                if retry_after is not None:
+                    raise ProviderError(429, str(retry_after), reason="budget_exhausted")
                 async with client.stream(
                     "POST",
                     url,

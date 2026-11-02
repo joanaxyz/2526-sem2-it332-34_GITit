@@ -30,3 +30,27 @@ def test_client_ip_rejects_forwarded_header_from_untrusted_peer():
         "/", REMOTE_ADDR="198.51.100.20", HTTP_X_FORWARDED_FOR="203.0.113.8"
     )
     assert get_client_ip(request) == "198.51.100.20"
+
+
+@override_settings(DJANGO_TRUST_PROXY_HEADERS=True, DJANGO_TRUSTED_PROXY_IPS=["10.0.0.0/8"])
+def test_client_ip_stops_at_vercel_egress_without_assuming_browser_identity():
+    request = RequestFactory().get(
+        "/", REMOTE_ADDR="10.0.0.10", HTTP_X_FORWARDED_FOR="203.0.113.8, 198.51.100.9"
+    )
+    assert get_client_ip(request) == "198.51.100.9"
+
+
+@override_settings(DJANGO_TRUST_PROXY_HEADERS=True, DJANGO_TRUSTED_PROXY_IPS=["10.0.0.0/8"])
+def test_client_ip_does_not_walk_past_invalid_boundary():
+    request = RequestFactory().get(
+        "/", REMOTE_ADDR="10.0.0.10", HTTP_X_FORWARDED_FOR="203.0.113.8, invalid"
+    )
+    assert get_client_ip(request) == "10.0.0.10"
+
+
+@override_settings(DJANGO_TRUST_PROXY_HEADERS=True, DJANGO_TRUSTED_PROXY_IPS=["10.0.0.0/8"])
+def test_all_trusted_chain_does_not_select_spoofed_leftmost_value():
+    request = RequestFactory().get(
+        "/", REMOTE_ADDR="10.0.0.10", HTTP_X_FORWARDED_FOR="10.0.0.200, 10.0.0.9"
+    )
+    assert get_client_ip(request) == "10.0.0.10"

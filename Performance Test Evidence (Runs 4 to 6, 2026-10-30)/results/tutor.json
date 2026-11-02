@@ -1,0 +1,74 @@
+[
+  {
+    "question": "What is a branch in Git?",
+    "status": 200,
+    "ms": 4356,
+    "reply_chars": 563,
+    "keys": [
+      "reply",
+      "response_kind",
+      "scenario_related",
+      "suggested_topics"
+    ]
+  },
+  {
+    "question": "What does git status show?",
+    "status": 200,
+    "ms": 3243,
+    "reply_chars": 784,
+    "keys": [
+      "reply",
+      "response_kind",
+      "scenario_related",
+      "suggested_topics"
+    ]
+  },
+  {
+    "question": "What is the difference between git fetch and git pull?",
+    "status": 200,
+    "ms": 3335,
+    "reply_chars": 771,
+    "keys": [
+      "reply",
+      "response_kind",
+      "scenario_related",
+      "suggested_topics"
+    ]
+  },
+  {
+    "question": "Why do merge conflicts happen?",
+    "status": 200,
+    "ms": 2469,
+    "reply_chars": 459,
+    "keys": [
+      "reply",
+      "response_kind",
+      "scenario_related",
+      "suggested_topics"
+    ]
+  },
+  {
+    "question": "What does the staging area do?",
+    "status": 200,
+    "ms": 4399,
+    "reply_chars": 621,
+    "keys": [
+      "reply",
+      "response_kind",
+      "scenario_related",
+      "suggested_topics"
+    ]
+  },
+  {
+    "question": "What is a remote in Git?",
+    "status": 200,
+    "ms": 2789,
+    "reply_chars": 558,
+    "keys": [
+      "reply",
+      "response_kind",
+      "scenario_related",
+      "suggested_topics"
+    ]
+  }
+]

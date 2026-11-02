@@ -3,7 +3,7 @@ import { Check, ChevronDown } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import {
-  EMPTY_RATE, KPIS, SUPPLEMENTARY_KPI, formatKpi, kpiEvidence, metricTargetStatus,
+  EMPTY_RATE, KPIS, SUPPLEMENTARY_KPI, carStartingPoint, formatKpi, kpiEvidence, metricTargetStatus,
   type KpiKey, type Status,
 } from '@/features/performance/utils/performanceKpis'
 import { GO_SCR_TARGET, MODULES, moduleTarget } from '@/features/performance/utils/learningObjectives'
@@ -52,17 +52,19 @@ function MeasurementRail({ metric, rate, target, compact = false, scaleMax }: {
   </div>
 }
 
-function MetricReading({ metric, rate, target, overall = false }: {
-  metric: KpiKey; rate: RateMetric; target: number; overall?: boolean
+function MetricReading({ metric, rate, target, overall = false, start }: {
+  metric: KpiKey; rate: RateMetric; target: number; overall?: boolean; start?: RateMetric
 }) {
   const definition = KPIS.find((item) => item.key === metric)!
   const status = metricTargetStatus(rate, target, definition.up)
+  const startingPoint = metric === 'car' ? carStartingPoint(start) : null
   return <div className={`objective-metric objective-metric--${overall ? 'overall' : 'module'}`} data-state={status}>
     <div className="objective-metric-heading"><span className="objective-metric-abbr" aria-hidden="true">{definition.abbr}</span><span>{metricName(metric)}</span></div>
     <strong className="objective-metric-value">{formatKpi(metric, rate)}</strong>
     <MeasurementRail metric={metric} rate={rate} target={target} compact={!overall} />
     <div className="objective-metric-foot"><Goal metric={metric} target={target} /><StatusBadge status={status} /></div>
     {metric === 'arc' ? <span className="objective-metric-direction">Lower is better</span> : null}
+    {startingPoint ? <span className="objective-metric-direction">{startingPoint}</span> : null}
     {overall && metric === 'rta' ? <span className="objective-metric-direction">Modules 3–4</span> : null}
   </div>
 }
@@ -112,7 +114,7 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
           <span>Mastery KPIs · Modules 1–4</span>
         </div>
         <div className="record-overall-readings" role="group" aria-label="Overall KPIs">
-          {KPIS.map((metric) => <MetricReading key={metric.key} metric={metric.key} rate={data.kpis[metric.key]} target={metric.target} overall />)}
+          {KPIS.map((metric) => <MetricReading key={metric.key} metric={metric.key} rate={data.kpis[metric.key]} target={metric.target} start={data.kpis.car_first} overall />)}
         </div>
         <MetricEvidence rates={KPIS.map(({ key }) => ({ key, rate: data.kpis[key] }))} label="Overall evidence" />
       </section>
@@ -174,7 +176,7 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
                 </div>
               </header>
               <div className="objective-module-kpis" role="group" aria-label={`Module ${module.num} KPIs`}>
-                {metrics.map((metric) => <MetricReading key={metric.key} metric={metric.key} rate={rateFor(metric.key)} target={metric.key === 'scr' ? GO_SCR_TARGET : moduleTarget(metric.key, module.num)} />)}
+                {metrics.map((metric) => <MetricReading key={metric.key} metric={metric.key} rate={rateFor(metric.key)} target={metric.key === 'scr' ? GO_SCR_TARGET : moduleTarget(metric.key, module.num)} start={results?.car_first} />)}
               </div>
               <MetricEvidence rates={metrics.map(({ key }) => ({ key, rate: rateFor(key) }))} label={`Module ${module.num} evidence`} />
 
@@ -201,7 +203,7 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
                         {readings.length > 1 ? <StatusBadge status={status} /> : null}
                         <details className="specific-objective-evidence">
                           <summary>{readings.length > 1 ? 'Both targets required · evidence' : 'Evidence'}</summary>
-                          <p>{readings[0].kpi === 'car' ? 'This objective’s first-mastery assessments.' : 'Results across this module.'}</p>
+                          <p>{readings[0].kpi === 'car' ? 'This objective’s scored scenarios.' : 'Results across this module.'}</p>
                           {readings.map((item) => <p key={item.kpi}><strong>{KPIS.find((metric) => metric.key === item.kpi)!.abbr}</strong> · {kpiEvidence(item.kpi, item.rate)}</p>)}
                         </details>
                       </div>
@@ -224,13 +226,13 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
       <div className="record-footnotes">
         <details className="performance-calculation">
           <summary>How these KPIs are measured</summary>
-          <p>Arcane Spire practice in Modules 1–4, across all time. Replay runs are excluded. The activity range above does not change these results.</p>
+          <p>Arcane Spire practice in Modules 1–4, across all time. Replay runs are excluded, except that Command Accuracy Rate counts a replay on a variant you had not solved before. The activity range above does not change these results.</p>
           <p>These mastery KPIs are separate from the run-based finish rate above. Scenario Completion Rate measures each general objective. Command Accuracy Rate uses each specific objective’s mapped scenarios; the module summary combines its assessments. Hard-Level Completion Rate, Average Retry Count, and Retry Transfer Accuracy use module results.</p>
           {KPIS.map((metric) => <div key={metric.key}>
             <h4>{metricName(metric.key)} ({metric.abbr})</h4>
             <p>{metric.explanation}</p><p>{metric.formula}</p><p>{metric.why}</p>
           </div>)}
-          <p>{data.samples.car_missing} mastered tiers lack validated command evidence and remain unscored.</p>
+          <p>{data.samples.car_missing} cleared scenarios lack validated command evidence and remain unscored.</p>
           <p>{data.samples.in_progress_tiers} opened tiers are in progress and not counted yet.</p>
         </details>
         {selected >= 3 ? <details className="objective-transfer-checkpoints performance-calculation">

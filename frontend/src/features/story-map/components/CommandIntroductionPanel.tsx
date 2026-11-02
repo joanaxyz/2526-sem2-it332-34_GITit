@@ -6,7 +6,6 @@ import type { CommandIntroduction } from '@/features/story-map/api/commandIntrod
 import { RepositoryChangeDiagram } from '@/features/story-map/components/RepositoryChangeDiagram'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
 import { useCommandIntroduction } from '@/features/story-map/hooks/useCommandIntroduction'
-import { useMediaQuery } from '@/shared/utils/useMediaQuery'
 import { commandFamilyIcon, repositoryChangeIcon } from '@/features/story-map/utils/commandIntroductionIcons'
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
 import { COMMAND_GUIDE_LAYOUT_KEY } from '@/shared/level/workspaceKeys'
@@ -14,15 +13,6 @@ import { COMMAND_GUIDE_LAYOUT_KEY } from '@/shared/level/workspaceKeys'
 type RepositoryChange = CommandIntroduction['needs'][number]
 type Tab = 'command' | 'change'
 
-// Room for the command card and the "What changes" card side by side, with
-// the workspace still visible around them. Below this they share one card.
-const WIDE_QUERY = '(min-width: 1180px) and (min-height: 640px)'
-const DEFAULT_PANE_LAYOUT = {
-  main: { width: 454, height: 410 },
-  aside: { width: 426, height: 396 },
-  gap: 52,
-  top: 24,
-}
 // The scenario, project files and tips stay readable while a guide is open.
 // (Its chat launcher sits above the veil instead: see tutor.css.)
 const CONTEXT_REGIONS = [
@@ -43,16 +33,14 @@ const CLOSE_ON_OUTSIDE_CLICK = {
  * Git-It, the guide mascot, speaks it: the card is its speech bubble, pointing
  * at the mascot beside it, as the companion sits beside its chat.
  * It explains the command part by part and shows what it will change as a
- * diagram; new words and techniques are tips beside it. Wide screens
- * show the guide as one frame holding the explanation and the change as their
- * own cards, each resized on its own; narrower screens use tabs in one card.
+ * diagram; new words and techniques are tips beside it. The command and its
+ * repository changes share one card, with tabs at every screen size.
  *
- * Before a command its only button is close (×): it stays beside the terminal
+ * Before a command the mascot closes it: it stays beside the terminal
  * while the learner types and turns into feedback once the command runs. Close,
  * Escape, or a click outside collapses it into the mascot launcher, which
  * brings it back. After a command, "Got it" records the guide as done.
- * Its AI chat is a launcher of its own in the workspace (GuideTutor, beside
- * the Guide launcher), so it never covers the card.
+ * Its AI chat opens in its own window and collapses to a separate launcher.
  */
 export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss }: {
   run: TierRun
@@ -61,10 +49,8 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
   onDismiss: () => void
 }) {
   const lesson = useCommandIntroduction(run, tutor)
-  const wide = useMediaQuery(WIDE_QUERY)
-  const [tab, setTab] = useState<Tab>('command')
   const introduction = tutor.phase === 'introduction'
-  // Feedback waits for "Got it"; introductions and replays can be put away.
+  // Outside clicks and Escape dismiss introductions and replays; feedback uses explicit controls.
   const dismissible = replay || introduction
   const missed = tutor.verdict === 'incorrect'
   const form = tutor.command_form
@@ -97,6 +83,10 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
         <p className="command-intro__note">
           Type it in the terminal and press Enter. This guide shows the result. It counts toward your command limit.
         </p>
+        {!replay ? <p className="command-intro__note">
+          This guide appears automatically only once for each command. Take a moment to explore {hasChange ? 'both tabs' : 'the guide'},
+          and use the AI guide if you need help.
+        </p> : null}
       </>
     )
   } else if (missed) {
@@ -118,11 +108,9 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
     )
   }
 
-  const split = wide && change !== null
-  const body = split || change === null ? command : (
+  const body = change === null ? command : (
     <GuideTabs
-      tab={tab}
-      onTab={setTab}
+      key={`${tutor.context_id}-${tutor.phase}-${tutor.verdict}`}
       tabs={[
         { id: 'command', label: 'Command', content: command },
         { id: 'change', label: changeTitle, content: change },
@@ -136,7 +124,7 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
     selector: introduction ? '[data-command-input]' : '[data-tour-target="live-dag"]',
     icon: commandFamilyIcon(form.usage_form),
     title: tutor.title,
-    placement: introduction ? 'top' : 'left',
+    placement: introduction ? 'bottom' : 'left',
     body,
   }
 
@@ -148,6 +136,7 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
       finishLabel={lesson.pending ? 'Saving…' : 'Got it'}
       finishDisabled={lesson.pending}
       cardClassName="command-intro"
+      cardWidth={528}
       skipLabel="Close command guide"
       skipIconOnly
       showSkip={dismissible}
@@ -156,18 +145,11 @@ export function CommandIntroductionPanel({ run, tutor, replay = false, onDismiss
       focusCard={replay || !introduction}
       showProgress={false}
       showSpeaker
+      controlsWithSpeaker
       transformable
       transformPreferenceKey={COMMAND_GUIDE_LAYOUT_KEY}
-      paneLayout={DEFAULT_PANE_LAYOUT}
-      paneLabels={{ main: 'command card', aside: `${changeTitle.toLowerCase()} card` }}
       reveal={introduction ? CONTEXT_REGIONS : FEEDBACK_REGIONS}
       collapseTarget='[data-mascot-launcher="command-guide"]'
-      aside={split ? (
-        <section className="command-intro__aside" aria-label={changeTitle}>
-          <h3 className="command-intro__aside-title">{changeTitle}</h3>
-          {change}
-        </section>
-      ) : undefined}
       onClose={(reason) => {
         if (reason === 'finish') {
           void lesson.complete().then((completed) => { if (completed) focusTerminal() })
@@ -186,12 +168,11 @@ function sameWords(left: string, right: string) {
   return words(left) === words(right)
 }
 
-function GuideTabs({ tab, onTab, tabs }: {
-  tab: Tab
-  onTab: (tab: Tab) => void
+function GuideTabs({ tabs }: {
   tabs: readonly { id: Tab; label: string; content: ReactNode }[]
 }) {
   const baseId = useId()
+  const [tab, onTab] = useState<Tab>('command')
   return (
     <div className="command-intro__tabs">
       <div className="command-intro__tablist" role="tablist" aria-label="Command guide sections">
@@ -203,8 +184,21 @@ function GuideTabs({ tab, onTab, tabs }: {
             id={`${baseId}-${item.id}-tab`}
             aria-selected={tab === item.id}
             aria-controls={`${baseId}-${item.id}-panel`}
+            tabIndex={tab === item.id ? 0 : -1}
             className="command-intro__tab"
             onClick={() => onTab(item.id)}
+            onKeyDown={(event) => {
+              const index = tabs.findIndex((entry) => entry.id === item.id)
+              const next = event.key === 'Home' ? 0
+                : event.key === 'End' ? tabs.length - 1
+                : event.key === 'ArrowRight' ? (index + 1) % tabs.length
+                : event.key === 'ArrowLeft' ? (index - 1 + tabs.length) % tabs.length
+                : null
+              if (next === null) return
+              event.preventDefault()
+              onTab(tabs[next].id)
+              document.getElementById(`${baseId}-${tabs[next].id}-tab`)?.focus()
+            }}
           >
             {item.label}
           </button>
@@ -217,6 +211,7 @@ function GuideTabs({ tab, onTab, tabs }: {
           id={`${baseId}-${item.id}-panel`}
           aria-labelledby={`${baseId}-${item.id}-tab`}
           hidden={tab !== item.id}
+          tabIndex={0}
           className="command-intro__tabpanel"
         >
           {item.content}

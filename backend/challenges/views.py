@@ -34,6 +34,8 @@ CHALLENGE_WORKSPACE_FILES = RunWorkspaceFileService(
 
 
 class ChallengeRunStartAPIView(APIView):
+    throttle_scope = "run_start"
+
     @extend_schema(
         request=ChallengeRunStartSerializer, responses={201: ChallengeRunResponseSerializer}
     )
@@ -226,6 +228,8 @@ class ChallengeWorkspaceFileAPIView(APIView):
 
 
 class ChallengeRetryAPIView(APIView):
+    throttle_scope = "run_start"
+
     @extend_schema(request=None, responses={201: ChallengeRunResponseSerializer})
     def post(self, request, run_id: int):
         player = get_or_create_player(request.user)

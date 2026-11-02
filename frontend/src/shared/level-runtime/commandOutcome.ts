@@ -28,7 +28,12 @@ export function predictLocalOutcome(
   counts: { counted: number; max: number; scoringPolicyVersion?: number },
 ): CommandSubmissionOutcome | null {
   if (!execution.normalized_command.trim()) return null
-  const counted = !execution.processed || ((counts.scoringPolicyVersion ?? 1) >= 2 && execution.diagnostic && execution.exit_code !== 0)
+  // A normal negative query is still a valid inspection. Keep this aligned
+  // with the backend command boundary, including missing config values.
+  const inspectionSucceeded = execution.exit_code === 0 || (
+    execution.exit_code === 1 && ['check-ignore', 'grep', 'merge-base', 'config'].includes(execution.command_family ?? '')
+  )
+  const counted = !execution.processed || ((counts.scoringPolicyVersion ?? 1) >= 2 && execution.diagnostic && !inspectionSucceeded)
   if (!counted && !execution.diagnostic) return null
   const countedCommands = counts.counted + (counted ? 1 : 0)
   return {
