@@ -42,8 +42,12 @@ services:
         value: "False"
       - key: GUNICORN_WORKERS
         value: "1"
+      # Requests spend most of their time waiting on Postgres, not the 0.1
+      # CPU, so threads add capacity where extra workers would only add
+      # memory. Each thread holds one persistent connection, which keeps 8
+      # inside the Supabase Free session pooler's 15-connection limit.
       - key: GUNICORN_THREADS
-        value: "2"
+        value: "8"
       - key: GUNICORN_TIMEOUT
         value: "60"
 

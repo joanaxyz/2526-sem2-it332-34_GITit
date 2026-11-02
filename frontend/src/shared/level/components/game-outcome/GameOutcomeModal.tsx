@@ -49,6 +49,7 @@ export function GameOutcomeModal({
   stats,
   children,
   headerActions,
+  footerActions,
   className,
 }: {
   open: boolean
@@ -74,6 +75,8 @@ export function GameOutcomeModal({
   children?: ReactNode
   /** Icon-button actions rendered in the top-right header cluster. */
   headerActions?: ReactNode
+  /** Next action rendered below score details and statistics. */
+  footerActions?: ReactNode
   className?: string
 }) {
   const isFailed = tone === 'failure'
@@ -153,6 +156,7 @@ export function GameOutcomeModal({
 
           </div>
         </div>
+        {footerActions ? <div className="game-outcome-footer-actions">{footerActions}</div> : null}
         <p className="game-outcome-hint text-center">
           Click anywhere to continue<span className="sr-only">, or press Enter, Space, or Escape.</span>
         </p>

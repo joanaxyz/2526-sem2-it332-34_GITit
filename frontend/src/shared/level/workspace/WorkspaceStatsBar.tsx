@@ -8,13 +8,13 @@ import { cn } from '@/shared/utils/cn'
  * command budget and star target anchors (`command-budget`, `star-budget`)
  * on their values so the first-run tour can find them.
  */
-export function WorkspaceStatsBar({ stats, repoGraph }: { stats: WorkspaceStat[]; repoGraph?: RepoGraphTrigger }) {
+export function WorkspaceStatsBar({ stats, repoGraph, compactLabels = [] }: { stats: WorkspaceStat[]; repoGraph?: RepoGraphTrigger; compactLabels?: readonly string[] }) {
   return (
-    <div className="tier-stats-bar" role="group" aria-label="Level status">
+    <div className={cn('tier-stats-bar', compactLabels.length > 0 && 'tier-stats-bar--compact')} role="group" aria-label="Level status">
       <dl className="tier-stats">
         {stats.map((stat) => (
           <div className="tier-stat" key={stat.label}>
-            <dt>
+            <dt className={compactLabels.includes(stat.label) ? 'sr-only' : undefined}>
               <stat.icon aria-hidden="true" className={cn('tier-stat-icon', stat.iconClass)} />
               {stat.label}
             </dt>

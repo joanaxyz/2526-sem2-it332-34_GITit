@@ -105,7 +105,7 @@ describe('story world and companion registries', () => {
     expect(getStoryWorld('nonexistent-world').slug).toBe('arcane-spire')
   })
 
-  it('resolves every authored chapter parallax to its story-local PNG path', () => {
+  it('resolves every authored chapter parallax to its story-local WebP path', () => {
     for (const [worldSlug, keys] of Object.entries(EXPECTED_PARALLAX_KEYS)) {
       const parallax = STORY_WORLDS[worldSlug]?.battle.parallax ?? {}
 
@@ -114,7 +114,7 @@ describe('story world and companion registries', () => {
       for (const [index, key] of keys.entries()) {
         const src = parallax[key]?.src
 
-        const filename = `chapter-${String(index + 1).padStart(2, '0')}.png`
+        const filename = `chapter-${String(index + 1).padStart(2, '0')}.webp`
 
         expect(src).toBe(`/cosmetics/story-worlds/${worldSlug}/backgrounds/battle/${filename}`)
       }
