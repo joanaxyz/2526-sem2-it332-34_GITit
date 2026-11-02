@@ -9,6 +9,9 @@ import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/co
 import { storyPath } from '@/shared/navigation/routes'
 import { OnboardingBanner } from './OnboardingBanner'
 
+// The `home` and `equip` phases are retired: OnboardingProvider maps them to
+// `done`, so this component never renders for any account. Kept in place to
+// preserve the import in HomeHubView without a disruptive removal refactor.
 export type HomeTourSection = 'overview' | 'profile'
 
 function sectionFor(view: HomeView): HomeTourSection {

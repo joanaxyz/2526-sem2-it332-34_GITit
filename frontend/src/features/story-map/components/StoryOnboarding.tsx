@@ -1,4 +1,4 @@
-import { BookOpen, GitBranch, Play, Sparkles, Swords } from 'lucide-react'
+import { BookOpen, GitBranch } from 'lucide-react'
 import { useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 
@@ -7,7 +7,7 @@ import { Button } from '@/shared/components/Button'
 import { GameplayWorkspaceTour, type WorkspaceTourStep } from '@/shared/level/components/GameplayWorkspaceTour'
 import { Modal } from '@/shared/components/Modal'
 import { MascotMessage } from '@/shared/mascot/MascotMessage'
-import { HOME_ROUTE, SHOP_ROUTE } from '@/shared/navigation/routes'
+import { SHOP_ROUTE } from '@/shared/navigation/routes'
 
 export function StoryOnboarding({
   ready,
@@ -32,43 +32,18 @@ export function StoryOnboarding({
       selector: '[data-onboarding="stories"]',
       icon: GitBranch,
       title: 'This is your learning map',
-      body: 'Choose a chapter, read its guide, then open a level. Practice runs use a safe workspace, never your real projects.',
+      body: 'Choose a chapter and open a level. Practice runs use a safe workspace — never your real projects.',
     },
     {
       id: 'learn',
       selector: compact ? '[aria-controls="story-map-tools"]' : '.chapter-book',
       icon: BookOpen,
-      title: 'Check the chapter guide',
+      title: 'Open the Field Guide',
       body: compact
-        ? 'Open Chapter tools, then use the Field Guide to review the commands for this chapter.'
-        : 'Open the Field Guide to review the commands for this chapter.',
+        ? 'Open Chapter tools, then use the Field Guide to review the Git commands for this chapter before you play.'
+        : 'Open the Field Guide to review the Git commands for this chapter before you play.',
     },
-    {
-      id: 'challenges',
-      selector: '[data-onboarding="challenges"]',
-      icon: Swords,
-      title: 'Challenges follow practice',
-      body: 'Finish the chapter’s Adventure levels to unlock its Challenge difficulties.',
-      optional: true,
-    },
-    {
-      id: 'play',
-      selector: '[data-onboarding="next-level"]',
-      icon: Play,
-      title: 'Open your next level',
-      body: 'Choose the glowing level, then select Play. The objective tells you what to do.',
-      optional: true,
-    },
-    {
-      id: 'companion',
-      selector: compact ? '[aria-controls="story-map-utilities"]' : '.story-companion-panel',
-      icon: Sparkles,
-      title: hasCompanion ? 'Your companion is ready' : 'Choose a companion before playing',
-      body: (compact ? 'Open Story utilities to see your companion. ' : '') + (hasCompanion
-        ? 'Next, visit Home to see your profile and progress.'
-        : 'Every playable level needs an equipped companion. Next, choose one in the Shop.'),
-    },
-  ] satisfies WorkspaceTourStep[], [compact, hasCompanion])
+  ] satisfies WorkspaceTourStep[], [compact])
 
   if (!onboarding) return null
 
@@ -86,14 +61,14 @@ export function StoryOnboarding({
     <>
       <Modal
         open={onboarding.phase === 'welcome'}
-        title="Choose how to learn"
+        title="Welcome to GIT it!"
         className="story-onboarding-choice"
         contentClassName="story-onboarding-choice__content"
         onClose={skipOrientation}
       >
         <MascotMessage>
         <p>
-          New to Git? Take the short primer. Already know the basics? Go to the first chapter.
+          New to Git? Start with the short primer. Already know the basics? Jump straight to the first chapter.
         </p>
         <div className="story-onboarding-choice__actions">
           {orientationAvailable ? (
@@ -103,19 +78,18 @@ export function StoryOnboarding({
             Go to first chapter
           </Button>
         </div>
-        <small>You can open the primer later from Chapters.</small>
+        <small>You can open the primer anytime from the Chapters panel.</small>
         </MascotMessage>
       </Modal>
 
       {ready && onboarding.phase === 'stories' ? (
         <GameplayWorkspaceTour
           label="Getting started"
-          finishLabel={hasCompanion ? 'Explore Home' : 'Choose a companion'}
+          finishLabel={hasCompanion ? 'Start playing' : 'Choose a companion'}
           steps={steps}
           onClose={() => {
             if (hasCompanion) {
-              onboarding.setPhase('home')
-              navigate(HOME_ROUTE)
+              onboarding.setPhase('done')
             } else {
               onboarding.setPhase('shop')
               navigate(`${SHOP_ROUTE}?required=1`)

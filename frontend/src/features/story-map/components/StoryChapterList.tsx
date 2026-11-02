@@ -1,4 +1,4 @@
-import { ChevronDown, Lock } from 'lucide-react'
+import { ChevronDown, Lock, X } from 'lucide-react'
 import { type CSSProperties, useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
 
@@ -10,10 +10,16 @@ export function StoryChapterList({
   chapters,
   activeChapterId,
   onSelectChapter,
+  showCoachmark = false,
+  onCoachmarkDismiss,
+  inOrientation = false,
 }: {
   chapters: LearningChapter[]
   activeChapterId: number
   onSelectChapter: (chapterId: number) => void
+  showCoachmark?: boolean
+  onCoachmarkDismiss?: () => void
+  inOrientation?: boolean
 }) {
   const [open, setOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement>(null)
@@ -137,7 +143,38 @@ export function StoryChapterList({
           </span>
           <ChevronDown aria-hidden="true" />
         </button>
+
+        {showCoachmark ? (
+          <div className="story-chapter-coachmark" role="status" aria-live="polite">
+            <div className="story-chapter-coachmark-body">
+              <p className="story-chapter-coachmark-title">Explore other chapters anytime!</p>
+              <p className="story-chapter-coachmark-text">
+                You don&apos;t have to finish the Git Primer first. Open the Chapters menu to explore other modules whenever you like.
+              </p>
+              <button
+                type="button"
+                className="story-chapter-coachmark-dismiss"
+                onClick={onCoachmarkDismiss}
+              >
+                Got it
+              </button>
+            </div>
+            <button
+              type="button"
+              className="story-chapter-coachmark-close"
+              aria-label="Dismiss"
+              onClick={onCoachmarkDismiss}
+            >
+              <X aria-hidden="true" />
+            </button>
+          </div>
+        ) : null}
       </div>
+
+      {inOrientation && !showCoachmark ? (
+        <p className="story-chapter-hint">Switch chapters anytime — no need to finish this one first.</p>
+      ) : null}
+
       {open && menuPosition ? createPortal(
         <div
           ref={menuRef}

@@ -76,6 +76,8 @@
   min-height: 0;
   flex: 1 1 0;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
 }
 
 .shop-error-panel,

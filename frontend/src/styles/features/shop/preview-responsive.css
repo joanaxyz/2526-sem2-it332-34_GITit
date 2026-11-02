@@ -3,10 +3,6 @@
   min-height: 0;
 }
 
-.shop-companion-preview-suite {
-  overflow-y: visible;
-}
-
 @media (max-width: 1200px) {
   .shop-ref-page {
     height: auto;

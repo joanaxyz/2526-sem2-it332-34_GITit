@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { CSSProperties } from 'react'
 import { useBlocker, useNavigate } from 'react-router-dom'
 import { useQueryClient } from '@tanstack/react-query'
+import { hasSeenFirstCommandMilestone, markFirstCommandMilestoneSeen } from '@/shared/level/utils/milestones'
 import { AdventureExitConfirmModal } from '@/features/adventures/components/AdventureExitConfirmModal'
 import { AdventureLevelLibraryModal } from '@/features/adventures/components/AdventureLevelLibraryModal'
 import { AdventureOutcomeModal } from '@/features/adventures/components/AdventureOutcomeModal'
@@ -9,6 +10,7 @@ import { AdventureStartOverConfirmModal } from '@/features/adventures/components
 import { AdventureStatusHeader } from '@/features/adventures/components/AdventureStatusHeader'
 import { AdventureWorkspaceMain } from '@/features/adventures/components/AdventureWorkspaceMain'
 import { AdventureWorkspaceTour } from '@/features/adventures/components/AdventureWorkspaceTour'
+import { OnboardingBanner } from '@/features/onboarding/components/OnboardingBanner'
 import { adventuresApi } from '@/features/adventures/api/adventuresApi'
 import { useAdventureCommandSubmission } from '@/features/adventures/hooks/useAdventureCommandSubmission'
 import { createAdventureWorkspaceCommandHandler } from '@/features/adventures/utils/adventureWorkspaceCommand'
@@ -58,6 +60,7 @@ export function AdventureSession({
   const [exitConfirmOpen, setExitConfirmOpen] = useState(false)
   const [exitNavigationRunId, setExitNavigationRunId] = useState<number | null>(null)
   const [lastWorkspace, setLastWorkspace] = useState<AdventureWorkspaceSnapshot | null>(null)
+  const [firstCommandMessage, setFirstCommandMessage] = useState<string | null>(null)
   const queriedRun = query.data
   const queriedRunId = queriedRun?.id ?? null
   const queriedRunStatus = queriedRun?.status ?? null
@@ -87,6 +90,20 @@ export function AdventureSession({
   useEffect(() => {
     latestRunRef.current = queriedRun ?? null
   }, [queriedRun])
+
+  // First-command milestone: show a one-time nudge after the learner's first
+  // server-confirmed Git command. Guard fires synchronously before setState
+  // to prevent double-fire from concurrent renders.
+  useEffect(() => {
+    if (hasSeenFirstCommandMilestone(user?.id)) return
+    const steps = queriedRun?.current_attempt?.steps ?? []
+    const hasServerStep = steps.some(
+      (step) => step.id >= 0 && step.result_category !== 'Pending' && step.result_category !== 'Error',
+    )
+    if (!hasServerStep) return
+    markFirstCommandMilestoneSeen(user?.id)
+    setFirstCommandMessage('Your first Git command ran! Keep going — complete all the waves to finish the level.')
+  }, [queriedRun, user?.id])
 
   useEffect(() => {
     if (navigationBlocker.state !== 'blocked' || !activeRunId) return
@@ -209,6 +226,16 @@ export function AdventureSession({
         onStartOver={() => setStartOverConfirmOpen(true)}
         onOpenLibrary={() => setLevelLibraryOpen(true)}
       />
+
+      {firstCommandMessage ? (
+        <OnboardingBanner
+          title="First command complete"
+          onSkip={() => setFirstCommandMessage(null)}
+          skipLabel="Dismiss"
+        >
+          {firstCommandMessage}
+        </OnboardingBanner>
+      ) : null}
 
       <AdventureWorkspaceMain
         run={run}
