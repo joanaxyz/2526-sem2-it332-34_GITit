@@ -33,30 +33,6 @@ function markSeen(name: string, userId?: number | null): void {
   }
 }
 
-function firstCommandKey(userId?: number | null) {
-  return `${MILESTONE_KEY_PREFIX}first-command:${userId ?? 'guest'}`
-}
-
-export function hasSeenFirstCommandMilestone(userId?: number | null): boolean {
-  const storage = safeStorage()
-  if (!storage) return true
-  try {
-    return storage.getItem(firstCommandKey(userId)) === 'seen'
-  } catch {
-    return true
-  }
-}
-
-export function markFirstCommandMilestoneSeen(userId?: number | null): void {
-  const storage = safeStorage()
-  if (!storage) return
-  try {
-    storage.setItem(firstCommandKey(userId), 'seen')
-  } catch {
-    // Storage can be blocked in privacy modes; the milestone must not crash the app.
-  }
-}
-
 export function hasSeenChapterNavCoachmark(userId?: number | null): boolean {
   return hasSeen('chapter-nav-coachmark', userId)
 }

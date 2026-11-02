@@ -1,6 +1,7 @@
 """User-management HTTP adapters for the admin console."""
 
 from drf_spectacular.utils import extend_schema
+from rest_framework import status
 from rest_framework.exceptions import NotFound
 from rest_framework.response import Response
 from rest_framework.views import APIView
@@ -20,7 +21,6 @@ from adminconsole.serializers import (
     AdminUserListResponseSerializer,
 )
 from adminconsole.services import AdminEconomyService, AdminUserActionService
-from rest_framework import status
 from common.permissions import IsStaff
 from players.services import get_or_create_player
 
