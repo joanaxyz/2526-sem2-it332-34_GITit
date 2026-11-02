@@ -349,9 +349,9 @@ button.shop-price-chip:focus-visible {
 }
 
 @keyframes shop-sparkle-twinkle {
-  0%, 100% { opacity: 1;   font-size: 0.65rem; }
-  40%       { opacity: 0.4; font-size: 0.45rem; }
-  70%       { opacity: 0.9; font-size: 0.7rem; }
+  0%, 100% { opacity: 1;   transform: scale(1); }
+  40%       { opacity: 0.4; transform: scale(0.7); }
+  70%       { opacity: 0.9; transform: scale(1.1); }
 }
 
 /* Glow pulse on the buttons themselves */
@@ -379,17 +379,13 @@ button.shop-price-chip:focus-visible {
 
 .shop-purchase-dock:has([data-onboarding='shop-purchase']:not(:disabled))::before,
 .app-onboarding-banner__actions:has([data-onboarding='shop-back-to-map'])::before {
-  animation:
-    shop-sparkle-spin-cw 2.4s linear infinite,
-    shop-sparkle-twinkle 1.4s ease-in-out infinite;
+  animation: shop-sparkle-spin-cw 2.4s linear infinite;
 }
 
 .shop-purchase-dock:has([data-onboarding='shop-purchase']:not(:disabled))::after,
 .app-onboarding-banner__actions:has([data-onboarding='shop-back-to-map'])::after {
   font-size: 0.45rem;
-  animation:
-    shop-sparkle-spin-ccw 3s linear infinite,
-    shop-sparkle-twinkle 1.8s ease-in-out infinite 0.6s;
+  animation: shop-sparkle-spin-ccw 3s linear infinite;
   filter: drop-shadow(0 0 4px rgba(var(--theme-primary-rgb), 0.8));
 }
 

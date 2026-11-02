@@ -61,7 +61,7 @@ export function StoryOnboarding({
     <>
       <Modal
         open={onboarding.phase === 'welcome'}
-        title="Welcome to GIT it!"
+        title="Choose how to learn"
         className="story-onboarding-choice"
         contentClassName="story-onboarding-choice__content"
         onClose={skipOrientation}

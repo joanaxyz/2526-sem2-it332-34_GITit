@@ -15,7 +15,7 @@ describe('level tour storage', () => {
     expect(hasSeenLevelTour(7, 'challenge')).toBe(false)
     expect(hasSeenLevelTour(8, 'adventure')).toBe(false)
     expect(levelTourStorageKey(7, 'adventure')).toBe(
-      'git-it-practice-workspace-tour:v5:7:adventure',
+      'git-it-practice-workspace-tour:v6:7:adventure',
     )
   })
 
