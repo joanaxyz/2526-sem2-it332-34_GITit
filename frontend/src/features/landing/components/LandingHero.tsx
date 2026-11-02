@@ -2,21 +2,10 @@ import { Link } from 'react-router-dom'
 
 import gitLogoImage from '@/assets/images/git-it-logo-new.png'
 import { Button } from '@/shared/components/Button'
-import { storyPath } from '@/shared/navigation/routes'
 
 export function LandingHeader() {
   return (
-    <header className="landing-header">
-      <nav className="landing-header__nav" aria-label="Account">
-        {/* Protected restores a saved session at the story map, or sends the player to /login. */}
-        <Button asChild variant="outline" size="sm" className="landing-header__sign-in">
-          <Link to={storyPath()}>Sign in</Link>
-        </Button>
-        <Button asChild size="sm">
-          <Link to="/register">Create account</Link>
-        </Button>
-      </nav>
-    </header>
+    <header className="landing-header" />
   )
 }
 
