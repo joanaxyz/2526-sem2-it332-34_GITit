@@ -1,7 +1,7 @@
 .auth-strength {
   display: grid;
-  gap: 0.42rem;
-  padding-top: 0.1rem;
+  gap: 0.25rem;
+  padding-top: 0.05rem;
 }
 
 .auth-strength-bars {

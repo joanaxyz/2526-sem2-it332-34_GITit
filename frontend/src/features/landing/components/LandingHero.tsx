@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-import gitLogoImage from '@/assets/images/git-it-logo-arcane.webp'
+import gitLogoImage from '@/assets/images/git-it-logo-new.png'
 import { Button } from '@/shared/components/Button'
 import { storyPath } from '@/shared/navigation/routes'
 
@@ -25,7 +25,7 @@ export function LandingHero() {
     <section className="landing-hero" aria-labelledby="landing-hero-title">
       <div className="landing-hero__sky" aria-hidden="true" />
       <div className="landing-hero__copy">
-        <img className="landing-hero__logo" src={gitLogoImage} alt="GIT it!" width={900} height={305} />
+        <img className="landing-hero__logo" src={gitLogoImage} alt="GIT it!" width={1431} height={623} />
         <h1 id="landing-hero-title" className="landing-hero__title">
           Stop memorising Git. Start reading the repository.
         </h1>
