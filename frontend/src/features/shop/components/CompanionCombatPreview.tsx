@@ -9,6 +9,7 @@ import { SpriteAnimator } from '@/shared/sprites/SpriteAnimator'
 import type { SpriteAnimation } from '@/shared/sprites/types'
 
 const POSE_STAGE_HEIGHT = 300
+const POSE_STAGE_INSET = 16
 
 const moveLabels: Record<string, string> = {
   idle: 'Idle',
@@ -33,6 +34,20 @@ export function CompanionPosePreview({ companionSlug }: { companionSlug: string 
   }, [companionDef])
   const [activePoseKey, setActivePoseKey] = useState(() => poses[0]?.key ?? 'idle')
   const [playKey, setPlayKey] = useState(0)
+  const stageRef = useRef<HTMLDivElement>(null)
+  const [stageSize, setStageSize] = useState({ width: 256, height: 256 })
+
+  useEffect(() => {
+    const stage = stageRef.current
+    if (!stage || typeof ResizeObserver === 'undefined') return
+    const observer = new ResizeObserver(([entry]) => {
+      if (!entry) return
+      const { width, height } = entry.contentRect
+      if (width > 0 && height > 0) setStageSize({ width, height })
+    })
+    observer.observe(stage)
+    return () => observer.disconnect()
+  }, [])
 
   if (!companion || !companionDef || poses.length === 0) {
     return <section className="shop-companion-preview shop-inspector-empty" aria-hidden="true" />
@@ -40,7 +55,13 @@ export function CompanionPosePreview({ companionSlug }: { companionSlug: string 
 
   const activePoseIndex = Math.max(0, poses.findIndex((pose) => pose.key === activePoseKey))
   const activePose = poses[activePoseIndex]
-  const scale = POSE_STAGE_HEIGHT / (companionDef.sprites.idle?.frameHeight ?? 256)
+  const idle = companion.sprites.idle
+  // Reserve room for the pixel-anchor shift below the frame so the feet stay visible.
+  const scale = Math.min(
+    Math.max(1, stageSize.width - POSE_STAGE_INSET) / (idle.frameWidth * (idle.displayScale ?? 1)),
+    Math.min(POSE_STAGE_HEIGHT, Math.max(1, stageSize.height - POSE_STAGE_INSET)) /
+      (idle.frameHeight * (idle.displayScale ?? 1) + companion.metrics.footOffset),
+  )
 
   function stepPose(direction: number) {
     const nextPose = poses[(activePoseIndex + direction + poses.length) % poses.length]
@@ -54,7 +75,7 @@ export function CompanionPosePreview({ companionSlug }: { companionSlug: string 
         <span>Pose</span>
         <small aria-live="polite" aria-atomic="true">{activePose.label}</small>
       </header>
-      <div className="shop-companion-pose-stage" data-tone={companionSlug}>
+      <div className="shop-companion-pose-stage" data-tone={companionSlug} ref={stageRef}>
         <div className="shop-companion-pose-ground" aria-hidden="true" />
         <SpriteAnimator
           key={`${activePose.key}-${playKey}`}
