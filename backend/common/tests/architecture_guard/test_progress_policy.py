@@ -179,11 +179,10 @@ def test_stats_openapi_guard_rejects_wrong_nested_schema_signatures():
     schema = json.loads((ROOT / STATS_GENERATED_OPENAPI).read_text(encoding="utf-8"))
     schemas = schema["components"]["schemas"]
     schemas["RateMetric"]["properties"]["value"] = {"type": "number", "format": "double"}
-    schemas["StatsSkillAxis"]["properties"]["command"] = {"type": "integer"}
     schemas["StatsTrendPoint"]["properties"]["date"] = {"type": "string"}
     schemas["StatsTrendPoint"]["properties"]["levels_completed"] = {"type": "string"}
-    schemas["StatsSummaryResponse"]["properties"]["skill_profile"] = {
-        "items": {"$ref": "#/components/schemas/StatsSkillAxis"}
+    schemas["StatsSummaryResponse"]["properties"]["activity_trend"] = {
+        "items": {"$ref": "#/components/schemas/StatsTrendPoint"}
     }
     schemas["StatsActivityResponse"]["properties"]["activity_trend"] = {
         "items": {"$ref": "#/components/schemas/StatsTrendPoint"}
@@ -191,7 +190,6 @@ def test_stats_openapi_guard_rejects_wrong_nested_schema_signatures():
     violations = stats_openapi_contract_violations(schema)
     for component_name in (
         "RateMetric",
-        "StatsSkillAxis",
         "StatsTrendPoint",
         "StatsActivityResponse",
         "StatsSummaryResponse",

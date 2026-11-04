@@ -79,19 +79,17 @@ HOME_HUB_LINE_LIMITS = {
 }
 
 # Home Overview is one composition over a pure model and one owner per band. The
-# composition picks the active view. Progress/skills render pure model slices;
+# composition picks the active view. Progress/achievements render pure model slices;
 # results owns the on-demand performance query and delegates ready rendering.
 HOME_STATS_DIR = "frontend/src/features/home/components/home-stats"
 HOME_STATS_VIEW = "frontend/src/features/home/components/HomeStatsView.tsx"
 HOME_STATS_MODEL = f"{HOME_STATS_DIR}/homeStatsModel.ts"
 HOME_PROGRESS_PANEL = f"{HOME_STATS_DIR}/HomeProgressPanel.tsx"
-HOME_SKILLS_PANEL = f"{HOME_STATS_DIR}/HomeSkillsPanel.tsx"
 HOME_RESULTS_PANEL = f"{HOME_STATS_DIR}/HomeResultsPanel.tsx"
 HOME_ACHIEVEMENT_GALLERY = f"{HOME_STATS_DIR}/HomeAchievementGallery.tsx"
 # role -> (path, model slice prop rendered by the composition)
 HOME_OVERVIEW_PANELS = {
     "progress": (HOME_PROGRESS_PANEL, "HomeProgressPanel", "progress"),
-    "skills": (HOME_SKILLS_PANEL, "HomeSkillsPanel", "skills"),
     "results": (HOME_RESULTS_PANEL, "HomeResultsPanel", "results"),
     "gallery": (HOME_ACHIEVEMENT_GALLERY, "HomeAchievementGallery", "achievements"),
 }
@@ -101,7 +99,6 @@ HOME_OVERVIEW_PANELS = {
 # are passed in by name. They are controls, not model data.
 HOME_OVERVIEW_PANEL_PROPS = {
     "progress": ("progress", "activityWindow", "onSelectActivityWindow"),
-    "skills": ("skills",),
     "results": (),
     "gallery": ("achievements",),
 }
@@ -112,10 +109,6 @@ HOME_STATS_LINE_LIMITS = {
     # The progress band owns the span control (week/month/year) as well as the
     # plot and the citadel.
     "progress": 180,
-    # The skills band owns both readings of one profile — the per-command bar
-    # list and the radar dial — the control that switches them, and the hover
-    # link that survives either view.
-    "skills": 140,
     "results": 175,
     "gallery": 150,
 }
@@ -1069,9 +1062,6 @@ def home_overview_source_violations(
                     "deriveAchievements",
                     "useState",
                 ),
-                # The skills band keeps one piece of local UI state: which row the
-                # pointer is on, which is what lights the matching radar vertex.
-                "skills": ("ActivityTrendChart", "deriveAchievements"),
                 "results": (
                     "ActivityTrendChart",
                     "GitCommandIcon",
@@ -1137,7 +1127,6 @@ def home_overview_source_violations(
         for exported_type in (
             "HomeStatsModel",
             "HomeProgressModel",
-            "HomeSkillsModel",
         ):
             if not re.search(rf"\bexport\s+type\s+{exported_type}\b", source):
                 violations.append(f"{path_label}: model must export {exported_type}")
@@ -1179,12 +1168,6 @@ def home_overview_source_violations(
             "ActivitySpanPicker",
             "home-overview-story-block",
             "home-overview-story-rate",
-        ),
-        "skills": (
-            "GitCommandIcon",
-            "SkillProfileBars",
-            "MasteryRadar",
-            "home-overview-mastery-orb",
         ),
         "results": (
             "LearnerPerformanceInstrument",
@@ -1298,7 +1281,6 @@ def home_overview_css_source_violations(
         expected = [
             "./stats-layout.css",
             "./stats-progress.css",
-            "./stats-skills.css",
             "./stats-kpis.css",
             "./stats-results.css",
             "./stats-achievements.css",

@@ -51,7 +51,7 @@ export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: Rep
       value: rewardClaimed ? (
         'Claimed'
       ) : (
-        <span className="lvlctx-num">+{run.reward.coins} GitCoins</span>
+        <span className="lvlctx-num">+{run.reward.coins} GitCoins · +{run.reward.xp} XP</span>
       ),
     },
   ]

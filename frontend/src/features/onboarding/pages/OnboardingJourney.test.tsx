@@ -166,11 +166,11 @@ beforeEach(() => {
   vi.spyOn(shopApi, 'purchase').mockResolvedValue({ owned: true, shop: catalog(true, true), wallet: { balance: 0 } })
   vi.spyOn(playerLoadoutApi, 'equipCompanion').mockResolvedValue({ active_companion: 'blue', shop: catalog(true, true) })
   vi.spyOn(preferencesApi, 'get').mockImplementation(async () => ({
-    motion_mode: 'system', onboarding_phase: serverPhase,
+    motion_mode: 'system', onboarding_phase: serverPhase, leaderboard_visible: true,
   }))
   vi.spyOn(preferencesApi, 'update').mockImplementation(async (payload) => {
     serverPhase = payload.onboarding_phase ?? serverPhase
-    return { motion_mode: 'system', onboarding_phase: serverPhase }
+    return { motion_mode: 'system', onboarding_phase: serverPhase, leaderboard_visible: true }
   })
 })
 
@@ -305,21 +305,21 @@ describe('first-visit onboarding journey', () => {
   })
 
   it('does not write a stale cached phase while the server preference is loading', async () => {
-    const pendingPreferences = deferred<{ motion_mode: 'system'; onboarding_phase: OnboardingPhase }>()
+    const pendingPreferences = deferred<{ motion_mode: 'system'; onboarding_phase: OnboardingPhase; leaderboard_visible: boolean }>()
     writeOnboardingPhase(309, 'welcome')
     vi.mocked(preferencesApi.get).mockReturnValueOnce(pendingPreferences.promise)
 
     renderJourney(309, { entry: '/shop' })
     expect(preferencesApi.update).not.toHaveBeenCalled()
 
-    pendingPreferences.resolve({ motion_mode: 'system', onboarding_phase: 'done' })
+    pendingPreferences.resolve({ motion_mode: 'system', onboarding_phase: 'done', leaderboard_visible: true })
     await waitFor(() => expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('done'))
     expect(preferencesApi.update).not.toHaveBeenCalled()
     await waitFor(() => expect(localStorage.getItem(onboardingStorageKey(309))).toBe('done'))
   })
 
   it('does not expose stale orientation state to children before the server responds', async () => {
-    const pendingPreferences = deferred<{ motion_mode: 'system'; onboarding_phase: OnboardingPhase }>()
+    const pendingPreferences = deferred<{ motion_mode: 'system'; onboarding_phase: OnboardingPhase; leaderboard_visible: boolean }>()
     writeOnboardingPhase(310, 'orientation')
     vi.mocked(preferencesApi.get).mockReturnValueOnce(pendingPreferences.promise)
     const client = new QueryClient({ defaultOptions: { queries: { retry: false } } })
@@ -339,7 +339,7 @@ describe('first-visit onboarding journey', () => {
     expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('done')
     expect(preferencesApi.update).not.toHaveBeenCalled()
 
-    pendingPreferences.resolve({ motion_mode: 'system', onboarding_phase: 'done' })
+    pendingPreferences.resolve({ motion_mode: 'system', onboarding_phase: 'done', leaderboard_visible: true })
     await waitFor(() => expect(screen.getByLabelText('Onboarding phase')).toHaveTextContent('done'))
     expect(preferencesApi.update).not.toHaveBeenCalled()
     await waitFor(() => expect(localStorage.getItem(onboardingStorageKey(310))).toBe('done'))

@@ -37,6 +37,30 @@ class CoinTransaction(models.Model):
         return f"CoinTransaction({self.player_id}: {self.amount} {self.reason})"
 
 
+class XpTransaction(models.Model):
+    """XP ledger entry. There is no stored total: XP is never spent, so the ledger
+    is the balance, and ``award_key`` keeps every source once per player."""
+
+    player = models.ForeignKey(
+        "players.Player", on_delete=models.CASCADE, related_name="xp_transactions"
+    )
+    amount = models.PositiveIntegerField()
+    reason = models.CharField(max_length=32)
+    award_key = models.CharField(max_length=128)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ["-created_at", "-id"]
+        constraints = [
+            models.UniqueConstraint(
+                fields=["player", "award_key"], name="unique_xp_award_per_player"
+            ),
+        ]
+
+    def __str__(self) -> str:
+        return f"XpTransaction({self.player_id}: {self.amount} {self.reason})"
+
+
 class PlayerCompletion(models.Model):
     """Shared shape for "player finished this thing" records: who, and when."""
 

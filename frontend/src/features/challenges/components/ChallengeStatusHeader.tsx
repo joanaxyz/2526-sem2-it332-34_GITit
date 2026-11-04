@@ -49,7 +49,7 @@ function challengeStats(run: ChallengeRun): WorkspaceStat[] {
       ? [{
           label: 'Reward',
           icon: GitCoinIcon,
-          value: rewardClaimed ? 'Claimed' : <span className="lvlctx-num">+{run.reward_coins} GitCoins</span>,
+          value: rewardClaimed ? 'Claimed' : <span className="lvlctx-num">+{run.reward_coins} GitCoins · +{run.reward_xp} XP</span>,
         }]
       : []),
   ]

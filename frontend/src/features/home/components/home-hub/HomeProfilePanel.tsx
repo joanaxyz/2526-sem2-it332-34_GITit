@@ -5,7 +5,7 @@ import type { CompanionPresentation } from '@/features/home/components/home-hub/
 import { RankBadge } from '@/features/home/components/HomeRankBadge'
 import type { HomeSummary } from '@/features/home/types'
 import type { StatsSummary } from '@/features/stats/types'
-import { RANK_TIERS, deriveRank } from '@/shared/progress/rank'
+import { RANK_TIERS, deriveRank, rankProgressLabel } from '@/shared/progress/rank'
 
 type HomeProfilePanelProps = {
   home: HomeSummary
@@ -24,7 +24,7 @@ function formatNumber(value: number | null | undefined, fallback = 0) {
  * These were two tabs behind a switch, which hid half the answer at all times
  * and only existed because both halves had to fit one fixed-height card. The
  * category is a column of open sections now, so they simply stack — and the
- * facts each one used to repeat (the mastery meter, the two clear counts) are
+ * facts each one used to repeat (the rank meter, the two clear counts) are
  * stated once, by whichever section owns them.
  */
 export function HomeProfilePanel({
@@ -57,11 +57,7 @@ export function HomeProfilePanel({
             <div className="ref-meter" aria-label={`${rank.progressPct}% toward the next rank`}>
               <span style={{ width: `${rank.progressPct}%` }} />
             </div>
-            <em>
-              {rank.nextTier
-                ? `${formatNumber(rank.ratingInTier)} / ${formatNumber(rank.ratingForNext)} mastery`
-                : 'Max rank'}
-            </em>
+            <em>{rankProgressLabel(rank)}</em>
           </div>
         </div>
         <div className="home-profile-name">

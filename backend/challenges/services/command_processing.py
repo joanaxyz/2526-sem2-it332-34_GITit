@@ -32,6 +32,7 @@ from practice.services.visualization import RepositoryVisualizationService
 from progress.models import ChallengeLevelCompletion, ChallengeTrialCompletion
 from progress.services.scored_completions import update_best_score
 from progress.wallet import WalletService
+from progress.xp import award_gate_xp
 from simulator.services import (
     RepositorySnapshotService,
     RepositoryStateSimulator,
@@ -303,6 +304,7 @@ class ChallengeCommandProcessingService:
                     reason="challenge_trial_reward",
                     award_key=f"trial-reward:{run.challenge_trial_id}",
                 )
+            award_gate_xp(player=run.player, trial=run.challenge_trial)
             chest_pending = True
         else:
             completion = (

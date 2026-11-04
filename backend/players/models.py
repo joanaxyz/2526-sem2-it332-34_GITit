@@ -54,6 +54,7 @@ class PlayerPreferences(models.Model):
     onboarding_phase = models.CharField(
         max_length=16, choices=ONBOARDING_CHOICES, default=ONBOARDING_DONE
     )
+    leaderboard_visible = models.BooleanField(default=True, db_default=True)
     updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self) -> str:

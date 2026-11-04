@@ -10,6 +10,7 @@ function normalizePreferences(data: PreferencesResponse): PlayerAccountPreferenc
   return {
     motion_mode: data.motion_mode ?? 'system',
     onboarding_phase: phase && onboardingPhases.includes(phase) ? phase : 'done',
+    leaderboard_visible: data.leaderboard_visible ?? true,
   }
 }
 

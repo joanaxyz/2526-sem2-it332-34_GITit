@@ -11,14 +11,8 @@ export type TierDifficulty = 'easy' | 'medium' | 'hard'
 type TierCompletionRewards = {
   first_level_clear: boolean
   coins_awarded: number
+  xp_awarded: number
   chapter_chests_awarded: Array<{ threshold: number; coins: number }>
-  mastery_advanced: Array<{
-    skill_slug: string
-    form_slug: string
-    solves: number
-    target: number
-    mastered: boolean
-  }>
 }
 
 type TierRef = {

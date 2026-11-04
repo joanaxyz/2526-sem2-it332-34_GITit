@@ -31,7 +31,7 @@ export function ChapterOverview({ chapter, preview = false }: { chapter: Learnin
       >
         <div className="story-overview-mastery">
           <div className="story-overview-progress-row">
-            <span>Mastery</span>
+            <span>Progress</span>
             <strong>{Math.round(progress)}%</strong>
           </div>
           <ProgressBar value={progress} className="story-overview-progress" glow fillAnimate />

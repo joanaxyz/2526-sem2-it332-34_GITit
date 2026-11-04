@@ -586,7 +586,7 @@
     },
     "dashboard_openapi_contract_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "4dc71976f0234bbd44269acce186ce5f72536e647d69e44be50c9ed1616f5418",
+      "normalized_ast_sha256": "b800dc69c3267e9d61a9c9a0ce6c8d408774ae9e8c83aa3e9525b21c4590246d",
       "owner": "scripts.checks.architecture_guard.contracts.progress",
       "pre_cutover_lines": [
         4527,
@@ -721,7 +721,7 @@
     },
     "progress_summary_backend_contract_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "b52638d1953ec1591c196f1bcf76b1453a446660b8013dc55de0dd1436a655c2",
+      "normalized_ast_sha256": "19568b7f3a04a68a5752907ad4e03ba75431ff5291e41d6fdd15c48330ceac16",
       "owner": "scripts.checks.architecture_guard.contracts.progress",
       "pre_cutover_lines": [
         4041,
@@ -838,7 +838,7 @@
     },
     "stats_contract_source_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "d2cd6aa0942b97c5dd4f2d24807146a61684caf72b61d419d5cdaafde9bb1e6c",
+      "normalized_ast_sha256": "511888ca14d4176a5ef07fa98fd8fb284fe055b0972264d86e3aff0e311d85a8",
       "owner": "scripts.checks.architecture_guard.contracts.progress",
       "pre_cutover_lines": [
         4185,
@@ -847,7 +847,7 @@
     },
     "stats_openapi_contract_violations": {
       "kind": "function",
-      "normalized_ast_sha256": "c997f4cfa01d2ed1b50ea0d21f490b86e09508de9f37b0e3597cb2cefebd4823",
+      "normalized_ast_sha256": "580c39fe53f2a47e885e8d446026559655e2267feff645892a19919d3120fd4a",
       "owner": "scripts.checks.architecture_guard.contracts.progress",
       "pre_cutover_lines": [
         4268,

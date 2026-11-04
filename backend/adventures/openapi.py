@@ -51,9 +51,10 @@ class AdventureLevelTierCommandRunResponseSerializer(TeachingResponseSerializer)
 
 
 class AdventureLevelTierRewardResponseSerializer(serializers.Serializer):
-    """The tier's first-clear GitCoin reward, shown before play."""
+    """The tier's first-clear GitCoin and XP reward, shown before play."""
 
     coins = serializers.IntegerField()
+    xp = serializers.IntegerField()
     claimed = serializers.BooleanField()
 
 

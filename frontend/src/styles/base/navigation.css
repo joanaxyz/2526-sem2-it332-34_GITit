@@ -225,7 +225,7 @@
     left: 0.65rem;
     z-index: var(--z-sticky);
     display: grid;
-    grid-template-columns: repeat(var(--mobile-nav-count, 3), minmax(0, 1fr));
+    grid-template-columns: repeat(var(--mobile-nav-count, 4), minmax(0, 1fr));
     border: 1px solid rgba(var(--theme-primary-rgb), 0.3);
     border-radius: var(--radius-lg);
     background: var(--surface-overlay);
@@ -234,7 +234,7 @@
   }
 
   .app-mobile-nav.has-admin {
-    --mobile-nav-count: 4;
+    --mobile-nav-count: 5;
   }
 
   /* The same traveling light as the desktop blade, hung from the top edge. */

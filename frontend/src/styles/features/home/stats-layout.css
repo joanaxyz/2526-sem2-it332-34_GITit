@@ -60,19 +60,6 @@
   padding-top: 1.35rem;
 }
 
-/* Skills is two subjects rather than two bands: the profile you are building
-   and what it has earned you. They are columns, split by one hairline. */
-.home-overview-grid.is-split {
-  grid-template-columns: minmax(0, 1.04fr) minmax(0, 1fr);
-  gap: 1.9rem;
-  align-items: start;
-}
-
-.home-overview-grid.is-split > .home-overview-achievements-panel {
-  border-left: 1px solid rgba(var(--theme-primary-rgb), 0.16);
-  padding-left: 1.9rem;
-}
-
 /* ── Band headers and their controls ───────────────────────────────────── */
 /* Heading on the left, its control on the right; they share the band's first
    line so the content under them starts at one height across the screen. */

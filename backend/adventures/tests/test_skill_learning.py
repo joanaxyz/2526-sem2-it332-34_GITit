@@ -205,8 +205,7 @@ def test_completion_without_command_use_credits_nothing(learner):
         player=learner, tier=tier, source_entry_point="level_page"
     )
 
-    credited = AdventureLevelTierCommandProcessingService()._credit_mastery(run, [unused])
+    AdventureLevelTierCommandProcessingService()._credit_mastery(run, [unused])
 
-    assert credited == []
     assert learned_command_skills(player=learner) == []
     assert not SkillMastery.objects.filter(player=learner, command_form=unused).exists()

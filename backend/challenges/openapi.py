@@ -58,6 +58,7 @@ class ChallengeRunResponseSerializer(serializers.Serializer):
     story = serializers.DictField(allow_null=True)
     difficulty = serializers.CharField(allow_null=True)
     reward_coins = serializers.IntegerField()
+    reward_xp = serializers.IntegerField()
     variant = serializers.DictField()
     mastery_progress = serializers.DictField()
     policy = serializers.DictField()

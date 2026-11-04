@@ -5,7 +5,7 @@ The authoring rules are documented in CONTENT_AUTHORING_GUIDE.md.
 
 from django.core.management import call_command
 
-from adventures.models import AdventureLevel, AdventureLevelTierScenarioVariant
+from adventures.models import AdventureLevel, AdventureLevelTierScenarioVariant, SkillMastery
 from adventures.services import AdventureLevelTierRunService
 from adventures.services.tier_command_processing import AdventureLevelTierCommandProcessingService
 from curriculum.models import CommandForm
@@ -105,15 +105,14 @@ def test_a_veteran_still_gets_the_add_patch_guide_after_clearing_basic_commits(
             attempt_number=1,
             was_processable=True,
         )
-    credited = AdventureLevelTierCommandProcessingService()._credit_mastery(
+    AdventureLevelTierCommandProcessingService()._credit_mastery(
         cleared, list(cleared.current_scenario.command_forms.all())
     )
-    assert "git add -p <path>" not in {
-        CommandForm.objects.get(
-            slug=item["form_slug"], command_skill__slug=item["skill_slug"]
-        ).usage_form
-        for item in credited
-    }
+    assert "git add -p <path>" not in set(
+        SkillMastery.objects.filter(player=cleared.player, solves__gt=0).values_list(
+            "command_form__usage_form", flat=True
+        )
+    )
 
     partial = _level("partial-staging-and-git-add-p").tiers.get(difficulty="easy")
     run = runs.start_run(player=player, tier=partial, source_entry_point="level_page")

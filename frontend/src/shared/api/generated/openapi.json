@@ -2563,6 +2563,42 @@
                 }
             }
         },
+        "/api/progress/leaderboard/": {
+            "get": {
+                "operationId": "progress_leaderboard_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "category",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "gates",
+                                "perfect_clears",
+                                "xp"
+                            ],
+                            "default": "xp"
+                        },
+                        "description": "What the all-time ranking is ordered by."
+                    }
+                ],
+                "tags": [
+                    "progress"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LeaderboardResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/progress/performance/": {
             "get": {
                 "operationId": "progress_performance_retrieve",
@@ -4145,9 +4181,12 @@
             },
             "AdventureLevelTierRewardResponse": {
                 "type": "object",
-                "description": "The tier's first-clear GitCoin reward, shown before play.",
+                "description": "The tier's first-clear GitCoin and XP reward, shown before play.",
                 "properties": {
                     "coins": {
+                        "type": "integer"
+                    },
+                    "xp": {
                         "type": "integer"
                     },
                     "claimed": {
@@ -4156,7 +4195,8 @@
                 },
                 "required": [
                     "claimed",
-                    "coins"
+                    "coins",
+                    "xp"
                 ]
             },
             "AdventureLevelTierRunResponse": {
@@ -4657,6 +4697,9 @@
                     "reward_coins": {
                         "type": "integer"
                     },
+                    "reward_xp": {
+                        "type": "integer"
+                    },
                     "variant": {
                         "type": "object",
                         "additionalProperties": {}
@@ -4730,6 +4773,7 @@
                     "replay",
                     "repository_state",
                     "reward_coins",
+                    "reward_xp",
                     "scaffolding",
                     "scenario_context",
                     "sibling_levels",
@@ -5538,9 +5582,8 @@
                     "perfect_clears": {
                         "type": "integer"
                     },
-                    "mastery": {
-                        "type": "number",
-                        "format": "double"
+                    "xp": {
+                        "type": "integer"
                     },
                     "retry_trends": {
                         "type": "array",
@@ -5555,9 +5598,9 @@
                     "completed_story_slug",
                     "counts",
                     "kpis",
-                    "mastery",
                     "perfect_clears",
-                    "retry_trends"
+                    "retry_trends",
+                    "xp"
                 ]
             },
             "DetailResponse": {
@@ -6062,6 +6105,71 @@
                 "type": "string",
                 "description": "* `shop-purchases` - shop-purchases"
             },
+            "LeaderboardEntry": {
+                "type": "object",
+                "properties": {
+                    "rank": {
+                        "type": "integer"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "value": {
+                        "type": "integer"
+                    },
+                    "is_you": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "is_you",
+                    "rank",
+                    "username",
+                    "value"
+                ]
+            },
+            "LeaderboardResponse": {
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "type": "string"
+                    },
+                    "entries": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LeaderboardEntry"
+                        }
+                    },
+                    "you": {
+                        "$ref": "#/components/schemas/LeaderboardYou"
+                    }
+                },
+                "required": [
+                    "category",
+                    "entries",
+                    "you"
+                ]
+            },
+            "LeaderboardYou": {
+                "type": "object",
+                "properties": {
+                    "rank": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "value": {
+                        "type": "integer"
+                    },
+                    "hidden": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "hidden",
+                    "rank",
+                    "value"
+                ]
+            },
             "LearnedSkillResponse": {
                 "type": "object",
                 "properties": {
@@ -6379,6 +6487,9 @@
                     },
                     "onboarding_phase": {
                         "$ref": "#/components/schemas/OnboardingPhaseEnum"
+                    },
+                    "leaderboard_visible": {
+                        "type": "boolean"
                     }
                 }
             },
@@ -6625,6 +6736,9 @@
                     },
                     "onboarding_phase": {
                         "$ref": "#/components/schemas/OnboardingPhaseEnum"
+                    },
+                    "leaderboard_visible": {
+                        "type": "boolean"
                     }
                 }
             },
@@ -7116,44 +7230,9 @@
                     "value"
                 ]
             },
-            "StatsSkillAxis": {
-                "type": "object",
-                "properties": {
-                    "key": {
-                        "type": "string"
-                    },
-                    "label": {
-                        "type": "string"
-                    },
-                    "hint": {
-                        "type": "string"
-                    },
-                    "value": {
-                        "type": "number",
-                        "format": "double",
-                        "nullable": true
-                    },
-                    "command": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "command",
-                    "hint",
-                    "key",
-                    "label",
-                    "value"
-                ]
-            },
             "StatsSummaryResponse": {
                 "type": "object",
                 "properties": {
-                    "skill_profile": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/StatsSkillAxis"
-                        }
-                    },
                     "activity_trend": {
                         "type": "array",
                         "items": {
@@ -7170,8 +7249,7 @@
                 "required": [
                     "activity_trend",
                     "activity_window",
-                    "headline",
-                    "skill_profile"
+                    "headline"
                 ]
             },
             "StatsTrendPoint": {

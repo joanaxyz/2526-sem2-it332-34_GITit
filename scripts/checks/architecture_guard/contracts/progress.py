@@ -110,13 +110,6 @@ def progress_summary_backend_contract_violations(
             "retries": "serializers.IntegerField()",
             "label": "serializers.CharField()",
         },
-        "StatsSkillAxisSerializer": {
-            "key": "serializers.CharField()",
-            "label": "serializers.CharField()",
-            "hint": "serializers.CharField()",
-            "value": "serializers.FloatField(allow_null=True)",
-            "command": "serializers.CharField()",
-        },
         "StatsTrendPointSerializer": {
             "date": "serializers.DateField()",
             "levels_completed": "serializers.IntegerField()",
@@ -140,7 +133,6 @@ def progress_summary_backend_contract_violations(
             "commands_run": "serializers.IntegerField()",
         },
         "StatsSummaryResponseSerializer": {
-            "skill_profile": "StatsSkillAxisSerializer(many=True)",
             "activity_trend": "StatsTrendPointSerializer(many=True)",
             # Echoed so the client labels the plot with the span it was served,
             # which is not always the span it asked for.
@@ -158,7 +150,7 @@ def progress_summary_backend_contract_violations(
             "completed_story_slug": "serializers.CharField(allow_null=True)",
             "completed_stories": "serializers.ListField(child=serializers.CharField())",
             "perfect_clears": "serializers.IntegerField()",
-            "mastery": "serializers.FloatField()",
+            "xp": "serializers.IntegerField()",
             "retry_trends": "DashboardRetryTrendSerializer(many=True)",
         },
     }
@@ -243,7 +235,6 @@ def stats_contract_source_violations(
     aliases = ts_exported_type_aliases(stats_types_without_comments)
     expected_aliases = {
         "StatsSummary": "ApiSchemas['StatsSummaryResponse']",
-        "SkillAxis": "StatsSummary['skill_profile'][number]",
         "TrendPoint": "StatsSummary['activity_trend'][number]",
         "ActivityWindow": "StatsSummary['activity_window']",
     }
@@ -319,13 +310,6 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
             "denominator": {"type": "integer"},
             "unit": {"$ref": "#/components/schemas/UnitEnum"},
         },
-        "StatsSkillAxis": {
-            "key": {"type": "string"},
-            "label": {"type": "string"},
-            "hint": {"type": "string"},
-            "value": nullable_number,
-            "command": {"type": "string"},
-        },
         "StatsTrendPoint": {
             "date": {"type": "string", "format": "date"},
             "levels_completed": {"type": "integer"},
@@ -349,10 +333,6 @@ def stats_openapi_contract_violations(schema: dict) -> list[str]:
             "commands_run": {"type": "integer"},
         },
         "StatsSummaryResponse": {
-            "skill_profile": {
-                "type": "array",
-                "items": {"$ref": "#/components/schemas/StatsSkillAxis"},
-            },
             "activity_trend": {
                 "type": "array",
                 "items": {"$ref": "#/components/schemas/StatsTrendPoint"},
@@ -622,7 +602,7 @@ def dashboard_openapi_contract_violations(schema: dict) -> list[str]:
                 "items": {"type": "string"},
             },
             "perfect_clears": {"type": "integer"},
-            "mastery": {"type": "number", "format": "double"},
+            "xp": {"type": "integer"},
             "retry_trends": {
                 "type": "array",
                 "items": {"$ref": "#/components/schemas/DashboardRetryTrend"},

@@ -44,7 +44,7 @@ export type ApiSchemas = {
   "AdventureLevelTierCommandResponse": { "command_family": string; "command_outcome": { [key: string]: JsonValue }; "diagnostic_metadata": Array<string>; "exit_code": number; "learned_skills"?: Array<ApiSchemas["LearnedSkillResponse"]>; "run": ApiSchemas["AdventureLevelTierCommandRunResponse"]; "stderr": string; "stdout": string; "step": ApiSchemas["AdventureLevelTierCommandStepResponse"] }
   "AdventureLevelTierCommandRunResponse": { "command_comparison"?: ApiSchemas["CommandComparisonResponse"] | null; "command_guides": Array<ApiSchemas["CommandIntroductionResponse"]>; "completed_at": string | null; "completion"?: { [key: string]: JsonValue } | null; "counts": { [key: string]: JsonValue }; "failure_reason": string | null; "guide_elsewhere": ApiSchemas["GuideElsewhere"] | null; "id": number; "next_difficulty"?: { [key: string]: JsonValue } | null; "progress"?: { [key: string]: JsonValue }; "replay": boolean; "repository_state": { [key: string]: JsonValue }; "rewards"?: { [key: string]: JsonValue } | null; "star_breakdown": ApiSchemas["StarBreakdownResponse"] | null; "stars": number; "status": ApiSchemas["GameplayRunStatus"]; "tips": Array<ApiSchemas["Tip"]>; "tutor": ApiSchemas["CommandIntroductionResponse"] | null; "visualization": { [key: string]: JsonValue } }
   "AdventureLevelTierCommandStepResponse": { "command_classification": string; "command_text": string; "contextual_feedback": string; "created_at": string; "evaluation_result": string; "id": number; "result_category": string; "terminal_output": string; "visualization_snapshot": { [key: string]: JsonValue } }
-  "AdventureLevelTierRewardResponse": { "claimed": boolean; "coins": number }
+  "AdventureLevelTierRewardResponse": { "claimed": boolean; "coins": number; "xp": number }
   "AdventureLevelTierRunResponse": { "chapter": { [key: string]: JsonValue } | null; "command_comparison"?: ApiSchemas["CommandComparisonResponse"] | null; "command_guides": Array<ApiSchemas["CommandIntroductionResponse"]>; "completed_at": string | null; "completion": { [key: string]: JsonValue } | null; "counts": { [key: string]: JsonValue }; "difficulty": string | null; "expected_state": { [key: string]: JsonValue } | null; "failure_reason": string | null; "guide_elsewhere": ApiSchemas["GuideElsewhere"] | null; "id": number; "next_difficulty": { [key: string]: JsonValue } | null; "policy": { [key: string]: JsonValue }; "progress": { [key: string]: JsonValue }; "replay": boolean; "repository_state": { [key: string]: JsonValue }; "reward": ApiSchemas["AdventureLevelTierRewardResponse"]; "scaffolding": { [key: string]: JsonValue }; "scenario": ApiSchemas["AdventureLevelTierScenarioPositionResponse"]; "scenario_context": { [key: string]: JsonValue }; "star_breakdown": ApiSchemas["StarBreakdownResponse"] | null; "stars": number; "status": ApiSchemas["GameplayRunStatus"]; "steps": Array<ApiSchemas["AdventureLevelTierRunStepResponse"]>; "story": { [key: string]: JsonValue } | null; "tier": { [key: string]: JsonValue }; "tips": Array<ApiSchemas["Tip"]>; "transfer"?: boolean; "tutor": ApiSchemas["CommandIntroductionResponse"] | null; "variant": { [key: string]: JsonValue }; "visualization": { [key: string]: JsonValue } }
   "AdventureLevelTierRunStart": { "prior_run_id"?: number | null; "replay"?: boolean; "source_entry_point"?: ApiSchemas["SourceEntryPointEnum"]; "transfer"?: boolean }
   "AdventureLevelTierRunStepResponse": { "command_classification": string; "command_text": string; "contextual_feedback": string; "created_at": string; "id": number; "result_category": string; "terminal_output": string; "visualization_snapshot": { [key: string]: JsonValue } }
@@ -52,7 +52,7 @@ export type ApiSchemas = {
   "ChallengeCommandResponse": { "command_family": string; "command_outcome": { [key: string]: JsonValue }; "diagnostic_metadata": Array<string>; "exit_code": number; "run": ApiSchemas["ChallengeCommandRunResponse"]; "stderr": string; "stdout": string; "step": ApiSchemas["ChallengeCommandStepResponse"] }
   "ChallengeCommandRunResponse": { "command_comparison"?: ApiSchemas["CommandComparisonResponse"] | null; "completed_at": string | null; "completion"?: { [key: string]: JsonValue } | null; "counts": { [key: string]: JsonValue }; "failure_reason": string | null; "id": number; "mastery_progress"?: { [key: string]: JsonValue }; "next_difficulty"?: { [key: string]: JsonValue } | null; "replay": boolean; "repository_state": { [key: string]: JsonValue }; "sibling_levels"?: Array<{ [key: string]: JsonValue }>; "star_breakdown": ApiSchemas["StarBreakdownResponse"]; "stars": number; "status": ApiSchemas["GameplayRunStatus"]; "visualization": { [key: string]: JsonValue } }
   "ChallengeCommandStepResponse": { "command_classification": string; "command_text": string; "contextual_feedback": string; "created_at": string; "evaluation_result": string; "id": number; "result_category": string; "terminal_output": string; "visualization_snapshot": { [key: string]: JsonValue } }
-  "ChallengeRunResponse": { "challenge": { [key: string]: JsonValue }; "chapter": { [key: string]: JsonValue }; "command_comparison"?: ApiSchemas["CommandComparisonResponse"] | null; "completed_at": string | null; "completion": { [key: string]: JsonValue } | null; "counts": { [key: string]: JsonValue }; "difficulty": string | null; "expected_state": { [key: string]: JsonValue } | null; "failure_reason": string | null; "id": number; "mastery_progress": { [key: string]: JsonValue }; "next_difficulty": { [key: string]: JsonValue } | null; "policy": { [key: string]: JsonValue }; "replay": boolean; "repository_state": { [key: string]: JsonValue }; "reward_coins": number; "scaffolding": { [key: string]: JsonValue }; "scenario_context": { [key: string]: JsonValue }; "sibling_levels": Array<{ [key: string]: JsonValue }>; "star_breakdown": ApiSchemas["StarBreakdownResponse"]; "stars": number; "status": ApiSchemas["GameplayRunStatus"]; "steps": Array<ApiSchemas["ChallengeRunStepResponse"]>; "story": { [key: string]: JsonValue } | null; "variant": { [key: string]: JsonValue }; "visualization": { [key: string]: JsonValue } }
+  "ChallengeRunResponse": { "challenge": { [key: string]: JsonValue }; "chapter": { [key: string]: JsonValue }; "command_comparison"?: ApiSchemas["CommandComparisonResponse"] | null; "completed_at": string | null; "completion": { [key: string]: JsonValue } | null; "counts": { [key: string]: JsonValue }; "difficulty": string | null; "expected_state": { [key: string]: JsonValue } | null; "failure_reason": string | null; "id": number; "mastery_progress": { [key: string]: JsonValue }; "next_difficulty": { [key: string]: JsonValue } | null; "policy": { [key: string]: JsonValue }; "replay": boolean; "repository_state": { [key: string]: JsonValue }; "reward_coins": number; "reward_xp": number; "scaffolding": { [key: string]: JsonValue }; "scenario_context": { [key: string]: JsonValue }; "sibling_levels": Array<{ [key: string]: JsonValue }>; "star_breakdown": ApiSchemas["StarBreakdownResponse"]; "stars": number; "status": ApiSchemas["GameplayRunStatus"]; "steps": Array<ApiSchemas["ChallengeRunStepResponse"]>; "story": { [key: string]: JsonValue } | null; "variant": { [key: string]: JsonValue }; "visualization": { [key: string]: JsonValue } }
   "ChallengeRunStart": { "prior_run_id"?: number | null; "replay"?: boolean; "source_entry_point"?: ApiSchemas["SourceEntryPointEnum"] }
   "ChallengeRunStepResponse": { "command_classification": string; "command_text": string; "contextual_feedback": string; "created_at": string; "id": number; "result_category": string; "terminal_output": string; "visualization_snapshot": { [key: string]: JsonValue } }
   "ChapterChestOpen": { "threshold": number }
@@ -77,7 +77,7 @@ export type ApiSchemas = {
   "DashboardCounts": { "abandoned": number; "completed": number; "failed": number; "started": number }
   "DashboardKpiSet": { "arc": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"] }
   "DashboardRetryTrend": { "attempts": number; "label": string; "level_title": string; "retries": number }
-  "DashboardSummaryResponse": { "chapter_kpis": { [key: string]: ApiSchemas["DashboardKpiSet"] }; "completed_stories": Array<string>; "completed_story_slug": string | null; "counts": ApiSchemas["DashboardCounts"]; "kpis": ApiSchemas["DashboardKpiSet"]; "mastery": number; "perfect_clears": number; "retry_trends": Array<ApiSchemas["DashboardRetryTrend"]> }
+  "DashboardSummaryResponse": { "chapter_kpis": { [key: string]: ApiSchemas["DashboardKpiSet"] }; "completed_stories": Array<string>; "completed_story_slug": string | null; "counts": ApiSchemas["DashboardCounts"]; "kpis": ApiSchemas["DashboardKpiSet"]; "perfect_clears": number; "retry_trends": Array<ApiSchemas["DashboardRetryTrend"]>; "xp": number }
   "DetailResponse": { "detail": string }
   "DifficultyEnum": "beginner" | "intermediate" | "advanced"
   "DrillBlank": { "answer": string; "index": number; "options": Array<ApiSchemas["DrillChoice"]> }
@@ -101,6 +101,9 @@ export type ApiSchemas = {
   "GuideHome": { "chapter_number": number; "difficulty": string; "level_title": string; "scenario_title": string }
   "IntroductionComplete": { "token": string }
   "Key7e0Enum": "shop-purchases"
+  "LeaderboardEntry": { "is_you": boolean; "rank": number; "username": string; "value": number }
+  "LeaderboardResponse": { "category": string; "entries": Array<ApiSchemas["LeaderboardEntry"]>; "you": ApiSchemas["LeaderboardYou"] }
+  "LeaderboardYou": { "hidden": boolean; "rank": number | null; "value": number }
   "LearnedSkillResponse": { "base_command": string; "chapter_id"?: number | null; "chapter_number": number; "chapter_title": string; "id": number; "knowledge"?: Array<ApiSchemas["CommandKnowledgeResponse"]>; "learned_at": string; "slug": string; "summary": string; "title": string }
   "LearnedSkillsResponse": { "results": Array<ApiSchemas["LearnedSkillResponse"]> }
   "LevelDrillPlanResponse": { "available": boolean; "cards": Array<ApiSchemas["DrillCard"]>; "level": ApiSchemas["DrillLevel"]; "progress": ApiSchemas["DrillProgress"]; "resume": ApiSchemas["DrillResume"] | null; "sequence": ApiSchemas["DrillSequence"] | null }
@@ -115,13 +118,13 @@ export type ApiSchemas = {
   "PatchedAccountUpdate": { "email"?: string; "username"?: string }
   "PatchedAdminChapterUpdateRequest": { "battle_stage"?: { [key: string]: JsonValue }; "description"?: string; "is_playable"?: boolean; "is_published"?: boolean; "number"?: number; "sort_order"?: number; "title"?: string }
   "PatchedAdminStoryUpdateRequest": { "difficulty"?: ApiSchemas["DifficultyEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "sort_order"?: number; "summary"?: string; "title"?: string; "world_slug"?: string }
-  "PatchedPlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
+  "PatchedPlayerPreferences": { "leaderboard_visible"?: boolean; "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
   "PerformanceKpiSet": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "car_first": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"] }
   "PerformanceModule": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "car_first": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "number": number; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"]; "title": string }
   "PerformanceSamples": { "attempted_tiers": number; "car_missing": number; "car_scored": number; "in_progress_tiers": number; "mastered_tiers": number; "mastery_missing": number; "participants": number; "transfer_assigned": number; "transfer_missing": number; "transfer_pending": number }
   "PerformanceSummaryResponse": { "completed_sessions": number; "kpis": ApiSchemas["PerformanceKpiSet"]; "modules": Array<ApiSchemas["PerformanceModule"]>; "objectives": { [key: string]: ApiSchemas["RateMetric"] }; "samples": ApiSchemas["PerformanceSamples"]; "transfers": Array<ApiSchemas["TransferCheckpoint"]> }
   "PhaseEnum": "introduction" | "feedback"
-  "PlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
+  "PlayerPreferences": { "leaderboard_visible"?: boolean; "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
   "RateMetric": { "denominator": number; "numerator": number; "unit"?: ApiSchemas["UnitEnum"]; "value": number | null }
   "ReasonEnum": "not_cleared" | "command_target_exceeded" | "generous_target_exceeded" | "efficient_target_exceeded" | "retry_allowance_exceeded" | "previous_scoring_rules"
   "Register": { "email": string; "password": string; "password_confirm": string; "username": string }
@@ -147,8 +150,7 @@ export type ApiSchemas = {
   "StatsActivityResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "activity_window": ApiSchemas["ActivityWindowEnum"] }
   "StatsHeadline": { "accuracy": number | null; "comebacks": ApiSchemas["StatsScopedCount"]; "commands_run": number; "finish_rate": ApiSchemas["RateMetric"]; "gate_trial_clears": number; "gitcoins": number; "gitcoins_earned": number; "hard_gate_trial_clears": number; "hard_tier_clears": ApiSchemas["StatsScopedCount"]; "levels_completed": number; "perfect_clears": number }
   "StatsScopedCount": { "scope": string; "value": number }
-  "StatsSkillAxis": { "command": string; "hint": string; "key": string; "label": string; "value": number | null }
-  "StatsSummaryResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "activity_window": ApiSchemas["ActivityWindowEnum"]; "headline": ApiSchemas["StatsHeadline"]; "skill_profile": Array<ApiSchemas["StatsSkillAxis"]> }
+  "StatsSummaryResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "activity_window": ApiSchemas["ActivityWindowEnum"]; "headline": ApiSchemas["StatsHeadline"] }
   "StatsTrendPoint": { "commands_run": number; "date": string; "levels_completed": number }
   "Story": { "completed": boolean; "difficulty": ApiSchemas["DifficultyEnum"]; "id": number; "is_published": boolean; "lock_reason": string; "locked": boolean; "prerequisite_story": ApiSchemas["StoryPrerequisite"] | null; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }
   "StoryPrerequisite": { "completed": boolean; "slug": string; "title": string }
@@ -230,6 +232,7 @@ export type ApiPath =
   | "/api/player/loadout/companion/"
   | "/api/player/preferences/"
   | "/api/progress/dashboard/"
+  | "/api/progress/leaderboard/"
   | "/api/progress/performance/"
   | "/api/progress/stats/"
   | "/api/progress/stats/activity/"
@@ -299,6 +302,7 @@ export type ApiMethodByPath = {
   "/api/player/loadout/companion/": "POST"
   "/api/player/preferences/": "GET" | "PATCH"
   "/api/progress/dashboard/": "GET"
+  "/api/progress/leaderboard/": "GET"
   "/api/progress/performance/": "GET"
   "/api/progress/stats/": "GET"
   "/api/progress/stats/activity/": "GET"
@@ -383,6 +387,7 @@ export const apiOperations = {
   player_preferences_retrieve: { method: "GET", path: "/api/player/preferences/", operationId: "player_preferences_retrieve", tags: ["player"] },
   player_preferences_partial_update: { method: "PATCH", path: "/api/player/preferences/", operationId: "player_preferences_partial_update", tags: ["player"] },
   progress_dashboard_retrieve: { method: "GET", path: "/api/progress/dashboard/", operationId: "progress_dashboard_retrieve", tags: ["progress"] },
+  progress_leaderboard_retrieve: { method: "GET", path: "/api/progress/leaderboard/", operationId: "progress_leaderboard_retrieve", tags: ["progress"] },
   progress_performance_retrieve: { method: "GET", path: "/api/progress/performance/", operationId: "progress_performance_retrieve", tags: ["progress"] },
   progress_stats_retrieve: { method: "GET", path: "/api/progress/stats/", operationId: "progress_stats_retrieve", tags: ["progress"] },
   progress_stats_activity_retrieve: { method: "GET", path: "/api/progress/stats/activity/", operationId: "progress_stats_activity_retrieve", tags: ["progress"] },
@@ -470,6 +475,7 @@ export type ApiRequestBodyByOperation = {
   player_preferences_retrieve: null
   player_preferences_partial_update: ApiSchemas["PatchedPlayerPreferences"]
   progress_dashboard_retrieve: null
+  progress_leaderboard_retrieve: null
   progress_performance_retrieve: null
   progress_stats_retrieve: null
   progress_stats_activity_retrieve: null
@@ -554,6 +560,7 @@ export type ApiResponseBodyByOperation = {
   player_preferences_retrieve: ApiSchemas["PlayerPreferences"]
   player_preferences_partial_update: ApiSchemas["PlayerPreferences"]
   progress_dashboard_retrieve: ApiSchemas["DashboardSummaryResponse"]
+  progress_leaderboard_retrieve: ApiSchemas["LeaderboardResponse"]
   progress_performance_retrieve: ApiSchemas["PerformanceSummaryResponse"]
   progress_stats_retrieve: ApiSchemas["StatsSummaryResponse"]
   progress_stats_activity_retrieve: ApiSchemas["StatsActivityResponse"]

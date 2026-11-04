@@ -17,11 +17,6 @@ describe('buildHomeStatsModel', () => {
   it('adapts the rich summaries into every Overview view slice and the achievement ledger', () => {
     const model = buildHomeStatsModel(richHomeFixture, richStatsFixture)
 
-    // The fixture mirrors the published catalog: eighteen commands, real titles.
-    expect(model.skills.rows).toHaveLength(18)
-    expect(model.skills.rows[0]).toMatchObject({ label: 'git init', command: 'git init', short: 'init', value: 100 })
-    expect(model.skills.overallMastery).toBe(54)
-    expect(model.skills.masteryStars).toBe(2)
     // A month of daily points, exactly as the backend served them.
     expect(model.progress.activity.points).toHaveLength(30)
     expect(model.progress.activity.points[0]).toEqual({
@@ -55,9 +50,6 @@ describe('buildHomeStatsModel', () => {
   it('plots nothing at all for an account with no trend', () => {
     const model = buildHomeStatsModel(emptyHomeFixture, emptyStatsFixture)
 
-    expect(model.skills.rows).toHaveLength(18)
-    expect(model.skills.overallMastery).toBe(0)
-    expect(model.skills.masteryStars).toBe(0)
     // An empty window is drawn as an empty state, never as fourteen fake days.
     expect(model.progress.activity.points).toEqual([])
     expect(model.progress.activity).toMatchObject({
@@ -107,20 +99,9 @@ describe('buildHomeStatsModel', () => {
     })
   })
 
-  it('preserves command fallbacks, clamps percentages, and keeps tier counts exact', () => {
+  it('clamps percentages and keeps tier counts exact', () => {
     const home = structuredClone(richHomeFixture)
     const stats = structuredClone(richStatsFixture)
-    stats.skill_profile = [
-      { key: 'low', label: 'Low', hint: 'Low value', value: -20, command: 'Low' },
-      { key: 'high', label: 'High', hint: 'High value', value: 150, command: 'High' },
-      {
-        key: 'missing',
-        label: 'Fallback command',
-        hint: 'No value',
-        value: null,
-        command: 'Fallback command',
-      },
-    ]
     stats.headline.levels_completed = 0
     stats.headline.perfect_clears = 30
     stats.headline.finish_rate.value = 120
@@ -129,27 +110,11 @@ describe('buildHomeStatsModel', () => {
 
     const model = buildHomeStatsModel(home, stats)
 
-    expect(model.skills.rows.at(-1)?.command).toBe('Fallback command')
-    // The radar rim wears the machine name, so "git add" becomes "add".
-    expect(model.skills.rows.map((row) => row.short)).toEqual(['Low', 'High', 'Fallback command'])
-    expect(buildHomeStatsModel(home, richStatsFixture).skills.rows[4].short).toBe('add')
-    expect(model.skills.overallMastery).toBe(65)
-    expect(model.skills.masteryStars).toBe(2)
     expect(model.progress.story).toMatchObject({
       levelsCompleted: 0,
       perfectClears: 30,
       finishRate: { value: 100 },
     })
-  })
-
-  it('does not award a proficiency star before command mastery is earned', () => {
-    const stats = structuredClone(richStatsFixture)
-    stats.skill_profile = stats.skill_profile.map((axis) => ({ ...axis, value: 0 }))
-
-    const model = buildHomeStatsModel(richHomeFixture, stats)
-
-    expect(model.skills.overallMastery).toBe(0)
-    expect(model.skills.masteryStars).toBe(0)
   })
 
   it('does not mutate frozen source summaries or share KPI metric objects', () => {

@@ -50,7 +50,7 @@ export const richHomeFixture: HomeSummary = {
   completed_story_slug: null,
   completed_stories: [],
   perfect_clears: 26,
-  mastery: 68,
+  xp: 3200,
   retry_trends: [
     { level_title: 'Rebase the Haunted Branch', attempts: 1, retries: 0, label: 'Chapter 5 - Challenge - Hard' },
     { level_title: 'Cherry-pick the Lost Relics', attempts: 3, retries: 2, label: 'Chapter 4 - Challenge - Medium' },
@@ -75,6 +75,6 @@ export const emptyHomeFixture: HomeSummary = {
   completed_story_slug: null,
   completed_stories: [],
   perfect_clears: 0,
-  mastery: 0,
+  xp: 0,
   retry_trends: [],
 }

@@ -12,7 +12,7 @@ import { Map, Sparkles, UserRound, type LucideIcon } from 'lucide-react'
  * Progress combines recent activity, active-curriculum context, and the
  * Modules 1–4 practice record. Legacy Run results links land there too.
  */
-export type HomeView = 'profile' | 'progress' | 'skills'
+export type HomeView = 'profile' | 'progress' | 'achievements'
 
 export type HomeViewOption = {
   id: HomeView
@@ -23,7 +23,7 @@ export type HomeViewOption = {
 export const HOME_VIEWS: readonly HomeViewOption[] = [
   { id: 'profile', label: 'Profile', Icon: UserRound },
   { id: 'progress', label: 'Progress', Icon: Map },
-  { id: 'skills', label: 'Skills & achievements', Icon: Sparkles },
+  { id: 'achievements', label: 'Achievements', Icon: Sparkles },
 ] as const
 
 export const DEFAULT_HOME_VIEW: HomeView = 'profile'
@@ -35,6 +35,7 @@ export const DEFAULT_HOME_VIEW: HomeView = 'profile'
  */
 const LEGACY_HOME_VIEWS: Readonly<Record<string, HomeView>> = {
   results: 'progress',
+  skills: 'achievements',
 }
 
 export function homeViewFromParam(value: string | null): HomeView {
