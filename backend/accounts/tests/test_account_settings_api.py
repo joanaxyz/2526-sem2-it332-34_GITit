@@ -87,9 +87,7 @@ def test_duplicates_are_field_errors_and_no_partial_update(
     client, account, django_user_model, field, value
 ):
     django_user_model.objects.create_user(username="taken", email="taken@example.com")
-    response = client.patch(
-        "/api/auth/me/", {"username": "unused", field: value}, format="json"
-    )
+    response = client.patch("/api/auth/me/", {"username": "unused", field: value}, format="json")
     assert response.status_code == 400
     assert field in response.data
     account.refresh_from_db()
@@ -144,7 +142,9 @@ def test_resend_cooldown_and_new_code_replace_old_code(
     old_hash = PendingEmailChange.objects.get(user=account).code_hash
     request_change(client, django_capture_on_commit_callbacks, email="new@example.com")
     assert len(mail.outbox) == 1
-    different = request_change(client, django_capture_on_commit_callbacks, email="different@example.com")
+    different = request_change(
+        client, django_capture_on_commit_callbacks, email="different@example.com"
+    )
     assert different.status_code == 429
     PendingEmailChange.objects.update(last_sent_at=timezone.now() - timedelta(minutes=2))
     request_change(client, django_capture_on_commit_callbacks, email="different@example.com")

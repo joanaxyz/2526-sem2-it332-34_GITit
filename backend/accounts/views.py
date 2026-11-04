@@ -417,7 +417,9 @@ class MeAPIView(APIView):
     def get(self, request):
         return Response(UserSerializer(request.user).data)
 
-    @extend_schema(request=AccountUpdateSerializer, responses={200: AccountUpdateResponseSerializer})
+    @extend_schema(
+        request=AccountUpdateSerializer, responses={200: AccountUpdateResponseSerializer}
+    )
     def patch(self, request):
         serializer = AccountUpdateSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)

@@ -24,9 +24,10 @@ class AccountSettingsService:
     def _check_available(user, field, value):
         users = get_user_model().objects.exclude(pk=user.pk)
         identities = AccountIdentity.objects.exclude(user=user)
-        if users.filter(**{f"{field}__iexact": value}).exists() or identities.filter(
-            **{f"{field}_key": value.casefold()}
-        ).exists():
+        if (
+            users.filter(**{f"{field}__iexact": value}).exists()
+            or identities.filter(**{f"{field}_key": value.casefold()}).exists()
+        ):
             raise ValidationError({field: f"An account already exists for this {field}."})
 
     @staticmethod
