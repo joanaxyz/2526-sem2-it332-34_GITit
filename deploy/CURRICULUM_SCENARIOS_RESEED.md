@@ -73,7 +73,7 @@ module; the content and checks are complete for all four, so they ship together.
 
 6. **Credit XP for earlier progress.** It is idempotent: every source pays
    through the award key the runtime uses. Ranks read XP, so run this in the same
-   deploy or existing learners show as Newcomer until it runs.
+   deploy or existing learners show as Peasant until it runs.
 
    ```bash
    python manage.py award_missing_xp --dry-run

@@ -12,9 +12,9 @@ import levelAdeptImage from '@/assets/images/achievements/level-adept.png'
 import levelChampionImage from '@/assets/images/achievements/level-champion.png'
 import levelVeteranImage from '@/assets/images/achievements/level-veteran.png'
 import perfectionistImage from '@/assets/images/achievements/perfectionist.png'
-import rankCommitterImage from '@/assets/images/achievements/rank-committer.png'
-import rankReleaseManagerImage from '@/assets/images/achievements/rank-release-manager.png'
-import rankReviewerImage from '@/assets/images/achievements/rank-reviewer.png'
+import rankBaronImage from '@/assets/images/achievements/rank-baron.png'
+import rankDukeImage from '@/assets/images/achievements/rank-duke.png'
+import rankKnightImage from '@/assets/images/achievements/rank-knight.png'
 import sharpshooterImage from '@/assets/images/achievements/sharpshooter.png'
 import starCollectorImage from '@/assets/images/achievements/star-collector.png'
 
@@ -33,9 +33,9 @@ export const ACHIEVEMENT_IMAGES = {
   'level-champion': levelChampionImage,
   'level-veteran': levelVeteranImage,
   'perfectionist': perfectionistImage,
-  'rank-committer': rankCommitterImage,
-  'rank-release-manager': rankReleaseManagerImage,
-  'rank-reviewer': rankReviewerImage,
+  'rank-baron': rankBaronImage,
+  'rank-duke': rankDukeImage,
+  'rank-knight': rankKnightImage,
   'sharpshooter': sharpshooterImage,
   'star-collector': starCollectorImage,
 } as const

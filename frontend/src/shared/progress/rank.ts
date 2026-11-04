@@ -10,7 +10,7 @@ import type { HomeSummary } from '@/shared/progress/types'
  * reachable by a learner who failed every first-run transfer checkpoint.
  */
 export type RankTier = {
-  /** Ladder position, 1-based (Newcomer = 1). */
+  /** Ladder position, 1-based (Peasant = 1). */
   rank: number
   /** Roman numeral shown in crests and pills ("IV"). */
   numeral: string
@@ -22,12 +22,12 @@ export type RankTier = {
 }
 
 export const RANK_TIERS: RankTier[] = [
-  { rank: 1, numeral: 'I', name: 'Newcomer', minXp: 0, color: 'rgb(var(--theme-spark-rgb))', colorRgb: '125, 211, 252' },
-  { rank: 2, numeral: 'II', name: 'Contributor', minXp: 500, color: 'hsl(var(--success))', colorRgb: '52, 211, 153' },
-  { rank: 3, numeral: 'III', name: 'Committer', minXp: 1500, color: 'hsl(var(--primary))', colorRgb: 'var(--theme-primary-rgb)' },
-  { rank: 4, numeral: 'IV', name: 'Reviewer', minXp: 3000, color: 'rgb(var(--theme-challenge-rgb))', colorRgb: '167, 139, 250' },
-  { rank: 5, numeral: 'V', name: 'Release Manager', minXp: 4500, color: 'rgb(var(--theme-challenge-rgb))', colorRgb: '244, 114, 182' },
-  { rank: 6, numeral: 'VI', name: 'Maintainer', minXp: 5400, color: 'rgb(var(--theme-spark-rgb))', colorRgb: '251, 191, 36' },
+  { rank: 1, numeral: 'I', name: 'Peasant', minXp: 0, color: 'rgb(var(--theme-spark-rgb))', colorRgb: '125, 211, 252' },
+  { rank: 2, numeral: 'II', name: 'Squire', minXp: 500, color: 'hsl(var(--success))', colorRgb: '52, 211, 153' },
+  { rank: 3, numeral: 'III', name: 'Knight', minXp: 1500, color: 'hsl(var(--primary))', colorRgb: 'var(--theme-primary-rgb)' },
+  { rank: 4, numeral: 'IV', name: 'Baron', minXp: 3000, color: 'rgb(var(--theme-challenge-rgb))', colorRgb: '167, 139, 250' },
+  { rank: 5, numeral: 'V', name: 'Duke', minXp: 4500, color: 'rgb(var(--theme-challenge-rgb))', colorRgb: '244, 114, 182' },
+  { rank: 6, numeral: 'VI', name: 'King', minXp: 5400, color: 'rgb(var(--theme-spark-rgb))', colorRgb: '251, 191, 36' },
 ]
 
 export type RankInfo = {
