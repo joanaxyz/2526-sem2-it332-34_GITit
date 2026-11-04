@@ -47,6 +47,13 @@ Each scenario has one role:
 | spiral | The level's command plus forms from earlier levels, as a real workflow. |
 | transfer | Hard: unfamiliar state or distractors, known forms only. |
 
+The `transfer` role is a practice scenario. It is not an RTA transfer checkpoint: those
+are separate extension scenarios, one per Module 3–4 level, listed with their authored
+difference in `seed_data/source/transfer_checkpoints.py`. Seeding reserves each on the
+first scenario of the level's Hard tier, outside the plan's `variants`. A checkpoint must
+compose the level into a route no practice variant of that level uses, with moves already
+practised (`curriculum/tests/test_transfer_checkpoints.py`).
+
 The scenario grammar (`curriculum/tests/test_scenario_plan_invariants.py` checks all of
 it with the real guide resolver):
 

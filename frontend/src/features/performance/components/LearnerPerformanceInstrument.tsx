@@ -8,6 +8,7 @@ import {
 } from '@/features/performance/utils/performanceKpis'
 import { GO_SCR_TARGET, MODULES, moduleTarget } from '@/features/performance/utils/learningObjectives'
 import type { PerformanceSummary, RateMetric } from '@/features/performance/types'
+import { transferCheckpointPath } from '@/shared/level/transferCheckpoint'
 
 type ObjectiveStatus = Status | 'partial'
 const STATUS_TEXT: Record<ObjectiveStatus, string> = {
@@ -108,6 +109,20 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
 
   return (
     <div className="learning-objectives-record">
+      {data.transfers.length > 0 ? <section className="objective-transfer-checkpoints" aria-labelledby={`${id}-transfers`}>
+        <div className="record-section-heading">
+          <h3 id={`${id}-transfers`}>Transfer checkpoints ready</h3>
+          <span>One unfamiliar problem, no hints · only your first run counts</span>
+        </div>
+        <ul aria-label="Available transfer checkpoints">
+          {data.transfers.map((point) => <li key={point.tier_id}>
+            <Link to={transferCheckpointPath(point)}>
+              {point.run_id ? 'Resume' : 'Start'} transfer checkpoint: {point.title}
+            </Link>
+          </li>)}
+        </ul>
+      </section> : null}
+
       <section className="record-overall" aria-labelledby={`${id}-overall`}>
         <div className="record-section-heading">
           <h3 id={`${id}-overall`}>Across all modules</h3>
@@ -235,16 +250,10 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
           <p>{data.samples.car_missing} cleared scenarios lack validated command evidence and remain unscored.</p>
           <p>{data.samples.in_progress_tiers} opened tiers are in progress and not counted yet.</p>
         </details>
-        {selected >= 3 ? <details className="objective-transfer-checkpoints performance-calculation">
-          <summary>Available transfer checkpoints · Modules 3–4</summary>
-          <p>Modules 3–4 · {data.samples.transfer_pending} pending · {data.samples.transfer_missing} mastered tiers without eligible transfer evidence</p>
-          {data.transfers.length > 0 ? <ul aria-label="Available transfer checkpoints">
-            {data.transfers.map((point) => <li key={point.tier_id}>
-              <Link to={point.run_id ? `/adventure-tier-runs/${point.run_id}` : `/adventure-level-tiers/${point.tier_id}/runs?transfer=1`}>
-                {point.run_id ? 'Resume' : 'Start'} transfer checkpoint: {point.title}
-              </Link>
-            </li>)}
-          </ul> : <p>{KPIS.find((metric) => metric.key === 'rta')!.emptyHint}</p>}
+        {selected >= 3 ? <details className="performance-calculation">
+          <summary>Transfer checkpoints · Modules 3–4</summary>
+          <p>Modules 3–4 · {data.samples.transfer_pending} pending · {data.samples.transfer_missing} mastered Hard tiers without eligible transfer evidence</p>
+          <p>{KPIS.find((metric) => metric.key === 'rta')!.emptyHint}</p>
         </details> : null}
         <details className="performance-calculation" key={selected}>
           <summary>Module {selected} retry recovery · supplementary</summary>

@@ -278,9 +278,14 @@ Its deprecated `rtr` response alias has no current UI consumer.
 `KpiCheckpoint` preserves assessment evidence separately from mutable best-star
 completion pointers. Runs snapshot validated reference counts and content hashes.
 `KpiExposure` records every presentation, including discarded empty launches;
-legacy incomplete exposure histories cannot establish transfer novelty. Explicit
-transfer starts use the existing access-checked tier-start route, bypass practice
-reward/mastery mutation, and hide answer scaffolding.
+legacy incomplete exposure histories cannot establish transfer novelty. Only
+Module 3–4 Hard tiers expect a transfer checkpoint (`progress.objectives.transfer_expected`); run
+payloads carry `transfer_checkpoint` so the outcome screen can offer a ready one,
+and level payloads carry its state so a row appears under the Hard tier once assigned.
+Explicit transfer starts use the existing access-checked tier-start route, bypass
+practice mastery mutation, and hide answer scaffolding. A cleared checkpoint pays its
+own reward once per tier (`award_transfer_reward`): 150 GitCoins and XP on the first
+run, or 50 of each if it is first cleared in practice. No KPI reads that reward.
 
 Learner, Admin aggregate and Admin per-player reads share formulas. Admin excludes
 staff and averages participant scores; date filters select Manila-time starts,

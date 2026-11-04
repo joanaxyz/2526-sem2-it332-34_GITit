@@ -19,13 +19,15 @@ export function tierOutcomeState(run: TierRun) {
 }
 
 /** What the workspace mascot offers once a finished tier run's modal is
- * dismissed: the next scenario, the next difficulty, a retry, or the map. */
+ * dismissed: the next scenario, the next difficulty, a ready transfer
+ * checkpoint, a retry, or the map. */
 export function tierOutcomeNextStep({
   run,
   onBackToMap,
   onNextLevel,
   onRetry,
   onContinue,
+  onTransfer,
 }: {
   run: TierRun
   onBackToMap: () => void
@@ -34,6 +36,8 @@ export function tierOutcomeNextStep({
   /** Starts the next run on the same tier after a scenario clear that left scenarios
    * to play; the server picks the learner's next uncleared scenario. */
   onContinue?: () => void
+  /** Opens the tier's ready transfer checkpoint. */
+  onTransfer?: () => void
 }): OutcomeNextStep | null {
   if (run.status !== 'completed' && run.status !== 'failed') return null
   const { isFailed, isReplay, isTransfer, canAdvance, isPartialClear } = tierOutcomeState(run)
@@ -55,6 +59,14 @@ export function tierOutcomeNextStep({
       prompt: 'Click me to continue to the next scenario!',
       detail: nextScenario ? `Next: ${nextScenario.title}` : undefined,
       onSelect: onContinue,
+    }
+  }
+  if (run.transfer_checkpoint && onTransfer) {
+    return {
+      caption: 'Transfer checkpoint',
+      prompt: 'Click me to take your transfer checkpoint!',
+      detail: run.transfer_checkpoint.title,
+      onSelect: onTransfer,
     }
   }
   if (isFailed && onRetry) return { caption: 'Try again', prompt: 'Click me to try again!', onSelect: onRetry }

@@ -194,8 +194,7 @@ def test_failed_transfer_cannot_be_erased_even_by_empty_restart(django_user_mode
     AdventureLevelTierRunService().discard(run=first)
     point.refresh_from_db()
     assert point.passed is False
-    with pytest.raises(Locked):
-        start(player, tier, transfer=True)
+    assert start(player, tier, transfer=True).is_replay  # Practice, not a second assessment.
     end(start(player, tier))
     assert MetricsService().performance_summary(player=player)["kpis"]["rta"]["value"] == 0
 
@@ -359,3 +358,83 @@ def test_deleting_a_learner_removes_their_checkpoints(django_user_model):
 )
 def test_car_ratio(passed, target, actual, expected):
     assert car_score(passed=passed, target=target, actual=actual) == expected
+
+
+@pytest.mark.django_db
+def test_clearing_a_hard_tier_offers_its_transfer_checkpoint_until_it_is_taken(django_user_model):
+    from adventures.tier_payloads import tier_run_payload
+
+    player, tier, _, _ = bundle(django_user_model, required=1)
+    cleared = end(start(player, tier))
+    assert tier_run_payload(cleared)["transfer_checkpoint"] == {
+        "tier_id": tier.id,
+        "title": tier.adventure_level.title,
+        "run_id": None,
+    }
+    transfer = start(player, tier, transfer=True)
+    assert tier_run_payload(cleared)["transfer_checkpoint"]["run_id"] == transfer.id
+    assert tier_run_payload(transfer)["transfer_checkpoint"] is None
+    end(transfer)
+    assert tier_run_payload(cleared)["transfer_checkpoint"] is None
+
+
+@pytest.mark.django_db
+def test_only_hard_tiers_expect_transfer_evidence(django_user_model):
+    player, tier, _, _ = bundle(django_user_model, required=1)
+    tier.difficulty = "easy"
+    tier.save(update_fields=["difficulty"])
+    end(start(player, tier))
+    assert not KpiCheckpoint.objects.filter(player=player, tier=tier, kind="transfer").exists()
+    assert MetricsService().performance_summary(player=player)["samples"]["transfer_missing"] == 0
+
+
+@pytest.mark.django_db
+def test_practising_a_concluded_checkpoint_never_changes_its_recorded_result(django_user_model):
+    player, tier, scenario, _ = bundle(django_user_model, required=1)
+    end(start(player, tier))
+    assessed = end(start(player, tier, transfer=True), passed=False)
+    point = KpiCheckpoint.objects.get(player=player, tier=tier, kind="transfer")
+    service = MetricsService()
+    before = service.performance_summary(player=player)
+    assert before["kpis"]["rta"]["value"] == 0
+
+    practice = end(start(player, tier, transfer=True), count=3)
+
+    assert practice.id != assessed.id and practice.is_transfer and practice.is_replay
+    assert practice.status == "completed" and practice.stars == 0
+    point.refresh_from_db()
+    assert point.run_id == assessed.id and point.passed is False
+    assert service.performance_summary(player=player)["kpis"] == before["kpis"]
+
+
+@pytest.mark.django_db
+def test_leaving_transfer_practice_costs_nothing(django_user_model):
+    player, tier, _, _ = bundle(django_user_model, required=1)
+    end(start(player, tier))
+    end(start(player, tier, transfer=True))
+    empty = start(player, tier, transfer=True)
+    assert start(player, tier, transfer=True).id == empty.id  # A double mount resumes it.
+    AdventureLevelTierRunService().discard(run=empty)
+    assert not type(empty).objects.filter(pk=empty.pk).exists()
+    point = KpiCheckpoint.objects.get(player=player, tier=tier, kind="transfer")
+    assert point.passed is True
+
+
+@pytest.mark.django_db
+def test_the_level_node_shows_a_checkpoint_only_once_hard_is_cleared(django_user_model):
+    from curriculum.selectors.adventure_access import adventure_summary_payload
+
+    player, tier, _, _ = bundle(django_user_model, required=1)
+    level = tier.adventure_level
+
+    def row():
+        tiers = adventure_summary_payload(player=player, adventure=level)["tiers"]
+        return next(item for item in tiers if item["id"] == tier.id)["transfer_checkpoint"]
+
+    assert row() is None
+    end(start(player, tier))
+    assert row() == {"status": "ready", "run_id": None}
+    assessed = start(player, tier, transfer=True)
+    assert row() == {"status": "in_progress", "run_id": assessed.id}
+    end(assessed, passed=False)
+    assert row() == {"status": "recorded", "run_id": None}

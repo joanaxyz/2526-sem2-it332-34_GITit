@@ -17,6 +17,7 @@ from adventures.models import (
 )
 from players.models import Player
 from progress.models import AdventureLevelTierCompletion, KpiCheckpoint, KpiExposure, KpiStudy
+from progress.objectives import transfer_expected
 
 from .checkpoints import actual_count
 from .mastery_metrics import (
@@ -321,7 +322,8 @@ def _records(study):
                     "attempted": bool(attempts),
                     "invalid_runs": len(ended) - len(valid),
                     "car_missing": unscored,
-                    "transfer_missing": spec["module"] in (3, 4) and transfer is None,
+                    "transfer_missing": transfer_expected(spec["module"], spec["difficulty"])
+                    and transfer is None,
                     "mastery_run": mastery.id if mastery else None,
                     "transfer_run": checkpoint.run_id if checkpoint else None,
                 }

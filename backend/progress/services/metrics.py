@@ -33,6 +33,7 @@ PLAY_REWARD_REASONS = (
     "adventure_tier_reward",
     "challenge_trial_reward",
     "chapter_chest",
+    "transfer_checkpoint_reward",
 )
 
 # Trailing window (days) for the consistency axis.

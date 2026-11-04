@@ -9,6 +9,9 @@ from players.models import PlayerPreferences
 from players.services import get_or_create_player
 from progress.models import (
     AdventureLevelTierCompletion,
+    CoinTransaction,
+    KpiCheckpoint,
+    Wallet,
     XpTransaction,
 )
 from progress.serializers import LeaderboardResponseSerializer
@@ -24,6 +27,11 @@ def _learner(django_user_model, username, **extra):
 
 def _give_xp(player, amount, key="grant"):
     XpService().award(player=player, amount=amount, reason="tier_clear", award_key=key)
+
+
+def _balance(player):
+    wallet = Wallet.objects.filter(player=player).first()
+    return wallet.balance if wallet else 0
 
 
 @pytest.mark.django_db
@@ -56,6 +64,58 @@ def test_clearing_a_tier_in_play_credits_xp_and_reports_it(django_user_model):
     assert MetricsService().dashboard_summary(player=player)["xp"] == XpService().total(
         player=player
     )
+
+
+@pytest.mark.django_db
+def test_first_run_checkpoint_clear_pays_the_full_reward_and_practice_adds_nothing(
+    django_user_model,
+):
+    player, tier, _scenario, _variants = bundle(django_user_model, required=1)
+    end(start(player, tier))
+    xp, coins = XpService().total(player=player), _balance(player)
+
+    end(start(player, tier, transfer=True))
+
+    assert XpService().total(player=player) == xp + 150
+    assert _balance(player) == coins + 150
+
+    practice = end(start(player, tier, transfer=True))
+
+    assert practice.is_replay
+    assert XpService().total(player=player) == xp + 150
+    assert _balance(player) == coins + 150
+
+
+@pytest.mark.django_db
+def test_a_failed_checkpoint_can_still_earn_the_practice_reward_once(django_user_model):
+    player, tier, _scenario, _variants = bundle(django_user_model, required=1)
+    end(start(player, tier))
+    xp, coins = XpService().total(player=player), _balance(player)
+
+    end(start(player, tier, transfer=True), passed=False)
+
+    assert XpService().total(player=player) == xp
+    end(start(player, tier, transfer=True))
+    end(start(player, tier, transfer=True))
+
+    assert XpService().total(player=player) == xp + 50
+    assert _balance(player) == coins + 50
+    point = KpiCheckpoint.objects.get(player=player, tier=tier, kind="transfer")
+    assert point.passed is False  # Practice earns the smaller reward; the result stands.
+
+
+@pytest.mark.django_db
+def test_checkpoint_gitcoins_count_as_earned_through_play(django_user_model):
+    player, tier, _scenario, _variants = bundle(django_user_model, required=1)
+    end(start(player, tier))
+    end(start(player, tier, transfer=True))
+
+    stats = MetricsService().stats_summary(player=player)
+
+    assert stats["headline"]["gitcoins_earned"] == _balance(player)
+    assert CoinTransaction.objects.filter(
+        player=player, reason="transfer_checkpoint_reward"
+    ).exists()
 
 
 @pytest.mark.django_db

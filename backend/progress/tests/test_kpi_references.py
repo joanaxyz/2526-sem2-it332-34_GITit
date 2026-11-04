@@ -9,7 +9,7 @@ from django.core.management.base import CommandError
 from adventures.models import AdventureLevelTierScenarioVariant
 from curriculum.services.solution_replay import FRONTEND
 from progress.services.references import ref_hash, seed_refs, valid_ref, validate_refs
-from testing.kpi_fixtures import bundle, routes
+from testing.kpi_fixtures import bundle, routes, variant
 
 needs_simulator = pytest.mark.skipif(
     shutil.which("node") is None or not (FRONTEND / "node_modules").exists(),
@@ -115,3 +115,17 @@ def test_seed_gives_every_published_tier_variant_a_valid_reference():
     ).select_related("scenario")
     assert variants
     assert [v.slug for v in variants if valid_ref(v) is None] == []
+
+
+@pytest.mark.django_db
+def test_reservation_is_limited_to_a_hard_tiers_first_scenario(django_user_model):
+    _, tier, scenario, variants = bundle(django_user_model, required=2)
+    later = tier.scenarios.exclude(id=scenario.id).get()
+    extra = variant(later, "kpi-later")
+    reserve = {"reserve": True, "reason": "Reviewed difference"}
+    with pytest.raises(CommandError, match="first scenario"):
+        call_command("kpi_refs", cases=[extra.slug], **reserve)
+    tier.difficulty = "easy"
+    tier.save(update_fields=["difficulty"])
+    with pytest.raises(CommandError, match="Hard tier"):
+        call_command("kpi_refs", cases=[variants[1].slug], **reserve)

@@ -10,6 +10,7 @@ from functools import cache
 from curriculum.seed_data.scenario_bank import extension_scenario_bank, scenario_bank
 from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES
 from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN
+from curriculum.seed_data.source.transfer_checkpoints import TRANSFER_CHECKPOINTS
 
 
 def published_cases():
@@ -33,6 +34,13 @@ def published_cases():
                         "difficulty": difficulty,
                         "scenario": scenario.slug,
                     }
+    for level, checkpoint in TRANSFER_CHECKPOINTS.items():
+        placements[checkpoint["case_id"]] = {
+            "surface": "story",
+            "level": level,
+            "difficulty": "hard",
+            "scenario": MODULE_SCENARIO_PLAN[level]["hard"][0].slug,
+        }
     for gate in CHALLENGE_GATES.values():
         for difficulty, ids in gate["trials"].items():
             for case_id in ids:

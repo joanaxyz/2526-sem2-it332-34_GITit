@@ -14,6 +14,7 @@ from common.constants import (
     SESSION_STATUS_FAILED,
 )
 from progress.models import AdventureLevelTierCompletion, KpiCheckpoint, KpiExposure
+from progress.objectives import transfer_expected
 
 # car_first is CAR's starting point for learners, not an evaluated KPI.
 KEYS = ("scr", "car", "car_first", "hlcr", "arc", "rta", "retry_success_rate")
@@ -290,7 +291,11 @@ def live_records(runs, *, end_before=None):
                     and not checkpoint_ready(transfer, seen=seen[player_id])
                 )
                 or bool(
-                    row["tier__adventure_level__chapter__number"] in (3, 4) and at and not transfer
+                    transfer_expected(
+                        row["tier__adventure_level__chapter__number"], row["tier__difficulty"]
+                    )
+                    and at
+                    and not transfer
                 ),
                 "retry_total": len(retries),
                 "retry_wins": sum(r["status"] == SESSION_STATUS_COMPLETED for r in retries),
@@ -320,7 +325,9 @@ def samples(records):
         "transfer_missing": sum(
             r.get(
                 "transfer_missing",
-                r["module"] in (3, 4) and r["mastered"] and not r.get("transfer_assigned", False),
+                transfer_expected(r["module"], r["difficulty"])
+                and r["mastered"]
+                and not r.get("transfer_assigned", False),
             )
             for r in records
         ),

@@ -80,12 +80,9 @@ module; the content and checks are complete for all four, so they ship together.
    python manage.py award_missing_xp
    ```
 
-7. **Re-reserve transfer cases.** The seed already refreshed every KPI command
-   reference from the committed replay. Transfer reservations live on variant
-   rows. The new scenarios are new rows, so
-   re-reserve each transfer case with
-   `python manage.py kpi_refs --cases <slug> --reserve --reason "<what differs>"`.
-   The shared dev database had none on 2026-10-20.
+7. **Nothing to refresh for KPIs.** The seed updates every KPI command reference
+   from the committed replay and reserves the six transfer checkpoints from
+   `curriculum/seed_data/source/transfer_checkpoints.py`.
 8. **Check health.**
 
    ```bash

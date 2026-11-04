@@ -3,6 +3,7 @@ from django.core.management.base import BaseCommand, CommandError
 from django.db import transaction
 
 from adventures.models import AdventureLevelTierScenarioVariant
+from progress.objectives import transfer_expected
 from progress.services.references import state_key, validate_refs
 
 
@@ -44,13 +45,17 @@ class Command(BaseCommand):
                 ordinary = variant.scenario.variants.filter(
                     is_published=True, is_transfer=False
                 ).exclude(pk__in=reserved_ids)
+                tier = variant.scenario.tier
+                first = tier.scenarios.filter(is_published=True).order_by("sort_order", "id")[0]
                 if (
-                    variant.scenario.tier.adventure_level.chapter.number not in (3, 4)
+                    not transfer_expected(tier.adventure_level.chapter.number, tier.difficulty)
+                    or variant.scenario_id != first.id
                     or not ordinary.exists()
                     or any(state_key(v) == state_key(variant) for v in ordinary)
                 ):
                     raise CommandError(
-                        "Transfer needs Module 3–4, a distinct repository/goal, and ordinary practice content."
+                        "Transfer needs the first scenario of a Module 3–4 Hard tier, "
+                        "a distinct repository/goal, and ordinary practice content."
                     )
                 variant.is_transfer = True
                 variant.transfer_note = options["reason"].strip()

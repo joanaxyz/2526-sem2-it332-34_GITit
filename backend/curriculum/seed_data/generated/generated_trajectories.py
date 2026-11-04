@@ -3772,6 +3772,218 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
+  "cherry-transfer-release-backport": {
+    "final": {
+      "coarse": "a78804d9c5d4522b",
+      "exact": "6e33b2dddbbe946b"
+    },
+    "steps": [
+      {
+        "command": "git cherry-pick --abort",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "remove",
+            "kind": "working_tree",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "Edits to src/export.py are discarded or saved elsewhere."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "Conflict resolved in src/export.py."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "cherry-pick"
+            ],
+            "text": "The cherry-pick is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "eb7bab3a02736d96",
+            "exact": "4b3cb47c73e8f1f1"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick -x c4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "src/export.py has uncommitted edits."
+          },
+          {
+            "action": "add",
+            "kind": "conflict",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "Conflict to resolve in src/export.py."
+          },
+          {
+            "action": "start",
+            "kind": "operation",
+            "subjects": [
+              "cherry-pick"
+            ],
+            "text": "A cherry-pick is in progress."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "5dfb083db6e8d6fb",
+            "exact": "9a5104144c8621a1"
+          }
+        ]
+      },
+      {
+        "command": "git add src/export.py",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "src/export.py is staged."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "Conflict resolved in src/export.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "eb7bab3a02736d96",
+            "exact": "8588bea396b7b51f"
+          },
+          {
+            "coarse": "2b7aecd1219c4b99",
+            "exact": "fd1ed15d079be00f"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick --continue",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "release-1.6",
+            "subjects": [
+              "src/export.py"
+            ],
+            "text": "New commit on release-1.6, saving src/export.py."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "cherry-pick"
+            ],
+            "text": "The cherry-pick is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "cfc6d32fa41701aa",
+            "exact": "d33fdbc7fe7db3b0"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick --no-commit c5",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/report_totals.py"
+            ],
+            "text": "src/report_totals.py is staged."
+          },
+          {
+            "action": "start",
+            "kind": "operation",
+            "subjects": [
+              "cherry-pick"
+            ],
+            "text": "A cherry-pick is in progress."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "ef9295bc0167625c",
+            "exact": "e04043e575218940"
+          }
+        ]
+      },
+      {
+        "command": "git cherry-pick --no-commit c6",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/report_labels.py"
+            ],
+            "text": "src/report_labels.py is staged."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "d21fa39ea109617d",
+            "exact": "bac9c7865044d6c6"
+          }
+        ]
+      },
+      {
+        "command": "git commit -m \"Backport report fixes\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "release-1.6",
+            "subjects": [
+              "src/report_labels.py",
+              "src/report_totals.py"
+            ],
+            "text": "New commit on release-1.6, saving src/report_labels.py and src/report_totals.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "1663a9db9382809b",
+            "exact": "cb466877a912f186"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
   "clone-easy-api-lab": {
     "final": {
       "coarse": "c1fe28b26e20939c",
@@ -11808,6 +12020,183 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
+  "manual-transfer-checkout-v2": {
+    "final": {
+      "coarse": "e5c7edc733b3e556",
+      "exact": "72b6d2919071a3b2"
+    },
+    "steps": [
+      {
+        "command": "git merge --abort",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "remove",
+            "kind": "working_tree",
+            "subjects": [
+              "src/checkout.py"
+            ],
+            "text": "Edits to src/checkout.py are discarded or saved elsewhere."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/checkout.py"
+            ],
+            "text": "Conflict resolved in src/checkout.py."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "merge"
+            ],
+            "text": "The merge is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "879c8267fbb34ccd",
+            "exact": "411bd140305c35a0"
+          }
+        ]
+      },
+      {
+        "command": "git merge feature/checkout-v2",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/checkout.py",
+              "src/shipping.py"
+            ],
+            "text": "src/checkout.py and src/shipping.py have uncommitted edits."
+          },
+          {
+            "action": "add",
+            "kind": "conflict",
+            "subjects": [
+              "src/checkout.py",
+              "src/shipping.py"
+            ],
+            "text": "Conflict to resolve in src/checkout.py and src/shipping.py."
+          },
+          {
+            "action": "start",
+            "kind": "operation",
+            "subjects": [
+              "merge"
+            ],
+            "text": "A merge is in progress."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "8222f4a0800277e7",
+            "exact": "1d524c9c73ecea52"
+          }
+        ]
+      },
+      {
+        "command": "git add src/checkout.py",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/checkout.py"
+            ],
+            "text": "src/checkout.py is staged."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/checkout.py"
+            ],
+            "text": "Conflict resolved in src/checkout.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "a65d50022d7167a1",
+            "exact": "436681209759f52a"
+          },
+          {
+            "coarse": "5b45d087b94bf8a0",
+            "exact": "5e98ba5aefb02dc9"
+          }
+        ]
+      },
+      {
+        "command": "git add src/shipping.py",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "src/shipping.py"
+            ],
+            "text": "src/shipping.py is staged."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/shipping.py"
+            ],
+            "text": "Conflict resolved in src/shipping.py."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "1818d2a58c91a62e",
+            "exact": "6e2fe82367637318"
+          },
+          {
+            "coarse": "154baf4fd84cce2d",
+            "exact": "00131570eeb0c343"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "src/checkout.py",
+              "src/shipping.py"
+            ],
+            "text": "New commit on main, saving src/checkout.py and src/shipping.py."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "merge"
+            ],
+            "text": "The merge is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "0df04b397f787c8d",
+            "exact": "0768204412e694b0"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
   "merge-easy-cap-docs": {
     "final": {
       "coarse": "b2a7c98b0198f088",
@@ -13518,6 +13907,147 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "e9e937795b10de35",
             "exact": "77e94acda7737aed"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "mergetool-transfer-pricing-refresh": {
+    "final": {
+      "coarse": "f35deb537ee0e8f0",
+      "exact": "d9bbaf05dce4b360"
+    },
+    "steps": [
+      {
+        "command": "git config merge.tool meld",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "set",
+            "kind": "config",
+            "subjects": [
+              "merge.tool"
+            ],
+            "text": "merge.tool is set."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "9cc7d3d8c2495ff7",
+            "exact": "7363fe6dbeaf7a82"
+          }
+        ]
+      },
+      {
+        "command": "git config mergetool.keepBackup false",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "set",
+            "kind": "config",
+            "subjects": [
+              "mergetool.keepBackup"
+            ],
+            "text": "mergetool.keepBackup is set."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "a043871cbae5fcb6",
+            "exact": "60bead5e6720ff30"
+          }
+        ]
+      },
+      {
+        "command": "git merge feature/pricing-refresh",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "add",
+            "kind": "staging",
+            "subjects": [
+              "docs/pricing.md"
+            ],
+            "text": "docs/pricing.md is staged."
+          },
+          {
+            "action": "add",
+            "kind": "working_tree",
+            "subjects": [
+              "src/discounts.py",
+              "src/pricing.py"
+            ],
+            "text": "src/discounts.py and src/pricing.py have uncommitted edits."
+          },
+          {
+            "action": "add",
+            "kind": "conflict",
+            "subjects": [
+              "src/discounts.py",
+              "src/pricing.py"
+            ],
+            "text": "Conflict to resolve in src/discounts.py and src/pricing.py."
+          },
+          {
+            "action": "start",
+            "kind": "operation",
+            "subjects": [
+              "merge"
+            ],
+            "text": "A merge is in progress."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "1a852477eb63080a",
+            "exact": "63222016dbe4c5de"
+          }
+        ]
+      },
+      {
+        "command": "git mergetool",
+        "diagnostic": false,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "c01d4d7140e1de16",
+            "exact": "a812e0edbb00cc67"
+          }
+        ]
+      },
+      {
+        "command": "git commit --no-edit",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [
+              "docs/pricing.md",
+              "src/discounts.py",
+              "src/pricing.py"
+            ],
+            "text": "New commit on main, saving docs/pricing.md, src/discounts.py and src/pricing.py."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "merge"
+            ],
+            "text": "The merge is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "c01d4d7140e1de16",
+            "exact": "a812e0edbb00cc67"
+          },
+          {
+            "coarse": "dfb9d22668b1c882",
+            "exact": "4c4c3c42bcc60407"
           }
         ]
       }
@@ -16928,6 +17458,137 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
     ],
     "version": 2
   },
+  "rebase-transfer-invoices": {
+    "final": {
+      "coarse": "5af5fa66c8afccc2",
+      "exact": "dda21105337592db"
+    },
+    "steps": [
+      {
+        "command": "git rebase --abort",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "branch",
+            "subjects": [
+              "feature/invoices"
+            ],
+            "text": "Branch feature/invoices moves to another commit."
+          },
+          {
+            "action": "remove",
+            "kind": "working_tree",
+            "subjects": [
+              "src/charts.js"
+            ],
+            "text": "Edits to src/charts.js are discarded or saved elsewhere."
+          },
+          {
+            "action": "remove",
+            "kind": "conflict",
+            "subjects": [
+              "src/charts.js"
+            ],
+            "text": "Conflict resolved in src/charts.js."
+          },
+          {
+            "action": "finish",
+            "kind": "operation",
+            "subjects": [
+              "rebase"
+            ],
+            "text": "The rebase is finished."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "8ec9d66002d60236",
+            "exact": "62aea3fadeb0ae49"
+          }
+        ]
+      },
+      {
+        "command": "git reflog",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "94adf63bfeaf851f",
+            "exact": "c9d57203bfd96bc0"
+          }
+        ]
+      },
+      {
+        "command": "git reset --hard c6",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "branch",
+            "subjects": [
+              "feature/invoices"
+            ],
+            "text": "Branch feature/invoices moves to another commit."
+          },
+          {
+            "action": "start",
+            "kind": "operation",
+            "subjects": [
+              "merge"
+            ],
+            "text": "A merge is in progress."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "94adf63bfeaf851f",
+            "exact": "c9d57203bfd96bc0"
+          }
+        ]
+      },
+      {
+        "command": "git rebase --onto main spike/heatmap feature/invoices",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "feature/invoices",
+            "subjects": [],
+            "text": "3 new commits on feature/invoices."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "c44b576f849c6323",
+            "exact": "8102973a73b4fd63"
+          }
+        ]
+      },
+      {
+        "command": "git push --force-with-lease origin feature/invoices",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/feature/invoices"
+            ],
+            "text": "origin/feature/invoices is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "1635ee04167f5bed",
+            "exact": "073e22ee958e6fe9"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
   "rec-easy-cap-ui": {
     "final": {
       "coarse": "e00bd680eca8ea8b",
@@ -17878,6 +18539,124 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "2f405f8fecd2e589",
             "exact": "c76a6325ad89b652"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "reflog-transfer-report-rollback": {
+    "final": {
+      "coarse": "fbfd63abfa813347",
+      "exact": "94e729a6b6d03dee"
+    },
+    "steps": [
+      {
+        "command": "git reflog",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "fe565dd0e6496858",
+            "exact": "69d70fe685e73188"
+          }
+        ]
+      },
+      {
+        "command": "git show c2",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "fe565dd0e6496858",
+            "exact": "69d70fe685e73188"
+          }
+        ]
+      },
+      {
+        "command": "git show c3",
+        "diagnostic": true,
+        "effect": [],
+        "positions": [
+          {
+            "coarse": "fe565dd0e6496858",
+            "exact": "69d70fe685e73188"
+          }
+        ]
+      },
+      {
+        "command": "git switch -c recovery/report-redesign c3",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "branch",
+            "subjects": [
+              "recovery/report-redesign"
+            ],
+            "text": "Branch recovery/report-redesign is created."
+          },
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "recovery/report-redesign"
+            ],
+            "text": "HEAD moves to recovery/report-redesign."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "fe565dd0e6496858",
+            "exact": "69d70fe685e73188"
+          }
+        ]
+      },
+      {
+        "command": "git switch main",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "head",
+            "subjects": [
+              "main"
+            ],
+            "text": "HEAD moves to main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "35d9a76438382472",
+            "exact": "7bdc30818c8fa86c"
+          }
+        ]
+      },
+      {
+        "command": "git reset --hard c2",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "branch",
+            "subjects": [
+              "main"
+            ],
+            "text": "Branch main moves to another commit."
+          },
+          {
+            "action": "start",
+            "kind": "operation",
+            "subjects": [
+              "merge"
+            ],
+            "text": "A merge is in progress."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "8e68ee966c2e8a6e",
+            "exact": "941f8a60d6406d8e"
           }
         ]
       }
@@ -19150,6 +19929,92 @@ SOLUTION_TRAJECTORIES = json.loads(r"""
           {
             "coarse": "13ddbeaa3d986013",
             "exact": "d6f5a09343c378ec"
+          }
+        ]
+      }
+    ],
+    "version": 2
+  },
+  "revert-transfer-statements": {
+    "final": {
+      "coarse": "a64c9b751cf6777c",
+      "exact": "9263bec9616800d7"
+    },
+    "steps": [
+      {
+        "command": "git commit --amend -m \"Add statement export\"",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [],
+            "text": "New commit on main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "53a67343fb528db6",
+            "exact": "73122bb4e071d722"
+          }
+        ]
+      },
+      {
+        "command": "git revert c4",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [],
+            "text": "New commit on main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "53a67343fb528db6",
+            "exact": "d7bb352dc982ffa0"
+          }
+        ]
+      },
+      {
+        "command": "git revert c2",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "create",
+            "kind": "commit",
+            "ref": "main",
+            "subjects": [],
+            "text": "New commit on main."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "bd478cc92822d043",
+            "exact": "e79e2b7b8d765309"
+          }
+        ]
+      },
+      {
+        "command": "git push",
+        "diagnostic": false,
+        "effect": [
+          {
+            "action": "move",
+            "kind": "remote",
+            "subjects": [
+              "origin/main"
+            ],
+            "text": "origin/main is updated."
+          }
+        ],
+        "positions": [
+          {
+            "coarse": "a03eb04aa322f813",
+            "exact": "0167d46da3b983a1"
           }
         ]
       }

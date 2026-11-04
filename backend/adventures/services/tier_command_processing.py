@@ -362,7 +362,10 @@ class AdventureLevelTierCommandProcessingService:
         )
         rewards = None
         if run.is_transfer:
+            from progress.services.checkpoints import award_transfer_reward
+
             completion = None
+            rewards = award_transfer_reward(run)
         elif not run.is_replay:
             progress, _ = AdventureLevelTierProgress.objects.select_for_update().get_or_create(
                 player=run.player, tier=run.tier

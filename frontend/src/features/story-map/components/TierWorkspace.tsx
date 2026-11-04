@@ -6,6 +6,7 @@ import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
 import { TierStatusHeader } from '@/features/story-map/components/TierStatusHeader'
 import { TierOutcomeModal } from '@/features/story-map/components/TierOutcomeModal'
 import { tierOutcomeNextStep } from '@/features/story-map/components/tierOutcome'
+import { transferCheckpointPath, transferPracticePath } from '@/shared/level/transferCheckpoint'
 import { CommandIntroductionPanel } from '@/features/story-map/components/CommandIntroductionPanel'
 import { WorkspaceTips } from '@/features/story-map/components/WorkspaceTips'
 import { useTierCommandSubmission } from '@/features/story-map/hooks/useTierCommandSubmission'
@@ -208,13 +209,20 @@ export function TierWorkspace() {
     !mutation.isPending &&
     dismissedCompletionRunId !== run.id &&
     completionAnimationReady(run.id)
+  const openTransfer = run.transfer_checkpoint
+    ? () => navigate(transferCheckpointPath(run.transfer_checkpoint!))
+    : undefined
+  const retryRun = run.transfer && run.replay
+    ? () => navigate(transferPracticePath(run.tier.id))
+    : playAgain
   // Once the result is dismissed, the mascot carries the run's next step.
   const nextStep = dismissedCompletionRunId === run.id && !exitNavigationPending
     ? tierOutcomeNextStep({
       run,
       onBackToMap: () => navigate(mapUrlForRun(run)),
-      onRetry: playAgain,
+      onRetry: retryRun,
       onContinue: continueTier,
+      onTransfer: openTransfer,
       onNextLevel: run.next_difficulty ? () => startNextLevel(run.next_difficulty!.id) : undefined,
     })
     : null
@@ -324,7 +332,8 @@ export function TierWorkspace() {
           setDismissedCompletionRunId(run.id)
         }}
         onBackToMap={() => navigate(mapUrlForRun(run))}
-        onRetry={playAgain}
+        onRetry={retryRun}
+        onTransfer={openTransfer}
       />
       {nextStep ? <OutcomeNextStepMascot key={run.id} step={nextStep} /> : null}
       <WorkspaceStoryModal

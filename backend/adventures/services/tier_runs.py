@@ -248,7 +248,10 @@ class AdventureLevelTierRunService:
         return self.hydrate_run(run)
 
     def _start_transfer(self, *, player, tier, source_entry_point):
-        """Launch the sole assessed transfer run under the normal player lock."""
+        """Launch the sole assessed transfer run under the normal player lock.
+
+        Once its result is recorded the same start opens ungraded practice.
+        """
         from progress.models import KpiCheckpoint
         from progress.services.checkpoints import assign_transfer, record_exposure, transfer_ready
 
@@ -277,7 +280,12 @@ class AdventureLevelTierRunService:
         if checkpoint.run_id:
             if checkpoint.run.status == SESSION_STATUS_STARTED:
                 return checkpoint.run  # Duplicate mount resumes the very same assessment.
-            raise Locked("This transfer result is already recorded. Continue with free practice.")
+            return self._start_transfer_practice(
+                player=player,
+                tier=tier,
+                variant=checkpoint.variant,
+                source_entry_point=source_entry_point,
+            )
         variant = checkpoint.variant
         active = self._active_run(player=player, tier=tier, for_update=True)
         if active:
@@ -300,6 +308,31 @@ class AdventureLevelTierRunService:
         checkpoint.save(update_fields=["run"])
         record_exposure(run)
         return run
+
+    def _start_transfer_practice(self, *, player, tier, variant, source_entry_point):
+        """Replay a concluded checkpoint: a transfer run for hidden scaffolding and no
+        rewards, a replay so nothing reads it as evidence. The checkpoint keeps its own
+        run, so ``finish_transfer`` never touches the recorded result."""
+        if not (variant.is_published and variant.scenario.is_published):
+            raise Locked("This transfer checkpoint is no longer available for practice.")
+        active = self._active_run(player=player, tier=tier, for_update=True)
+        if active:
+            if active.is_transfer:
+                return active
+            self.discard(run=active)
+        budget, limit = command_budget(variant)
+        return AdventureLevelTierRun.objects.create(
+            player=player,
+            tier=tier,
+            current_scenario=variant.scenario,
+            selected_variant=variant,
+            source_entry_point=source_entry_point,
+            is_transfer=True,
+            is_replay=True,
+            assess_diag=variant.assess_diag,
+            **run_scoring_snapshot(variant, efficient=budget, maximum=limit),
+            repository_state=variant.initial_state,
+        )
 
     def _unretried_last_failure(self, *, player, tier: AdventureLevelTier):
         """The learner's most recent run on this tier, if it failed and nothing
@@ -376,7 +409,7 @@ class AdventureLevelTierRunService:
         locked = AdventureLevelTierRun.objects.select_for_update().filter(pk=run.pk).first()
         if locked is None or locked.status != SESSION_STATUS_STARTED:
             return False
-        if not locked.steps.exists() and not locked.is_transfer:
+        if not locked.steps.exists() and (not locked.is_transfer or locked.is_replay):
             return discard_started_run(locked)
         locked.status = SESSION_STATUS_ABANDONED
         locked.ended_at = timezone.now()

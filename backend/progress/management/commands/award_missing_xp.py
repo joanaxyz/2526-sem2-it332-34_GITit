@@ -12,13 +12,15 @@ from django.db.models import Sum
 from progress.models import (
     AdventureLevelTierCompletion,
     ChallengeTrialCompletion,
+    KpiCheckpoint,
     XpTransaction,
 )
-from progress.xp import award_gate_xp, award_tier_xp
+from progress.services.checkpoints import TRANSFER_REWARD, transfer_award_key
+from progress.xp import XpService, award_gate_xp, award_tier_xp
 
 
 class Command(BaseCommand):
-    help = "Credit XP for tier clears and gate trials already earned (idempotent)."
+    help = "Credit XP for tier clears, gate trials and checkpoints already earned (idempotent)."
 
     def add_arguments(self, parser):
         parser.add_argument(
@@ -47,3 +49,13 @@ class Command(BaseCommand):
         trials = ChallengeTrialCompletion.objects.select_related("player", "challenge_trial")
         for completion in trials.order_by("id"):
             award_gate_xp(player=completion.player, trial=completion.challenge_trial)
+        passed = KpiCheckpoint.objects.filter(
+            kind=KpiCheckpoint.Kind.TRANSFER, passed=True
+        ).select_related("player")
+        for point in passed.order_by("id"):
+            XpService().award(
+                player=point.player,
+                amount=TRANSFER_REWARD,
+                reason="transfer_checkpoint",
+                award_key=transfer_award_key(point.tier_id),
+            )

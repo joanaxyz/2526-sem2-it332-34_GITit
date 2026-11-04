@@ -10,6 +10,7 @@ import { Badge } from '@/shared/components/Badge'
 import { playGameOverSound, playVictorySound } from '@/shared/audio/battleAudio'
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 import { difficultyLabel, tierOutcomeState } from '@/features/story-map/components/tierOutcome'
+import { TRANSFER_REWARD } from '@/shared/level/transferCheckpoint'
 import { StarScoreChecklist } from '@/shared/level/components/StarScoreChecklist'
 
 /** Mirrors ChallengeOutcomeModal. Tiers have no sibling-level navigator - a
@@ -22,6 +23,7 @@ export function TierOutcomeModal({
   onBackToMap,
   onRetry,
   onContinue,
+  onTransfer,
 }: {
   open: boolean
   run: TierRun
@@ -29,10 +31,12 @@ export function TierOutcomeModal({
   onBackToMap: () => void
   onContinue?: () => void
   onRetry?: () => void
+  onTransfer?: () => void
 }) {
   const { isFailed, isReplay, isTransfer, canAdvance, isPartialClear } = tierOutcomeState(run)
   // A cleared scenario that is not the tier's last names itself and the next scenario.
   const nextScenario = run.progress.next_scenario
+  const transferReady = Boolean(run.transfer_checkpoint && onTransfer)
 
   useEffect(() => {
     if (!open) return
@@ -43,7 +47,10 @@ export function TierOutcomeModal({
     }
   }, [isFailed, open])
 
-  const headline = isTransfer
+  const isTransferPractice = isTransfer && isReplay
+  const headline = isTransferPractice
+    ? isFailed ? 'Practice ended' : 'Practice cleared'
+    : isTransfer
     ? isFailed ? 'Transfer checkpoint not cleared' : 'Transfer checkpoint cleared'
     : isReplay
     ? isFailed
@@ -60,7 +67,9 @@ export function TierOutcomeModal({
   const hasNextScenario = !isFailed && !isReplay && !isTransfer && Boolean(nextScenario && onContinue)
 
   const hitActionLimit = isFailed && run.counts.max_reached
-  const message = isTransfer
+  const message = isTransferPractice
+    ? 'This was practice, so your recorded transfer result has not changed.'
+    : isTransfer
     ? 'Your first transfer result is recorded. You can continue free practice; later runs cannot change this checkpoint result.'
     : isReplay
     ? isFailed
@@ -135,7 +144,7 @@ export function TierOutcomeModal({
           Replay
         </Badge>
       ) : null}
-      {!isFailed && !isReplay && run.rewards?.coins_awarded ? (
+      {!isFailed && run.rewards?.coins_awarded ? (
         <Badge variant="secondary" className="game-outcome-badge">
           <GitCoinIcon className="size-3.5" />
           +{run.rewards.coins_awarded} GitCoins
@@ -185,7 +194,7 @@ export function TierOutcomeModal({
     <GameOutcomeModal
       open={open}
       onClose={onClose}
-      title={isTransfer ? 'Transfer result recorded' : isFailed ? 'Level failed' : isPartialClear ? 'Scenario complete' : 'Level complete'}
+      title={isTransferPractice ? 'Practice complete' : isTransfer ? 'Transfer result recorded' : isFailed ? 'Level failed' : isPartialClear ? 'Scenario complete' : 'Level complete'}
       tone={isFailed ? 'failure' : 'success'}
       icon={Icon}
       resultLabel={isFailed ? 'Game Over' : 'You Won'}
@@ -194,13 +203,21 @@ export function TierOutcomeModal({
       level={{ label: `Level ${run.tier.adventure_level_number}`, title: run.tier.adventure_level_title }}
       badges={badges}
       headline={headline}
-      message={hasNextScenario ? null : message}
+      message={hasNextScenario ? null : transferReady ? `${message} A transfer checkpoint is ready: one unfamiliar problem with no hints, worth +${TRANSFER_REWARD} GitCoins and +${TRANSFER_REWARD} XP if you clear it on your first run. Take it now, or later from this level or Progress.` : message}
       footerActions={hasNextScenario && nextScenario ? (
         <Button type="button" size="lg" className="outcome-next-button" onClick={(event) => {
           event.stopPropagation()
           onContinue?.()
         }}>
           <span>Next: {nextScenario.title}</span>
+          <ArrowRight className="size-4" aria-hidden="true" />
+        </Button>
+      ) : transferReady ? (
+        <Button type="button" size="lg" className="outcome-next-button" onClick={(event) => {
+          event.stopPropagation()
+          onTransfer?.()
+        }}>
+          <span>Take transfer checkpoint</span>
           <ArrowRight className="size-4" aria-hidden="true" />
         </Button>
       ) : null}
