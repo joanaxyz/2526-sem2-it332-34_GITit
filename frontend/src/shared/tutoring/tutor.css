@@ -22,6 +22,8 @@
 /* The guide's chat launcher belongs with the guide: it stays above the guide's veil
    wherever it is dragged, below the chat window it opens. */
 .mascot-launcher:has(> [data-mascot-launcher="guide-tutor"]) { z-index: var(--z-mascot); }
+/* The moving map guide must not intercept the AI launcher's click or drag. */
+.mascot-launcher:has(> [data-mascot-launcher="home-tutor"]) { z-index: var(--z-tutor); }
 @keyframes tutor-companion-think {
   0%, 100% { background-position: 0 0; }
   12.5% { background-position: 33.333333% 0; }

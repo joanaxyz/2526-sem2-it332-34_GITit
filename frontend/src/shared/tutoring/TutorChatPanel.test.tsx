@@ -35,6 +35,20 @@ function ask(text: string) {
 }
 
 describe('shared tutoring surfaces', () => {
+  it('introduces the visible launcher while preserving the saved open-window preference', () => {
+    localStorage.setItem('git-it:pref:tutor-window:home-open', 'true')
+    const dismiss = vi.fn()
+    const { rerender } = render(<HomeTutor showIntroduction onDismissIntroduction={dismiss} />)
+    expect(screen.getByRole('button', { name: 'Ask Blue' })).toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Ask Blue' })).not.toBeInTheDocument()
+    expect(screen.getByText('AI companion')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Ask Blue' }))
+    expect(dismiss).toHaveBeenCalledOnce()
+    rerender(<HomeTutor showIntroduction={false} onDismissIntroduction={dismiss} />)
+    expect(screen.getByRole('dialog', { name: 'Ask Blue' })).toBeInTheDocument()
+    expect(localStorage.getItem('git-it:pref:tutor-window:home-open')).toBe('true')
+  })
+
   it.each(['blue', 'black', 'white'])('uses %s for the launcher, floating portrait, greeting and reply', async (slug) => {
     const companion = getCompanion(slug)
     vi.mocked(usePlayerLoadout).mockReturnValue({ companion, companionSlug: slug, hasCompanion: true, isLoading: false, isError: false, error: null })

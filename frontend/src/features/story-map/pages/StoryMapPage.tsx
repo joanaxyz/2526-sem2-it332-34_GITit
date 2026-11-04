@@ -267,9 +267,9 @@ export function StoryMapPage() {
       {coachmarks.worldMascotCoachmarkVisible ? (
         <AnchoredCoachmark
           targetSelector=".world-mascot-actor"
-          title="Meet your little guide!"
-          body="This little companion has Git tips to share. Click it whenever you need a quick reminder!"
-          onDismiss={coachmarks.dismissWorldMascotCoachmark}
+          title="Meet Git-It"
+          body="Click Git-It for a quick tip from what you've learned. Click the map to move your guide."
+          step={{ current: 1, total: 2 }} onDismiss={coachmarks.dismissWorldMascotCoachmark}
         />
       ) : null}
 
