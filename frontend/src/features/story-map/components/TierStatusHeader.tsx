@@ -38,7 +38,7 @@ export function TierStatusHeader({
       label="Adventure command bar"
       missionLabel="Current adventure"
       title={run.tier.adventure_level_title}
-      note={run.transfer ? 'Transfer checkpoint · first attempt recorded' : null}
+      note={run.transfer ? run.replay ? 'Transfer checkpoint · ungraded practice' : 'Transfer checkpoint · first attempt recorded' : null}
       stats={<TierStatsBar run={run} repoGraph={repoGraph} />}
       guide={!run.transfer ? (
         <CommandGuideLauncher

@@ -80,17 +80,30 @@ play invalidates its assessment reference.
 ## Transfer and exposure
 
 Authors explicitly reserve a variant with a written explanation of the
-meaningful repository or goal difference. Reserved variants are excluded from
+meaningful repository or goal difference. The six official checkpoints are
+purpose-written in `curriculum/seed_data/source/transfer_checkpoints.py`, and
+seeding reserves them: each composes what its level taught into a route no
+practice variant in that level uses, with only moves already practised.
+Reserved variants are excluded from
 normal practice selection. A new variant ID alone does not establish transfer.
 Canonical repository fingerprints screen equivalent content; the authored
 review remains necessary to judge the educational difference.
 
+A transfer checkpoint closes a level: only the Hard tiers of Modules 3–4 carry
+one, reserved in the tier's first scenario (`kpi_refs --reserve` enforces both).
+Reserved variants never appear in practice, retries, replays or drills.
+
 After mastery, an eligible learner receives an assigned transfer checkpoint.
-Home Progress offers an explicit start/resume link under RTA. It uses the
+The cleared screen and the mascot offer it at once, and Home Progress keeps a
+start/resume link at the top until it is taken. A row under the level's Hard
+tier appears only once it is assigned. It stays optional, and a first attempt
+always asks for confirmation. It uses the
 existing tier workspace with no expected-state answer or command guide. Its
 first run is kept separately from practice mastery, rewards and replay scores.
 Duplicate starts resume that run; abandonment records failure even when no
-command was submitted. Later practice cannot replace the first result.
+command was submitted. Later practice cannot replace the first result: once it
+is recorded, starting the checkpoint opens ungraded practice (a transfer run
+that is also a replay), which no KPI reads and which earns nothing.
 
 Every launch records durable `KpiExposure`, including empty discarded practice
 launches. Previously seen IDs or canonical states are ineligible. Existing
@@ -160,7 +173,7 @@ python manage.py migrate
 python manage.py seed_all
 # Diagnostic-only cases need explicit author selection:
 python manage.py kpi_refs --cases CASE_SLUG --diagnostics
-# Review a structurally different case before reserving it:
+# Review a structurally different case before reserving it outside the seeded checkpoints:
 python manage.py kpi_refs --cases TRANSFER_CASE_SLUG --reserve --reason "Describe the repository or goal difference"
 
 python manage.py kpi_study create capstone-v1 --players 12 13 --tiers 41 42 --cutoff 2026-11-01T17:00:00+08:00

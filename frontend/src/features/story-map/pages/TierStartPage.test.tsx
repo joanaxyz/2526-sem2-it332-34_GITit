@@ -1,6 +1,6 @@
 import { StrictMode } from 'react'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import { MemoryRouter, Route, Routes } from 'react-router-dom'
 
@@ -54,6 +54,24 @@ describe('TierStartPage', () => {
     expect(await screen.findByText('Workspace')).toBeInTheDocument()
     expect(tierRunsApi.startRun).toHaveBeenCalledOnce()
     expect(tierRunsApi.startRun).toHaveBeenCalledWith(7, { replay: false })
+  })
+
+  it('asks before a first transfer attempt, then starts it once', async () => {
+    renderStart('/adventure-level-tiers/7/runs?transfer=1')
+
+    expect(screen.getByText(/leaving it counts as a fail/)).toBeInTheDocument()
+    expect(tierRunsApi.startRun).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Start now' }))
+    expect(await screen.findByText('Workspace')).toBeInTheDocument()
+    expect(tierRunsApi.startRun).toHaveBeenCalledOnce()
+    expect(tierRunsApi.startRun).toHaveBeenCalledWith(7, { transfer: true })
+  })
+
+  it('starts transfer practice without asking', async () => {
+    renderStart('/adventure-level-tiers/7/runs?transfer=1&practice=1')
+
+    expect(await screen.findByText('Workspace')).toBeInTheDocument()
+    expect(tierRunsApi.startRun).toHaveBeenCalledWith(7, { transfer: true })
   })
 
   it('continues a tier from the run just played', async () => {

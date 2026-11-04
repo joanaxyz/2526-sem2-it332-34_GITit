@@ -139,7 +139,11 @@ def _level_scenarios(level: AdventureLevel) -> list:
 
 
 def _published_variants(scenario) -> list:
-    return [variant for variant in scenario.variants.all() if variant.is_published]
+    return [
+        variant
+        for variant in scenario.variants.all()
+        if variant.is_published and not variant.is_transfer
+    ]
 
 
 def _solution_commands(scenarios: list) -> list[str]:

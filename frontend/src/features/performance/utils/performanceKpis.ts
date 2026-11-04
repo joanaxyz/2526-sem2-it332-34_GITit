@@ -50,8 +50,8 @@ export const KPIS = [
   {
     key: 'rta', label: 'Transfer checkpoints cleared',
     explanation: 'Your first attempt on a reserved unfamiliar repository or goal, after practice. Its first result is preserved even if you practice again.',
-    scope: 'Modules 3–4 · reserved unseen transfer checkpoints',
-    emptyHint: 'Measured on unseen transfer checkpoints in Modules 3–4. Requires reserved content and complete exposure evidence.',
+    scope: 'Modules 3–4 · reserved unseen checkpoint after each Hard tier',
+    emptyHint: 'Clear a Hard tier in Modules 3–4 to unlock its unseen transfer checkpoint. Requires reserved content and complete exposure evidence.',
     abbr: 'RTA', name: 'Retry Transfer Accuracy', target: 65, up: true, pct: true,
     formula: 'Novel checkpoints cleared on first run ÷ Novel checkpoints assessed × 100',
     why: 'Measures transfer after practice, including learners who never failed. Formal studies include all assigned valid checkpoints at cutoff; unavailable novelty evidence is missing.',

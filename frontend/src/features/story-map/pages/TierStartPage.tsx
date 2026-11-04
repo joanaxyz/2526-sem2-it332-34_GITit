@@ -1,5 +1,5 @@
-import { useEffect, useRef } from 'react'
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom'
+import { useEffect, useRef, useState } from 'react'
+import { useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 
 import { tierRunsApi } from '@/features/story-map/api/tierRunsApi'
@@ -7,6 +7,7 @@ import { loadTierRunPage } from '@/features/story-map/pages/loadTierRunPage'
 import { tierRunAssetManifest } from '@/features/story-map/utils/tierBattle'
 import { syncTierRunInCache } from '@/features/story-map/utils/tierRunCache'
 import type { TierRun } from '@/features/story-map/components/tierWorkspaceTypes'
+import { Button } from '@/shared/components/Button'
 import { ErrorState } from '@/shared/components/ErrorState'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 import { warmBattleAssets } from '@/shared/battle/battleAssets'
@@ -37,6 +38,7 @@ const loadingCopy: Record<TierStartMode | 'continue', { label: string; descripti
 export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
   const { tierId, runId } = useParams<{ tierId?: string; runId?: string }>()
   const navigate = useNavigate()
+  const location = useLocation()
   const queryClient = useQueryClient()
   const { companionSlug } = usePlayerLoadout()
   const targetId = Number(mode === 'retry' ? runId : tierId)
@@ -44,6 +46,10 @@ export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
   // TierVariantSelectionService rotates away from its variant.
   const [searchParams] = useSearchParams()
   const transfer = searchParams.get('transfer') === '1'
+  const practice = transfer && searchParams.get('practice') === '1'
+  // Starting a checkpoint spends its only graded attempt, and leaving counts
+  // as a fail, so every route to a first attempt stops here. Practice risks nothing.
+  const [confirmed, setConfirmed] = useState(!transfer || practice)
   const priorRunValue = Number(searchParams.get('prior_run_id') ?? Number.NaN)
   const priorRunId = mode === 'start' && Number.isInteger(priorRunValue) && priorRunValue > 0
     ? priorRunValue
@@ -73,12 +79,12 @@ export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
   // remount must not fire the request again.
   const requested = useRef(false)
   useEffect(() => {
-    if (requested.current) return
+    if (!confirmed || requested.current) return
     requested.current = true
     void loadTierRunPage().catch(() => undefined)
     start.mutate()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])
+  }, [confirmed])
 
   if (start.isError) {
     return (
@@ -88,7 +94,27 @@ export function TierStartPage({ mode = 'start' }: { mode?: TierStartMode }) {
     )
   }
 
-  const copy = transfer
+  if (!confirmed) {
+    return (
+      <div className="grid min-h-screen place-items-center bg-background p-6">
+        <section className="max-w-md space-y-4 text-center" aria-labelledby="transfer-confirm-title">
+          <h1 id="transfer-confirm-title" className="text-xl font-semibold">Start your transfer checkpoint?</h1>
+          <p>One attempt, no hints. Only this first run counts, and leaving it counts as a fail. You can practice it freely afterwards.</p>
+          <div className="flex justify-center gap-3">
+            <Button type="button" variant="outline" onClick={() => {
+              if (location.key === 'default') navigate('/home', { replace: true })
+              else navigate(-1)
+            }}>Not now</Button>
+            <Button type="button" onClick={() => setConfirmed(true)}>Start now</Button>
+          </div>
+        </section>
+      </div>
+    )
+  }
+
+  const copy = practice
+    ? { label: 'Starting practice', description: 'This run is ungraded, so your recorded transfer result will not change.' }
+    : transfer
     ? { label: 'Starting transfer checkpoint', description: 'Your first attempt on this unfamiliar scenario is recorded.' }
     : loadingCopy[priorRunId === null ? mode : 'continue']
   return <LoadingScreen description={copy.description} label={copy.label} />

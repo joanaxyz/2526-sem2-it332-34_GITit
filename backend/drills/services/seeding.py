@@ -162,7 +162,15 @@ def seed_all_level_drills(*, level_ids: list[int] | None = None) -> DrillSeedSum
     # handful per level. Variants carry large initial/target repository
     # JSON that the drill never reads, so only the authored solution is
     # loaded - prefetching the full rows would pull hundreds of megabytes.
-    variant_fields = ("id", "scenario_id", "slug", "label", "solution_commands", "is_published")
+    variant_fields = (
+        "id",
+        "scenario_id",
+        "slug",
+        "label",
+        "solution_commands",
+        "is_published",
+        "is_transfer",
+    )
     levels = (
         AdventureLevel.objects.filter(is_published=True)
         .select_related("chapter")

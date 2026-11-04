@@ -16,6 +16,13 @@ export type AdventureLevelTierAccess = {
   completion: LevelCompletionSummary | null
   /** First-clear GitCoins for this tier; `claimed` once it has been paid. */
   reward: { coins: number; claimed: boolean }
+  /** Null keeps the row hidden until the Hard tier is cleared. */
+  transfer_checkpoint?: TierTransferCheckpointRow | null
+}
+
+export type TierTransferCheckpointRow = {
+  status: 'ready' | 'in_progress' | 'recorded'
+  run_id: number | null
 }
 
 /** Squire's Drill state for one level, as the chapter overview reports it. */

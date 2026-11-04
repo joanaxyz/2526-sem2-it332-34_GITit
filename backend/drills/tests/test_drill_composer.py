@@ -8,11 +8,12 @@ text), and the blank must fall on a slot worth hiding.
 
 from django.core.management import call_command
 
-from adventures.models import AdventureLevel
+from adventures.models import AdventureLevel, AdventureLevelTierScenarioVariant
 from drills.services.composer import (
     MAX_SEQUENCE_STEPS,
     MIN_DISTRACTORS,
     MIN_SEQUENCE_STEPS,
+    _published_variants,
     compose_level_drill,
     level_command_forms,
     token_kind,
@@ -140,3 +141,15 @@ def test_a_level_with_nothing_to_teach_composes_no_cards(db):
 
     assert level_command_forms(level) == []
     assert compose_level_drill(level)["cards"] == []
+
+
+def test_reserved_transfer_variants_stay_out_of_drills(db):
+    call_command("seed_curriculum", verbosity=0)
+    variant = AdventureLevelTierScenarioVariant.objects.filter(is_published=True).first()
+    scenario = variant.scenario
+    assert variant in _published_variants(scenario)
+
+    variant.is_transfer = True
+    variant.save(update_fields=["is_transfer"])
+
+    assert variant not in _published_variants(scenario)

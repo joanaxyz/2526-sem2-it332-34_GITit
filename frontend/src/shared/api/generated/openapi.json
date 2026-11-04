@@ -4075,6 +4075,14 @@
                         "additionalProperties": {},
                         "nullable": true
                     },
+                    "transfer_checkpoint": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TierTransferCheckpointResponse"
+                            }
+                        ],
+                        "nullable": true
+                    },
                     "rewards": {
                         "type": "object",
                         "additionalProperties": {},
@@ -4298,6 +4306,14 @@
                     "next_difficulty": {
                         "type": "object",
                         "additionalProperties": {},
+                        "nullable": true
+                    },
+                    "transfer_checkpoint": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TierTransferCheckpointResponse"
+                            }
+                        ],
                         "nullable": true
                     },
                     "completion": {
@@ -7350,6 +7366,27 @@
                     "guide_elsewhere",
                     "tips",
                     "tutor"
+                ]
+            },
+            "TierTransferCheckpointResponse": {
+                "type": "object",
+                "description": "A transfer checkpoint ready to start or resume after a practice clear.",
+                "properties": {
+                    "tier_id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "run_id": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "run_id",
+                    "tier_id",
+                    "title"
                 ]
             },
             "Tip": {

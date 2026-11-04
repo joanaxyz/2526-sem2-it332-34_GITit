@@ -421,6 +421,131 @@ def _backport_capstone(
     }
 
 
+# ---------------------------------------------------------------------------
+# Transfer checkpoints: each composes what its level taught, on content no
+# practice variant uses (see source/transfer_checkpoints.py).
+# ---------------------------------------------------------------------------
+
+
+def _checkout_two_files() -> dict[str, Any]:
+    first, second = "src/checkout.py", "src/shipping.py"
+    base = {"README.md": "readme-v1", first: "FEE = 5", second: "FREE_OVER = 100"}
+    commits = [
+        commit("c0", "Common base", [], base),
+        commit("c1", "Lower the fee and shipping limit", ["c0"], {**base, first: "FEE = 4", second: "FREE_OVER = 80"}),
+        commit("c2", "Checkout v1 fee", ["c0"], {**base, first: "FEE = 6"}),
+        commit(
+            "c3",
+            "Checkout v2 tax and zones",
+            ["c0"],
+            {**base, first: "FEE = 5\nTAX = 0.12", second: "FREE_OVER = 100\nZONES = 3"},
+        ),
+    ]
+    branches = {"main": "c1", "feature/checkout-v1": "c2", "feature/checkout-v2": "c3"}
+    return {
+        "initial_state": _stopped_merge(
+            commits, branches, branch="feature/checkout-v1", target="c2", path=first
+        ),
+        "state_requirements": clean(
+            "main",
+            {"type": "commit_is_merge", "branch": "main"},
+            {"type": "commit_has_parent", "branch": "main", "parent": "c3"},
+            {"type": "branch_history_excludes", "branch": "main", "commits": ["c2"]},
+            {
+                "type": "commit_tree_contains",
+                "branch": "main",
+                "tree": {first: "FEE = 4\nTAX = 0.12", second: "FREE_OVER = 80\nZONES = 3"},
+            },
+            conflict_free=True,
+        ),
+    }
+
+
+def _pricing_refresh() -> dict[str, Any]:
+    first, second, docs = "src/pricing.py", "src/discounts.py", "docs/pricing.md"
+    base = {"README.md": "readme-v1", first: "BASE = 10", second: "MEMBER = 0.05"}
+    commits = [
+        commit("c0", "Common base", [], base),
+        commit("c1", "Main pricing update", ["c0"], {**base, first: "BASE = 9", second: "MEMBER = 0.1"}),
+        commit(
+            "c2",
+            "Pricing refresh",
+            ["c0"],
+            {
+                **base,
+                first: "BASE = 10\nCURRENCY = 'PHP'",
+                second: "MEMBER = 0.05\nSEASONAL = 0.05",
+                docs: "pricing-docs-v1",
+            },
+        ),
+    ]
+    return {
+        "initial_state": repo(commits=commits, branches={"main": "c1", "feature/pricing-refresh": "c2"}),
+        "state_requirements": clean(
+            "main",
+            {"type": "commit_is_merge", "branch": "main"},
+            {"type": "commit_has_parent", "branch": "main", "parent": "c2"},
+            {
+                "type": "commit_tree_contains",
+                "branch": "main",
+                "tree": {
+                    first: "BASE = 9\nCURRENCY = 'PHP'",
+                    second: "MEMBER = 0.1\nSEASONAL = 0.05",
+                    docs: "pricing-docs-v1",
+                },
+            },
+            conflict_free=True,
+            config={"merge.tool": "meld", "mergetool.keepBackup": "false"},
+        ),
+    }
+
+
+def _release_backport() -> dict[str, Any]:
+    path, totals, labels = "src/export.py", "src/report_totals.py", "src/report_labels.py"
+    right, message = "Use semicolons in CSV export", "Backport report fixes"
+    base = {"README.md": "readme-v1", path: "return to_csv(rows)", totals: "totals-v1", labels: "labels-v1"}
+    main = {**base, "README.md": "readme-main"}
+    streamed = {**main, path: "return stream_csv(rows)"}
+    fixed = {**main, path: "return to_csv(rows, delimiter=';')"}
+    commits = [
+        commit("c0", "Baseline", [], base),
+        commit("c1", "Main groundwork", ["c0"], main),
+        commit("c2", "Try a streaming export format", ["c1"], streamed),
+        commit("c3", "Prepare release-1.6", ["c0"], {**base, path: "return to_csv(rows, header=True)"}),
+        commit("c4", right, ["c2"], fixed),
+        commit("c5", "Fix report totals", ["c4"], {**fixed, totals: "totals-fixed"}),
+        commit(
+            "c6",
+            "Fix report labels",
+            ["c5"],
+            {**fixed, totals: "totals-fixed", labels: "labels-fixed"},
+        ),
+    ]
+    release = "release-1.6"
+    return {
+        "initial_state": _stopped_pick(
+            commits, {"main": "c6", release: "c3"}, head=release, source="c2", path=path
+        ),
+        "state_requirements": clean(
+            release,
+            tip(
+                f"{release}~1",
+                message_contains=[right, "cherry picked from commit c4"],
+                parent_equals="c3",
+                tree_contains={path: "return to_csv(rows, header=True, delimiter=';')"},
+            ),
+            tip(
+                release,
+                message_equals=message,
+                tree_contains={totals: "totals-fixed", labels: "labels-fixed"},
+            ),
+            {"type": "commit_count_on_branch_equals", "branch": release, "count": 4},
+            points_to("main", "c6"),
+            conflict_free=True,
+        ),
+    }
+
+
 FIXTURES: dict[str, dict[str, Any]] = {
     # 3.1
     "manual-easy-abort-wrong-branch": _abort_wrong_merge(
@@ -529,4 +654,8 @@ FIXTURES: dict[str, dict[str, Any]] = {
             "resolved": "email = form.email.strip().lower()",
         },
     ),
+    # Transfer checkpoints
+    "manual-transfer-checkout-v2": _checkout_two_files(),
+    "mergetool-transfer-pricing-refresh": _pricing_refresh(),
+    "cherry-transfer-release-backport": _release_backport(),
 }

@@ -34548,6 +34548,978 @@
         "maximum": 8
       }
     },
+    "manual-transfer-checkout-v2": {
+      "surface": "story",
+      "level": "resolving-conflicts-manually",
+      "difficulty": "hard",
+      "scenario": "resolve-with-less-guidance",
+      "objective": "Get `main` out of the current merge, merge `feature/checkout-v2` instead, make both files below match exactly, and complete the merge with its prepared message.",
+      "documented_alternatives": [
+        "`git reset --merge` for the abort; `git merge --continue`; adding both files in one `git add`."
+      ],
+      "required_techniques": [],
+      "routes": [
+        {
+          "name": "authored",
+          "kind": "reference",
+          "commands": [
+            "git merge --abort",
+            "git merge feature/checkout-v2",
+            "git add src/checkout.py",
+            "git add src/shipping.py",
+            "git commit --no-edit"
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/checkout.py",
+              "content": "FEE = 4\nTAX = 0.12",
+              "after_command_index": 2
+            },
+            {
+              "mode": "write",
+              "path": "src/shipping.py",
+              "content": "FREE_OVER = 80\nZONES = 3",
+              "after_command_index": 3
+            }
+          ],
+          "counted_commands": 5,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "documented-1-1",
+          "kind": "syntax",
+          "commands": [
+            "git merge --continue",
+            "git merge feature/checkout-v2",
+            "git add src/checkout.py",
+            "git add src/shipping.py",
+            "git commit --no-edit"
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/checkout.py",
+              "content": "FEE = 4\nTAX = 0.12",
+              "after_command_index": 2
+            },
+            {
+              "mode": "write",
+              "path": "src/shipping.py",
+              "content": "FREE_OVER = 80\nZONES = 3",
+              "after_command_index": 3
+            }
+          ],
+          "counted_commands": 5,
+          "accepted": false,
+          "gaps": [
+            "solution command 1/5 was rejected: \"git merge --continue\" (Committing is not possible because you have unmerged files.)",
+            "Commit is not a merge commit.",
+            "Commit parents were ['c0'], expected 'c3'.",
+            "Tree mismatched paths: ['src/checkout.py', 'src/shipping.py'].",
+            "Working tree still has changes or conflicts.",
+            "Conflicts remain: ['src/checkout.py']."
+          ],
+          "status": "unsupported_or_incomplete_route"
+        },
+        {
+          "name": "documented-2-1",
+          "kind": "syntax",
+          "commands": [
+            "git merge --abort",
+            "git merge --continue",
+            "git add src/checkout.py",
+            "git add src/shipping.py",
+            "git commit --no-edit"
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/checkout.py",
+              "content": "FEE = 4\nTAX = 0.12",
+              "after_command_index": 2
+            },
+            {
+              "mode": "write",
+              "path": "src/shipping.py",
+              "content": "FREE_OVER = 80\nZONES = 3",
+              "after_command_index": 3
+            }
+          ],
+          "counted_commands": 5,
+          "accepted": false,
+          "gaps": [
+            "solution command 2/5 was rejected: \"git merge --continue\" (fatal: There is no merge in progress (MERGE_HEAD missing).)",
+            "Commit is not a merge commit.",
+            "Commit parents were ['c0'], expected 'c3'.",
+            "Tree mismatched paths: ['src/checkout.py', 'src/shipping.py']."
+          ],
+          "status": "unsupported_or_incomplete_route"
+        },
+        {
+          "name": "syntax-3-1",
+          "kind": "syntax",
+          "commands": [
+            "git merge --abort",
+            "git merge feature/checkout-v2",
+            "git add -- src/checkout.py",
+            "git add src/shipping.py",
+            "git commit --no-edit"
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/checkout.py",
+              "content": "FEE = 4\nTAX = 0.12",
+              "after_command_index": 2
+            },
+            {
+              "mode": "write",
+              "path": "src/shipping.py",
+              "content": "FREE_OVER = 80\nZONES = 3",
+              "after_command_index": 3
+            }
+          ],
+          "counted_commands": 5,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "workflow-3-2",
+          "kind": "workflow",
+          "commands": [
+            "git merge --abort",
+            "git merge feature/checkout-v2",
+            "git add .",
+            "git add src/shipping.py",
+            "git commit --no-edit"
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/checkout.py",
+              "content": "FEE = 4\nTAX = 0.12",
+              "after_command_index": 2
+            },
+            {
+              "mode": "write",
+              "path": "src/shipping.py",
+              "content": "FREE_OVER = 80\nZONES = 3",
+              "after_command_index": 3
+            }
+          ],
+          "counted_commands": 5,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "documented-3-3",
+          "kind": "syntax",
+          "commands": [
+            "git merge --abort",
+            "git merge feature/checkout-v2",
+            "git add",
+            "git add src/shipping.py",
+            "git commit --no-edit"
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/checkout.py",
+              "content": "FEE = 4\nTAX = 0.12",
+              "after_command_index": 2
+            },
+            {
+              "mode": "write",
+              "path": "src/shipping.py",
+              "content": "FREE_OVER = 80\nZONES = 3",
+              "after_command_index": 3
+            }
+          ],
+          "counted_commands": 5,
+          "accepted": false,
+          "gaps": [
+            "solution command 3/5 was rejected: \"git add\" (Nothing specified, nothing added.)",
+            "Commit is not a merge commit.",
+            "Commit parents were ['c0'], expected 'c3'.",
+            "Tree mismatched paths: ['src/checkout.py', 'src/shipping.py'].",
+            "Working tree still has changes or conflicts.",
+            "Conflicts remain: ['src/checkout.py', 'src/shipping.py']."
+          ],
+          "status": "unsupported_or_incomplete_route"
+        },
+        {
+          "name": "syntax-4-1",
+          "kind": "syntax",
+          "commands": [
+            "git merge --abort",
+            "git merge feature/checkout-v2",
+            "git add src/checkout.py",
+            "git add -- src/shipping.py",
+            "git commit --no-edit"
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/checkout.py",
+              "content": "FEE = 4\nTAX = 0.12",
+              "after_command_index": 2
+            },
+            {
+              "mode": "write",
+              "path": "src/shipping.py",
+              "content": "FREE_OVER = 80\nZONES = 3",
+              "after_command_index": 3
+            }
+          ],
+          "counted_commands": 5,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "workflow-4-2",
+          "kind": "workflow",
+          "commands": [
+            "git merge --abort",
+            "git merge feature/checkout-v2",
+            "git add src/checkout.py",
+            "git add .",
+            "git commit --no-edit"
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/checkout.py",
+              "content": "FEE = 4\nTAX = 0.12",
+              "after_command_index": 2
+            },
+            {
+              "mode": "write",
+              "path": "src/shipping.py",
+              "content": "FREE_OVER = 80\nZONES = 3",
+              "after_command_index": 3
+            }
+          ],
+          "counted_commands": 5,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "documented-4-3",
+          "kind": "syntax",
+          "commands": [
+            "git merge --abort",
+            "git merge feature/checkout-v2",
+            "git add src/checkout.py",
+            "git add",
+            "git commit --no-edit"
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/checkout.py",
+              "content": "FEE = 4\nTAX = 0.12",
+              "after_command_index": 2
+            },
+            {
+              "mode": "write",
+              "path": "src/shipping.py",
+              "content": "FREE_OVER = 80\nZONES = 3",
+              "after_command_index": 3
+            }
+          ],
+          "counted_commands": 5,
+          "accepted": false,
+          "gaps": [
+            "solution command 4/5 was rejected: \"git add\" (Nothing specified, nothing added.)",
+            "Commit is not a merge commit.",
+            "Commit parents were ['c0'], expected 'c3'.",
+            "Tree mismatched paths: ['src/checkout.py', 'src/shipping.py'].",
+            "Working tree still has changes or conflicts.",
+            "Index still has ['src/checkout.py'].",
+            "Conflicts remain: ['src/shipping.py']."
+          ],
+          "status": "unsupported_or_incomplete_route"
+        }
+      ],
+      "rejected_approaches": [
+        "Unchanged starting repository"
+      ],
+      "starting_state_rejected": true,
+      "classification": "multiple_workflows",
+      "review_status": "references, concrete documented commands and generated equivalents replayed",
+      "rejected_state_tests": [
+        {
+          "name": "wrong_branch",
+          "rejected": true
+        },
+        {
+          "name": "unrelated_staging",
+          "rejected": true
+        }
+      ],
+      "thresholds": {
+        "efficient": 5,
+        "generous": 8,
+        "maximum": 10
+      }
+    },
+    "mergetool-transfer-pricing-refresh": {
+      "surface": "story",
+      "level": "using-a-merge-tool",
+      "difficulty": "hard",
+      "scenario": "judge-which-side-to-keep",
+      "objective": "Set `meld` as this repository's merge tool and turn off its backup files. Then merge `feature/pricing-refresh`, resolve both conflicted files in the merge tool to the content below, and complete the merge with its prepared message.",
+      "documented_alternatives": [
+        "Setting the options after the merge stops but before `git mergetool`; `git merge --continue`."
+      ],
+      "required_techniques": [],
+      "routes": [
+        {
+          "name": "authored",
+          "kind": "reference",
+          "commands": [
+            "git config merge.tool meld",
+            "git config mergetool.keepBackup false",
+            "git merge feature/pricing-refresh",
+            "git mergetool",
+            "git commit --no-edit"
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/pricing.py",
+              "content": "BASE = 9\nCURRENCY = 'PHP'",
+              "after_command_index": 4
+            },
+            {
+              "mode": "write",
+              "path": "src/discounts.py",
+              "content": "MEMBER = 0.1\nSEASONAL = 0.05",
+              "after_command_index": 4
+            }
+          ],
+          "counted_commands": 5,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "documented-3-1",
+          "kind": "syntax",
+          "commands": [
+            "git config merge.tool meld",
+            "git config mergetool.keepBackup false",
+            "git merge --continue",
+            "git mergetool",
+            "git commit --no-edit"
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/pricing.py",
+              "content": "BASE = 9\nCURRENCY = 'PHP'",
+              "after_command_index": 4
+            },
+            {
+              "mode": "write",
+              "path": "src/discounts.py",
+              "content": "MEMBER = 0.1\nSEASONAL = 0.05",
+              "after_command_index": 4
+            }
+          ],
+          "counted_commands": 5,
+          "accepted": false,
+          "gaps": [
+            "solution command 3/5 was rejected: \"git merge --continue\" (fatal: There is no merge in progress (MERGE_HEAD missing).)",
+            "Commit is not a merge commit.",
+            "Commit parents were ['c0'], expected 'c2'.",
+            "Tree mismatched paths: ['src/pricing.py', 'src/discounts.py', 'docs/pricing.md']."
+          ],
+          "status": "unsupported_or_incomplete_route"
+        }
+      ],
+      "rejected_approaches": [
+        "Unchanged starting repository"
+      ],
+      "starting_state_rejected": true,
+      "classification": "one_verified_route",
+      "review_status": "references, concrete documented commands and generated equivalents replayed",
+      "rejected_state_tests": [
+        {
+          "name": "wrong_branch",
+          "rejected": true
+        },
+        {
+          "name": "unrelated_staging",
+          "rejected": true
+        }
+      ],
+      "thresholds": {
+        "efficient": 5,
+        "generous": 8,
+        "maximum": 10
+      }
+    },
+    "cherry-transfer-release-backport": {
+      "surface": "story",
+      "level": "cherry-picking-commits",
+      "difficulty": "hard",
+      "scenario": "review-two-backports-before-committing",
+      "objective": "Cancel the current cherry-pick. Apply `c4` so the new commit records its source, with `src/export.py` matching the content below. Then bring `c5` and `c6` onto `release-1.6` as a single commit with the message shown below. **Leave `main` unchanged.**",
+      "documented_alternatives": [
+        "`git cherry-pick -n` for `--no-commit`."
+      ],
+      "required_techniques": [],
+      "routes": [
+        {
+          "name": "authored",
+          "kind": "reference",
+          "commands": [
+            "git cherry-pick --abort",
+            "git cherry-pick -x c4",
+            "git add src/export.py",
+            "git cherry-pick --continue",
+            "git cherry-pick --no-commit c5",
+            "git cherry-pick --no-commit c6",
+            "git commit -m \"Backport report fixes\""
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/export.py",
+              "content": "return to_csv(rows, header=True, delimiter=';')",
+              "after_command_index": 2
+            }
+          ],
+          "counted_commands": 7,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "documented-1-1",
+          "kind": "syntax",
+          "commands": [
+            "git cherry-pick -n",
+            "git cherry-pick -x c4",
+            "git add src/export.py",
+            "git cherry-pick --continue",
+            "git cherry-pick --no-commit c5",
+            "git cherry-pick --no-commit c6",
+            "git commit -m \"Backport report fixes\""
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/export.py",
+              "content": "return to_csv(rows, header=True, delimiter=';')",
+              "after_command_index": 2
+            }
+          ],
+          "counted_commands": 7,
+          "accepted": false,
+          "gaps": [
+            "solution command 1/7 was rejected: \"git cherry-pick -n\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "Commit message did not contain ['Use semicolons in CSV export', 'cherry picked from commit c4'].",
+            "Commit message was 'Prepare release-1.6'.",
+            "Branch 'release-1.6' has 2 commits, expected 4.",
+            "Working tree still has changes or conflicts.",
+            "Conflicts remain: ['src/export.py']."
+          ],
+          "status": "unsupported_or_incomplete_route"
+        },
+        {
+          "name": "documented-2-1",
+          "kind": "syntax",
+          "commands": [
+            "git cherry-pick --abort",
+            "git cherry-pick -n",
+            "git add src/export.py",
+            "git cherry-pick --continue",
+            "git cherry-pick --no-commit c5",
+            "git cherry-pick --no-commit c6",
+            "git commit -m \"Backport report fixes\""
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/export.py",
+              "content": "return to_csv(rows, header=True, delimiter=';')",
+              "after_command_index": 2
+            }
+          ],
+          "counted_commands": 7,
+          "accepted": false,
+          "gaps": [
+            "solution command 2/7 was rejected: \"git cherry-pick -n\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "Commit message did not contain ['Use semicolons in CSV export', 'cherry picked from commit c4'].",
+            "Commit message was 'Prepare release-1.6'.",
+            "Branch 'release-1.6' has 2 commits, expected 4."
+          ],
+          "status": "unsupported_or_incomplete_route"
+        },
+        {
+          "name": "syntax-3-1",
+          "kind": "syntax",
+          "commands": [
+            "git cherry-pick --abort",
+            "git cherry-pick -x c4",
+            "git add -- src/export.py",
+            "git cherry-pick --continue",
+            "git cherry-pick --no-commit c5",
+            "git cherry-pick --no-commit c6",
+            "git commit -m \"Backport report fixes\""
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/export.py",
+              "content": "return to_csv(rows, header=True, delimiter=';')",
+              "after_command_index": 2
+            }
+          ],
+          "counted_commands": 7,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "workflow-3-2",
+          "kind": "workflow",
+          "commands": [
+            "git cherry-pick --abort",
+            "git cherry-pick -x c4",
+            "git add .",
+            "git cherry-pick --continue",
+            "git cherry-pick --no-commit c5",
+            "git cherry-pick --no-commit c6",
+            "git commit -m \"Backport report fixes\""
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/export.py",
+              "content": "return to_csv(rows, header=True, delimiter=';')",
+              "after_command_index": 2
+            }
+          ],
+          "counted_commands": 7,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "documented-4-1",
+          "kind": "syntax",
+          "commands": [
+            "git cherry-pick --abort",
+            "git cherry-pick -x c4",
+            "git add src/export.py",
+            "git cherry-pick -n",
+            "git cherry-pick --no-commit c5",
+            "git cherry-pick --no-commit c6",
+            "git commit -m \"Backport report fixes\""
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/export.py",
+              "content": "return to_csv(rows, header=True, delimiter=';')",
+              "after_command_index": 2
+            }
+          ],
+          "counted_commands": 7,
+          "accepted": false,
+          "gaps": [
+            "solution command 4/7 was rejected: \"git cherry-pick -n\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "Commit message did not contain ['Use semicolons in CSV export', 'cherry picked from commit c4'].",
+            "Commit message was 'Prepare release-1.6'.",
+            "Branch 'release-1.6' has 2 commits, expected 4.",
+            "Index still has ['src/export.py']."
+          ],
+          "status": "unsupported_or_incomplete_route"
+        },
+        {
+          "name": "documented-5-1",
+          "kind": "syntax",
+          "commands": [
+            "git cherry-pick --abort",
+            "git cherry-pick -x c4",
+            "git add src/export.py",
+            "git cherry-pick --continue",
+            "git cherry-pick -n",
+            "git cherry-pick --no-commit c6",
+            "git commit -m \"Backport report fixes\""
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/export.py",
+              "content": "return to_csv(rows, header=True, delimiter=';')",
+              "after_command_index": 2
+            }
+          ],
+          "counted_commands": 7,
+          "accepted": false,
+          "gaps": [
+            "solution command 5/7 was rejected: \"git cherry-pick -n\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "Commit message did not contain ['Use semicolons in CSV export', 'cherry picked from commit c4'].",
+            "Commit message was 'Use semicolons in CSV export\\n\\n(cherry picked from commit c4)'.",
+            "Branch 'release-1.6' has 3 commits, expected 4."
+          ],
+          "status": "unsupported_or_incomplete_route"
+        },
+        {
+          "name": "documented-6-1",
+          "kind": "syntax",
+          "commands": [
+            "git cherry-pick --abort",
+            "git cherry-pick -x c4",
+            "git add src/export.py",
+            "git cherry-pick --continue",
+            "git cherry-pick --no-commit c5",
+            "git cherry-pick -n",
+            "git commit -m \"Backport report fixes\""
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/export.py",
+              "content": "return to_csv(rows, header=True, delimiter=';')",
+              "after_command_index": 2
+            }
+          ],
+          "counted_commands": 7,
+          "accepted": false,
+          "gaps": [
+            "solution command 6/7 was rejected: \"git cherry-pick -n\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "Commit message did not contain ['Use semicolons in CSV export', 'cherry picked from commit c4'].",
+            "Commit message was 'Use semicolons in CSV export\\n\\n(cherry picked from commit c4)'.",
+            "Branch 'release-1.6' has 3 commits, expected 4.",
+            "Index still has ['src/report_totals.py']."
+          ],
+          "status": "unsupported_or_incomplete_route"
+        },
+        {
+          "name": "syntax-7-1",
+          "kind": "syntax",
+          "commands": [
+            "git cherry-pick --abort",
+            "git cherry-pick -x c4",
+            "git add src/export.py",
+            "git cherry-pick --continue",
+            "git cherry-pick --no-commit c5",
+            "git cherry-pick --no-commit c6",
+            "git commit --message 'Backport report fixes'"
+          ],
+          "files": [
+            {
+              "mode": "write",
+              "path": "src/export.py",
+              "content": "return to_csv(rows, header=True, delimiter=';')",
+              "after_command_index": 2
+            }
+          ],
+          "counted_commands": 7,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        }
+      ],
+      "rejected_approaches": [
+        "Unchanged starting repository"
+      ],
+      "starting_state_rejected": true,
+      "classification": "multiple_workflows",
+      "review_status": "references, concrete documented commands and generated equivalents replayed",
+      "rejected_state_tests": [
+        {
+          "name": "wrong_branch",
+          "rejected": true
+        },
+        {
+          "name": "unrelated_staging",
+          "rejected": true
+        }
+      ],
+      "thresholds": {
+        "efficient": 7,
+        "generous": 10,
+        "maximum": 12
+      }
+    },
+    "reflog-transfer-report-rollback": {
+      "surface": "story",
+      "level": "recovering-from-hard-resets",
+      "difficulty": "hard",
+      "scenario": "pick-the-right-candidate",
+      "objective": "Find the two lost commits in the reflog. Keep the redesign on a new branch named `recovery/report-redesign`, and move `main` back to the commit that finishes the report. **Finish on `main`.**",
+      "documented_alternatives": [
+        "`git branch recovery/report-redesign c3` instead of switching to it."
+      ],
+      "required_techniques": [],
+      "routes": [
+        {
+          "name": "authored",
+          "kind": "reference",
+          "commands": [
+            "git reflog",
+            "git show c2",
+            "git show c3",
+            "git switch -c recovery/report-redesign c3",
+            "git switch main",
+            "git reset --hard c2"
+          ],
+          "files": [],
+          "counted_commands": 3,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "syntax-4-1",
+          "kind": "syntax",
+          "commands": [
+            "git reflog",
+            "git show c2",
+            "git show c3",
+            "git checkout -b recovery/report-redesign c3",
+            "git switch main",
+            "git reset --hard c2"
+          ],
+          "files": [],
+          "counted_commands": 3,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "split_branch-4-2",
+          "kind": "workflow",
+          "commands": [
+            "git reflog",
+            "git show c2",
+            "git show c3",
+            "git branch recovery/report-redesign c3",
+            "git switch recovery/report-redesign",
+            "git switch main",
+            "git reset --hard c2"
+          ],
+          "files": [],
+          "counted_commands": 4,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "syntax-4-3",
+          "kind": "syntax",
+          "commands": [
+            "git reflog",
+            "git show c2",
+            "git show c3",
+            "git switch --create recovery/report-redesign c3",
+            "git switch main",
+            "git reset --hard c2"
+          ],
+          "files": [],
+          "counted_commands": 3,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "syntax-5-1",
+          "kind": "syntax",
+          "commands": [
+            "git reflog",
+            "git show c2",
+            "git show c3",
+            "git switch -c recovery/report-redesign c3",
+            "git checkout main",
+            "git reset --hard c2"
+          ],
+          "files": [],
+          "counted_commands": 3,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        }
+      ],
+      "rejected_approaches": [
+        "Unchanged starting repository"
+      ],
+      "starting_state_rejected": true,
+      "classification": "multiple_workflows",
+      "review_status": "references, concrete documented commands and generated equivalents replayed",
+      "rejected_state_tests": [
+        {
+          "name": "wrong_branch",
+          "rejected": true
+        },
+        {
+          "name": "unrelated_staging",
+          "rejected": true
+        }
+      ],
+      "thresholds": {
+        "efficient": 4,
+        "generous": 6,
+        "maximum": 8
+      }
+    },
+    "revert-transfer-statements": {
+      "surface": "story",
+      "level": "reversing-pushed-commits-safely",
+      "difficulty": "hard",
+      "scenario": "two-faulty-commits-one-publish",
+      "objective": "Change `c6`'s message to the one below. Undo `c4` and then `c2`, each with its own new commit, newest first. Then push `main` to `origin` once.",
+      "documented_alternatives": [
+        "`git push origin main`."
+      ],
+      "required_techniques": [],
+      "routes": [
+        {
+          "name": "authored",
+          "kind": "reference",
+          "commands": [
+            "git commit --amend -m \"Add statement export\"",
+            "git revert c4",
+            "git revert c2",
+            "git push"
+          ],
+          "files": [],
+          "counted_commands": 4,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "syntax-1-1",
+          "kind": "syntax",
+          "commands": [
+            "git commit --amend --message 'Add statement export'",
+            "git revert c4",
+            "git revert c2",
+            "git push"
+          ],
+          "files": [],
+          "counted_commands": 4,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "documented-4-1",
+          "kind": "syntax",
+          "commands": [
+            "git commit --amend -m \"Add statement export\"",
+            "git revert c4",
+            "git revert c2",
+            "git push origin main"
+          ],
+          "files": [],
+          "counted_commands": 4,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        }
+      ],
+      "rejected_approaches": [
+        "Unchanged starting repository"
+      ],
+      "starting_state_rejected": true,
+      "classification": "syntax_alternatives",
+      "review_status": "references, concrete documented commands and generated equivalents replayed",
+      "rejected_state_tests": [
+        {
+          "name": "wrong_branch",
+          "rejected": true
+        },
+        {
+          "name": "unrelated_staging",
+          "rejected": true
+        }
+      ],
+      "thresholds": {
+        "efficient": 4,
+        "generous": 6,
+        "maximum": 8
+      }
+    },
+    "rebase-transfer-invoices": {
+      "surface": "story",
+      "level": "completing-rebase-recovery-sequences",
+      "difficulty": "hard",
+      "scenario": "abort-then-move-only-your-commits",
+      "objective": "Cancel the current rebase and put `feature/invoices` back on the commit you last pushed. Then move __only__ the branch's own three commits onto `main`, leaving the spike's commits behind, and update `origin`'s `feature/invoices`.",
+      "documented_alternatives": [
+        "`git push --force-with-lease` with the upstream set."
+      ],
+      "required_techniques": [],
+      "routes": [
+        {
+          "name": "authored",
+          "kind": "reference",
+          "commands": [
+            "git rebase --abort",
+            "git reflog",
+            "git reset --hard c6",
+            "git rebase --onto main spike/heatmap feature/invoices",
+            "git push --force-with-lease origin feature/invoices"
+          ],
+          "files": [],
+          "counted_commands": 4,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "documented-5-1",
+          "kind": "syntax",
+          "commands": [
+            "git rebase --abort",
+            "git reflog",
+            "git reset --hard c6",
+            "git rebase --onto main spike/heatmap feature/invoices",
+            "git push --force-with-lease"
+          ],
+          "files": [],
+          "counted_commands": 4,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        }
+      ],
+      "rejected_approaches": [
+        "Unchanged starting repository"
+      ],
+      "starting_state_rejected": true,
+      "classification": "syntax_alternatives",
+      "review_status": "references, concrete documented commands and generated equivalents replayed",
+      "rejected_state_tests": [
+        {
+          "name": "wrong_branch",
+          "rejected": true
+        },
+        {
+          "name": "unrelated_staging",
+          "rejected": true
+        }
+      ],
+      "thresholds": {
+        "efficient": 4,
+        "generous": 6,
+        "maximum": 8
+      }
+    },
     "gate1-easy-two-commit-start-field-log": {
       "surface": "challenge",
       "level": "module-1-challenge-gate",

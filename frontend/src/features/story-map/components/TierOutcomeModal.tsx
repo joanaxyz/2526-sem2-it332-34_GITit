@@ -22,6 +22,7 @@ export function TierOutcomeModal({
   onBackToMap,
   onRetry,
   onContinue,
+  onTransfer,
 }: {
   open: boolean
   run: TierRun
@@ -29,10 +30,12 @@ export function TierOutcomeModal({
   onBackToMap: () => void
   onContinue?: () => void
   onRetry?: () => void
+  onTransfer?: () => void
 }) {
   const { isFailed, isReplay, isTransfer, canAdvance, isPartialClear } = tierOutcomeState(run)
   // A cleared scenario that is not the tier's last names itself and the next scenario.
   const nextScenario = run.progress.next_scenario
+  const transferReady = Boolean(run.transfer_checkpoint && onTransfer)
 
   useEffect(() => {
     if (!open) return
@@ -43,7 +46,10 @@ export function TierOutcomeModal({
     }
   }, [isFailed, open])
 
-  const headline = isTransfer
+  const isTransferPractice = isTransfer && isReplay
+  const headline = isTransferPractice
+    ? isFailed ? 'Practice ended' : 'Practice cleared'
+    : isTransfer
     ? isFailed ? 'Transfer checkpoint not cleared' : 'Transfer checkpoint cleared'
     : isReplay
     ? isFailed
@@ -60,7 +66,9 @@ export function TierOutcomeModal({
   const hasNextScenario = !isFailed && !isReplay && !isTransfer && Boolean(nextScenario && onContinue)
 
   const hitActionLimit = isFailed && run.counts.max_reached
-  const message = isTransfer
+  const message = isTransferPractice
+    ? 'This was practice, so your recorded transfer result has not changed.'
+    : isTransfer
     ? 'Your first transfer result is recorded. You can continue free practice; later runs cannot change this checkpoint result.'
     : isReplay
     ? isFailed
@@ -185,7 +193,7 @@ export function TierOutcomeModal({
     <GameOutcomeModal
       open={open}
       onClose={onClose}
-      title={isTransfer ? 'Transfer result recorded' : isFailed ? 'Level failed' : isPartialClear ? 'Scenario complete' : 'Level complete'}
+      title={isTransferPractice ? 'Practice complete' : isTransfer ? 'Transfer result recorded' : isFailed ? 'Level failed' : isPartialClear ? 'Scenario complete' : 'Level complete'}
       tone={isFailed ? 'failure' : 'success'}
       icon={Icon}
       resultLabel={isFailed ? 'Game Over' : 'You Won'}
@@ -194,13 +202,21 @@ export function TierOutcomeModal({
       level={{ label: `Level ${run.tier.adventure_level_number}`, title: run.tier.adventure_level_title }}
       badges={badges}
       headline={headline}
-      message={hasNextScenario ? null : message}
+      message={hasNextScenario ? null : transferReady ? `${message} A transfer checkpoint is ready: one unfamiliar problem with no hints, and only your first run counts. Take it now, or later from this level or Progress.` : message}
       footerActions={hasNextScenario && nextScenario ? (
         <Button type="button" size="lg" className="outcome-next-button" onClick={(event) => {
           event.stopPropagation()
           onContinue?.()
         }}>
           <span>Next: {nextScenario.title}</span>
+          <ArrowRight className="size-4" aria-hidden="true" />
+        </Button>
+      ) : transferReady ? (
+        <Button type="button" size="lg" className="outcome-next-button" onClick={(event) => {
+          event.stopPropagation()
+          onTransfer?.()
+        }}>
+          <span>Take transfer checkpoint</span>
           <ArrowRight className="size-4" aria-hidden="true" />
         </Button>
       ) : null}
