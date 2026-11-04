@@ -33,6 +33,8 @@ export type Achievement = {
   desc: string
   Icon: LucideIcon
   imageSrc: string
+  /** The gallery set this belongs to; the ledger returns sets in shelf order. */
+  group: string
   color: string
   points: number
   current: number
@@ -40,13 +42,22 @@ export type Achievement = {
   unlocked: boolean
 }
 
+/** The gallery's sets, in shelf order. Every achievement belongs to exactly one. */
+const ACHIEVEMENT_GROUPS: ReadonlyArray<{ label: string; ids: readonly AchievementImageId[] }> = [
+  { label: 'The climb', ids: ['first-clear', 'level-adept', 'level-veteran', 'level-champion', 'arcane-spire-master'] },
+  { label: 'Trials', ids: ['hard-tier-breaker', 'hard-tier-hunter', 'gate-breaker', 'gate-warden'] },
+  { label: 'Precision', ids: ['perfectionist', 'star-collector', 'sharpshooter', 'comeback-kid'] },
+  { label: 'Ranks', ids: ['rank-committer', 'rank-reviewer', 'rank-release-manager'] },
+  { label: 'Practice', ids: ['command-cadet', 'command-captain', 'coin-hoarder'] },
+]
+
 /** Each Arcane Spire module closes with one Challenge Gate. */
 const CHALLENGE_GATE_COUNT = 4
 
 function rankThreshold(name: string): number {
   const tier = RANK_TIERS.find((candidate) => candidate.name === name)
   if (!tier) throw new Error(`Unknown rank tier: ${name}`)
-  return tier.minScore
+  return tier.minXp
 }
 
 export function deriveAchievements(home: HomeSummary, stats: StatsSummary): Achievement[] {
@@ -55,7 +66,6 @@ export function deriveAchievements(home: HomeSummary, stats: StatsSummary): Achi
   const accuracyReady = h.commands_run >= 100
   const hardTierClears = h.hard_tier_clears?.value ?? 0
   const comebacks = h.comebacks?.value ?? 0
-  const mastery = Math.floor(home.mastery)
 
   const make = (
     id: AchievementImageId,
@@ -67,7 +77,7 @@ export function deriveAchievements(home: HomeSummary, stats: StatsSummary): Achi
     current: number,
     target: number,
     unlockedOverride?: boolean,
-  ): Achievement => ({
+  ): Omit<Achievement, 'group'> => ({
     id,
     title,
     desc,
@@ -85,7 +95,7 @@ export function deriveAchievements(home: HomeSummary, stats: StatsSummary): Achi
   const GOLD = 'hsl(var(--warning))'
 
   // `levels_completed` counts cleared tiers (Easy, Medium and Hard are one each).
-  return [
+  const ledger = [
     make('first-clear', 'First Clean Run', 'Clear your first Arcane Spire tier', Swords, GOLD, 10, h.levels_completed, 1),
     make('level-adept', 'Pathfinder', 'Clear 10 Arcane Spire tiers', Swords, GOLD, 15, h.levels_completed, 10),
     make('level-veteran', 'Tower Archivist', 'Clear 30 Arcane Spire tiers', Medal, GOLD, 20, h.levels_completed, 30),
@@ -105,9 +115,9 @@ export function deriveAchievements(home: HomeSummary, stats: StatsSummary): Achi
     ),
     make('perfectionist', 'Perfect Committer', 'Earn 5 perfect clears', Star, GOLD, 20, h.perfect_clears, 5),
     make('star-collector', 'Star Collector', 'Earn 25 perfect clears', Star, GOLD, 25, h.perfect_clears, 25),
-    make('rank-glyph-weaver', 'Glyph Weaver', 'Reach the Glyph Weaver rank', Flame, GOLD, 15, mastery, rankThreshold('Glyph Weaver')),
-    make('rank-arcane-adept', 'Arcane Adept', 'Reach the Arcane Adept rank', Flame, GOLD, 25, mastery, rankThreshold('Arcane Adept')),
-    make('rank-archon', 'Archon', 'Reach the Archon rank', Flame, GOLD, 40, mastery, rankThreshold('Archon')),
+    make('rank-committer', 'Committer', 'Reach the Committer rank', Flame, GOLD, 15, home.xp, rankThreshold('Committer')),
+    make('rank-reviewer', 'Reviewer', 'Reach the Reviewer rank', Flame, GOLD, 25, home.xp, rankThreshold('Reviewer')),
+    make('rank-release-manager', 'Release Manager', 'Reach the Release Manager rank', Flame, GOLD, 40, home.xp, rankThreshold('Release Manager')),
     make('comeback-kid', 'Recovery Artist', 'Turn 3 retries into wins', Sparkles, GOLD, 15, comebacks, 3),
     make('command-cadet', 'Command Cadet', 'Run 100 git commands', TerminalSquare, GOLD, 10, h.commands_run, 100),
     make('command-captain', 'Command Captain', 'Run 1,000 git commands', TerminalSquare, GOLD, 25, h.commands_run, 1000),
@@ -126,7 +136,7 @@ export function deriveAchievements(home: HomeSummary, stats: StatsSummary): Achi
     make(
       'arcane-spire-master',
       'Arcane Spire Master',
-      'Master the Arcane Spire curriculum',
+      'Complete the Arcane Spire curriculum',
       Crown,
       GOLD,
       50,
@@ -137,4 +147,9 @@ export function deriveAchievements(home: HomeSummary, stats: StatsSummary): Achi
       1,
     ),
   ]
+  return ACHIEVEMENT_GROUPS.flatMap((group) =>
+    ledger
+      .filter((achievement) => group.ids.includes(achievement.id))
+      .map((achievement) => ({ ...achievement, group: group.label })),
+  )
 }

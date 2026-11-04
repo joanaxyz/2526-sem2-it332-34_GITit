@@ -4,6 +4,7 @@ const DEFAULT_STORY_SLUG = 'arcane-spire'
 
 export const HOME_ROUTE = '/home'
 export const SHOP_ROUTE = '/shop'
+export const LEADERBOARD_ROUTE = '/leaderboard'
 export const STORY_DETAIL_ROUTE = '/stories/:storySlug'
 export const DESIGN_PREVIEW_STORY_MAP_ROUTE = '/design-preview/story-map'
 export const ADMIN_ROUTES = {

@@ -11,6 +11,7 @@ from collections.abc import Iterable
 
 from common.constants import DIFFICULTY_EASY, DIFFICULTY_HARD, DIFFICULTY_MEDIUM
 from progress.wallet import WalletService
+from progress.xp import TIER_XP
 
 TIER_REWARD_COINS = {DIFFICULTY_EASY: 25, DIFFICULTY_MEDIUM: 35, DIFFICULTY_HARD: 50}
 # A module's Challenge Gate trials, seeded into ChallengeTrial.reward_coins and
@@ -29,7 +30,11 @@ def tier_reward_key(tier) -> str:
 
 
 def tier_reward_payload(tier, *, claimed_keys: set[str]) -> dict:
-    return {"coins": tier_reward_coins(tier), "claimed": tier_reward_key(tier) in claimed_keys}
+    return {
+        "coins": tier_reward_coins(tier),
+        "xp": TIER_XP.get(tier.difficulty, 0),
+        "claimed": tier_reward_key(tier) in claimed_keys,
+    }
 
 
 def claimed_tier_reward_keys(*, player, tiers: Iterable) -> set[str]:

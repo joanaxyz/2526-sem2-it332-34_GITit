@@ -41,7 +41,7 @@ class TestChannel extends EventTarget {
 function startedRun(replay: boolean): ChallengeRun & TierRun {
   return {
     id: 42, replay, status: 'started', stars: 0, completed_at: null, failure_reason: null,
-    difficulty: 'easy', reward_coins: 0, reward: { coins: 0, claimed: true },
+    difficulty: 'easy', reward_coins: 0, reward_xp: 0, reward: { coins: 0, xp: 0, claimed: true },
     challenge: { id: 2, slug: 'repository-basics', title: 'Repository basics', summary: '', narrative: '', level_id: 3 },
     tier: { id: 2, difficulty: 'easy', adventure_level_id: 3, adventure_level_slug: 'repository-basics', adventure_level_title: 'Repository basics', adventure_level_number: 1 },
     chapter: { id: 1, number: 1, title: 'Foundations' }, story: null,

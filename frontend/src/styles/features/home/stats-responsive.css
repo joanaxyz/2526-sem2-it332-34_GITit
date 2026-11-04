@@ -2,29 +2,11 @@
 /* Structural only: columns collapse, hairlines move from the side to the top.
    Nothing here restyles a component, and every rule lives in a media query. */
 
-/* Below this the two subjects stop being columns: half of 1200px is not enough
-   for a dial or for a gallery row, so they stack and the hairline moves. */
-@media (max-width: 1200px) {
-  .home-overview-grid.is-split { grid-template-columns: minmax(0, 1fr); gap: 1.6rem; }
-  .home-overview-grid.is-split > .home-overview-achievements-panel {
-    border-left: 0;
-    border-top: 1px solid rgba(var(--theme-primary-rgb), 0.16);
-    padding-left: 0;
-    padding-top: 1.35rem;
-  }
-}
-
 @media (max-width: 900px) {
-  /* The radar rail and the run meter drop under their band rather than shrinking
-     to a width where neither can be read. */
+  /* The run meter drops under its band rather than shrinking to a width where
+     it cannot be read. */
   .home-overview-stat-subgrid { grid-template-columns: minmax(0, 1fr); }
-  .home-overview-mastery-orb .ref-chart-radar { max-width: 24rem; margin-inline: auto; }
   .home-overview-story-block { border-top: 1px solid rgba(var(--theme-primary-rgb), 0.14); border-left: 0; padding-top: 0.9rem; padding-left: 0; }
-}
-
-@media (max-width: 760px) {
-  .home-overview-command-row { grid-template-columns: 1.6rem minmax(6rem, 1fr) 3rem; gap: 0.45rem; }
-  .home-overview-command-meter { grid-column: 2 / 4; }
 }
 
 @media (max-width: 620px) {
@@ -32,12 +14,11 @@
   .ref-panel.home-overview-stats-panel,
   .home-overview-achievements-panel { padding: 0.85rem; }
   .performance-band-heading h2 { font-size: 1.4rem; }
+  .home-overview-achievement-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.3rem 0.7rem; }
+  .home-overview-achievement-medallion { width: 6rem; height: 6rem; }
 }
 
 @media (max-width: 480px) {
   .home-overview-story-body { grid-template-columns: minmax(0, 1fr); }
   .home-overview-story-sigil { display: none; }
-  .home-overview-achievement-card { grid-template-columns: 3rem minmax(0, 1fr); }
-  .home-overview-achievement-card > small { grid-column: 2; grid-row: auto; text-align: left; }
-  .home-overview-achievement-card .ref-meter { grid-column: 2; }
 }

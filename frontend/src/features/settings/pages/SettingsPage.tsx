@@ -1,6 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Eye, GraduationCap, KeyRound, LogOut, MonitorCog, RotateCcw, Save, ShieldCheck, UserRound } from 'lucide-react'
+import { Eye, GraduationCap, KeyRound, LogOut, MonitorCog, RotateCcw, Save, ShieldCheck, Trophy, UserRound } from 'lucide-react'
 import { useForm } from 'react-hook-form'
 import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
@@ -55,6 +55,14 @@ export function SettingsPage() {
         persistPreferences(saved)
         applyPreferences(saved)
       }
+    },
+  })
+  const leaderboardMutation = useMutation({
+    mutationFn: preferencesApi.update,
+    onSuccess: (data) => {
+      queryClient.setQueryData(queryKeys.preferences, data)
+      void queryClient.invalidateQueries({ queryKey: queryKeys.leaderboards })
+      toast.success('Preferences saved')
     },
   })
   const passwordForm = useForm<PasswordValues>({ resolver: zodResolver(passwordSchema), mode: 'onBlur' })
@@ -172,6 +180,27 @@ export function SettingsPage() {
               <span>Show roaming mascot</span>
             </label>
             <p className="settings-note">Show or hide the roaming mascot on Home and the map. AI help and the command-guide launcher stay available. Guide messages use your companion’s portrait when the roaming mascot is hidden. Saved on this device.</p>
+          </div>
+        </section>
+
+        <section className="settings-section" aria-labelledby="leaderboard-settings-title">
+          <div className="settings-section__head">
+            <p className="settings-eyebrow" id="leaderboard-settings-title"><Trophy aria-hidden="true" />Leaderboard</p>
+            <p className="settings-section__desc">Choose whether other learners can see you on the leaderboard.</p>
+          </div>
+          <div className="settings-section__body">
+            <label className="settings-toggle">
+              <input
+                type="checkbox"
+                role="switch"
+                checked={preferences.data?.leaderboard_visible ?? true}
+                disabled={preferences.isPending || leaderboardMutation.isPending}
+                onChange={(event) => leaderboardMutation.mutate({ leaderboard_visible: event.target.checked })}
+              />
+              <span>Show me on the leaderboard</span>
+            </label>
+            <p className="settings-note">Only your username and scores are shown. You keep earning XP while hidden.</p>
+            {leaderboardMutation.isError ? <p className="settings-error">{leaderboardMutation.error.message}</p> : null}
           </div>
         </section>
 

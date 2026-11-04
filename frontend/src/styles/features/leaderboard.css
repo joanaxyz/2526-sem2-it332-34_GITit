@@ -1,0 +1,148 @@
+/* Leaderboard: one hairline-split standings column, ranked by the machine voice. */
+.leaderboard-page {
+  display: grid;
+  width: min(100%, 46rem);
+  margin: 0 auto;
+  gap: 1.1rem;
+  align-content: start;
+  padding: clamp(1rem, 3vw, 2rem) clamp(1rem, 2vw, 1.5rem) 2.5rem;
+  color: var(--text-primary);
+}
+
+.leaderboard-head h1 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 3vw, 2.4rem);
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+.leaderboard-head p {
+  margin: 0.2rem 0 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.leaderboard-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.leaderboard-tabs button {
+  min-height: var(--control-height-sm);
+  border: 1px solid var(--control-border);
+  border-radius: var(--control-radius);
+  background: var(--control-bg);
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  padding: 0 0.9rem;
+  transition: border-color var(--motion-normal) var(--ease-out), background var(--motion-normal) var(--ease-out), color var(--motion-normal) var(--ease-out);
+}
+
+.leaderboard-tabs button:hover,
+.leaderboard-tabs button.is-active {
+  border-color: var(--control-border-hover);
+  background: var(--control-bg-hover);
+  color: var(--text-primary);
+}
+
+.leaderboard-tabs button:focus-visible {
+  outline: none;
+  box-shadow: var(--control-focus-ring);
+}
+
+.leaderboard-list {
+  display: grid;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.leaderboard-row {
+  display: grid;
+  grid-template-columns: 2.6rem minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem;
+  min-height: 3.5rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.52);
+  padding: 0.45rem 0.6rem;
+}
+
+.leaderboard-row.is-you {
+  border-radius: var(--radius-sm);
+  background: rgba(var(--theme-primary-rgb), 0.1);
+}
+
+.leaderboard-rank {
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: 1.05rem;
+  font-weight: 800;
+  text-align: center;
+}
+
+/* The podium is the one earned moment on this page. */
+.leaderboard-row:nth-child(-n + 3) .leaderboard-rank {
+  color: hsl(var(--warning));
+}
+
+.leaderboard-name {
+  display: grid;
+  min-width: 0;
+}
+
+.leaderboard-name strong {
+  overflow: hidden;
+  font-size: var(--text-sm);
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.leaderboard-name small {
+  color: var(--text-tertiary);
+  font-size: var(--text-2xs);
+}
+
+.leaderboard-value {
+  font-family: var(--font-mono);
+  font-size: var(--text-sm);
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.leaderboard-value small {
+  color: var(--text-tertiary);
+  font-size: var(--text-2xs);
+  font-weight: 600;
+}
+
+.leaderboard-you,
+.leaderboard-empty {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+.leaderboard-you strong {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+}
+
+.leaderboard-you a {
+  color: rgb(var(--theme-primary-rgb));
+}
+
+.leaderboard-loading {
+  display: grid;
+  gap: 0.5rem;
+}
+
+.leaderboard-loading i {
+  display: block;
+  height: 3.1rem;
+  border-radius: var(--radius-sm);
+  background: rgba(var(--theme-primary-rgb), 0.06);
+}

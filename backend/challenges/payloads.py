@@ -17,6 +17,7 @@ from practice.services.context import ScenarioContextNormalizer
 from practice.services.scaffolding import ScaffoldingService
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import ChallengeTrialCompletion
+from progress.xp import gate_xp
 from simulator.services import RepositorySnapshotService
 
 
@@ -84,6 +85,7 @@ def challenge_run_payload(run: ChallengeRun, *, include_steps: bool = True) -> d
         "difficulty": run.difficulty or None,
         # GitCoins paid on first completion of this trial (0 = no reward).
         "reward_coins": run.challenge_trial.reward_coins if run.challenge_trial_id else 0,
+        "reward_xp": gate_xp(run.challenge_trial) if run.challenge_trial_id else 0,
         "variant": {
             "id": run.selected_variant_id,
             "label": run.selected_variant.label,

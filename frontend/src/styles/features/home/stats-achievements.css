@@ -1,8 +1,7 @@
 /* Achievement collection -------------------------------------------------- */
 .home-overview-achievements-panel {
   display: grid;
-  grid-template-rows: auto auto minmax(0, 1fr);
-  gap: 0.7rem;
+  gap: 1.1rem;
 }
 
 .home-overview-achievements-head {
@@ -104,103 +103,138 @@
   color: rgb(var(--theme-primary-rgb));
 }
 
-/* Full-width now that Overview shows one category at a time: hairline rows that
-   reflow into as many columns as the viewport honestly fits. */
+.home-overview-achievement-empty {
+  margin: 0;
+  color: var(--text-secondary);
+  font-size: var(--text-sm);
+}
+
+/* Sets: each shelf is named by a hairline rather than boxed. */
+.home-overview-achievement-set {
+  display: grid;
+  gap: 1rem;
+}
+
+.home-overview-achievement-set-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 1rem;
+  border-bottom: 1px solid hsl(var(--border) / 0.52);
+  padding-bottom: 0.4rem;
+}
+
+.home-overview-achievement-set-head h3 {
+  margin: 0;
+  color: var(--text-secondary);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.home-overview-achievement-set-head span {
+  color: var(--text-tertiary);
+  font-family: var(--font-mono);
+  font-size: var(--text-2xs);
+}
+
+/* The art is the reward, so it leads: a shelf of badges, not rows of text. */
 .home-overview-achievement-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(21rem, 1fr));
-  gap: 0 1.6rem;
-  min-height: 0;
+  grid-template-columns: repeat(auto-fill, minmax(min(15rem, 100%), 1fr));
+  gap: 1.6rem 1rem;
 }
 
 .home-overview-achievement-card {
   --achievement-accent: hsl(var(--warning) / 0.55);
-  position: relative;
-  display: grid;
-  grid-template-columns: 3.35rem minmax(0, 1fr) auto;
-  grid-template-rows: auto auto auto;
-  gap: 0.12rem 0.7rem;
-  align-items: center;
+  display: flex;
   min-width: 0;
-  min-height: 4.55rem;
-  border-bottom: 1px solid hsl(var(--border) / 0.52);
-  padding: 0.5rem 0.1rem;
-  opacity: 0.58;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.3rem;
+  text-align: center;
 }
 
-.home-overview-achievement-card.is-unlocked { opacity: 1; }
-
 .home-overview-achievement-medallion {
-  grid-row: 1 / 4;
+  position: relative;
   display: grid;
-  width: 3.25rem;
-  height: 3.25rem;
+  width: 8.5rem;
+  height: 8.5rem;
+  margin-bottom: 0.35rem;
   place-items: center;
 }
 
-.home-overview-achievement-medallion img,
-.home-overview-achievement-medallion svg {
+.home-overview-achievement-medallion img {
   width: 100%;
   height: 100%;
   object-fit: contain;
+  transition: transform var(--motion-normal) var(--ease-out);
 }
 
-.home-overview-achievement-medallion svg {
-  width: 1.25rem;
-  height: 1.25rem;
-  color: var(--achievement-accent);
+.home-overview-achievement-card.is-unlocked .home-overview-achievement-medallion img {
+  filter: drop-shadow(0 0 14px color-mix(in srgb, var(--achievement-accent) 34%, transparent));
 }
 
-.home-overview-achievement-earned {
+.home-overview-achievement-card.is-unlocked:hover .home-overview-achievement-medallion img {
+  transform: translateY(-3px) scale(1.04);
+}
+
+.home-overview-achievement-card.is-locked .home-overview-achievement-medallion img {
+  filter: grayscale(1) brightness(0.48);
+}
+
+.home-overview-achievement-lock {
   position: absolute;
-  top: 0.45rem;
-  left: 2.55rem;
-  width: 0.78rem;
-  height: 0.78rem;
-  color: var(--achievement-accent);
-  fill: currentColor;
-  filter: drop-shadow(0 0 6px color-mix(in srgb, var(--achievement-accent) 64%, transparent));
+  right: 0.5rem;
+  bottom: 0.5rem;
+  display: grid;
+  width: 1.75rem;
+  height: 1.75rem;
+  place-items: center;
+  border: 1px solid hsl(var(--border));
+  border-radius: 50%;
+  background: hsl(var(--background));
+  color: var(--text-secondary);
+}
+
+.home-overview-achievement-lock svg {
+  width: 0.9rem;
+  height: 0.9rem;
 }
 
 .home-overview-achievement-card > strong {
-  align-self: end;
-  overflow: hidden;
   color: var(--text-primary);
-  font-size: var(--text-xs);
-  line-height: 1.2;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+  font-size: var(--text-sm);
+  line-height: 1.25;
+}
+
+.home-overview-achievement-card.is-locked > strong {
+  color: var(--text-secondary);
 }
 
 .home-overview-achievement-card > span:not(.home-overview-achievement-medallion) {
-  align-self: start;
-  display: -webkit-box;
-  overflow: hidden;
+  max-width: 15rem;
   color: var(--text-tertiary);
   font-size: var(--text-2xs);
-  line-height: 1.35;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 1;
+  line-height: 1.4;
 }
 
 .home-overview-achievement-card > small {
-  grid-column: 3;
-  grid-row: 1 / 3;
   color: hsl(var(--warning) / 0.82);
   font-family: var(--font-mono);
   font-size: var(--text-2xs);
-  text-align: right;
-  white-space: nowrap;
+}
+
+.home-overview-achievement-card.is-locked > small {
+  color: var(--text-tertiary);
 }
 
 .home-overview-achievement-card .ref-meter {
-  grid-column: 2 / 4;
+  width: min(100%, 8rem);
   height: 0.28rem;
-}
-
-.home-overview-achievement-card.is-unlocked .ref-meter span {
-  background: var(--achievement-accent);
-  box-shadow: 0 0 8px color-mix(in srgb, var(--achievement-accent) 48%, transparent);
+  margin-top: 0.25rem;
 }
 
 .home-overview-achievement-card.is-locked .ref-meter span {

@@ -19,7 +19,8 @@ Use these terms in product copy, code names, tests, and seed data:
 - `Level map` — the visual chapter navigation surface.
 - `Story world` — a site/map visual bundle.
 - `Companion` — a player-side battle/avatar cosmetic.
-- `GitCoin` — the reward currency.
+- `GitCoin` — the reward currency, spent in the shop.
+- `XP` — the lifetime score behind ranks and the leaderboard. It is never spent.
 
 Deprecated labels from earlier refactors must not appear in active code or current documentation. Current URLs live in `frontend/src/shared/navigation/routes.ts`; obsolete aliases and their redirect handlers have been removed.
 
@@ -387,8 +388,10 @@ database honestly has none rather than synthesising it per request.
 - `seed_data/source/scenario_plan/` owns placement: each level's scenarios per tier, in play order, with their roles and variants. `seed_curriculum` upserts them by slug and unpublishes the scenarios and variants it no longer names; runs keep their rows.
 - An `AdventureLevelTierRun` is one attempt at one scenario. One solve clears a scenario; `AdventureLevelTierProgress.cleared_scenario_slugs` records the cleared scenarios, and the tier completes (`AdventureLevelTierCompletion`) once every published scenario is cleared. Starting a tier plays the next uncleared scenario, and a retry rotates variants within that scenario; replay cycles through the scenarios (`adventures/tier_scenarios.py`, `services/tier_runs.py`, `services/tier_variants.py`). A solve on a scenario that a reseed unpublished clears the learner's next uncleared scenario.
 - A tier's stars are the lowest of its scenarios' best stars. A run's star budget comes from its variant, falling back to the scenario's (`services/tier_budget.py`).
-- Each scenario clear credits mastery to the published forms the clearing run's commands used (`tutoring.services.forms.forms_used_by`). Mastery never opens or closes a command guide.
+- Each scenario clear credits a solve to the published forms the clearing run's commands used (`tutoring.services.forms.forms_used_by`). `SkillMastery` is internal progress, not a learner score: `learned_at` feeds the spellbook, and `mastered` decides story completion (`curriculum/selectors/stories.py`). It never opens or closes a command guide.
 - `adventures/rewards.py` owns the GitCoin ladder: Easy 25, Medium 35, Hard 50 once per tier, and 50/75/100 for Challenge Gate trials, all through idempotent wallet keys. The one-time cutover commands `award_missing_tier_rewards` and `map_partial_tier_progress` backfill rewards and partial progress (`deploy/CURRICULUM_SCENARIOS_RESEED.md`).
+- `progress/xp.py` owns XP: the same ladder as GitCoins, plus 10 XP per star of a tier's best grade, so a replay pays only stars it newly earns. Chests pay none. `XpTransaction` is the only store, and `award_missing_xp` backfills it. Ranks are derived from XP in `frontend/src/shared/progress/rank.ts`.
+- `progress/services/leaderboard.py` owns the all-time leaderboard (`GET /api/progress/leaderboard/`): XP, perfect clears and Challenge Gate trials, top ten plus the requester's place. It returns usernames only, excludes staff and anyone who turned off `PlayerPreferences.leaderboard_visible`, and deliberately has no KPI or checkpoint category.
 - A level counts as passed on the map and in chapter progress once its Easy tier is complete. Chapter completion counts each published level once plus each published gate trial.
 - `seed_curriculum` seeds one Challenge Gate per module from `source/challenge_gates.py`: Easy, Medium, and Hard trials with two variants each. The gate opens once every required level of the module has completed all three tiers (`chapter_tiers_cleared`); inside it, Medium waits for the Easy trial and Hard for Medium. Challenge runs play in the same workspace as adventure tiers (`frontend/src/shared/level/workspace/`): battle stage, terminal, Live and Expected diagrams.
 ## Generated Curriculum Targets

@@ -190,20 +190,12 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
     assert payload["run"]["rewards"] == {
         "first_level_clear": True,
         "coins_awarded": 25,
+        "xp_awarded": 25 + 3 * 10,
         "chapter_chests_awarded": [
             {"threshold": 25, "coins": 25},
             {"threshold": 50, "coins": 60},
             {"threshold": 75, "coins": 100},
             {"threshold": 100, "coins": 150},
-        ],
-        "mastery_advanced": [
-            {
-                "skill_slug": "git-init",
-                "form_slug": "current",
-                "solves": 1,
-                "target": 2,
-                "mastered": False,
-            }
         ],
     }
 

@@ -13,6 +13,7 @@ export type PlayerPreferences = {
 /** What the API reports for the signed-in account. */
 export type PlayerAccountPreferences = PlayerPreferences & {
   onboarding_phase: OnboardingPhase
+  leaderboard_visible: boolean
 }
 
 const storageKey = 'git-it-preferences'

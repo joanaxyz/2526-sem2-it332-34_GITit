@@ -8,7 +8,7 @@ import { companionSkillPortrait, primarySkillCommand } from '@/shared/cosmetics/
 import type { CompanionDef } from '@/shared/cosmetics/types'
 import { GitCommandIcon } from '@/shared/git/commandCatalog/commandIcons'
 import { SHOP_ROUTE } from '@/shared/navigation/routes'
-import { useRank } from '@/shared/progress/rank'
+import { rankProgressLabel, useRank } from '@/shared/progress/rank'
 
 type NextSkill = {
   level: AdventureLevelSummary
@@ -65,11 +65,11 @@ export function StorySkillFocusPanel({
           </span>
           <div className="story-skill-reward-copy">
             <strong className="story-skill-reward-name">Every spell inscribed</strong>
-            <span className="story-skill-reward-level">Chapter mastered</span>
+            <span className="story-skill-reward-level">Chapter complete</span>
             <p className="story-skill-reward-desc">
               {companionLabel
                 ? `You have inscribed every command in this chapter into ${companionLabel}'s Spellbook.`
-                : 'Every command in this chapter has been mastered.'}
+                : 'Every command in this chapter has been learned.'}
             </p>
           </div>
         </div>
@@ -131,7 +131,7 @@ export function StoryCompanionPanel({ companion }: { companion: CompanionDef | n
             </div>
             <div>
               <dt>Rank Progress</dt>
-              <dd>{rank ? (rank.nextTier ? `${Math.round(rank.ratingInTier)} / ${Math.round(rank.ratingForNext)} mastery` : 'Max rank') : '—'}</dd>
+              <dd>{rank ? rankProgressLabel(rank) : '—'}</dd>
             </div>
           </dl>
         </div>

@@ -1,9 +1,9 @@
-import { Compass, GitBranch, ShieldCheck, Store, type LucideIcon } from 'lucide-react'
+import { Compass, GitBranch, ShieldCheck, Store, Trophy, type LucideIcon } from 'lucide-react'
 import { useCallback, useEffect, useLayoutEffect, useRef } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 
 import { useAuthStore } from '@/shared/auth/useAuth'
-import { ADMIN_ROUTES, HOME_ROUTE, SHOP_ROUTE, isStoryMapRoute, storyPath } from '@/shared/navigation/routes'
+import { ADMIN_ROUTES, HOME_ROUTE, LEADERBOARD_ROUTE, SHOP_ROUTE, isStoryMapRoute, storyPath } from '@/shared/navigation/routes'
 import { cn } from '@/shared/utils/cn'
 
 type PrimaryNavItem = {
@@ -26,6 +26,12 @@ const primaryNavItems: PrimaryNavItem[] = [
     label: 'Modules',
     Icon: GitBranch,
     match: isStoryMapRoute,
+  },
+  {
+    to: LEADERBOARD_ROUTE,
+    label: 'Leaderboard',
+    Icon: Trophy,
+    match: (pathname) => pathname.startsWith(LEADERBOARD_ROUTE),
   },
   {
     to: SHOP_ROUTE,

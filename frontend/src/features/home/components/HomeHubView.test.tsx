@@ -270,14 +270,21 @@ describe('HomeHubView contract', () => {
     fireEvent.click(switcher())
     expect(
       screen.getAllByRole('option').map((option) => option.querySelector('strong')?.textContent),
-    ).toEqual(['Profile', 'Progress', 'Skills & achievements'])
+    ).toEqual(['Profile', 'Progress', 'Achievements'])
   })
 
   it('hands each data category to the stats view and renders no tab strip', () => {
+    renderHub('/home?view=achievements')
+
+    expect(screen.getByTestId('home-stats-view')).toHaveAttribute('data-view', 'achievements')
+    expect(screen.queryByRole('navigation', { name: 'Home sections' })).not.toBeInTheDocument()
+  })
+
+  it('lands a bookmarked Skills link on Achievements', () => {
     renderHub('/home?view=skills')
 
-    expect(screen.getByTestId('home-stats-view')).toHaveAttribute('data-view', 'skills')
-    expect(screen.queryByRole('navigation', { name: 'Home sections' })).not.toBeInTheDocument()
+    expect(switcher()).toHaveTextContent('Achievements')
+    expect(screen.getByTestId('home-stats-view')).toHaveAttribute('data-view', 'achievements')
   })
 
   it('lands a bookmarked Run results link on the category that absorbed it', () => {
@@ -302,7 +309,7 @@ describe('HomeHubView contract', () => {
     fireEvent.keyDown(listbox, { key: 'End' })
     fireEvent.keyDown(listbox, { key: 'Enter' })
 
-    expect(router.state.location.search).toBe('?view=skills')
+    expect(router.state.location.search).toBe('?view=achievements')
     expect(screen.queryByRole('listbox')).not.toBeInTheDocument()
   })
 
@@ -459,7 +466,7 @@ describe('HomeHubView contract', () => {
     const profile = profileRegion()
     // The ladder used to sit behind a tab; it is always on screen now, so a
     // companion failure can never be the reason a rank is not visible.
-    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
+    expect(within(profile).getAllByText('Reviewer').length).toBeGreaterThan(0)
 
     mocks.usePlayerLoadout.mockReturnValue({
       companion: COMPANIONS.blue,
@@ -471,7 +478,7 @@ describe('HomeHubView contract', () => {
     })
     await act(async () => router.navigate('/home?view=profile&refresh=error', { replace: true }))
 
-    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
+    expect(within(profile).getAllByText('Reviewer').length).toBeGreaterThan(0)
     expect(within(profile).getAllByRole('alert')[0]).toHaveTextContent('Companion unavailable')
   })
 
@@ -480,14 +487,14 @@ describe('HomeHubView contract', () => {
     const profile = profileRegion()
 
     fireEvent.click(within(profile).getByRole('button', { name: /attack with inspect history/i }))
-    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
+    expect(within(profile).getAllByText('Reviewer').length).toBeGreaterThan(0)
 
     openView('Progress')
     expect(profileWorkspace()).toHaveAttribute('hidden')
     openView('Profile')
 
     expect(profileWorkspace()).not.toHaveAttribute('hidden')
-    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
+    expect(within(profile).getAllByText('Reviewer').length).toBeGreaterThan(0)
     expect(within(profile).getByRole('button', { name: /attack with inspect history/i })).toHaveClass('is-selected')
   })
 
@@ -497,13 +504,13 @@ describe('HomeHubView contract', () => {
 
     expect(within(profile).getByText('Learner')).toBeInTheDocument()
     // Levels and chapters are not gated, so the title is the bare rank name.
-    expect(within(profile).getByText('Learner').closest('.home-profile-name')).toHaveTextContent('Arcane Adept')
+    expect(within(profile).getByText('Learner').closest('.home-profile-name')).toHaveTextContent('Reviewer')
     expect(within(profile).queryByText(/of the .* Chapter/)).not.toBeInTheDocument()
 
     // Each of these is stated once now that both halves render together: the
     // clear counts sit under the crest, the meter sits in it.
     expect(within(profile).getByText('43')).toBeInTheDocument()
-    expect(within(profile).getByLabelText('40% toward the next rank')).toBeInTheDocument()
+    expect(within(profile).getByLabelText('13% toward the next rank')).toBeInTheDocument()
   })
 
   it('lists the owned roster in Profile and equips the selected companion', async () => {
@@ -631,7 +638,7 @@ describe('HomeHubView contract', () => {
     })
     await act(async () => router.navigate('/home?view=profile&refresh=1', { replace: true }))
 
-    expect(within(profile).getAllByText('Arcane Adept').length).toBeGreaterThan(0)
+    expect(within(profile).getAllByText('Reviewer').length).toBeGreaterThan(0)
     expect(screen.getByLabelText(/white idle animation/i)).toBeInTheDocument()
   })
 })

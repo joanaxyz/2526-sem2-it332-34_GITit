@@ -43,6 +43,7 @@ CHALLENGE_RUN_KEYS = {
     "replay",
     "repository_state",
     "reward_coins",
+    "reward_xp",
     "scaffolding",
     "scenario_context",
     "sibling_levels",
@@ -221,7 +222,7 @@ def test_adventure_tier_full_success_endpoints_match_the_domain_schema(db, djang
     for response in (start, detail, workspace):
         _assert_valid(AdventureLevelTierRunResponseSerializer, response.json())
         assert response.json()["scenario"] == {"index": 1, "total": 1, "title": "Stage README"}
-        assert response.json()["reward"] == {"coins": 25, "claimed": False}
+        assert response.json()["reward"] == {"coins": 25, "xp": 25, "claimed": False}
         # The outcome modal names the level as the story map numbers it.
         assert response.json()["tier"]["adventure_level_number"] == 1
     run = AdventureLevelTierRun.objects.get(id=run_id)

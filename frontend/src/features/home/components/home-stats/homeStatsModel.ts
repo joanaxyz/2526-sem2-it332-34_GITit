@@ -1,6 +1,6 @@
 import type { HomeSummary } from '@/features/home/types'
 import { deriveAchievements, type Achievement } from '@/features/home/utils/achievements'
-import type { SkillAxis, StatsSummary, TrendPoint } from '@/features/stats/types'
+import type { StatsSummary, TrendPoint } from '@/features/stats/types'
 import { activityWindowOption, type ActivityWindow } from '@/features/stats/utils/activityWindow'
 
 type HomeActivityPoint = {
@@ -11,12 +11,6 @@ type HomeActivityPoint = {
   caption: string
   commandsRun: number
   levelsCompleted: number
-}
-
-export type HomeSkillProfileRow = SkillAxis & {
-  command: string
-  /** Machine name for the radar rim, e.g. "add". */
-  short: string
 }
 
 type HomeRateMetric = {
@@ -57,26 +51,13 @@ export type HomeProgressModel = {
   }
 }
 
-/** Overview view "Git skills": how reliably each command family is used. */
-export type HomeSkillsModel = {
-  rows: HomeSkillProfileRow[]
-  overallMastery: number
-  masteryStars: number
-}
-
 export type HomeStatsModel = {
   progress: HomeProgressModel
-  skills: HomeSkillsModel
   achievements: Achievement[]
 }
 
 function clampPercent(value: number) {
   return Math.max(0, Math.min(100, Math.round(value)))
-}
-
-function average(values: number[]) {
-  if (values.length === 0) return 0
-  return values.reduce((sum, value) => sum + value, 0) / values.length
 }
 
 function bucketLabels(iso: string, monthly: boolean) {
@@ -131,19 +112,7 @@ function buildActivity(stats: StatsSummary): HomeProgressModel['activity'] {
   }
 }
 
-function buildSkillRows(axes: SkillAxis[]): HomeSkillProfileRow[] {
-  return axes.map((axis) => {
-    const command = axis.command ?? axis.label
-    return { ...axis, command, short: command.replace(/^git\s+/, '') }
-  })
-}
-
 export function buildHomeStatsModel(home: HomeSummary, stats: StatsSummary): HomeStatsModel {
-  const skillValues = stats.skill_profile
-    .map((axis) => axis.value)
-    .filter((value): value is number => typeof value === 'number')
-  const overallMastery = clampPercent(average(skillValues))
-
   return {
     progress: {
       activity: buildActivity(stats),
@@ -160,12 +129,6 @@ export function buildHomeStatsModel(home: HomeSummary, stats: StatsSummary): Hom
               : clampPercent(stats.headline.finish_rate.value),
         },
       },
-    },
-    skills: {
-      rows: buildSkillRows(stats.skill_profile),
-      overallMastery,
-      // Proficiency is earned: a learner at 0% must not receive a free star.
-      masteryStars: Math.min(3, Math.ceil(overallMastery / 34)),
     },
     achievements: deriveAchievements(home, stats),
   }

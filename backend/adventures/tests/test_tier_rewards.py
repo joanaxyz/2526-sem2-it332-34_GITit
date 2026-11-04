@@ -69,9 +69,9 @@ def test_the_level_map_shows_each_tier_reward_and_whether_it_was_paid(db, django
     }
 
     assert rewards == {
-        "easy": {"coins": 25, "claimed": True},
-        "medium": {"coins": 35, "claimed": False},
-        "hard": {"coins": 50, "claimed": False},
+        "easy": {"coins": 25, "xp": 25, "claimed": True},
+        "medium": {"coins": 35, "xp": 35, "claimed": False},
+        "hard": {"coins": 50, "xp": 50, "claimed": False},
     }
 
 

@@ -4,7 +4,7 @@ from django.db.models import Count, Q, Sum
 from django.db.models.functions import TruncDate
 from django.utils import timezone
 
-from adventures.models import AdventureLevelTierRun, SkillMastery
+from adventures.models import AdventureLevelTierRun
 from common.constants import (
     DIFFICULTY_HARD,
     RESULT_INVALID,
@@ -13,7 +13,7 @@ from common.constants import (
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
 )
-from curriculum.models import Chapter, CommandForm, CommandSkill
+from curriculum.models import Chapter
 from curriculum.selectors import published_stories, stories_completed_map
 from practice.models import CommandStep
 from progress.models import (
@@ -24,6 +24,7 @@ from progress.models import (
 )
 from progress.objectives import SO_CAR_LEVELS
 from progress.services.kpi_range import ALL_TIME, KpiRange
+from progress.xp import XpService
 
 # Ledger reasons for GitCoins won by playing: tier clears, Challenge Gate
 # trials, and chapter chests.
@@ -219,10 +220,8 @@ class MetricsService:
             "completed_story_slug": completed_stories[0] if completed_stories else None,
             "completed_stories": completed_stories,
             "perfect_clears": perfect_stars,
-            # Rank is expressed directly in terms of this (0-100): the same
-            # "how deeply have you drilled what you've met" score as the Stats
-            # page's Mastery radar axis.
-            "mastery": self._mastery_score(player=player) or 0,
+            # The frontend derives the learner's rank from this.
+            "xp": XpService().total(player=player),
             "retry_trends": self._retry_trends(runs=runs, started=started),
         }
 
@@ -248,10 +247,6 @@ class MetricsService:
             if total_steps
             else None
         )
-
-        # Per-command skill mastery: only commands the playable curriculum can
-        # actually teach and award progress for.
-        skill_profile = self._command_skill_profile(player=player)
 
         # Arcane Spire tier completions are the progress units shown as levels.
         completion_counts = self._runebound_completions(player=player).aggregate(
@@ -290,7 +285,6 @@ class MetricsService:
 
         activity = self.activity_summary(player=player, activity_window=activity_window)
         return {
-            "skill_profile": skill_profile,
             **activity,
             "headline": headline,
         }
@@ -313,86 +307,6 @@ class MetricsService:
             ),
             "activity_window": window,
         }
-
-    def _command_skill_profile(self, *, player) -> list[dict]:
-        """One row per mastery-bearing Arcane Spire command.
-
-        The command library is intentionally broader than the active learner
-        curriculum: it also contains other story tracks, reference-only entries,
-        and forms the simulator may support before a required Arcane Spire scenario
-        teaches them. Those entries must not show up as learner mastery because
-        they are outside this dashboard's curriculum boundary.
-
-        Mastery for each included skill = average of (solves / target) across its
-        published, playable forms that are exercised by a required published scenario,
-        capped at 100%.
-        """
-        from adventures.services import form_solve_targets
-
-        forms = list(
-            CommandForm.objects.filter(
-                is_published=True,
-                is_playable=True,
-                command_skill__is_published=True,
-            )
-            .filter(
-                adventure_level_tier_scenarios__is_published=True,
-                adventure_level_tier_scenarios__tier__is_published=True,
-                adventure_level_tier_scenarios__tier__adventure_level__is_published=True,
-                adventure_level_tier_scenarios__tier__adventure_level__is_required=True,
-                adventure_level_tier_scenarios__tier__adventure_level__chapter__story__slug=(
-                    self.LEARNER_CURRICULUM_STORY_SLUG
-                ),
-            )
-            .only("id", "command_skill_id")
-            .distinct()
-        )
-        if not forms:
-            return []
-
-        skill_ids = {form.command_skill_id for form in forms}
-        skills = list(
-            CommandSkill.objects.filter(id__in=skill_ids, is_published=True).order_by(
-                "sort_order", "base_command"
-            )
-        )
-
-        forms_by_skill: dict[int, list[int]] = {}
-        all_form_ids: set[int] = set()
-        for f in forms:
-            forms_by_skill.setdefault(f.command_skill_id, []).append(f.id)
-            all_form_ids.add(f.id)
-
-        targets = form_solve_targets(all_form_ids) if all_form_ids else {}
-        solves_map: dict[int, int] = {}
-        if all_form_ids:
-            for row in SkillMastery.objects.filter(
-                player=player, command_form_id__in=all_form_ids
-            ).values_list("command_form_id", "solves"):
-                solves_map[row[0]] = row[1]
-
-        rows = []
-        for skill in skills:
-            form_ids = forms_by_skill[skill.id]
-            ratios = [
-                min(1.0, (solves_map.get(fid, 0) / max(1, targets.get(fid, 1)))) for fid in form_ids
-            ]
-            value = round(sum(ratios) / len(ratios) * 100, 1)
-            rows.append(
-                {
-                    "key": skill.slug,
-                    "label": skill.title,
-                    "hint": skill.summary or f"Mastery of {skill.base_command}",
-                    "value": value,
-                    "command": skill.base_command,
-                }
-            )
-        return rows
-
-    def _mastery_score(self, *, player) -> float | None:
-        """The same overall Arcane Spire command mastery shown in the Skills tab."""
-        values = [row["value"] for row in self._command_skill_profile(player=player)]
-        return self._mean(values)
 
     def _mean(self, values: list) -> float | None:
         return round(sum(values) / len(values), 1) if values else None

@@ -113,14 +113,6 @@ class DashboardRetryTrendSerializer(serializers.Serializer):
     label = serializers.CharField()
 
 
-class StatsSkillAxisSerializer(serializers.Serializer):
-    key = serializers.CharField()
-    label = serializers.CharField()
-    hint = serializers.CharField()
-    value = serializers.FloatField(allow_null=True)
-    command = serializers.CharField()
-
-
 class StatsTrendPointSerializer(serializers.Serializer):
     date = serializers.DateField()
     levels_completed = serializers.IntegerField()
@@ -147,7 +139,6 @@ class StatsHeadlineSerializer(serializers.Serializer):
 
 
 class StatsSummaryResponseSerializer(serializers.Serializer):
-    skill_profile = StatsSkillAxisSerializer(many=True)
     activity_trend = StatsTrendPointSerializer(many=True)
     # Echoed back so the client labels the plot with the window it actually got,
     # not the one it asked for: an unknown window resolves to the default.
@@ -169,5 +160,24 @@ class DashboardSummaryResponseSerializer(serializers.Serializer):
     completed_story_slug = serializers.CharField(allow_null=True)
     completed_stories = serializers.ListField(child=serializers.CharField())
     perfect_clears = serializers.IntegerField()
-    mastery = serializers.FloatField()
+    xp = serializers.IntegerField()
     retry_trends = DashboardRetryTrendSerializer(many=True)
+
+
+class LeaderboardEntrySerializer(serializers.Serializer):
+    rank = serializers.IntegerField()
+    username = serializers.CharField()
+    value = serializers.IntegerField()
+    is_you = serializers.BooleanField()
+
+
+class LeaderboardYouSerializer(serializers.Serializer):
+    rank = serializers.IntegerField(allow_null=True)
+    value = serializers.IntegerField()
+    hidden = serializers.BooleanField()
+
+
+class LeaderboardResponseSerializer(serializers.Serializer):
+    category = serializers.CharField()
+    entries = LeaderboardEntrySerializer(many=True)
+    you = LeaderboardYouSerializer()

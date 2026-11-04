@@ -281,7 +281,7 @@ export function Component() {
                   </div>
                   <div>
                     <dt>Rank Progress</dt>
-                    <dd>320 / 500 mastery</dd>
+                    <dd>320 / 500 XP</dd>
                   </div>
                 </dl>
               </div>

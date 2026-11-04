@@ -12,7 +12,7 @@ export function HomeResultsPanel() {
       <header className="performance-band-heading">
         <div>
           <h2>Learning record</h2>
-          <p>Your mastery, from the whole journey to each objective.</p>
+          <p>Your results, from the whole journey to each objective.</p>
         </div>
         <span>Arcane Spire · All time</span>
       </header>

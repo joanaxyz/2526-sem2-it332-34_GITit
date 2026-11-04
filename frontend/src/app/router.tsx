@@ -23,6 +23,7 @@ import {
   DESIGN_PREVIEW_STORY_MAP_ROUTE,
   ADMIN_ROUTES,
   HOME_ROUTE,
+  LEADERBOARD_ROUTE,
   SHOP_ROUTE,
   STORY_DETAIL_ROUTE,
 } from '@/shared/navigation/routes'
@@ -119,6 +120,12 @@ const appRoutes: RouteObject[] = [
         path: STORY_DETAIL_ROUTE,
         lazy: async () => ({
           Component: (await import('@/features/story-map/pages/StoryMapPage')).StoryMapPage,
+        }),
+      },
+      {
+        path: LEADERBOARD_ROUTE,
+        lazy: async () => ({
+          Component: (await import('@/features/leaderboard/pages/LeaderboardPage')).LeaderboardPage,
         }),
       },
       {

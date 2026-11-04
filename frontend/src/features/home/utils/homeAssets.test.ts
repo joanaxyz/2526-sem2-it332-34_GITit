@@ -53,7 +53,7 @@ describe('homeAssetManifest', () => {
 
     expect(homeAssetManifest({ catalog: undefined, view: 'profile' }).images)
       .not.toContain(achievementArt[0])
-    expect(homeAssetManifest({ catalog: undefined, view: 'skills' }).images)
+    expect(homeAssetManifest({ catalog: undefined, view: 'achievements' }).images)
       .toEqual(expect.arrayContaining(achievementArt))
   })
 })

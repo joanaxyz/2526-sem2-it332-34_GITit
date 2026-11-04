@@ -1,5 +1,5 @@
 import { CommandComparison } from '@/shared/level/components/CommandComparison'
-import { ArrowRight, Gem, Map, RefreshCcw, Repeat2, RotateCcw, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, WandSparkles, XCircle } from 'lucide-react'
+import { ArrowRight, Gem, Map, RefreshCcw, Repeat2, RotateCcw, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, XCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
 
@@ -141,10 +141,10 @@ export function TierOutcomeModal({
           +{run.rewards.coins_awarded} GitCoins
         </Badge>
       ) : null}
-      {!isFailed && !isReplay && run.rewards?.mastery_advanced.length ? (
+      {!isFailed && run.rewards?.xp_awarded ? (
         <Badge variant="secondary" className="game-outcome-badge">
-          <WandSparkles className="size-3.5" />
-          {run.rewards.mastery_advanced.length} skill {run.rewards.mastery_advanced.length === 1 ? 'advanced' : 'advances'}
+          <Sparkles className="size-3.5" />
+          +{run.rewards.xp_awarded} XP
         </Badge>
       ) : null}
       {!isFailed && !isReplay && run.rewards?.chapter_chests_awarded.length ? (

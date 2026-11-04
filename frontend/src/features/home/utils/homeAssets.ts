@@ -66,7 +66,7 @@ export function homeAssetManifest({
     if (avatar) images.push(avatar)
   }
 
-  if (view === 'skills') images.push(...Object.values(ACHIEVEMENT_IMAGES))
+  if (view === 'achievements') images.push(...Object.values(ACHIEVEMENT_IMAGES))
 
   return { anchored, images: Array.from(new Set(images.filter(Boolean))) }
 }

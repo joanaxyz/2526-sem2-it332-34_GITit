@@ -8,7 +8,6 @@ import { useActivityWindow } from '@/features/stats/hooks/useActivityWindow'
 import { HomeAchievementGallery } from './home-stats/HomeAchievementGallery'
 import { HomeProgressPanel } from './home-stats/HomeProgressPanel'
 import { HomeResultsPanel } from './home-stats/HomeResultsPanel'
-import { HomeSkillsPanel } from './home-stats/HomeSkillsPanel'
 import { buildHomeStatsModel } from './home-stats/homeStatsModel'
 
 /**
@@ -35,7 +34,7 @@ export function HomeStatsView({
 
   return (
     <section
-      className={`home-overview-grid${view === 'skills' ? ' is-split' : ''}`}
+      className="home-overview-grid"
       aria-label="Player overview"
     >
       {view === 'progress' ? (
@@ -48,12 +47,7 @@ export function HomeStatsView({
           <HomeResultsPanel />
         </article>
       ) : null}
-      {view === 'skills' ? (
-        <>
-          <HomeSkillsPanel skills={model.skills} />
-          <HomeAchievementGallery achievements={model.achievements} />
-        </>
-      ) : null}
+      {view === 'achievements' ? <HomeAchievementGallery achievements={model.achievements} /> : null}
     </section>
   )
 }
