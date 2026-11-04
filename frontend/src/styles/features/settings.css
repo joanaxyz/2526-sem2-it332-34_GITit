@@ -74,7 +74,12 @@
   outline: none;
   box-shadow: var(--control-focus-ring);
 }
-.settings-fields input[readonly] { opacity: .78; }
+.settings-account, .settings-account-form { display: grid; gap: .85rem; min-width: 0; }
+.settings-account-form .settings-note { margin: 0; overflow-wrap: anywhere; }
+.settings-fields input { min-width: 0; }
+.settings-fields input:disabled { opacity: .55; cursor: not-allowed; }
+.settings-fields input[aria-invalid="true"] { border-color: hsl(var(--destructive)); }
+.settings-fields small { color: hsl(var(--destructive)); }
 .settings-note { margin: .75rem 0 0; color: var(--text-tertiary); font-size: var(--text-xs); line-height: 1.5; }
 .settings-toggle { display: inline-flex; width: fit-content; align-items: center; gap: .7rem; color: var(--text-primary); font-size: var(--text-sm); font-weight: 700; cursor: pointer; }
 .settings-toggle input {

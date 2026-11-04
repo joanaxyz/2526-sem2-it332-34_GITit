@@ -6,6 +6,7 @@ import { useNavigate } from 'react-router-dom'
 import { toast } from 'sonner'
 import { z } from 'zod'
 
+import { AccountSettingsForm } from '@/features/settings/components/AccountSettingsForm'
 import { preferencesApi } from '@/shared/preferences/preferencesApi'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { useServerFieldErrors } from '@/shared/api/useServerFieldErrors'
@@ -127,11 +128,7 @@ export function SettingsPage() {
             <p className="settings-section__desc">Your current sign-in identity.</p>
           </div>
           <div className="settings-section__body">
-            <div className="settings-fields settings-fields--two">
-              <label><span>Username</span><input value={user?.username ?? ''} readOnly /></label>
-              <label><span>Email</span><input value={user?.email ?? ''} readOnly /></label>
-            </div>
-            <p className="settings-note">Username and email changes require a verified-change flow and are intentionally read-only for now.</p>
+            {user ? <AccountSettingsForm key={user.id} user={user} /> : null}
           </div>
         </section>
 

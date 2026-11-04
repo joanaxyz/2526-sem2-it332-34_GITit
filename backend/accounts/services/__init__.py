@@ -10,9 +10,11 @@ from .core import (
 )
 from .oauth import OAuthError, OAuthService
 from .passwords import PasswordResetService
+from .profile import AccountSettingsService
 from .verification import EmailVerificationService
 
 __all__ = [
+    "AccountSettingsService",
     "IssuedTokens",
     "UserService",
     "TokenBlacklistService",

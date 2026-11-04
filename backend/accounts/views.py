@@ -16,7 +16,10 @@ from rest_framework_simplejwt.tokens import RefreshToken
 
 from accounts.serializers import (
     AccessTokenResponseSerializer,
+    AccountUpdateResponseSerializer,
+    AccountUpdateSerializer,
     DetailResponseSerializer,
+    EmailChangeConfirmSerializer,
     EmailVerificationConfirmSerializer,
     EmailVerificationRequiredSerializer,
     EmailVerificationResendSerializer,
@@ -31,6 +34,7 @@ from accounts.serializers import (
     UserSerializer,
 )
 from accounts.services import (
+    AccountSettingsService,
     EmailVerificationService,
     OAuthError,
     OAuthService,
@@ -412,3 +416,31 @@ class MeAPIView(APIView):
     @extend_schema(responses={200: UserSerializer})
     def get(self, request):
         return Response(UserSerializer(request.user).data)
+
+    @extend_schema(request=AccountUpdateSerializer, responses={200: AccountUpdateResponseSerializer})
+    def patch(self, request):
+        serializer = AccountUpdateSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user, pending_email = AccountSettingsService().update(
+            user=request.user, **serializer.validated_data
+        )
+        return Response({"user": UserSerializer(user).data, "pending_email": pending_email})
+
+
+class EmailChangeConfirmAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+    throttle_scope = "auth_security"
+
+    @extend_schema(request=EmailChangeConfirmSerializer, responses={200: UserSerializer})
+    def post(self, request):
+        serializer = EmailChangeConfirmSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        user = AccountSettingsService().confirm_email(
+            user=request.user, code=serializer.validated_data["code"]
+        )
+        if user is None:
+            return Response(
+                {"code": [EmailVerificationService.invalid_code_message]},
+                status=status.HTTP_400_BAD_REQUEST,
+            )
+        return Response(UserSerializer(user).data)

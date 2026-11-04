@@ -101,3 +101,14 @@ class OAuthIdentity(models.Model):
 
     def __str__(self) -> str:
         return f"{self.provider}:{self.subject} -> {self.user_id}"
+
+
+class PendingEmailChange(models.Model):
+    """A proposed address; the sign-in email stays unchanged until confirmed."""
+
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+    email = models.EmailField(max_length=254)
+    code_hash = models.CharField(max_length=64)
+    code_expires_at = models.DateTimeField()
+    failed_attempts = models.PositiveSmallIntegerField(default=0)
+    last_sent_at = models.DateTimeField()

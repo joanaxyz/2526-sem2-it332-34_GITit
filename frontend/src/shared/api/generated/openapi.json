@@ -1160,6 +1160,46 @@
                 }
             }
         },
+        "/api/auth/email-change/confirm/": {
+            "post": {
+                "operationId": "auth_email_change_confirm_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/auth/email-verification/confirm/": {
             "post": {
                 "operationId": "auth_email_verification_confirm_create",
@@ -1330,6 +1370,43 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "auth_me_partial_update",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAccountUpdate"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAccountUpdate"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAccountUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountUpdateResponse"
                                 }
                             }
                         },
@@ -2930,6 +3007,23 @@
                 },
                 "required": [
                     "access"
+                ]
+            },
+            "AccountUpdateResponse": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "$ref": "#/components/schemas/User"
+                    },
+                    "pending_email": {
+                        "type": "string",
+                        "format": "email",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "pending_email",
+                    "user"
                 ]
             },
             "ActivityWindowEnum": {
@@ -5831,6 +5925,18 @@
                     "task"
                 ]
             },
+            "EmailChangeConfirm": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "maxLength": 16
+                    }
+                },
+                "required": [
+                    "code"
+                ]
+            },
             "EmailVerificationConfirm": {
                 "type": "object",
                 "properties": {
@@ -6185,6 +6291,19 @@
                 "required": [
                     "email"
                 ]
+            },
+            "PatchedAccountUpdate": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "maxLength": 30
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                }
             },
             "PatchedAdminChapterUpdateRequest": {
                 "type": "object",

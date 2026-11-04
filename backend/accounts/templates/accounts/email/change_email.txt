@@ -1,0 +1,12 @@
+Hi {{ user.username }},
+
+Your GIT it! email change code is:
+
+    {{ code }}
+
+Enter it in Settings to use this email address for your account. The code expires in {{ expires_minutes }} minutes.
+
+If you didn't request this change, ignore this email. Your account email stays unchanged until you enter the code in Settings.
+
+— GIT it!
+{{ site_url }}

@@ -8,6 +8,7 @@ export type JsonObject = { [key: string]: JsonValue }
 
 export type ApiSchemas = {
   "AccessTokenResponse": { "access": string }
+  "AccountUpdateResponse": { "pending_email": string | null; "user": ApiSchemas["User"] }
   "ActivityWindowEnum": "month" | "week" | "year"
   "AdminAnalyticsResponse": { "active_learners_30d": number; "completions": ApiSchemas["AdminCompletions"]; "kpi_range": ApiSchemas["AdminKpiRange"]; "objectives": { [key: string]: ApiSchemas["RateMetric"] }; "per_story": Array<ApiSchemas["AdminStoryAnalytics"]>; "runebound_performance": ApiSchemas["PerformanceSummaryResponse"]; "runs": ApiSchemas["AdminRuns"] }
   "AdminChapter": { "battle_stage": { [key: string]: JsonValue }; "description": string; "id": number; "is_playable": boolean; "is_published": boolean; "management_source": string; "number": number; "slug": string; "sort_order": number; "story_id": number | null; "title": string }
@@ -90,6 +91,7 @@ export type ApiSchemas = {
   "DrillRunState": { "answered": number; "cards": { [key: string]: { [key: string]: JsonValue } }; "correct": number; "queue": Array<string>; "sequence_pending"?: boolean }
   "DrillRunStateResponse": { "resume": ApiSchemas["DrillResume"] | null }
   "DrillSequence": { "label": string; "steps": Array<string>; "task": string }
+  "EmailChangeConfirm": { "code": string }
   "EmailVerificationConfirm": { "code": string; "email": string }
   "EmailVerificationRequired": { "code": ApiSchemas["EmailVerificationRequiredCodeEnum"]; "detail": string; "email": string }
   "EmailVerificationRequiredCodeEnum": "email_unverified"
@@ -110,6 +112,7 @@ export type ApiSchemas = {
   "PasswordChange": { "current_password": string; "password": string; "password_confirm": string }
   "PasswordResetConfirm": { "password": string; "password_confirm": string; "token": string; "uid": string }
   "PasswordResetRequest": { "email": string }
+  "PatchedAccountUpdate": { "email"?: string; "username"?: string }
   "PatchedAdminChapterUpdateRequest": { "battle_stage"?: { [key: string]: JsonValue }; "description"?: string; "is_playable"?: boolean; "is_published"?: boolean; "number"?: number; "sort_order"?: number; "title"?: string }
   "PatchedAdminStoryUpdateRequest": { "difficulty"?: ApiSchemas["DifficultyEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "sort_order"?: number; "summary"?: string; "title"?: string; "world_slug"?: string }
   "PatchedPlayerPreferences": { "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
@@ -194,6 +197,7 @@ export type ApiPath =
   | "/api/adventure-tier-runs/{run_id}/introduction/complete/"
   | "/api/adventure-tier-runs/{run_id}/retry/"
   | "/api/adventure-tier-runs/{run_id}/submit-command/"
+  | "/api/auth/email-change/confirm/"
   | "/api/auth/email-verification/confirm/"
   | "/api/auth/email-verification/resend/"
   | "/api/auth/login/"
@@ -262,11 +266,12 @@ export type ApiMethodByPath = {
   "/api/adventure-tier-runs/{run_id}/introduction/complete/": "POST"
   "/api/adventure-tier-runs/{run_id}/retry/": "POST"
   "/api/adventure-tier-runs/{run_id}/submit-command/": "POST"
+  "/api/auth/email-change/confirm/": "POST"
   "/api/auth/email-verification/confirm/": "POST"
   "/api/auth/email-verification/resend/": "POST"
   "/api/auth/login/": "POST"
   "/api/auth/logout/": "POST"
-  "/api/auth/me/": "GET"
+  "/api/auth/me/": "GET" | "PATCH"
   "/api/auth/oauth/exchange/": "POST"
   "/api/auth/password-change/": "POST"
   "/api/auth/password-reset/confirm/": "POST"
@@ -338,11 +343,13 @@ export const apiOperations = {
   command_introduction_complete: { method: "POST", path: "/api/adventure-tier-runs/{run_id}/introduction/complete/", operationId: "command_introduction_complete", tags: ["adventure-tier-runs"] },
   adventure_tier_runs_retry_create: { method: "POST", path: "/api/adventure-tier-runs/{run_id}/retry/", operationId: "adventure_tier_runs_retry_create", tags: ["adventure-tier-runs"] },
   adventure_tier_runs_submit_command_create: { method: "POST", path: "/api/adventure-tier-runs/{run_id}/submit-command/", operationId: "adventure_tier_runs_submit_command_create", tags: ["adventure-tier-runs"] },
+  auth_email_change_confirm_create: { method: "POST", path: "/api/auth/email-change/confirm/", operationId: "auth_email_change_confirm_create", tags: ["auth"] },
   auth_email_verification_confirm_create: { method: "POST", path: "/api/auth/email-verification/confirm/", operationId: "auth_email_verification_confirm_create", tags: ["auth"] },
   auth_email_verification_resend_create: { method: "POST", path: "/api/auth/email-verification/resend/", operationId: "auth_email_verification_resend_create", tags: ["auth"] },
   auth_login_create: { method: "POST", path: "/api/auth/login/", operationId: "auth_login_create", tags: ["auth"] },
   auth_logout_create: { method: "POST", path: "/api/auth/logout/", operationId: "auth_logout_create", tags: ["auth"] },
   auth_me_retrieve: { method: "GET", path: "/api/auth/me/", operationId: "auth_me_retrieve", tags: ["auth"] },
+  auth_me_partial_update: { method: "PATCH", path: "/api/auth/me/", operationId: "auth_me_partial_update", tags: ["auth"] },
   auth_oauth_exchange_create: { method: "POST", path: "/api/auth/oauth/exchange/", operationId: "auth_oauth_exchange_create", tags: ["auth"] },
   auth_password_change_create: { method: "POST", path: "/api/auth/password-change/", operationId: "auth_password_change_create", tags: ["auth"] },
   auth_password_reset_confirm_create: { method: "POST", path: "/api/auth/password-reset/confirm/", operationId: "auth_password_reset_confirm_create", tags: ["auth"] },
@@ -423,11 +430,13 @@ export type ApiRequestBodyByOperation = {
   command_introduction_complete: ApiSchemas["IntroductionComplete"]
   adventure_tier_runs_retry_create: null
   adventure_tier_runs_submit_command_create: ApiSchemas["CommandSubmit"]
+  auth_email_change_confirm_create: ApiSchemas["EmailChangeConfirm"]
   auth_email_verification_confirm_create: ApiSchemas["EmailVerificationConfirm"]
   auth_email_verification_resend_create: ApiSchemas["EmailVerificationResend"]
   auth_login_create: ApiSchemas["Login"]
   auth_logout_create: null
   auth_me_retrieve: null
+  auth_me_partial_update: ApiSchemas["PatchedAccountUpdate"]
   auth_oauth_exchange_create: ApiSchemas["OAuthTicketExchange"]
   auth_password_change_create: ApiSchemas["PasswordChange"]
   auth_password_reset_confirm_create: ApiSchemas["PasswordResetConfirm"]
@@ -505,11 +514,13 @@ export type ApiResponseBodyByOperation = {
   command_introduction_complete: ApiSchemas["TeachingResponse"]
   adventure_tier_runs_retry_create: ApiSchemas["AdventureLevelTierRunResponse"]
   adventure_tier_runs_submit_command_create: ApiSchemas["AdventureLevelTierCommandResponse"]
+  auth_email_change_confirm_create: ApiSchemas["User"]
   auth_email_verification_confirm_create: ApiSchemas["SessionResponse"]
   auth_email_verification_resend_create: ApiSchemas["DetailResponse"]
   auth_login_create: ApiSchemas["SessionResponse"]
   auth_logout_create: null
   auth_me_retrieve: ApiSchemas["User"]
+  auth_me_partial_update: ApiSchemas["AccountUpdateResponse"]
   auth_oauth_exchange_create: ApiSchemas["SessionResponse"]
   auth_password_change_create: ApiSchemas["SessionResponse"]
   auth_password_reset_confirm_create: ApiSchemas["DetailResponse"]
