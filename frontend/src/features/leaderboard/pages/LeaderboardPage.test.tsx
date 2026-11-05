@@ -36,7 +36,7 @@ describe('LeaderboardPage', () => {
     const get = vi.spyOn(leaderboardApi, 'get').mockResolvedValue(board)
     renderPage()
 
-    expect((await screen.findByText('ada')).closest('li')).toHaveTextContent('Rank IV · Reviewer')
+    expect((await screen.findByText('ada')).closest('li')).toHaveTextContent('Rank IV · Baron')
     expect(get).toHaveBeenCalledWith('xp')
     expect(screen.getByRole('button', { name: 'XP' })).toHaveAttribute('aria-pressed', 'true')
     expect(screen.getByText('linus (you)')).toBeInTheDocument()

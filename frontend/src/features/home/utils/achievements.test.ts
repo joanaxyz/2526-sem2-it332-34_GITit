@@ -61,9 +61,9 @@ describe('deriveAchievements', () => {
       'star-collector',
       'comeback-kid',
       'sharpshooter',
-      'rank-committer',
-      'rank-reviewer',
-      'rank-release-manager',
+      'rank-knight',
+      'rank-baron',
+      'rank-duke',
       'command-cadet',
       'command-captain',
       'coin-hoarder',
@@ -92,8 +92,8 @@ describe('deriveAchievements', () => {
   it('tracks rank badges against the rank ladder thresholds', () => {
     const byId = new Map(deriveAchievements(home, stats).map((achievement) => [achievement.id, achievement]))
 
-    expect(byId.get('rank-committer')).toMatchObject({ current: 1500, target: 1500, unlocked: true })
-    expect(byId.get('rank-reviewer')).toMatchObject({ current: 2000, target: 3000, unlocked: false })
+    expect(byId.get('rank-knight')).toMatchObject({ current: 1500, target: 1500, unlocked: true })
+    expect(byId.get('rank-baron')).toMatchObject({ current: 2000, target: 3000, unlocked: false })
   })
 
   it('counts GitCoins earned from play, not the spendable balance', () => {

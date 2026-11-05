@@ -50,7 +50,10 @@ def rates(records):
     mastered = [r for r in observed if r["mastered"]]
     car = [s for r in records for s in r["car_scores"]]
     car_first = [s for r in records for s in r["car_first_scores"]]
-    transfer = [r["transfer"] for r in records if r["transfer"] is not None]
+    # Live reports and new studies score checkpoints. Historical retry-policy
+    # studies supply explicit counts so their recorded policy stays unchanged.
+    rta_wins = sum(r.get("rta_wins", int(r["transfer"] or 0)) for r in records)
+    rta_total = sum(r.get("rta_total", int(r["transfer"] is not None)) for r in records)
     retry_total = sum(r.get("retry_total", 0) for r in records)
     result = {
         "scr": rate(len(mastered), len(observed)),
@@ -58,7 +61,7 @@ def rates(records):
         "car_first": rate(sum(car_first), len(car_first), average=True),
         "hlcr": rate(sum(r["mastered"] for r in hard), len(hard)),
         "arc": rate(sum(r["failures"] for r in mastered), len(mastered), average=True),
-        "rta": rate(sum(transfer), len(transfer)),
+        "rta": rate(rta_wins, rta_total),
         "retry_success_rate": rate(sum(r.get("retry_wins", 0) for r in records), retry_total),
     }
     result["rtr"] = result["retry_success_rate"]
@@ -82,6 +85,35 @@ def balanced(records, *, cohort=False):
 
 def content_key(semantic_key, variant_id):
     return semantic_key or f"id:{variant_id}"
+
+
+def retry_transfer_counts(runs, *, end_before=None):
+    """Count the first structurally changed retry in each failure streak.
+
+    Restores the RTA eligibility rule from 6968759: completed/failed first
+    retries in Modules 3–4, excluding replays and same-structure variants.
+    """
+    candidates = runs.filter(
+        is_replay=False,
+        is_transfer=False,
+        tier__adventure_level__chapter__number__in=(3, 4),
+        prior_run__status=SESSION_STATUS_FAILED,
+        status__in=(SESSION_STATUS_COMPLETED, SESSION_STATUS_FAILED),
+    ).exclude(prior_run__prior_run__status=SESSION_STATUS_FAILED)
+    if end_before:
+        candidates = candidates.filter(ended_at__lt=end_before)
+    counts = defaultdict(lambda: {"rta_wins": 0, "rta_total": 0})
+    for run in candidates.select_related("selected_variant", "prior_run__selected_variant"):
+        variant, prior = run.selected_variant, run.prior_run.selected_variant
+        if (
+            variant.initial_state == prior.initial_state
+            and variant.target_state == prior.target_state
+        ):
+            continue
+        count = counts[run.player_id, run.tier_id]
+        count["rta_total"] += 1
+        count["rta_wins"] += run.status == SESSION_STATUS_COMPLETED
+    return counts
 
 
 def scenario_car(clears):

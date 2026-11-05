@@ -4,14 +4,14 @@ import { RANK_TIERS, rankForXp, rankProgressLabel } from '@/shared/progress/rank
 
 describe('rankForXp', () => {
   it.each([
-    [0, 'Newcomer'],
-    [499, 'Newcomer'],
-    [500, 'Contributor'],
-    [1500, 'Committer'],
-    [3000, 'Reviewer'],
-    [4500, 'Release Manager'],
-    [5400, 'Maintainer'],
-    [6000, 'Maintainer'],
+    [0, 'Peasant'],
+    [499, 'Peasant'],
+    [500, 'Squire'],
+    [1500, 'Knight'],
+    [3000, 'Baron'],
+    [4500, 'Duke'],
+    [5400, 'King'],
+    [6000, 'King'],
   ])('places %i XP at %s', (xp, name) => {
     expect(rankForXp(xp).tier.name).toBe(name)
   })

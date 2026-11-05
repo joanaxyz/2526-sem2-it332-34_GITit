@@ -139,6 +139,10 @@ Its versioned manifest fixes participant IDs, tier requirements, accepted
 reference hashes, reserved transfer variants, positive module weights and an
 aware cutoff timestamp. Adding curriculum later does not change its denominator.
 
+New studies use checkpoint policy `mastery-kpis-v2`. Existing studies recorded
+with retry-based policy `mastery-kpis-v3-retry-rta` retain their original
+first structurally changed retry calculation when frozen or exported.
+
 At cutoff, only terminal run evidence at or before the cutoff can establish
 mastery or score CAR. Study CAR scores every assigned scenario by its latest
 fresh clear before cutoff, replays included, against the manifest reference; an
