@@ -110,9 +110,8 @@ def is_diagnostic_command(command: str) -> bool:
     if subcommand == "submodule":
         return args == ["status"]
     if subcommand == "config":
-        return (
-            len([part for part in args if not part.startswith("-")]) == 1
-            or any(option in args for option in {"--get", "--list", "-l"})
+        return len([part for part in args if not part.startswith("-")]) == 1 or any(
+            option in args for option in {"--get", "--list", "-l"}
         )
     if subcommand == "branch":
         return len([part for part in args if not part.startswith("-")]) == 0

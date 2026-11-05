@@ -35,10 +35,18 @@ def test_unknown_git_subcommands_still_count_as_unknown():
     assert not is_diagnostic_command("git frobnicate")
 
 
-@pytest.mark.parametrize("command", [
-    "git -h", "git commit -h", "git switch --help", "git config -h",
-    "git help switch", "git config user.name", "git config --global user.name",
-])
+@pytest.mark.parametrize(
+    "command",
+    [
+        "git -h",
+        "git commit -h",
+        "git switch --help",
+        "git config -h",
+        "git help switch",
+        "git config user.name",
+        "git config --global user.name",
+    ],
+)
 def test_help_and_config_queries_are_accepted_as_read_only(command):
     state = {"repository_initialized": True, "branches": {"main": None}}
     service = ClientCommandExecutionService()
@@ -53,11 +61,17 @@ def test_help_and_config_queries_are_accepted_as_read_only(command):
     assert execution.next_state == service.state_tools.normalize_state(state)
 
 
-@pytest.mark.parametrize("command", [
-    'git commit -m "--help"', 'git commit --message "-h"',
-    'git commit -am "--help"', 'git tag -m "--help" v1',
-    'git stash push -m "--help"', "git add -- -h",
-    'git config user.name Learner',
-])
+@pytest.mark.parametrize(
+    "command",
+    [
+        'git commit -m "--help"',
+        'git commit --message "-h"',
+        'git commit -am "--help"',
+        'git tag -m "--help" v1',
+        'git stash push -m "--help"',
+        "git add -- -h",
+        "git config user.name Learner",
+    ],
+)
 def test_help_looking_values_and_paths_do_not_bypass_mutation_checks(command):
     assert not is_diagnostic_command(command)

@@ -292,7 +292,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git branch -M trunk\" (error: unknown switch `-M`.)",
+            "solution command 1/1 was rejected: \"git branch -M trunk\" (error: unknown switch `M')",
             "repository_initialized is False.",
             "The repository is at None, expected '.'.",
             "HEAD is not on branch 'trunk'."
@@ -807,7 +807,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git branch -M trunk\" (error: unknown switch `-M`.)",
+            "solution command 1/1 was rejected: \"git branch -M trunk\" (error: unknown switch `M')",
             "repository_initialized is False.",
             "The repository is at None, expected 'api-playground'.",
             "HEAD is not on branch 'trunk'."
@@ -945,7 +945,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git -C field-notes init -b main\" (git: '-C' is not supported in this simulator.)",
+            "solution command 1/1 was rejected: \"git -C field-notes init -b main\" (unknown option: -C)",
             "repository_initialized is False.",
             "The repository is at None, expected 'field-notes'."
           ],
@@ -1120,7 +1120,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git -C research-log init -b main\" (git: '-C' is not supported in this simulator.)",
+            "solution command 1/1 was rejected: \"git -C research-log init -b main\" (unknown option: -C)",
             "repository_initialized is False.",
             "The repository is at None, expected 'research-log'."
           ],
@@ -1241,7 +1241,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git branch -M trunk\" (error: unknown switch `-M`.)",
+            "solution command 1/1 was rejected: \"git branch -M trunk\" (error: unknown switch `M')",
             "repository_initialized is False.",
             "The repository is at None, expected 'ui-kit'.",
             "HEAD is not on branch 'trunk'."
@@ -1306,7 +1306,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git -C ui-kit init -b trunk\" (git: '-C' is not supported in this simulator.)",
+            "solution command 1/1 was rejected: \"git -C ui-kit init -b trunk\" (unknown option: -C)",
             "repository_initialized is False.",
             "The repository is at None, expected 'ui-kit'.",
             "HEAD is not on branch 'trunk'."
@@ -2377,7 +2377,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mUpdate form validation'\" (error: unknown option `-mUpdate form validation`.)",
+            "solution command 2/2 was rejected: \"git commit '-mUpdate form validation'\" (error: unknown switch `mUpdate form validation')",
             "Index still has ['src/form.js'].",
             "Commit message did not contain ['Update form validation']."
           ],
@@ -2494,7 +2494,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mClarify setup steps'\" (error: unknown option `-mClarify setup steps`.)",
+            "solution command 2/2 was rejected: \"git commit '-mClarify setup steps'\" (error: unknown switch `mClarify setup steps')",
             "Index still has ['README.md'].",
             "Commit message did not contain ['Clarify setup steps']."
           ],
@@ -2611,7 +2611,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mAdjust navbar spacing'\" (error: unknown option `-mAdjust navbar spacing`.)",
+            "solution command 2/2 was rejected: \"git commit '-mAdjust navbar spacing'\" (error: unknown switch `mAdjust navbar spacing')",
             "Index still has ['styles/navbar.css'].",
             "Commit message did not contain ['Adjust navbar spacing']."
           ],
@@ -2715,7 +2715,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mAdd Docker configuration'\" (error: unknown option `-mAdd Docker configuration`.)",
+            "solution command 2/2 was rejected: \"git commit '-mAdd Docker configuration'\" (error: unknown switch `mAdd Docker configuration')",
             "Index still has ['.env.example', 'Dockerfile'].",
             "Commit message did not contain ['Add Docker configuration']."
           ],
@@ -2819,7 +2819,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mUpdate profile card layout'\" (error: unknown option `-mUpdate profile card layout`.)",
+            "solution command 2/2 was rejected: \"git commit '-mUpdate profile card layout'\" (error: unknown switch `mUpdate profile card layout')",
             "Index still has ['src/profile-card.js', 'styles/profile-card.css'].",
             "Commit message did not contain ['Update profile card layout']."
           ],
@@ -2923,7 +2923,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mRefine search results view'\" (error: unknown option `-mRefine search results view`.)",
+            "solution command 2/2 was rejected: \"git commit '-mRefine search results view'\" (error: unknown switch `mRefine search results view')",
             "Index still has ['src/search.js', 'templates/search.html'].",
             "Commit message did not contain ['Refine search results view']."
           ],
@@ -3027,7 +3027,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mDocument export flow update'\" (error: unknown option `-mDocument export flow update`.)",
+            "solution command 2/2 was rejected: \"git commit '-mDocument export flow update'\" (error: unknown switch `mDocument export flow update')",
             "Index still has ['docs/export.md', 'src/export.py'].",
             "Commit message did not contain ['Document export flow update']."
           ],
@@ -3351,7 +3351,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mInitial commit'\" (error: unknown option `-mInitial commit`.)",
+            "solution command 2/2 was rejected: \"git commit '-mInitial commit'\" (error: unknown switch `mInitial commit')",
             "Index still has ['README.md', 'main.py', 'requirements.txt'].",
             "Commit message did not contain ['Initial commit']."
           ],
@@ -3428,7 +3428,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 1/2 was rejected: \"git add\" (Nothing specified, nothing added.)",
+            "solution command 2/2 was rejected: \"git commit -m \\\"Prepare 1.2 release\\\"\" (nothing to commit, working tree clean)",
             "Repository has 1 commits, expected 2.",
             "Commit message was 'Release 1.1'.",
             "Commit message did not contain ['Prepare 1.2 release']."
@@ -3562,7 +3562,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mFix request handler null check'\" (error: unknown option `-mFix request handler null check`.)",
+            "solution command 2/2 was rejected: \"git commit '-mFix request handler null check'\" (error: unknown switch `mFix request handler null check')",
             "Commit message did not contain ['Fix request handler null check']."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -3677,7 +3677,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mUpdate profile card behavior'\" (error: unknown option `-mUpdate profile card behavior`.)",
+            "solution command 2/2 was rejected: \"git commit '-mUpdate profile card behavior'\" (error: unknown switch `mUpdate profile card behavior')",
             "Commit message did not contain ['Update profile card behavior']."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -3792,7 +3792,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mFix export validation'\" (error: unknown option `-mFix export validation`.)",
+            "solution command 2/2 was rejected: \"git commit '-mFix export validation'\" (error: unknown switch `mFix export validation')",
             "Commit message did not contain ['Fix export validation']."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -3895,7 +3895,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mAdd parser module with unit tests'\" (error: unknown option `-mAdd parser module with unit tests`.)",
+            "solution command 2/2 was rejected: \"git commit '-mAdd parser module with unit tests'\" (error: unknown switch `mAdd parser module with unit tests')",
             "Commit message did not contain ['Add parser module with unit tests']."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -3997,7 +3997,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mRefine search ranking display'\" (error: unknown option `-mRefine search ranking display`.)",
+            "solution command 2/2 was rejected: \"git commit '-mRefine search ranking display'\" (error: unknown switch `mRefine search ranking display')",
             "Commit message did not contain ['Refine search ranking display']."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -4026,7 +4026,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "easy",
       "scenario": "stage-one-hunk",
-      "objective": "Stage __only__ the billing rounding fix and commit it with the message `Fix billing calculation rounding error`. Leave The diagnostic print statements out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the billing rounding fix and commit it with the message `Fix billing calculation rounding error`. Leave the diagnostic print statements out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Fix billing calculation rounding error\"`, `git commit --message=\"Fix billing calculation rounding error\"`, `git commit -m\"Fix billing calculation rounding error\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -4096,7 +4096,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mFix billing calculation rounding error'\" (error: unknown option `-mFix billing calculation rounding error`.)",
+            "solution command 2/2 was rejected: \"git commit '-mFix billing calculation rounding error'\" (error: unknown switch `mFix billing calculation rounding error')",
             "Index still has ['src/billing.py'].",
             "Commit message did not contain ['Fix billing calculation rounding error']."
           ],
@@ -4130,7 +4130,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "easy",
       "scenario": "stage-one-hunk",
-      "objective": "Stage __only__ the auth validation fix and commit it with the message `Fix auth validation`. Leave The unfinished refactor out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the auth validation fix and commit it with the message `Fix auth validation`. Leave the unfinished refactor out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Fix auth validation\"`, `git commit --message=\"Fix auth validation\"`, `git commit -m\"Fix auth validation\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -4200,7 +4200,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mFix auth validation'\" (error: unknown option `-mFix auth validation`.)",
+            "solution command 2/2 was rejected: \"git commit '-mFix auth validation'\" (error: unknown switch `mFix auth validation')",
             "Index still has ['src/auth.py'].",
             "Commit message did not contain ['Fix auth validation']."
           ],
@@ -4234,7 +4234,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "easy",
       "scenario": "stage-one-hunk",
-      "objective": "Stage __only__ the export formatting fix and commit it with the message `Fix export formatting`. Leave The extra logging out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the export formatting fix and commit it with the message `Fix export formatting`. Leave the extra logging out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Fix export formatting\"`, `git commit --message=\"Fix export formatting\"`, `git commit -m\"Fix export formatting\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -4304,7 +4304,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mFix export formatting'\" (error: unknown option `-mFix export formatting`.)",
+            "solution command 2/2 was rejected: \"git commit '-mFix export formatting'\" (error: unknown switch `mFix export formatting')",
             "Index still has ['src/export.py'].",
             "Commit message did not contain ['Fix export formatting']."
           ],
@@ -4338,7 +4338,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "easy",
       "scenario": "another-file-another-hunk",
-      "objective": "Stage __only__ the updated route handlers and commit it with the message `Update API route handlers`. Leave The experimental auth middleware out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the updated route handlers and commit it with the message `Update API route handlers`. Leave the experimental auth middleware out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Update API route handlers\"`, `git commit --message=\"Update API route handlers\"`, `git commit -m\"Update API route handlers\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -4408,7 +4408,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mUpdate API route handlers'\" (error: unknown option `-mUpdate API route handlers`.)",
+            "solution command 2/2 was rejected: \"git commit '-mUpdate API route handlers'\" (error: unknown switch `mUpdate API route handlers')",
             "Index still has ['src/routes.py'].",
             "Commit message did not contain ['Update API route handlers']."
           ],
@@ -4442,7 +4442,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "easy",
       "scenario": "another-file-another-hunk",
-      "objective": "Stage __only__ the ranking algorithm fix and commit it with the message `Fix search ranking`. Leave The cleanup refactor out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the ranking algorithm fix and commit it with the message `Fix search ranking`. Leave the cleanup refactor out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Fix search ranking\"`, `git commit --message=\"Fix search ranking\"`, `git commit -m\"Fix search ranking\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -4512,7 +4512,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mFix search ranking'\" (error: unknown option `-mFix search ranking`.)",
+            "solution command 2/2 was rejected: \"git commit '-mFix search ranking'\" (error: unknown switch `mFix search ranking')",
             "Index still has ['src/search.py'].",
             "Commit message did not contain ['Fix search ranking']."
           ],
@@ -4546,7 +4546,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "medium",
       "scenario": "one-hunk-out-of-many",
-      "objective": "Stage __only__ the parser bug fix and commit it with the message `Fix parser blank-line bug`. Leave The refactor and experiment out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the parser bug fix and commit it with the message `Fix parser blank-line bug`. Leave the refactor and experiment out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Fix parser blank-line bug\"`, `git commit --message=\"Fix parser blank-line bug\"`, `git commit -m\"Fix parser blank-line bug\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -4616,7 +4616,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mFix parser blank-line bug'\" (error: unknown option `-mFix parser blank-line bug`.)",
+            "solution command 2/2 was rejected: \"git commit '-mFix parser blank-line bug'\" (error: unknown switch `mFix parser blank-line bug')",
             "Index still has ['src/parser.py'].",
             "Commit message did not contain ['Fix parser blank-line bug']."
           ],
@@ -4650,7 +4650,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "medium",
       "scenario": "one-hunk-out-of-many",
-      "objective": "Stage __only__ the profile validation fix and commit it with the message `Fix profile validation`. Leave The copy, cleanup, and notes out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the profile validation fix and commit it with the message `Fix profile validation`. Leave the copy, cleanup, and notes out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Fix profile validation\"`, `git commit --message=\"Fix profile validation\"`, `git commit -m\"Fix profile validation\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -4720,7 +4720,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mFix profile validation'\" (error: unknown option `-mFix profile validation`.)",
+            "solution command 2/2 was rejected: \"git commit '-mFix profile validation'\" (error: unknown switch `mFix profile validation')",
             "Index still has ['src/profile.py'].",
             "Commit message did not contain ['Fix profile validation']."
           ],
@@ -4754,7 +4754,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "medium",
       "scenario": "one-hunk-out-of-many",
-      "objective": "Stage __only__ the payment rounding fix and commit it with the message `Fix payment rounding`. Leave The logging, comment edit, and scratch file out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the payment rounding fix and commit it with the message `Fix payment rounding`. Leave the logging, comment edit, and scratch file out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Fix payment rounding\"`, `git commit --message=\"Fix payment rounding\"`, `git commit -m\"Fix payment rounding\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -4824,7 +4824,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mFix payment rounding'\" (error: unknown option `-mFix payment rounding`.)",
+            "solution command 2/2 was rejected: \"git commit '-mFix payment rounding'\" (error: unknown switch `mFix payment rounding')",
             "Index still has ['src/payment.py'].",
             "Commit message did not contain ['Fix payment rounding']."
           ],
@@ -4858,7 +4858,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "medium",
       "scenario": "one-hunk-out-of-many",
-      "objective": "Stage __only__ the dashboard filter fix and commit it with the message `Fix dashboard filter`. Leave The theme work, console output, and notes out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the dashboard filter fix and commit it with the message `Fix dashboard filter`. Leave the theme work, console output, and notes out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Fix dashboard filter\"`, `git commit --message=\"Fix dashboard filter\"`, `git commit -m\"Fix dashboard filter\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -4928,7 +4928,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mFix dashboard filter'\" (error: unknown option `-mFix dashboard filter`.)",
+            "solution command 2/2 was rejected: \"git commit '-mFix dashboard filter'\" (error: unknown switch `mFix dashboard filter')",
             "Index still has ['src/dashboard.js'].",
             "Commit message did not contain ['Fix dashboard filter']."
           ],
@@ -4962,7 +4962,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "medium",
       "scenario": "one-hunk-out-of-many",
-      "objective": "Stage __only__ the network configuration hunk and commit it with the message `Update network Terraform configuration`. Leave The experimental flags and debug file out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the network configuration hunk and commit it with the message `Update network Terraform configuration`. Leave the experimental flags and debug file out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Update network Terraform configuration\"`, `git commit --message=\"Update network Terraform configuration\"`, `git commit -m\"Update network Terraform configuration\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -5032,7 +5032,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mUpdate network Terraform configuration'\" (error: unknown option `-mUpdate network Terraform configuration`.)",
+            "solution command 2/2 was rejected: \"git commit '-mUpdate network Terraform configuration'\" (error: unknown switch `mUpdate network Terraform configuration')",
             "Index still has ['terraform/main.tf'].",
             "Commit message did not contain ['Update network Terraform configuration']."
           ],
@@ -5316,7 +5316,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "hard",
       "scenario": "hunks-across-code-and-tests",
-      "objective": "Stage __only__ the auth validation fix and matching test and commit it with the message `Fix auth validation and add its test`. Leave The refactor, test cleanup, and debug notes out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the auth validation fix and matching test and commit it with the message `Fix auth validation and add its test`. Leave the refactor, test cleanup, and debug notes out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Fix auth validation and add its test\"`, `git commit --message=\"Fix auth validation and add its test\"`, `git commit -m\"Fix auth validation and add its test\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -5405,7 +5405,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 3/3 was rejected: \"git commit '-mFix auth validation and add its test'\" (error: unknown option `-mFix auth validation and add its test`.)",
+            "solution command 3/3 was rejected: \"git commit '-mFix auth validation and add its test'\" (error: unknown switch `mFix auth validation and add its test')",
             "Index still has ['src/auth.py', 'tests/test_auth.py'].",
             "Commit message did not contain ['Fix auth validation and add its test']."
           ],
@@ -5439,7 +5439,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "hard",
       "scenario": "hunks-across-code-and-tests",
-      "objective": "Stage __only__ the search ranking fix and matching test and commit it with the message `Fix search ranking and add its test`. Leave The cleanup, fixture edits, and temporary output out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the search ranking fix and matching test and commit it with the message `Fix search ranking and add its test`. Leave the cleanup, fixture edits, and temporary output out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Fix search ranking and add its test\"`, `git commit --message=\"Fix search ranking and add its test\"`, `git commit -m\"Fix search ranking and add its test\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -5528,7 +5528,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 3/3 was rejected: \"git commit '-mFix search ranking and add its test'\" (error: unknown option `-mFix search ranking and add its test`.)",
+            "solution command 3/3 was rejected: \"git commit '-mFix search ranking and add its test'\" (error: unknown switch `mFix search ranking and add its test')",
             "Index still has ['src/search.py', 'tests/test_search.py'].",
             "Commit message did not contain ['Fix search ranking and add its test']."
           ],
@@ -5562,7 +5562,7 @@
       "level": "partial-staging-and-git-add-p",
       "difficulty": "hard",
       "scenario": "hunks-across-code-and-tests",
-      "objective": "Stage __only__ the export formatting fix and matching test and commit it with the message `Fix export formatting and add its test`. Leave The logging, test cleanup, and follow-up notes out of the commit and finish on `main`.",
+      "objective": "Stage __only__ the export formatting fix and matching test and commit it with the message `Fix export formatting and add its test`. Leave the logging, test cleanup, and follow-up notes out of the commit and finish on `main`.",
       "documented_alternatives": [
         "`git commit --message \"Fix export formatting and add its test\"`, `git commit --message=\"Fix export formatting and add its test\"`, `git commit -m\"Fix export formatting and add its test\"`, single quotes instead of double. The message must match exactly (case-sensitive; surrounding spaces ignored).",
         "Common patterns that apply: P4, P5, P6."
@@ -5651,7 +5651,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 3/3 was rejected: \"git commit '-mFix export formatting and add its test'\" (error: unknown option `-mFix export formatting and add its test`.)",
+            "solution command 3/3 was rejected: \"git commit '-mFix export formatting and add its test'\" (error: unknown switch `mFix export formatting and add its test')",
             "Index still has ['src/export.py', 'tests/test_export.py'].",
             "Commit message did not contain ['Fix export formatting and add its test']."
           ],
@@ -6118,7 +6118,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git commit --amend '-mInitial commit'\" (error: unknown option `-mInitial commit`.)",
+            "solution command 1/1 was rejected: \"git commit --amend '-mInitial commit'\" (error: unknown switch `mInitial commit')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Commit message did not contain ['Initial commit']."
           ],
@@ -6205,7 +6205,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git commit --amend '-mClarify login copy'\" (error: unknown option `-mClarify login copy`.)",
+            "solution command 1/1 was rejected: \"git commit --amend '-mClarify login copy'\" (error: unknown switch `mClarify login copy')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Commit message did not contain ['Clarify login copy']."
           ],
@@ -6292,7 +6292,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git commit --amend '-mClarify setup requirements'\" (error: unknown option `-mClarify setup requirements`.)",
+            "solution command 1/1 was rejected: \"git commit --amend '-mClarify setup requirements'\" (error: unknown switch `mClarify setup requirements')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Commit message did not contain ['Clarify setup requirements']."
           ],
@@ -6379,7 +6379,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git commit --amend '-mAdjust navbar spacing'\" (error: unknown option `-mAdjust navbar spacing`.)",
+            "solution command 1/1 was rejected: \"git commit --amend '-mAdjust navbar spacing'\" (error: unknown switch `mAdjust navbar spacing')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Commit message did not contain ['Adjust navbar spacing']."
           ],
@@ -6466,7 +6466,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git commit --amend '-mUpdate Terraform staging environment configuration'\" (error: unknown option `-mUpdate Terraform staging environment configuration`.)",
+            "solution command 1/1 was rejected: \"git commit --amend '-mUpdate Terraform staging environment configuration'\" (error: unknown switch `mUpdate Terraform staging environment configuration')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Commit message did not contain ['Update Terraform staging environment configuration']."
           ],
@@ -6583,7 +6583,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit --amend '-mAdd auth module'\" (error: unknown option `-mAdd auth module`.)",
+            "solution command 2/2 was rejected: \"git commit --amend '-mAdd auth module'\" (error: unknown switch `mAdd auth module')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Index still has ['src/logout.py'].",
             "Commit changes were missing ['src/logout.py']."
@@ -6701,7 +6701,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit --amend '-mUpdate profile card layout'\" (error: unknown option `-mUpdate profile card layout`.)",
+            "solution command 2/2 was rejected: \"git commit --amend '-mUpdate profile card layout'\" (error: unknown switch `mUpdate profile card layout')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Index still has ['styles/profile-card.css'].",
             "Commit changes were missing ['styles/profile-card.css']."
@@ -6819,7 +6819,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit --amend '-mDocument export flow update'\" (error: unknown option `-mDocument export flow update`.)",
+            "solution command 2/2 was rejected: \"git commit --amend '-mDocument export flow update'\" (error: unknown switch `mDocument export flow update')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Index still has ['docs/export.md'].",
             "Commit changes were missing ['docs/export.md']."
@@ -6937,7 +6937,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit --amend '-mRefine search results view'\" (error: unknown option `-mRefine search results view`.)",
+            "solution command 2/2 was rejected: \"git commit --amend '-mRefine search results view'\" (error: unknown switch `mRefine search results view')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Index still has ['templates/search.html'].",
             "Commit changes were missing ['templates/search.html']."
@@ -7055,7 +7055,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit --amend '-mAdd parser feature and update changelog'\" (error: unknown option `-mAdd parser feature and update changelog`.)",
+            "solution command 2/2 was rejected: \"git commit --amend '-mAdd parser feature and update changelog'\" (error: unknown switch `mAdd parser feature and update changelog')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Index still has ['docs/CHANGELOG.md'].",
             "Commit message did not contain ['Add parser feature and update changelog']."
@@ -7173,7 +7173,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit --amend '-mPolish profile card layout'\" (error: unknown option `-mPolish profile card layout`.)",
+            "solution command 2/2 was rejected: \"git commit --amend '-mPolish profile card layout'\" (error: unknown switch `mPolish profile card layout')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Index still has ['styles/profile-layout.css'].",
             "Commit message did not contain ['Polish profile card layout']."
@@ -7465,7 +7465,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit --amend '-mAdd auth validation coverage'\" (error: unknown option `-mAdd auth validation coverage`.)",
+            "solution command 2/2 was rejected: \"git commit --amend '-mAdd auth validation coverage'\" (error: unknown switch `mAdd auth validation coverage')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Index still has ['tests/test_auth.py'].",
             "Commit message did not contain ['Add auth validation coverage']."
@@ -7583,7 +7583,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit --amend '-mDocument export validation behavior'\" (error: unknown option `-mDocument export validation behavior`.)",
+            "solution command 2/2 was rejected: \"git commit --amend '-mDocument export validation behavior'\" (error: unknown switch `mDocument export validation behavior')",
             "Branch 'main' tip 'c2' compared with replaced commit 'c2'.",
             "Index still has ['docs/export.md'].",
             "Commit message did not contain ['Document export validation behavior']."
@@ -7904,7 +7904,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git restore --worktree styles/theme.css\" (error: unknown option `--worktree`.)",
+            "solution command 1/1 was rejected: \"git restore --worktree styles/theme.css\" (error: unknown option `worktree')",
             "Working tree still has changes or conflicts."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -7919,7 +7919,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git restore -W styles/theme.css\" (error: unknown option `-W`.)",
+            "solution command 1/1 was rejected: \"git restore -W styles/theme.css\" (error: unknown switch `W')",
             "Working tree still has changes or conflicts."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -7934,7 +7934,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git checkout -- styles/theme.css\" (git checkout in this simulator supports -b to create a branch, or --ours/--theirs for conflicted files.)",
+            "solution command 1/1 was rejected: \"git checkout -- styles/theme.css\" (error: invalid checkout arguments)",
             "Working tree still has changes or conflicts."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -9260,7 +9260,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 1/4 was rejected: \"git restore -W tmp/output.txt\" (error: unknown option `-W`.)",
+            "solution command 1/4 was rejected: \"git restore -W tmp/output.txt\" (error: unknown switch `W')",
             "Repository has 1 commits, expected 2.",
             "Commit message was 'Initial project snapshot'.",
             "Index still has ['debug.log'].",
@@ -9302,7 +9302,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 2/4 was rejected: \"git restore -W tmp/output.txt\" (error: unknown option `-W`.)",
+            "solution command 2/4 was rejected: \"git restore -W tmp/output.txt\" (error: unknown switch `W')",
             "Repository has 1 commits, expected 2.",
             "Commit message was 'Initial project snapshot'.",
             "Working tree still contains ['tmp/output.txt']."
@@ -9455,7 +9455,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 1/4 was rejected: \"git restore -W build/invoice.html\" (error: unknown option `-W`.)",
+            "solution command 1/4 was rejected: \"git restore -W build/invoice.html\" (error: unknown switch `W')",
             "Repository has 1 commits, expected 2.",
             "Commit message was 'Initial project snapshot'.",
             "Index still has ['notes/invoice-ideas.md'].",
@@ -9497,7 +9497,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 2/4 was rejected: \"git restore -W build/invoice.html\" (error: unknown option `-W`.)",
+            "solution command 2/4 was rejected: \"git restore -W build/invoice.html\" (error: unknown switch `W')",
             "Repository has 1 commits, expected 2.",
             "Commit message was 'Initial project snapshot'.",
             "Working tree still contains ['build/invoice.html']."
@@ -16073,7 +16073,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git branch -u origin/feature/auth\" (error: unknown switch `-u`.)",
+            "solution command 1/1 was rejected: \"git branch -u origin/feature/auth\" (error: unknown switch `u')",
             "Upstream for 'feature/auth' is not set.",
             "'origin/feature/auth' and 'feature/auth' do not match."
           ],
@@ -16089,7 +16089,7 @@
           "counted_commands": 0,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git branch --set-upstream-to=origin/feature/auth\" (error: unknown switch `--set-upstream-to=origin/feature/auth`.)",
+            "solution command 1/1 was rejected: \"git branch --set-upstream-to=origin/feature/auth\" (error: unknown option `set-upstream-to=origin/feature/auth')",
             "Upstream for 'feature/auth' is not set.",
             "'origin/feature/auth' and 'feature/auth' do not match."
           ],
@@ -16168,7 +16168,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git branch -u origin/feature/orders\" (error: unknown switch `-u`.)",
+            "solution command 1/1 was rejected: \"git branch -u origin/feature/orders\" (error: unknown switch `u')",
             "Upstream for 'feature/orders' is not set.",
             "'origin/feature/orders' and 'feature/orders' do not match."
           ],
@@ -16184,7 +16184,7 @@
           "counted_commands": 0,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git branch --set-upstream-to=origin/feature/orders\" (error: unknown switch `--set-upstream-to=origin/feature/orders`.)",
+            "solution command 1/1 was rejected: \"git branch --set-upstream-to=origin/feature/orders\" (error: unknown option `set-upstream-to=origin/feature/orders')",
             "Upstream for 'feature/orders' is not set.",
             "'origin/feature/orders' and 'feature/orders' do not match."
           ],
@@ -16263,7 +16263,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git branch -u origin/feature/parser\" (error: unknown switch `-u`.)",
+            "solution command 1/1 was rejected: \"git branch -u origin/feature/parser\" (error: unknown switch `u')",
             "Upstream for 'feature/parser' is not set.",
             "'origin/feature/parser' and 'feature/parser' do not match."
           ],
@@ -16279,7 +16279,7 @@
           "counted_commands": 0,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git branch --set-upstream-to=origin/feature/parser\" (error: unknown switch `--set-upstream-to=origin/feature/parser`.)",
+            "solution command 1/1 was rejected: \"git branch --set-upstream-to=origin/feature/parser\" (error: unknown option `set-upstream-to=origin/feature/parser')",
             "Upstream for 'feature/parser' is not set.",
             "'origin/feature/parser' and 'feature/parser' do not match."
           ],
@@ -16358,7 +16358,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git branch -u origin/feature/v2-migration-guide\" (error: unknown switch `-u`.)",
+            "solution command 1/1 was rejected: \"git branch -u origin/feature/v2-migration-guide\" (error: unknown switch `u')",
             "Upstream for 'feature/v2-migration-guide' is not set.",
             "'origin/feature/v2-migration-guide' and 'feature/v2-migration-guide' do not match."
           ],
@@ -16374,7 +16374,7 @@
           "counted_commands": 0,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git branch --set-upstream-to=origin/feature/v2-migration-guide\" (error: unknown switch `--set-upstream-to=origin/feature/v2-migration-guide`.)",
+            "solution command 1/1 was rejected: \"git branch --set-upstream-to=origin/feature/v2-migration-guide\" (error: unknown option `set-upstream-to=origin/feature/v2-migration-guide')",
             "Upstream for 'feature/v2-migration-guide' is not set.",
             "'origin/feature/v2-migration-guide' and 'feature/v2-migration-guide' do not match."
           ],
@@ -17318,7 +17318,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git pull --no-rebase origin develop\" (error: unknown option `--no-rebase`.)",
+            "solution command 1/1 was rejected: \"git pull --no-rebase origin develop\" (error: unknown option `no-rebase')",
             "Missing commits in history: ['c2']."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -17423,7 +17423,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git pull --no-rebase origin staging\" (error: unknown option `--no-rebase`.)",
+            "solution command 1/1 was rejected: \"git pull --no-rebase origin staging\" (error: unknown option `no-rebase')",
             "Missing commits in history: ['c2']."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -17817,7 +17817,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 3/3 was rejected: \"git pull --no-rebase origin develop\" (error: unknown option `--no-rebase`.)",
+            "solution command 3/3 was rejected: \"git pull --no-rebase origin develop\" (error: unknown option `no-rebase')",
             "Missing commits in history: ['c2'].",
             "'origin/develop' and 'develop' do not match."
           ],
@@ -17903,7 +17903,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 3/3 was rejected: \"git pull --no-rebase origin release/next\" (error: unknown option `--no-rebase`.)",
+            "solution command 3/3 was rejected: \"git pull --no-rebase origin release/next\" (error: unknown option `no-rebase')",
             "Missing commits in history: ['c2'].",
             "'origin/release/next' and 'release/next' do not match."
           ],
@@ -18358,7 +18358,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 1/2 was rejected: \"git pull --no-rebase origin feature/payments\" (error: unknown option `--no-rebase`.)",
+            "solution command 1/2 was rejected: \"git pull --no-rebase origin feature/payments\" (error: unknown option `no-rebase')",
             "Missing commits in history: ['c3'].",
             "'origin/feature/payments' and 'feature/payments' do not match."
           ],
@@ -18449,7 +18449,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 1/2 was rejected: \"git pull --no-rebase origin hotfix/critical\" (error: unknown option `--no-rebase`.)",
+            "solution command 1/2 was rejected: \"git pull --no-rebase origin hotfix/critical\" (error: unknown option `no-rebase')",
             "Missing commits in history: ['c3'].",
             "'origin/hotfix/critical' and 'hotfix/critical' do not match."
           ],
@@ -18540,7 +18540,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 1/2 was rejected: \"git pull --no-rebase origin feature/ui-layout\" (error: unknown option `--no-rebase`.)",
+            "solution command 1/2 was rejected: \"git pull --no-rebase origin feature/ui-layout\" (error: unknown option `no-rebase')",
             "Missing commits in history: ['c3'].",
             "'origin/feature/ui-layout' and 'feature/ui-layout' do not match."
           ],
@@ -18752,7 +18752,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 2/3 was rejected: \"git merge --no-edit origin/feature/auth\" (error: unknown option `--no-edit`.)",
+            "solution command 2/3 was rejected: \"git merge --no-edit origin/feature/auth\" (error: unknown option `no-edit')",
             "Missing commits in history: ['c3'].",
             "'origin/feature/auth' and 'feature/auth' do not match.",
             "Required technique missing: merge"
@@ -18818,7 +18818,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 2/3 was rejected: \"git merge --no-edit origin/feature/payments\" (error: unknown option `--no-edit`.)",
+            "solution command 2/3 was rejected: \"git merge --no-edit origin/feature/payments\" (error: unknown option `no-edit')",
             "Missing commits in history: ['c3'].",
             "'origin/feature/payments' and 'feature/payments' do not match.",
             "Required technique missing: merge"
@@ -18884,7 +18884,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 2/3 was rejected: \"git merge --no-edit origin/hotfix/critical\" (error: unknown option `--no-edit`.)",
+            "solution command 2/3 was rejected: \"git merge --no-edit origin/hotfix/critical\" (error: unknown option `no-edit')",
             "Missing commits in history: ['c3'].",
             "'origin/hotfix/critical' and 'hotfix/critical' do not match.",
             "Required technique missing: merge"
@@ -18951,7 +18951,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 2/3 was rejected: \"git merge --no-edit origin/feature/test-runner-v2\" (error: unknown option `--no-edit`.)",
+            "solution command 2/3 was rejected: \"git merge --no-edit origin/feature/test-runner-v2\" (error: unknown option `no-edit')",
             "Missing commits in history: ['c3'].",
             "'origin/feature/test-runner-v2' and 'feature/test-runner-v2' do not match.",
             "Required technique missing: merge"
@@ -19285,7 +19285,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 3/4 was rejected: \"git merge --no-edit origin/feature/auth\" (error: unknown option `--no-edit`.)",
+            "solution command 3/4 was rejected: \"git merge --no-edit origin/feature/auth\" (error: unknown option `no-edit')",
             "Missing commits in history: ['c3'].",
             "'origin/feature/auth' and 'feature/auth' do not match."
           ],
@@ -19367,7 +19367,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 3/4 was rejected: \"git merge --no-edit origin/feature/payments\" (error: unknown option `--no-edit`.)",
+            "solution command 3/4 was rejected: \"git merge --no-edit origin/feature/payments\" (error: unknown option `no-edit')",
             "Missing commits in history: ['c3'].",
             "'origin/feature/payments' and 'feature/payments' do not match."
           ],
@@ -19449,7 +19449,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 3/4 was rejected: \"git merge --no-edit origin/hotfix/critical\" (error: unknown option `--no-edit`.)",
+            "solution command 3/4 was rejected: \"git merge --no-edit origin/hotfix/critical\" (error: unknown option `no-edit')",
             "Missing commits in history: ['c3'].",
             "'origin/hotfix/critical' and 'hotfix/critical' do not match."
           ],
@@ -19532,7 +19532,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 3/4 was rejected: \"git merge --no-edit origin/feature/compliance-audit\" (error: unknown option `--no-edit`.)",
+            "solution command 3/4 was rejected: \"git merge --no-edit origin/feature/compliance-audit\" (error: unknown option `no-edit')",
             "Missing commits in history: ['c3'].",
             "'origin/feature/compliance-audit' and 'feature/compliance-audit' do not match."
           ],
@@ -19805,7 +19805,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-edit feature/auth\" (error: unknown option `--no-edit`.)",
+            "solution command 1/1 was rejected: \"git merge --no-edit feature/auth\" (error: unknown option `no-edit')",
             "Branch 'main' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -19821,7 +19821,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --ff feature/auth\" (error: unknown option `--ff`.)",
+            "solution command 1/1 was rejected: \"git merge --ff feature/auth\" (error: unknown option `ff')",
             "Branch 'main' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -19837,7 +19837,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --ff-only feature/auth\" (error: unknown option `--ff-only`.)",
+            "solution command 1/1 was rejected: \"git merge --ff-only feature/auth\" (error: unknown option `ff-only')",
             "Branch 'main' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -19897,7 +19897,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-edit feature/payments\" (error: unknown option `--no-edit`.)",
+            "solution command 1/1 was rejected: \"git merge --no-edit feature/payments\" (error: unknown option `no-edit')",
             "Branch 'develop' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -19913,7 +19913,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --ff feature/payments\" (error: unknown option `--ff`.)",
+            "solution command 1/1 was rejected: \"git merge --ff feature/payments\" (error: unknown option `ff')",
             "Branch 'develop' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -19929,7 +19929,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --ff-only feature/payments\" (error: unknown option `--ff-only`.)",
+            "solution command 1/1 was rejected: \"git merge --ff-only feature/payments\" (error: unknown option `ff-only')",
             "Branch 'develop' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -19989,7 +19989,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-edit hotfix/fix-critical\" (error: unknown option `--no-edit`.)",
+            "solution command 1/1 was rejected: \"git merge --no-edit hotfix/fix-critical\" (error: unknown option `no-edit')",
             "Branch 'release/v2' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -20005,7 +20005,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --ff hotfix/fix-critical\" (error: unknown option `--ff`.)",
+            "solution command 1/1 was rejected: \"git merge --ff hotfix/fix-critical\" (error: unknown option `ff')",
             "Branch 'release/v2' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -20021,7 +20021,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --ff-only hotfix/fix-critical\" (error: unknown option `--ff-only`.)",
+            "solution command 1/1 was rejected: \"git merge --ff-only hotfix/fix-critical\" (error: unknown option `ff-only')",
             "Branch 'release/v2' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -20081,7 +20081,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-edit docs/readme-update\" (error: unknown option `--no-edit`.)",
+            "solution command 1/1 was rejected: \"git merge --no-edit docs/readme-update\" (error: unknown option `no-edit')",
             "Branch 'staging' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -20097,7 +20097,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --ff docs/readme-update\" (error: unknown option `--ff`.)",
+            "solution command 1/1 was rejected: \"git merge --ff docs/readme-update\" (error: unknown option `ff')",
             "Branch 'staging' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -20113,7 +20113,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --ff-only docs/readme-update\" (error: unknown option `--ff-only`.)",
+            "solution command 1/1 was rejected: \"git merge --ff-only docs/readme-update\" (error: unknown option `ff-only')",
             "Branch 'staging' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -20173,7 +20173,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-edit feature/contact-form\" (error: unknown option `--no-edit`.)",
+            "solution command 1/1 was rejected: \"git merge --no-edit feature/contact-form\" (error: unknown option `no-edit')",
             "Branch 'integration' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -20189,7 +20189,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --ff feature/contact-form\" (error: unknown option `--ff`.)",
+            "solution command 1/1 was rejected: \"git merge --ff feature/contact-form\" (error: unknown option `ff')",
             "Branch 'integration' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -20205,7 +20205,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --ff-only feature/contact-form\" (error: unknown option `--ff-only`.)",
+            "solution command 1/1 was rejected: \"git merge --ff-only feature/contact-form\" (error: unknown option `ff-only')",
             "Branch 'integration' has depth 1, expected at least 2.",
             "Required technique missing: merge"
           ],
@@ -20265,7 +20265,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-ff --no-edit feature/auth\" (error: unknown option `--no-edit`.)",
+            "solution command 1/1 was rejected: \"git merge --no-ff --no-edit feature/auth\" (error: unknown option `no-edit')",
             "Branch 'main' has depth 1, expected at least 3.",
             "Required technique missing: merge"
           ],
@@ -20293,7 +20293,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-ff -m 'any message' feature/auth\" (error: unknown option `-m`.)",
+            "solution command 1/1 was rejected: \"git merge --no-ff -m 'any message' feature/auth\" (error: unknown switch `m')",
             "Branch 'main' has depth 1, expected at least 3.",
             "Required technique missing: merge"
           ],
@@ -20353,7 +20353,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-ff --no-edit feature/payments\" (error: unknown option `--no-edit`.)",
+            "solution command 1/1 was rejected: \"git merge --no-ff --no-edit feature/payments\" (error: unknown option `no-edit')",
             "Branch 'develop' has depth 1, expected at least 3.",
             "Required technique missing: merge"
           ],
@@ -20381,7 +20381,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-ff -m 'any message' feature/payments\" (error: unknown option `-m`.)",
+            "solution command 1/1 was rejected: \"git merge --no-ff -m 'any message' feature/payments\" (error: unknown switch `m')",
             "Branch 'develop' has depth 1, expected at least 3.",
             "Required technique missing: merge"
           ],
@@ -20441,7 +20441,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-ff --no-edit hotfix/fix-critical\" (error: unknown option `--no-edit`.)",
+            "solution command 1/1 was rejected: \"git merge --no-ff --no-edit hotfix/fix-critical\" (error: unknown option `no-edit')",
             "Branch 'release/v2' has depth 1, expected at least 3.",
             "Required technique missing: merge"
           ],
@@ -20469,7 +20469,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-ff -m 'any message' hotfix/fix-critical\" (error: unknown option `-m`.)",
+            "solution command 1/1 was rejected: \"git merge --no-ff -m 'any message' hotfix/fix-critical\" (error: unknown switch `m')",
             "Branch 'release/v2' has depth 1, expected at least 3.",
             "Required technique missing: merge"
           ],
@@ -20529,7 +20529,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-ff --no-edit feature/sso-integration\" (error: unknown option `--no-edit`.)",
+            "solution command 1/1 was rejected: \"git merge --no-ff --no-edit feature/sso-integration\" (error: unknown option `no-edit')",
             "Branch 'release/v1' has depth 1, expected at least 3.",
             "Required technique missing: merge"
           ],
@@ -20557,7 +20557,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git merge --no-ff -m 'any message' feature/sso-integration\" (error: unknown option `-m`.)",
+            "solution command 1/1 was rejected: \"git merge --no-ff -m 'any message' feature/sso-integration\" (error: unknown switch `m')",
             "Branch 'release/v1' has depth 1, expected at least 3.",
             "Required technique missing: merge"
           ],
@@ -20699,7 +20699,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 4/4 was rejected: \"git merge --no-ff --no-edit feature/reports\" (error: unknown option `--no-edit`.)",
+            "solution command 4/4 was rejected: \"git merge --no-ff --no-edit feature/reports\" (error: unknown option `no-edit')",
             "Commit is not a merge commit.",
             "Required technique missing: merge"
           ],
@@ -20845,7 +20845,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 4/4 was rejected: \"git merge --no-ff --no-edit feature/mfa\" (error: unknown option `--no-edit`.)",
+            "solution command 4/4 was rejected: \"git merge --no-ff --no-edit feature/mfa\" (error: unknown option `no-edit')",
             "Commit is not a merge commit.",
             "Required technique missing: merge"
           ],
@@ -20925,7 +20925,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git merge --no-ff --no-edit feature/auth\" (error: unknown option `--no-edit`.)",
+            "solution command 2/2 was rejected: \"git merge --no-ff --no-edit feature/auth\" (error: unknown option `no-edit')",
             "Branch 'main' has depth 2, expected at least 4.",
             "Required technique missing: merge"
           ],
@@ -20955,7 +20955,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git merge --no-ff -m 'any message' feature/auth\" (error: unknown option `-m`.)",
+            "solution command 2/2 was rejected: \"git merge --no-ff -m 'any message' feature/auth\" (error: unknown switch `m')",
             "Branch 'main' has depth 2, expected at least 4.",
             "Required technique missing: merge"
           ],
@@ -21031,7 +21031,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git merge --no-ff --no-edit feature/payments\" (error: unknown option `--no-edit`.)",
+            "solution command 2/2 was rejected: \"git merge --no-ff --no-edit feature/payments\" (error: unknown option `no-edit')",
             "Branch 'develop' has depth 2, expected at least 4.",
             "Required technique missing: merge"
           ],
@@ -21061,7 +21061,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git merge --no-ff -m 'any message' feature/payments\" (error: unknown option `-m`.)",
+            "solution command 2/2 was rejected: \"git merge --no-ff -m 'any message' feature/payments\" (error: unknown switch `m')",
             "Branch 'develop' has depth 2, expected at least 4.",
             "Required technique missing: merge"
           ],
@@ -21137,7 +21137,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git merge --no-ff --no-edit hotfix/critical\" (error: unknown option `--no-edit`.)",
+            "solution command 2/2 was rejected: \"git merge --no-ff --no-edit hotfix/critical\" (error: unknown option `no-edit')",
             "Branch 'release/v1' has depth 2, expected at least 4.",
             "Required technique missing: merge"
           ],
@@ -21167,7 +21167,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git merge --no-ff -m 'any message' hotfix/critical\" (error: unknown option `-m`.)",
+            "solution command 2/2 was rejected: \"git merge --no-ff -m 'any message' hotfix/critical\" (error: unknown switch `m')",
             "Branch 'release/v1' has depth 2, expected at least 4.",
             "Required technique missing: merge"
           ],
@@ -21243,7 +21243,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git merge --no-ff --no-edit hotfix/cert-renewal\" (error: unknown option `--no-edit`.)",
+            "solution command 2/2 was rejected: \"git merge --no-ff --no-edit hotfix/cert-renewal\" (error: unknown option `no-edit')",
             "Branch 'release/stable' has depth 2, expected at least 4.",
             "Required technique missing: merge"
           ],
@@ -21273,7 +21273,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git merge --no-ff -m 'any message' hotfix/cert-renewal\" (error: unknown option `-m`.)",
+            "solution command 2/2 was rejected: \"git merge --no-ff -m 'any message' hotfix/cert-renewal\" (error: unknown switch `m')",
             "Branch 'release/stable' has depth 2, expected at least 4.",
             "Required technique missing: merge"
           ],
@@ -21777,7 +21777,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mAdd report generator module'\" (error: unknown option `-mAdd report generator module`.)",
+            "solution command 2/2 was rejected: \"git commit '-mAdd report generator module'\" (error: unknown switch `mAdd report generator module')",
             "Branch 'integration' has depth 1, expected at least 2."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -21876,7 +21876,7 @@
           "counted_commands": 2,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git commit '-mAdd payment flow'\" (error: unknown option `-mAdd payment flow`.)",
+            "solution command 2/2 was rejected: \"git commit '-mAdd payment flow'\" (error: unknown switch `mAdd payment flow')",
             "Branch 'staging' has depth 1, expected at least 2."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -21967,7 +21967,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 3/3 was rejected: \"git branch --delete --force feature/auth\" (error: unknown switch `--force`.)",
+            "solution command 3/3 was rejected: \"git branch --delete --force feature/auth\" (error: unknown option `force')",
             "Branch 'feature/auth' still exists."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -22075,7 +22075,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 3/3 was rejected: \"git branch --delete --force feature/orders\" (error: unknown switch `--force`.)",
+            "solution command 3/3 was rejected: \"git branch --delete --force feature/orders\" (error: unknown option `force')",
             "Branch 'feature/orders' still exists."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -22183,7 +22183,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 3/3 was rejected: \"git branch --delete --force feature/parser\" (error: unknown switch `--force`.)",
+            "solution command 3/3 was rejected: \"git branch --delete --force feature/parser\" (error: unknown option `force')",
             "Branch 'feature/parser' still exists."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -22306,7 +22306,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 2/3 was rejected: \"git commit '-mAdd log rotation configuration'\" (error: unknown option `-mAdd log rotation configuration`.)",
+            "solution command 2/3 was rejected: \"git commit '-mAdd log rotation configuration'\" (error: unknown switch `mAdd log rotation configuration')",
             "Branch 'main' has depth 1, expected at least 2.",
             "Branch 'feature/log-rotation' still exists."
           ],
@@ -22324,7 +22324,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 3/3 was rejected: \"git branch --delete --force feature/log-rotation\" (error: unknown switch `--force`.)",
+            "solution command 3/3 was rejected: \"git branch --delete --force feature/log-rotation\" (error: unknown option `force')",
             "Branch 'feature/log-rotation' still exists."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -22677,7 +22677,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 3/3 was rejected: \"git commit '-mAdd GDPR data export endpoint'\" (error: unknown option `-mAdd GDPR data export endpoint`.)",
+            "solution command 3/3 was rejected: \"git commit '-mAdd GDPR data export endpoint'\" (error: unknown switch `mAdd GDPR data export endpoint')",
             "Branch 'staging' has 1 commits, expected 2.",
             "Commit message was 'Bootstrap project'.",
             "Index still has ['src/gdpr_export.py']."
@@ -22960,7 +22960,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 4/4 was rejected: \"git branch --delete --force feature/cli-colors\" (error: unknown switch `--force`.)",
+            "solution command 4/4 was rejected: \"git branch --delete --force feature/cli-colors\" (error: unknown option `force')",
             "Branch 'feature/cli-colors' still exists."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -23076,7 +23076,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 4/4 was rejected: \"git branch --delete --force feature/toast-ui\" (error: unknown switch `--force`.)",
+            "solution command 4/4 was rejected: \"git branch --delete --force feature/toast-ui\" (error: unknown option `force')",
             "Branch 'feature/toast-ui' still exists."
           ],
           "status": "unsupported_or_incomplete_route"
@@ -25914,7 +25914,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git reset --merge\" (error: unknown option `--merge`.)",
+            "solution command 1/1 was rejected: \"git reset --merge\" (error: unknown option `merge')",
             "Working tree still has changes or conflicts.",
             "Conflicts remain: ['src/theme.css']."
           ],
@@ -25977,7 +25977,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git reset --merge\" (error: unknown option `--merge`.)",
+            "solution command 1/1 was rejected: \"git reset --merge\" (error: unknown option `merge')",
             "Working tree still has changes or conflicts.",
             "Conflicts remain: ['src/payments.py']."
           ],
@@ -27470,7 +27470,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 2/4 was rejected: \"git merge\" (usage: git merge [--no-ff | --squash] <branch>)",
+            "solution command 2/4 was rejected: \"git merge\" (fatal: No remote for the current branch.)",
             "Commit is not a merge commit.",
             "Commit parents were ['c0'], expected 'c2'.",
             "Tree mismatched paths: ['src/prices.py'].",
@@ -27520,7 +27520,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 3/4 was rejected: \"git mergetool -t meld\" (error: unknown option `-t`.)",
+            "solution command 3/4 was rejected: \"git mergetool -t meld\" (error: unknown switch `t')",
             "Commit is not a merge commit.",
             "Commit parents were ['c0'], expected 'c2'.",
             "Tree mismatched paths: ['src/prices.py'].",
@@ -27775,7 +27775,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 1/3 was rejected: \"git merge -X theirs feature/i18n-refresh\" (error: unknown option `-X`.)",
+            "solution command 1/3 was rejected: \"git merge -X theirs feature/i18n-refresh\" (error: unknown switch `X')",
             "Commit is not a merge commit.",
             "Commit parents were ['c0'], expected 'c2'.",
             "Tree mismatched paths: ['src/i18n.json'].",
@@ -28368,7 +28368,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 1/3 was rejected: \"git cherry-pick --no-commit c2 c3\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "solution command 1/3 was rejected: \"git cherry-pick --no-commit c2 c3\" (error: incorrect number of arguments)",
             "Commit message was 'Prepare release-1.2'.",
             "Branch 'release-1.2' has 2 commits, expected 3."
           ],
@@ -28416,7 +28416,7 @@
           "counted_commands": 3,
           "accepted": false,
           "gaps": [
-            "solution command 2/3 was rejected: \"git cherry-pick --no-commit c2 c3\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "solution command 2/3 was rejected: \"git cherry-pick --no-commit c2 c3\" (error: incorrect number of arguments)",
             "Commit message was 'Prepare release-1.2'.",
             "Branch 'release-1.2' has 2 commits, expected 3.",
             "Index still has ['src/login.py']."
@@ -29007,7 +29007,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git reset --merge\" (error: unknown option `--merge`.)",
+            "solution command 1/1 was rejected: \"git reset --merge\" (error: unknown option `merge')",
             "A cherry-pick is still in progress.",
             "Working tree still has changes or conflicts.",
             "Index still has ['README.md'].",
@@ -29087,7 +29087,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 1/1 was rejected: \"git cherry-pick --quit\" (error: unknown option `--quit`.)",
+            "solution command 1/1 was rejected: \"git cherry-pick --quit\" (error: unknown option `quit')",
             "A cherry-pick is still in progress.",
             "Working tree still has changes or conflicts.",
             "Index still has ['src/totals.py'].",
@@ -29187,7 +29187,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 3/5 was rejected: \"git cherry-pick --no-commit c2 c4\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "solution command 3/5 was rejected: \"git cherry-pick --no-commit c2 c4\" (error: incorrect number of arguments)",
             "Commit message was 'Prepare release-2.2'.",
             "Branch 'release-2.2' has 2 commits, expected 3."
           ],
@@ -29207,7 +29207,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 4/5 was rejected: \"git cherry-pick --no-commit c2 c4\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "solution command 4/5 was rejected: \"git cherry-pick --no-commit c2 c4\" (error: incorrect number of arguments)",
             "Commit message was 'Prepare release-2.2'.",
             "Branch 'release-2.2' has 2 commits, expected 3.",
             "Index still has ['src/auth.py']."
@@ -29310,7 +29310,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 3/5 was rejected: \"git cherry-pick --no-commit c1 c3\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "solution command 3/5 was rejected: \"git cherry-pick --no-commit c1 c3\" (error: incorrect number of arguments)",
             "Commit message was 'Prepare release-3.0'.",
             "Branch 'release-3.0' has 2 commits, expected 3."
           ],
@@ -29330,7 +29330,7 @@
           "counted_commands": 4,
           "accepted": false,
           "gaps": [
-            "solution command 4/5 was rejected: \"git cherry-pick --no-commit c1 c3\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "solution command 4/5 was rejected: \"git cherry-pick --no-commit c1 c3\" (error: incorrect number of arguments)",
             "Commit message was 'Prepare release-3.0'.",
             "Branch 'release-3.0' has 2 commits, expected 3.",
             "Index still has ['src/export.py']."
@@ -33810,7 +33810,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git rebase -i\" (usage: git rebase [-i] <upstream>)",
+            "solution command 2/2 was rejected: \"git rebase -i\" (fatal: No upstream configured for the current branch.)",
             "Missing commits in history: ['c1'].",
             "Branch 'fix/footer-typo' has 5 commits, expected 4.",
             "Commit tree is missing tokens ['privacy-v2'].",
@@ -33877,7 +33877,7 @@
           "counted_commands": 1,
           "accepted": false,
           "gaps": [
-            "solution command 2/2 was rejected: \"git rebase -i\" (usage: git rebase [-i] <upstream>)",
+            "solution command 2/2 was rejected: \"git rebase -i\" (fatal: No upstream configured for the current branch.)",
             "Missing commits in history: ['c2'].",
             "Branch 'hotfix/login-timeout' has 6 commits, expected 5.",
             "Commit tree is missing tokens ['reset-v2', 'security-v2'].",
@@ -34743,12 +34743,13 @@
           "counted_commands": 5,
           "accepted": false,
           "gaps": [
-            "solution command 3/5 was rejected: \"git add\" (Nothing specified, nothing added.)",
+            "solution command 5/5 was rejected: \"git commit --no-edit\" (Committing is not possible because you have unmerged files.)",
             "Commit is not a merge commit.",
             "Commit parents were ['c0'], expected 'c3'.",
             "Tree mismatched paths: ['src/checkout.py', 'src/shipping.py'].",
             "Working tree still has changes or conflicts.",
-            "Conflicts remain: ['src/checkout.py', 'src/shipping.py']."
+            "Index still has ['src/shipping.py'].",
+            "Conflicts remain: ['src/checkout.py']."
           ],
           "status": "unsupported_or_incomplete_route"
         },
@@ -34837,7 +34838,7 @@
           "counted_commands": 5,
           "accepted": false,
           "gaps": [
-            "solution command 4/5 was rejected: \"git add\" (Nothing specified, nothing added.)",
+            "solution command 5/5 was rejected: \"git commit --no-edit\" (Committing is not possible because you have unmerged files.)",
             "Commit is not a merge commit.",
             "Commit parents were ['c0'], expected 'c3'.",
             "Tree mismatched paths: ['src/checkout.py', 'src/shipping.py'].",
@@ -35026,7 +35027,7 @@
           "counted_commands": 7,
           "accepted": false,
           "gaps": [
-            "solution command 1/7 was rejected: \"git cherry-pick -n\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "solution command 1/7 was rejected: \"git cherry-pick -n\" (error: incorrect number of arguments)",
             "Commit message did not contain ['Use semicolons in CSV export', 'cherry picked from commit c4'].",
             "Commit message was 'Prepare release-1.6'.",
             "Branch 'release-1.6' has 2 commits, expected 4.",
@@ -35058,7 +35059,7 @@
           "counted_commands": 7,
           "accepted": false,
           "gaps": [
-            "solution command 2/7 was rejected: \"git cherry-pick -n\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "solution command 2/7 was rejected: \"git cherry-pick -n\" (error: incorrect number of arguments)",
             "Commit message did not contain ['Use semicolons in CSV export', 'cherry picked from commit c4'].",
             "Commit message was 'Prepare release-1.6'.",
             "Branch 'release-1.6' has 2 commits, expected 4."
@@ -35138,7 +35139,7 @@
           "counted_commands": 7,
           "accepted": false,
           "gaps": [
-            "solution command 4/7 was rejected: \"git cherry-pick -n\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "solution command 4/7 was rejected: \"git cherry-pick -n\" (error: incorrect number of arguments)",
             "Commit message did not contain ['Use semicolons in CSV export', 'cherry picked from commit c4'].",
             "Commit message was 'Prepare release-1.6'.",
             "Branch 'release-1.6' has 2 commits, expected 4.",
@@ -35169,7 +35170,7 @@
           "counted_commands": 7,
           "accepted": false,
           "gaps": [
-            "solution command 5/7 was rejected: \"git cherry-pick -n\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "solution command 5/7 was rejected: \"git cherry-pick -n\" (error: incorrect number of arguments)",
             "Commit message did not contain ['Use semicolons in CSV export', 'cherry picked from commit c4'].",
             "Commit message was 'Use semicolons in CSV export\\n\\n(cherry picked from commit c4)'.",
             "Branch 'release-1.6' has 3 commits, expected 4."
@@ -35199,7 +35200,7 @@
           "counted_commands": 7,
           "accepted": false,
           "gaps": [
-            "solution command 6/7 was rejected: \"git cherry-pick -n\" (usage: git cherry-pick [--no-commit] <commit>)",
+            "solution command 6/7 was rejected: \"git cherry-pick -n\" (error: incorrect number of arguments)",
             "Commit message did not contain ['Use semicolons in CSV export', 'cherry picked from commit c4'].",
             "Commit message was 'Use semicolons in CSV export\\n\\n(cherry picked from commit c4)'.",
             "Branch 'release-1.6' has 3 commits, expected 4.",
