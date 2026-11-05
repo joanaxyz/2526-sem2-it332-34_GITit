@@ -208,7 +208,7 @@ export function Component() {
   const storyWorld = getStoryWorld(DEFAULT_STORY_WORLD_SLUG)
   const companionPortrait = companion.sprites.portrait?.src ?? companion.sprites.idle?.src ?? ''
   const storyMapStyle = {
-    backgroundImage: `url("${storyWorld.map?.background.src ?? '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png'}")`,
+    backgroundImage: `url("${storyWorld.map?.background.src ?? '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp'}")`,
   } as React.CSSProperties
 
   return (

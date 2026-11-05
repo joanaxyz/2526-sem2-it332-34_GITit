@@ -43,8 +43,13 @@ REQUIRED_README_SNIPPETS = [
     "npm run api:type-adoption-check",
 ]
 
-# Checked-in solution references introduced with the scoring and alternatives audit.
-ALLOWED_DOC_ENTRIES = {"goals", "git-solution-audit.md", "taught-vs-alternative-solutions.md"}
+# Checked-in solution references and the UI design reference library.
+ALLOWED_DOC_ENTRIES = {
+    "goals",
+    "designs",
+    "git-solution-audit.md",
+    "taught-vs-alternative-solutions.md",
+}
 
 STALE_DOC_SNIPPETS = [
     "Command Adventure",

@@ -1,4 +1,5 @@
 import type { SpriteAnimation } from '@/shared/sprites/types'
+import { publicMediaUrl } from '@/shared/media/publicMedia'
 import { DEFAULT_SKILL_COMPANION, SKILL_EFFECT_ROOTS } from '@/shared/cosmetics/skillPortrait'
 import { companionPlacementGeometry } from '@/shared/cosmetics/companions/companionSkills'
 import { skillElementForCompanion } from '@/shared/audio/battleAudio'
@@ -35,7 +36,7 @@ function sheet(name: string, companionSlug = DEFAULT_EFFECT_COMPANION, rootOverr
   const owner = companionEffectSlug(companionSlug)
   return {
     name: `${owner}.skill.${name}`,
-    src: `${rootOverride ?? effectRootForCompanion(owner)}/${name}.png`,
+    src: publicMediaUrl(`${rootOverride ?? effectRootForCompanion(owner)}/${name}.png`),
     frameWidth: FRAME,
     frameHeight: FRAME,
     columns: COLUMNS,

@@ -17,7 +17,7 @@
   position: absolute;
   inset: 0;
   z-index: -2;
-  background: url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png') center top / cover no-repeat fixed;
+  background: url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp') center top / cover no-repeat fixed;
 }
 
 .story-page-shell::before {

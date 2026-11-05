@@ -9,11 +9,11 @@ afterEach(cleanup)
 
 describe('CompanionSkillPortrait', () => {
   it.each([
-    ['blue', 'git init', 'skill-flames-25/init.png', 0, -768],
-    ['black', 'git init', 'skill-lightning-25/init.png', -1024, -512],
-    ['white', 'git add', 'skill-ice-25/add.png', 0, -768],
-    ['white', 'git unsupported', 'skill-ice-25/default.png', 0, -768],
-    ['unknown', 'git init', 'skill-flames-25/init.png', 0, -768],
+    ['blue', 'git init', 'skill-flames-25/init.lossless.webp', 0, -768],
+    ['black', 'git init', 'skill-lightning-25/init.lossless.webp', -1024, -512],
+    ['white', 'git add', 'skill-ice-25/add.lossless.webp', 0, -768],
+    ['white', 'git unsupported', 'skill-ice-25/default.lossless.webp', 0, -768],
+    ['unknown', 'git init', 'skill-flames-25/init.lossless.webp', 0, -768],
   ] as const)('crops one indexed impact frame from shipped %s art for %s', (companion, command, suffix, x, y) => {
     render(<CompanionSkillPortrait companionSlug={companion} command={command} title="Learned spell" />)
     const portrait = screen.getByRole('img', { name: 'Learned spell' })

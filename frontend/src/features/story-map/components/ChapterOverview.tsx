@@ -1,4 +1,4 @@
-import chapterBadgeImage from '@/assets/images/chapter_badge.png'
+import chapterBadgeImage from '@/assets/images/chapter_badge.lossless.webp'
 import { ChapterBookCard } from '@/features/story-map/components/book/ChapterBookCard'
 import { ChapterProgressRewards } from '@/features/story-map/components/ChapterProgressRewards'
 import type { LearningChapter } from '@/features/story-map/types'

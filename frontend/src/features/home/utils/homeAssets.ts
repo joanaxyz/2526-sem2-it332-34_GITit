@@ -1,4 +1,4 @@
-import heroShowcasePedestalImage from '@/assets/images/hero_showcase_pedestal.png'
+import heroShowcasePedestalImage from '@/assets/images/hero_showcase_pedestal.lossless.webp'
 import type { HomeView } from '@/features/home/components/home-hub/homeViews'
 import { ACHIEVEMENT_IMAGES } from '@/features/home/utils/achievementImages'
 import { warmRankBadges } from '@/features/home/utils/rankBadges'
@@ -27,7 +27,7 @@ export type HomeAssetManifest = {
 
 export function homeBackdropSrc(): string {
   const storyWorld = getStoryWorld(DEFAULT_STORY_WORLD_SLUG)
-  return storyWorld.map?.background.src ?? '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png'
+  return storyWorld.map?.background.src ?? '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp'
 }
 
 /** Square avatar art, falling back to portrait/idle for companions without one. */

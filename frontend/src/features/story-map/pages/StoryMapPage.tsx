@@ -93,7 +93,7 @@ export function StoryMapPage() {
   const storyWorld = useMemo(() => getStoryWorld(activeStory?.world_slug ?? storySlug), [activeStory?.world_slug, storySlug])
   const storyMapStyle = {
     ...storyWorldStyle(storyWorld),
-    backgroundImage: `url("${storyWorld.map?.background.src ?? '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png'}")`,
+    backgroundImage: `url("${storyWorld.map?.background.src ?? '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp'}")`,
   } as CSSProperties
   const [activeChapterId, setActiveChapterId] = useState<number | null>(null)
   const userSelectedChapterId = useRef<number | null>(null)

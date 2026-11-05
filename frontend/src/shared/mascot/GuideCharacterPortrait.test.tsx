@@ -23,7 +23,7 @@ describe('guide character portrait', () => {
     render(<GuideCharacterPortrait alt="Learning guide" />)
 
     const portrait = screen.getByRole('img', { name: 'Learning guide' })
-    expect(portrait).toHaveAttribute('src', '/mascot/portrait.png')
+    expect(portrait).toHaveAttribute('src', '/mascot/portrait.lossless.webp')
     expect(portrait).toHaveAttribute('data-guide-character', 'mascot')
     expect(mocks.usePlayerLoadout).not.toHaveBeenCalled()
   })
@@ -36,7 +36,7 @@ describe('guide character portrait', () => {
     expect(screen.getByRole('img', { name: 'Ember companion' })).toHaveAttribute('src', '/companions/ember/portrait.png')
 
     act(() => applyGuideMascotVisibility(true))
-    expect(screen.getByRole('img', { name: 'Learning guide' })).toHaveAttribute('src', '/mascot/portrait.png')
+    expect(screen.getByRole('img', { name: 'Learning guide' })).toHaveAttribute('src', '/mascot/portrait.lossless.webp')
   })
 
   it('falls back to the mascot portrait when the mascot is hidden and no companion is equipped', () => {

@@ -76,7 +76,7 @@ describe('TierStatusHeader', () => {
     const button = screen.getByRole('button', { name: 'Open command guide' })
     expect(button).toHaveAttribute('data-mascot-launcher', 'command-guide')
     expect(button).not.toHaveTextContent('Command guide')
-    expect(button.querySelector('img')).toHaveAttribute('src', '/mascot/portrait.png')
+    expect(button.querySelector('img')).toHaveAttribute('src', '/mascot/portrait.lossless.webp')
     expect(button.closest('.gameplay-workspace-header')).toBeNull()
     fireEvent.click(button)
     expect(onSelectCommandGuide).toHaveBeenCalledWith('form:git init')

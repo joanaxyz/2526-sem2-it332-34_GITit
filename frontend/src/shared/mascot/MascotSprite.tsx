@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react'
+import { publicMediaUrl } from '@/shared/media/publicMedia'
 import { SpriteAnimator } from '@/shared/sprites/SpriteAnimator'
 import { warmImages } from '@/shared/sprites/preload'
 import type { SpriteAnimation, SpriteAnimatorHandle } from '@/shared/sprites/types'
@@ -9,7 +10,7 @@ const mascotAnimations = Object.fromEntries(
   (['idle', 'random', 'float', 'fly', 'take-off', 'land', 'walk', 'run', 'die'] as const).map((pose) => {
     const grid = ['random', 'fly', 'take-off', 'land'].includes(pose) ? 8 : 5
     return [pose, {
-      name: `git-it-mascot.${pose}`, src: `/mascot/${pose}.png`,
+      name: `git-it-mascot.${pose}`, src: publicMediaUrl(`/mascot/${pose}.png`),
       frameWidth: 256, frameHeight: 256, columns: grid, rows: grid,
       frameCount: grid * grid, fps: pose === 'take-off' || pose === 'land' ? 48 : 24,
       loop: !['random', 'take-off', 'land', 'die'].includes(pose),

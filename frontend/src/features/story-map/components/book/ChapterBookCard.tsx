@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-import fieldGuideBookImage from '@/assets/images/book.png'
+import fieldGuideBookImage from '@/assets/images/book.lossless.webp'
 import { ChapterBookModal } from '@/features/story-map/components/book/ChapterBookModal'
 import { GamePanel } from '@/shared/components/GamePanel'
 

@@ -11,7 +11,7 @@
         "orient_to": "travel",
         "layers": [
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/effects/skill.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/effects/skill.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -50,7 +50,7 @@
     },
     "sprites": {
       "idle": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/idle.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/idle.lossless.webp",
         "fps": 10,
         "loops": true,
         "frameWidth": 245,
@@ -60,7 +60,7 @@
         "frameCount": 25
       },
       "attack": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/attack.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/attack.lossless.webp",
         "fps": 24,
         "loops": false,
         "frameWidth": 245,
@@ -70,7 +70,7 @@
         "frameCount": 25
       },
       "hurt": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/hurt.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/hurt.lossless.webp",
         "fps": 26,
         "loops": false,
         "frameWidth": 245,
@@ -80,7 +80,7 @@
         "frameCount": 25
       },
       "death": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/death.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/death.lossless.webp",
         "fps": 20,
         "loops": false,
         "frameWidth": 245,
@@ -90,7 +90,7 @@
         "frameCount": 25
       },
       "portrait": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/portrait.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-01/portrait.lossless.webp",
         "fps": 1,
         "loops": false,
         "frameWidth": 256,
@@ -114,7 +114,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/effects/skill.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/effects/skill.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -145,7 +145,7 @@
     },
     "sprites": {
       "idle": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/idle.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/idle.lossless.webp",
         "fps": 10,
         "loops": true,
         "frameWidth": 247,
@@ -155,7 +155,7 @@
         "frameCount": 25
       },
       "attack": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/attack.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/attack.lossless.webp",
         "fps": 24,
         "loops": false,
         "frameWidth": 247,
@@ -165,7 +165,7 @@
         "frameCount": 25
       },
       "hurt": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/hurt.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/hurt.lossless.webp",
         "fps": 26,
         "loops": false,
         "frameWidth": 247,
@@ -175,7 +175,7 @@
         "frameCount": 25
       },
       "death": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/death.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/death.lossless.webp",
         "fps": 20,
         "loops": false,
         "frameWidth": 247,
@@ -185,7 +185,7 @@
         "frameCount": 25
       },
       "portrait": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/portrait.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-02/portrait.lossless.webp",
         "fps": 1,
         "loops": false,
         "frameWidth": 256,
@@ -208,7 +208,7 @@
         "orient_to": "travel",
         "layers": [
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/effects/skill.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/effects/skill.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -247,7 +247,7 @@
     },
     "sprites": {
       "idle": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/idle.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/idle.lossless.webp",
         "fps": 10,
         "loops": true,
         "frameWidth": 228,
@@ -257,7 +257,7 @@
         "frameCount": 25
       },
       "attack": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/attack.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/attack.lossless.webp",
         "fps": 24,
         "loops": false,
         "frameWidth": 228,
@@ -267,7 +267,7 @@
         "frameCount": 25
       },
       "hurt": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/hurt.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/hurt.lossless.webp",
         "fps": 26,
         "loops": false,
         "frameWidth": 228,
@@ -277,7 +277,7 @@
         "frameCount": 25
       },
       "death": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/death.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/death.lossless.webp",
         "fps": 20,
         "loops": false,
         "frameWidth": 228,
@@ -287,7 +287,7 @@
         "frameCount": 25
       },
       "portrait": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/portrait.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-04/portrait.lossless.webp",
         "fps": 1,
         "loops": false,
         "frameWidth": 256,
@@ -311,7 +311,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/effects/skill.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/effects/skill.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -342,7 +342,7 @@
     },
     "sprites": {
       "idle": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/idle.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/idle.lossless.webp",
         "fps": 10,
         "loops": true,
         "frameWidth": 500,
@@ -352,7 +352,7 @@
         "frameCount": 25
       },
       "attack": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/attack.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/attack.lossless.webp",
         "fps": 24,
         "loops": false,
         "frameWidth": 500,
@@ -362,7 +362,7 @@
         "frameCount": 25
       },
       "hurt": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/hurt.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/hurt.lossless.webp",
         "fps": 26,
         "loops": false,
         "frameWidth": 500,
@@ -372,7 +372,7 @@
         "frameCount": 25
       },
       "death": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/death.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/death.lossless.webp",
         "fps": 20,
         "loops": false,
         "frameWidth": 500,
@@ -382,7 +382,7 @@
         "frameCount": 25
       },
       "portrait": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/portrait.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-05/portrait.lossless.webp",
         "fps": 1,
         "loops": false,
         "frameWidth": 256,
@@ -405,7 +405,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/effects/skill.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/effects/skill.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -436,7 +436,7 @@
     },
     "sprites": {
       "idle": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/idle.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/idle.lossless.webp",
         "fps": 10,
         "loops": true,
         "frameWidth": 219,
@@ -446,7 +446,7 @@
         "frameCount": 25
       },
       "attack": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/attack.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/attack.lossless.webp",
         "fps": 24,
         "loops": false,
         "frameWidth": 219,
@@ -456,7 +456,7 @@
         "frameCount": 25
       },
       "hurt": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/hurt.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/hurt.lossless.webp",
         "fps": 26,
         "loops": false,
         "frameWidth": 219,
@@ -466,7 +466,7 @@
         "frameCount": 25
       },
       "death": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/death.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/death.lossless.webp",
         "fps": 20,
         "loops": false,
         "frameWidth": 219,
@@ -476,7 +476,7 @@
         "frameCount": 25
       },
       "portrait": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/portrait.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-06/portrait.lossless.webp",
         "fps": 1,
         "loops": false,
         "frameWidth": 256,
@@ -500,7 +500,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/effects/skill.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/effects/skill.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -531,7 +531,7 @@
     },
     "sprites": {
       "idle": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/idle.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/idle.lossless.webp",
         "fps": 10,
         "loops": true,
         "frameWidth": 243,
@@ -541,7 +541,7 @@
         "frameCount": 25
       },
       "attack": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/attack.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/attack.lossless.webp",
         "fps": 24,
         "loops": false,
         "frameWidth": 243,
@@ -551,7 +551,7 @@
         "frameCount": 25
       },
       "hurt": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/hurt.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/hurt.lossless.webp",
         "fps": 26,
         "loops": false,
         "frameWidth": 243,
@@ -561,7 +561,7 @@
         "frameCount": 25
       },
       "death": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/death.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/death.lossless.webp",
         "fps": 20,
         "loops": false,
         "frameWidth": 243,
@@ -571,7 +571,7 @@
         "frameCount": 25
       },
       "portrait": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/portrait.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-07/portrait.lossless.webp",
         "fps": 1,
         "loops": false,
         "frameWidth": 256,
@@ -595,7 +595,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/effects/skill.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/effects/skill.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -626,7 +626,7 @@
     },
     "sprites": {
       "idle": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/idle.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/idle.lossless.webp",
         "fps": 10,
         "loops": true,
         "frameWidth": 247,
@@ -636,7 +636,7 @@
         "frameCount": 25
       },
       "attack": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/attack.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/attack.lossless.webp",
         "fps": 24,
         "loops": false,
         "frameWidth": 247,
@@ -646,7 +646,7 @@
         "frameCount": 25
       },
       "hurt": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/hurt.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/hurt.lossless.webp",
         "fps": 26,
         "loops": false,
         "frameWidth": 247,
@@ -656,7 +656,7 @@
         "frameCount": 25
       },
       "death": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/death.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/death.lossless.webp",
         "fps": 20,
         "loops": false,
         "frameWidth": 247,
@@ -666,7 +666,7 @@
         "frameCount": 25
       },
       "portrait": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/portrait.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-08/portrait.lossless.webp",
         "fps": 1,
         "loops": false,
         "frameWidth": 256,
@@ -689,7 +689,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/effects/skill.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/effects/skill.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -720,7 +720,7 @@
     },
     "sprites": {
       "idle": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/idle.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/idle.lossless.webp",
         "fps": 10,
         "loops": true,
         "frameWidth": 217,
@@ -730,7 +730,7 @@
         "frameCount": 25
       },
       "attack": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/attack.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/attack.lossless.webp",
         "fps": 24,
         "loops": false,
         "frameWidth": 217,
@@ -740,7 +740,7 @@
         "frameCount": 25
       },
       "hurt": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/hurt.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/hurt.lossless.webp",
         "fps": 26,
         "loops": false,
         "frameWidth": 217,
@@ -750,7 +750,7 @@
         "frameCount": 25
       },
       "death": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/death.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/death.lossless.webp",
         "fps": 20,
         "loops": false,
         "frameWidth": 217,
@@ -760,7 +760,7 @@
         "frameCount": 25
       },
       "portrait": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/portrait.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-09/portrait.lossless.webp",
         "fps": 1,
         "loops": false,
         "frameWidth": 256,
@@ -783,7 +783,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill-back.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill-back.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -799,7 +799,7 @@
             "orient_to": "target-facing"
           },
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -830,7 +830,7 @@
     },
     "sprites": {
       "idle": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/idle.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/idle.lossless.webp",
         "fps": 10,
         "loops": true,
         "frameWidth": 200,
@@ -840,7 +840,7 @@
         "frameCount": 25
       },
       "attack": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/attack.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/attack.lossless.webp",
         "fps": 24,
         "loops": false,
         "frameWidth": 200,
@@ -850,7 +850,7 @@
         "frameCount": 25
       },
       "hurt": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/hurt.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/hurt.lossless.webp",
         "fps": 26,
         "loops": false,
         "frameWidth": 200,
@@ -860,7 +860,7 @@
         "frameCount": 25
       },
       "death": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/death.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/death.lossless.webp",
         "fps": 20,
         "loops": false,
         "frameWidth": 200,
@@ -870,7 +870,7 @@
         "frameCount": 25
       },
       "portrait": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/portrait.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-10/portrait.lossless.webp",
         "fps": 1,
         "loops": false,
         "frameWidth": 256,
@@ -894,7 +894,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill-back.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill-back.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -910,7 +910,7 @@
             "orient_to": "target-facing"
           },
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -941,7 +941,7 @@
     },
     "sprites": {
       "idle": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/idle.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/idle.lossless.webp",
         "fps": 10,
         "loops": true,
         "frameWidth": 248,
@@ -951,7 +951,7 @@
         "frameCount": 25
       },
       "attack": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/attack.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/attack.lossless.webp",
         "fps": 24,
         "loops": false,
         "frameWidth": 248,
@@ -961,7 +961,7 @@
         "frameCount": 25
       },
       "hurt": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/hurt.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/hurt.lossless.webp",
         "fps": 26,
         "loops": false,
         "frameWidth": 248,
@@ -971,7 +971,7 @@
         "frameCount": 25
       },
       "death": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/death.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/death.lossless.webp",
         "fps": 20,
         "loops": false,
         "frameWidth": 248,
@@ -981,7 +981,7 @@
         "frameCount": 25
       },
       "portrait": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/portrait.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-11/portrait.lossless.webp",
         "fps": 1,
         "loops": false,
         "frameWidth": 256,
@@ -1004,7 +1004,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/effects/skill.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/effects/skill.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -1035,7 +1035,7 @@
     },
     "sprites": {
       "idle": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/idle.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/idle.lossless.webp",
         "fps": 10,
         "loops": true,
         "frameWidth": 244,
@@ -1045,7 +1045,7 @@
         "frameCount": 25
       },
       "attack": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/attack.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/attack.lossless.webp",
         "fps": 24,
         "loops": false,
         "frameWidth": 244,
@@ -1055,7 +1055,7 @@
         "frameCount": 25
       },
       "hurt": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/hurt.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/hurt.lossless.webp",
         "fps": 26,
         "loops": false,
         "frameWidth": 244,
@@ -1065,7 +1065,7 @@
         "frameCount": 25
       },
       "death": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/death.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/death.lossless.webp",
         "fps": 20,
         "loops": false,
         "frameWidth": 244,
@@ -1075,7 +1075,7 @@
         "frameCount": 25
       },
       "portrait": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/portrait.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-12/portrait.lossless.webp",
         "fps": 1,
         "loops": false,
         "frameWidth": 256,
@@ -1099,7 +1099,7 @@
         "orient_to": "target-facing",
         "layers": [
           {
-            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/effects/skill.png",
+            "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/effects/skill.lossless.webp",
             "fps": 18,
             "loops": false,
             "frameWidth": 256,
@@ -1130,7 +1130,7 @@
     },
     "sprites": {
       "idle": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/idle.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/idle.lossless.webp",
         "fps": 10,
         "loops": true,
         "frameWidth": 231,
@@ -1140,7 +1140,7 @@
         "frameCount": 25
       },
       "attack": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/attack.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/attack.lossless.webp",
         "fps": 24,
         "loops": false,
         "frameWidth": 231,
@@ -1150,7 +1150,7 @@
         "frameCount": 25
       },
       "hurt": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/hurt.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/hurt.lossless.webp",
         "fps": 26,
         "loops": false,
         "frameWidth": 231,
@@ -1160,7 +1160,7 @@
         "frameCount": 25
       },
       "death": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/death.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/death.lossless.webp",
         "fps": 20,
         "loops": false,
         "frameWidth": 231,
@@ -1170,7 +1170,7 @@
         "frameCount": 25
       },
       "portrait": {
-        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/portrait.png",
+        "src": "/cosmetics/story-worlds/arcane-spire/monsters/monster-15/portrait.lossless.webp",
         "fps": 1,
         "loops": false,
         "frameWidth": 256,

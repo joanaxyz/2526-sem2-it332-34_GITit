@@ -1,9 +1,9 @@
 import { CheckCircle2, ListChecks, Lock, Swords, X } from 'lucide-react'
 import type { CSSProperties, RefObject } from 'react'
 
-import easyIconImage from '@/assets/images/easy_icon.png'
-import hardIconImage from '@/assets/images/hard_icon.png'
-import mediumIconImage from '@/assets/images/medium_icon.png'
+import easyIconImage from '@/assets/images/easy_icon.lossless.webp'
+import hardIconImage from '@/assets/images/hard_icon.lossless.webp'
+import mediumIconImage from '@/assets/images/medium_icon.lossless.webp'
 import type {
   AdventureLevelSummary,
   AdventureLevelTierAccess,

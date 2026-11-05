@@ -21,7 +21,7 @@
     radial-gradient(circle at 50% 22%, rgba(var(--theme-primary-rgb), 0.1), transparent 28rem),
     linear-gradient(90deg, rgba(0, 6, 18, 0.42), rgba(0, 8, 26, 0.58) 60%, rgba(0, 6, 18, 0.72)),
     linear-gradient(180deg, rgba(1, 7, 18, 0.4), rgba(1, 7, 18, 0.62)),
-    var(--home-theme-map, url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png')) center / cover no-repeat;
+    var(--home-theme-map, url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp')) center / cover no-repeat;
 }
 
 .home-ref-grid {

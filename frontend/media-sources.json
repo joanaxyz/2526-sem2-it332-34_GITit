@@ -1,0 +1,1277 @@
+{
+  "public/audio/battle/background/inside-battle-loop.wav": {
+    "sourceSha256": "fa89ced2fc3734837d31f13218182ede8de535c5a5a3bb63ec95bfb1118da257",
+    "target": "public/audio/battle/background/inside-battle-loop.mp3",
+    "targetSha256": "37569c2843cb21f6f43a1af1a14eaf622336ffc8dc4425c1e5461209e134c5fa"
+  },
+  "public/audio/battle/background/outside-battle-loop.wav": {
+    "sourceSha256": "e470b528aaefe60100098748967dc96b55e82c142a6047b4c5579824368f4a23",
+    "target": "public/audio/battle/background/outside-battle-loop.mp3",
+    "targetSha256": "735c9a843a499a793bb68ae444a4b5c15774577c537e9897cf37b7fdfbc1cbd3"
+  },
+  "public/cosmetics/companion/black/attack-end.png": {
+    "sourceSha256": "a405d110890ffe9c971b30190a76ae648c98cb68fa55f79d7f536af517dec908",
+    "target": "public/cosmetics/companion/black/attack-end.lossless.webp",
+    "targetSha256": "4ff7dbbe1f2a38cdd9d97f030615e2ce2cb9affc1da1af8645022b180543044f"
+  },
+  "public/cosmetics/companion/black/attack.png": {
+    "sourceSha256": "727cd8589270cdccd8c11c1fca80fdbd9eadee0c66fcd89d046e01387a86745f",
+    "target": "public/cosmetics/companion/black/attack.lossless.webp",
+    "targetSha256": "d0ae89647bd8f04c1b045c1630df759d31782f436d502f59310c9818cd251415"
+  },
+  "public/cosmetics/companion/black/avatar.png": {
+    "sourceSha256": "ed811279485d42833dff8b359a960943dcd2365fe3d4f5f7334447e8480e0787",
+    "target": "public/cosmetics/companion/black/avatar.lossless.webp",
+    "targetSha256": "c6b6509168ff1ad36f152b359f8b71f87e9f418316b5f88145c183dc8e0fb0b7"
+  },
+  "public/cosmetics/companion/black/chat-avatar.png": {
+    "sourceSha256": "f82a5346de7cc71539c95912606ca53e32d9c4364c494ef6f9b111dd26a624f5",
+    "target": "public/cosmetics/companion/black/chat-avatar.lossless.webp",
+    "targetSha256": "1781c42b68b0ff69be0f1f2bd8b2c6606bfa2492b8fe591934b94fa1e6cb931c"
+  },
+  "public/cosmetics/companion/black/chat-thinking.png": {
+    "sourceSha256": "96e308b58c6e6829275bcca9882b3318c62d12d6337f991178580b2305c1f56b",
+    "target": "public/cosmetics/companion/black/chat-thinking.lossless.webp",
+    "targetSha256": "73cb4aaff237f961454a091811bcf21e5fb0d74879cd913718f1ab39136e03ea"
+  },
+  "public/cosmetics/companion/black/death.png": {
+    "sourceSha256": "eba0426bb89981624d5da284719d1bb255640b6f0a9330be46564c87e1ea74e5",
+    "target": "public/cosmetics/companion/black/death.lossless.webp",
+    "targetSha256": "e5ff051a795052934aa33ff886ebb047bd0cd6e32953d7177b37c67428cb5509"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/add.png": {
+    "sourceSha256": "a1c67873a1f046dc13957d2e6dc50b1ecf8aaf2adf3695a367df49e908bc4883",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/add.lossless.webp",
+    "targetSha256": "6d7d80a3df6fc0025224e7474df0a99651c30af58a719c47f6711a9fac3a999b"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/branch.png": {
+    "sourceSha256": "38f718898b1ed7c94c9660f0cd78067db918cbb77c68ca00914a54974cfe32e4",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/branch.lossless.webp",
+    "targetSha256": "973fe30136cebe3877de340d493bc5329d1269e8cc70d57633c2c8ec0d4148b2"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/check-ignore.png": {
+    "sourceSha256": "65920a8d615a8d21bff82746ab1d047701b57d5f176a1bf6efb385b492d8b189",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/check-ignore.lossless.webp",
+    "targetSha256": "7948cf9dcf5e61f0aa573a4c42d6d3943f781a5c136534399ab16c4ea0dc4134"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/checkout-conflict.png": {
+    "sourceSha256": "7e9875587189ddcbfbd137f68941da62f743e1908846d58b824ba36aaab4ac01",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/checkout-conflict.lossless.webp",
+    "targetSha256": "b0e1b682902f51e6a687a0d3680147f89fdacef6518cd485c883d73304b85702"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/checkout.png": {
+    "sourceSha256": "2f2aaca7a927c4a342f882068a82c310b255ee3becc38226b0bb7e151960b812",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/checkout.lossless.webp",
+    "targetSha256": "3940035f54e1915c11baa3247534637fab4a103b9af4bf7b993b5a5b3affbf80"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_back.png": {
+    "sourceSha256": "60f4f50e323339cafac0d66a0b8e627ba0ec4083f60f12be56f98f430ff9079c",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_back.lossless.webp",
+    "targetSha256": "4b3e08202db3272efa63bc1bc6f461722cac6022b0c765661a04d3aefa1d681b"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_front.png": {
+    "sourceSha256": "13aac1237cc37f6e9c663f5beff9b3a88544647500ee7a1a5b9aba0b1e6fb1b0",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_front.lossless.webp",
+    "targetSha256": "8e8923097d0cadbd1c7c9a684ad6e1a14fae5db1e13ed583f45070d50a52f4a4"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/clone.png": {
+    "sourceSha256": "f167f9976c85803d4f5c5c16938cc46dc89663eea6d3c19c36349d9e5f1699b4",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/clone.lossless.webp",
+    "targetSha256": "964404d7cd0c36fe85067a4c5ca3d74a5bdbc60f7aa9f91ca40928e8e0a05d59"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/commit.png": {
+    "sourceSha256": "230bd92f059480df28c3cff5e69ff1024433e4f5055c343c8468a55f084bcc0c",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/commit.lossless.webp",
+    "targetSha256": "a913eb1823fec1b6af58d3914abcd5dbd7957b912b8b5a24368dd35f23154388"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/config.png": {
+    "sourceSha256": "d704c19af1955c5a37f77ccdad08f7db972cf67c5b1b6df0ffd0a9f22ba2fc4c",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/config.lossless.webp",
+    "targetSha256": "8801477e780d82c5a92b22a845ac162319964fbb22087ca61c3e1d9b2a81c3be"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/default.png": {
+    "sourceSha256": "64bb16502770f28145574b1b5e9ac91b31d5be9efa74011d3a8187478036f79f",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/default.lossless.webp",
+    "targetSha256": "a5f0fbe2a569e21265c74200ee4e08f7bdd5a50639693a85f15a24c65fb752bc"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/diff-conflict.png": {
+    "sourceSha256": "e17c7fa76c37dcb2d88c31e6e5abaf3ee5a3d70f3dc489b259f9dbcef93dca9f",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/diff-conflict.lossless.webp",
+    "targetSha256": "1e47b6c87a5edd892892d3a5c7a035cb52281066191a6c21619a89cd9ff52a08"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/diff.png": {
+    "sourceSha256": "ee449aacd8929c363631e6022f75053c5d9e4e9a1010d5ada410ca33911d4f7f",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/diff.lossless.webp",
+    "targetSha256": "eaffa638f69e42d5cafc887895a5d9e16c335a08e9e38575f44a29dd345aeac6"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/fetch.png": {
+    "sourceSha256": "a2e4f01299f37e5e91fdf02202a97283e80f3b14ab57e67aa72d678317353745",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/fetch.lossless.webp",
+    "targetSha256": "4ea199835cdc6af27093b04fd29633cc8fd3d13e42f5f5dde650830985c2ece7"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/init.png": {
+    "sourceSha256": "2c410ab9053907cc6d34c7bf3554402503a4255a977f060ed78a2a5cac00bb26",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/init.lossless.webp",
+    "targetSha256": "e5457cff5aa157ce8fd2d794eba678bc252755387362d8030632f5c756892f79"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/log.png": {
+    "sourceSha256": "29ac3aa02f54f4f563f661c7fffcabb43b70de2c4e5dabf564b30f59fa155f1e",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/log.lossless.webp",
+    "targetSha256": "a973d3dc87804e8403ccf60a2b32d021105d70757a8ce9cb96172f4c23a6f051"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/ls-files.png": {
+    "sourceSha256": "2332d8f6711de1679eca4d862d88c31073defcb45c445716175a2b7b24aa7588",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/ls-files.lossless.webp",
+    "targetSha256": "e00aa96672b8fd32bdc5ee62d8360c1a4f51390c7a8027068f1b5a5fc969f6e3"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/merge-base_back.png": {
+    "sourceSha256": "e1550503c3581ab42206d875a5d6b53b1aca574e3c90ed8f65f1dfb95311617c",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/merge-base_back.lossless.webp",
+    "targetSha256": "9159cda04b794d294a433f08f474de32c3db0a5022f1c2f76b1e35b6ac8699be"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/merge-base_front.png": {
+    "sourceSha256": "fbab1443c36e4bf72846398c11c603c34c6dc92332a50e119d2b0adbeb145145",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/merge-base_front.lossless.webp",
+    "targetSha256": "9c7db6464fd56f905d626cd07cfb87dc8f7f0f86df8a6a43cf36ec4df481a2af"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/merge.png": {
+    "sourceSha256": "b88485dcc2f8b78c13230ac78e21203a33ddceda95b7e855037370e5bef53975",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/merge.lossless.webp",
+    "targetSha256": "d15068c47036fd79fb4e4ae494e9e0bd9bae23747e8f55d50a3f31b67873cfc6"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/mergetool.png": {
+    "sourceSha256": "3b7f40a4cb97445c2553a1c3281a2c5eff6665d993547def2d8343afab8a9033",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/mergetool.lossless.webp",
+    "targetSha256": "3ef42b233aa301b6accb57d00f5e4796fe1cd61717b5dccc402ff8616dd52619"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/pull.png": {
+    "sourceSha256": "a9263887a2ea97df009c836721d6817349c156deb79e364a00db8f0df93edba2",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/pull.lossless.webp",
+    "targetSha256": "e699e0d8b547280e97eb2048d1ee58cdf75e54ad2bd650fd3894b8c83f9c682a"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/push.png": {
+    "sourceSha256": "d27b81ad2899bb43f8540737a57b7511267b0c3883e67fae9abaa6b82e06b09d",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/push.lossless.webp",
+    "targetSha256": "4b4ae25b856b43b8e5b02123d66142c82d93cdfc9d06d397c494a196985886ca"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/rebase.png": {
+    "sourceSha256": "d35b086ae69b0b7535c366ed2993196576c08990e115aa86230b691022e3fa62",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/rebase.lossless.webp",
+    "targetSha256": "8408b52f597262e2b0088212c10edad023597aa11887c6a758483c39817e42c7"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/reflog.png": {
+    "sourceSha256": "8e017077d6d894f0deb11e11c7d163bac68533045851932f8deb25b6cdc2ec40",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/reflog.lossless.webp",
+    "targetSha256": "8831f500c8bd4ffadce7b3f6da226f414e54cb67daae59669ee4218813123552"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/remote_back.png": {
+    "sourceSha256": "e65dd952c85f6d14acb9c745138684f206b9f8c552e0d0ab00fa9f646952d65c",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/remote_back.lossless.webp",
+    "targetSha256": "878f6b2827236721428423df20586ec337bc8a43272238bea5d4a5e8b95b25d1"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/remote_front.png": {
+    "sourceSha256": "0cd9739f7a57186ac73ec1ecc08e3d32768464b573db6b4b1ff1ebc44dae3f2d",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/remote_front.lossless.webp",
+    "targetSha256": "069b9dd7313cf790adc3f3fece38546cb070e575a0234f56e25a48e4743e5337"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/reset.png": {
+    "sourceSha256": "038a3f532f9c8877e2627998ce0eeab977c918b0cbcd347261f1f2dea52f38cd",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/reset.lossless.webp",
+    "targetSha256": "f2913f681425c2e93c8f93f19437a52dacccd9b851a552219e23a14d1f1aecb7"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/restore.png": {
+    "sourceSha256": "9a972971ecffc90b676a9bf9241e024d507c2ac4b825967698e200516e2da7e5",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/restore.lossless.webp",
+    "targetSha256": "3e8574ade0fa3919d738105d372e90d49276d0be79fbc088baf08da84b28d9b6"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/rev-list.png": {
+    "sourceSha256": "1c0875dde0b4d9a715915dfad2081177e5f216c73f9ea94eb5a77c5a6a9e6357",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/rev-list.lossless.webp",
+    "targetSha256": "81f0c17d0f8520346c68130820aa79d3d2038bc7c16ea5682004eac6e9ba8bea"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/revert.png": {
+    "sourceSha256": "2b9bfdbe3dea9a8d476166b3cd0020e9c6c51e476ad78996eb09faefaf55f53c",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/revert.lossless.webp",
+    "targetSha256": "8fc879389d37cf8c547ea19e4dcc61a67b9f97039487ee2ae9e5bb08373fed42"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/rm.png": {
+    "sourceSha256": "30e5258f6662e6b1bc17ba930400590837977c50aa965fcee21187075fcc5bee",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/rm.lossless.webp",
+    "targetSha256": "9496e4929c76098e3265fbe9b3287d2ef8fc7476c19d86c7352969b8495cba86"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/show.png": {
+    "sourceSha256": "3c6c5863804a340671876df6f96acb7c8a89f9c15c1993b03c711936742e3afe",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/show.lossless.webp",
+    "targetSha256": "7cfbe3af35cd20c43acaa974e1734833b03cd031d9ef5aa143536d092c983ede"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/stash.png": {
+    "sourceSha256": "5cf4fb2ca631ef56b6a3632cea9c82a1157ad4e7dbeddbeaf5de885d97e08d46",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/stash.lossless.webp",
+    "targetSha256": "331dfea002f5e1e56b317ec410bdce58614c63666890a2382e847897540c9f81"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/status.png": {
+    "sourceSha256": "73931748adca7c65848e5f1d628eb6bcffeec0c0fa5de0d9c503cfff75c136d0",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/status.lossless.webp",
+    "targetSha256": "67859147bc921f910a1a2699a22ef76dbfe340e3767bfd4c3a9d74fa22c0da5a"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/switch.png": {
+    "sourceSha256": "3ecad2f081acc8c7e234cf71821bbcfec0338e7a04594d84526fe3d7fd9fa265",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/switch.lossless.webp",
+    "targetSha256": "8196bb5cc36dbc572da685da70318952aca89dfbc2a85c4812b73ab8c6082b1f"
+  },
+  "public/cosmetics/companion/black/effects/skill-lightning-25/tag.png": {
+    "sourceSha256": "7fb8b554719ee0865f8bd26421487ece1e5d0fbdbaca7781a42ddcccf54e01b7",
+    "target": "public/cosmetics/companion/black/effects/skill-lightning-25/tag.lossless.webp",
+    "targetSha256": "3a11fbcbf81e9316a03030c907093a2efeccf2ee4d30fcf0ebfaf9ae32ba45ef"
+  },
+  "public/cosmetics/companion/black/hurt.png": {
+    "sourceSha256": "3c522338e5dc9d50ac16dbfbf9f6b96dc9bd1091c31140c6f9ea8bd1f1ce223a",
+    "target": "public/cosmetics/companion/black/hurt.lossless.webp",
+    "targetSha256": "81677f5c1b0ab0fa3030958b8cf6581ff72914abad8be75a9b9abd2c5690d61a"
+  },
+  "public/cosmetics/companion/black/idle.png": {
+    "sourceSha256": "4d5ae67a3af0dd8fd67e25785e5f66cca26aabcf07a11ae20e43b601533ccc76",
+    "target": "public/cosmetics/companion/black/idle.lossless.webp",
+    "targetSha256": "41a616dbdc2acb22cae3134c4ac8e95b5aa787d57f1c50766273306e1086d122"
+  },
+  "public/cosmetics/companion/black/miss.png": {
+    "sourceSha256": "18b79c2a9876260925d907af9f6dab4cdd2de9fbf49180fbecb2693e72cd23b8",
+    "target": "public/cosmetics/companion/black/miss.lossless.webp",
+    "targetSha256": "f5ab80f0638601b913ee316e1af0916591a615643c12379ed49a00382f5c3a58"
+  },
+  "public/cosmetics/companion/black/portrait.png": {
+    "sourceSha256": "e2bf0279d91c56cea097230ed87cd8b3d4198f1e5d312b953e59b0dc8c9359fd",
+    "target": "public/cosmetics/companion/black/portrait.lossless.webp",
+    "targetSha256": "31f3e360934ccee945d4dd450e32fd2a4b2e2a345d591ad16d44e69ab110e642"
+  },
+  "public/cosmetics/companion/black/run.png": {
+    "sourceSha256": "a1f0e9ad10140543162377afc217963b8905dc999db2d3b2950b39c82ea494b3",
+    "target": "public/cosmetics/companion/black/run.lossless.webp",
+    "targetSha256": "f4b3a8c70ada089133465850417e316796d29e3b3ead792f747d7509c5a09e5e"
+  },
+  "public/cosmetics/companion/blue/attack-end.png": {
+    "sourceSha256": "0e35aff6a2e342d93e294f06e78cd1624a2ae2aa3c5d9a6a26cc2eabb31f7a20",
+    "target": "public/cosmetics/companion/blue/attack-end.lossless.webp",
+    "targetSha256": "2e05e618b530a111ffd298e282c1ade5044823e123a9dec2aeeb650eb276f90c"
+  },
+  "public/cosmetics/companion/blue/attack.png": {
+    "sourceSha256": "6f0ceccc31750e6af91ed5a1c4fe00086a487bd02635ca8b2d415cbccee503a4",
+    "target": "public/cosmetics/companion/blue/attack.lossless.webp",
+    "targetSha256": "679d5bd3ec4862f3fb11d6d7fa64d1e7fb119eb89112ef2066a19488089dfb94"
+  },
+  "public/cosmetics/companion/blue/avatar.png": {
+    "sourceSha256": "78e65f23c002dbfa0a0ed7457fcdf46a90ada5e68b7a8c137e24f88ae151b2c4",
+    "target": "public/cosmetics/companion/blue/avatar.lossless.webp",
+    "targetSha256": "eba384fb903313488fd40401f67b25c78e21f5987d35e91ab3f0cbb9f6f24ae4"
+  },
+  "public/cosmetics/companion/blue/chat-avatar.png": {
+    "sourceSha256": "d0cf85056685ef60dcf4e98201c8546c6e673a44f7a93a0a57e5c26433154474",
+    "target": "public/cosmetics/companion/blue/chat-avatar.lossless.webp",
+    "targetSha256": "83919d2745f3f3c777c1f21f9ecac24929498a0a714c2f034dd148f59359a38e"
+  },
+  "public/cosmetics/companion/blue/chat-thinking.png": {
+    "sourceSha256": "90bae4e17347ac08be793d0dad6404971fc8b54e2e02809ce338f4fa35c38c13",
+    "target": "public/cosmetics/companion/blue/chat-thinking.lossless.webp",
+    "targetSha256": "7a6c4d370c508481f7622d5d1b4374d162552b847089a40e0c497520abe8719d"
+  },
+  "public/cosmetics/companion/blue/death.png": {
+    "sourceSha256": "3dd8713763bd4dcf869789b0004f4043853eb866d7949841444555b24fd4b2ae",
+    "target": "public/cosmetics/companion/blue/death.lossless.webp",
+    "targetSha256": "55fc916caad4e26936d08671456d7004836355bca7d08f039ce0a9b3a8bf1cbe"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/add.png": {
+    "sourceSha256": "d1a9508cc2ed2e4ca1f9ba7ab9d1ba1415f965a9dfd5022e28c4ba748e52626a",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/add.lossless.webp",
+    "targetSha256": "460296d8bc45dac615d799959e64f9fc2cec36a2afa55a591b0ba69f0b939be7"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/branch.png": {
+    "sourceSha256": "db5c78736baf50542ec7e33c6d186f18a6ede7e4488953eaccf10dabdafc20ff",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/branch.lossless.webp",
+    "targetSha256": "5f6e4a6b1e16cee20231dcc04a7161e89049cc77200ca34c80783f15c08b205f"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/check-ignore.png": {
+    "sourceSha256": "393f87ff6e48aabbd884f186bbcb161561386977b3b340605849bf5dcf2804c8",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/check-ignore.lossless.webp",
+    "targetSha256": "99b436db47a36cedaddb960b79b3976c91a7bc740853406b51639d9479923000"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/checkout-conflict.png": {
+    "sourceSha256": "a3810c2b3342373955005c5d1453105dd1c45c33623fa6d03ca8206855439eec",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/checkout-conflict.lossless.webp",
+    "targetSha256": "0cb59f6713d362e994e1a69124f68e52725743db1832e2a3b4f1863fa607de03"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/checkout.png": {
+    "sourceSha256": "9b706885046c8b90b1311e44620828894ad9d51ec0795cfef761c5488329c0b9",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/checkout.lossless.webp",
+    "targetSha256": "cb7993f8765999c3db96b6f18e4b7aaaeceed3ab78ca16f2cdd92b1a218bd772"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/cherry-pick.png": {
+    "sourceSha256": "019a3ff726383fd1e7051097b40789250fef0bfd5d94517623e6b32fc724913c",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/cherry-pick.lossless.webp",
+    "targetSha256": "7f7893cf2837c66d78e832c47621e52ac46af5a152fc1eb6b9df2116adae26b2"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/clone.png": {
+    "sourceSha256": "803044fbf7ce1250471a1f01945805c68e25cdf5af9d192ecc13c778b2756546",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/clone.lossless.webp",
+    "targetSha256": "4b325a49f611754775ec0d5e7a7b25888c790a2cf1b0098ebc4872175b17b7b1"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/commit.png": {
+    "sourceSha256": "5de6dc2c2b14acbb92717151904545a5fb8f9834a1ce5482448e3aa55e3e9352",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/commit.lossless.webp",
+    "targetSha256": "b3fc1d862c5953dc73ea1c4901cffec399b12474ad5d0d9f7010ad444523b75f"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/config.png": {
+    "sourceSha256": "afa5bf404541950a906e92ed51b54bc5e5c177c9b721e6ceaf4e90740188f1fe",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/config.lossless.webp",
+    "targetSha256": "0172396ec1560e576265a8aeca83d154507c70b3e715b1db73b66cc2ddf91cc3"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/default.png": {
+    "sourceSha256": "a33a4639ebc6203c7ce88d5415bddecac99e4d14dfb17e016b3cb14f56b967f9",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/default.lossless.webp",
+    "targetSha256": "0019d2842b1f5cb78ea01986fcc150fccfd5d78ed04634185a33f74858a42e6e"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/diff-conflict.png": {
+    "sourceSha256": "867fcdaf40ce32bf1fa444036245e141016749a21b666a9a51a862c896ebad18",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/diff-conflict.lossless.webp",
+    "targetSha256": "6c22cce45f55611ca9ec35d7663ee50470b257d7050dc70f2e5e54ee3d1dd184"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/diff.png": {
+    "sourceSha256": "d39e1bdcb74b740826c16fe9ce5665e8dc957fc2f472e4ac096bf77a1868067d",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/diff.lossless.webp",
+    "targetSha256": "bce5a5fb5f629a503167c14ca954c3c2863c8ad85081f3eb17ed22b11a9c9e62"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/fetch.png": {
+    "sourceSha256": "0b23fa7a64b03a6edcad69ec31e213376ea35733caa1b9bdb4fafc9f93b8bd47",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/fetch.lossless.webp",
+    "targetSha256": "50fdc5cb2fb38c76fa0f3da4f88c55d614635bcf1dbc3c55e7009d72b96b5189"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/init.png": {
+    "sourceSha256": "1c66920368d92bd76b441ae2017475f5c80dd894625989baaad47eae5e49c909",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/init.lossless.webp",
+    "targetSha256": "07c2723b6dc263eb1286d5a113ae4d49bf1f778abba911b67bcb940df5abbaa9"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/log.png": {
+    "sourceSha256": "4b43d96ceedbaab4f2efe74e17e1ccc4f2fb0e80eb9f0c10ad91d4548c4d5046",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/log.lossless.webp",
+    "targetSha256": "0c18db52d25428bec91b614842c8685cda49799886434abc9a453129f70d73b4"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/ls-files.png": {
+    "sourceSha256": "c2b7ce5687195bdb41649ce71f50d3973dc411818892ed0bc65554d541bf95d3",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/ls-files.lossless.webp",
+    "targetSha256": "b5f6ed101563b4b74d8538c1182914f55944d4b6841cf0007518889c719f2810"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/merge-base.png": {
+    "sourceSha256": "52d64b43d9c877fe07eba9539aa72f6885b3743b95b574ba93e4460c664ffa8a",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/merge-base.lossless.webp",
+    "targetSha256": "26b6113fbf71652a8992fcb0bb8e0a6e273bfe1d62669c231129dd979942ecca"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/merge.png": {
+    "sourceSha256": "9d89e43ac7f3e98d8be25404ca12b71513c249cf0e3cbb9f9e47dcf7f08964b8",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/merge.lossless.webp",
+    "targetSha256": "1f72a906565b1d497b8109d9d5911560b1d3589689fcdb3691fdfd232d93e01d"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/mergetool.png": {
+    "sourceSha256": "05020f3bbb884f32da07b3f10b550713eb9a519e326c04e98c86f94d49f92b59",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/mergetool.lossless.webp",
+    "targetSha256": "b59a79438db37c387d73fc609e24a3028bf4f59a6987a0de4e1b32af81205f4b"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/pull.png": {
+    "sourceSha256": "ceac52ea63e7b0a49fe7110f1ca679c2fec23caf55ccb24d04c32a2ac33a7414",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/pull.lossless.webp",
+    "targetSha256": "b6181a248a0311d3c04b82894a1518adda667e781f0eb4c21d33a12ac6db133e"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/push.png": {
+    "sourceSha256": "45b77b506ffeda3b98919391f0459f17b53843d83c4349fa95d60acd6660a307",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/push.lossless.webp",
+    "targetSha256": "ed728b70391aa05f86492c6d70b68528f743cc8329597aaace202e1236a46f7d"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/rebase.png": {
+    "sourceSha256": "b17ffc3c12b08ff0a05492120bdc3c485fe9d63597e15b689d85cd766a943360",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/rebase.lossless.webp",
+    "targetSha256": "0b4151f44d598d5548cde66cb2d23412f14b6182cc12e409d179d68bfb97ed01"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/reflog.png": {
+    "sourceSha256": "0ad0911e35710b110ea18eedee1a2729bbc0774d6812aa8cb43eec44c7d9fa6d",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/reflog.lossless.webp",
+    "targetSha256": "b46285ea22e91e29b6ff6d7a81926cf0524b6d15f7a43a8c637ab1e7812a50d5"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/remote.png": {
+    "sourceSha256": "df189449e1c067aa1873318c3b786d82865e39023cf76f97ee4f92b214228c3f",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/remote.lossless.webp",
+    "targetSha256": "4a20c23eb56e3f8ada7c6b318bbe7ba5e3e94a47bc382e23e7f93ce147912b92"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/reset.png": {
+    "sourceSha256": "cd5911afff6d2c8c5f2288ab9e13fe6d7d67d423983948e0652fdea9b50ac179",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/reset.lossless.webp",
+    "targetSha256": "88a0918e8dee1f9130ce5a389c688210ce29ba94c8f21fd5822f2592c0146381"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/restore.png": {
+    "sourceSha256": "943e86b69c6f04186f729cc2963dfa4f4b712bbfe45208bfcd3363f5c502deff",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/restore.lossless.webp",
+    "targetSha256": "88ba07bfebd516ee96dc34606ca1683c960f90f35f6663a8f3e2317b6443de27"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/rev-list.png": {
+    "sourceSha256": "3a9b6d5756b6fb440b50ce369b2d88c7e5fc4aa95e18e0dca489a524dfb45a20",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/rev-list.lossless.webp",
+    "targetSha256": "abea61804a5e6b8f06924d6a8f890b30e56f95e8fc3c05bb525e7a5ede6211c9"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/revert.png": {
+    "sourceSha256": "a438dc613b5c47ea5b5e87c201f5008202adc1f5afa1bb792e5702ec1c79f8cb",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/revert.lossless.webp",
+    "targetSha256": "ece0295c7be09ba1253fd4f9d7ba485a1849dee9c7287899a3c24181f2621363"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/rm.png": {
+    "sourceSha256": "b93cb55a458b055d373061d2ee23d34c98e013f711b6b0313794a9e5d89e4554",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/rm.lossless.webp",
+    "targetSha256": "69443a89d3a28bbbce6a1fb5645a78b2c3e08c3b97be848fffdf3b4e8bc5847d"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/show.png": {
+    "sourceSha256": "7bbae4a90176891f224b9436c04504b06bb8ab8bc5527283a8a9877743d363f8",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/show.lossless.webp",
+    "targetSha256": "c52003f53823dd1b7c6a541d16580031e4ef44b234d54cf001eb100da06305c8"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/stash.png": {
+    "sourceSha256": "52a254b601c072df7833a782d9bbd2e667cba6bd043f66067bd19d8151dc3e0f",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/stash.lossless.webp",
+    "targetSha256": "8b7f4e7e6cf614667123892bfe2ac403b2ee8f76ea910523bfaed6c524c9b966"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/status.png": {
+    "sourceSha256": "8fe029fdfa5a43c82c23c272ad0b55a22d12b2a62cf6ee26a3d50bc10886a559",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/status.lossless.webp",
+    "targetSha256": "e70cecd6ee9b108a19dbced7a5157225f566adbe0bb4c1dd4668f03ebbd950bc"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/switch.png": {
+    "sourceSha256": "e3056a9dae155d213b182d8251c87120f11a3a950f6324e53209de79d31e3254",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/switch.lossless.webp",
+    "targetSha256": "fb0ebff18ee43aab55571671f477b7fdfb5c16fd1e4cff222bc7c2fe97e54e65"
+  },
+  "public/cosmetics/companion/blue/effects/skill-flames-25/tag.png": {
+    "sourceSha256": "61aa6ff539c33ec9dda3d07b99ed64005c2a4fe6867915afe7bcf813eadc5aa5",
+    "target": "public/cosmetics/companion/blue/effects/skill-flames-25/tag.lossless.webp",
+    "targetSha256": "545e18206bac52f2c1f0ba980eaaff6a923fd355ffc9df5c7d6d29294d568215"
+  },
+  "public/cosmetics/companion/blue/hurt.png": {
+    "sourceSha256": "00e150b62ed3fa42f0dca975e5f75c6588c3615219a68aede88227b40470825e",
+    "target": "public/cosmetics/companion/blue/hurt.lossless.webp",
+    "targetSha256": "e4eae52837e4d2c646db42fe5866e829825e8b6227bf5635f9dd0b5ea5939a7f"
+  },
+  "public/cosmetics/companion/blue/idle.png": {
+    "sourceSha256": "1b8c3c2ff92e3e56d72e70d90cdaa11934cd998abb2df80a5cab05546c347f74",
+    "target": "public/cosmetics/companion/blue/idle.lossless.webp",
+    "targetSha256": "4d196b22ba7ce8debcddbcf71305101c0ea8411147b55fc141ef447f55aba339"
+  },
+  "public/cosmetics/companion/blue/miss.png": {
+    "sourceSha256": "2e30708af880981b3399bb76aea9e22e8566e253dd012503db6e83cfd82c7aa7",
+    "target": "public/cosmetics/companion/blue/miss.lossless.webp",
+    "targetSha256": "a429f88bd253c7a6b7750bd1b5245ca5e458b5acb84a5435dd4224c7dc1a61f2"
+  },
+  "public/cosmetics/companion/blue/portrait.png": {
+    "sourceSha256": "160214ae2e8fad1e113d62e7954b56a7a18d2102b5e0e00b738e306c807d8bab",
+    "target": "public/cosmetics/companion/blue/portrait.lossless.webp",
+    "targetSha256": "6429137d6dcc9c12f443c5bae6c17336107f3dca744a192ac1324c08eeb2a7e9"
+  },
+  "public/cosmetics/companion/blue/run.png": {
+    "sourceSha256": "2783d5a8af8bfee415547014beab9e4635c4985178d6b37a3475838bd7de2cf1",
+    "target": "public/cosmetics/companion/blue/run.lossless.webp",
+    "targetSha256": "c958995566097906c7ff89b5015800e5d2d2e6962dab13a804784b6204c47016"
+  },
+  "public/cosmetics/companion/white/attack-end.png": {
+    "sourceSha256": "fe33dacbe8028dd2eb34d717240db399e3e23f8397d5457b961fafb33f74cbf8",
+    "target": "public/cosmetics/companion/white/attack-end.lossless.webp",
+    "targetSha256": "788c183606754a8618b61962bc4bb3158c965c5d85102bce6ab94f4745eab482"
+  },
+  "public/cosmetics/companion/white/attack.png": {
+    "sourceSha256": "dbb7280eb10060ce0940aa77d9a829ae616c51be2f14ba9b208c82a1df062ec7",
+    "target": "public/cosmetics/companion/white/attack.lossless.webp",
+    "targetSha256": "efa2091e44de990bcf3db360d39a278381dfd92fc3d38cafba7132c9a85e1349"
+  },
+  "public/cosmetics/companion/white/avatar.png": {
+    "sourceSha256": "1ed24193f92cc7258a4e609144c45258f454645f70560623e83f7ee4cdbc4311",
+    "target": "public/cosmetics/companion/white/avatar.lossless.webp",
+    "targetSha256": "5bd26c6963034ab9ba6f80e61c98476aeb48f2af99c4ba68d721bbb79b60cb95"
+  },
+  "public/cosmetics/companion/white/chat-avatar.png": {
+    "sourceSha256": "10618bb4077aa9a2253b687927f11044d5b9506da194cef8349cb71cdaa32c10",
+    "target": "public/cosmetics/companion/white/chat-avatar.lossless.webp",
+    "targetSha256": "341749ca7b039a052f004f780106a21ffc72fdbfd8aae616986014dd1b9fb7b7"
+  },
+  "public/cosmetics/companion/white/chat-thinking.png": {
+    "sourceSha256": "2995fdcfa636d2c6624a7fd0e1dc9b407567e63db9bd9057a214ce93cac89dcf",
+    "target": "public/cosmetics/companion/white/chat-thinking.lossless.webp",
+    "targetSha256": "a1aee4996c1f6710afd12dc6b76e1f815ed2de193f173b9228c4a8c93b40def8"
+  },
+  "public/cosmetics/companion/white/death.png": {
+    "sourceSha256": "aa5c5c258edcb2e2a290cfcd47166a3c136307ef0cca9409845258fa6bb130b8",
+    "target": "public/cosmetics/companion/white/death.lossless.webp",
+    "targetSha256": "f929077052efcffbc6e78d255b830a9459ddc7bd34db90fe14e7344e845e7ce8"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/add.png": {
+    "sourceSha256": "1b9ff4761647bb37dba465f5754e9fc033dbe6487cb2d027a6c7c88d41a88429",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/add.lossless.webp",
+    "targetSha256": "1e42f77e0f4bfafb11509de97a0d45acbb952552705756ad9c49e6d216bcd32d"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/branch.png": {
+    "sourceSha256": "390455df4e965d8fc4a85d841e09c1a8785be7a9363fc6b28fbcfed82c45361d",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/branch.lossless.webp",
+    "targetSha256": "a565adb6d91393c00e7a3b79d3f83502dc20bd11a93ed97703e3816c5a6c2fcb"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/check-ignore.png": {
+    "sourceSha256": "7f9e84505729a46238d2640f0d54318bb3ec1dcf48a74f444b071c9a77843aaf",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/check-ignore.lossless.webp",
+    "targetSha256": "dce9fab109b0389f72f36e411b1ebba775cd5bacbf2fd038e5916840c5fc014f"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/checkout-conflict.png": {
+    "sourceSha256": "12ab567971398a28bd53b47f3f67d2d3670031809b497ae88cf79b65f8e3554d",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/checkout-conflict.lossless.webp",
+    "targetSha256": "19fd6690f9045151098db1fb004d4d75d7fa33477a964e44b62f965998a4f063"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/checkout.png": {
+    "sourceSha256": "2399c030ebbdb000f61434b3083f423aad6ff02073c29595d4a9d819c069a132",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/checkout.lossless.webp",
+    "targetSha256": "74470ed309b1caadb678ac377eff9ac5c607c135d07d205f08755bf7d1f784eb"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/cherry-pick.png": {
+    "sourceSha256": "1e581342d70d9d3df659e7ec9b1e7be5337e2bef484ee677f9b44432d0c16c43",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/cherry-pick.lossless.webp",
+    "targetSha256": "d70c05b1c88ef02d59072185d8d36ae9e693df1cfe57769be2076a97acf89c9d"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/clone.png": {
+    "sourceSha256": "abce8a5c7cbb581add8a7a88c53a589c091edafa1927f0a5858ae8f45fc73ce0",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/clone.lossless.webp",
+    "targetSha256": "fcdeb8a2deb9fa91367c759f6ac7248319b507a507d80ce39bb34872adb5db30"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/commit.png": {
+    "sourceSha256": "1de9e7b524d22e24b5df36dbc82ffaeb8f7c2a7f676e2765087a6bedbbc18995",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/commit.lossless.webp",
+    "targetSha256": "9596a63a3ded7644b990ea05d3b7b75c72f1e5104da85d2026ba222aa9ad1468"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/config.png": {
+    "sourceSha256": "bb687ffee0cb61c4c0bb66458c778221c2cab15991563f0086c0f2863b042264",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/config.lossless.webp",
+    "targetSha256": "83ae1c9e752a6c7a110ee91db39d08840d210cfdd7cda829e58297fc3ea474a5"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/default.png": {
+    "sourceSha256": "c6dc55b2bac008a3dc8aa59a14d6985daa2386fd8524abde4e97ca8651235cb2",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/default.lossless.webp",
+    "targetSha256": "cfc47a23c39267b40d39b64b5a62b846f4be1718c756c6f35d7e0e70cdc22c35"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/diff-conflict.png": {
+    "sourceSha256": "dea1a339d4eb6ccace6ca96e70220eedd3f14b659dac28968d627af020b968af",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/diff-conflict.lossless.webp",
+    "targetSha256": "6a39ee0cc35f3cbe2b800d9ea8e554e004b4a833a1290863673da420f11c549e"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/diff.png": {
+    "sourceSha256": "9766993e6903b44d62e8fa6a04f7b4a1ac7f54101d563e745f91f71177a1c17d",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/diff.lossless.webp",
+    "targetSha256": "aafa576f738776725049b2b899e7385dd5026e2e6648825aa116317c350629bf"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/fetch.png": {
+    "sourceSha256": "332f303767b198914bb3bfc55406641cb2f8a0a4ac5021127f781ce23a87a687",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/fetch.lossless.webp",
+    "targetSha256": "a2f97b638a3a372b2a465fd0903ddd8f7764a5ead438881534b7323055df3347"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/init.png": {
+    "sourceSha256": "bf568cf0581c19ad2dc0449306341a865c8d66f8c33a33de7f9f53f436671b19",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/init.lossless.webp",
+    "targetSha256": "4f9290f1af63b6da4706bde27b107527ce4e00f5c926ed529e314c919c7db54e"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/log.png": {
+    "sourceSha256": "bb687ffee0cb61c4c0bb66458c778221c2cab15991563f0086c0f2863b042264",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/log.lossless.webp",
+    "targetSha256": "83ae1c9e752a6c7a110ee91db39d08840d210cfdd7cda829e58297fc3ea474a5"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/ls-files.png": {
+    "sourceSha256": "b9636ae4ad8846451ff4c8a70dd3a821d533d54315760a642bf756031fa6ef26",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/ls-files.lossless.webp",
+    "targetSha256": "fdc4aa833c7a21c76bb4debcd0cafef418e33c20979c1795f7e212bd6f4a4107"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/merge-base.png": {
+    "sourceSha256": "db2300691fb325f0494320eb4df89c1a050f5f0a2e7afce858c4968b3ad93e85",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/merge-base.lossless.webp",
+    "targetSha256": "014e532701860366475728281a3e9ea46ff5667b42844448ecfcd318ee1446d3"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/merge.png": {
+    "sourceSha256": "bd4289bb659ae2079667e32cdcfae444cd6bdd791c1fc39bd59294d381808e8f",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/merge.lossless.webp",
+    "targetSha256": "c8df11a0c9689c5c1007f5ad0c825614ea6e6d48ea64c8d362c01afa19d04f6d"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/mergetool.png": {
+    "sourceSha256": "77c130c7ea25ec8d25c5e7fafd12ed4d94bb29db35e55e8e035b77747407b0ed",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/mergetool.lossless.webp",
+    "targetSha256": "4b4b2d2433b6c24a6774b5e322bf815fcc8ee8ea5293e4918ef14db4676a8296"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/pull.png": {
+    "sourceSha256": "1852153c65d71562834d8551ea9232d7d2165530ba7fd6ef88d4fca0fee20a1a",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/pull.lossless.webp",
+    "targetSha256": "91f633b8273fd42b8788fead57f907f27fe00d1c03bae2bf893f43977cfa3284"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/push.png": {
+    "sourceSha256": "1d89d10ca66a8d4460b31b9f04cd4849d68c6cc64f283b59fdec530646410cd6",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/push.lossless.webp",
+    "targetSha256": "51e3dc8107ad6434407962d43bc603fbc6f738a5dbcb2f5e8b3f73ffc8beaf52"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/rebase.png": {
+    "sourceSha256": "2f0d53185181cd74905ea96bcde21264c99f10573da0402f3564c2b4022f6451",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/rebase.lossless.webp",
+    "targetSha256": "87c7de48244dfdd01689678ce010dd511a5eaa833f00ce6bafb761028e329c14"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/reflog.png": {
+    "sourceSha256": "cf12028adbc0ca96ebc7f14242a09cacee1021095cc639936e3f5d0582a06c8c",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/reflog.lossless.webp",
+    "targetSha256": "e877e7edf4bcd77d2dd3359d4cee03a6dd0bc32afb1bc1a16859fe03ccebddb5"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/remote.png": {
+    "sourceSha256": "f5d6634d1aaace8c35d7a5d04612d2217945e35a45285f46f98001f2e754f7c7",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/remote.lossless.webp",
+    "targetSha256": "504c2a3e71142b1b8a938c813495ce68827a9f14124047b30f59fbda085ffa60"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/reset.png": {
+    "sourceSha256": "fe7d2c15e4d63cd02fba7818dde93161da5389d946a197c7a27026cfbe6a6f7d",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/reset.lossless.webp",
+    "targetSha256": "59cb03977ba9c19bfdfd35ec1cbb9ff56b5f93d45b2ebf26e1db52e48423c122"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/restore.png": {
+    "sourceSha256": "e2226552a617dec0da698060391c50f948b7d69779e40e19e55625c8b06e3a49",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/restore.lossless.webp",
+    "targetSha256": "5538c3985c563017f888d3235e98b1bcc48f39d1d606d3c588a23e63f470fa53"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/rev-list.png": {
+    "sourceSha256": "29fa974b3d6c65562f1bdb52fd729f6ab0ea7212436965c0ce99c665f92098c1",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/rev-list.lossless.webp",
+    "targetSha256": "391ca9902c3c5a93c2f67bfd81b48210737322de2568db5977e059030fb1ed5c"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/revert.png": {
+    "sourceSha256": "96718fea208af8b4c3f1d03e9ac07d0e7dc18346102078ac56132da158489904",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/revert.lossless.webp",
+    "targetSha256": "b2da7a701a510b91923668de2b4f6a35bd9570968f10d24cccefa95d6518acde"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/rm.png": {
+    "sourceSha256": "01277421418856a5d545a84ad75abc714c83dc539884b187558388c1c9d51da0",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/rm.lossless.webp",
+    "targetSha256": "1b913ffc5c444552b61d62ddd1f55537f386ff7573fbe2f1bcc647f16b93d6c9"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/show.png": {
+    "sourceSha256": "bce2d36129c76dc74cd68479e6035c6159fcf004970ac9d9ec14fbe04d1e6d2c",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/show.lossless.webp",
+    "targetSha256": "5bc663f652f92387bc69563525340b9e0c90369ad5915b17fad3f76ef444d856"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/stash.png": {
+    "sourceSha256": "79536c23d9048f8b4030f7b1758fbac5183715a3f6bb7183f82918480b8055e1",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/stash.lossless.webp",
+    "targetSha256": "4d1802db3cbba6d28eabc9318b65724feee374375eb78efdd61b8f4176a7fc55"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/status.png": {
+    "sourceSha256": "a03fd97ae306e5ee6932df1028f42ca6b96f1d8cc84e2c8d661281b565e5a027",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/status.lossless.webp",
+    "targetSha256": "27b230696414934d17b59f816b153383b2b8c50628e6f2622aafc93f9cd428e8"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/switch.png": {
+    "sourceSha256": "4d3a4614679767a1c2fba649107c0cf5104458624883480484a1b3a3a84ba065",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/switch.lossless.webp",
+    "targetSha256": "3a0a8abda4acee88182a394eb4b59af7b98ed89a62436d6de5a9b5034d77f539"
+  },
+  "public/cosmetics/companion/white/effects/skill-ice-25/tag.png": {
+    "sourceSha256": "6f14df59fc1166d3df644d863a1c360f7a9851d2ebb7f4afb025942cb77614e2",
+    "target": "public/cosmetics/companion/white/effects/skill-ice-25/tag.lossless.webp",
+    "targetSha256": "600847ec4422135908f5acb4facdf7f206997923b67305e97e741d99606ddf97"
+  },
+  "public/cosmetics/companion/white/hurt.png": {
+    "sourceSha256": "e18ebd38fe5a51f03b3e4aa29b3328cc7f436228657231879cc66919d397c6c0",
+    "target": "public/cosmetics/companion/white/hurt.lossless.webp",
+    "targetSha256": "fb1fd9108b40dc3d75799946c6509f37780b13bd48dab7284e7670b5f8703796"
+  },
+  "public/cosmetics/companion/white/idle.png": {
+    "sourceSha256": "1ee00473d063b41ea01394e126285c39c87c0347c2b7889b7c44271c70cb33ad",
+    "target": "public/cosmetics/companion/white/idle.lossless.webp",
+    "targetSha256": "ed37129bc33ce6f1ea32563a856d1aa476ac189a6f4b302ba0156a0052740166"
+  },
+  "public/cosmetics/companion/white/miss.png": {
+    "sourceSha256": "22006e0f7dff16842b143e598d37e2c4b3f7799bfcd25808c27247b1ac9f4744",
+    "target": "public/cosmetics/companion/white/miss.lossless.webp",
+    "targetSha256": "abb48e3df7d94710f1ce963ba24f822ef8d0cd105b189c891110cf465ec3e175"
+  },
+  "public/cosmetics/companion/white/run.png": {
+    "sourceSha256": "18fa0d6fe3f20d570aeabb837a07884f756a93a9ce6a110b8dd535a45ece79b0",
+    "target": "public/cosmetics/companion/white/run.lossless.webp",
+    "targetSha256": "83b9cb83d013d909c5c4d5509465d22e9315d8ecea2c5c661b382cc611ebb650"
+  },
+  "public/cosmetics/companion/white/white.png": {
+    "sourceSha256": "08df5165e56d494f229ca81e942479542b5584c15600e4a02ff0006ca4355180",
+    "target": "public/cosmetics/companion/white/white.lossless.webp",
+    "targetSha256": "39e723be39f44d9b5fb042b5feaffb85898202a68a40751d7e3cc517cfa80915"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png": {
+    "sourceSha256": "3afba87c8b88965a3272c5777d3777cda564217dcda327520f5acdcb481f32c7",
+    "target": "public/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp",
+    "targetSha256": "295a0e57bf72e77ad13dc122092290081ab86b11ca9472f1e93f06af6987f5c3"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-01/attack.png": {
+    "sourceSha256": "7a8396cbee5eacd967deb1b2683a3a78e83e4dbd52738a93cafcd6d32b0cf417",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-01/attack.lossless.webp",
+    "targetSha256": "c498149157980afe5a6f3a6b08e1aa728c566e4f33fdbbe247f80e28894e1272"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-01/death.png": {
+    "sourceSha256": "1be1b1969e26b657539917e92a7dbfff05f333b1ae9fbd654b3bf9e64e5d4f54",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-01/death.lossless.webp",
+    "targetSha256": "7ca9a2d98c50acd858535182e0beb32419b53ecf32388c2c3dd73d46e5d8bc54"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-01/effects/skill.png": {
+    "sourceSha256": "73e6844358dc815bca349ebf2d6d1dd4b6e15f3b4d9d6fea3a091290e8fe6daf",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-01/effects/skill.lossless.webp",
+    "targetSha256": "e2e24bd014a836e48196593d38e0411bbcdab29883c5e67ede3b21998da50422"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-01/hurt.png": {
+    "sourceSha256": "81080b4b11ec1883636e7fca6db94e6e328aa2d90d90531c4eac2376746710d9",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-01/hurt.lossless.webp",
+    "targetSha256": "645f6ee37769bf2bf4cb26756f4cb128e144af049c6ee77f69f669f6cd1df083"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-01/idle.png": {
+    "sourceSha256": "bff39a3193503549b1b68d357c0f5f6a34c91e985fb01f9b48b1db0ebbf1bec3",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-01/idle.lossless.webp",
+    "targetSha256": "f0deb6fc4f46257bcd5e771e45e3e0dfdbc0327f837da949cb30379435bf95d7"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-01/portrait.png": {
+    "sourceSha256": "22c27f9381128ce2b9d79a81683ee795dd6260dc2b7b0eefe3bb03605464275a",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-01/portrait.lossless.webp",
+    "targetSha256": "f58237722e00180e98bf4b35ae01449ec8f834b8039d36a2375cfc28ba6ec188"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-02/attack.png": {
+    "sourceSha256": "78548b324ae5391db7a18713e444c84f3d4e89d171f42432e468a559f1603b68",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-02/attack.lossless.webp",
+    "targetSha256": "ceda08452d44b4e904f657689fde4956e5f3e020fb6c06286018361bb65df01f"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-02/death.png": {
+    "sourceSha256": "e6b17f529061b883ea12711bd678f362a1ce88a24f1ca9e3e1456c6a6b1c0089",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-02/death.lossless.webp",
+    "targetSha256": "d541058cb5630c052b88bdd792f4e605b0ec0f867a7c735014c717cc8c1da45b"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-02/effects/skill.png": {
+    "sourceSha256": "f0f656cf77e58ac566c060ee59929584b2ab32e1340db65d249af160801fd421",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-02/effects/skill.lossless.webp",
+    "targetSha256": "bf767c3e37956667b2360a12b1316eea05b57fcf2cda4cc1f89d50d91aef8a1d"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-02/hurt.png": {
+    "sourceSha256": "a291681b5cfb8b7e11a311bee76209c705e5055a1b4155ae3a348f4aa478d63d",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-02/hurt.lossless.webp",
+    "targetSha256": "a9b579d1e81468fd4254a277180d4a74a93523f03e231962b179059820b5fa90"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-02/idle.png": {
+    "sourceSha256": "11d7548c98f3bb109fb54b1b915350019311789b4f4e363b9cef5a7dfc758a86",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-02/idle.lossless.webp",
+    "targetSha256": "40791ad83c8edf8c3a4779d820cc5cdd9b771867581331180b094a5f22e17b98"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-02/portrait.png": {
+    "sourceSha256": "9d9d66d256b79dd7fdaffdc9118017f024b3ae7ed1147f390c402fa382b063eb",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-02/portrait.lossless.webp",
+    "targetSha256": "b4ef4b02177d15d79530a8ea04c5a22e7b6c47d214d19b4e2c53cd6e722ee763"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-04/attack.png": {
+    "sourceSha256": "a6c39b7896c2a7ef22e20c24bed81b963c9bcd2de872163814c3d6629c9c6483",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-04/attack.lossless.webp",
+    "targetSha256": "adaf236d99015ada045a2ee84a98f852f43ad075acd632b64a27f9caa8749100"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-04/death.png": {
+    "sourceSha256": "72d92c12e678b537d4b7d257db1e80bbc31be45756d9e4652173e19306b37824",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-04/death.lossless.webp",
+    "targetSha256": "d60fd93fc76326c16e61816046159d188a319cc9908beddcebbb265b514d83fa"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-04/effects/skill.png": {
+    "sourceSha256": "f795d3bc1b3832fc16d20970e7fbf17f6aa5fedcbb7ea10d738f2c9e5fc8d605",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-04/effects/skill.lossless.webp",
+    "targetSha256": "6118ff355881d5c48123b995fb3ba470e3cb916a52e53eca8e37181c8ee4a736"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-04/hurt.png": {
+    "sourceSha256": "f1689010e7ca1e6d853ad15c615d5ae9c9426532086db9d29d1b5202a5943952",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-04/hurt.lossless.webp",
+    "targetSha256": "f04a92d4567b1776c52148980fd761a795f0f87567215c62fd67690e6fc7e60e"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-04/idle.png": {
+    "sourceSha256": "65145cc5ed7b6a4e4b141babe73516dee5c60bb796f33b6a0e14342095524bdd",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-04/idle.lossless.webp",
+    "targetSha256": "4403078fc6b4dcceca64301875da4b5edfcb3c31492ce7d6f6336aa72a305ce1"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-04/portrait.png": {
+    "sourceSha256": "5d651f38f3b0729cd9e3a8d7de54a748e78366de0642c0011bbe186d60ef2357",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-04/portrait.lossless.webp",
+    "targetSha256": "1501c0fe14afd2f988b7e1d26e4c78d470ef7281f3546e731fa28bcd0079d9fc"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-05/attack.png": {
+    "sourceSha256": "e74c6ea908fdd3ca6f339d4999a3fb28946c8e2c697275d06197b01d0157dca9",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-05/attack.lossless.webp",
+    "targetSha256": "98110518a7348150471fbfbb23722b6619e170826fc7003809842028e546ef58"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-05/death.png": {
+    "sourceSha256": "ae44788c453927c8c31763630602139ba3b204851a9bb756558c51f8b7cafc28",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-05/death.lossless.webp",
+    "targetSha256": "36c488a59655a50ce3a9038b0ff3342e542974f14fdf28076dbe800ae9a9dfd8"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-05/effects/skill.png": {
+    "sourceSha256": "8b1605053feec5263e2b6a6b72686581ec6cb525df3786eb731e6b561c4afd77",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-05/effects/skill.lossless.webp",
+    "targetSha256": "7b40033ae75a8a3d7b0d7d912995a59902517322f2a0a4e04e22451733230c3d"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-05/hurt.png": {
+    "sourceSha256": "693af59442a37a2bc901381fcac1c2a784f47ab0c24734405673ee2e7f5a3c2e",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-05/hurt.lossless.webp",
+    "targetSha256": "d86fa2f2f3944403f3a806dfa681a56172661ac76dff18fb989cdb36d360ab20"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-05/idle.png": {
+    "sourceSha256": "989e4fe4a9e72d7815157a901251dd7a3933c5e4c001c6f2543f6d28e3197f44",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-05/idle.lossless.webp",
+    "targetSha256": "bb6caf80abe145c942a0a58a4f607bbf9fafc8439a67d34247c6a51234f7b48d"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-05/portrait.png": {
+    "sourceSha256": "5449ff05027098a171f40329a5b863f847275ce95a66ea52face230db090ebac",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-05/portrait.lossless.webp",
+    "targetSha256": "c1e1703cad6fcddf0b59b116875f61869c172adfdf54e2346f49489b570a7377"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-06/attack.png": {
+    "sourceSha256": "4c8c9f0868201b0bc1612a8ef54a04f290459e35ca13b19a8cdd22828fa68553",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-06/attack.lossless.webp",
+    "targetSha256": "fcc2aff018e80b0655a1641c14015c3ca587eb28fc029f92a17728186d3dfe8c"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-06/death.png": {
+    "sourceSha256": "d2b828a778722a97f965e002764243b9e9ee86881c4a80517cd0dc9abbcd36ed",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-06/death.lossless.webp",
+    "targetSha256": "8cf5aefb225e834384b201b18898e5ed6e1f6999f327e1ccb75d6a22a1f5c95c"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-06/effects/skill.png": {
+    "sourceSha256": "dfdc5effa0552d76264039fbb429fc2c7d95b61abde042e229d928986b2d6101",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-06/effects/skill.lossless.webp",
+    "targetSha256": "78cbdcd76702800a54a11ffc23febdf2cd26ca4d0b6346d3c0b75f0e2bf4b6ab"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-06/hurt.png": {
+    "sourceSha256": "743300ed0845bae22d61e73b6b23c327ce3feaa3a52acfd89f5c9cdd677b2062",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-06/hurt.lossless.webp",
+    "targetSha256": "3ee2505e61d4469e8ea12c3c1f7e2fa555dd922ac39293cb3edb8dcc1879b718"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-06/idle.png": {
+    "sourceSha256": "7935136fa0570b17684fa1a374f3104b25dbf4359b73991ee6f80dd0f8ace33e",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-06/idle.lossless.webp",
+    "targetSha256": "3be5ceb55584b0055940085b31cf9aca1eda941bfb43d58050986f27e60d9707"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-06/portrait.png": {
+    "sourceSha256": "3ebc8c017d1423be35e5bcb22d55e8c0ec246c2a788fb4f8cdc058c41413e3e0",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-06/portrait.lossless.webp",
+    "targetSha256": "afada8f31cb4e2fb9a8ed838cdb44e85ddb6fc3a67d9a529531e16d79d164491"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-07/attack.png": {
+    "sourceSha256": "4411e9dbbfd9b224f233cb56bdbe6c0aed3e147ff0cb4cee389b0c5cc26fbd8f",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-07/attack.lossless.webp",
+    "targetSha256": "a3718f9f7a223da34a98b0fdc5a231fd47d9784ac174458c5396acbb65c933da"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-07/death.png": {
+    "sourceSha256": "ff2e9fad6bfe14d66c5c012fe2c6029a58f145dd333cf0671127e98f2ae57bf5",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-07/death.lossless.webp",
+    "targetSha256": "b8a8367382039e16f2e7e1be07e1fbd13f2562dd365c066f6d6f263b509291a6"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-07/effects/skill.png": {
+    "sourceSha256": "1aa2cec2b38df3f3f13a0c2e708057ea5e0e5d2585590b841a29d5c054ed23d9",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-07/effects/skill.lossless.webp",
+    "targetSha256": "e0568e5d9025f9faa805ba078500a2d3ced126a6bd5d9fa68ee659205263e715"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-07/hurt.png": {
+    "sourceSha256": "2c9c343d8a75cbb77bd709d527990f0c98033887fb76d1eda8087eb25ef16786",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-07/hurt.lossless.webp",
+    "targetSha256": "8cfe25319a10c8193af05c1479a38de250c52636d1a6cebc65c64d93590d9438"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-07/idle.png": {
+    "sourceSha256": "df05a54075c860a0da04b2a978b919d6b3a09c61db13b9d6eb81cfb41f1cc38a",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-07/idle.lossless.webp",
+    "targetSha256": "12cd3c0fbb6c64c45b5c376687b215b74605a0e5d48043b80cd8d7900926cd51"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-07/portrait.png": {
+    "sourceSha256": "e28406d688865c91073299342ccf212eb0650ea81f920cbae47f8592d291c790",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-07/portrait.lossless.webp",
+    "targetSha256": "be1ebddcd632273a884425ff2b60dd5221576b1354c7d9fdcd2dbe21442a2d84"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-08/attack.png": {
+    "sourceSha256": "cb4b1647865eecfca71f9b9e75aaec6aa6a42bd6440e224b6d9a8e9f4381ada0",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-08/attack.lossless.webp",
+    "targetSha256": "eaa6d2baf29fa6cdf382e4d651b94e3f666f124246fa235dcb1c9fac179506d7"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-08/death.png": {
+    "sourceSha256": "5fe106a6eabf1c9eaeefee59b632c38a548d5dbf8fdf517d4f17e9103ad3e295",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-08/death.lossless.webp",
+    "targetSha256": "141263340ce93f2b3122e03768a17da2133c2ab536ea1583365b5e342d32ffbd"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-08/effects/skill.png": {
+    "sourceSha256": "d63a9f6cd8ed8ea92b988f3e7aa3fed5720df833b1157f275bf2112b52de4d68",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-08/effects/skill.lossless.webp",
+    "targetSha256": "db49cf5b7608e9498623f799a835d437eb74fda5b3e99cda1212f7479ce58a9c"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-08/hurt.png": {
+    "sourceSha256": "dee3c9c341a3cf2a981d60a27994a67e0ad353674a85aad1755494fb1593d8cc",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-08/hurt.lossless.webp",
+    "targetSha256": "0741456595a6d6f71a31dbc7f3a4aa17bd85e87c50aabe184080382e7bb0d2e7"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-08/idle.png": {
+    "sourceSha256": "17004896e598595758d18b23f4bc364f1776355c27b8d204c6268b696e85b243",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-08/idle.lossless.webp",
+    "targetSha256": "4035502cf5ad65342eddc2814ff6fc0f42d975d2e1716f73de364f7059557d0a"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-08/portrait.png": {
+    "sourceSha256": "e8805cd0cbd315236d560ec16ca792b04ccc54da7f8fddd5ffc811586e1d93ab",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-08/portrait.lossless.webp",
+    "targetSha256": "6160183824b4ae6835a7dac2f7a2ff6aa34c1c6e4499c60a4f33b488ca56ce42"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-09/attack.png": {
+    "sourceSha256": "8cb624345c2fdb22a7478f5ae6c20c44786c4665f54f733288b912359ed6721b",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-09/attack.lossless.webp",
+    "targetSha256": "d57fa91d0685336ededa5356f6883357dc8aeb1c1a2915f70e93611981ed3dbc"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-09/death.png": {
+    "sourceSha256": "51aa2ad1d070d4abdd517623b8c1fb59aa0b614009b9cd715058289f2d06302f",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-09/death.lossless.webp",
+    "targetSha256": "c4840493ff732ca76cb2236b770dbb11554bb198ec0e5bc3a142ee1aa540d2e1"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-09/effects/skill.png": {
+    "sourceSha256": "dc678c5a260a4683e9be731be69ad8dc38261dbad3fba26a43e074ec32d204d9",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-09/effects/skill.lossless.webp",
+    "targetSha256": "05bd0411278b8407a81d240d2af4ca008d10198783a08941d72e52dc112bbf69"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-09/hurt.png": {
+    "sourceSha256": "cb88a041a4dad7d3da4c4c89108f0b818594383139ba09b9af9912ee2fe5f1de",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-09/hurt.lossless.webp",
+    "targetSha256": "16de9a6e706894be247c30529030b1b77a0111aa2d656f1dfa5c97f03a3e2336"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-09/idle.png": {
+    "sourceSha256": "cc61d03d9c1e944d3d2bf6821497a5726d5a2988cb14208280fa54dce4eb5d28",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-09/idle.lossless.webp",
+    "targetSha256": "f91abb67279b4a95c228b3d3dbb484fb9ac22d944f96d2248d2888334af234f2"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-09/portrait.png": {
+    "sourceSha256": "ec17f38bd329d0c1bf3113ada33907b7a753b3ac9013f7bf395c2ae23bad85eb",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-09/portrait.lossless.webp",
+    "targetSha256": "6eef2d829b59480e5426ef084551d9632fe1de5e111b82d4a3c9cdd1dc532351"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/attack.png": {
+    "sourceSha256": "7a9d4894df698c6c84aea1ee14ba551f75bd1d2321830e6174c07579b552d969",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/attack.lossless.webp",
+    "targetSha256": "6b381083a79ae953301acd6bf7c19dafb6da52d5624f610e34b232c050ae9cf1"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/death.png": {
+    "sourceSha256": "048ccf4fd58d8b24b0d077438fa32ecee53845a49538ce4d09db8a9f45f0db03",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/death.lossless.webp",
+    "targetSha256": "1999559a0f5832daa6692de990e3fbae7aa97cb649aa0a4cb9c08f0a3fdecbf7"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill-back.png": {
+    "sourceSha256": "d0819f088567770884aadf5d92ddea1c8d109eaa5a559b73196a22fe6269c535",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill-back.lossless.webp",
+    "targetSha256": "c9525cc681b822bb0a273563500186cd07ecaa83a12b56cdc3f222285c08640c"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill.png": {
+    "sourceSha256": "27f6ca100b4e1abf8c27441c0e52ac060588acbf10f7b443e38f2616500d1cf0",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/effects/skill.lossless.webp",
+    "targetSha256": "13fc8e6ab03f2010dddeced1110498e54cb220958a13e4495090807bb30c84b6"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/hurt.png": {
+    "sourceSha256": "3ac8075f847a42c1fbd70d8d5de36209b79d8fbdca9056cb626b7240c8a5a2e0",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/hurt.lossless.webp",
+    "targetSha256": "ed524441e33c33cc14a98003d9010b980df001c5ddf1693ca4389b0905d503e9"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/idle.png": {
+    "sourceSha256": "0f4edb8b0aac173aa9720f5e6a5cc1509edbfc74bbb5a56fea6c7dbcc07518a7",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/idle.lossless.webp",
+    "targetSha256": "1ec45f21e6e708b6f3daa1f81a2a022317b00b7339be24246f128862cf8beee9"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/portrait.png": {
+    "sourceSha256": "975e9f65c23f0fa88761ee7a2b83579ba45cbcde3f45c6e053d8ad7cde8d4d44",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-10/portrait.lossless.webp",
+    "targetSha256": "47d1a4127b124ed6064f74ee8b41901e615d632e7b3b8d9a66679b6d792d484a"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/attack.png": {
+    "sourceSha256": "9b26d590870f16fb7433367ae1d95311901289cca055b5538b9624fe0fafaedf",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/attack.lossless.webp",
+    "targetSha256": "4e0874dac2ebe6a51addf2d4911bfb1a174edd61d5a2fe59c4e8303121d2b744"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/death.png": {
+    "sourceSha256": "cf598c060c8b4573678e2f1bc41513f7518b2117a0ec8d4c2b64b5c1caa4dfff",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/death.lossless.webp",
+    "targetSha256": "cfea9e21ebb25fa92cd43cd9253c735ce101badab9b72e3f23fff8cdaded3c9c"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill-back.png": {
+    "sourceSha256": "cd514db281e2bbc9ac38ee01820ef9999ae8dd45c73ff379889e7b47709cc862",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill-back.lossless.webp",
+    "targetSha256": "e022c9f99261c94b43e5115665f27ac91b33022291155a8a2a4d14c493988809"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill.png": {
+    "sourceSha256": "983a686173f391c18bd74b99197cbbea4a5ac74f42018965c799a6db633ff771",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/effects/skill.lossless.webp",
+    "targetSha256": "be380b332182156a025805e8fe7a7f18f070d45220cd4cdc140920a2140070c6"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/hurt.png": {
+    "sourceSha256": "8a1a98492654b40bd268a710283e837f920588321184bdf8b9906a5d37322d82",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/hurt.lossless.webp",
+    "targetSha256": "f02b28750fa479db3ace7b92c7116afa31874b0e5032c81b8aa70c4225cf6de8"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/idle.png": {
+    "sourceSha256": "4095f97f2428386f7a40e628253859fdead0ae5ef4c2b64fb7c5313d93119eb5",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/idle.lossless.webp",
+    "targetSha256": "190ae919d0c62165bab34c3a0984f82d2be7fa9ba958b6e476305e3c22f40fc7"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/portrait.png": {
+    "sourceSha256": "479fb718ef4cbaf7e4c8d0572ec71ef588b738aacf7c4b6e8ef3b47c2cf3cfc0",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-11/portrait.lossless.webp",
+    "targetSha256": "c6b98ab0156c2f360416416a2a822b5968a0081a986b0690433384514a6e6595"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-12/attack.png": {
+    "sourceSha256": "c432e6ac5ae76d7ed331405ff8a176fb69cdb68b4c310e7845a7fdbf83f2b8ec",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-12/attack.lossless.webp",
+    "targetSha256": "3e7904a62a9ad515200cc052270dbab24f91bb7bdba3e54219a4995c144328ef"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-12/death.png": {
+    "sourceSha256": "7c268317e161007825e54da988c6f5af7e612a5502e4a64b35cb6cf5697c638c",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-12/death.lossless.webp",
+    "targetSha256": "f6d66cca34f729867a2ea1a10aafb5f55a0de4a8fa0cef2d71ec0aacab29348b"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-12/effects/skill.png": {
+    "sourceSha256": "0d725acbd4a62e99af2bf4c438c07cee04f235791975aaa21c3c7973b57bf371",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-12/effects/skill.lossless.webp",
+    "targetSha256": "c56fb76588722b283847f0709d5a1e223fa49e3b519aaaad0b9d5f603bba36c8"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-12/hurt.png": {
+    "sourceSha256": "b4f68fafcb2903c5e1d818e594d080193bc010f12b8dd15fbc9b5bfa1d907746",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-12/hurt.lossless.webp",
+    "targetSha256": "bafb4f377e7c90d4861d04dd2387a5f81f9c78914fac38514ed0d398e9911d43"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-12/idle.png": {
+    "sourceSha256": "1e8dcc584c69653fa8d75a1c6c03cc207ce166fd0a02ca77c673e89c37c49bf6",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-12/idle.lossless.webp",
+    "targetSha256": "6fbe7624d5c66a1cbb41d775955cb204d1b723eb75e7e7817c384fac81acfdc9"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-12/portrait.png": {
+    "sourceSha256": "aa9a434db513e75d21b39db8587cd3f7f90d95600361989f592fbe0170f85ace",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-12/portrait.lossless.webp",
+    "targetSha256": "853a8fcce3d9a4127322957baeba4e86b3f00dd9aa7f28dc251ff0f463191047"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-15/attack.png": {
+    "sourceSha256": "8a47a110e5793699aa80bd771b7d3c398ba319994011ded25e7b2b5285ccd0bb",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-15/attack.lossless.webp",
+    "targetSha256": "ba2c8afe1823d0a8ceac01c7b630b9cec5124e7e62e93a65ed1ae727ffe65419"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-15/death.png": {
+    "sourceSha256": "28d0385d8e712e21cf883b61036dec7a12c72a90ff7fe948871d7bc8f4d27270",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-15/death.lossless.webp",
+    "targetSha256": "b08657e1b103d6794a69de65f1d43ccab6781872481c9722dcf170ae9901bde8"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-15/effects/skill.png": {
+    "sourceSha256": "88409ed1e6d0472f85e3f3ee2c8eab988be1df6f1e67f8a954330d97023d10ed",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-15/effects/skill.lossless.webp",
+    "targetSha256": "1e8d1e29a528194dfbcf1e0e8f134532a9348e5617e8a02193f81fe934051ffe"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-15/hurt.png": {
+    "sourceSha256": "f4181ff8406b9a792adfcf2d69e504585fe2ad981691289923b81243c7ee294a",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-15/hurt.lossless.webp",
+    "targetSha256": "2b1828485e0a646ae16b818b656e1ddae9aea98ac878296c7f21a332fb77cc34"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-15/idle.png": {
+    "sourceSha256": "f45c77e42a5e3d8aa929782ce134e186a08f8f9ab764d26cd7fad29255c36d4a",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-15/idle.lossless.webp",
+    "targetSha256": "00577ae2121a12aa59905e4dda885118044f1c112527c2d6ade17bc6681f48b3"
+  },
+  "public/cosmetics/story-worlds/arcane-spire/monsters/monster-15/portrait.png": {
+    "sourceSha256": "cf788d86a0893c73da4ab2f49e8f4f3fc4ea1aa592fbe90c53a6f898b5a4502c",
+    "target": "public/cosmetics/story-worlds/arcane-spire/monsters/monster-15/portrait.lossless.webp",
+    "targetSha256": "be3294a99bb0c3598f6b9a39b5773e9e81db5364ff8dab1c0c38fadd04a6b52a"
+  },
+  "public/mascot/die.png": {
+    "sourceSha256": "c3d07544d1d66017e308e543644ab967046ddabb007a659915c886ef117dd08f",
+    "target": "public/mascot/die.lossless.webp",
+    "targetSha256": "fbd0171dd7971c2a7aa4397f4b9501ecb4fc4da315a9756cbf1bc8ead23c4a9b"
+  },
+  "public/mascot/float.png": {
+    "sourceSha256": "9b89de2561ccaf1e56f05f77937d601a39e561360ea95d26ebfdf5dba1100cc3",
+    "target": "public/mascot/float.lossless.webp",
+    "targetSha256": "1cb17b088e43b513fb92826763e56634662ad071e496cb62e67f0a28e951bf90"
+  },
+  "public/mascot/fly.png": {
+    "sourceSha256": "f9ce36ccb804fc7f06f454b109372ff0e22df463386ebadc994031c48e8deacf",
+    "target": "public/mascot/fly.lossless.webp",
+    "targetSha256": "714fb66c2c881b8bd993dabad0ca5bb17bc3a7a2f2e50dac76c8073b3fe1d27a"
+  },
+  "public/mascot/idle.png": {
+    "sourceSha256": "41e21ede6ed7acb0b6c9e594134db893fd2b0270bb6369e2fe1040e35e03ee45",
+    "target": "public/mascot/idle.lossless.webp",
+    "targetSha256": "ab78cf2a414ab4a773883e820b14b5d6be2b7f8cbfcf249c8ea53dc4c9a84bc0"
+  },
+  "public/mascot/land.png": {
+    "sourceSha256": "8d9cb2c0a7460a2ae1555c2d4fda78605cc7ac0bc8299a2b4ce62cdaa9106c14",
+    "target": "public/mascot/land.lossless.webp",
+    "targetSha256": "42cd9e01a0ca5bd559261a4ce7b1c125e57cc73401dfac136f6110786c528453"
+  },
+  "public/mascot/portrait.png": {
+    "sourceSha256": "9afd72459c0d6382b3ea3c0e535b4f26e0e38f4841f35a90695b03c21eda45cf",
+    "target": "public/mascot/portrait.lossless.webp",
+    "targetSha256": "f73bc5668f13c0b88eb9484b80f52e4cc94593feb415277a6373e7843ea6d4af"
+  },
+  "public/mascot/random.png": {
+    "sourceSha256": "9b01df9f9de55a8380e7c54b90954abe7f8a2ac8676c1fe9677c5eccb8a7d1a9",
+    "target": "public/mascot/random.lossless.webp",
+    "targetSha256": "d31dc98305556086176aa63a5bc3ec8dd6eb8aef3d28190da8b162f521bc878c"
+  },
+  "public/mascot/run.png": {
+    "sourceSha256": "497a362082cd3c3cbb0135a4048f8284f66a3099b3c94af91c79da63881796d2",
+    "target": "public/mascot/run.lossless.webp",
+    "targetSha256": "7e7a8ac890a8473b7708d26d6351670849d568323b7090453dfbcda2eca023e6"
+  },
+  "public/mascot/take-off.png": {
+    "sourceSha256": "d10eff56a20380f97d2cc6d83b74403cc60b5c450f9af0b28ce21c596111a017",
+    "target": "public/mascot/take-off.lossless.webp",
+    "targetSha256": "0db7381ac1af8a323496a01d47045245596b62a6502838fe6e33c2f0b72f54f1"
+  },
+  "public/mascot/walk.png": {
+    "sourceSha256": "6a0f36b16e46e2c3b1e4a6c550e5aa3ce74efabc4ec30c54258fc2b9403380e3",
+    "target": "public/mascot/walk.lossless.webp",
+    "targetSha256": "852b0ee1b7dcc5b60c8568ed43db7489a05e8018d790c180c28b35f5065f6a1b"
+  },
+  "src/assets/images/GIT_coin.png": {
+    "sourceSha256": "253b887d5914fa91ea6bbd5ecab338ee2c1eede10fc8f90666ab1e12e0389561",
+    "target": "src/assets/images/GIT_coin.lossless.webp",
+    "targetSha256": "195c641a1bb12930507493148c57d2e640273bb17a14f71fe3234e30bdf799cd"
+  },
+  "src/assets/images/achievements/arcane-spire-master.png": {
+    "sourceSha256": "dbf6bc3f7a3cf8304c5d918286f55935bf2d3bc5b661a63edfcffce1031b5f7e",
+    "target": "src/assets/images/achievements/arcane-spire-master.lossless.webp",
+    "targetSha256": "eac9d81df5288f63d533f8a6805d7376cc8e101d5bab9931c5a11a79ae9da549"
+  },
+  "src/assets/images/achievements/coin-hoarder.png": {
+    "sourceSha256": "08de81f487d533c7ce8f57a9b9474c22bba8d59f4b13c739bf19eaa5c05b4914",
+    "target": "src/assets/images/achievements/coin-hoarder.lossless.webp",
+    "targetSha256": "72cc8d82aea8b8d076ea188e73e5390941a5ab9a2f42b64ee8ef22097017f615"
+  },
+  "src/assets/images/achievements/comeback-kid.png": {
+    "sourceSha256": "f74898f74abef52b48134075469049f6e491892a82f4ab174654414afb29f4da",
+    "target": "src/assets/images/achievements/comeback-kid.lossless.webp",
+    "targetSha256": "46130b1edcb708ae16c4416b8a9e776ed60a6314eb0af875ae15901f4ac29341"
+  },
+  "src/assets/images/achievements/command-cadet.png": {
+    "sourceSha256": "5f1457008010ab6da0b3fbda108fd901cfc7121d50678e1e12a5b83ba12826cf",
+    "target": "src/assets/images/achievements/command-cadet.lossless.webp",
+    "targetSha256": "593f6bbd0568c151cc7b75b0b720cf82ff4c14a7c186e2244bb0ea69f5e6542c"
+  },
+  "src/assets/images/achievements/command-captain.png": {
+    "sourceSha256": "e5b8f4139a11425ad6ddefa0b7064c3ac66801aabc3dbf753c42ee4646df704c",
+    "target": "src/assets/images/achievements/command-captain.lossless.webp",
+    "targetSha256": "b017ee7dcb7997a14dc5448177c7fba983eba4072c28614ff935f4ed66fcf737"
+  },
+  "src/assets/images/achievements/first-clear.png": {
+    "sourceSha256": "b927e8afc6b08b919dbcd1136abbd67428c0f33f68a0e39f193ddbcacfa1a695",
+    "target": "src/assets/images/achievements/first-clear.lossless.webp",
+    "targetSha256": "59925fe96e6d1b9b5ba4f7ea26fe4067094011cb8c866482d3a8ebfc80e8e220"
+  },
+  "src/assets/images/achievements/gate-breaker.png": {
+    "sourceSha256": "d1cd40551c19b3e14cec15a1f51ee9e8b35798457a94f2dae32764f54f07f56e",
+    "target": "src/assets/images/achievements/gate-breaker.lossless.webp",
+    "targetSha256": "d6c2a8e8b457eb0dc831df0b6a1c3d4f9d2de1de6a55c92487beedad13df7be8"
+  },
+  "src/assets/images/achievements/gate-warden.png": {
+    "sourceSha256": "73541136cd5ebde929ec165ba705e707280bed6bfc6ec9f4ed17af908b260b5c",
+    "target": "src/assets/images/achievements/gate-warden.lossless.webp",
+    "targetSha256": "8098db1dd29a5ba81ff2ee98da89ce2cf1671cc18a2ce60f41cb8114ccdf7a07"
+  },
+  "src/assets/images/achievements/hard-tier-breaker.png": {
+    "sourceSha256": "aa80963f50b036f53b77d2ae70ba535be00657e9dc04c8676437a01bdcddeb3f",
+    "target": "src/assets/images/achievements/hard-tier-breaker.lossless.webp",
+    "targetSha256": "928fa66a13b018f6846552046c4c79e2ed747f38aaec519e88f25518624ce2d1"
+  },
+  "src/assets/images/achievements/hard-tier-hunter.png": {
+    "sourceSha256": "2be5dbf3ec0efdbeb40e4fba6e9b9d517ba735f4d9dd77b08b5ca5508ae9caf3",
+    "target": "src/assets/images/achievements/hard-tier-hunter.lossless.webp",
+    "targetSha256": "0201f47729179745821c89c3f06e2fcf140b612e0b6c8abc82ce0be3b5f7b25a"
+  },
+  "src/assets/images/achievements/level-adept.png": {
+    "sourceSha256": "85aa53425ff4b175a7cebac58bc699a684599e67b08952efbdaec4572d995cfe",
+    "target": "src/assets/images/achievements/level-adept.lossless.webp",
+    "targetSha256": "49a4e28c2096cbd72f0a6037de73813e20700ae7527b6db7be2e9ce38da40d44"
+  },
+  "src/assets/images/achievements/level-champion.png": {
+    "sourceSha256": "9e9f0869a57d1531fff13af5887b1052a54f69df111536590541d701c6cc9468",
+    "target": "src/assets/images/achievements/level-champion.lossless.webp",
+    "targetSha256": "73b279660433157601a4710a55f36b6144bb6f410761b961c38a3a4c59298bf6"
+  },
+  "src/assets/images/achievements/level-veteran.png": {
+    "sourceSha256": "0d25aeaa2761dc5954d878f617e1b1ae935e5cce0f4794f9b461a26ff89d0045",
+    "target": "src/assets/images/achievements/level-veteran.lossless.webp",
+    "targetSha256": "832ec289c0d07fa9c93751e2ede0534af12c2c1353f31cc71d6c893c0ccacd0b"
+  },
+  "src/assets/images/achievements/perfectionist.png": {
+    "sourceSha256": "2c61067e4fd9bf1bbc4754e908d016baac44eef112ee5f009cffbb73aebd1979",
+    "target": "src/assets/images/achievements/perfectionist.lossless.webp",
+    "targetSha256": "d0b5f9197f5e1be3278697d7d96598a4aed6b7a31791a918021bf2c5befe2426"
+  },
+  "src/assets/images/achievements/rank-baron.png": {
+    "sourceSha256": "9b9156fd369110abc93e56e691393f7857ad7374a3cdd22a7350d491b094d7f7",
+    "target": "src/assets/images/achievements/rank-baron.lossless.webp",
+    "targetSha256": "992984a53e691e08b2abd99d08c8cd08f23239c15101e08faf804b5d71d0b9e6"
+  },
+  "src/assets/images/achievements/rank-duke.png": {
+    "sourceSha256": "b8c72de30a82b314cd15dedef78d089bf55d8761c8989dac775dce4c49cb6e7f",
+    "target": "src/assets/images/achievements/rank-duke.lossless.webp",
+    "targetSha256": "72b515701abb146e6f20e6cfe583493f9d6439a4673e24a58be7dea1511218e8"
+  },
+  "src/assets/images/achievements/rank-knight.png": {
+    "sourceSha256": "d6b0254c2c3253bc3320bae6c4e4cd9face6f2f6ab554092fc52cf2c8fbe83ea",
+    "target": "src/assets/images/achievements/rank-knight.lossless.webp",
+    "targetSha256": "438b8bab36e5c1bf967a25762b088ea2f06679fe9128265e4ff7990e88aa8757"
+  },
+  "src/assets/images/achievements/sharpshooter.png": {
+    "sourceSha256": "5d36b756fa1d6cddf5a65039dde74a300343f9d7115ab78025c1d1ea5c0ac760",
+    "target": "src/assets/images/achievements/sharpshooter.lossless.webp",
+    "targetSha256": "e3bea66e29b33766a1dedd420755544e49f6ea0a442f252c2788356347033825"
+  },
+  "src/assets/images/achievements/star-collector.png": {
+    "sourceSha256": "3a9a9824554b0ab0bec367bc5b412f1805c6134f3b1bba31ce70dfc80ee972b3",
+    "target": "src/assets/images/achievements/star-collector.lossless.webp",
+    "targetSha256": "eeee2ca24dc053104eaae240e6eb44d17061f29d2a81a9ef6fee6f6402d803c7"
+  },
+  "src/assets/images/book.png": {
+    "sourceSha256": "890c387c78a33e9d9deec759adb24ec4d34f58aa8403a57f4d35d677b5b2cf8b",
+    "target": "src/assets/images/book.lossless.webp",
+    "targetSha256": "47900dd815d0928570973d70c9c0d5106de20d4d284bf2df7fff81422b5affdb"
+  },
+  "src/assets/images/chapter_badge.png": {
+    "sourceSha256": "393363c4fee2a8b348cf5c26a42027533439a68d40eff00d448776667c164809",
+    "target": "src/assets/images/chapter_badge.lossless.webp",
+    "targetSha256": "f24f5d22fe4f2c60f1ed41c0cb609e05a93284b14c8dbad27ab34773f137af16"
+  },
+  "src/assets/images/chest_active.png": {
+    "sourceSha256": "6832273e09ad4c3f26e7c9c73f254a14ca7c0a0b8a12e26696989056ec157603",
+    "target": "src/assets/images/chest_active.lossless.webp",
+    "targetSha256": "d72ffe99945cdc44d76af6b8aa7f6335bac0fbeb1f615030e151d132f9b9d45e"
+  },
+  "src/assets/images/chest_normal.png": {
+    "sourceSha256": "7d42c6ce4896cbc19c63c316c804da77292920f7659736b1784d519645985f35",
+    "target": "src/assets/images/chest_normal.lossless.webp",
+    "targetSha256": "61abe55f613df6f41921df40715a01ea4fa867acaa91a4607daafc6e4a01c9d0"
+  },
+  "src/assets/images/chest_open.png": {
+    "sourceSha256": "e126bf0a625ecd2bc3c2fb22d954028104796e00a103c7e964ffd65058d54ed5",
+    "target": "src/assets/images/chest_open.lossless.webp",
+    "targetSha256": "c954794745a173bc2307e7f15891997290fbf5e00e7a76b8405e3989df335445"
+  },
+  "src/assets/images/easy_icon.png": {
+    "sourceSha256": "fd40ff96978ad2d18f1613bb4ac6bf4e27fd6deaecc89a045eaf232e7d877a17",
+    "target": "src/assets/images/easy_icon.lossless.webp",
+    "targetSha256": "a2ea9f799da1afb717694c044c71d809dad9cce61fabe2f069a04eab033a9517"
+  },
+  "src/assets/images/git-it-logo-new.png": {
+    "sourceSha256": "02e95ceb15b2e1b2aa21f4e0897982aa03f34782a2a838f1074d64e9cf10cd13",
+    "target": "src/assets/images/git-it-logo-new.lossless.webp",
+    "targetSha256": "df9e1af24924bc6c03deb06c524731b74c9a975745b5492625370002ad7a9b0a"
+  },
+  "src/assets/images/hard_icon.png": {
+    "sourceSha256": "98d305d9a2de6563efd37f75d7101240583e742f28b284549c44d754f5a9ebdd",
+    "target": "src/assets/images/hard_icon.lossless.webp",
+    "targetSha256": "5721da7a5c84809da2bdc9c80559e2d7d39e2b331c0be192d18d13e91186d986"
+  },
+  "src/assets/images/hero_showcase_pedestal.png": {
+    "sourceSha256": "47c5ed8dbae9954c4904ddab5ad2e5cb17a3af414fc5ead527af5ff285a8b0d3",
+    "target": "src/assets/images/hero_showcase_pedestal.lossless.webp",
+    "targetSha256": "e9ae54e9e97a477e3e829509f4324109b4103b754e600c600815f076333d7c4d"
+  },
+  "src/assets/images/medium_icon.png": {
+    "sourceSha256": "91f0bf2f37cd7d97f5965b79696bd583abe53a24781333380b33854154baee4b",
+    "target": "src/assets/images/medium_icon.lossless.webp",
+    "targetSha256": "ba006f95f7f8252f18503f0701f0794c23e0002ba1407596679cc681e38034b7"
+  }
+}

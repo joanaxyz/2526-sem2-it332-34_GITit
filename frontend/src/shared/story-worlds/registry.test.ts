@@ -3,7 +3,7 @@
 import { existsSync } from 'node:fs'
 import path from 'node:path'
 
-import { describe, expect, it } from 'vitest'
+import { describe, expect, it, vi } from 'vitest'
 
 import { getStoryWorld, listStoryWorldMonsters, listStoryWorlds, STORY_WORLDS } from '@/shared/story-worlds/registry'
 import { COMPANIONS, getCompanion, listCompanions } from '@/shared/cosmetics/companions/registry'
@@ -67,9 +67,9 @@ describe('story world and companion registries', () => {
   it('registers every authored companion slug', () => {
     expect(Object.keys(COMPANIONS).sort()).toEqual(['black', 'blue', 'white'])
     expect(listCompanions().map((companion) => companion.id).sort()).toEqual(['black', 'blue', 'white'])
-    expect(getCompanion('blue').sprites.idle.src).toBe('/cosmetics/companion/blue/idle.png')
-    expect(getCompanion('white').sprites.idle.src).toBe('/cosmetics/companion/white/idle.png')
-    expect(getCompanion('black').sprites.idle.src).toBe('/cosmetics/companion/black/idle.png')
+    expect(getCompanion('blue').sprites.idle.src).toBe('/cosmetics/companion/blue/idle.lossless.webp')
+    expect(getCompanion('white').sprites.idle.src).toBe('/cosmetics/companion/white/idle.lossless.webp')
+    expect(getCompanion('black').sprites.idle.src).toBe('/cosmetics/companion/black/idle.lossless.webp')
   })
 
   it('only registers render-ready story worlds', () => {
@@ -79,6 +79,20 @@ describe('story world and companion registries', () => {
       'frostbound-citadel',
       'neon-backstreets',
     ])
+  })
+
+  it('only registers Arcane Spire in production and falls back for inactive worlds', async () => {
+    vi.stubEnv('DEV', false)
+    vi.resetModules()
+    try {
+      const production = await import('./registry')
+      expect(production.listStoryWorlds().map((world) => world.slug)).toEqual(['arcane-spire'])
+      expect(production.getStoryWorld('frostbound-citadel').slug).toBe('arcane-spire')
+      expect(production.getStoryWorld('neon-backstreets').slug).toBe('arcane-spire')
+    } finally {
+      vi.unstubAllEnvs()
+      vi.resetModules()
+    }
   })
 
   it('uses canonical story identities rather than deprecated placeholder registries', () => {
@@ -91,9 +105,9 @@ describe('story world and companion registries', () => {
   })
 
   it('keeps companions separate from story worlds', () => {
-    expect(getCompanion('black').sprites.idle.src).toBe('/cosmetics/companion/black/idle.png')
+    expect(getCompanion('black').sprites.idle.src).toBe('/cosmetics/companion/black/idle.lossless.webp')
     expect(spriteSourceForSkill('push', 'black')).toBe(
-      '/cosmetics/companion/black/effects/skill-lightning-25/push.png',
+      '/cosmetics/companion/black/effects/skill-lightning-25/push.lossless.webp',
     )
 
     expect(STORY_WORLDS.black).toBeUndefined()
@@ -141,7 +155,7 @@ describe('story world and companion registries', () => {
 
         expect(portrait, `${world.slug}/${slug}`).toBeDefined()
         expect(portrait?.src, `${world.slug}/${slug}`).toMatch(
-          new RegExp(`^/cosmetics/story-worlds/${world.slug}/monsters/monster-\\d+/portrait\\.png$`),
+          new RegExp(`^/cosmetics/story-worlds/${world.slug}/monsters/monster-\\d+/portrait(?:\\.lossless\\.webp|\\.png)$`),
         )
         expect(portrait?.src, `${world.slug}/${slug} does not reuse idle art`).not.toBe(
           skin.sprites.idle?.src,

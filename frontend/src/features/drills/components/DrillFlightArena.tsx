@@ -4,6 +4,7 @@ import { Check, Heart, Pause, Play, X } from 'lucide-react'
 import type { DrillChoice, DrillVerdict } from '@/features/drills/types'
 import { MascotSprite, type MascotPose } from '@/shared/mascot/MascotSprite'
 import { warmImages } from '@/shared/sprites/preload'
+import { publicMediaUrl } from '@/shared/media/publicMedia'
 
 type Point = { x: number; y: number }
 
@@ -51,7 +52,7 @@ export function DrillFlightArena({ options, verdict, lives, started, onStart, on
     playBounds.current.top + (index + 0.5) * Math.max(0, height - playBounds.current.top - playBounds.current.bottom) / Math.max(1, options.length), [options.length])
 
   useEffect(() => {
-    void warmImages(['idle', 'fly', 'float', 'take-off', 'die'].map((name) => `/mascot/${name}.png`))
+    void warmImages(['idle', 'fly', 'float', 'take-off', 'die'].map((name) => publicMediaUrl(`/mascot/${name}.png`)))
   }, [])
 
   useLayoutEffect(() => {

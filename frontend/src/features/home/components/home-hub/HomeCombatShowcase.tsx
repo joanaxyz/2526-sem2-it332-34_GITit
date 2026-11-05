@@ -1,7 +1,7 @@
 import { type CSSProperties, useEffect, useMemo, useRef, useState } from 'react'
 import { BookOpen } from 'lucide-react'
 
-import heroShowcasePedestalImage from '@/assets/images/hero_showcase_pedestal.png'
+import heroShowcasePedestalImage from '@/assets/images/hero_showcase_pedestal.lossless.webp'
 import { HomeAttackTarget } from '@/features/home/components/home-hub/HomeAttackTarget'
 import { HomeCombatCompanionStatus } from '@/features/home/components/home-hub/HomeCompanionStatus'
 import type { CompanionPresentation } from '@/features/home/components/home-hub/companionPresentation'

@@ -8,7 +8,7 @@
       "playback": "projectile",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/init.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/init.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -38,7 +38,7 @@
       "playback": "projectile",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/clone.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/clone.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -66,7 +66,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/config.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/config.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -93,7 +93,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/status.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/status.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -120,7 +120,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/log.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/log.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -147,7 +147,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/show.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/show.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -174,7 +174,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/diff.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/diff.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -202,7 +202,7 @@
       "playback": "projectile",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/add.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/add.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -232,7 +232,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/commit.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/commit.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -259,7 +259,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/rm.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/rm.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -287,7 +287,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/restore.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/restore.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -314,7 +314,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/reset.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/reset.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -341,7 +341,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/revert.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/revert.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -368,7 +368,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/stash.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/stash.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -396,7 +396,7 @@
       "playback": "projectile",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/branch.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/branch.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -424,7 +424,7 @@
       "playback": "ground",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/switch.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/switch.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -451,7 +451,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/checkout.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/checkout.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -479,7 +479,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/merge.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/merge.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -507,7 +507,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/merge-base.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/merge-base.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -534,7 +534,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/rebase.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/rebase.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -561,7 +561,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/cherry-pick.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/cherry-pick.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -588,7 +588,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/reflog.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/reflog.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -616,7 +616,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/check-ignore.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/check-ignore.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -643,7 +643,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/ls-files.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/ls-files.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -670,7 +670,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/checkout-conflict.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/checkout-conflict.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -697,7 +697,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/diff-conflict.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/diff-conflict.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -724,7 +724,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/mergetool.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/mergetool.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -751,7 +751,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/remote.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/remote.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -778,7 +778,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/fetch.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/fetch.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -805,7 +805,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/pull.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/pull.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -832,7 +832,7 @@
       "playback": "ground",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/push.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/push.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -859,7 +859,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/tag.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/tag.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -886,7 +886,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/rev-list.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/rev-list.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -913,7 +913,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/blue/effects/skill-flames-25/default.png",
+        "src": "/cosmetics/companion/blue/effects/skill-flames-25/default.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -943,7 +943,7 @@
       "playback": "projectile",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/init.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/init.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -973,7 +973,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/clone.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/clone.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1001,7 +1001,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/config.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/config.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1028,7 +1028,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/status.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/status.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1055,7 +1055,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/log.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/log.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1082,7 +1082,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/show.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/show.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1109,7 +1109,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/diff.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/diff.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1137,7 +1137,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/add.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/add.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1167,7 +1167,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/commit.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/commit.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1194,7 +1194,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/rm.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/rm.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1222,7 +1222,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/restore.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/restore.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1249,7 +1249,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/reset.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/reset.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1276,7 +1276,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/revert.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/revert.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1303,7 +1303,7 @@
       "playback": "projectile",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/stash.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/stash.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1331,7 +1331,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/branch.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/branch.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1359,7 +1359,7 @@
       "playback": "ground",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/switch.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/switch.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1386,7 +1386,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/checkout.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/checkout.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1414,7 +1414,7 @@
       "playback": "projectile",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/merge.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/merge.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1442,7 +1442,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/merge-base.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/merge-base.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1469,7 +1469,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/rebase.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/rebase.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1496,7 +1496,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/cherry-pick.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/cherry-pick.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1523,7 +1523,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/reflog.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/reflog.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1551,7 +1551,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/check-ignore.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/check-ignore.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1578,7 +1578,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/ls-files.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/ls-files.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1605,7 +1605,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/checkout-conflict.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/checkout-conflict.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1632,7 +1632,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/diff-conflict.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/diff-conflict.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1659,7 +1659,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/mergetool.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/mergetool.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1686,7 +1686,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/remote.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/remote.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1713,7 +1713,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/fetch.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/fetch.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1740,7 +1740,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/pull.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/pull.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1767,7 +1767,7 @@
       "playback": "ground",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/push.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/push.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1794,7 +1794,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/tag.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/tag.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1821,7 +1821,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/rev-list.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/rev-list.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1848,7 +1848,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/white/effects/skill-ice-25/default.png",
+        "src": "/cosmetics/companion/white/effects/skill-ice-25/default.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1878,7 +1878,7 @@
       "playback": "projectile",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/init.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/init.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1908,7 +1908,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/clone.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/clone.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1936,7 +1936,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/config.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/config.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1963,7 +1963,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/status.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/status.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -1990,7 +1990,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/log.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/log.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2017,7 +2017,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/show.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/show.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2044,7 +2044,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/diff.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/diff.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2072,7 +2072,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/add.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/add.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2102,7 +2102,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/commit.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/commit.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2129,7 +2129,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/rm.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/rm.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2157,7 +2157,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/restore.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/restore.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2184,7 +2184,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/reset.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/reset.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2211,7 +2211,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/revert.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/revert.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2238,7 +2238,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/stash.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/stash.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2266,7 +2266,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/branch.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/branch.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2294,7 +2294,7 @@
       "playback": "ground",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/switch.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/switch.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2321,7 +2321,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/checkout.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/checkout.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2349,7 +2349,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2377,7 +2377,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_front.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_front.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2398,11 +2398,11 @@
       "layers": [
         {
           "layer": "back",
-          "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_back.png"
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_back.lossless.webp"
         },
         {
           "layer": "front",
-          "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_front.png"
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/merge-base_front.lossless.webp"
         }
       ]
     },
@@ -2414,7 +2414,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/rebase.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/rebase.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2441,7 +2441,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_front.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_front.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2462,11 +2462,11 @@
       "layers": [
         {
           "layer": "back",
-          "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_back.png"
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_back.lossless.webp"
         },
         {
           "layer": "front",
-          "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_front.png"
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/cherry-pick_front.lossless.webp"
         }
       ]
     },
@@ -2478,7 +2478,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/reflog.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/reflog.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2506,7 +2506,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/check-ignore.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/check-ignore.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2533,7 +2533,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/ls-files.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/ls-files.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2560,7 +2560,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/checkout-conflict.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/checkout-conflict.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2587,7 +2587,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/diff-conflict.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/diff-conflict.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2614,7 +2614,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/mergetool.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/mergetool.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2641,7 +2641,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_front.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_front.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2662,11 +2662,11 @@
       "layers": [
         {
           "layer": "back",
-          "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_back.png"
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_back.lossless.webp"
         },
         {
           "layer": "front",
-          "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_front.png"
+          "src": "/cosmetics/companion/black/effects/skill-lightning-25/remote_front.lossless.webp"
         }
       ]
     },
@@ -2678,7 +2678,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/fetch.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/fetch.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2705,7 +2705,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/pull.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/pull.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2732,7 +2732,7 @@
       "playback": "ground",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/push.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/push.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2759,7 +2759,7 @@
       "playback": "target",
       "anchor": "feet",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/tag.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/tag.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2786,7 +2786,7 @@
       "playback": "target",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/rev-list.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/rev-list.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,
@@ -2813,7 +2813,7 @@
       "playback": "projectile",
       "anchor": "center",
       "sheet": {
-        "src": "/cosmetics/companion/black/effects/skill-lightning-25/default.png",
+        "src": "/cosmetics/companion/black/effects/skill-lightning-25/default.lossless.webp",
         "frameWidth": 256,
         "frameHeight": 256,
         "columns": 5,

@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-import gitCoinImage from '@/assets/images/GIT_coin.png'
+import gitCoinImage from '@/assets/images/GIT_coin.lossless.webp'
 import { EncounterStage } from '@/features/landing/components/EncounterStage'
 import { ScenarioVignette } from '@/features/landing/components/ScenarioVignette'
 import { SCENARIO_STEPS, SPIRE_MODULES, TIER_SUPPORT } from '@/features/landing/utils/landingContent'

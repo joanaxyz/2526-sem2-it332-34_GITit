@@ -23,7 +23,7 @@ describe('SkillLearnedOverlay', () => {
     const dialog = screen.getByRole('dialog', { name: "You've learned a new skill" })
     await waitFor(() => expect(dialog).toHaveFocus())
     const portrait = screen.getByRole('img', { name: 'Create a repository skill' })
-    expect(portrait.querySelector('image')).toHaveAttribute('href', '/cosmetics/companion/black/effects/skill-lightning-25/init.png')
+    expect(portrait.querySelector('image')).toHaveAttribute('href', '/cosmetics/companion/black/effects/skill-lightning-25/init.lossless.webp')
     expect(portrait.querySelector('image')).toHaveAttribute('x', '-1024')
     expect(portrait.querySelector('image')).toHaveAttribute('y', '-512')
     fireEvent.keyDown(dialog, { key: 'Tab' })

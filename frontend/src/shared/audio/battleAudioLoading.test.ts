@@ -37,7 +37,7 @@ describe('audio request admission', () => {
     audio.startBackgroundMusic('outside')
     audio.startBackgroundMusic('inside')
     audio.setBattleMusicEnabled(true)
-    expect(loadAudio).toHaveBeenCalledExactlyOnceWith('/audio/battle/background/inside-battle-loop.wav')
+    expect(loadAudio).toHaveBeenCalledExactlyOnceWith('/audio/battle/background/inside-battle-loop.mp3')
     expect(tryPlay).toHaveBeenCalledOnce()
     expect(audio.isBattleSoundEnabled()).toBe(false)
     audio.setBattleMusicEnabled(false)

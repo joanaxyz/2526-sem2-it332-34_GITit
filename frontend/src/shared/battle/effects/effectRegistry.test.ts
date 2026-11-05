@@ -171,23 +171,23 @@ describe('effectRegistry', () => {
   })
 
   it('resolves concrete command forms to their own sheets', () => {
-    expect(spriteSourceForSkill('checkout-conflict')).toBe(`${ROOT}/checkout-conflict.png`)
-    expect(spriteSourceForSkill('diff-conflict')).toBe(`${ROOT}/diff-conflict.png`)
-    expect(spriteSourceForSkill('merge-base')).toBe(`${ROOT}/merge-base.png`)
-    expect(spriteSourceForSkill('ls-files')).toBe(`${ROOT}/ls-files.png`)
-    expect(spriteSourceForSkill('tag')).toBe(`${ROOT}/tag.png`)
-    expect(spriteSourceForSkill('rev-list')).toBe(`${ROOT}/rev-list.png`)
+    expect(spriteSourceForSkill('checkout-conflict')).toBe(`${ROOT}/checkout-conflict.lossless.webp`)
+    expect(spriteSourceForSkill('diff-conflict')).toBe(`${ROOT}/diff-conflict.lossless.webp`)
+    expect(spriteSourceForSkill('merge-base')).toBe(`${ROOT}/merge-base.lossless.webp`)
+    expect(spriteSourceForSkill('ls-files')).toBe(`${ROOT}/ls-files.lossless.webp`)
+    expect(spriteSourceForSkill('tag')).toBe(`${ROOT}/tag.lossless.webp`)
+    expect(spriteSourceForSkill('rev-list')).toBe(`${ROOT}/rev-list.lossless.webp`)
   })
 
   it('keeps unknown skills on the default sheet', () => {
-    expect(spriteSourceForSkill('not-a-real-skill')).toBe(`${ROOT}/default.png`)
+    expect(spriteSourceForSkill('not-a-real-skill')).toBe(`${ROOT}/default.lossless.webp`)
     expect(effectPlaybackForSkill('not-a-real-skill')).toBe('projectile')
   })
 
   it('wires companions without dedicated spell art to the Blue fallback', () => {
     expect(effectSheetForSkill('commit', 'unknown')).toMatchObject({
       name: 'unknown.skill.commit',
-      src: `${ROOT}/commit.png`,
+      src: `${ROOT}/commit.lossless.webp`,
     })
     expect(effectPlaybackForSkill('commit', 'unknown')).toBe('target')
   })
@@ -195,11 +195,11 @@ describe('effectRegistry', () => {
   it('uses White ice art for every White skill sheet', () => {
     expect(effectSheetForSkill('init', 'white')).toMatchObject({
       name: 'white.skill.init',
-      src: `${WHITE_ROOT}/init.png`,
+      src: `${WHITE_ROOT}/init.lossless.webp`,
     })
     expect(effectSheetForSkill('commit', 'white')).toMatchObject({
       name: 'white.skill.commit',
-      src: `${WHITE_ROOT}/commit.png`,
+      src: `${WHITE_ROOT}/commit.lossless.webp`,
     })
     expect(effectPlaybackForSkill('init', 'white')).toBe('projectile')
     expect(tintForSkill('init', 'white')).toBe('azure')
@@ -363,16 +363,16 @@ describe('effectRegistry', () => {
   })
 
   it('uses the single Blue remote sheet and split Black remote sheets', () => {
-    expect(spriteSourceForSkill('remote', 'blue')).toBe(`${ROOT}/remote.png`)
-    expect(spriteSourceForSkill('remote', 'black')).toBe(`${BLACK_ROOT}/remote_front.png`)
+    expect(spriteSourceForSkill('remote', 'blue')).toBe(`${ROOT}/remote.lossless.webp`)
+    expect(spriteSourceForSkill('remote', 'black')).toBe(`${BLACK_ROOT}/remote_front.lossless.webp`)
   })
 
   it('uses Black lightning art for every Black skill sheet', () => {
     expect(effectSheetForSkill('init', 'black')).toMatchObject({
       name: 'black.skill.init',
-      src: `${BLACK_ROOT}/init.png`,
+      src: `${BLACK_ROOT}/init.lossless.webp`,
     })
-    expect(spriteSourceForSkill('push', 'black')).toBe(`${BLACK_ROOT}/push.png`)
+    expect(spriteSourceForSkill('push', 'black')).toBe(`${BLACK_ROOT}/push.lossless.webp`)
     expect(effectPlaybackForSkill('init', 'black')).toBe('projectile')
     expect(tintForSkill('init', 'black')).toBe('violet')
   })

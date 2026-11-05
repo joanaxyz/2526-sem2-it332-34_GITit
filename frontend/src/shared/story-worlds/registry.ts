@@ -2,11 +2,12 @@ import type { SpriteDef } from '@/shared/cosmetics/types'
 import type { MonsterSkin, StoryWorldDef } from '@/shared/story-worlds/types'
 
 import { arcaneSpireWorld } from './arcane-spire'
-import { frostboundCitadelWorld } from './frostbound-citadel'
-import { neonBackstreetsWorld } from './neon-backstreets'
 
 // Only Arcane Spire is selected by the active story record. The other visual
-// packs remain as an asset library; they no longer imply active curricula.
+// packs remain available in local previews and are omitted from releases.
+const previewWorlds = import.meta.env.DEV
+  ? (await import('./previewWorlds')).previewStoryWorlds
+  : {}
 
 /** The default render-ready story world everyone can enter. */
 export const DEFAULT_STORY_WORLD_SLUG = 'arcane-spire'
@@ -17,8 +18,7 @@ export const DEFAULT_STORY_WORLD_SLUG = 'arcane-spire'
  */
 export const STORY_WORLDS: Record<string, StoryWorldDef> = {
   [arcaneSpireWorld.slug]: arcaneSpireWorld,
-  [frostboundCitadelWorld.slug]: frostboundCitadelWorld,
-  [neonBackstreetsWorld.slug]: neonBackstreetsWorld,
+  ...previewWorlds,
 }
 
 export function getStoryWorld(slug: string | null | undefined): StoryWorldDef {

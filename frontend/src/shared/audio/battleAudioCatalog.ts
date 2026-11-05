@@ -1,3 +1,5 @@
+import { publicMediaUrl } from '@/shared/media/publicMedia'
+
 export type BattleSkillElement = 'flame' | 'ice' | 'lightning'
 export type BattleSkillSoundPhase =
   | 'charge'
@@ -88,7 +90,7 @@ export function buttonSrc(sound: ButtonSound): string {
 
 export function backgroundSrc(kind: BattleBackgroundKind): string {
   const fileName = kind === 'outside' ? 'outside-battle-loop' : 'inside-battle-loop'
-  return `${AUDIO_ROOT}/background/${fileName}.wav`
+  return publicMediaUrl(`${AUDIO_ROOT}/background/${fileName}.wav`)
 }
 
 export function companionSrc(companionSlug: (typeof COMPANION_SOUND_SLUGS)[number], sound: CompanionSound): string {
