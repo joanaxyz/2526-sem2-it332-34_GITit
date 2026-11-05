@@ -13,8 +13,7 @@ from progress.models import ChallengeTrialCompletion, CoinTransaction
 from progress.serializers import StatsActivityResponseSerializer, StatsSummaryResponseSerializer
 from progress.services import MetricsService
 
-SUMMARY_KEYS = {"skill_profile", "activity_trend", "activity_window", "headline"}
-SKILL_AXIS_KEYS = {"key", "label", "hint", "value", "command"}
+SUMMARY_KEYS = {"activity_trend", "activity_window", "headline"}
 TREND_POINT_KEYS = {"date", "levels_completed", "commands_run"}
 HEADLINE_KEYS = {
     "levels_completed",
@@ -86,23 +85,6 @@ def test_authenticated_stats_summary_matches_documented_contract(db, django_user
     payload = response.json()
     assert set(payload) == SUMMARY_KEYS
 
-    assert {
-        "key": "status",
-        "label": "Status",
-        "hint": "Inspect the working tree.",
-        "value": 0.0,
-        "command": "git status",
-    } in payload["skill_profile"]
-    assert all(set(axis) == SKILL_AXIS_KEYS for axis in payload["skill_profile"])
-    assert all(
-        type(axis["key"]) is str
-        and type(axis["label"]) is str
-        and type(axis["hint"]) is str
-        and (type(axis["value"]) is float or axis["value"] is None)
-        and type(axis["command"]) is str
-        for axis in payload["skill_profile"]
-    )
-
     # The default window is a trailing month of daily points.
     assert payload["activity_window"] == "month"
     assert len(payload["activity_trend"]) == 30
@@ -152,85 +134,6 @@ def test_authenticated_stats_summary_matches_documented_contract(db, django_user
 
     documented = StatsSummaryResponseSerializer(data=payload)
     assert documented.is_valid(), documented.errors
-
-
-def test_stats_skill_profile_excludes_unearnable_and_non_runebound_commands(db, django_user_model):
-    CommandSkill.objects.create(
-        slug="library-only",
-        base_command="git library-only",
-        title="Library only",
-        summary="Reference material with no playable curriculum scenario.",
-    )
-    reference_skill = CommandSkill.objects.create(
-        slug="reference-only",
-        base_command="git reference-only",
-        title="Reference only",
-    )
-    CommandForm.objects.create(
-        command_skill=reference_skill,
-        slug="reference",
-        usage_form="git reference-only",
-        label="Read about a command",
-        is_published=True,
-        is_playable=False,
-    )
-    simulator_only_skill = CommandSkill.objects.create(
-        slug="simulator-only",
-        base_command="git simulator-only",
-        title="Simulator only",
-    )
-    CommandForm.objects.create(
-        command_skill=simulator_only_skill,
-        slug="supported",
-        usage_form="git simulator-only",
-        label="Supported but not taught",
-        is_published=True,
-        is_playable=True,
-    )
-    other_story = Story.objects.create(slug="frostbound-citadel", title="Frostbound Citadel")
-    other_chapter = Chapter.objects.create(
-        story=other_story,
-        slug="arcane-chapter",
-        number=1,
-        title="Arcane Chapter",
-        description="A published curriculum outside Runebound Turret.",
-    )
-    other_skill = CommandSkill.objects.create(
-        slug="arcane-command",
-        base_command="git arcane",
-        title="Arcane command",
-    )
-    other_form = CommandForm.objects.create(
-        command_skill=other_skill,
-        chapter=other_chapter,
-        slug="playable",
-        usage_form="git arcane",
-        label="A playable command from another story",
-        is_published=True,
-        is_playable=True,
-    )
-    other_level = AdventureLevel.objects.create(
-        chapter=other_chapter,
-        slug="arcane-level",
-        title="Arcane Level",
-        is_required=True,
-        is_published=True,
-    )
-    other_level.command_forms.add(other_form)
-    other_tier = AdventureLevelTier.objects.create(adventure_level=other_level, difficulty="easy")
-    other_scenario = AdventureLevelTierScenario.objects.create(
-        tier=other_tier,
-        slug="arcane-scenario",
-        title="Arcane Scenario",
-        is_published=True,
-    )
-    other_scenario.command_forms.add(other_form)
-    user = django_user_model.objects.create_user(username="stats-curriculum-scope")
-    player = get_or_create_player(user)
-
-    skill_profile = MetricsService()._command_skill_profile(player=player)
-
-    assert skill_profile == []
 
 
 def test_stats_headline_counts_gate_trials_and_coins_won_through_play(db, django_user_model):
@@ -285,7 +188,6 @@ def test_stats_headline_counts_gate_trials_and_coins_won_through_play(db, django
 def test_stats_contract_rejects_the_displaced_openapi_shape():
     serializer = StatsSummaryResponseSerializer(
         data={
-            "skill_profile": [],
             "activity": [],
             "headlines": {},
             "totals": {},

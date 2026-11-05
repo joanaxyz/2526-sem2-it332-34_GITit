@@ -13,7 +13,7 @@ function makeRun(overrides: Partial<TierRun> = {}): TierRun {
     stars: 2,
     policy: { min_counted_commands: 1, max_counted_commands: 12, generous_counted_commands: 7 },
     counts: { counted_action_total: 3 },
-    reward: { coins: 35, claimed: false },
+    reward: { coins: 35, xp: 35, claimed: false },
     scenario: { index: 1, total: 1, title: '' },
     ...overrides,
   } as unknown as TierRun
@@ -40,10 +40,10 @@ describe('TierStatsBar', () => {
 
   it('shows the tier reward before play and marks it claimed once paid', () => {
     const { unmount } = render(<TierStatsBar run={makeRun()} />)
-    expect(statValue('Reward')).toHaveTextContent('+35 GitCoins')
+    expect(statValue('Reward')).toHaveTextContent('+35 GitCoins · +35 XP')
     unmount()
 
-    render(<TierStatsBar run={makeRun({ reward: { coins: 35, claimed: true } })} />)
+    render(<TierStatsBar run={makeRun({ reward: { coins: 35, xp: 35, claimed: true } })} />)
     expect(statValue('Reward')).toHaveTextContent('Claimed')
   })
 
@@ -63,8 +63,8 @@ describe('TierStatsBar', () => {
           rewards: {
             first_level_clear: false,
             coins_awarded: 35,
+            xp_awarded: 0,
             chapter_chests_awarded: [],
-            mastery_advanced: [],
           },
         })}
       />,

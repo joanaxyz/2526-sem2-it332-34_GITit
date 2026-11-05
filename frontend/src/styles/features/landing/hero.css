@@ -59,7 +59,7 @@
   position: absolute;
   inset: 0;
   z-index: -2;
-  background: url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png') 28% center / cover no-repeat;
+  background: url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp') 28% center / cover no-repeat;
   transform: scaleX(-1);
 }
 

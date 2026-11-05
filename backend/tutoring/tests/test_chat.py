@@ -69,8 +69,8 @@ def brief(case_id):
 
 def test_every_seed_task_is_recognized_without_reading_solution_fields():
     rows = documents()
-    assert len(rows) == 399
-    assert len({row["id"] for row in rows}) == 399
+    assert len(rows) == 405
+    assert len({row["id"] for row in rows}) == 405
     assert all(set(row) == {"id", "text", "task"} for row in rows)
     for row in rows:
         for task in (row["task"], copied(row["task"])):

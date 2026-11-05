@@ -5,7 +5,7 @@ Vercel hosts the Vite SPA. The Django API stays on Render, and Vercel proxies
 
 ```text
 browser ──► Vercel ──┬── React/Vite app
-                     ├── images, audio, video
+                     ├── runtime images and audio
                      ├── JS/CSS
                      └── /api/*
                             └──► Render: git-it-app, backend only
@@ -40,6 +40,26 @@ Keeping `/api` on the Vercel origin preserves the existing model exactly:
 | [`frontend/vercel.json`](../frontend/vercel.json) | Rewrites, security headers, cache policy |
 | [`frontend/.env.production`](../frontend/.env.production) | Pins `VITE_API_BASE_URL=/api` |
 | [`frontend/.vercelignore`](../frontend/.vercelignore) | Keeps local-only files out of the upload |
+
+Production builds publish Arcane Spire, the companions, and shared runtime
+images and audio. The Vite build excludes the inactive Frostbound
+Citadel and Neon Backstreets packs, source-art folders (`raw`, `_raw`,
+`_shift_raw`, `pose`, `references`, `samples`), diagnostics, previews, and
+`_raw.zip` archives from `dist`. Originals remain locally for asset authoring;
+local development previews still register all three worlds.
+The same build filtering applies to Vercel and Docker.
+
+Lossless WebP delivery copies replace PNGs only when smaller and verified
+pixel-identical. `src/shared/media/optimizedPublicMedia.json` records dynamic
+URL replacements (including compact MP3 background loops); `media-sources.json` records source/copy hashes. Builds fail
+if an original or delivery copy changes without regeneration. After editing
+runtime art, regenerate with `python scripts/assets/optimize_delivery_media.py
+--apply` from the repository root (requires Pillow and ffmpeg locally; deployment builds
+use the generated files directly). Production excludes replaced PNG and WAV originals.
+
+This reduces new deployment sizes. To reclaim storage held by earlier
+deployments, remove unneeded deployment history in Vercel while preserving
+the current production deployment and any required rollback versions.
 
 On the Render side:
 

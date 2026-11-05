@@ -7,6 +7,8 @@ export type RegisterPayload = ApiRequestBody<'auth_register_create'>
 export type PasswordResetRequestPayload = ApiRequestBody<'auth_password_reset_request_create'>
 export type PasswordResetConfirmPayload = ApiRequestBody<'auth_password_reset_confirm_create'>
 export type PasswordChangePayload = ApiRequestBody<'auth_password_change_create'>
+export type AccountUpdatePayload = ApiRequestBody<'auth_me_partial_update'>
+export type EmailChangeConfirmPayload = ApiRequestBody<'auth_email_change_confirm_create'>
 export type EmailVerificationConfirmPayload = ApiRequestBody<'auth_email_verification_confirm_create'>
 export type EmailVerificationResendPayload = ApiRequestBody<'auth_email_verification_resend_create'>
 export type OAuthTicketExchangePayload = ApiRequestBody<'auth_oauth_exchange_create'>
@@ -39,6 +41,12 @@ export const authApi = {
   },
   me() {
     return apiOperationRequest('auth_me_retrieve', '/auth/me/')
+  },
+  updateAccount(payload: AccountUpdatePayload) {
+    return apiOperationRequest('auth_me_partial_update', '/auth/me/', { body: payload })
+  },
+  confirmEmailChange(payload: EmailChangeConfirmPayload) {
+    return apiOperationRequest('auth_email_change_confirm_create', '/auth/email-change/confirm/', { body: payload })
   },
   requestPasswordReset(payload: PasswordResetRequestPayload) {
     return apiOperationRequest(

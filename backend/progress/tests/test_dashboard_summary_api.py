@@ -20,7 +20,7 @@ SUMMARY_KEYS = {
     "completed_story_slug",
     "completed_stories",
     "perfect_clears",
-    "mastery",
+    "xp",
     "retry_trends",
 }
 KPI_KEYS = {"scr", "arc", "hlcr"}
@@ -56,7 +56,7 @@ def assert_dashboard_wire_shape(payload):
     assert all(type(slug) is str for slug in payload["completed_stories"])
 
     assert type(payload["perfect_clears"]) is int
-    assert type(payload["mastery"]) in {int, float}
+    assert type(payload["xp"]) is int
     assert type(payload["retry_trends"]) is list
     for row in payload["retry_trends"]:
         assert set(row) == RETRY_KEYS

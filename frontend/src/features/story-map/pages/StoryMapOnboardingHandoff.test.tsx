@@ -70,9 +70,9 @@ beforeEach(() => {
     companion: COMPANIONS.blue, companionSlug: 'blue', hasCompanion: false,
     isLoading: false, isError: false, error: null,
   })
-  vi.spyOn(preferencesApi, 'get').mockResolvedValue({ motion_mode: 'system', onboarding_phase: 'orientation' })
+  vi.spyOn(preferencesApi, 'get').mockResolvedValue({ motion_mode: 'system', onboarding_phase: 'orientation', leaderboard_visible: true })
   vi.spyOn(preferencesApi, 'update').mockImplementation(async (payload) => ({
-    motion_mode: 'system', onboarding_phase: payload.onboarding_phase ?? 'orientation',
+    motion_mode: 'system', onboarding_phase: payload.onboarding_phase ?? 'orientation', leaderboard_visible: true,
   }))
   vi.spyOn(storyMapApi, 'listChapters').mockResolvedValue([orientationChapter, chapter])
   vi.spyOn(storyMapApi, 'listOrientationLessons').mockResolvedValue([lesson(10, false)])

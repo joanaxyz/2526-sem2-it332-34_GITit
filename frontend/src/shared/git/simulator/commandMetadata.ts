@@ -58,6 +58,12 @@ export const SUPPORTED_OPTIONS: Record<string, Set<string>> = {
 
 export const GIT_COMMAND_NAMES = Object.keys(SUPPORTED_OPTIONS).sort()
 
+export function requestsCommandHelp(parsed: ParsedGitCommand) {
+  return hasOption(parsed, '-h') || hasOption(parsed, '--help')
+}
+
+// Invalid input should report what failed, never a lesson's solution template.
+// Syntax and option lists belong to explicitly requested help.
 export function validateCommand(parsed: ParsedGitCommand) {
   const allowed = SUPPORTED_OPTIONS[parsed.subcommand]
   if (!allowed) return null
@@ -67,54 +73,49 @@ export function validateCommand(parsed: ParsedGitCommand) {
 
   switch (parsed.subcommand) {
     case 'init':
-      if (parsed.args.length > 1) return 'usage: git init [-q | --quiet] [--initial-branch=<branch-name>] [<directory>]'
+      if (parsed.args.length > 1) return 'fatal: Too many arguments.'
       if (optionValues(parsed, '-b', '--initial-branch').length > 1) return 'error: only one initial branch may be specified'
       return null
     case 'clone':
       if (!parsed.args.length) return 'fatal: You must specify a repository to clone.'
-      if (parsed.args.length > 2) return 'usage: git clone <repository> [<directory>]'
+      if (parsed.args.length > 2) return 'fatal: Too many arguments.'
       if (optionValues(parsed, '-b', '--branch').length > 1) return 'error: only one branch may be specified for clone'
       return positiveIntOption(optionValues(parsed, '--depth')[0], 'depth')
-    case 'add':
-      if (hasOption(parsed, '-p') || hasOption(parsed, '--patch')) return null
-      if (hasOption(parsed, '-A') || hasOption(parsed, '--all')) return null
-      if (hasOption(parsed, '-u') || hasOption(parsed, '--update')) return null
-      return parsed.pathspecs.length ? null : 'Nothing specified, nothing added.'
     case 'commit':
       if (optionValues(parsed, '-m').length > 1) return 'error: only one -m option is supported in this session.'
       if (hasOption(parsed, '--allow-empty')) return unknownOptionMessage(parsed.subcommand, '--allow-empty')
       if (parsed.pathspecs.length) return 'fatal: paths with git commit are not supported in this simulator'
       return null
     case 'remote':
-      if ((hasOption(parsed, '-v') || hasOption(parsed, '--verbose')) && parsed.args.length) return 'usage: git remote [-v]'
       if (!parsed.args.length) return null
       if (parsed.args[0] === 'add' && parsed.args.length === 3) return null
       if (parsed.args[0] === 'set-url' && parsed.args.length === 3) return null
-      return 'Only git remote and git remote -v are supported in Chapter 1.'
+      if (['add', 'set-url'].includes(parsed.args[0])) return 'error: incorrect number of arguments'
+      return `error: unknown subcommand: \`${parsed.args[0]}'`
     case 'restore':
       return parsed.pathspecs.length ? null : 'fatal: you must specify path(s) to restore'
     case 'rm':
       if (!parsed.pathspecs.length) return 'fatal: No pathspec was given.'
-      if (hasOption(parsed, '-r') && !hasOption(parsed, '--cached')) return 'fatal: git rm -r is only supported with --cached in Chapter 1'
+      if (hasOption(parsed, '-r') && !hasOption(parsed, '--cached')) return 'error: recursive removal is not available in this environment'
       return null
     case 'check-ignore':
-      return hasOption(parsed, '-v') && parsed.pathspecs.length === 1 ? null : 'usage: git check-ignore -v <path>'
+      return parsed.pathspecs.length ? null : 'fatal: no path specified'
     case 'merge':
       if (hasOption(parsed, '--abort') && hasOption(parsed, '--continue')) return 'fatal: --abort and --continue cannot be used together'
       if (hasOption(parsed, '--abort') || hasOption(parsed, '--continue')) return parsed.args.length ? 'fatal: --abort/--continue does not take a branch name' : null
       if (hasOption(parsed, '--no-ff') && hasOption(parsed, '--squash')) return 'fatal: --no-ff and --squash cannot be combined'
-      return parsed.args.length === 1 ? null : 'usage: git merge [--no-ff | --squash] <branch>'
+      return parsed.args.length === 1 ? null : parsed.args.length ? 'error: too many arguments' : 'fatal: No remote for the current branch.'
     case 'checkout':
-      if (hasOption(parsed, '-b')) return parsed.args.length >= 1 && parsed.args.length <= 2 ? null : 'usage: git checkout -b <branch> [<start-point>]'
+      if (hasOption(parsed, '-b')) return parsed.args.length >= 1 && parsed.args.length <= 2 ? null : parsed.args.length ? 'fatal: too many arguments' : "error: switch `b' requires a value"
       if (!hasOption(parsed, '--ours') && !hasOption(parsed, '--theirs') && parsed.args.length === 1 && !parsed.argv.includes('--')) return null
       if ([hasOption(parsed, '--ours'), hasOption(parsed, '--theirs')].filter(Boolean).length !== 1) {
-        return 'git checkout in this simulator supports -b to create a branch, or --ours/--theirs for conflicted files.'
+        return 'error: invalid checkout arguments'
       }
-      return parsed.pathspecs.length ? null : 'fatal: git checkout --ours/--theirs requires a conflicted path.'
+      return parsed.pathspecs.length ? null : 'fatal: you must specify path(s) to restore'
     case 'config':
-      if (hasOption(parsed, '--list') || hasOption(parsed, '-l')) return parsed.args.length ? 'usage: git config [--list|-l]' : null
-      if (hasOption(parsed, '--get')) return parsed.args.length === 1 ? null : 'usage: git config --get <key>'
-      return parsed.args.length === 2 ? null : 'usage: git config [--global] <key> <value>'
+      if (hasOption(parsed, '--list') || hasOption(parsed, '-l')) return parsed.args.length ? 'error: wrong number of arguments' : null
+      if (hasOption(parsed, '--get')) return parsed.args.length === 1 ? null : 'error: wrong number of arguments'
+      return parsed.args.length >= 1 && parsed.args.length <= 2 ? null : parsed.args.length ? 'error: wrong number of arguments' : 'error: no action specified'
     case 'cherry-pick':
       if (hasOption(parsed, '--abort') && hasOption(parsed, '--continue')) {
         return 'fatal: --abort and --continue cannot be used together'
@@ -125,94 +126,94 @@ export function validateCommand(parsed: ParsedGitCommand) {
           : null
       }
       if (hasOption(parsed, '--no-commit') && hasOption(parsed, '-n')) return 'error: use only one no-commit option'
-      return parsed.args.length === 1 ? null : 'usage: git cherry-pick [--no-commit] <commit>'
+      return parsed.args.length === 1 ? null : 'error: incorrect number of arguments'
     case 'fetch':
-      return parsed.args.length > 1 ? 'usage: git fetch [--prune] [<remote>]' : null
+      return parsed.args.length > 1 ? 'error: too many arguments' : null
     case 'reset':
       if ([hasOption(parsed, '--soft'), hasOption(parsed, '--mixed'), hasOption(parsed, '--hard')].filter(Boolean).length > 1) return 'fatal: reset modes cannot be combined'
       if (parsed.argv.includes('--')) {
         if (hasOption(parsed, '--soft') || hasOption(parsed, '--hard')) return 'fatal: reset mode cannot be combined with paths'
         const separator = parsed.argv.indexOf('--')
-        return separator <= 3 && parsed.argv.length > separator + 1 ? null : 'usage: git reset [HEAD] -- <path>...'
+        return separator <= 3 && parsed.argv.length > separator + 1 ? null : 'error: invalid reset arguments'
       }
-      return parsed.args.length <= 1 ? null : 'usage: git reset [--soft | --mixed | --hard] [<target>]'
+      return parsed.args.length <= 1 ? null : 'error: too many arguments'
     case 'revert':
-      return parsed.args.length === 1 ? null : 'usage: git revert [--no-edit] <commit>'
+      return parsed.args.length === 1 ? null : 'error: incorrect number of arguments'
     case 'switch':
       if (hasOption(parsed, '-c') || hasOption(parsed, '--create')) {
-        return parsed.args.length >= 1 && parsed.args.length <= 2 ? null : 'usage: git switch -c <branch> [<start-point>]'
+        return parsed.args.length >= 1 && parsed.args.length <= 2 ? null : parsed.args.length ? 'fatal: too many arguments' : "error: switch `c' requires a value"
       }
-      if (!parsed.args.length && !hasOption(parsed, '--detach')) return 'usage: git switch <branch>'
+      if (!parsed.args.length && !hasOption(parsed, '--detach')) return 'fatal: missing branch or commit argument'
       return parsed.args.length > 1 ? 'fatal: too many arguments' : null
     case 'stash': {
       const subcommand = parsed.args[0] ?? 'push'
       return ['push', 'pop', 'list', 'drop', 'apply', 'show'].includes(subcommand) ? null : `error: unknown stash subcommand: '${subcommand}'`
     }
     case 'push':
-      if (hasOption(parsed, '--delete') || hasOption(parsed, '-d')) return parsed.args.length >= 2 ? null : 'usage: git push <remote> --delete <branch>'
-      return parsed.args.length > 2 ? 'usage: git push [<remote>] [<branch>]' : null
+      if (hasOption(parsed, '--delete') || hasOption(parsed, '-d')) return parsed.args.length >= 2 ? null : 'fatal: --delete needs a ref to be specified'
+      return parsed.args.length > 2 ? 'error: too many arguments' : null
     case 'pull':
-      return parsed.args.length > 2 ? 'usage: git pull [--rebase] [<remote>] [<branch>]' : null
+      return parsed.args.length > 2 ? 'error: too many arguments' : null
     case 'rebase':
       if (hasOption(parsed, '--abort') && hasOption(parsed, '--continue')) return 'fatal: --abort and --continue cannot be used together'
       if (hasOption(parsed, '--abort') || hasOption(parsed, '--continue')) return parsed.args.length || hasOption(parsed, '-i') ? 'fatal: --abort/--continue do not take additional arguments' : null
-      return parsed.args.length >= 1 ? null : 'usage: git rebase [-i] <upstream>'
+      return parsed.args.length >= 1 ? null : 'fatal: No upstream configured for the current branch.'
     case 'merge-base':
-      return parsed.args.length === 2 ? null : 'usage: git merge-base <commit> <commit>'
+      return parsed.args.length === 2 ? null : 'error: incorrect number of arguments'
     case 'rev-list':
-      return hasOption(parsed, '--count') && parsed.args.length === 1 && parsed.args[0].includes('..') ? null : 'usage: git rev-list --count <left>..<right>'
+      return hasOption(parsed, '--count') && parsed.args.length === 1 && parsed.args[0].includes('..') ? null : 'error: invalid revision arguments'
     case 'shortlog':
-      return parsed.args.length <= 1 ? null : 'usage: git shortlog [-sn] [<revision>]'
+      return parsed.args.length <= 1 ? null : 'error: too many arguments'
     case 'rev-parse':
-      if (hasOption(parsed, '--show-toplevel')) return parsed.args.length ? 'usage: git rev-parse --show-toplevel' : null
-      return parsed.args.length === 1 ? null : 'usage: git rev-parse <revision>'
+      if (hasOption(parsed, '--show-toplevel')) return parsed.args.length ? 'error: too many arguments' : null
+      return parsed.args.length === 1 ? null : 'error: incorrect number of arguments'
     case 'blame':
-      return parsed.args.length === 1 ? null : 'usage: git blame <path>'
+      return parsed.args.length === 1 ? null : 'error: incorrect number of arguments'
     case 'grep':
-      return parsed.args.length >= 1 && parsed.args.length <= 2 ? null : 'usage: git grep <pattern> [<tree>]'
+      return parsed.args.length >= 1 && parsed.args.length <= 2 ? null : parsed.args.length ? 'error: too many arguments' : 'fatal: no pattern given'
     case 'describe':
-      return parsed.args.length <= 1 ? null : 'usage: git describe --tags [<commit-ish>]'
+      return parsed.args.length <= 1 ? null : 'error: too many arguments'
     case 'range-diff':
-      return parsed.args.length === 2 ? null : 'usage: git range-diff <old-range> <new-range>'
+      return parsed.args.length === 2 ? null : 'fatal: need two commit ranges'
     case 'merge-tree':
-      return parsed.args.length === 2 ? null : 'usage: git merge-tree <branch-a> <branch-b>'
+      return parsed.args.length === 2 ? null : 'error: incorrect number of arguments'
     case 'verify-commit':
-      return parsed.args.length === 1 ? null : 'usage: git verify-commit <commit>'
+      return parsed.args.length === 1 ? null : 'error: incorrect number of arguments'
     case 'verify-tag':
-      return parsed.args.length === 1 ? null : 'usage: git verify-tag <tag>'
+      return parsed.args.length === 1 ? null : 'error: incorrect number of arguments'
     case 'fsck':
     case 'count-objects':
     case 'show-ref':
     case 'for-each-ref':
-      return parsed.args.length ? `usage: git ${parsed.subcommand}` : null
+      return parsed.args.length ? 'error: too many arguments' : null
     case 'cat-file':
-      if (hasOption(parsed, '-p') === hasOption(parsed, '-t')) return 'usage: git cat-file (-p | -t) <object>'
-      return parsed.args.length === 1 ? null : 'usage: git cat-file (-p | -t) <object>'
+      if (hasOption(parsed, '-p') === hasOption(parsed, '-t')) return 'error: must specify exactly one mode'
+      return parsed.args.length === 1 ? null : 'error: incorrect number of arguments'
     case 'ls-tree':
-      return parsed.args.length === 1 ? null : 'usage: git ls-tree <tree>'
+      return parsed.args.length === 1 ? null : 'fatal: you must specify a tree object'
     case 'symbolic-ref':
-      return parsed.args.length === 1 ? null : 'usage: git symbolic-ref HEAD'
+      return parsed.args.length === 1 ? null : 'error: incorrect number of arguments'
     case 'bisect':
-      if (parsed.args[0] === 'run') return parsed.args.length >= 2 ? null : 'usage: git bisect run <authored-test>'
-      return parsed.args[0] === 'log' && parsed.args.length === 1 ? null : 'usage: git bisect (run <authored-test> | log)'
+      if (parsed.args[0] === 'run') return parsed.args.length >= 2 ? null : 'error: bisect run failed: no command provided'
+      return parsed.args[0] === 'log' && parsed.args.length === 1 ? null : 'error: invalid bisect arguments'
     case 'rerere':
-      return ['status', 'diff'].includes(parsed.args[0] ?? '') && parsed.args.length === 1 ? null : 'usage: git rerere (status | diff)'
+      return ['status', 'diff'].includes(parsed.args[0] ?? '') && parsed.args.length === 1 ? null : 'error: invalid rerere arguments'
     case 'worktree':
-      return parsed.args[0] === 'list' && parsed.args.length === 1 ? null : 'usage: git worktree list'
+      return parsed.args[0] === 'list' && parsed.args.length === 1 ? null : 'error: invalid worktree arguments'
     case 'sparse-checkout':
-      return parsed.args[0] === 'list' && parsed.args.length === 1 ? null : 'usage: git sparse-checkout list'
+      return parsed.args[0] === 'list' && parsed.args.length === 1 ? null : 'error: invalid sparse-checkout arguments'
     case 'submodule':
-      return parsed.args[0] === 'status' && parsed.args.length === 1 ? null : 'usage: git submodule status'
+      return parsed.args[0] === 'status' && parsed.args.length === 1 ? null : 'error: invalid submodule arguments'
     default:
       return null
   }
 }
 
 function unknownOptionMessage(subcommand: string, option: string) {
-  if (subcommand === 'clone') return `error: unknown option \`${option}\`. Chapter 1 clone supports only -b/--branch and --depth.`
   if (subcommand === 'log') return `fatal: unrecognized argument: ${option}`
-  if (subcommand === 'branch') return `error: unknown switch \`${option}\`.`
-  return `error: unknown option \`${option}\`.`
+  return option.startsWith('--')
+    ? `error: unknown option \`${option.slice(2)}'`
+    : `error: unknown switch \`${option.slice(1)}'`
 }
 
 function positiveIntOption(value: string | true | undefined, option: string) {
@@ -221,6 +222,7 @@ function positiveIntOption(value: string | true | undefined, option: string) {
 }
 
 export function isDiagnosticCommand(parsed: ParsedGitCommand) {
+  if (requestsCommandHelp(parsed)) return true
   switch (parsed.subcommand) {
     case 'status':
     case 'log':
@@ -257,7 +259,7 @@ export function isDiagnosticCommand(parsed: ParsedGitCommand) {
     case 'version':
       return true
     case 'config':
-      return hasOption(parsed, '--get') || hasOption(parsed, '--list') || hasOption(parsed, '-l')
+      return parsed.args.length === 1 || hasOption(parsed, '--get') || hasOption(parsed, '--list') || hasOption(parsed, '-l')
     case 'branch':
       return !parsed.args.length && !hasOption(parsed, '-d') && !hasOption(parsed, '-D') && !hasOption(parsed, '--delete') && !hasOption(parsed, '-m') && !hasOption(parsed, '--move')
     case 'remote':

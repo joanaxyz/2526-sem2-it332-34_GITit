@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useRef } from 'react'
 
 import { FloatingMascotLauncher } from '@/shared/mascot/FloatingMascotLauncher'
+import { AnchoredCoachmark } from '@/shared/components/AnchoredCoachmark'
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { usePersistentState } from '@/shared/utils/persistentState'
 import { TutorCompanionPortrait } from './TutorCompanionPortrait'
@@ -18,7 +19,11 @@ const PHONE_WIDTH = 720
  *   so the saved preference is preserved and takes over once suppression lifts.
  *   Used by the caller during early onboarding phases to avoid competing with tours.
  */
-export function HomeTutor({ suppressOpen = false }: { suppressOpen?: boolean }) {
+export function HomeTutor({ suppressOpen = false, showIntroduction = false, onDismissIntroduction }: {
+  suppressOpen?: boolean
+  showIntroduction?: boolean
+  onDismissIntroduction?: () => void
+}) {
   const { companion } = usePlayerLoadout()
   const [open, setOpen] = usePersistentState<boolean>(
     'tutor-window:home-open',
@@ -27,7 +32,7 @@ export function HomeTutor({ suppressOpen = false }: { suppressOpen?: boolean }) 
   )
   // During early phases the window is hidden without writing to storage — the
   // student's saved preference is preserved and takes effect once suppression lifts.
-  const effectiveOpen = open && !suppressOpen
+  const effectiveOpen = open && !suppressOpen && !showIntroduction
   const launcher = useRef<HTMLButtonElement>(null)
   const refocusLauncher = useRef(false)
 
@@ -53,8 +58,19 @@ export function HomeTutor({ suppressOpen = false }: { suppressOpen?: boolean }) 
         portrait={<TutorCompanionPortrait companion={companion} className="tutor-companion--launcher" />}
         open={effectiveOpen}
         buttonRef={launcher}
-        onOpen={() => setOpen(true)}
+        onOpen={() => {
+          if (showIntroduction) onDismissIntroduction?.()
+          setOpen(true)
+        }}
       />
+      {showIntroduction && !suppressOpen && onDismissIntroduction ? <AnchoredCoachmark
+        targetSelector='[data-mascot-launcher="home-tutor"]'
+        title={`Ask ${companion.label}`}
+        body="Ask a Git question or get help with your next step. Drag this launcher anywhere to keep help close."
+        variant="tutor"
+        step={{ current: 2, total: 2 }}
+        onDismiss={onDismissIntroduction}
+      /> : null}
       {effectiveOpen ? <TutorWindow companion={companion} context={HOME_CONTEXT} onDismiss={dismiss} /> : null}
     </>
   )

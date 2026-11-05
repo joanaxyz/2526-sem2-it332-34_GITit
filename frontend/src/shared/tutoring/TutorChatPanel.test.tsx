@@ -35,20 +35,34 @@ function ask(text: string) {
 }
 
 describe('shared tutoring surfaces', () => {
+  it('introduces the visible launcher while preserving the saved open-window preference', () => {
+    localStorage.setItem('git-it:pref:tutor-window:home-open', 'true')
+    const dismiss = vi.fn()
+    const { rerender } = render(<HomeTutor showIntroduction onDismissIntroduction={dismiss} />)
+    expect(screen.getByRole('button', { name: 'Ask Blue' })).toBeInTheDocument()
+    expect(screen.queryByRole('dialog', { name: 'Ask Blue' })).not.toBeInTheDocument()
+    expect(screen.getByText('AI companion')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'Ask Blue' }))
+    expect(dismiss).toHaveBeenCalledOnce()
+    rerender(<HomeTutor showIntroduction={false} onDismissIntroduction={dismiss} />)
+    expect(screen.getByRole('dialog', { name: 'Ask Blue' })).toBeInTheDocument()
+    expect(localStorage.getItem('git-it:pref:tutor-window:home-open')).toBe('true')
+  })
+
   it.each(['blue', 'black', 'white'])('uses %s for the launcher, floating portrait, greeting and reply', async (slug) => {
     const companion = getCompanion(slug)
     vi.mocked(usePlayerLoadout).mockReturnValue({ companion, companionSlug: slug, hasCompanion: true, isLoading: false, isError: false, error: null })
     render(<HomeTutor />)
     const dialog = screen.getByRole('dialog', { name: `Ask ${companion.label}` })
     expect(dialog.querySelector('.tutor-companion')).toBeNull()
-    expect(dialog.parentElement?.querySelector('.tutor-window__avatar img')).toHaveAttribute('src', `/cosmetics/companion/${slug}/chat-avatar.png`)
+    expect(dialog.parentElement?.querySelector('.tutor-window__avatar img')).toHaveAttribute('src', `/cosmetics/companion/${slug}/chat-avatar.lossless.webp`)
     expect(screen.getByText(new RegExp(`Hi, I’m ${companion.label}`))).toBeInTheDocument()
     fireEvent.change(screen.getByRole('textbox', { name: `Ask ${companion.label} a question` }), { target: { value: 'Explain branches' } })
     fireEvent.click(screen.getByRole('button', { name: 'Send question' }))
     expect(await screen.findByRole('article', { name: companion.label })).toHaveTextContent(reply.reply)
     fireEvent.click(screen.getByRole('button', { name: `Close Ask ${companion.label}` }))
     const launcher = screen.getByRole('button', { name: `Ask ${companion.label}` })
-    expect(launcher.querySelector('img')).toHaveAttribute('src', `/cosmetics/companion/${slug}/chat-avatar.png`)
+    expect(launcher.querySelector('img')).toHaveAttribute('src', `/cosmetics/companion/${slug}/chat-avatar.lossless.webp`)
     expect(launcher).toHaveFocus()
   })
 
@@ -60,7 +74,7 @@ describe('shared tutoring surfaces', () => {
     expect(avatar).not.toHaveAttribute('data-thinking')
     ask('Explain staging')
     expect(avatar).toHaveAttribute('data-thinking')
-    expect(avatar.querySelector('.tutor-companion__thinking')).toHaveStyle({ backgroundImage: 'url("/cosmetics/companion/blue/chat-thinking.png")' })
+    expect(avatar.querySelector('.tutor-companion__thinking')).toHaveStyle({ backgroundImage: 'url("/cosmetics/companion/blue/chat-thinking.lossless.webp")' })
     expect(screen.getByRole('status')).toHaveTextContent('Blue is thinking')
     expect(screen.getByRole('log').querySelector('[role="status"]')).toBeNull()
     await act(async () => { resolve(reply) })
@@ -75,7 +89,7 @@ describe('shared tutoring surfaces', () => {
     view.rerender(<HomeTutor />)
     expect(screen.getByRole('dialog', { name: 'Ask White' })).toBeInTheDocument()
     expect(screen.getByRole('textbox', { name: 'Ask White a question' })).toHaveValue('Explain branches')
-    expect(document.querySelector('.tutor-window__avatar img')).toHaveAttribute('src', '/cosmetics/companion/white/chat-avatar.png')
+    expect(document.querySelector('.tutor-window__avatar img')).toHaveAttribute('src', '/cosmetics/companion/white/chat-avatar.lossless.webp')
   })
 
   it('browses saved explanations manually without calling AI', () => {
@@ -249,7 +263,7 @@ describe('shared tutoring surfaces', () => {
     setGuideMascotVisibility(false)
     render(<HomeTutor />)
     expect(screen.queryByRole('button', { name: 'Ask Blue' })).not.toBeInTheDocument()
-    expect(screen.getByRole('dialog').parentElement?.querySelector('.tutor-window__avatar img')).toHaveAttribute('src', '/cosmetics/companion/blue/chat-avatar.png')
+    expect(screen.getByRole('dialog').parentElement?.querySelector('.tutor-window__avatar img')).toHaveAttribute('src', '/cosmetics/companion/blue/chat-avatar.lossless.webp')
     expect(screen.getByRole('dialog').querySelector('.tutor-window__avatar')).toBeNull()
     ask('Explain staging')
     expect(await screen.findByText(reply.reply)).toBeInTheDocument()
@@ -260,7 +274,7 @@ describe('shared tutoring surfaces', () => {
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
     const trigger = screen.getByRole('button', { name: 'Ask Blue' })
     expect(trigger).toHaveTextContent('Ask Blue')
-    expect(trigger.querySelector('img')).toHaveAttribute('src', '/cosmetics/companion/blue/chat-avatar.png')
+    expect(trigger.querySelector('img')).toHaveAttribute('src', '/cosmetics/companion/blue/chat-avatar.lossless.webp')
     expect(trigger).toHaveFocus()
     fireEvent.click(trigger)
     expect(screen.getByRole('dialog')).toBeInTheDocument()

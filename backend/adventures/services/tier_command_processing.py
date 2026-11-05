@@ -35,6 +35,7 @@ from practice.services.scaffolding import FeedbackGenerationService, Scaffolding
 from practice.services.visualization import RepositoryVisualizationService
 from progress.models import AdventureLevelTierCompletion
 from progress.services.scored_completions import update_best_score
+from progress.xp import award_tier_xp
 from simulator.services import (
     RepositorySnapshotService,
     RepositoryStateSimulator,
@@ -50,6 +51,14 @@ from tutoring.services.planner import PlannerReads, plan_introduction
 from .selectors import form_solve_targets
 from .skill_learning import learn_from_command
 from .tier_history import TierCommandHistoryCache
+
+# A clear that earns XP but no first-clear reward, such as a replay's new star.
+NO_NEW_REWARDS = {
+    "first_level_clear": False,
+    "coins_awarded": 0,
+    "xp_awarded": 0,
+    "chapter_chests_awarded": [],
+}
 
 
 class AdventureLevelTierCommandProcessingService:
@@ -353,7 +362,10 @@ class AdventureLevelTierCommandProcessingService:
         )
         rewards = None
         if run.is_transfer:
+            from progress.services.checkpoints import award_transfer_reward
+
             completion = None
+            rewards = award_transfer_reward(run)
         elif not run.is_replay:
             progress, _ = AdventureLevelTierProgress.objects.select_for_update().get_or_create(
                 player=run.player, tier=run.tier
@@ -366,12 +378,11 @@ class AdventureLevelTierCommandProcessingService:
                 # counts: it clears the learner's next uncleared scenario.
                 scenario = next_scenario(scenarios, progress) or scenario
             cleared = cleared_slugs(progress)
-            mastery_advanced: list[dict] = []
             scenario_cleared = scenario.slug not in cleared
             if scenario_cleared:
                 cleared.append(scenario.slug)
                 progress.cleared_scenario_slugs = cleared
-                mastery_advanced = self._credit_mastery(run, scenario_forms)
+                self._credit_mastery(run, scenario_forms)
             progress.save(
                 update_fields=["successful_clears", "cleared_scenario_slugs", "updated_at"]
             )
@@ -383,8 +394,8 @@ class AdventureLevelTierCommandProcessingService:
                 rewards = {
                     "first_level_clear": False,
                     "coins_awarded": 0,
+                    "xp_awarded": 0,
                     "chapter_chests_awarded": [],
-                    "mastery_advanced": mastery_advanced,
                 }
             elif tier_cleared:
                 completion, created = AdventureLevelTierCompletion.objects.get_or_create(
@@ -414,8 +425,8 @@ class AdventureLevelTierCommandProcessingService:
                     rewards = {
                         "first_level_clear": first_level_clear,
                         "coins_awarded": coins_awarded,
+                        "xp_awarded": 0,
                         "chapter_chests_awarded": chapter_chests_awarded,
-                        "mastery_advanced": mastery_advanced,
                     }
         else:
             completion = (
@@ -433,39 +444,33 @@ class AdventureLevelTierCommandProcessingService:
                     completion.save(update_fields=["stars"])
             else:
                 update_best_score(completion, run=run, run_field="tier_run")
+        if completion is not None:
+            xp_awarded = award_tier_xp(player=run.player, tier=run.tier, stars=completion.stars)
+            if xp_awarded:
+                rewards = {**(rewards or NO_NEW_REWARDS), "xp_awarded": xp_awarded}
         # The response reports this completion; do not read it back.
         run._prefetched_completion = completion
         run._payload_context_loaded = True
         return {"status", "completed_at", "ended_at", "stars"}, rewards
 
-    def _credit_mastery(self, run: AdventureLevelTierRun, scenario_forms) -> list[dict]:
+    def _credit_mastery(self, run: AdventureLevelTierRun, scenario_forms) -> None:
         """One solve for every published form the scenario's clears actually used.
 
         Called once per cleared scenario, with the clearing run's commands: it
         credits each form the learner typed - and nothing they did not type,
         which would otherwise suppress that form's guide later.
         ``scenario_forms`` (the scenario's published forms) only break resolver ties.
+        A story counts as completed once its forms all reach their targets.
         """
         forms = forms_used_by(_processed_commands(run), preferred=scenario_forms)
         if not forms:
-            return []
+            return
         targets = form_solve_targets({form.id for form in forms})
-        advanced = []
         for form in forms:
             row, _ = SkillMastery.objects.get_or_create(player=run.player, command_form=form)
             row.solves += 1
             row.mastered = row.solves >= targets.get(form.id, 1)
             row.save(update_fields=["solves", "mastered", "updated_at"])
-            advanced.append(
-                {
-                    "skill_slug": form.command_skill.slug,
-                    "form_slug": form.slug,
-                    "solves": row.solves,
-                    "target": targets.get(form.id, 1),
-                    "mastered": row.mastered,
-                }
-            )
-        return advanced
 
 
 def tier_stars(*, run: AdventureLevelTierRun, scenarios, scenario=None) -> int:

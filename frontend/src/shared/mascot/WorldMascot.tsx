@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
 import { createPortal } from 'react-dom'
+import { publicMediaUrl } from '@/shared/media/publicMedia'
 import { MascotSprite, type MascotPose } from './MascotSprite'
 import { mascotPerch, mascotPlatform, mascotPlatforms, mascotTilt, platformNear, type MascotPlatform } from './mascotPlatforms'
 import { warmImages } from '@/shared/sprites/preload'
@@ -53,7 +54,7 @@ export function WorldMascot({ surface, knowledge = [], contextKey = surface }: {
     const parent = scopeRef.current?.parentElement
     const actor = actorRef.current
     if (!host || !parent || !actor || !guideMascotVisible) return
-    void warmImages(['idle', 'float', 'fly', 'walk', 'run', 'land', 'take-off'].map((name) => `/mascot/${name}.png`))
+    void warmImages(['idle', 'float', 'fly', 'walk', 'run', 'land', 'take-off'].map((name) => publicMediaUrl(`/mascot/${name}.png`)))
     const media = window.matchMedia?.('(prefers-reduced-motion: reduce)')
     let reduced = media?.matches ?? false
     let currentPose: MascotPose = 'float'

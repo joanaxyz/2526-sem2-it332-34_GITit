@@ -255,7 +255,7 @@ so glow never competes with the art.
 - Use rounded black cursor silhouettes with fine neon-blue edges and highlights. The static SVG set renders at 28×28px, with scaled click points for each action. Directional resize cursors remain native, and touch devices keep their normal behavior.
 
 ### Navigation
-- **Hub chrome (atmospheric):** a floating, centered "launcher blade" (HOME · TRACKS · SHOP) with the brand badge and wallet/profile loose in the corners (Halo-style), over the living sky. Atmospheric pages only.
+- **Hub chrome (atmospheric):** a floating, centered "launcher blade" (DASHBOARD · MODULES · LEADERBOARD · SHOP) with the brand badge and wallet/profile loose in the corners (Halo-style), over the living sky. Atmospheric pages only.
 - **Workspace chrome:** focused tools use their own solid, docked chrome. Dense, scrolling surfaces must NOT sit under the floating hub blade.
 
 ## 6. Do's and Don'ts

@@ -3802,6 +3802,99 @@
     "maximum_counted_commands": 8,
     "seed_notes": []
   },
+  "manual-transfer-checkout-v2": {
+    "scenario_number": "3.1.18",
+    "difficulty": "hard",
+    "label": "Back out of checkout v1, then settle both files of v2",
+    "story": "You started merging `feature/checkout-v1` into `main` and Git stopped on a conflict in `src/checkout.py`.\n\nThen Sage told you v1 is dead: the branch to merge is `feature/checkout-v2`, and it touches shipping as well as checkout. `main` lowered the fee and the free-shipping limit, and both of those must survive. **The wrong merge must leave no trace on `main`.**",
+    "starting_point": "You are on `main`, in the middle of a merge of `feature/checkout-v1` that stopped on a conflict; `feature/checkout-v2` is the branch you meant.",
+    "real_world_context": "A single merge can stop on several files. Git only completes it once every one of them has been settled, so a merge is finished file by file, not all at once.",
+    "task": "Get `main` out of the current merge, merge `feature/checkout-v2` instead, make both files below match exactly, and complete the merge with its prepared message.",
+    "required_files": [
+      {
+        "path": "src/checkout.py",
+        "content": "FEE = 4\nTAX = 0.12"
+      },
+      {
+        "path": "src/shipping.py",
+        "content": "FREE_OVER = 80\nZONES = 3"
+      }
+    ],
+    "objective_checks": [
+      "main has a merge commit with feature/checkout-v2 as a parent.",
+      "feature/checkout-v1's commit is not in main's history.",
+      "src/checkout.py and src/shipping.py contain exactly the required content, and no conflicts remain."
+    ],
+    "expected_result": "`main` has a merge commit from `feature/checkout-v2`, with both files settled and nothing from v1.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git merge --abort"
+      },
+      {
+        "kind": "command",
+        "command": "git merge feature/checkout-v2"
+      },
+      {
+        "kind": "file_edit",
+        "path": "src/checkout.py",
+        "content": "FEE = 4\nTAX = 0.12",
+        "after_command_index": 2
+      },
+      {
+        "kind": "command",
+        "command": "git add src/checkout.py"
+      },
+      {
+        "kind": "file_edit",
+        "path": "src/shipping.py",
+        "content": "FREE_OVER = 80\nZONES = 3",
+        "after_command_index": 3
+      },
+      {
+        "kind": "command",
+        "command": "git add src/shipping.py"
+      },
+      {
+        "kind": "command",
+        "command": "git commit --no-edit"
+      }
+    ],
+    "solution_commands": [
+      "git merge --abort",
+      "git merge feature/checkout-v2",
+      "git add src/checkout.py",
+      "git add src/shipping.py",
+      "git commit --no-edit"
+    ],
+    "solution_workspace_files": [
+      {
+        "mode": "write",
+        "path": "src/checkout.py",
+        "content": "FEE = 4\nTAX = 0.12",
+        "after_command_index": 2
+      },
+      {
+        "mode": "write",
+        "path": "src/shipping.py",
+        "content": "FREE_OVER = 80\nZONES = 3",
+        "after_command_index": 3
+      }
+    ],
+    "accepted_alternatives": [
+      "`git reset --merge` for the abort; `git merge --continue`; adding both files in one `git add`."
+    ],
+    "not_accepted": [
+      "Resolving the v1 merge.",
+      "Completing the merge with only one file settled."
+    ],
+    "evaluation": [
+      "HEAD on `main`; tip is a merge with parent `c3`; history excludes `c2`; both trees = the required content; clean tree."
+    ],
+    "minimum_counted_commands": 5,
+    "maximum_counted_commands": 10,
+    "seed_notes": []
+  },
   "mergetool-medium-configure-tool-billing": {
     "scenario_number": "3.2.14",
     "difficulty": "medium",
@@ -3946,6 +4039,100 @@
     ],
     "minimum_counted_commands": 4,
     "maximum_counted_commands": 8,
+    "seed_notes": []
+  },
+  "mergetool-transfer-pricing-refresh": {
+    "scenario_number": "3.2.16",
+    "difficulty": "hard",
+    "label": "Set up the merge tool, then settle the pricing refresh",
+    "story": "You are on a freshly set-up laptop, so this repository has no merge tool configured yet. Sage wants `meld` used here, and does not want any backup copies left lying around after a merge.\n\n`feature/pricing-refresh` is ready to come into `main`. It changes the pricing and the discounts, both of which `main` also changed, and it adds a pricing page to the docs.",
+    "starting_point": "You are on `main`; no merge tool is configured; merging `feature/pricing-refresh` will conflict in two files.",
+    "real_world_context": "Merge-tool settings belong to the repository or the machine, not the branch. On a new setup you choose the tool and how it behaves before the first conflict arrives.",
+    "task": "Set `meld` as this repository's merge tool and turn off its backup files. Then merge `feature/pricing-refresh`, resolve both conflicted files in the merge tool to the content below, and complete the merge with its prepared message.",
+    "required_files": [
+      {
+        "path": "src/pricing.py",
+        "content": "BASE = 9\nCURRENCY = 'PHP'"
+      },
+      {
+        "path": "src/discounts.py",
+        "content": "MEMBER = 0.1\nSEASONAL = 0.05"
+      }
+    ],
+    "objective_checks": [
+      "merge.tool is meld, and mergetool.keepBackup is false.",
+      "main has a merge commit with feature/pricing-refresh as a parent.",
+      "src/pricing.py and src/discounts.py contain exactly the required content, and docs/pricing.md came in unchanged."
+    ],
+    "expected_result": "The tool is set up, and `main` has a merge commit with both files settled.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git config merge.tool meld"
+      },
+      {
+        "kind": "command",
+        "command": "git config mergetool.keepBackup false"
+      },
+      {
+        "kind": "command",
+        "command": "git merge feature/pricing-refresh"
+      },
+      {
+        "kind": "command",
+        "command": "git mergetool"
+      },
+      {
+        "kind": "file_edit",
+        "path": "src/pricing.py",
+        "content": "BASE = 9\nCURRENCY = 'PHP'",
+        "after_command_index": 4
+      },
+      {
+        "kind": "file_edit",
+        "path": "src/discounts.py",
+        "content": "MEMBER = 0.1\nSEASONAL = 0.05",
+        "after_command_index": 4
+      },
+      {
+        "kind": "command",
+        "command": "git commit --no-edit"
+      }
+    ],
+    "solution_commands": [
+      "git config merge.tool meld",
+      "git config mergetool.keepBackup false",
+      "git merge feature/pricing-refresh",
+      "git mergetool",
+      "git commit --no-edit"
+    ],
+    "solution_workspace_files": [
+      {
+        "mode": "write",
+        "path": "src/pricing.py",
+        "content": "BASE = 9\nCURRENCY = 'PHP'",
+        "after_command_index": 4
+      },
+      {
+        "mode": "write",
+        "path": "src/discounts.py",
+        "content": "MEMBER = 0.1\nSEASONAL = 0.05",
+        "after_command_index": 4
+      }
+    ],
+    "accepted_alternatives": [
+      "Setting the options after the merge stops but before `git mergetool`; `git merge --continue`."
+    ],
+    "not_accepted": [
+      "Leaving backups switched on.",
+      "Hand-editing `docs/pricing.md`, which merged cleanly."
+    ],
+    "evaluation": [
+      "`merge.tool` = `meld`, `mergetool.keepBackup` = `false`.",
+      "HEAD on `main`; tip is a merge with parent `c2`; both trees = the required content; `docs/pricing.md` = the branch's version; clean tree."
+    ],
+    "minimum_counted_commands": 5,
+    "maximum_counted_commands": 10,
     "seed_notes": []
   },
   "cherry-easy-trace-source-hotfix": {
@@ -4513,6 +4700,95 @@
     "maximum_counted_commands": 12,
     "seed_notes": []
   },
+  "cherry-transfer-release-backport": {
+    "scenario_number": "3.3.24",
+    "difficulty": "hard",
+    "label": "Clear the wrong pick, then assemble the 1.6 backport",
+    "story": "You are on `release-1.6`, stopped on a cherry-pick of `c2`, and it is the wrong commit: it is an experiment.\n\nSage needs three things from `main` on this release. The separator fix `c4` goes on by itself, as its own commit, and it must say where it came from. The two small report fixes `c5` and `c6` belong together, so reviewers should see them as one commit.",
+    "starting_point": "You are on `release-1.6`, in the middle of a cherry-pick of `c2` that stopped on a conflict in `src/export.py`.",
+    "real_world_context": "A release branch tells a story to reviewers. Recording a commit's source keeps it traceable, and folding small related fixes into one commit keeps the release history readable.",
+    "task": "Cancel the current cherry-pick. Apply `c4` so the new commit records its source, with `src/export.py` matching the content below. Then bring `c5` and `c6` onto `release-1.6` as a single commit with the message shown below. **Leave `main` unchanged.**",
+    "required_files": [
+      {
+        "path": "src/export.py",
+        "content": "return to_csv(rows, header=True, delimiter=';')"
+      }
+    ],
+    "objective_checks": [
+      "release-1.6 has a commit for c4 that records its source, on top of its old tip.",
+      "src/export.py contains exactly the required content.",
+      "release-1.6's newest commit has the required message and carries both report fixes.",
+      "main is unchanged."
+    ],
+    "expected_result": "`release-1.6` has the traced separator fix followed by one commit with both report fixes.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git cherry-pick --abort"
+      },
+      {
+        "kind": "command",
+        "command": "git cherry-pick -x c4"
+      },
+      {
+        "kind": "file_edit",
+        "path": "src/export.py",
+        "content": "return to_csv(rows, header=True, delimiter=';')",
+        "after_command_index": 2
+      },
+      {
+        "kind": "command",
+        "command": "git add src/export.py"
+      },
+      {
+        "kind": "command",
+        "command": "git cherry-pick --continue"
+      },
+      {
+        "kind": "command",
+        "command": "git cherry-pick --no-commit c5"
+      },
+      {
+        "kind": "command",
+        "command": "git cherry-pick --no-commit c6"
+      },
+      {
+        "kind": "command",
+        "command": "git commit -m \"Backport report fixes\""
+      }
+    ],
+    "solution_commands": [
+      "git cherry-pick --abort",
+      "git cherry-pick -x c4",
+      "git add src/export.py",
+      "git cherry-pick --continue",
+      "git cherry-pick --no-commit c5",
+      "git cherry-pick --no-commit c6",
+      "git commit -m \"Backport report fixes\""
+    ],
+    "solution_workspace_files": [
+      {
+        "mode": "write",
+        "path": "src/export.py",
+        "content": "return to_csv(rows, header=True, delimiter=';')",
+        "after_command_index": 2
+      }
+    ],
+    "accepted_alternatives": [
+      "`git cherry-pick -n` for `--no-commit`."
+    ],
+    "not_accepted": [
+      "Three separate commits.",
+      "Backporting `c2`, the experiment."
+    ],
+    "evaluation": [
+      "HEAD on `release-1.6`; `release-1.6~1` has parent `c3` and records `cherry picked from commit c4`.",
+      "Tip message = `Backport report fixes`; tree has both report fixes; history has four commits; `main` still at `c6`."
+    ],
+    "minimum_counted_commands": 7,
+    "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
   "reflog-medium-recover-and-publish-search": {
     "scenario_number": "4.1.16",
     "difficulty": "medium",
@@ -4718,6 +4994,70 @@
       "Clean tree."
     ],
     "minimum_counted_commands": 2,
+    "maximum_counted_commands": 8,
+    "seed_notes": []
+  },
+  "reflog-transfer-report-rollback": {
+    "scenario_number": "4.1.20",
+    "difficulty": "hard",
+    "label": "Put main right and keep the redesign safe",
+    "story": "A careless reset took `main` back two commits, and now neither of them shows up in your log.\n\nThe two lost commits are not equally welcome. One finishes the borrowing report, and that is where `main` should be standing. The other is a redesign that Sage wants kept for later but not on `main`, on a new branch named `recovery/report-redesign`. Have a look at both before you move anything.",
+    "starting_point": "You are on `main`, two commits behind where you were; the reflog still knows both lost commits.",
+    "real_world_context": "The reflog shows where a branch has been, and recovery means choosing what each of those positions deserves: some belong back on the branch, and some only need a safe name.",
+    "task": "Find the two lost commits in the reflog. Keep the redesign on a new branch named `recovery/report-redesign`, and move `main` back to the commit that finishes the report. **Finish on `main`.**",
+    "required_files": [],
+    "objective_checks": [
+      "recovery/report-redesign exists and points to the redesign commit.",
+      "main points to the commit that finishes the report, and the redesign is not on it.",
+      "main is checked out and the working folder is clean."
+    ],
+    "expected_result": "`main` holds the finished report, and the redesign is safe on its own branch.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git reflog"
+      },
+      {
+        "kind": "command",
+        "command": "git show c2"
+      },
+      {
+        "kind": "command",
+        "command": "git show c3"
+      },
+      {
+        "kind": "command",
+        "command": "git switch -c recovery/report-redesign c3"
+      },
+      {
+        "kind": "command",
+        "command": "git switch main"
+      },
+      {
+        "kind": "command",
+        "command": "git reset --hard c2"
+      }
+    ],
+    "solution_commands": [
+      "git reflog",
+      "git show c2",
+      "git show c3",
+      "git switch -c recovery/report-redesign c3",
+      "git switch main",
+      "git reset --hard c2"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git branch recovery/report-redesign c3` instead of switching to it."
+    ],
+    "not_accepted": [
+      "Leaving `main` on the redesign.",
+      "Recovering only one of the two commits."
+    ],
+    "evaluation": [
+      "HEAD on `main`; `main` = `c2`; `recovery/report-redesign` = `c3`; clean tree."
+    ],
+    "minimum_counted_commands": 3,
     "maximum_counted_commands": 8,
     "seed_notes": []
   },
@@ -5018,6 +5358,61 @@
       "`c3` still in history; `origin/main` = `main`; clean tree."
     ],
     "minimum_counted_commands": 3,
+    "maximum_counted_commands": 8,
+    "seed_notes": []
+  },
+  "revert-transfer-statements": {
+    "scenario_number": "4.2.16",
+    "difficulty": "hard",
+    "label": "Reword the local commit, reverse two pushed ones",
+    "story": "Two commits that went out to `origin` are causing trouble: `c2` rounds totals down, and `c4` hides the tax line. Everything around them is fine and must stay.\n\nThere is also `c6`, your newest commit, which nobody else has seen. Its message just says `wip`, and Sage will not let that go out.",
+    "starting_point": "You are on `main`; `origin/main` is at `c5`, and `c6` exists only on your machine.",
+    "real_world_context": "History others have seen is corrected with new commits, and history only you have seen can simply be rewritten. Real clean-ups often need both, and the order matters.",
+    "task": "Change `c6`'s message to the one below. Undo `c4` and then `c2`, each with its own new commit, newest first. Then push `main` to `origin` once.",
+    "required_files": [],
+    "objective_checks": [
+      "c6's work is on main under the required message, and c6 itself is gone.",
+      "Each of c4, c2 has its own revert commit on main, newest first.",
+      "The commits around them are untouched, and origin/main matches local main after one push."
+    ],
+    "expected_result": "`main` has the reworded commit followed by two reverts, and `origin/main` matches it.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git commit --amend -m \"Add statement export\""
+      },
+      {
+        "kind": "command",
+        "command": "git revert c4"
+      },
+      {
+        "kind": "command",
+        "command": "git revert c2"
+      },
+      {
+        "kind": "command",
+        "command": "git push"
+      }
+    ],
+    "solution_commands": [
+      "git commit --amend -m \"Add statement export\"",
+      "git revert c4",
+      "git revert c2",
+      "git push"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git push origin main`."
+    ],
+    "not_accepted": [
+      "Rewriting `c2` or `c4`, which are already on `origin`.",
+      "Reverting first, which leaves `c6` buried under new commits."
+    ],
+    "evaluation": [
+      "HEAD on `main`; `main~2` message = `Add statement export` with parent `c5`; history excludes `c6`.",
+      "Newest commit reverts `c2`, the one before reverts `c4`; tree restores `src/totals.py` and `src/tax.py`; `origin/main` = `main`."
+    ],
+    "minimum_counted_commands": 4,
     "maximum_counted_commands": 8,
     "seed_notes": []
   },
@@ -5580,6 +5975,66 @@
     ],
     "minimum_counted_commands": 2,
     "maximum_counted_commands": 12,
+    "seed_notes": []
+  },
+  "rebase-transfer-invoices": {
+    "scenario_number": "4.3.20",
+    "difficulty": "hard",
+    "label": "Rescue the invoices branch from two bad rebases",
+    "story": "`feature/invoices` has had a rough day. An earlier rebase silently dropped its tax-lines commit, and you only noticed after starting another rebase onto `main`, which has now stopped on a conflict in a file you never touched.\n\nThat conflict comes from `spike/heatmap`, the throwaway branch `feature/invoices` was started from. Sage wants the branch back to the state you pushed, with all three of its own commits, sitting directly on `main`, with none of the spike. Other people use this remote branch, so update it **without overwriting work you have not seen**.",
+    "starting_point": "You are in the middle of a rebase of `feature/invoices` onto `main`, stopped on a conflict from a `spike/heatmap` commit; the commit you last pushed is still in the reflog.",
+    "real_world_context": "When a rebase has gone wrong twice, stacking a third on top makes it worse. Stop, return to the last good state, and then replay exactly what you meant to.",
+    "task": "Cancel the current rebase and put `feature/invoices` back on the commit you last pushed. Then move __only__ the branch's own three commits onto `main`, leaving the spike's commits behind, and update `origin`'s `feature/invoices`.",
+    "required_files": [],
+    "objective_checks": [
+      "No rebase is in progress.",
+      "feature/invoices sits on main's latest commit with its three commits, including the tax lines.",
+      "Nothing from spike/heatmap is on feature/invoices, and spike/heatmap is unchanged.",
+      "origin/feature/invoices matches local feature/invoices."
+    ],
+    "expected_result": "`feature/invoices` has its three commits directly on `main`, and `origin` matches it.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git rebase --abort"
+      },
+      {
+        "kind": "command",
+        "command": "git reflog"
+      },
+      {
+        "kind": "command",
+        "command": "git reset --hard c6"
+      },
+      {
+        "kind": "command",
+        "command": "git rebase --onto main spike/heatmap feature/invoices"
+      },
+      {
+        "kind": "command",
+        "command": "git push --force-with-lease origin feature/invoices"
+      }
+    ],
+    "solution_commands": [
+      "git rebase --abort",
+      "git reflog",
+      "git reset --hard c6",
+      "git rebase --onto main spike/heatmap feature/invoices",
+      "git push --force-with-lease origin feature/invoices"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "`git push --force-with-lease` with the upstream set."
+    ],
+    "not_accepted": [
+      "`git push --force`.",
+      "Keeping any `spike/heatmap` commit on the branch."
+    ],
+    "evaluation": [
+      "HEAD on `feature/invoices`; history contains `c1`, excludes `c2` and `c3`; five commits; tree has `src/invoices.py`, `src/tax_lines.py` and `charts-main`; no `src/spike.css`; `spike/heatmap` = `c3`; remote matches."
+    ],
+    "minimum_counted_commands": 4,
+    "maximum_counted_commands": 8,
     "seed_notes": []
   },
   "gate1-easy-two-commit-start-field-log": {

@@ -183,3 +183,72 @@ def test_study_car_uses_fresh_replays_before_cutoff_like_live_reports(
     assert report["modules"][0]["kpis"]["car_first"]["value"] == 75
     assert report["kpis"]["arc"]["value"] == 0  # The replay is not a retry.
     assert "car_first" not in report["participants"][0]["kpis"]
+
+
+@pytest.mark.django_db
+@pytest.mark.parametrize("success_after_cutoff", [False, True])
+def test_existing_retry_policy_study_counts_changed_first_retries_at_cutoff(
+    django_user_model, monkeypatch, success_after_cutoff
+):
+    player, tier, _, variants = bundle(django_user_model, required=1)
+    changed = variants[1]
+    changed.is_transfer = False
+    changed.save(update_fields=["is_transfer"])
+    other = get_or_create_player(django_user_model.objects.create_user(username="other-retry"))
+    AdventureLevelTierCompletion.objects.create(
+        player=other, tier=tier.adventure_level.tiers.get(difficulty="medium")
+    )
+    cutoff = timezone.now() + timedelta(hours=1)
+    study = create_study(
+        slug="retry-rta", player_ids=[player.id, other.id], tier_ids=[tier.id], cutoff=cutoff
+    )
+    study.manifest["policy"] = "mastery-kpis-v3-retry-rta"
+    study.save(update_fields=["manifest"])
+    for learner, passed in ((player, True), (other, False)):
+        failed = end(start(learner, tier), passed=False)
+        retry = end(start(learner, tier, prior_run=failed), passed=passed)
+        assert retry.selected_variant_id == changed.id
+        if passed:
+            AdventureLevelTierRun.objects.filter(pk=retry.pk).update(
+                ended_at=cutoff + timedelta(seconds=int(success_after_cutoff))
+            )
+        if not passed:
+            end(start(learner, tier, prior_run=retry))  # Later success cannot erase the failure.
+    live = MetricsService().all_player_performance_summary()
+    assert live["kpis"]["rta"]["value"] is None  # Live RTA requires a reserved checkpoint.
+    historical_rta = {
+        "value": 50,
+        "numerator": 100,
+        "denominator": 2,
+        "unit": "participants",
+    }
+    monkeypatch.setattr(
+        "progress.services.studies.timezone.now", lambda: cutoff + timedelta(seconds=1)
+    )
+    report = freeze_study(study)
+    assert report["manifest"]["policy"] == "mastery-kpis-v3-retry-rta"
+    assert report["kpis"]["rta"] == (
+        {"value": 0, "numerator": 0, "denominator": 1, "unit": "participants"}
+        if success_after_cutoff
+        else historical_rta
+    )
+    assert [(r["rta_wins"], r["rta_total"]) for r in report["records"]] == [
+        (0, 0) if success_after_cutoff else (1, 1),
+        (0, 1),
+    ]
+
+
+@pytest.mark.django_db
+def test_new_study_uses_checkpoint_policy(django_user_model, monkeypatch):
+    player, tier, _, _ = bundle(django_user_model, required=1)
+    cutoff = timezone.now() + timedelta(hours=1)
+    study = create_study(
+        slug="existing-checkpoint-policy", player_ids=[player.id], tier_ids=[tier.id], cutoff=cutoff
+    )
+    assert study.manifest["policy"] == "mastery-kpis-v2"
+    monkeypatch.setattr(
+        "progress.services.studies.timezone.now", lambda: cutoff + timedelta(seconds=1)
+    )
+    report = freeze_study(study)
+    assert report["kpis"]["rta"]["value"] == 0
+    assert "rta_total" not in report["records"][0]

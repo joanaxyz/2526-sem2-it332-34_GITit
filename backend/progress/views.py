@@ -1,4 +1,5 @@
 from drf_spectacular.utils import OpenApiParameter, extend_schema
+from rest_framework.exceptions import ValidationError
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
@@ -6,11 +7,13 @@ from common.openapi import WalletSummaryResponseSerializer
 from players.services import get_or_create_player
 from progress.serializers import (
     DashboardSummaryResponseSerializer,
+    LeaderboardResponseSerializer,
     PerformanceSummaryResponseSerializer,
     StatsActivityResponseSerializer,
     StatsSummaryResponseSerializer,
 )
 from progress.services import MetricsService
+from progress.services.leaderboard import CATEGORIES, DEFAULT_CATEGORY, leaderboard
 from progress.services.metrics import ACTIVITY_WINDOWS, DEFAULT_ACTIVITY_WINDOW
 from progress.wallet import WalletService
 
@@ -20,6 +23,27 @@ class DashboardSummaryAPIView(APIView):
     def get(self, request):
         player = get_or_create_player(request.user)
         return Response(MetricsService().dashboard_summary(player=player))
+
+
+class LeaderboardAPIView(APIView):
+    @extend_schema(
+        parameters=[
+            OpenApiParameter(
+                name="category",
+                description="What the all-time ranking is ordered by.",
+                enum=CATEGORIES,
+                default=DEFAULT_CATEGORY,
+                required=False,
+            )
+        ],
+        responses={200: LeaderboardResponseSerializer},
+    )
+    def get(self, request):
+        category = request.query_params.get("category", DEFAULT_CATEGORY)
+        if category not in CATEGORIES:
+            raise ValidationError({"category": "Unknown leaderboard category."})
+        player = get_or_create_player(request.user)
+        return Response(leaderboard(player=player, category=category))
 
 
 class StatsSummaryAPIView(APIView):

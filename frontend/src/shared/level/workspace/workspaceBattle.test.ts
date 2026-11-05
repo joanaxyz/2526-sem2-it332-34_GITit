@@ -40,7 +40,7 @@ describe('workspaceRunAssetManifest', () => {
 
     expect(sources).toContain(storyWorld.battle.backdrop.src)
     expect(sources).toContain(effectSheetForSkill('commit', 'blue').src)
-    expect(sources.some((src) => src.includes('/companion/blue/idle.png'))).toBe(true)
+    expect(sources).toContain('/cosmetics/companion/blue/idle.lossless.webp')
     expect(
       Object.values(storyWorld.battle.monsters).some((monster) =>
         sources.includes(monster.sprites.idle.src),

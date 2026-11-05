@@ -110,7 +110,7 @@ describe('HomeStatsView contract', () => {
     expect(screen.getByRole('region', { name: 'Where you stand' })).toBeInTheDocument()
     expect(screen.getByRole('region', { name: 'Practice record' })).toBeInTheDocument()
     expect(screen.queryByRole('region', { name: 'Git skills' })).not.toBeInTheDocument()
-    expect(screen.queryByRole('region', { name: 'Achievement gallery' })).not.toBeInTheDocument()
+    expect(screen.queryByRole('region', { name: 'Achievements' })).not.toBeInTheDocument()
     // Progress is one column; only Skills splits into two.
     expect(screen.getByRole('region', { name: 'Player overview' })).not.toHaveClass('is-split')
   })
@@ -165,54 +165,45 @@ describe('HomeStatsView contract', () => {
     expect(Array.from(story!.querySelectorAll('dd')).map((value) => value.textContent)).toEqual(['43', '26'])
   })
 
-  it('pairs command confidence with the achievement gallery under Skills', () => {
-    renderView('skills')
-
-    const skills = screen.getByRole('region', { name: 'Git skills' })
-    // Bars are the default view: every value is in text without hovering.
-    expect(skills.querySelectorAll('.home-overview-command-row')).toHaveLength(18)
-    expect(within(skills).getByLabelText('git init: 100%')).toBeInTheDocument()
-    expect(within(skills).getByLabelText('git rebase: 0%')).toBeInTheDocument()
-    expect(skills.querySelector('.ref-chart-dial')).toBeNull()
-
-    const view = within(skills).getByRole('group', { name: 'Skill profile view' })
-    expect(within(view).getByRole('button', { name: 'Bars' })).toHaveAttribute('aria-pressed', 'true')
-
-    // The radar is the same eighteen values as a shape, with the machine names
-    // on its rim. It replaces the bars rather than sitting beside them, which is
-    // what lets this band share the row with the gallery.
-    fireEvent.click(within(view).getByRole('button', { name: 'Radar' }))
-    expect(skills.querySelectorAll('.home-overview-command-row')).toHaveLength(0)
-    expect(within(skills).getByLabelText('Overall mastery 54%')).toBeInTheDocument()
-    expect(within(skills).getByLabelText('2 of 3 proficiency stars')).toBeInTheDocument()
-    const radar = within(skills).getByRole('img', {
-      name: /^Mastery across 18 Arcane Spire commands, overall 54%/,
-    })
-    expect(Array.from(radar.querySelectorAll('.ref-chart-rim-label')).map((tick) => tick.textContent)).toEqual([
-      'init', 'clone', 'log', 'show', 'add', 'commit', 'restore', 'branch', 'switch',
-      'merge', 'revert', 'reflog', 'stash', 'cherry-pick', 'fetch', 'pull', 'push', 'rebase',
-    ])
-
-    // Achievements were merged into this category rather than kept separate.
-    const gallery = screen.getByRole('region', { name: 'Achievement gallery' })
-    expect(within(gallery).getByText('/ 19 unlocked')).toBeInTheDocument()
-  })
-
-  it('stands the skills band and the gallery side by side', () => {
-    renderView('skills')
+  it('shows the achievement sets on their own, with no skills band beside them', () => {
+    renderView('achievements')
 
     const overview = screen.getByRole('region', { name: 'Player overview' })
-    expect(overview).toHaveClass('is-split')
-    expect(Array.from(overview.children).map((child) => child.getAttribute('aria-label'))).toEqual([
-      'Git skills',
-      'Achievement gallery',
+    expect(Array.from(overview.children).map((child) => child.getAttribute('aria-label'))).toEqual(['Achievements'])
+    expect(document.querySelector('.home-overview-command-row')).toBeNull()
+
+    const gallery = screen.getByRole('region', { name: 'Achievements' })
+    expect(within(gallery).getByText('/ 19 unlocked')).toBeInTheDocument()
+    expect(within(gallery).getAllByRole('heading', { level: 3 }).map((heading) => heading.textContent)).toEqual([
+      'The climb', 'Trials', 'Precision', 'Ranks', 'Practice',
     ])
+  })
+
+  it('keeps the art on a locked achievement, marked with a lock', () => {
+    renderView('achievements')
+
+    const locked = document.querySelectorAll('.home-overview-achievement-card.is-locked')
+    expect(locked).toHaveLength(6)
+    locked.forEach((card) => {
+      expect(card.querySelector('.home-overview-achievement-medallion img')).not.toBeNull()
+      expect(card.querySelector('.home-overview-achievement-lock')).not.toBeNull()
+    })
+    expect(document.querySelector('.is-unlocked .home-overview-achievement-lock')).toBeNull()
+  })
+
+  it('drops an emptied set and explains an empty filter', () => {
+    renderView('achievements', emptyHomeFixture, emptyStatsFixture)
+
+    fireEvent.click(screen.getByRole('button', { name: 'Unlocked 0' }))
+
+    expect(document.querySelector('.home-overview-achievement-set')).toBeNull()
+    expect(screen.getByText(/Nothing unlocked yet/)).toBeInTheDocument()
   })
 
   it('shows every achievement a filter matches, and says how many that will be', () => {
-    renderView('skills')
+    renderView('achievements')
 
-    const gallery = screen.getByRole('region', { name: 'Achievement gallery' })
+    const gallery = screen.getByRole('region', { name: 'Achievements' })
     expect(within(gallery).getByText('240')).toBeInTheDocument()
     expect(within(gallery).getByText('/ 455 pts')).toBeInTheDocument()
     expect(within(gallery).getByLabelText('240 of 455 achievement points earned')).toBeInTheDocument()
@@ -273,17 +264,9 @@ describe('HomeStatsView contract', () => {
     expect(within(signals).getAllByText('Not measured yet')).toHaveLength(4)
     progress.unmount()
 
-    const skills = renderView('skills', emptyHomeFixture, emptyStatsFixture)
-    const skillRows = document.querySelectorAll('.home-overview-command-row')
-    expect(skillRows).toHaveLength(18)
-    expect(Array.from(skillRows).map((row) => row.lastElementChild?.textContent)).toEqual(Array(18).fill('--'))
-    // A fresh account's dial is a ring of hollow vertices, not a spike: the
-    // inner radius means 0% still draws.
-    fireEvent.click(screen.getByRole('button', { name: 'Radar' }))
-    expect(screen.getByLabelText('Overall mastery 0%')).toBeInTheDocument()
-    expect(document.querySelectorAll('.ref-chart-vertex[data-empty="true"]')).toHaveLength(18)
+    const achievements = renderView('achievements', emptyHomeFixture, emptyStatsFixture)
     expect(screen.getByText('/ 19 unlocked')).toBeInTheDocument()
-    skills.unmount()
+    achievements.unmount()
   })
 
   it('keeps tier-completion zero exact and reads command acceptance only from performance', async () => {
@@ -303,6 +286,6 @@ describe('HomeStatsView contract', () => {
     const home = deepFreeze(structuredClone(richHomeFixture))
     const stats = deepFreeze(structuredClone(richStatsFixture))
 
-    expect(() => renderView('skills', home, stats)).not.toThrow()
+    expect(() => renderView('achievements', home, stats)).not.toThrow()
   })
 })

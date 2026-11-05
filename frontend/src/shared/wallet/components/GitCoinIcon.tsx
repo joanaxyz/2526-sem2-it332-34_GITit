@@ -1,4 +1,4 @@
-import gitCoinImage from '@/assets/images/GIT_coin.png'
+import gitCoinImage from '@/assets/images/GIT_coin.lossless.webp'
 import { cn } from '@/shared/utils/cn'
 
 /**

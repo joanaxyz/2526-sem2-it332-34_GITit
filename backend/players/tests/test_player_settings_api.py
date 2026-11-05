@@ -29,7 +29,11 @@ def test_preferences_are_created_with_defaults_and_can_be_updated(db, django_use
     assert response.status_code == status.HTTP_200_OK
     # A lazily created record must never opt an existing account into the
     # getting-started journey; only registration does that.
-    assert response.json() == {"motion_mode": "system", "onboarding_phase": "done"}
+    assert response.json() == {
+        "motion_mode": "system",
+        "onboarding_phase": "done",
+        "leaderboard_visible": True,
+    }
     player = get_or_create_player(user)
     assert PlayerPreferences.objects.filter(player=player).exists()
 
@@ -40,7 +44,11 @@ def test_preferences_are_created_with_defaults_and_can_be_updated(db, django_use
     )
 
     assert updated.status_code == status.HTTP_200_OK
-    assert updated.json() == {"motion_mode": "reduced", "onboarding_phase": "done"}
+    assert updated.json() == {
+        "motion_mode": "reduced",
+        "onboarding_phase": "done",
+        "leaderboard_visible": True,
+    }
     record = PlayerPreferences.objects.get(player=player)
     assert record.motion_mode == "reduced"
 

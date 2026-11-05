@@ -7,8 +7,8 @@ describe('companionBattleFromDef', () => {
   it('treats Blue death as a frame animation', () => {
     const battle = companionBattleFromDef(getCompanion('blue'))
 
-    expect(battle?.attackEnd.src).toBe('/cosmetics/companion/blue/attack-end.png')
-    expect(battle?.miss.src).toBe('/cosmetics/companion/blue/miss.png')
+    expect(battle?.attackEnd.src).toBe('/cosmetics/companion/blue/attack-end.lossless.webp')
+    expect(battle?.miss.src).toBe('/cosmetics/companion/blue/miss.lossless.webp')
     expect(battle?.death).toMatchObject({
       frameWidth: 253,
       frameHeight: 244,
@@ -27,7 +27,7 @@ describe('companionBattleFromDef', () => {
     expect(world?.id).toBe('white')
     expect(world?.sprites.idle).toMatchObject({
       name: 'white.idle',
-      src: '/cosmetics/companion/white/idle.png',
+      src: '/cosmetics/companion/white/idle.lossless.webp',
       frameWidth: 250,
       frameHeight: 239,
       columns: 5,
@@ -37,19 +37,19 @@ describe('companionBattleFromDef', () => {
     expect(world?.sprites.run.name).toBe('white.run')
     expect(battle?.attack).toMatchObject({
       name: 'white.attack',
-      src: '/cosmetics/companion/white/attack.png',
+      src: '/cosmetics/companion/white/attack.lossless.webp',
       frameCount: 25,
       loop: false,
     })
     expect(battle?.attackEnd).toMatchObject({
       name: 'white.attack-end',
-      src: '/cosmetics/companion/white/attack-end.png',
+      src: '/cosmetics/companion/white/attack-end.lossless.webp',
       frameCount: 25,
       loop: false,
     })
     expect(battle?.miss).toMatchObject({
       name: 'white.miss',
-      src: '/cosmetics/companion/white/miss.png',
+      src: '/cosmetics/companion/white/miss.lossless.webp',
       frameCount: 25,
       loop: false,
     })
@@ -65,7 +65,7 @@ describe('companionBattleFromDef', () => {
     expect(world?.id).toBe('black')
     expect(world?.sprites.idle).toMatchObject({
       name: 'black.idle',
-      src: '/cosmetics/companion/black/idle.png',
+      src: '/cosmetics/companion/black/idle.lossless.webp',
       frameWidth: 251,
       frameHeight: 251,
       columns: 5,
@@ -75,19 +75,19 @@ describe('companionBattleFromDef', () => {
     expect(world?.sprites.run.name).toBe('black.run')
     expect(battle?.attack).toMatchObject({
       name: 'black.attack',
-      src: '/cosmetics/companion/black/attack.png',
+      src: '/cosmetics/companion/black/attack.lossless.webp',
       frameCount: 25,
       loop: false,
     })
     expect(battle?.attackEnd).toMatchObject({
       name: 'black.attack-end',
-      src: '/cosmetics/companion/black/attack-end.png',
+      src: '/cosmetics/companion/black/attack-end.lossless.webp',
       frameCount: 25,
       loop: false,
     })
     expect(battle?.miss).toMatchObject({
       name: 'black.miss',
-      src: '/cosmetics/companion/black/miss.png',
+      src: '/cosmetics/companion/black/miss.lossless.webp',
       frameCount: 25,
       loop: false,
     })

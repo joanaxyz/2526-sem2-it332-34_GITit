@@ -36,14 +36,14 @@ describe('battleAssetManifest', () => {
     const anchored = manifest().anchored.map((sheet) => sheet.src)
 
     expect(anchored).toContain(storyWorld.battle.monsters[SPECIES].sprites.idle.src)
-    expect(anchored.some((src) => src.includes('/companion/blue/idle.png'))).toBe(true)
-    expect(anchored.some((src) => src.includes('/companion/blue/run.png'))).toBe(true)
+    expect(anchored.some((src) => src.includes('/companion/blue/idle.lossless.webp'))).toBe(true)
+    expect(anchored.some((src) => src.includes('/companion/blue/run.lossless.webp'))).toBe(true)
   })
 
   it('claims every sheet the companion fights with', () => {
     const images = manifest().images
 
-    for (const pose of ['attack.png', 'attack-end.png', 'miss.png', 'hurt.png', 'death.png']) {
+    for (const pose of ['attack.lossless.webp', 'attack-end.lossless.webp', 'miss.lossless.webp', 'hurt.lossless.webp', 'death.lossless.webp']) {
       expect(images.some((src) => src.endsWith(`/companion/blue/${pose}`))).toBe(true)
     }
   })

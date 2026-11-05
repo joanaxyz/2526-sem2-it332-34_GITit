@@ -40,7 +40,7 @@
 .drill-flight-sky {
   position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(180deg, #040c18a6, #0712221a 45%, #040b18a6),
-    url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png') center 35% / cover;
+    url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp') center 35% / cover;
 }
 .drill-flight-horizon { position: absolute; inset: 45% 0 0; pointer-events: none; background: linear-gradient(transparent, #050e1b8c); }
 .drill-flight-question { position: absolute; z-index: 3; top: 1.75rem; left: max(1.5rem, 3vw); width: min(48rem, calc(100% - 3rem)); pointer-events: none; }

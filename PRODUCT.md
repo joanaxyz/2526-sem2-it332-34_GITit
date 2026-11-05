@@ -36,7 +36,7 @@ Voice: a confident guide in the world, not a textbook. Short, concrete, in-ficti
 
 1. **The world is the interface.** Navigation and progress are expressed through the game world (chapter nodes, quest doors, chests) rather than abstract menus — spatial and physical over list-and-label.
 2. **Immersion outside, clarity inside.** Hub/level-map/quest surfaces carry the atmosphere; the practice workspace is ruthlessly legible — terminal, DAG, and feedback win every contest with decoration.
-3. **Progress must feel earned.** Rewards (coins, unlocks, mastery) are paced and weighty. No free dopamine; celebration scales with achievement.
+3. **Progress must feel earned.** Rewards (coins, XP, unlocks) are paced and weighty. No free dopamine; celebration scales with achievement.
 4. **State over story.** The repository DAG is the ground truth of every interaction. When in doubt, make the state more visible, not the explanation longer.
 5. **Deliberate eye-candy.** Depth, glow, and motion are part of the build, never an afterthought — each effect has a reason, a place, and a reduced-motion fallback.
 

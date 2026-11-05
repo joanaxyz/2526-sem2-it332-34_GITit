@@ -36,12 +36,40 @@ def parse_git_command(command: str) -> list[str] | None:
     return parts
 
 
+def _requests_command_help(subcommand: str, args: list[str]) -> bool:
+    # Match the browser parser: a help-looking message or a path after `--`
+    # is data, not a request to skip command execution.
+    value_options = {
+        "commit": {"-m", "--message", "-am"},
+        "init": {"-b", "--initial-branch"},
+        "clone": {"-b", "--branch", "--depth"},
+        "log": {"-n", "--max-count"},
+        "mergetool": {"--tool"},
+        "rebase": {"--onto"},
+        "restore": {"--source"},
+        "stash": {"-m", "--message"},
+        "tag": {"-m", "--message"},
+    }.get(subcommand, set())
+    index = 0
+    while index < len(args):
+        token = args[index]
+        if token == "--":
+            break
+        if token in {"-h", "--help"}:
+            return True
+        index += 2 if token in value_options else 1
+    return False
+
+
 def is_diagnostic_command(command: str) -> bool:
     parts = parse_git_command(command)
     if not parts or len(parts) < 2:
         return False
     subcommand = parts[1]
-    if subcommand in {"--help", "--version", "help", "version"}:
+    if subcommand in {"-h", "--help", "--version", "help", "version"}:
+        return True
+    args = parts[2:]
+    if _requests_command_help(subcommand, args):
         return True
     if subcommand in {
         "status",
@@ -71,7 +99,6 @@ def is_diagnostic_command(command: str) -> bool:
         "symbolic-ref",
     }:
         return True
-    args = parts[2:]
     if subcommand == "bisect":
         return bool(args) and args[0] in {"run", "log"}
     if subcommand == "rerere":
@@ -83,7 +110,10 @@ def is_diagnostic_command(command: str) -> bool:
     if subcommand == "submodule":
         return args == ["status"]
     if subcommand == "config":
-        return any(option in args for option in {"--get", "--list", "-l"})
+        return (
+            len([part for part in args if not part.startswith("-")]) == 1
+            or any(option in args for option in {"--get", "--list", "-l"})
+        )
     if subcommand == "branch":
         return len([part for part in args if not part.startswith("-")]) == 0
     if subcommand == "remote":

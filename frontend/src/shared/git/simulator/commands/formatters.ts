@@ -9,50 +9,102 @@ export function formatOutcome(state: MutableRepositoryState, parsed: ParsedGitCo
     case 'branch':
       return formatBranch(state, outcome)
     case 'remote':
-      return formatRemote(state, parsed)
+      return parsed.args.length ? '' : formatRemote(state, parsed)
     case 'commit': {
       const details = outcome.details ?? {}
       return `[${details.branch ?? 'HEAD'} ${details.commit_id}] ${details.message ?? 'commit'}`
     }
     case 'add':
     case 'restore':
-    case 'rm':
     case 'checkout':
       return ''
+    case 'rm':
+      return (outcome.details?.removed as string[] ?? []).map((path) => `rm '${path}'`).join('\n')
     default:
       return outcome.stdout ?? ''
   }
 }
 
 export function formatStatus(state: MutableRepositoryState, parsed: ParsedGitCommand) {
+  const base = headTree(state)
+  const staging = state.staging ?? {}
+  const working = state.working_tree ?? {}
+  const index = applyChanges(base, changesFromEntries(base, staging))
+  const conflicts = new Set(state.conflicts ?? [])
+  const staged: string[] = []
+  const unstaged: string[] = []
+  const unmerged: string[] = []
+  const untracked: string[] = []
+  const ignored: string[] = []
+  const rows: string[] = []
+  const paths = [...new Set([...Object.keys(staging), ...Object.keys(working), ...conflicts])].sort()
+  for (const path of paths) {
+    if (conflicts.has(path)) {
+      rows.push(`UU ${path}`)
+      unmerged.push(`\tboth modified:   ${path}`)
+      continue
+    }
+    const stagedCode = path in staging ? statusCode(staging[path], path in base) : ' '
+    let workingCode = ' '
+    if (path in working) {
+      const status = entryStatus(working[path])
+      if (status === 'ignored') {
+        if (hasOption(parsed, '--ignored')) {
+          ignored.push(`\t${path}`)
+        }
+        continue
+      }
+      const tracked = path in index || ['modified', 'deleted', 'removed'].includes(status)
+      if (!tracked) {
+        untracked.push(`\t${path}`)
+      } else {
+        workingCode = statusCode(working[path], true)
+      }
+    }
+    if (stagedCode !== ' ') staged.push(`\t${statusLabel(stagedCode).padEnd(12)}${path}`)
+    if (workingCode !== ' ') unstaged.push(`\t${statusLabel(workingCode).padEnd(12)}${path}`)
+    if (workingCode !== ' ' || stagedCode !== ' ') rows.push(`${stagedCode}${workingCode} ${path}`)
+  }
   const short = hasOption(parsed, '-s') || hasOption(parsed, '--short') || hasOption(parsed, '--porcelain') || hasOption(parsed, '-sb')
   if (short) {
-    const lines = hasOption(parsed, '-sb') ? [`## ${headBranch(state) ?? 'HEAD'}`] : []
-    for (const [path, value] of Object.entries(state.staging ?? {})) lines.push(`${statusCode(value, true)}  ${path}`)
-    for (const [path, value] of Object.entries(state.working_tree ?? {})) {
-      if (entryStatus(value) === 'ignored' && !hasOption(parsed, '--ignored')) continue
-      lines.push(` ${statusCode(value, false)} ${path}`)
-    }
-    return lines.join('\n')
+    const branch = headBranch(state) ?? 'HEAD (no branch)'
+    const header = headCommit(state) ? branch : `No commits yet on ${branch}`
+    return [
+      ...(hasOption(parsed, '-sb') ? [`## ${header}`] : []),
+      ...rows,
+      ...untracked.map((path) => `?? ${path.slice(1)}`),
+      ...ignored.map((path) => `!! ${path.slice(1)}`),
+    ].join('\n')
   }
   const branch = headBranch(state)
   const lines = [branch ? `On branch ${branch}` : `HEAD detached at ${headCommit(state) ?? 'unknown'}`]
-  if (state.conflicts?.length) lines.push('You have unmerged paths.', ...state.conflicts.map((path) => `\tboth modified:   ${path}`))
-  if (Object.keys(state.staging ?? {}).length) lines.push('Changes to be committed:', ...Object.keys(state.staging ?? {}).map((path) => `\t${path}`))
-  if (Object.keys(state.working_tree ?? {}).some((path) => entryStatus(state.working_tree?.[path]) !== 'ignored' || hasOption(parsed, '--ignored'))) {
-    lines.push('Changes not staged for commit:', ...Object.keys(state.working_tree ?? {}).map((path) => `\t${path}`))
+  if (!headCommit(state)) lines.push('', 'No commits yet')
+  for (const [heading, entries] of [
+    ['Changes to be committed:', staged],
+    ['Unmerged paths:', unmerged],
+    ['Changes not staged for commit:', unstaged],
+    ['Untracked files:', untracked],
+    ['Ignored files:', ignored],
+  ] as const) {
+    if (entries.length) lines.push('', heading, ...entries)
   }
-  if (lines.length === 1) lines.push('nothing to commit, working tree clean')
+  if (!staged.length && !unmerged.length) {
+    if (lines.length > 1) lines.push('')
+    lines.push(unstaged.length ? 'no changes added to commit' : untracked.length
+      ? 'nothing added to commit but untracked files present'
+      : headCommit(state) ? 'nothing to commit, working tree clean' : 'nothing to commit')
+  }
   return lines.join('\n')
 }
 
-function statusCode(value: RepositoryValue, staged: boolean) {
+function statusCode(value: RepositoryValue, tracked: boolean) {
   const status = entryStatus(value)
   if (isDeleteMarker(status) || isDeleteMarker(value)) return 'D'
-  if (status === 'untracked') return '?'
-  if (status === 'ignored') return '!'
-  if (status === 'added') return 'A'
-  return staged ? 'M' : 'M'
+  return tracked ? 'M' : 'A'
+}
+
+function statusLabel(code: string) {
+  return code === 'A' ? 'new file:' : code === 'D' ? 'deleted:' : 'modified:'
 }
 
 function formatBranch(state: MutableRepositoryState, outcome: CommandOutcome) {

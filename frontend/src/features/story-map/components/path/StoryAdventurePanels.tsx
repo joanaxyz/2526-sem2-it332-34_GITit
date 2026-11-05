@@ -1,13 +1,14 @@
 import { CheckCircle2, ListChecks, Lock, Swords, X } from 'lucide-react'
 import type { CSSProperties, RefObject } from 'react'
 
-import easyIconImage from '@/assets/images/easy_icon.png'
-import hardIconImage from '@/assets/images/hard_icon.png'
-import mediumIconImage from '@/assets/images/medium_icon.png'
+import easyIconImage from '@/assets/images/easy_icon.lossless.webp'
+import hardIconImage from '@/assets/images/hard_icon.lossless.webp'
+import mediumIconImage from '@/assets/images/medium_icon.lossless.webp'
 import type {
   AdventureLevelSummary,
   AdventureLevelTierAccess,
   ChallengeSummary,
+  TierTransferCheckpointRow,
 } from '@/features/story-map/types'
 import {
   actionForChallengeLevel,
@@ -16,6 +17,7 @@ import {
   difficultyLabel,
 } from '@/features/story-map/utils/challengeUi'
 import { StarRating } from '@/shared/level/components/StarRating'
+import { TRANSFER_REWARD } from '@/shared/level/transferCheckpoint'
 import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 
 const DIFFICULTY_ORDER = ['easy', 'medium', 'hard'] as const
@@ -30,6 +32,12 @@ const DIFFICULTY_TIER_LABELS: Record<(typeof DIFFICULTY_ORDER)[number], string> 
   easy: 'Easy',
   medium: 'Medium',
   hard: 'Hard',
+}
+
+const TRANSFER_ROW_COPY: Record<TierTransferCheckpointRow['status'], { action: string; meta: string }> = {
+  ready: { action: 'Start', meta: `One unfamiliar problem, no hints · +${TRANSFER_REWARD} GitCoins and XP` },
+  in_progress: { action: 'Resume', meta: 'First attempt in progress' },
+  recorded: { action: 'Practice', meta: 'Result recorded · practice is ungraded' },
 }
 
 export type LevelTierRowStatus = 'locked' | 'cleared' | 'in_progress' | 'not_started'
@@ -58,6 +66,7 @@ export function StoryLevelTierPanel({
   style,
   onClose,
   onStartTier,
+  onOpenTransfer,
   onOpenDrill,
 }: {
   level: AdventureLevelSummary
@@ -67,12 +76,15 @@ export function StoryLevelTierPanel({
   style?: CSSProperties
   onClose: () => void
   onStartTier: (tierId: number, replay: boolean) => void
+  onOpenTransfer: (tierId: number, checkpoint: TierTransferCheckpointRow) => void
   onOpenDrill: () => void
 }) {
   const rows = DIFFICULTY_ORDER.map((difficulty) => {
     const tier = level.tiers.find((item) => item.difficulty === difficulty)
     return { difficulty, tier, status: tierRowStatus(tier) }
   })
+  const hardTier = rows.find((row) => row.difficulty === 'hard')?.tier
+  const checkpoint = hardTier?.transfer_checkpoint ?? null
   // Exactly one accent action per callout: the first tier that is unlocked
   // and unfinished. Everything else is a review or a lock, so the primary
   // move is unambiguous without reading a word.
@@ -212,6 +224,29 @@ export function StoryLevelTierPanel({
             </li>
           )
         })}
+        {hardTier && checkpoint ? (
+          <li key={`${level.id}-transfer`}>
+            <button
+              type="button"
+              className="story-level-tier-row"
+              data-status={checkpoint.status === 'recorded' ? 'cleared' : 'not_started'}
+              style={{ '--row-index': rows.length } as CSSProperties}
+              aria-label={`${level.title}, transfer checkpoint: ${TRANSFER_ROW_COPY[checkpoint.status].action}`}
+              onClick={() => onOpenTransfer(hardTier.id, checkpoint)}
+            >
+              <span className="story-level-tier-row-mark">
+                <ListChecks className="size-6" aria-hidden="true" />
+              </span>
+              <span className="story-level-tier-row-copy">
+                <strong>Transfer checkpoint</strong>
+                <span className="story-level-tier-row-meta">{TRANSFER_ROW_COPY[checkpoint.status].meta}</span>
+              </span>
+              <span className={checkpoint.status === 'recorded' ? 'story-level-tier-row-action ui-drawn-outline' : 'story-level-tier-row-action ui-drawn-plate'}>
+                {TRANSFER_ROW_COPY[checkpoint.status].action}
+              </span>
+            </button>
+          </li>
+        ) : null}
       </ul>
     </section>
   )

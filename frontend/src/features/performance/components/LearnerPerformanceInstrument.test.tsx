@@ -303,9 +303,9 @@ describe('learner learning objectives', () => {
     ]
     renderRecord(data)
     selectModule(3)
-    fireEvent.click(screen.getByText('Available transfer checkpoints · Modules 3–4'))
+    fireEvent.click(screen.getByText('Transfer checkpoints · Modules 3–4'))
     expect(screen.getByRole('link', { name: /Start transfer checkpoint/ })).toHaveAttribute('href', '/adventure-level-tiers/9/runs?transfer=1')
     expect(screen.getByRole('link', { name: /Resume transfer checkpoint/ })).toHaveAttribute('href', '/adventure-tier-runs/42')
-    expect(screen.getByText(/1 pending · 2 mastered tiers without eligible transfer evidence/)).toBeInTheDocument()
+    expect(screen.getByText(/1 pending · 2 mastered Hard tiers without eligible transfer evidence/)).toBeInTheDocument()
   })
 })

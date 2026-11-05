@@ -7,26 +7,6 @@ import type { ActivityWindow } from '@/features/stats/utils/activityWindow'
 
 /** Mirrors the home preview player: 43 levels, 5 gate trials, 1240 coins. */
 export const richStatsFixture: StatsSummary = {
-  skill_profile: [
-    { key: 'git-init', label: 'git init', hint: 'Create Git metadata in the current directory or a named directory.', value: 100, command: 'git init' },
-    { key: 'git-clone', label: 'git clone', hint: 'Create a local repository from a remote URL and optionally choose branch, depth, or folder.', value: 92, command: 'git clone' },
-    { key: 'git-log', label: 'git log', hint: 'Inspect commit history and branch shape.', value: 88, command: 'git log' },
-    { key: 'git-show', label: 'git show', hint: 'Inspect the latest commit or a named object without changing repository state.', value: 74, command: 'git show' },
-    { key: 'git-add', label: 'git add', hint: 'Copy selected working directory changes into the staging area.', value: 96, command: 'git add' },
-    { key: 'git-commit', label: 'git commit', hint: 'Create or replace a commit from the staged snapshot.', value: 90, command: 'git commit' },
-    { key: 'git-restore', label: 'git restore', hint: 'Discard working-tree changes or move staged changes back to the working directory.', value: 61, command: 'git restore' },
-    { key: 'git-branch', label: 'git branch', hint: 'Inspect, create, and delete branch pointers while keeping HEAD where it is.', value: 68, command: 'git branch' },
-    { key: 'git-switch', label: 'git switch', hint: 'Move HEAD to another branch, or create and switch in one safe step.', value: 55, command: 'git switch' },
-    { key: 'git-merge', label: 'git merge', hint: 'Combine another branch into the current branch, or manage an in-progress merge.', value: 47, command: 'git merge' },
-    { key: 'git-revert', label: 'git revert', hint: 'Create a new commit that reverses an older commit without deleting shared history.', value: 33, command: 'git revert' },
-    { key: 'git-reflog', label: 'git reflog', hint: 'Inspect recent HEAD movements for recovery clues.', value: 20, command: 'git reflog' },
-    { key: 'git-stash', label: 'git stash', hint: 'Temporarily shelve local work and restore it later.', value: 28, command: 'git stash' },
-    { key: 'git-cherry-pick', label: 'git cherry-pick', hint: 'Apply one existing commit onto the current branch.', value: 12, command: 'git cherry-pick' },
-    { key: 'git-fetch', label: 'git fetch', hint: 'Update remote-tracking branches without changing local work.', value: 35, command: 'git fetch' },
-    { key: 'git-pull', label: 'git pull', hint: 'Fetch and integrate upstream changes into the current branch.', value: 24, command: 'git pull' },
-    { key: 'git-push', label: 'git push', hint: 'Publish local commits, set upstream tracking, force with lease, or delete remote branches.', value: 41, command: 'git push' },
-    { key: 'git-rebase', label: 'git rebase', hint: 'Replay commits onto another base to keep history linear.', value: 0, command: 'git rebase' },
-  ],
   activity_window: 'month',
   activity_trend: [
     { date: '2026-05-15', levels_completed: 0, commands_run: 0 },
@@ -77,26 +57,6 @@ export const richStatsFixture: StatsSummary = {
 
 /** Brand-new account: everything null/zero - exercises the empty states. */
 export const emptyStatsFixture: StatsSummary = {
-  skill_profile: [
-    { key: 'git-init', label: 'git init', hint: 'Create Git metadata in the current directory or a named directory.', value: null, command: 'git init' },
-    { key: 'git-clone', label: 'git clone', hint: 'Create a local repository from a remote URL and optionally choose branch, depth, or folder.', value: null, command: 'git clone' },
-    { key: 'git-log', label: 'git log', hint: 'Inspect commit history and branch shape.', value: null, command: 'git log' },
-    { key: 'git-show', label: 'git show', hint: 'Inspect the latest commit or a named object without changing repository state.', value: null, command: 'git show' },
-    { key: 'git-add', label: 'git add', hint: 'Copy selected working directory changes into the staging area.', value: null, command: 'git add' },
-    { key: 'git-commit', label: 'git commit', hint: 'Create or replace a commit from the staged snapshot.', value: null, command: 'git commit' },
-    { key: 'git-restore', label: 'git restore', hint: 'Discard working-tree changes or move staged changes back to the working directory.', value: null, command: 'git restore' },
-    { key: 'git-branch', label: 'git branch', hint: 'Inspect, create, and delete branch pointers while keeping HEAD where it is.', value: null, command: 'git branch' },
-    { key: 'git-switch', label: 'git switch', hint: 'Move HEAD to another branch, or create and switch in one safe step.', value: null, command: 'git switch' },
-    { key: 'git-merge', label: 'git merge', hint: 'Combine another branch into the current branch, or manage an in-progress merge.', value: null, command: 'git merge' },
-    { key: 'git-revert', label: 'git revert', hint: 'Create a new commit that reverses an older commit without deleting shared history.', value: null, command: 'git revert' },
-    { key: 'git-reflog', label: 'git reflog', hint: 'Inspect recent HEAD movements for recovery clues.', value: null, command: 'git reflog' },
-    { key: 'git-stash', label: 'git stash', hint: 'Temporarily shelve local work and restore it later.', value: null, command: 'git stash' },
-    { key: 'git-cherry-pick', label: 'git cherry-pick', hint: 'Apply one existing commit onto the current branch.', value: null, command: 'git cherry-pick' },
-    { key: 'git-fetch', label: 'git fetch', hint: 'Update remote-tracking branches without changing local work.', value: null, command: 'git fetch' },
-    { key: 'git-pull', label: 'git pull', hint: 'Fetch and integrate upstream changes into the current branch.', value: null, command: 'git pull' },
-    { key: 'git-push', label: 'git push', hint: 'Publish local commits, set upstream tracking, force with lease, or delete remote branches.', value: null, command: 'git push' },
-    { key: 'git-rebase', label: 'git rebase', hint: 'Replay commits onto another base to keep history linear.', value: null, command: 'git rebase' },
-  ],
   activity_window: 'month',
   activity_trend: [],
   headline: {

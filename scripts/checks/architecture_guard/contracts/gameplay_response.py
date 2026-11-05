@@ -181,7 +181,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
     violations: list[str] = []
     schemas = schema.get("components", {}).get("schemas", {})
     exact_fields = {
-        "AdventureLevelTierRewardResponse": {"coins", "claimed"},
+        "AdventureLevelTierRewardResponse": {"coins", "xp", "claimed"},
         "AdventureLevelTierScenarioPositionResponse": {"index", "total", "title"},
         "ChallengeRunStepResponse": {
             "id",
@@ -236,6 +236,7 @@ def gameplay_response_openapi_violations(schema: dict) -> list[str]:
             "story",
             "difficulty",
             "reward_coins",
+            "reward_xp",
             "variant",
             "mastery_progress",
             "policy",

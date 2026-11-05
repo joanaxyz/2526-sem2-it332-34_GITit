@@ -44,6 +44,7 @@ from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES, GATE_MA
 from curriculum.seed_data.source.scenario_fixtures import extension_case
 from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN, ScenarioSpec
 from curriculum.seed_data.source.scenario_plan.types import SPIRAL
+from curriculum.seed_data.source.transfer_checkpoints import TRANSFER_CHECKPOINTS
 from curriculum.seed_data.spec_helpers import required_commit_message_details
 from tutoring.services.forms import catalog_forms, forms_used_by
 from tutoring.services.homes import assign_guide_homes
@@ -13508,7 +13509,34 @@ class Command(BaseCommand):
                         "sort_order": index,
                     },
                 )
-            scenario.variants.exclude(slug__in=spec.variants).update(is_published=False)
+            reserved = (
+                self._seed_transfer_checkpoint(level, scenario, len(spec.variants))
+                if difficulty == "hard" and order == 0
+                else []
+            )
+            scenario.variants.exclude(slug__in=[*spec.variants, *reserved]).update(
+                is_published=False
+            )
         tier.scenarios.exclude(slug__in=[spec.slug for spec in scenarios]).update(
             is_published=False
         )
+
+    def _seed_transfer_checkpoint(
+        self, level: AdventureLevel, scenario: AdventureLevelTierScenario, sort_order: int
+    ) -> list[str]:
+        """Reserve the level's checkpoint here, apart from the scenario's practice variants."""
+        checkpoint = TRANSFER_CHECKPOINTS.get(level.slug)
+        if checkpoint is None:
+            return []
+        case_id = checkpoint["case_id"]
+        AdventureLevelTierScenarioVariant.objects.update_or_create(
+            scenario=scenario,
+            slug=case_id,
+            defaults={
+                **self._variant_defaults(extension_case(case_id), placed_difficulty="hard"),
+                "sort_order": sort_order,
+                "is_transfer": True,
+                "transfer_note": checkpoint["note"],
+            },
+        )
+        return [case_id]

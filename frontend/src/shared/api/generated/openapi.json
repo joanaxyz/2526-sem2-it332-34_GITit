@@ -1160,6 +1160,46 @@
                 }
             }
         },
+        "/api/auth/email-change/confirm/": {
+            "post": {
+                "operationId": "auth_email_change_confirm_create",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/EmailChangeConfirm"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/auth/email-verification/confirm/": {
             "post": {
                 "operationId": "auth_email_verification_confirm_create",
@@ -1330,6 +1370,43 @@
                             "application/json": {
                                 "schema": {
                                     "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            },
+            "patch": {
+                "operationId": "auth_me_partial_update",
+                "tags": [
+                    "auth"
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAccountUpdate"
+                            }
+                        },
+                        "application/x-www-form-urlencoded": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAccountUpdate"
+                            }
+                        },
+                        "multipart/form-data": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PatchedAccountUpdate"
+                            }
+                        }
+                    }
+                },
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/AccountUpdateResponse"
                                 }
                             }
                         },
@@ -2486,6 +2563,42 @@
                 }
             }
         },
+        "/api/progress/leaderboard/": {
+            "get": {
+                "operationId": "progress_leaderboard_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "category",
+                        "schema": {
+                            "type": "string",
+                            "enum": [
+                                "gates",
+                                "perfect_clears",
+                                "xp"
+                            ],
+                            "default": "xp"
+                        },
+                        "description": "What the all-time ranking is ordered by."
+                    }
+                ],
+                "tags": [
+                    "progress"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/LeaderboardResponse"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/progress/performance/": {
             "get": {
                 "operationId": "progress_performance_retrieve",
@@ -2930,6 +3043,23 @@
                 },
                 "required": [
                     "access"
+                ]
+            },
+            "AccountUpdateResponse": {
+                "type": "object",
+                "properties": {
+                    "user": {
+                        "$ref": "#/components/schemas/User"
+                    },
+                    "pending_email": {
+                        "type": "string",
+                        "format": "email",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "pending_email",
+                    "user"
                 ]
             },
             "ActivityWindowEnum": {
@@ -3981,6 +4111,14 @@
                         "additionalProperties": {},
                         "nullable": true
                     },
+                    "transfer_checkpoint": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TierTransferCheckpointResponse"
+                            }
+                        ],
+                        "nullable": true
+                    },
                     "rewards": {
                         "type": "object",
                         "additionalProperties": {},
@@ -4051,9 +4189,12 @@
             },
             "AdventureLevelTierRewardResponse": {
                 "type": "object",
-                "description": "The tier's first-clear GitCoin reward, shown before play.",
+                "description": "The tier's first-clear GitCoin and XP reward, shown before play.",
                 "properties": {
                     "coins": {
+                        "type": "integer"
+                    },
+                    "xp": {
                         "type": "integer"
                     },
                     "claimed": {
@@ -4062,7 +4203,8 @@
                 },
                 "required": [
                     "claimed",
-                    "coins"
+                    "coins",
+                    "xp"
                 ]
             },
             "AdventureLevelTierRunResponse": {
@@ -4204,6 +4346,14 @@
                     "next_difficulty": {
                         "type": "object",
                         "additionalProperties": {},
+                        "nullable": true
+                    },
+                    "transfer_checkpoint": {
+                        "allOf": [
+                            {
+                                "$ref": "#/components/schemas/TierTransferCheckpointResponse"
+                            }
+                        ],
                         "nullable": true
                     },
                     "completion": {
@@ -4563,6 +4713,9 @@
                     "reward_coins": {
                         "type": "integer"
                     },
+                    "reward_xp": {
+                        "type": "integer"
+                    },
                     "variant": {
                         "type": "object",
                         "additionalProperties": {}
@@ -4636,6 +4789,7 @@
                     "replay",
                     "repository_state",
                     "reward_coins",
+                    "reward_xp",
                     "scaffolding",
                     "scenario_context",
                     "sibling_levels",
@@ -5444,9 +5598,8 @@
                     "perfect_clears": {
                         "type": "integer"
                     },
-                    "mastery": {
-                        "type": "number",
-                        "format": "double"
+                    "xp": {
+                        "type": "integer"
                     },
                     "retry_trends": {
                         "type": "array",
@@ -5461,9 +5614,9 @@
                     "completed_story_slug",
                     "counts",
                     "kpis",
-                    "mastery",
                     "perfect_clears",
-                    "retry_trends"
+                    "retry_trends",
+                    "xp"
                 ]
             },
             "DetailResponse": {
@@ -5831,6 +5984,18 @@
                     "task"
                 ]
             },
+            "EmailChangeConfirm": {
+                "type": "object",
+                "properties": {
+                    "code": {
+                        "type": "string",
+                        "maxLength": 16
+                    }
+                },
+                "required": [
+                    "code"
+                ]
+            },
             "EmailVerificationConfirm": {
                 "type": "object",
                 "properties": {
@@ -5955,6 +6120,76 @@
                 ],
                 "type": "string",
                 "description": "* `shop-purchases` - shop-purchases"
+            },
+            "LeaderboardEntry": {
+                "type": "object",
+                "properties": {
+                    "rank": {
+                        "type": "integer"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "companion_slug": {
+                        "type": "string",
+                        "nullable": true
+                    },
+                    "value": {
+                        "type": "integer"
+                    },
+                    "is_you": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "companion_slug",
+                    "is_you",
+                    "rank",
+                    "username",
+                    "value"
+                ]
+            },
+            "LeaderboardResponse": {
+                "type": "object",
+                "properties": {
+                    "category": {
+                        "type": "string"
+                    },
+                    "entries": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/LeaderboardEntry"
+                        }
+                    },
+                    "you": {
+                        "$ref": "#/components/schemas/LeaderboardYou"
+                    }
+                },
+                "required": [
+                    "category",
+                    "entries",
+                    "you"
+                ]
+            },
+            "LeaderboardYou": {
+                "type": "object",
+                "properties": {
+                    "rank": {
+                        "type": "integer",
+                        "nullable": true
+                    },
+                    "value": {
+                        "type": "integer"
+                    },
+                    "hidden": {
+                        "type": "boolean"
+                    }
+                },
+                "required": [
+                    "hidden",
+                    "rank",
+                    "value"
+                ]
             },
             "LearnedSkillResponse": {
                 "type": "object",
@@ -6186,6 +6421,19 @@
                     "email"
                 ]
             },
+            "PatchedAccountUpdate": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "maxLength": 30
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email"
+                    }
+                }
+            },
             "PatchedAdminChapterUpdateRequest": {
                 "type": "object",
                 "description": "Reject misspelled or stale fields instead of silently ignoring them.",
@@ -6260,6 +6508,9 @@
                     },
                     "onboarding_phase": {
                         "$ref": "#/components/schemas/OnboardingPhaseEnum"
+                    },
+                    "leaderboard_visible": {
+                        "type": "boolean"
                     }
                 }
             },
@@ -6506,6 +6757,9 @@
                     },
                     "onboarding_phase": {
                         "$ref": "#/components/schemas/OnboardingPhaseEnum"
+                    },
+                    "leaderboard_visible": {
+                        "type": "boolean"
                     }
                 }
             },
@@ -6997,44 +7251,9 @@
                     "value"
                 ]
             },
-            "StatsSkillAxis": {
-                "type": "object",
-                "properties": {
-                    "key": {
-                        "type": "string"
-                    },
-                    "label": {
-                        "type": "string"
-                    },
-                    "hint": {
-                        "type": "string"
-                    },
-                    "value": {
-                        "type": "number",
-                        "format": "double",
-                        "nullable": true
-                    },
-                    "command": {
-                        "type": "string"
-                    }
-                },
-                "required": [
-                    "command",
-                    "hint",
-                    "key",
-                    "label",
-                    "value"
-                ]
-            },
             "StatsSummaryResponse": {
                 "type": "object",
                 "properties": {
-                    "skill_profile": {
-                        "type": "array",
-                        "items": {
-                            "$ref": "#/components/schemas/StatsSkillAxis"
-                        }
-                    },
                     "activity_trend": {
                         "type": "array",
                         "items": {
@@ -7051,8 +7270,7 @@
                 "required": [
                     "activity_trend",
                     "activity_window",
-                    "headline",
-                    "skill_profile"
+                    "headline"
                 ]
             },
             "StatsTrendPoint": {
@@ -7231,6 +7449,27 @@
                     "guide_elsewhere",
                     "tips",
                     "tutor"
+                ]
+            },
+            "TierTransferCheckpointResponse": {
+                "type": "object",
+                "description": "A transfer checkpoint ready to start or resume after a practice clear.",
+                "properties": {
+                    "tier_id": {
+                        "type": "integer"
+                    },
+                    "title": {
+                        "type": "string"
+                    },
+                    "run_id": {
+                        "type": "integer",
+                        "nullable": true
+                    }
+                },
+                "required": [
+                    "run_id",
+                    "tier_id",
+                    "title"
                 ]
             },
             "Tip": {

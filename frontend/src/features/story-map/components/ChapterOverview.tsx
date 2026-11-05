@@ -1,4 +1,4 @@
-import chapterBadgeImage from '@/assets/images/chapter_badge.png'
+import chapterBadgeImage from '@/assets/images/chapter_badge.lossless.webp'
 import { ChapterBookCard } from '@/features/story-map/components/book/ChapterBookCard'
 import { ChapterProgressRewards } from '@/features/story-map/components/ChapterProgressRewards'
 import type { LearningChapter } from '@/features/story-map/types'
@@ -31,7 +31,7 @@ export function ChapterOverview({ chapter, preview = false }: { chapter: Learnin
       >
         <div className="story-overview-mastery">
           <div className="story-overview-progress-row">
-            <span>Mastery</span>
+            <span>Progress</span>
             <strong>{Math.round(progress)}%</strong>
           </div>
           <ProgressBar value={progress} className="story-overview-progress" glow fillAnimate />

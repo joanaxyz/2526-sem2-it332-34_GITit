@@ -1,3 +1,5 @@
+import { publicMediaUrl } from '@/shared/media/publicMedia'
+
 /**
  * Where each companion keeps its git-skill spell assets: the animated attack
  * sheets used in battle AND the static `portrait/<command>.png` previews used
@@ -41,5 +43,5 @@ export function companionSkillPortrait(
   command: string,
 ): string {
   const family = skillCommandFamily(command) || 'default'
-  return `${rootForCompanion(companionSlug)}/portrait/${family}.png`
+  return publicMediaUrl(`${rootForCompanion(companionSlug)}/portrait/${family}.png`)
 }

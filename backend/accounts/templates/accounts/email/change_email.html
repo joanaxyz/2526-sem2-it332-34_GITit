@@ -1,0 +1,11 @@
+{% extends "accounts/email/base.html" %}
+{% block title %}Confirm your new GIT it! email{% endblock %}
+{% block preheader %}{{ code }} is your email change code. It expires in {{ expires_minutes }} minutes.{% endblock %}
+{% block guide_line %}Confirm this inbox to update your account email.{% endblock %}
+{% block heading %}Confirm your new email{% endblock %}
+{% block content %}
+<p style="margin:0 0 20px;font-size:15px;line-height:23px;color:#E8F6FA;">Hi {{ user.username }}, enter this code in GIT it! Settings:</p>
+<p style="margin:0;text-align:center;font-family:Consolas,monospace;font-size:34px;font-weight:800;letter-spacing:8px;color:#E8F6FA;">{{ code }}</p>
+<p style="margin:20px 0 0;font-size:14px;line-height:21px;color:#E8F6FA;">The code expires in {{ expires_minutes }} minutes. Your current email stays active until you confirm this one.</p>
+{% endblock %}
+{% block footer %}<p style="margin:0;">Didn't request this change? Ignore this email. Your account email stays unchanged.</p>{% endblock %}

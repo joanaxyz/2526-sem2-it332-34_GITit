@@ -46,6 +46,7 @@ REQUIRED_README_SNIPPETS = [
 # Checked-in solution references introduced with the scoring and alternatives audit.
 ALLOWED_DOC_ENTRIES = {
     "goals",
+    "designs",
     "git-solution-audit.md",
     "taught-vs-alternative-solutions.md",
     # Generated scenario export; regenerated via scripts/generate_scenario_md.py.

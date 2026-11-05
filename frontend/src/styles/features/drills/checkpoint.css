@@ -31,7 +31,7 @@
 .drill-path-scenery {
   position: absolute; inset: 0; pointer-events: none;
   background: linear-gradient(#080f1b8c, #080f1bf5 70%),
-    url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png') left 40% / 1180px auto;
+    url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp') left 40% / 1180px auto;
 }
 .drill-path-course::after {
   content: ''; position: absolute; z-index: 3; inset: 290px 0 0; pointer-events: none;
@@ -152,7 +152,7 @@
   padding: 1.75rem max(1.5rem, 3vw) 1.25rem;
   background: linear-gradient(#040c18a6, #0712221a 45%, #040b18cc);
 }
-.drill-screen--immersive .drill-flight-round[data-checkpoint] { background: #07111e url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png') center 35% / cover; }
+.drill-screen--immersive .drill-flight-round[data-checkpoint] { background: #07111e url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp') center 35% / cover; }
 .drill-screen--immersive .drill-checkpoint { display: flex; flex: 1; flex-direction: column; min-height: 0; gap: 0.75rem; margin-top: 1rem; }
 .drill-screen--immersive .drill-path-hud { position: absolute; z-index: 7; top: 1rem; right: 5rem; gap: 1rem; }
 .drill-screen--immersive .drill-path-count { font: 500 var(--text-xs) var(--font-mono); }

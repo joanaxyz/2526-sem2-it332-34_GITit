@@ -32,6 +32,14 @@ class AdventureLevelTierCommandStepResponseSerializer(AdventureLevelTierRunStepR
     evaluation_result = serializers.CharField()
 
 
+class TierTransferCheckpointResponseSerializer(serializers.Serializer):
+    """A transfer checkpoint ready to start or resume after a practice clear."""
+
+    tier_id = serializers.IntegerField()
+    title = serializers.CharField()
+    run_id = serializers.IntegerField(allow_null=True)
+
+
 class AdventureLevelTierCommandRunResponseSerializer(TeachingResponseSerializer):
     id = serializers.IntegerField()
     replay = serializers.BooleanField()
@@ -47,13 +55,15 @@ class AdventureLevelTierCommandRunResponseSerializer(TeachingResponseSerializer)
     progress = serializers.DictField(required=False)
     completion = serializers.DictField(required=False, allow_null=True)
     next_difficulty = serializers.DictField(required=False, allow_null=True)
+    transfer_checkpoint = TierTransferCheckpointResponseSerializer(required=False, allow_null=True)
     rewards = serializers.DictField(required=False, allow_null=True)
 
 
 class AdventureLevelTierRewardResponseSerializer(serializers.Serializer):
-    """The tier's first-clear GitCoin reward, shown before play."""
+    """The tier's first-clear GitCoin and XP reward, shown before play."""
 
     coins = serializers.IntegerField()
+    xp = serializers.IntegerField()
     claimed = serializers.BooleanField()
 
 
@@ -91,6 +101,7 @@ class AdventureLevelTierRunResponseSerializer(TeachingResponseSerializer):
     expected_state = serializers.DictField(allow_null=True)
     steps = AdventureLevelTierRunStepResponseSerializer(many=True)
     next_difficulty = serializers.DictField(allow_null=True)
+    transfer_checkpoint = TierTransferCheckpointResponseSerializer(required=False, allow_null=True)
     completion = serializers.DictField(allow_null=True)
     reward = AdventureLevelTierRewardResponseSerializer()
 

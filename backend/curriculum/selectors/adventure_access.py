@@ -200,6 +200,8 @@ class AdventureTierAccessContext:
     tier_ids_by_level_difficulty: dict[tuple[int, str], int] = field(default_factory=dict)
     # Award keys of the tier rewards this player has been paid (adventures/rewards.py).
     claimed_reward_keys: set[str] = field(default_factory=set)
+    # tier id -> level-node state of the player's transfer checkpoint.
+    transfer_checkpoints: dict[int, dict] = field(default_factory=dict)
 
 
 def _build_adventure_tier_access(
@@ -221,6 +223,7 @@ def _build_adventure_tier_access(
 
     completions: dict[int, object] = {}
     progress_rows: dict[int, object] = {}
+    transfer_checkpoints: dict[int, dict] = {}
     if player is not None:
         from adventures.models import AdventureLevelTierProgress
         from progress.models import AdventureLevelTierCompletion
@@ -240,6 +243,9 @@ def _build_adventure_tier_access(
                 player=player, tier_id__in=tier_ids
             ).only("id", "tier_id", "successful_clears", "cleared_scenario_slugs")
         }
+        from progress.services.checkpoints import transfer_rows
+
+        transfer_checkpoints = transfer_rows(player=player, tier_ids=tier_ids)
 
     from adventures.rewards import claimed_tier_reward_keys
 
@@ -248,6 +254,7 @@ def _build_adventure_tier_access(
         scenarios=scenarios,
         progress_rows=progress_rows,
         claimed_reward_keys=claimed_tier_reward_keys(player=player, tiers=tiers),
+        transfer_checkpoints=transfer_checkpoints,
         tier_ids_by_level_difficulty={
             (tier.adventure_level_id, tier.difficulty): tier.id
             for tier in tiers
@@ -287,6 +294,7 @@ def adventure_level_tier_payload(
         "scenario_progress": {"completed": completed, "total": total},
         "completion": _completion_payload(completion),
         "reward": tier_reward_payload(tier, claimed_keys=access.claimed_reward_keys),
+        "transfer_checkpoint": access.transfer_checkpoints.get(tier.id),
     }
 
 

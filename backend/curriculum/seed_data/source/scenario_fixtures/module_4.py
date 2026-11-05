@@ -445,6 +445,136 @@ def _reset_rebase_lease(
     }
 
 
+# ---------------------------------------------------------------------------
+# Transfer checkpoints: each composes what its level taught, on content no
+# practice variant uses (see source/transfer_checkpoints.py).
+# ---------------------------------------------------------------------------
+
+
+def _report_rollback() -> dict[str, Any]:
+    commits = _chain(
+        [
+            ("c0", "Project baseline", None, {"README.md": "readme-v1", "src/report.py": "report-v1"}),
+            ("c1", "Prepare the sprint", "c0", {"README.md": "readme-v2"}),
+            ("c2", "Finish the borrowing report", "c1", {"src/report.py": "report-final"}),
+            ("c3", "Redesign the report layout", "c2", {"src/report.py": "report-redesign"}),
+        ]
+    )
+    return {
+        "initial_state": repo(
+            commits=commits,
+            branches={"main": "c1"},
+            reflog=[
+                {"ref": "main", "commit": "c2", "action": "commit: Finish the borrowing report"},
+                {"ref": "main", "commit": "c3", "action": "commit: Redesign the report layout"},
+                {"ref": "main", "commit": "c1", "action": "reset: moving to HEAD~2"},
+            ],
+        ),
+        "state_requirements": clean(
+            "main",
+            points_to("main", "c2"),
+            points_to("recovery/report-redesign", "c3"),
+        ),
+    }
+
+
+def _statements_cleanup() -> dict[str, Any]:
+    rounding, tax_line, right = "Round totals down", "Hide the tax line", "Add statement export"
+    commits = _chain(
+        [
+            ("c0", "Initial commit", None, {"README.md": "readme-v1", "src/totals.py": "totals-v1", "src/tax.py": "tax-v1"}),
+            ("c1", "Add invoices", "c0", {"src/invoices.py": "invoices-v1"}),
+            ("c2", rounding, "c1", {"src/totals.py": "totals-broken"}),
+            ("c3", "Add receipts", "c2", {"src/receipts.py": "receipts-v1"}),
+            ("c4", tax_line, "c3", {"src/tax.py": "tax-broken"}),
+            ("c5", "Add exports", "c4", {"src/exports.py": "exports-v1"}),
+            ("c6", "wip", "c5", {"src/statements.py": "statements-v1"}),
+        ]
+    )
+    return {
+        "initial_state": repo(
+            commits=commits,
+            branches={"main": "c6"},
+            **origin("statements", branches={"origin/main": "c5"}, tracking={"main": "origin/main"}),
+        ),
+        "state_requirements": clean(
+            "main",
+            *_reverted("c2", "main", rounding),
+            {"type": "revert_preserves_history", "commit": "c4", "branch": "main"},
+            {"type": "branch_history_excludes", "branch": "main", "commits": ["c6"]},
+            tip("main~2", message_equals=right, parent_equals="c5"),
+            tip("main~1", message_contains=[f'Revert "{tax_line}"']),
+            tip(
+                "main",
+                tree_contains={
+                    "src/totals.py": "totals-v1",
+                    "src/tax.py": "tax-v1",
+                    "src/statements.py": "statements-v1",
+                },
+            ),
+            matches_origin("main"),
+        ),
+    }
+
+
+def _invoices_rescue() -> dict[str, Any]:
+    branch, spike, shared = "feature/invoices", "spike/heatmap", "src/charts.js"
+    commits = _chain(
+        [
+            ("c0", "Project baseline", None, {"README.md": "readme-v1", shared: "charts-v1"}),
+            ("c1", "Upgrade chart defaults", "c0", {shared: "charts-main"}),
+            ("c2", "Spike: heatmap", "c0", {shared: "charts-spike"}),
+            ("c3", "Spike: tune heatmap", "c2", {"src/spike.css": "spike-v1"}),
+            ("c4", "Start invoices", "c3", {"src/invoices.py": "invoices-v1"}),
+            ("c5", "Add tax lines", "c4", {"src/tax_lines.py": "tax-lines-v1"}),
+            ("c6", "Finish invoices", "c5", {"src/invoices.py": "invoices-v2"}),
+            ("c7", "Start invoices", "c3", {"src/invoices.py": "invoices-v1"}),
+            ("c8", "Finish invoices", "c7", {"src/invoices.py": "invoices-v2"}),
+        ]
+    )
+    remote = f"origin/{branch}"
+    return {
+        "initial_state": _stopped_rebase(
+            commits,
+            {"main": "c1", spike: "c3", branch: "c8"},
+            branch=branch,
+            onto="c1",
+            source="c2",
+            remaining=["c3", "c7", "c8"],
+            path=shared,
+            reflog=[
+                {"ref": branch, "commit": "c6", "action": "commit: Finish invoices"},
+                {"ref": branch, "commit": "c8", "action": f"rebase (finish): refs/heads/{branch} onto c3"},
+            ],
+            **origin(
+                "invoices",
+                branches={"origin/main": "c1", remote: "c6"},
+                tracking={"main": "origin/main", branch: remote},
+            ),
+        ),
+        "state_requirements": clean(
+            branch,
+            {"type": "rebase_not_in_progress"},
+            {"type": "branch_history_contains", "branch": branch, "commits": ["c1"]},
+            {"type": "branch_history_excludes", "branch": branch, "commits": ["c2", "c3"]},
+            {"type": "commit_count_on_branch_equals", "branch": branch, "count": 5},
+            {
+                "type": "commit_tree_contains",
+                "branch": branch,
+                "tree": {
+                    "src/invoices.py": "invoices-v2",
+                    "src/tax_lines.py": "tax-lines-v1",
+                    shared: "charts-main",
+                },
+            },
+            {"type": "commit_tree_excludes", "branch": branch, "paths": ["src/spike.css"]},
+            points_to(spike, "c3"),
+            matches_origin(branch),
+            conflict_free=True,
+        ),
+    }
+
+
 FIXTURES: dict[str, dict[str, Any]] = {
     # 4.1
     "reflog-medium-recover-and-publish-search": _recover_and_publish(
@@ -615,4 +745,8 @@ FIXTURES: dict[str, dict[str, Any]] = {
         last="Wire limiter into API",
         tip_id="c5",
     ),
+    # Transfer checkpoints
+    "reflog-transfer-report-rollback": _report_rollback(),
+    "revert-transfer-statements": _statements_cleanup(),
+    "rebase-transfer-invoices": _invoices_rescue(),
 }

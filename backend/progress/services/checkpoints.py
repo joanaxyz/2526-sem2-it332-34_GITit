@@ -10,8 +10,20 @@ from common.constants import (
     SESSION_STATUS_FAILED,
 )
 from progress.models import KpiCheckpoint, KpiExposure
+from progress.objectives import transfer_expected
+from progress.wallet import WalletService
+from progress.xp import XpService
 
 from .references import ref_hash, state_key, valid_ref
+
+# Paid in GitCoins and XP alike. A first-run clear earns the full reward; a
+# learner who missed it can still earn the smaller one by clearing it in practice.
+TRANSFER_REWARD = 150
+TRANSFER_PRACTICE_REWARD = 50
+
+
+def transfer_award_key(tier_id) -> str:
+    return f"transfer:{tier_id}"
 
 
 def failed_attempts(*, player_id, tier_id, before=None, replay=False) -> int:
@@ -79,7 +91,7 @@ def record_mastery(run) -> None:
 
 
 def assign_transfer(*, player, tier):
-    if tier.adventure_level.chapter.number not in (3, 4):
+    if not transfer_expected(tier.adventure_level.chapter.number, tier.difficulty):
         return None
     existing = KpiCheckpoint.objects.filter(player=player, tier=tier, kind="transfer").first()
     if existing is not None:
@@ -152,6 +164,63 @@ def transfer_ready(point, *, seen=None) -> bool:
             state_key=key,
         ).exists()
     )
+
+
+def pending_transfer(*, player_id, tier_id):
+    """The learner's launchable transfer checkpoint on this tier, if any."""
+    point = (
+        KpiCheckpoint.objects.filter(
+            player_id=player_id, tier_id=tier_id, kind="transfer", ended_at__isnull=True
+        )
+        .select_related("variant__scenario")
+        .first()
+    )
+    return point if point and transfer_ready(point) else None
+
+
+def transfer_rows(*, player, tier_ids) -> dict[int, dict]:
+    """The level-node state of each assigned checkpoint.
+
+    An unassigned tier has no entry, which keeps its row hidden until Hard is
+    cleared. So does a checkpoint that could not open. The recorded result itself
+    stays out of this: the node says it is done, not how it went.
+    """
+    rows = {}
+    for point in KpiCheckpoint.objects.filter(
+        player=player, tier_id__in=tier_ids, kind="transfer"
+    ).select_related("variant__scenario"):
+        if point.ended_at is not None:
+            if point.variant.is_published and point.variant.scenario.is_published:
+                rows[point.tier_id] = {"status": "recorded", "run_id": None}
+        elif transfer_ready(point):
+            rows[point.tier_id] = {
+                "status": "in_progress" if point.run_id else "ready",
+                "run_id": point.run_id,
+            }
+    return rows
+
+
+def award_transfer_reward(run) -> dict | None:
+    """Reward a cleared checkpoint, once per tier, whichever run cleared it first.
+
+    Both runs share one award key, so practice after a first-run clear pays nothing.
+    """
+    amount = TRANSFER_PRACTICE_REWARD if run.is_replay else TRANSFER_REWARD
+    key = transfer_award_key(run.tier_id)
+    coins = WalletService().award(
+        player=run.player, amount=amount, reason="transfer_checkpoint_reward", award_key=key
+    )
+    xp = XpService().award(
+        player=run.player, amount=amount, reason="transfer_checkpoint", award_key=key
+    )
+    if not coins and not xp:
+        return None
+    return {
+        "first_level_clear": False,
+        "coins_awarded": amount if coins else 0,
+        "xp_awarded": amount if xp else 0,
+        "chapter_chests_awarded": [],
+    }
 
 
 def finish_transfer(run) -> None:

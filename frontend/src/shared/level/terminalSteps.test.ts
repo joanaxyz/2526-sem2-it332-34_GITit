@@ -28,10 +28,13 @@ describe('terminalLinesFromSteps', () => {
     expect(lines[1]).toMatchObject({ kind: 'success', text: 'done' })
   })
 
-  it('renders a pending placeholder as a dim ellipsis', () => {
+  it('leaves silent commands at the next prompt without invented output', () => {
     const lines = terminalLinesFromSteps([createPendingStep('git init', -1)])
     expect(lines[0]).toMatchObject({ kind: 'input', text: 'git init' })
-    expect(lines[1]).toMatchObject({ kind: 'output', text: '...' })
+    expect(lines).toHaveLength(1)
+    expect(terminalLinesFromSteps([
+      { id: 1, command_text: 'git add .', terminal_output: '', result_category: 'TargetMatched' },
+    ])).toEqual([{ id: 'input-1', kind: 'input', text: 'git add .' }])
   })
 
   it('colors a client error placeholder as a warning', () => {

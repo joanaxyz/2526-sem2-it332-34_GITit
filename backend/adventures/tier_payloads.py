@@ -121,6 +121,7 @@ def tier_run_payload(run: AdventureLevelTierRun, *, include_steps: bool = True) 
             for step in steps
         ],
         "next_difficulty": next_difficulty_payload(run),
+        "transfer_checkpoint": transfer_checkpoint_payload(run),
         "completion": completion_payload(run),
         "reward": tier_reward_payload(
             run.tier,
@@ -159,6 +160,7 @@ def command_run_payload(
                 "progress": progress_payload(run),
                 "completion": completion_payload(run),
                 "next_difficulty": next_difficulty_payload(run),
+                "transfer_checkpoint": transfer_checkpoint_payload(run),
                 "rewards": rewards,
             }
         )
@@ -244,6 +246,22 @@ def run_counts_payload(run: AdventureLevelTierRun) -> dict:
         "remaining_counted_commands": max(0, maximum - run.counted_action_total),
         "max_reached": run.counted_action_total >= maximum,
         "total_attempts": run.total_attempts,
+    }
+
+
+def transfer_checkpoint_payload(run: AdventureLevelTierRun) -> dict | None:
+    """The tier's ready transfer checkpoint, offered after any practice clear."""
+    if run.is_transfer or run.status != SESSION_STATUS_COMPLETED or not run.tier_id:
+        return None
+    from progress.services.checkpoints import pending_transfer
+
+    point = pending_transfer(player_id=run.player_id, tier_id=run.tier_id)
+    if point is None:
+        return None
+    return {
+        "tier_id": run.tier_id,
+        "title": run.tier.adventure_level.title,
+        "run_id": point.run_id,
     }
 
 

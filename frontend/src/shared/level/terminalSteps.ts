@@ -39,6 +39,7 @@ export function terminalLinesFromSteps(steps: TerminalStep[]): TerminalLine[] {
   const lines: TerminalLine[] = []
   for (const step of steps) {
     lines.push({ id: `input-${step.id}`, kind: 'input', text: step.command_text })
+    if (!step.terminal_output) continue
     lines.push({
       id: `output-${step.id}`,
       kind:
@@ -47,7 +48,7 @@ export function terminalLinesFromSteps(steps: TerminalStep[]): TerminalLine[] {
           : step.result_category === ERROR_RESULT
             ? 'warning'
             : 'output',
-      text: step.result_category === PENDING_RESULT ? '...' : step.terminal_output,
+      text: step.terminal_output,
     })
   }
   return lines

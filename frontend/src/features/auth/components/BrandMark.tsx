@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 
-import gitLogoImage from '@/assets/images/git-it-logo-new.png'
+import gitLogoImage from '@/assets/images/git-it-logo-new.lossless.webp'
 import { cn } from '@/shared/utils/cn'
 
 type BrandMarkProps = {

@@ -3758,6 +3758,83 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 - HEAD on `main`; tip is a merge with parent `c3`; `c2` not in main's history; tree `src/payments.py` = the required content.
 - No conflicts; clean tree.
 
+### 3.1.18 Back out of checkout v1, then settle both files of v2 · Hard
+
+**Variant ID:** `manual-transfer-checkout-v2`
+
+**Story**
+You started merging `feature/checkout-v1` into `main` and Git stopped on a conflict in `src/checkout.py`.
+
+Then Sage told you v1 is dead: the branch to merge is `feature/checkout-v2`, and it touches shipping as well as checkout. `main` lowered the fee and the free-shipping limit, and both of those must survive. **The wrong merge must leave no trace on `main`.**
+
+**Starting point:** You are on `main`, in the middle of a merge of `feature/checkout-v1` that stopped on a conflict; `feature/checkout-v2` is the branch you meant.
+
+**Real-World Context**
+A single merge can stop on several files. Git only completes it once every one of them has been settled, so a merge is finished file by file, not all at once.
+
+**Your Task**
+Get `main` out of the current merge, merge `feature/checkout-v2` instead, make both files below match exactly, and complete the merge with its prepared message.
+
+**Required resolved file content**
+
+`src/checkout.py`
+
+```
+FEE = 4
+TAX = 0.12
+```
+
+`src/shipping.py`
+
+```
+FREE_OVER = 80
+ZONES = 3
+```
+
+**Objective Checklist**
+
+- [ ] main has a merge commit with feature/checkout-v2 as a parent.
+- [ ] feature/checkout-v1's commit is not in main's history.
+- [ ] src/checkout.py and src/shipping.py contain exactly the required content, and no conflicts remain.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git merge --abort` — Abandon the v1 merge.
+2. `git merge feature/checkout-v2` — Merge the right branch; it stops on both files.
+3. In the simulator's file editor, set `src/checkout.py` to exactly:
+
+   ```
+   FEE = 4
+   TAX = 0.12
+   ```
+4. `git add src/checkout.py` — Mark the first file resolved.
+5. In the simulator's file editor, set `src/shipping.py` to exactly:
+
+   ```
+   FREE_OVER = 80
+   ZONES = 3
+   ```
+6. `git add src/shipping.py` — Mark the second file resolved.
+7. `git commit --no-edit` — Complete the merge.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git reset --merge` for the abort; `git merge --continue`; adding both files in one `git add`.
+
+**Not accepted**
+
+- Resolving the v1 merge.
+- Completing the merge with only one file settled.
+
+**Expected Result**
+`main` has a merge commit from `feature/checkout-v2`, with both files settled and nothing from v1.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 5 · Maximum counted commands: 10
+
+- HEAD on `main`; tip is a merge with parent `c3`; history excludes `c2`; both trees = the required content; clean tree.
+
 ### 3.2.14 Set up the team's merge tool, then merge · Medium
 
 **Variant ID:** `mergetool-medium-configure-tool-billing`
@@ -3883,6 +3960,84 @@ Minimum counted commands: 4 · Maximum counted commands: 8
 
 - `mergetool.keepBackup` = `false`, `merge.tool` = `meld`.
 - HEAD on `main`; tip is a merge with parent `c2`; tree `src/api_version.py` = the required content; clean tree.
+
+### 3.2.16 Set up the merge tool, then settle the pricing refresh · Hard
+
+**Variant ID:** `mergetool-transfer-pricing-refresh`
+
+**Story**
+You are on a freshly set-up laptop, so this repository has no merge tool configured yet. Sage wants `meld` used here, and does not want any backup copies left lying around after a merge.
+
+`feature/pricing-refresh` is ready to come into `main`. It changes the pricing and the discounts, both of which `main` also changed, and it adds a pricing page to the docs.
+
+**Starting point:** You are on `main`; no merge tool is configured; merging `feature/pricing-refresh` will conflict in two files.
+
+**Real-World Context**
+Merge-tool settings belong to the repository or the machine, not the branch. On a new setup you choose the tool and how it behaves before the first conflict arrives.
+
+**Your Task**
+Set `meld` as this repository's merge tool and turn off its backup files. Then merge `feature/pricing-refresh`, resolve both conflicted files in the merge tool to the content below, and complete the merge with its prepared message.
+
+**Required resolved file content**
+
+`src/pricing.py`
+
+```
+BASE = 9
+CURRENCY = 'PHP'
+```
+
+`src/discounts.py`
+
+```
+MEMBER = 0.1
+SEASONAL = 0.05
+```
+
+**Objective Checklist**
+
+- [ ] merge.tool is meld, and mergetool.keepBackup is false.
+- [ ] main has a merge commit with feature/pricing-refresh as a parent.
+- [ ] src/pricing.py and src/discounts.py contain exactly the required content, and docs/pricing.md came in unchanged.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git config merge.tool meld` — Choose the merge tool.
+2. `git config mergetool.keepBackup false` — Stop the tool from keeping backups.
+3. `git merge feature/pricing-refresh` — Start the merge; it stops on both files.
+4. `git mergetool` — Open the conflicts in meld.
+5. In the simulator's merge tool, set `src/pricing.py` to exactly:
+
+   ```
+   BASE = 9
+   CURRENCY = 'PHP'
+   ```
+6. In the simulator's merge tool, set `src/discounts.py` to exactly:
+
+   ```
+   MEMBER = 0.1
+   SEASONAL = 0.05
+   ```
+7. `git commit --no-edit` — Complete the merge.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- Setting the options after the merge stops but before `git mergetool`; `git merge --continue`.
+
+**Not accepted**
+
+- Leaving backups switched on.
+- Hand-editing `docs/pricing.md`, which merged cleanly.
+
+**Expected Result**
+The tool is set up, and `main` has a merge commit with both files settled.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 5 · Maximum counted commands: 10
+
+- `merge.tool` = `meld`, `mergetool.keepBackup` = `false`.
+- HEAD on `main`; tip is a merge with parent `c2`; both trees = the required content; `docs/pricing.md` = the branch's version; clean tree.
 
 ### 3.3.14 Backport the retry fix and note its source · Easy
 
@@ -4406,6 +4561,72 @@ Minimum counted commands: 4 · Maximum counted commands: 12
 
 - Tip "Backport export fixes" with parent c5; both files fixed; src/new.py unchanged; three commits on release-3.0.
 
+### 3.3.24 Clear the wrong pick, then assemble the 1.6 backport · Hard
+
+**Variant ID:** `cherry-transfer-release-backport`
+
+**Story**
+You are on `release-1.6`, stopped on a cherry-pick of `c2`, and it is the wrong commit: it is an experiment.
+
+Sage needs three things from `main` on this release. The separator fix `c4` goes on by itself, as its own commit, and it must say where it came from. The two small report fixes `c5` and `c6` belong together, so reviewers should see them as one commit.
+
+**Starting point:** You are on `release-1.6`, in the middle of a cherry-pick of `c2` that stopped on a conflict in `src/export.py`.
+
+**Real-World Context**
+A release branch tells a story to reviewers. Recording a commit's source keeps it traceable, and folding small related fixes into one commit keeps the release history readable.
+
+**Your Task**
+Cancel the current cherry-pick. Apply `c4` so the new commit records its source, with `src/export.py` matching the content below. Then bring `c5` and `c6` onto `release-1.6` as a single commit with the message shown below. **Leave `main` unchanged.**
+
+**Required resolved file content**
+
+`src/export.py`
+
+```
+return to_csv(rows, header=True, delimiter=';')
+```
+
+**Objective Checklist**
+
+- [ ] release-1.6 has a commit for c4 that records its source, on top of its old tip.
+- [ ] src/export.py contains exactly the required content.
+- [ ] release-1.6's newest commit has the required message and carries both report fixes.
+- [ ] main is unchanged.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git cherry-pick --abort` — Cancel the wrong pick.
+2. `git cherry-pick -x c4` — Apply the right fix and record its source; it stops on the conflict.
+3. In the simulator's file editor, set `src/export.py` to exactly:
+
+   ```
+   return to_csv(rows, header=True, delimiter=';')
+   ```
+4. `git add src/export.py` — Mark the file resolved.
+5. `git cherry-pick --continue` — Finish the pick.
+6. `git cherry-pick --no-commit c5` — Apply the first report fix without committing.
+7. `git cherry-pick --no-commit c6` — Apply the second report fix without committing.
+8. `git commit -m "Backport report fixes"` — Commit them together.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git cherry-pick -n` for `--no-commit`.
+
+**Not accepted**
+
+- Three separate commits.
+- Backporting `c2`, the experiment.
+
+**Expected Result**
+`release-1.6` has the traced separator fix followed by one commit with both report fixes.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 7 · Maximum counted commands: 12
+
+- HEAD on `release-1.6`; `release-1.6~1` has parent `c3` and records `cherry picked from commit c4`.
+- Tip message = `Backport report fixes`; tree has both report fixes; history has four commits; `main` still at `c6`.
+
 ## Module 4 — Advanced Recovery and History
 
 ### 4.1.16 Recover the search ranking fix and publish it · Medium
@@ -4599,6 +4820,56 @@ Minimum counted commands: 2 · Maximum counted commands: 8
 
 - `recovery/export` at `c4`; HEAD on `main`; tip (parent `c1`) message contains the fix; tree has the fix and no debug or groundwork files.
 - Clean tree.
+
+### 4.1.20 Put main right and keep the redesign safe · Hard
+
+**Variant ID:** `reflog-transfer-report-rollback`
+
+**Story**
+A careless reset took `main` back two commits, and now neither of them shows up in your log.
+
+The two lost commits are not equally welcome. One finishes the borrowing report, and that is where `main` should be standing. The other is a redesign that Sage wants kept for later but not on `main`, on a new branch named `recovery/report-redesign`. Have a look at both before you move anything.
+
+**Starting point:** You are on `main`, two commits behind where you were; the reflog still knows both lost commits.
+
+**Real-World Context**
+The reflog shows where a branch has been, and recovery means choosing what each of those positions deserves: some belong back on the branch, and some only need a safe name.
+
+**Your Task**
+Find the two lost commits in the reflog. Keep the redesign on a new branch named `recovery/report-redesign`, and move `main` back to the commit that finishes the report. **Finish on `main`.**
+
+**Objective Checklist**
+
+- [ ] recovery/report-redesign exists and points to the redesign commit.
+- [ ] main points to the commit that finishes the report, and the redesign is not on it.
+- [ ] main is checked out and the working folder is clean.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git reflog` — Find the lost positions.
+2. `git show c2` — Inspect the first candidate.
+3. `git show c3` — Inspect the second candidate.
+4. `git switch -c recovery/report-redesign c3` — Give the redesign a safe name.
+5. `git switch main` — Go back to `main`.
+6. `git reset --hard c2` — Move `main` to the finished report.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git branch recovery/report-redesign c3` instead of switching to it.
+
+**Not accepted**
+
+- Leaving `main` on the redesign.
+- Recovering only one of the two commits.
+
+**Expected Result**
+`main` holds the finished report, and the redesign is safe on its own branch.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 8
+
+- HEAD on `main`; `main` = `c2`; `recovery/report-redesign` = `c3`; clean tree.
 
 ### 4.2.10 Sync first, then undo the docs theme · Easy
 
@@ -4891,6 +5162,55 @@ Minimum counted commands: 3 · Maximum counted commands: 8
 
 - Tip is `Revert "Shorten feed item IDs"`; `main~1` is `Add RSS feed` with parent `c3`, replacing `c4`; tree has the old feed IDs and the new feed.
 - `c3` still in history; `origin/main` = `main`; clean tree.
+
+### 4.2.16 Reword the local commit, reverse two pushed ones · Hard
+
+**Variant ID:** `revert-transfer-statements`
+
+**Story**
+Two commits that went out to `origin` are causing trouble: `c2` rounds totals down, and `c4` hides the tax line. Everything around them is fine and must stay.
+
+There is also `c6`, your newest commit, which nobody else has seen. Its message just says `wip`, and Sage will not let that go out.
+
+**Starting point:** You are on `main`; `origin/main` is at `c5`, and `c6` exists only on your machine.
+
+**Real-World Context**
+History others have seen is corrected with new commits, and history only you have seen can simply be rewritten. Real clean-ups often need both, and the order matters.
+
+**Your Task**
+Change `c6`'s message to the one below. Undo `c4` and then `c2`, each with its own new commit, newest first. Then push `main` to `origin` once.
+
+**Objective Checklist**
+
+- [ ] c6's work is on main under the required message, and c6 itself is gone.
+- [ ] Each of c4, c2 has its own revert commit on main, newest first.
+- [ ] The commits around them are untouched, and origin/main matches local main after one push.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git commit --amend -m "Add statement export"` — Fix the unpublished message.
+2. `git revert c4` — Undo the newer faulty commit.
+3. `git revert c2` — Undo the older faulty commit.
+4. `git push` — Publish once.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git push origin main`.
+
+**Not accepted**
+
+- Rewriting `c2` or `c4`, which are already on `origin`.
+- Reverting first, which leaves `c6` buried under new commits.
+
+**Expected Result**
+`main` has the reworded commit followed by two reverts, and `origin/main` matches it.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 4 · Maximum counted commands: 8
+
+- HEAD on `main`; `main~2` message = `Add statement export` with parent `c5`; history excludes `c6`.
+- Newest commit reverts `c2`, the one before reverts `c4`; tree restores `src/totals.py` and `src/tax.py`; `origin/main` = `main`.
 
 ### 4.3.10 Abandon the stopped docs rebase · Easy
 
@@ -5433,6 +5753,56 @@ HEALTH = '/health'
 Minimum counted commands: 2 · Maximum counted commands: 12
 
 - No rebase in progress; four commits on feature/health-route including main's c1; the resolved routes and the replayed test file are in the tip.
+
+### 4.3.20 Rescue the invoices branch from two bad rebases · Hard
+
+**Variant ID:** `rebase-transfer-invoices`
+
+**Story**
+`feature/invoices` has had a rough day. An earlier rebase silently dropped its tax-lines commit, and you only noticed after starting another rebase onto `main`, which has now stopped on a conflict in a file you never touched.
+
+That conflict comes from `spike/heatmap`, the throwaway branch `feature/invoices` was started from. Sage wants the branch back to the state you pushed, with all three of its own commits, sitting directly on `main`, with none of the spike. Other people use this remote branch, so update it **without overwriting work you have not seen**.
+
+**Starting point:** You are in the middle of a rebase of `feature/invoices` onto `main`, stopped on a conflict from a `spike/heatmap` commit; the commit you last pushed is still in the reflog.
+
+**Real-World Context**
+When a rebase has gone wrong twice, stacking a third on top makes it worse. Stop, return to the last good state, and then replay exactly what you meant to.
+
+**Your Task**
+Cancel the current rebase and put `feature/invoices` back on the commit you last pushed. Then move __only__ the branch's own three commits onto `main`, leaving the spike's commits behind, and update `origin`'s `feature/invoices`.
+
+**Objective Checklist**
+
+- [ ] No rebase is in progress.
+- [ ] feature/invoices sits on main's latest commit with its three commits, including the tax lines.
+- [ ] Nothing from spike/heatmap is on feature/invoices, and spike/heatmap is unchanged.
+- [ ] origin/feature/invoices matches local feature/invoices.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git rebase --abort` — Cancel the current rebase.
+2. `git reflog` — Find the commit you last pushed.
+3. `git reset --hard c6` — Return the branch to it.
+4. `git rebase --onto main spike/heatmap feature/invoices` — Replay only the branch's own commits.
+5. `git push --force-with-lease origin feature/invoices` — Update the remote safely.
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- `git push --force-with-lease` with the upstream set.
+
+**Not accepted**
+
+- `git push --force`.
+- Keeping any `spike/heatmap` commit on the branch.
+
+**Expected Result**
+`feature/invoices` has its three commits directly on `main`, and `origin` matches it.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 4 · Maximum counted commands: 8
+
+- HEAD on `feature/invoices`; history contains `c1`, excludes `c2` and `c3`; five commits; tree has `src/invoices.py`, `src/tax_lines.py` and `charts-main`; no `src/spike.css`; `spike/heatmap` = `c3`; remote matches.
 
 ## Module 1 Challenge Gate — Foundations Gate
 

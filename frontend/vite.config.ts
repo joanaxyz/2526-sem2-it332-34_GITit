@@ -1,6 +1,65 @@
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
+import { cp } from 'node:fs/promises'
 import path from 'node:path'
+import type { Plugin } from 'vite'
 import { defineConfig } from 'vitest/config'
 import react from '@vitejs/plugin-react'
+
+function runtimePublicAssets(): Plugin {
+  let publicDir: string
+  let outDir: string
+  let optimizedOriginals: Set<string>
+  let optimizedCopies: Set<string>
+
+  return {
+    name: 'runtime-public-assets',
+    apply: 'build',
+    configResolved(config) {
+      publicDir = config.publicDir
+      outDir = path.resolve(config.root, config.build.outDir)
+      const manifest = JSON.parse(readFileSync(
+        path.resolve(config.root, 'src/shared/media/optimizedPublicMedia.json'), 'utf8',
+      )) as Record<string, string>
+      optimizedOriginals = new Set(Object.keys(manifest))
+      optimizedCopies = new Set(Object.values(manifest))
+      const fingerprints = JSON.parse(readFileSync(
+        path.resolve(config.root, 'media-sources.json'), 'utf8',
+      )) as Record<string, { target: string; sourceSha256: string; targetSha256: string }>
+      for (const [source, fingerprint] of Object.entries(fingerprints)) {
+        const hash = (file: string) => createHash('sha256')
+          .update(readFileSync(path.resolve(config.root, file))).digest('hex')
+        if (hash(source) !== fingerprint.sourceSha256 || hash(fingerprint.target) !== fingerprint.targetSha256) {
+          throw new Error(`Stale optimized media: ${source}. Run python scripts/assets/optimize_delivery_media.py --apply from the repository root.`)
+        }
+      }
+    },
+    async writeBundle() {
+      await cp(publicDir, outDir, {
+        recursive: true,
+        filter(source) {
+          const parts = path.relative(publicDir, source).split(path.sep)
+          const url = `/${parts.join('/')}`
+          if (source.endsWith('.lossless.webp') && !optimizedCopies.has(url)) return false
+          if (
+            parts[0] === 'cosmetics' &&
+            parts[1] === 'story-worlds' &&
+            ['frostbound-citadel', 'neon-backstreets'].includes(parts[2])
+          ) return false
+
+          // Preserve authoring files locally without copying them into releases.
+          return !parts.some((part) => [
+            'raw', '_raw', '_shift_raw', 'pose', 'references', 'samples',
+          ].includes(part)) &&
+            !source.endsWith('_raw.zip') &&
+            path.basename(source) !== '_diagnostics.json' &&
+            !path.basename(source).startsWith('_preview-contact-sheet.') &&
+            !optimizedOriginals.has(url)
+        },
+      })
+    },
+  }
+}
 
 function vendorChunkName(moduleId: string): string | null {
   const normalizedId = moduleId.replace(/\\/g, '/')
@@ -30,7 +89,7 @@ function vendorChunkName(moduleId: string): string | null {
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => ({
-  plugins: [react()],
+  plugins: [react(), runtimePublicAssets()],
   optimizeDeps: {
     // Only the real pages. Scratch previews in the gitignored .tmp/ must never
     // break dev-server startup when the code they import moves.
@@ -50,6 +109,9 @@ export default defineConfig(({ mode }) => ({
     ],
   },
   build: {
+    // The plugin copies runtime media; Vite's default copy includes source art
+    // and inactive worlds even when no production code references those files.
+    copyPublicDir: false,
     // Sprite strips are tiny PNGs (often <4KB) but there are hundreds of
     // them; base64-inlining them balloons the battle JS chunk. Serve them as
     // real files so the browser caches each sheet independently.

@@ -17,6 +17,7 @@ from adventures.models import (
 )
 from players.models import Player
 from progress.models import AdventureLevelTierCompletion, KpiCheckpoint, KpiExposure, KpiStudy
+from progress.objectives import transfer_expected
 
 from .checkpoints import actual_count
 from .mastery_metrics import (
@@ -26,6 +27,7 @@ from .mastery_metrics import (
     content_key,
     rate,
     rates,
+    retry_transfer_counts,
     samples,
     scenario_car,
 )
@@ -176,6 +178,19 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
 def _records(study):
     manifest = study.manifest
     specs = {s["id"]: s for s in manifest["tiers"]}
+    retry_transfers = (
+        retry_transfer_counts(
+            AdventureLevelTierRun.objects.filter(
+                player_id__in=manifest["players"],
+                tier_id__in=specs,
+                started_at__gte=manifest["assigned_at"],
+                started_at__lte=study.cutoff,
+                ended_at__lte=study.cutoff,
+            )
+        )
+        if manifest["policy"] == "mastery-kpis-v3-retry-rta"
+        else None
+    )
     content = {
         v.id: v
         for v in AdventureLevelTierScenarioVariant.objects.filter(
@@ -321,9 +336,11 @@ def _records(study):
                     "attempted": bool(attempts),
                     "invalid_runs": len(ended) - len(valid),
                     "car_missing": unscored,
-                    "transfer_missing": spec["module"] in (3, 4) and transfer is None,
+                    "transfer_missing": transfer_expected(spec["module"], spec["difficulty"])
+                    and transfer is None,
                     "mastery_run": mastery.id if mastery else None,
                     "transfer_run": checkpoint.run_id if checkpoint else None,
+                    **(retry_transfers[player_id, tier_id] if retry_transfers is not None else {}),
                 }
             )
     return records

@@ -35,7 +35,7 @@ export function gitBisect(
       ].join('\n'),
     }
   }
-  throw new SimulatorCommandError('fatal: this curriculum tranche supports git bisect run and git bisect log')
+  throw new SimulatorCommandError('error: invalid bisect arguments', 129)
 }
 
 export function gitRerere(
@@ -58,14 +58,14 @@ export function gitRerere(
     ])
     return { command: 'rerere', stdout: rows.join('\n') }
   }
-  throw new SimulatorCommandError('usage: git rerere (status | diff)')
+  throw new SimulatorCommandError('error: invalid rerere arguments', 129)
 }
 
 export function gitWorktree(
   state: MutableRepositoryState,
   parsed: ParsedGitCommand,
 ): CommandOutcome {
-  if (parsed.args[0] !== 'list') throw new SimulatorCommandError('usage: git worktree list')
+  if (parsed.args[0] !== 'list') throw new SimulatorCommandError('error: invalid worktree arguments', 129)
   const authored = state.operation_metadata?.worktrees
   const worktrees = Array.isArray(authored) ? authored : []
   const rows = worktrees
@@ -86,7 +86,7 @@ export function gitSparseCheckout(
   state: MutableRepositoryState,
   parsed: ParsedGitCommand,
 ): CommandOutcome {
-  if (parsed.args[0] !== 'list') throw new SimulatorCommandError('usage: git sparse-checkout list')
+  if (parsed.args[0] !== 'list') throw new SimulatorCommandError('error: invalid sparse-checkout arguments', 129)
   return {
     command: 'sparse-checkout',
     stdout: asStringList(state.operation_metadata?.sparse_paths).join('\n'),
@@ -97,7 +97,7 @@ export function gitSubmodule(
   state: MutableRepositoryState,
   parsed: ParsedGitCommand,
 ): CommandOutcome {
-  if (parsed.args[0] !== 'status') throw new SimulatorCommandError('usage: git submodule status')
+  if (parsed.args[0] !== 'status') throw new SimulatorCommandError('error: invalid submodule arguments', 129)
   const authored = state.operation_metadata?.submodules
   const submodules = Array.isArray(authored) ? authored : []
   return {
@@ -116,7 +116,7 @@ export function configGet(
   state: MutableRepositoryState,
   parsed: ParsedGitCommand,
 ): CommandOutcome | null {
-  if (!hasOption(parsed, '--get')) return null
+  if (!hasOption(parsed, '--get') && (parsed.args.length !== 1 || hasOption(parsed, '--list') || hasOption(parsed, '-l'))) return null
   const key = parsed.args[0]
   const value = state.config?.[key]
   return {

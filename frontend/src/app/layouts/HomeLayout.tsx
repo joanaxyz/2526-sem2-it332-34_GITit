@@ -2,7 +2,6 @@ import { useCallback, useEffect, useState } from 'react'
 import { Outlet, useLocation } from 'react-router-dom'
 
 import { startBackgroundMusic, stopBackgroundMusic } from '@/shared/audio/battleAudio'
-import { AnchoredCoachmark } from '@/shared/components/AnchoredCoachmark'
 import { CursorGlow } from '@/shared/components/CursorGlow'
 import { OnboardingProvider } from '@/features/onboarding/components/OnboardingProvider'
 import { useAppOnboarding } from '@/features/onboarding/hooks/onboardingContext'
@@ -55,15 +54,9 @@ function HomeTutorWithOnboarding({ tutorKey, userId }: { tutorKey: string; userI
 
   return (
     <>
-      <HomeTutor key={tutorKey} suppressOpen={suppressOpen} />
-      {askBlueCoachmarkVisible ? (
-        <AnchoredCoachmark
-          targetSelector='[data-mascot-launcher="home-tutor"]'
-          title="Need help? Ask Blue!"
-          body="Ask Blue questions about Git, commands, or anything you're unsure about. You can open it anytime!"
-          onDismiss={dismissAskBlueCoachmark}
-        />
-      ) : null}
+      <HomeTutor key={tutorKey} suppressOpen={suppressOpen}
+        showIntroduction={isStoryMap && !suppressOpen && askBlueCoachmarkVisible}
+        onDismissIntroduction={dismissAskBlueCoachmark} />
     </>
   )
 }

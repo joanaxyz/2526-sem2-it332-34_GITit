@@ -13,7 +13,7 @@
   background:
     radial-gradient(50% 45% at 50% 34%, rgba(var(--theme-primary-rgb), 0.14), transparent 70%),
     linear-gradient(180deg, rgba(1, 8, 22, 0.34), rgba(1, 7, 18, 0.86)),
-    url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png') center / cover no-repeat;
+    url('/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp') center / cover no-repeat;
 }
 
 .auth-content {

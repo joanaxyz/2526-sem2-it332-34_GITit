@@ -1,4 +1,4 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { ComponentProps } from 'react'
 
@@ -127,5 +127,44 @@ describe('ordered scenario outcomes', () => {
 
   it('offers nothing while the run is still in progress', () => {
     expect(tierOutcomeNextStep({ run: clearedScenario({ status: 'started' }), onBackToMap: vi.fn() })).toBeNull()
+  })
+})
+
+describe('a ready transfer checkpoint', () => {
+  const clearedHardTier = {
+    transfer: false, replay: false, status: 'completed', stars: 3, difficulty: 'hard',
+    transfer_checkpoint: { tier_id: 7, title: 'Resolving Conflicts Manually', run_id: null },
+    next_difficulty: null,
+    tier: { id: 7, difficulty: 'hard', adventure_level_id: 3, adventure_level_slug: 'resolving-conflicts-manually', adventure_level_title: 'Resolving Conflicts Manually', adventure_level_number: 1 },
+    progress: { completed: 2, total: 2, cleared: true, next_scenario: null },
+    scenario: { index: 2, total: 2, title: '' },
+    reward: { coins: 50, claimed: true },
+    counts: { counted_action_total: 3, minimum_counted_commands: 3, maximum_counted_commands: 8,
+      non_counted_diagnostic_total: 0, total_attempts: 3, max_reached: false },
+  } as unknown as TierRun
+
+  it('is offered on the cleared screen and by the mascot', () => {
+    const take = vi.fn()
+    render(<TierOutcomeModal open run={clearedHardTier} onClose={() => {}} onBackToMap={() => {}} onTransfer={take} />)
+    expect(screen.getByText(/A transfer checkpoint is ready/)).toBeInTheDocument()
+    render(<>{shown.mock.calls.at(-1)?.[0].footerActions}</>)
+    fireEvent.click(screen.getByRole('button', { name: 'Take transfer checkpoint' }))
+    expect(take).toHaveBeenCalledOnce()
+    const step = tierOutcomeNextStep({ run: clearedHardTier, onBackToMap: () => {}, onTransfer: take })
+    expect(step).toMatchObject({ caption: 'Transfer checkpoint', detail: 'Resolving Conflicts Manually' })
+  })
+
+  it('tells a practice run that the recorded result has not changed', () => {
+    const run = { ...clearedHardTier, transfer: true, replay: true, transfer_checkpoint: null } as TierRun
+    render(<TierOutcomeModal open run={run} onClose={() => {}} onBackToMap={() => {}} />)
+    expect(screen.getByText(/recorded transfer result has not changed/)).toBeInTheDocument()
+    expect(shown.mock.calls.at(-1)?.[0]).toMatchObject({ showStars: false, title: 'Practice complete' })
+  })
+
+  it('is absent when no checkpoint waits', () => {
+    const run = { ...clearedHardTier, transfer_checkpoint: null } as TierRun
+    render(<TierOutcomeModal open run={run} onClose={() => {}} onBackToMap={() => {}} onTransfer={() => {}} />)
+    expect(screen.queryByText(/A transfer checkpoint is ready/)).not.toBeInTheDocument()
+    expect(tierOutcomeNextStep({ run, onBackToMap: () => {} })).toMatchObject({ caption: 'Map' })
   })
 })

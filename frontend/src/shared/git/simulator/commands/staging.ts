@@ -5,6 +5,9 @@ import { resolveRevision } from '@/shared/git/simulator/commands/refs'
 import { SimulatorCommandError, type CommandOutcome, type MutableRepositoryState, type ParsedGitCommand } from '@/shared/git/simulator/types'
 
 export function gitAdd(state: MutableRepositoryState, parsed: ParsedGitCommand): CommandOutcome {
+  if (!parsed.pathspecs.length && !Object.keys(parsed.options).length) {
+    return { command: 'add', stdout: '', stderr: 'Nothing specified, nothing added.' }
+  }
   if (hasOption(parsed, '-p') || hasOption(parsed, '--patch')) {
     const paths = stagePatch(state, parsed.pathspecs)
     return { command: 'add', details: { paths, mode: 'patch' } }

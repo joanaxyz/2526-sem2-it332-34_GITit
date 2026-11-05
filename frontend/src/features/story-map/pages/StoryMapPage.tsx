@@ -93,7 +93,7 @@ export function StoryMapPage() {
   const storyWorld = useMemo(() => getStoryWorld(activeStory?.world_slug ?? storySlug), [activeStory?.world_slug, storySlug])
   const storyMapStyle = {
     ...storyWorldStyle(storyWorld),
-    backgroundImage: `url("${storyWorld.map?.background.src ?? '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png'}")`,
+    backgroundImage: `url("${storyWorld.map?.background.src ?? '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp'}")`,
   } as CSSProperties
   const [activeChapterId, setActiveChapterId] = useState<number | null>(null)
   const userSelectedChapterId = useRef<number | null>(null)
@@ -267,9 +267,9 @@ export function StoryMapPage() {
       {coachmarks.worldMascotCoachmarkVisible ? (
         <AnchoredCoachmark
           targetSelector=".world-mascot-actor"
-          title="Meet your little guide!"
-          body="This little companion has Git tips to share. Click it whenever you need a quick reminder!"
-          onDismiss={coachmarks.dismissWorldMascotCoachmark}
+          title="Meet Git-It"
+          body="Click Git-It for a quick tip from what you've learned. Click the map to move your guide."
+          step={{ current: 1, total: 2 }} onDismiss={coachmarks.dismissWorldMascotCoachmark}
         />
       ) : null}
 

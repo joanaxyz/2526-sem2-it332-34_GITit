@@ -120,6 +120,7 @@ before committing:
 ```bash
 python3 scripts/assets/optimize_static_avatars.py --apply
 python3 scripts/assets/compact_actor_sheets.py --apply
+python3 scripts/assets/optimize_delivery_media.py --apply
 python3 scripts/check_runtime_assets.py --require-tracked
 ```
 
@@ -133,8 +134,16 @@ excluded because their transparent bounds are part of their authored battle
 placement.
 
 Review the regenerated art in the application and run the frontend test/build
-preflight above before committing it. Both tools are previews unless `--apply`
+preflight above before committing it. The image processors are previews unless `--apply`
 is supplied.
+
+The delivery-media command preserves the PNG originals and creates smaller
+lossless WebP copies with identical decoded pixels. It updates runtime paths
+and source/copy hashes; the build rejects stale copies after an artwork edit.
+Run it after the other image processors and commit the generated copies and
+manifests together. The command also encodes background music as 128 kbps MP3
+with gapless metadata, preserving the WAV originals. Sound effects and audio
+controls stay available; production excludes only replaced media originals.
 
 ## 3. Configure production secrets
 
@@ -299,10 +308,10 @@ Verify the public path and forwarded HTTPS scheme:
 curl --fail --show-error https://app.example.com/nginx-health
 curl --fail --show-error https://app.example.com/api/health/ready/
 curl --fail --show-error \
-  https://app.example.com/cosmetics/story-worlds/arcane-spire/monsters/monster-01/portrait.png \
+  https://app.example.com/cosmetics/story-worlds/arcane-spire/monsters/monster-01/portrait.lossless.webp \
   --output /dev/null
 curl --fail --show-error \
-  https://app.example.com/audio/battle/background/outside-battle-loop.wav \
+  https://app.example.com/audio/battle/background/outside-battle-loop.mp3 \
   --output /dev/null
 ```
 

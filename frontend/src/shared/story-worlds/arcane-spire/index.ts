@@ -12,11 +12,11 @@ const battleBackgrounds = Array.from(
 )
 
 const monsterPoses = [
-  '/cosmetics/story-worlds/arcane-spire/monsters/monster-11/idle.png',
-  '/cosmetics/story-worlds/arcane-spire/monsters/monster-05/idle.png',
-  '/cosmetics/story-worlds/arcane-spire/monsters/monster-06/idle.png',
-  '/cosmetics/story-worlds/arcane-spire/monsters/monster-10/idle.png',
-  '/cosmetics/story-worlds/arcane-spire/monsters/monster-08/idle.png',
+  '/cosmetics/story-worlds/arcane-spire/monsters/monster-11/idle.lossless.webp',
+  '/cosmetics/story-worlds/arcane-spire/monsters/monster-05/idle.lossless.webp',
+  '/cosmetics/story-worlds/arcane-spire/monsters/monster-06/idle.lossless.webp',
+  '/cosmetics/story-worlds/arcane-spire/monsters/monster-10/idle.lossless.webp',
+  '/cosmetics/story-worlds/arcane-spire/monsters/monster-08/idle.lossless.webp',
 ]
 
 /** Arcane Spire: the default story world and fallback renderer. */
@@ -82,7 +82,7 @@ export const arcaneSpireWorld: StoryWorldDef = {
   } as unknown as StoryBattleDef,
   map: {
     background: {
-      src: '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.png',
+      src: '/cosmetics/story-worlds/arcane-spire/backgrounds/level-map.lossless.webp',
       fps: 1,
       loops: false,
       frameWidth: 1659,

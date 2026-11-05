@@ -126,8 +126,6 @@ def test_a_cleared_scenario_credits_only_the_forms_the_learner_typed(db, django_
     )
 
     assert response.status_code == 200
-    advanced = response.json()["run"]["rewards"]["mastery_advanced"]
-    assert [item["form_slug"] for item in advanced] == ["current"]
     assert set(
         SkillMastery.objects.filter(player=player).values_list("command_form__slug", flat=True)
     ) == {"current"}

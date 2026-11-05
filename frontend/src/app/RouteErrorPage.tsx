@@ -1,7 +1,7 @@
 import { ArrowLeft } from 'lucide-react'
 import { isRouteErrorResponse, useRouteError } from 'react-router-dom'
 
-import gitLogoImage from '@/assets/images/git-it-logo-new.png'
+import gitLogoImage from '@/assets/images/git-it-logo-new.lossless.webp'
 import { Button } from '@/shared/components/Button'
 
 import './route-error.css'
@@ -30,7 +30,7 @@ export function RouteErrorPage() {
           <div className="route-error__portal">
             <img
               className="route-error__mascot"
-              src="/mascot/portrait.png"
+              src="/mascot/portrait.lossless.webp"
               alt="Git-It, the GIT it! mascot"
               width={1122}
               height={1402}

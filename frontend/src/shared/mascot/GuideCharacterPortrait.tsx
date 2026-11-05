@@ -1,7 +1,7 @@
 import { usePlayerLoadout } from '@/shared/player-loadout/usePlayerLoadout'
 import { useGuideMascotVisibility } from './useGuideMascotVisibility'
 
-const MASCOT_PORTRAIT_SRC = '/mascot/portrait.png'
+const MASCOT_PORTRAIT_SRC = '/mascot/portrait.lossless.webp'
 
 type PortraitProps = {
   className?: string

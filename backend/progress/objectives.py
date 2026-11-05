@@ -2,9 +2,10 @@
 
 Only the SOs measured by CAR (Command Accuracy Rate) are mapped; the HLCR,
 ARC and RTA objectives are measured per module instead. The mapping is at
-level granularity: an SO's CAR averages validated first-mastery assessments
-in the listed levels, then averages learner scores equally (Arcane Spire,
-replays excluded). It measures command efficiency relative to a reference.
+level granularity: an SO's CAR averages the scored scenarios in the listed
+levels, then averages learner scores equally (Arcane Spire, replays on content
+not cleared before included). It measures command efficiency relative to a
+reference.
 
 Every level currently maps to exactly one SO. If a level ever needs to count
 toward several SOs, list it under each and note the limitation here, because
@@ -41,3 +42,8 @@ SO_CAR_LEVELS: dict[str, tuple[str, ...]] = {
     "SO 4.2": ("reversing-pushed-commits-safely",),
     "SO 4.3": ("completing-rebase-recovery-sequences",),
 }
+
+
+def transfer_expected(module, difficulty):
+    """A transfer checkpoint closes a level: its Hard tier, in Modules 3-4 only."""
+    return module in (3, 4) and difficulty == "hard"

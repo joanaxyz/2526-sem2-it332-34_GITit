@@ -24,7 +24,7 @@
   ],
   "sprites": {
     "idle": {
-      "src": "/cosmetics/companion/white/idle.png",
+      "src": "/cosmetics/companion/white/idle.lossless.webp",
       "fps": 10,
       "loops": true,
       "frameWidth": 250,
@@ -34,7 +34,7 @@
       "frameCount": 25
     },
     "run": {
-      "src": "/cosmetics/companion/white/run.png",
+      "src": "/cosmetics/companion/white/run.lossless.webp",
       "fps": 16,
       "loops": true,
       "frameWidth": 250,
@@ -44,7 +44,7 @@
       "frameCount": 25
     },
     "hurt": {
-      "src": "/cosmetics/companion/white/hurt.png",
+      "src": "/cosmetics/companion/white/hurt.lossless.webp",
       "fps": 26,
       "loops": false,
       "frameWidth": 250,
@@ -54,7 +54,7 @@
       "frameCount": 25
     },
     "death": {
-      "src": "/cosmetics/companion/white/death.png",
+      "src": "/cosmetics/companion/white/death.lossless.webp",
       "fps": 12,
       "loops": false,
       "frameWidth": 250,
@@ -64,7 +64,7 @@
       "frameCount": 25
     },
     "portrait": {
-      "src": "/cosmetics/companion/white/white.png",
+      "src": "/cosmetics/companion/white/white.lossless.webp",
       "fps": 1,
       "loops": false,
       "frameWidth": 512,
@@ -74,7 +74,7 @@
       "frameCount": 1
     },
     "chatAvatar": {
-      "src": "/cosmetics/companion/white/chat-avatar.png",
+      "src": "/cosmetics/companion/white/chat-avatar.lossless.webp",
       "fps": 1,
       "loops": false,
       "frameWidth": 512,
@@ -84,7 +84,7 @@
       "frameCount": 1
     },
     "chatThinking": {
-      "src": "/cosmetics/companion/white/chat-thinking.png",
+      "src": "/cosmetics/companion/white/chat-thinking.lossless.webp",
       "fps": 5,
       "loops": true,
       "frameWidth": 256,
@@ -94,7 +94,7 @@
       "frameCount": 8
     },
     "avatar": {
-      "src": "/cosmetics/companion/white/avatar.png",
+      "src": "/cosmetics/companion/white/avatar.lossless.webp",
       "fps": 1,
       "loops": false,
       "frameWidth": 256,
@@ -104,7 +104,7 @@
       "frameCount": 1
     },
     "attack": {
-      "src": "/cosmetics/companion/white/attack.png",
+      "src": "/cosmetics/companion/white/attack.lossless.webp",
       "fps": 24,
       "loops": false,
       "frameWidth": 250,
@@ -114,7 +114,7 @@
       "frameCount": 25
     },
     "attack-end": {
-      "src": "/cosmetics/companion/white/attack-end.png",
+      "src": "/cosmetics/companion/white/attack-end.lossless.webp",
       "fps": 24,
       "loops": false,
       "frameWidth": 250,
@@ -124,7 +124,7 @@
       "frameCount": 25
     },
     "miss": {
-      "src": "/cosmetics/companion/white/miss.png",
+      "src": "/cosmetics/companion/white/miss.lossless.webp",
       "fps": 24,
       "loops": false,
       "frameWidth": 250,

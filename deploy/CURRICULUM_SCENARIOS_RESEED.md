@@ -71,13 +71,19 @@ module; the content and checks are complete for all four, so they ship together.
    python manage.py award_missing_tier_rewards
    ```
 
-6. **Re-reserve transfer cases.** The seed already refreshed every KPI command
-   reference from the committed replay. Transfer reservations live on variant
-   rows. The new scenarios are new rows, so
-   re-reserve each transfer case with
-   `python manage.py kpi_refs --cases <slug> --reserve --reason "<what differs>"`.
-   The shared dev database had none on 2026-10-20.
-7. **Check health.**
+6. **Credit XP for earlier progress.** It is idempotent: every source pays
+   through the award key the runtime uses. Ranks read XP, so run this in the same
+   deploy or existing learners show as Peasant until it runs.
+
+   ```bash
+   python manage.py award_missing_xp --dry-run
+   python manage.py award_missing_xp
+   ```
+
+7. **Nothing to refresh for KPIs.** The seed updates every KPI command reference
+   from the committed replay and reserves the six transfer checkpoints from
+   `curriculum/seed_data/source/transfer_checkpoints.py`.
+8. **Check health.**
 
    ```bash
    export APP_URL=https://git-it-app-czpy.onrender.com
@@ -85,9 +91,9 @@ module; the content and checks are complete for all four, so they ship together.
    curl --fail --show-error "$APP_URL/api/health/ready/"
    ```
 
-Running steps 4 and 5 a second time changes nothing. After this deploy, delete
-both commands (`map_partial_tier_progress`, `award_missing_tier_rewards`) and
-their tests.
+Running steps 4, 5 and 6 a second time changes nothing. After this deploy, delete
+the three commands (`map_partial_tier_progress`, `award_missing_tier_rewards`,
+`award_missing_xp`) and their tests.
 
 ## If the deploy times out while seeding
 

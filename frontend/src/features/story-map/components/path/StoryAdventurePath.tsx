@@ -1,9 +1,10 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 
-import type { AdventureLevelSummary, ChallengeSummary } from '@/features/story-map/types'
+import type { AdventureLevelSummary, ChallengeSummary, TierTransferCheckpointRow } from '@/features/story-map/types'
 import { allChallengeTrials } from '@/features/story-map/utils/challengeUi'
 import { pathDataFor, pathGeometry } from '@/features/story-map/utils/pathGeometry'
+import { transferCheckpointPath, transferPracticePath } from '@/shared/level/transferCheckpoint'
 import { useStoryArtifactNavigation } from '@/features/story-map/hooks/useStoryArtifactNavigation'
 import { useStoryAdventureStarts } from '@/features/story-map/hooks/useStoryAdventureStarts'
 import type { LearningChapter } from '@/features/story-map/types'
@@ -49,6 +50,11 @@ export function StoryAdventurePath({
   const { openChallengeArtifact } = useStoryArtifactNavigation()
   const navigate = useNavigate()
   const { startTier } = useStoryAdventureStarts({ hasCompanion, onCompanionRequired })
+  const openTransfer = (tierId: number, checkpoint: TierTransferCheckpointRow) => navigate(
+    checkpoint.status === 'recorded'
+      ? transferPracticePath(tierId)
+      : transferCheckpointPath({ tier_id: tierId, run_id: checkpoint.run_id }),
+  )
   const currentLevelId = nextPlayableLevelId(levels, chapter.locked)
   const placeholderCount = Math.max(3, chapter.adventure_level_count || 6)
   const nodes: Array<AdventureLevelSummary | undefined> = levels.length
@@ -346,6 +352,7 @@ export function StoryAdventurePath({
             style={levelTierPanelStyle}
             onClose={() => setSelectedLevelId(null)}
             onStartTier={startTier}
+            onOpenTransfer={openTransfer}
             onOpenDrill={() => navigate(`/adventure-levels/${selectedTierLevel.id}/drill`)}
           />
         ) : null}
@@ -359,6 +366,7 @@ export function StoryAdventurePath({
           placement="inline"
           onClose={() => setSelectedLevelId(null)}
           onStartTier={startTier}
+          onOpenTransfer={openTransfer}
           onOpenDrill={() => navigate(`/adventure-levels/${selectedTierLevel.id}/drill`)}
         />
       ) : null}

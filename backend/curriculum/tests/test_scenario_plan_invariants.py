@@ -33,6 +33,7 @@ from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES
 from curriculum.seed_data.source.scenario_fixtures import SCENARIO_FIXTURES, extension_case
 from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN
 from curriculum.seed_data.source.scenario_plan.types import DEBUT
+from curriculum.seed_data.source.transfer_checkpoints import TRANSFER_CHECKPOINTS
 from tutoring.services.forms import command_family, resolve_form
 from tutoring.services.techniques import techniques_in
 
@@ -234,6 +235,9 @@ def test_plan_shape_is_two_to_three_scenarios_of_two_or_more_variants():
 
 def test_every_scenario_is_placed_exactly_once():
     placed: dict[str, str] = {}
+    placed.update(
+        {c["case_id"]: f"{level} checkpoint" for level, c in TRANSFER_CHECKPOINTS.items()}
+    )
     problems = []
     for scenario in _walk():
         for case_id in scenario.variants:
@@ -400,7 +404,11 @@ def test_seed_publishes_exactly_the_planned_scenarios_and_is_idempotent():
                 if not scenario.is_published:
                     continue
                 variants = sorted(
-                    (variant for variant in scenario.variants.all() if variant.is_published),
+                    (
+                        variant
+                        for variant in scenario.variants.all()
+                        if variant.is_published and not variant.is_transfer
+                    ),
                     key=lambda row: (row.sort_order, row.semantic_key, row.id),
                 )
                 result[(tier.adventure_level.slug, tier.difficulty)].append(

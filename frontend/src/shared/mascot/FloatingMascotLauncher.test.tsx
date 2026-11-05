@@ -32,7 +32,7 @@ describe('floating mascot launcher', () => {
     const view = render(<header>{launcher({ onOpen })}</header>)
     expect(view.container.querySelector('button')).toBeNull()
     const button = screen.getByRole('button', { name: 'Open command guide' })
-    expect(button.querySelector('img')).toHaveAttribute('src', '/mascot/portrait.png')
+    expect(button.querySelector('img')).toHaveAttribute('src', '/mascot/portrait.lossless.webp')
     expect(button).toHaveTextContent('Guide')
     fireEvent.click(button)
     expect(onOpen).toHaveBeenCalledOnce()
@@ -41,7 +41,7 @@ describe('floating mascot launcher', () => {
   it('keeps Git-It when the roaming mascot is hidden', () => {
     setGuideMascotVisibility(false)
     render(launcher())
-    expect(screen.getByRole('button', { name: 'Open command guide' }).querySelector('img')).toHaveAttribute('src', '/mascot/portrait.png')
+    expect(screen.getByRole('button', { name: 'Open command guide' }).querySelector('img')).toHaveAttribute('src', '/mascot/portrait.lossless.webp')
   })
 
   it('moves without opening, then opens on the next normal click', () => {

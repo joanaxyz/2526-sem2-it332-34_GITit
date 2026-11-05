@@ -20,12 +20,11 @@ const home: HomeSummary = {
   completed_stories: [],
   completed_story_slug: null,
   perfect_clears: 2,
-  mastery: 42,
+  xp: 2000,
   retry_trends: [],
 }
 
 const stats: StatsSummary = {
-  skill_profile: [],
   activity_trend: [],
   activity_window: 'month',
   headline: {
@@ -53,23 +52,31 @@ describe('deriveAchievements', () => {
       'level-adept',
       'level-veteran',
       'level-champion',
+      'arcane-spire-master',
       'hard-tier-breaker',
       'hard-tier-hunter',
       'gate-breaker',
       'gate-warden',
       'perfectionist',
       'star-collector',
-      'rank-glyph-weaver',
-      'rank-arcane-adept',
-      'rank-archon',
       'comeback-kid',
+      'sharpshooter',
+      'rank-knight',
+      'rank-baron',
+      'rank-duke',
       'command-cadet',
       'command-captain',
-      'sharpshooter',
       'coin-hoarder',
-      'arcane-spire-master',
     ])
     expect(achievements.every((achievement) => achievement.imageSrc.length > 0)).toBe(true)
+  })
+
+  it('files every achievement in a set, with each set kept together on its shelf', () => {
+    const groups = deriveAchievements(home, stats).map((achievement) => achievement.group)
+
+    expect(groups).toHaveLength(19)
+    expect([...new Set(groups)]).toEqual(['The climb', 'Trials', 'Precision', 'Ranks', 'Practice'])
+    expect(groups.filter((group, index) => group !== groups[index - 1])).toHaveLength(5)
   })
 
   it('keeps accuracy achievements locked until enough commands have run', () => {
@@ -85,8 +92,8 @@ describe('deriveAchievements', () => {
   it('tracks rank badges against the rank ladder thresholds', () => {
     const byId = new Map(deriveAchievements(home, stats).map((achievement) => [achievement.id, achievement]))
 
-    expect(byId.get('rank-glyph-weaver')).toMatchObject({ current: 35, target: 35, unlocked: true })
-    expect(byId.get('rank-arcane-adept')).toMatchObject({ current: 42, target: 60, unlocked: false })
+    expect(byId.get('rank-knight')).toMatchObject({ current: 1500, target: 1500, unlocked: true })
+    expect(byId.get('rank-baron')).toMatchObject({ current: 2000, target: 3000, unlocked: false })
   })
 
   it('counts GitCoins earned from play, not the spendable balance', () => {

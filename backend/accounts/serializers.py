@@ -8,11 +8,9 @@ from rest_framework import serializers
 USERNAME_PATTERN = re.compile(r"^[A-Za-z0-9._-]{3,30}$")
 
 
-class RegisterSerializer(serializers.Serializer):
-    username = serializers.CharField(max_length=30)
-    email = serializers.EmailField()
-    password = serializers.CharField(write_only=True, min_length=8)
-    password_confirm = serializers.CharField(write_only=True, min_length=8)
+class AccountUpdateSerializer(serializers.Serializer):
+    username = serializers.CharField(max_length=30, required=False)
+    email = serializers.EmailField(required=False)
 
     def validate_username(self, value: str) -> str:
         username = value.strip()
@@ -24,6 +22,13 @@ class RegisterSerializer(serializers.Serializer):
 
     def validate_email(self, value: str) -> str:
         return get_user_model().objects.normalize_email(value).lower()
+
+
+class RegisterSerializer(AccountUpdateSerializer):
+    username = serializers.CharField(max_length=30)
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True, min_length=8)
+    password_confirm = serializers.CharField(write_only=True, min_length=8)
 
     def validate(self, attrs):
         if attrs["password"] != attrs["password_confirm"]:
@@ -112,6 +117,13 @@ class UserSerializer(serializers.Serializer):
     is_staff = serializers.BooleanField()
 
 
+class EmailChangeConfirmSerializer(serializers.Serializer):
+    code = serializers.CharField(max_length=16)
+
+    def validate_code(self, value: str) -> str:
+        return EmailVerificationConfirmSerializer().validate_code(value)
+
+
 class RegisterResponseSerializer(serializers.Serializer):
     user = UserSerializer()
 
@@ -127,6 +139,11 @@ class AccessTokenResponseSerializer(serializers.Serializer):
 
 class DetailResponseSerializer(serializers.Serializer):
     detail = serializers.CharField()
+
+
+class AccountUpdateResponseSerializer(serializers.Serializer):
+    user = UserSerializer()
+    pending_email = serializers.EmailField(allow_null=True)
 
 
 class EmailVerificationRequiredSerializer(serializers.Serializer):

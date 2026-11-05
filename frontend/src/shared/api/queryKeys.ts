@@ -6,6 +6,8 @@ export const queryKeys = {
   statsActivity: (window: string) => ['stats-summary', 'activity', window] as const,
   performanceSummary: ['performance-summary'] as const,
   wallet: ['wallet'] as const,
+  leaderboards: ['leaderboard'] as const,
+  leaderboard: (category: string) => ['leaderboard', category] as const,
   stories: ['stories'] as const,
   chapters: ['chapters'] as const,
   storyChapters: (storySlug: string | null | undefined) => ['chapters', storySlug ?? 'all'] as const,
