@@ -44,7 +44,7 @@ type ReadmeExpectation = {
 }
 
 function monsterIdFromLayerSource(src: string | undefined): string | null {
-  return src?.match(/\/monsters\/(monster-\d+)\/effects\/skill(?:-back)?\.png/)?.[1] ?? null
+  return src?.match(/\/monsters\/(monster-\d+)\/effects\/skill(?:-back)?(?:\.png|\.lossless\.webp)$/)?.[1] ?? null
 }
 
 function expectedFromReadme(desc: string): ReadmeExpectation | 'missing' | null {
