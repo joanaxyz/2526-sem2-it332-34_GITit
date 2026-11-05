@@ -1,4 +1,8 @@
+import pytest
+
+from common.git.client_command_execution import ClientCommandExecutionService
 from simulator.services import is_diagnostic_command
+from testing.frontend_execution import frontend_execution_payload
 
 
 def test_unsupported_inventory_commands_are_not_backend_diagnostics():
@@ -29,3 +33,31 @@ def test_supported_read_only_commands_stay_backend_diagnostics():
 
 def test_unknown_git_subcommands_still_count_as_unknown():
     assert not is_diagnostic_command("git frobnicate")
+
+
+@pytest.mark.parametrize("command", [
+    "git -h", "git commit -h", "git switch --help", "git config -h",
+    "git help switch", "git config user.name", "git config --global user.name",
+])
+def test_help_and_config_queries_are_accepted_as_read_only(command):
+    state = {"repository_initialized": True, "branches": {"main": None}}
+    service = ClientCommandExecutionService()
+    execution = service.from_payload(
+        repository_state=state,
+        command=command,
+        execution=frontend_execution_payload(command, state, diagnostic=True),
+    )
+    assert is_diagnostic_command(command)
+    assert execution.increment == 0
+    assert not execution.state_mutated
+    assert execution.next_state == service.state_tools.normalize_state(state)
+
+
+@pytest.mark.parametrize("command", [
+    'git commit -m "--help"', 'git commit --message "-h"',
+    'git commit -am "--help"', 'git tag -m "--help" v1',
+    'git stash push -m "--help"', "git add -- -h",
+    'git config user.name Learner',
+])
+def test_help_looking_values_and_paths_do_not_bypass_mutation_checks(command):
+    assert not is_diagnostic_command(command)

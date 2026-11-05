@@ -4,12 +4,13 @@ import type {
 } from '@/shared/level/types'
 import { GitCommandParser } from '@/shared/git/simulator/parser'
 import {
-  GIT_COMMAND_NAMES,
   SUPPORTED_OPTIONS,
   diagnosticMetadataForCommand,
   isDiagnosticCommand,
+  requestsCommandHelp,
   validateCommand,
 } from '@/shared/git/simulator/commandMetadata'
+import { commandHelpText, gitHelpText } from '@/shared/git/simulator/help'
 import { dispatch } from '@/shared/git/simulator/commands'
 import { formatOutcome } from '@/shared/git/simulator/commands/formatters'
 import {
@@ -129,30 +130,34 @@ function runGitCommand(
 
   const state = normalizeState(repositoryState)
   const spec = SUPPORTED_OPTIONS[parsed.subcommand]
+  if (spec && requestsCommandHelp(parsed)) {
+    const help = commandHelpText(parsed.subcommand)!
+    // Git's short usage (-h) exits 129 on stdout; help never executes the command.
+    return result({
+      processed: true, state, output: help, normalizedCommand: parsed.normalizedText,
+      exitCode: parsed.options['-h'] ? 129 : 0, stdout: help,
+      commandFamily: parsed.subcommand, diagnostic: true,
+    })
+  }
   if (!spec) {
-    if (parsed.subcommand === '--global' && parsed.args[0] === 'config') {
-      const guidance =
-        'error: invalid git config order.\nUse: git config --global <key> <value>\nOr list values with: git config --list'
+    if (['', '-h', '--help', 'help'].includes(parsed.subcommand)) {
+      const topic = parsed.args[0]
+      const helpText = topic ? commandHelpText(topic) : gitHelpText(
+        Object.hasOwn(parsed.options, '-a') || Object.hasOwn(parsed.options, '--all'),
+      )
+      if (helpText === null) {
+        return result({ processed: false, state, output: `git: '${topic}' is not a git command. See 'git --help'.`,
+          normalizedCommand: parsed.normalizedText, exitCode: 1 })
+      }
       return result({
-        processed: false,
-        state,
-        output: guidance,
-        normalizedCommand: parsed.normalizedText,
-        exitCode: 129,
-        stderr: guidance,
-      })
-    }
-    if (parsed.subcommand === '--help' || parsed.subcommand === 'help') {
-      const helpText = gitHelpText(parsed)
-      return result({
-        processed: true,
+        processed: Boolean(parsed.subcommand),
         state,
         output: helpText,
         normalizedCommand: parsed.normalizedText,
-        exitCode: 0,
+        exitCode: parsed.subcommand ? 0 : 1,
         stdout: helpText,
         commandFamily: parsed.subcommand,
-        diagnostic: true,
+        diagnostic: Boolean(parsed.subcommand),
         diagnosticMetadata: ['inspected_git_help'],
       })
     }
@@ -170,13 +175,15 @@ function runGitCommand(
         diagnosticMetadata: ['inspected_git_version'],
       })
     }
-    const commandName = parsed.subcommand || parsed.normalizedText
+    const message = parsed.subcommand.startsWith('-')
+      ? `unknown option: ${parsed.subcommand}`
+      : `git: '${parsed.subcommand}' is not a git command. See 'git --help'.`
     return result({
       processed: false,
       state,
-      output: `git: '${commandName}' is not supported in this simulator.`,
+      output: message,
       normalizedCommand: parsed.normalizedText,
-      exitCode: 129,
+      exitCode: parsed.subcommand.startsWith('-') ? 129 : 1,
     })
   }
 
@@ -187,13 +194,14 @@ function runGitCommand(
       state,
       output: validationError,
       normalizedCommand: parsed.normalizedText,
-      exitCode: 129,
+      exitCode: validationError.startsWith('fatal:') ? 128 : 129,
       diagnostic: isDiagnosticCommand(parsed),
       commandFamily: parsed.subcommand,
     })
   }
 
-  if (!state.repository_initialized && !['init', 'clone'].includes(parsed.subcommand)) {
+  const globalConfig = parsed.subcommand === 'config' && Object.hasOwn(parsed.options, '--global')
+  if (!state.repository_initialized && !['init', 'clone'].includes(parsed.subcommand) && !globalConfig) {
     const message = 'fatal: not a git repository (or any of the parent directories): .git'
     return result({
       processed: true,
@@ -279,39 +287,3 @@ function result({
     diagnostic_metadata: diagnosticMetadata,
   }
 }
-
-function gitHelpText(parsed: ParsedGitCommand) {
-  if (wantsCompleteHelp(parsed)) return completeGitHelpText()
-  return [
-    'usage: git <command> [<args>]',
-    '',
-    'Common commands: status, add, commit, log, branch, restore, diff, config',
-    '',
-    `This simulator supports ${GIT_COMMAND_NAMES.length} commands used by GIT IT lessons.`,
-    "Run 'git help -a' to list the supported simulator commands.",
-  ].join('\n')
-}
-
-function wantsCompleteHelp(parsed: ParsedGitCommand) {
-  return (
-    Object.hasOwn(parsed.options, '-a') ||
-    Object.hasOwn(parsed.options, '--all') ||
-    parsed.args.includes('all')
-  )
-}
-
-function completeGitHelpText() {
-  const playableCommands = Object.keys(SUPPORTED_OPTIONS).sort()
-
-  return [
-    `Supported simulator commands (${GIT_COMMAND_NAMES.length})`,
-    '',
-    'Commands:',
-    formatCommandList(playableCommands),
-  ].join('\n')
-}
-
-function formatCommandList(commands: string[]) {
-  return commands.map((command) => `  git ${command}`).join('\n')
-}
-

@@ -1,12 +1,14 @@
+import { hasOption } from '@/shared/git/simulator/parser'
 import { entryContent, headTree, setOperationMetadata } from '@/shared/git/simulator/state'
 import { commonAncestor, commitsSince, resolveRef } from '@/shared/git/simulator/commands/refs'
 import { SimulatorCommandError, type CommandOutcome, type MutableRepositoryState, type ParsedGitCommand } from '@/shared/git/simulator/types'
 
 export function gitCheckIgnore(state: MutableRepositoryState, parsed: ParsedGitCommand): CommandOutcome {
-  const path = parsed.pathspecs[0]
-  const rule = matchingGitignoreRule(state, path)
-  if (!rule) return { command: 'check-ignore', stdout: '', exitCode: 1 }
-  return { command: 'check-ignore', stdout: `.gitignore:1:${rule}\t${path}` }
+  const matches = parsed.pathspecs.flatMap((path) => {
+    const rule = matchingGitignoreRule(state, path)
+    return rule ? [hasOption(parsed, '-v') ? `.gitignore:1:${rule}\t${path}` : path] : []
+  })
+  return { command: 'check-ignore', stdout: matches.join('\n'), exitCode: matches.length ? 0 : 1 }
 }
 
 function matchingGitignoreRule(state: MutableRepositoryState, path: string) {

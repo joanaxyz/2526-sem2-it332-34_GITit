@@ -46,7 +46,7 @@ function renameBranch(state: MutableRepositoryState, parsed: ParsedGitCommand): 
   const oldName = parsed.args.length > 1 ? parsed.args[0] : headBranch(state)
   const newName = parsed.args.length > 1 ? parsed.args[1] : parsed.args[0]
   if (!oldName) throw new SimulatorCommandError('fatal: branch rename requires a current branch')
-  if (!newName) throw new SimulatorCommandError('usage: git branch -m [<oldbranch>] <newbranch>', 129)
+  if (!newName) throw new SimulatorCommandError('fatal: branch name required')
   if (!(oldName in (state.branches ?? {}))) throw new SimulatorCommandError(`error: refname refs/heads/${oldName} not found`, 1)
   if (newName in (state.branches ?? {})) throw new SimulatorCommandError(`fatal: A branch named '${newName}' already exists.`)
   state.branches ??= {}
