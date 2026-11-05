@@ -9,8 +9,8 @@
     "task": "Initialize the current directory as a Git repository, explicitly choosing `main` as its initial branch during initialization.\n\n**Do not stage files or create a commit.**",
     "required_files": [],
     "objective_checks": [
-      "A Git repository exists in the current folder.",
-      "The first branch was explicitly set to main during initialization.",
+      "Initialize the current folder as a Git repository.",
+      "Set main as the initial branch during initialization.",
       "Nothing is staged and no commit exists."
     ],
     "expected_result": "The current folder is now a repository on `main`. It has no commits and nothing is staged.",
@@ -49,8 +49,8 @@
     "task": "Initialize the current directory as a Git repository with `trunk` as its initial branch.",
     "required_files": [],
     "objective_checks": [
-      "A Git repository exists in the current folder.",
-      "The first branch is trunk."
+      "Initialize the current folder as a Git repository.",
+      "Set trunk as the initial branch."
     ],
     "expected_result": "The current folder is now a repository on `trunk`.",
     "answer_key": [
@@ -86,8 +86,8 @@
     "task": "Create a new `invoice-tracker` folder that is a Git repository, with `main` as its first branch.",
     "required_files": [],
     "objective_checks": [
-      "The folder invoice-tracker is a Git repository.",
-      "The first branch is main."
+      "Initialize invoice-tracker as a Git repository.",
+      "Set main as the initial branch."
     ],
     "expected_result": "`invoice-tracker` exists and is a repository on `main`.",
     "answer_key": [
@@ -125,8 +125,8 @@
     "task": "Create a new `oss-contrib` folder that is a Git repository, with `main` as its first branch.",
     "required_files": [],
     "objective_checks": [
-      "The folder oss-contrib is a Git repository.",
-      "The first branch is main."
+      "Initialize oss-contrib as a Git repository.",
+      "Set main as the initial branch."
     ],
     "expected_result": "`oss-contrib` exists and is a repository on `main`.",
     "answer_key": [
@@ -164,8 +164,8 @@
     "task": "Create a new `docs-site` folder that is a Git repository, with `main` as its first branch.",
     "required_files": [],
     "objective_checks": [
-      "The folder docs-site is a Git repository.",
-      "The first branch is main."
+      "Initialize docs-site as a Git repository.",
+      "Set main as the initial branch."
     ],
     "expected_result": "`docs-site` exists and is a repository on `main`.",
     "answer_key": [
@@ -203,8 +203,8 @@
     "task": "Create a new `api-playground` folder that is a Git repository, with `trunk` as its first branch.",
     "required_files": [],
     "objective_checks": [
-      "The folder api-playground is a Git repository.",
-      "The first branch is trunk."
+      "Initialize api-playground as a Git repository.",
+      "Set trunk as the initial branch."
     ],
     "expected_result": "`api-playground` exists and is a repository on `trunk`.",
     "answer_key": [
@@ -242,8 +242,8 @@
     "task": "Make the existing `field-notes` folder a Git repository with `main` as its first branch.\n\n**Do not stage or commit its files.**",
     "required_files": [],
     "objective_checks": [
-      "field-notes is a Git repository.",
-      "The first branch is main.",
+      "Initialize field-notes as a Git repository.",
+      "Set main as the initial branch.",
       "notes.txt and data.csv are unchanged and not staged."
     ],
     "expected_result": "`field-notes` is a repository on `main`. It has no commits, and its two files are untouched and not staged.",
@@ -266,8 +266,7 @@
     "not_accepted": [],
     "evaluation": [
       "Repository at `field-notes`; HEAD on `main`; 0 commits; nothing staged; `notes.txt` and `data.csv` unchanged.",
-      "NOT accepted: `git init` run from the parent folder (wrong folder).",
-      "Minimum counted commands: 1 · Maximum counted commands: 10 (proposed)"
+      "NOT accepted: `git init` run from the parent folder (wrong folder)."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 10,
@@ -283,8 +282,8 @@
     "task": "Create a repository in a new `ci-configs` folder, with `main` as its first branch.\n\n**Leave every other file in the workspace where it is.**",
     "required_files": [],
     "objective_checks": [
-      "The folder ci-configs is a Git repository.",
-      "The first branch is main.",
+      "Initialize ci-configs as a Git repository.",
+      "Set main as the initial branch.",
       "The rest of the workspace (including pipelines/build.yml) is not part of the repository and is unchanged."
     ],
     "expected_result": "Only `ci-configs` is a repository, on `main`. **Every other file is unchanged.**",
@@ -307,8 +306,7 @@
       "`mkdir ci-configs` then `git init -b main ci-configs`, or `mkdir ci-configs`, `cd ci-configs`, `git init -b main` are accepted (`mkdir` counts). `git -C ci-configs init` on its own is NOT valid because the folder does not exist yet."
     ],
     "evaluation": [
-      "Repository at `ci-configs`; HEAD on `main`; 0 commits; the workspace root is NOT a repository; `pipelines/build.yml` unchanged.",
-      "Minimum counted commands: 1 · Maximum counted commands: 8 (proposed)"
+      "Repository at `ci-configs`; HEAD on `main`; 0 commits; the workspace root is NOT a repository; `pipelines/build.yml` unchanged."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
@@ -324,7 +322,7 @@
     "task": "Initialize only the `research-log` subfolder as a Git repository with `main` as its initial branch.\n\n**Leave the parent folder and the sibling folders outside the repository.**",
     "required_files": [],
     "objective_checks": [
-      "research-log is a Git repository on main.",
+      "Initialize research-log as a Git repository on main.",
       "notes, archive and the parent folder are not repositories.",
       "Existing files are unchanged."
     ],
@@ -363,7 +361,7 @@
     "task": "Initialize only the `ui-kit` subfolder as a Git repository with `trunk` as its initial branch.\n\n**Leave the parent and sibling folders untouched.**",
     "required_files": [],
     "objective_checks": [
-      "ui-kit is a Git repository on trunk.",
+      "Initialize ui-kit as a Git repository on trunk.",
       "brand-assets, experiments and the parent folder are not repositories.",
       "Existing files are unchanged."
     ],
@@ -403,8 +401,8 @@
     "required_files": [],
     "objective_checks": [
       "The repository is still on main.",
-      "The existing commit is unchanged (same commit ID).",
-      "The edits in notes/today.md are still there, uncommitted."
+      "The existing commit is unchanged (same commit ID and content).",
+      "The uncommitted edits in notes/today.md are still present in the working folder."
     ],
     "expected_result": "Nothing was lost. The history, the branch and the edits are exactly as before.",
     "answer_key": [
@@ -435,16 +433,16 @@
     "scenario_number": "1.2.1",
     "difficulty": "easy",
     "label": "Clone docs-portal",
-    "story": "The department keeps its documentation portal on a shared server, and Maeve has asked every capstone group to fix the outdated pages about their own project.\n\nRight now the portal exists only on that server. You have no copy on your laptop to edit.",
+    "story": "The department's documentation portal has outdated pages for every capstone project, and Maeve wants the groups to fix their own sections before the end-of-semester review.\n\nYou pull up the shared server address. The portal is there, but you have no local copy to edit — anything you change has to go through a copy on your machine first.",
     "starting_point": "You are in your workspace, outside any repository. The remote repository is reachable at the address in the task.",
     "real_world_context": "A contributor needs the same documentation project and history the team already has. Cloning supplies a local working copy instead of starting an empty folder.",
     "task": "Clone the remote repository from `https://example.test/training/docs-portal.git`.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of docs-portal exists in docs-portal.",
+      "Clone docs-portal into a local folder named docs-portal.",
       "The default branch (main) is checked out.",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`docs-portal` is a copy of `docs-portal`, on `main`, with its full history.",
     "answer_key": [
@@ -479,10 +477,10 @@
     "task": "Clone the remote repository from `https://example.test/training/api-lab.git` into a local folder named `api-workshop`.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of api-lab exists in api-workshop.",
+      "Clone the repository into the api-workshop folder.",
       "The default branch (main) is checked out.",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`api-workshop` is a copy of `api-lab`, on `main`, with its full history.",
     "answer_key": [
@@ -511,16 +509,16 @@
     "scenario_number": "1.2.3",
     "difficulty": "easy",
     "label": "Clone profile-site at the starter branch",
-    "story": "Maeve wants everyone in the capstone group to have a personal profile site by next week.\n\nShe published a starter version of the template on its own branch so nobody begins from a blank page. **The `starter` branch is the one you should be working from**, __not the repository's default__.",
+    "story": "Maeve wants everyone in the capstone group to have a personal profile site by next week. She published a starter template on its own branch so nobody has to begin from a blank page.\n\nYou open the repository. The default branch shows the finished example — **not the `starter` branch you should actually be working from**.",
     "starting_point": "You are in your workspace, outside any repository. The remote repository is reachable at the address in the task.",
     "real_world_context": "The `starter` branch contains the template intended for new contributors. Checking it out as part of the clone puts the local workspace on the correct starting line immediately.",
     "task": "Clone the remote repository from `https://example.test/training/profile-site.git` with `starter` checked out.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of profile-site exists in profile-site.",
+      "Clone profile-site into a local folder named profile-site.",
       "starter is checked out.",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`profile-site` is a copy of `profile-site`, on `starter`, with its full history.",
     "answer_key": [
@@ -551,14 +549,14 @@
     "label": "Clone oss-toolkit via SSH",
     "story": "You have put off contributing to an open-source toolkit for months.\n\nLast night you finally added your SSH key to your account. Sage, who has contributed before, says the SSH address is the one to use now that your key is in place, since it skips the password prompts.",
     "starting_point": "You are in your workspace, outside any repository. The remote repository is reachable at the address in the task.",
-    "real_world_context": "When SSH access is configured, a developer can use the project’s SSH address to obtain a local copy and its history under that authentication setup.",
+    "real_world_context": "SSH cloning authenticates using a key pair instead of a password, which means no login prompt on every push or pull. Once a key is registered with the server, the SSH URL is the address to use for all subsequent operations on that project.",
     "task": "Clone the remote repository from `git@github.com:open-dev/oss-toolkit.git` using SSH.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of oss-toolkit exists in oss-toolkit.",
+      "Clone oss-toolkit into a local folder named oss-toolkit.",
       "The default branch (main) is checked out.",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`oss-toolkit` is a copy of `oss-toolkit`, on `main`, with its full history.",
     "answer_key": [
@@ -587,16 +585,16 @@
     "scenario_number": "1.2.5",
     "difficulty": "easy",
     "label": "Clone audit-logs into audit-logs-local",
-    "story": "The IT office keeps its audit logs repository on the university's internal Git server, and you have been asked to review a week of entries. Raven wants your working copy in a folder named `audit-logs-local`, so nobody mixes it up with the official version on the server.",
+    "story": "The university's IT office has flagged a week of unusual audit log entries and asked your team to investigate. The logs live in a repository on the internal Git server, but you need a local copy to work from.\n\nRaven is firm about the folder name: \"`audit-logs-local`. Not `audit-logs`,\" she says. \"The last time someone mixed those up, we spent an hour figuring out which copy was authoritative.\"",
     "starting_point": "You are in your workspace, outside any repository. No folder named `audit-logs-local` exists yet. The remote repository is reachable at the address in the task.",
     "real_world_context": "Internal repositories are usually copied into a local workspace before analysis or changes. Naming the destination `audit-logs-local` makes the copy easy to distinguish from other projects.",
     "task": "Clone the remote repository from `https://git.corp.example/it/audit-logs.git` into a local folder named `audit-logs-local`.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of audit-logs exists in audit-logs-local.",
+      "Clone the repository into the audit-logs-local folder.",
       "The default branch (main) is checked out.",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`audit-logs-local` is a copy of `audit-logs`, on `main`, with its full history.",
     "answer_key": [
@@ -627,14 +625,14 @@
     "label": "Clone backend-api at feature/auth",
     "story": "Your group's backend is mid-sprint and everyone is working on login, which lives on its own branch rather than the default one.\n\nFinn is tired of teammates cloning, forgetting to switch branches, and committing to the wrong place. You want your copy to open on the login work from the first minute.",
     "starting_point": "You are in your workspace, outside any repository. The remote repository is reachable at the address in the task.",
-    "real_world_context": "Joining work already underway on `feature/auth` calls for that branch as the initial checkout. It prevents a new teammate from beginning changes on the wrong line.",
+    "real_world_context": "When a team is mid-sprint on a feature branch, cloning with `-b feature/auth` means your working copy is on the right branch from the first command. The alternative — cloning, then manually switching — takes an extra step and leaves room to forget.",
     "task": "Clone the remote repository from `https://github.com/acme-startup/backend-api.git` with `feature/auth` checked out.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of backend-api exists in backend-api.",
+      "Clone backend-api into a local folder named backend-api.",
       "feature/auth is checked out.",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`backend-api` is a copy of `backend-api`, on `feature/auth`, with its full history.",
     "answer_key": [
@@ -663,16 +661,16 @@
     "scenario_number": "1.2.7",
     "difficulty": "medium",
     "label": "Clone analytics-lab via SSH into analytics-worktree",
-    "story": "Maeve has given you access to the department's analytics lab repository, and your SSH key is already registered. You keep several projects on this laptop, so the copy needs its own clearly named folder, `analytics-worktree`, rather than a default name you might overwrite later.",
+    "story": "Maeve added you to the department's analytics lab repository yesterday. Your SSH key is registered.\n\nThere's one catch: you already have three repositories on this laptop with similar names, and mixing them up last month cost you an afternoon. This copy goes in `analytics-worktree` — specific enough that you won't confuse it with anything else.",
     "starting_point": "You are in your workspace, outside any repository. No folder named `analytics-worktree` exists yet. The remote repository is reachable at the address in the task.",
     "real_world_context": "The analytics team uses an SSH remote and a conventional local worktree name. A clone can honor both the access method and the folder layout used in their instructions.",
     "task": "Clone the remote repository from `git@example.test:training/analytics-lab.git` into a local folder named `analytics-worktree` using SSH.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of analytics-lab exists in analytics-worktree.",
+      "Clone the repository into the analytics-worktree folder.",
       "The default branch (main) is checked out.",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`analytics-worktree` is a copy of `analytics-lab`, on `main`, with its full history.",
     "answer_key": [
@@ -707,10 +705,10 @@
     "task": "Clone the remote repository from `https://example.test/tools/cli-tool.git` into a local folder named `cli-starter-lab` with `starter` checked out.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of cli-tool exists in cli-starter-lab.",
+      "Clone the repository into the cli-starter-lab folder.",
       "starter is checked out.",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`cli-starter-lab` is a copy of `cli-tool`, on `starter`, with its full history.",
     "answer_key": [
@@ -745,11 +743,11 @@
     "task": "Clone the remote repository from `https://example.test/frontend/css-kit.git` using a history depth of 1.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of css-kit exists in css-kit.",
+      "Clone css-kit into a local folder named css-kit.",
       "The default branch (main) is checked out.",
       "The copy is shallow: only the latest commit is downloaded (history depth of 1).",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`css-kit` is a copy of `css-kit`, on `main`, with its history limited to one commit.",
     "answer_key": [
@@ -780,15 +778,15 @@
     "label": "Shallow SSH clone of oss-toolkit into oss-review",
     "story": "You are reviewing a single contribution to the open-source toolkit, and your laptop's storage is nearly full. Your SSH key is set up.\n\nAll you need is the latest snapshot, in a folder called `oss-review` so it stays apart from the copy you made last week. Raven reminds you that anything extra you download will have to be deleted later.",
     "starting_point": "You are in your workspace, outside any repository. No folder named `oss-review` exists yet. The remote repository is reachable at the address in the task.",
-    "real_world_context": "This review needs SSH access and only the newest snapshot. A shallow clone keeps the local review copy small, with older history unavailable until it is fetched.",
+    "real_world_context": "Combining SSH with `--depth 1` creates a minimal, authenticated copy of a repository: SSH handles the access credentials, while shallow depth limits how many commits are transferred. The tradeoff is that operations requiring older history — like inspecting early commits or comparing to a distant ancestor — will fail until the missing history is fetched.",
     "task": "Clone the remote repository from `git@github.com:open-dev/oss-toolkit.git` into a local folder named `oss-review` over SSH with a history depth of 1.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of oss-toolkit exists in oss-review.",
+      "Clone the repository into the oss-review folder.",
       "The default branch (main) is checked out.",
       "The copy is shallow: only the latest commit is downloaded (history depth of 1).",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`oss-review` is a copy of `oss-toolkit`, on `main`, with its history limited to one commit.",
     "answer_key": [
@@ -817,17 +815,17 @@
     "scenario_number": "1.2.11",
     "difficulty": "hard",
     "label": "Shallow clone mobile-ui at starter into mobile-ui-lab",
-    "story": "Finn wants a quick look at the mobile UI starter branch before tonight's group meeting.\n\nYou don't need to know how it got that way, only what it looks like now, and your connection is slow. Keep your copy in a folder called `mobile-ui-lab`.",
+    "story": "Finn needs to see the current state of the mobile UI starter branch before tonight's group meeting. The presentation is in three hours, and he doesn't have time to wait for the team's connection to transfer the full history.\n\n\"Just get the latest snapshot,\" he says. \"Put it in `mobile-ui-lab` so it doesn't overwrite the full copy.\"",
     "starting_point": "You are in your workspace, outside any repository. No folder named `mobile-ui-lab` exists yet. The remote repository is reachable at the address in the task.",
-    "real_world_context": "A quick starter-branch review needs the right branch and only its latest snapshot. Shallow history saves space, but earlier commits are not present locally.",
+    "real_world_context": "Combining `--depth 1` with `-b` at clone time gets you a lightweight snapshot of a specific branch in a single command. The resulting copy is small and fast to set up, though operations that need older commits — like inspecting early history or comparing to an ancestor — won't work until more history is fetched.",
     "task": "Clone the remote repository from `https://example.test/frontend/mobile-ui.git` into a local folder named `mobile-ui-lab` with `starter` checked out using a history depth of 1.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of mobile-ui exists in mobile-ui-lab.",
+      "Clone the repository into the mobile-ui-lab folder.",
       "starter is checked out.",
       "The copy is shallow: only the latest commit is downloaded (history depth of 1).",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`mobile-ui-lab` is a copy of `mobile-ui`, on `starter`, with its history limited to one commit.",
     "answer_key": [
@@ -858,17 +856,17 @@
     "scenario_number": "1.2.12",
     "difficulty": "hard",
     "label": "Shallow clone lab-notebook at review into notebook-review",
-    "story": "Maeve asks you to check a handful of lab notebook entries on the `review` branch before they are published.\n\nYou don't need the project's past, and the full repository is large. Keep your copy separate, in `notebook-review`, so it doesn't mix with your own notebook.",
+    "story": "Maeve is running the lab notebook entries through a final review before they go public next week. She's flagged the ones on the `review` branch as ready to check, but the full repository is large and she needs an answer today.\n\n\"Shallow copy is fine,\" she says. \"Just don't put it in the same folder as your notebook — that confusion cost us an hour last time.\"",
     "starting_point": "You are in your workspace, outside any repository. No folder named `notebook-review` exists yet. The remote repository is reachable at the address in the task.",
-    "real_world_context": "The reviewer needs the tip of `review` in a named workspace. Limiting history avoids copying older notebook commits that the immediate check does not require.",
+    "real_world_context": "A shallow branch clone gives you just enough to review the latest state of a specific line of work, without the storage cost of unrelated commits or branches. For large repositories with long histories, this can be the difference between a fast setup and a slow one.",
     "task": "Clone the remote repository from `https://example.test/docs/lab-notebook.git` into a local folder named `notebook-review` with `review` checked out using a history depth of 1.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of lab-notebook exists in notebook-review.",
+      "Clone the repository into the notebook-review folder.",
       "review is checked out.",
       "The copy is shallow: only the latest commit is downloaded (history depth of 1).",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`notebook-review` is a copy of `lab-notebook`, on `review`, with its history limited to one commit.",
     "answer_key": [
@@ -901,14 +899,14 @@
     "label": "Clone research-log via SSH into research-log-lab",
     "story": "Your thesis analysis will run on a laptop that won't have Wi-Fi at the field site.\n\n**You need the whole research log, history included, available offline**, because you'll be tracing when each entry changed. Your SSH key is already set up. The copy belongs in `research-log-lab`, separate from the shared one.",
     "starting_point": "You are in your workspace, outside any repository. No folder named `research-log-lab` exists yet. The remote repository is reachable at the address in the task.",
-    "real_world_context": "Offline analysis needs the repository files and their history in a local folder. This full SSH clone gives the researcher a working copy under `research-log-lab`.",
+    "real_world_context": "When a repository needs to work fully without a network connection, a complete clone is the right choice — commands like `git log`, `git blame`, and ancestor comparisons rely on having the full commit history available locally. SSH cloning ensures the initial transfer is authenticated; once cloned, the repository works identically regardless of which protocol was used.",
     "task": "Clone the remote repository from `git@example.test:docs/research-log.git` into a local folder named `research-log-lab` using SSH.",
     "required_files": [],
     "objective_checks": [
-      "A local copy of research-log exists in research-log-lab.",
+      "Clone the repository into the research-log-lab folder.",
       "The default branch (main) is checked out.",
       "origin points to the URL given in the task.",
-      "The new working folder has no uncommitted changes."
+      "The cloned repository is clean, with no staged or unstaged changes."
     ],
     "expected_result": "`research-log-lab` is a copy of `research-log`, on `main`, with its full history.",
     "answer_key": [
@@ -945,8 +943,8 @@
     "task": "Stage `README.md`, `main.py`, `requirements.txt` and create a commit with the message `Initial commit`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Initial commit” exists on main.",
-      "That commit contains README.md, main.py, requirements.txt.",
+      "Create a commit named \"Initial commit\" on main.",
+      "Include README.md, main.py, requirements.txt in that commit.",
       "Nothing else was committed.",
       "Finish on main."
     ],
@@ -988,8 +986,8 @@
     "task": "Stage `src/auth/` and create a commit with the message `Add auth module`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Add auth module” exists on main.",
-      "That commit contains src/auth/.",
+      "Create a commit named \"Add auth module\" on main.",
+      "Include src/auth/ in that commit.",
       "Nothing else was committed.",
       "Finish on main."
     ],
@@ -1031,8 +1029,8 @@
     "task": "Stage `src/form.js` and create a commit with the message `Update form validation`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Update form validation” exists on main.",
-      "That commit contains src/form.js.",
+      "Create a commit named \"Update form validation\" on main.",
+      "Include src/form.js in that commit.",
       "Nothing else was committed.",
       "Finish on main."
     ],
@@ -1074,8 +1072,8 @@
     "task": "Stage `README.md` and create a commit with the message `Clarify setup steps`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Clarify setup steps” exists on main.",
-      "That commit contains README.md.",
+      "Create a commit named \"Clarify setup steps\" on main.",
+      "Include README.md in that commit.",
       "Nothing else was committed.",
       "Finish on main."
     ],
@@ -1117,8 +1115,8 @@
     "task": "Stage `styles/navbar.css` and create a commit with the message `Adjust navbar spacing`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Adjust navbar spacing” exists on main.",
-      "That commit contains styles/navbar.css.",
+      "Create a commit named \"Adjust navbar spacing\" on main.",
+      "Include styles/navbar.css in that commit.",
       "Nothing else was committed.",
       "Finish on main."
     ],
@@ -1160,8 +1158,8 @@
     "task": "Stage `Dockerfile`, `.env.example` and create a commit with the message `Add Docker configuration`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Add Docker configuration” exists on main.",
-      "That commit contains Dockerfile, .env.example.",
+      "Create a commit named \"Add Docker configuration\" on main.",
+      "Include Dockerfile, .env.example in that commit.",
       "Nothing else was committed.",
       "Finish on main."
     ],
@@ -1203,8 +1201,8 @@
     "task": "Stage `src/profile-card.js`, `styles/profile-card.css` and create a commit with the message `Update profile card layout`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Update profile card layout” exists on main.",
-      "That commit contains src/profile-card.js, styles/profile-card.css.",
+      "Create a commit named \"Update profile card layout\" on main.",
+      "Include src/profile-card.js, styles/profile-card.css in that commit.",
       "Nothing else was committed.",
       "Finish on main."
     ],
@@ -1246,8 +1244,8 @@
     "task": "Stage `src/search.js`, `templates/search.html` and create a commit with the message `Refine search results view`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Refine search results view” exists on main.",
-      "That commit contains src/search.js, templates/search.html.",
+      "Create a commit named \"Refine search results view\" on main.",
+      "Include src/search.js, templates/search.html in that commit.",
       "Nothing else was committed.",
       "Finish on main."
     ],
@@ -1289,8 +1287,8 @@
     "task": "Stage `src/export.py`, `docs/export.md` and create a commit with the message `Document export flow update`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Document export flow update” exists on main.",
-      "That commit contains src/export.py, docs/export.md.",
+      "Create a commit named \"Document export flow update\" on main.",
+      "Include src/export.py, docs/export.md in that commit.",
       "Nothing else was committed.",
       "Finish on main."
     ],
@@ -1332,8 +1330,8 @@
     "task": "Stage `api/handler.py` and create a commit with the message `Fix request handler null check`.\n\n**Leave `api/experimental.py` uncommitted**; finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix request handler null check” exists on main.",
-      "That commit contains api/handler.py.",
+      "Create a commit named \"Fix request handler null check\" on main.",
+      "Include api/handler.py in that commit.",
       "api/experimental.py is not committed and still changed in the working folder.",
       "Finish on main."
     ],
@@ -1378,8 +1376,8 @@
     "task": "Stage `src/parser.py`, `tests/test_parser.py` and create a commit with the message `Add parser module with unit tests`.\n\n**Leave `debug.log` and `scratch.py` uncommitted**; finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Add parser module with unit tests” exists on main.",
-      "That commit contains src/parser.py, tests/test_parser.py.",
+      "Create a commit named \"Add parser module with unit tests\" on main.",
+      "Include src/parser.py, tests/test_parser.py in that commit.",
       "debug.log and scratch.py are not committed and still changed in the working folder.",
       "Finish on main."
     ],
@@ -1424,8 +1422,8 @@
     "task": "Stage `src/profile-card.js` and create a commit with the message `Update profile card behavior`.\n\n**Leave `notes/profile-ideas.md` uncommitted**; finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Update profile card behavior” exists on main.",
-      "That commit contains src/profile-card.js.",
+      "Create a commit named \"Update profile card behavior\" on main.",
+      "Include src/profile-card.js in that commit.",
       "notes/profile-ideas.md is not committed and still changed in the working folder.",
       "Finish on main."
     ],
@@ -1470,8 +1468,8 @@
     "task": "Stage `src/export.py` and create a commit with the message `Fix export validation`.\n\n**Leave `scratch/export-test-output.txt` uncommitted**; finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix export validation” exists on main.",
-      "That commit contains src/export.py.",
+      "Create a commit named \"Fix export validation\" on main.",
+      "Include src/export.py in that commit.",
       "scratch/export-test-output.txt is not committed and still changed in the working folder.",
       "Finish on main."
     ],
@@ -1516,8 +1514,8 @@
     "task": "Stage `src/search.js`, `templates/search.html` and create a commit with the message `Refine search ranking display`.\n\n**Leave `notes/search-ranking.md` uncommitted**; finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Refine search ranking display” exists on main.",
-      "That commit contains src/search.js, templates/search.html.",
+      "Create a commit named \"Refine search ranking display\" on main.",
+      "Include src/search.js, templates/search.html in that commit.",
       "notes/search-ranking.md is not committed and still changed in the working folder.",
       "Finish on main."
     ],
@@ -1559,15 +1557,15 @@
     "story": "You fixed a rounding error in `src/billing.py`, then added a few print statements further down the same file to see what the numbers looked like.\n\nMaeve is checking the project tonight, and the group needs the rounding fix saved now. The prints were only ever for you.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `src/billing.py`.",
     "real_world_context": "A rounding fix and temporary print statements can live in the same file. Partial staging saves the client-ready fix while the diagnostic experiment stays in the working copy.",
-    "task": "Stage __only__ the billing rounding fix and commit it with the message `Fix billing calculation rounding error`. Leave The diagnostic print statements out of the commit and finish on `main`.",
+    "task": "Stage __only__ the billing rounding fix and commit it with the message `Fix billing calculation rounding error`. Leave the diagnostic print statements out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix billing calculation rounding error” exists on main.",
+      "Create a commit named \"Fix billing calculation rounding error\" on main.",
       "It contains only the billing rounding fix.",
       "The diagnostic print statements is not committed and still in the working folder.",
       "Finish on main."
     ],
-    "expected_result": "Only the billing rounding fix is saved in the commit “`Fix billing calculation rounding error`”. The diagnostic print statements stays in the working folder, uncommitted.",
+    "expected_result": "Only the billing rounding fix is saved in the commit “`Fix billing calculation rounding error`”. The diagnostic print statements stay in the working folder, uncommitted.",
     "answer_key": [
       {
         "kind": "command",
@@ -1604,10 +1602,10 @@
     "story": "`src/routes.py` holds two pieces of work: the updated route handlers, which are finished, and an experimental auth middleware you commented out after starting it *on a whim*. Finn is waiting on the handlers to connect the frontend.\n\nBoth changes sit in the same file, which makes this awkward.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `src/routes.py`.",
     "real_world_context": "Updated route handlers are ready before the experimental middleware. Staging only the handler hunk prevents an unreviewed auth idea from joining the commit.",
-    "task": "Stage __only__ the updated route handlers and commit it with the message `Update API route handlers`. Leave The experimental auth middleware out of the commit and finish on `main`.",
+    "task": "Stage __only__ the updated route handlers and commit it with the message `Update API route handlers`. Leave the experimental auth middleware out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Update API route handlers” exists on main.",
+      "Create a commit named \"Update API route handlers\" on main.",
       "It contains only the updated route handlers.",
       "The experimental auth middleware is not committed and still in the working folder.",
       "Finish on main."
@@ -1649,10 +1647,10 @@
     "story": "Halfway through a large cleanup of `src/auth.py`, you spotted a validation bug and fixed it. The cleanup is nowhere near done, but the bug fix can't wait. Raven hit it while testing the sign-in page.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `src/auth.py`.",
     "real_world_context": "A narrow validation fix can be released before a larger auth refactor is finished. Partial staging separates the safe fix from the ongoing work.",
-    "task": "Stage __only__ the auth validation fix and commit it with the message `Fix auth validation`. Leave The unfinished refactor out of the commit and finish on `main`.",
+    "task": "Stage __only__ the auth validation fix and commit it with the message `Fix auth validation`. Leave the unfinished refactor out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix auth validation” exists on main.",
+      "Create a commit named \"Fix auth validation\" on main.",
       "It contains only the auth validation fix.",
       "The unfinished refactor is not committed and still in the working folder.",
       "Finish on main."
@@ -1694,10 +1692,10 @@
     "story": "In `src/search.py` you corrected the ranking so exact title matches come first, and while you were there you started tidying the surrounding code.\n\nSage is demoing search to Maeve tomorrow and needs the ranking fix. The tidying is unfinished.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `src/search.py`.",
     "real_world_context": "A ranking correction and code cleanup may have different review risks. Committing only the correction keeps its effect easy to assess.",
-    "task": "Stage __only__ the ranking algorithm fix and commit it with the message `Fix search ranking`. Leave The cleanup refactor out of the commit and finish on `main`.",
+    "task": "Stage __only__ the ranking algorithm fix and commit it with the message `Fix search ranking`. Leave the cleanup refactor out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix search ranking” exists on main.",
+      "Create a commit named \"Fix search ranking\" on main.",
       "It contains only the ranking algorithm fix.",
       "The cleanup refactor is not committed and still in the working folder.",
       "Finish on main."
@@ -1739,10 +1737,10 @@
     "story": "Librarians complained that exported dates came out in the wrong format.\n\nYou fixed it in `src/export.py` and, to see what was happening, added some temporary logging lines in the same file. Finn wants the format fix in before the weekly build, and nobody wants the logging there.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `src/export.py`.",
     "real_world_context": "The formatting fix can stand on its own while new logging remains experimental. Selecting just that hunk produces a focused export change.",
-    "task": "Stage __only__ the export formatting fix and commit it with the message `Fix export formatting`. Leave The extra logging out of the commit and finish on `main`.",
+    "task": "Stage __only__ the export formatting fix and commit it with the message `Fix export formatting`. Leave the extra logging out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix export formatting” exists on main.",
+      "Create a commit named \"Fix export formatting\" on main.",
       "It contains only the export formatting fix.",
       "The extra logging is not committed and still in the working folder.",
       "Finish on main."
@@ -1784,10 +1782,10 @@
     "story": "`src/parser.py` holds *three separate pieces* of work: a bug that made the importer choke on blank lines, which is fixed; a half-finished rewrite of token handling; and an experimental section you aren't sure about. Maeve will review the bug fix on its own.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `src/parser.py`.",
     "real_world_context": "The parser file holds a finished bug fix, a refactor, and an experiment. Partial staging can save the fix alone while the other two sections stay available locally.",
-    "task": "Stage __only__ the parser bug fix and commit it with the message `Fix parser blank-line bug`. Leave The refactor and experiment out of the commit and finish on `main`.",
+    "task": "Stage __only__ the parser bug fix and commit it with the message `Fix parser blank-line bug`. Leave the refactor and experiment out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix parser blank-line bug” exists on main.",
+      "Create a commit named \"Fix parser blank-line bug\" on main.",
       "It contains only the parser bug fix.",
       "The refactor and experiment are not committed and still in the working folder.",
       "Finish on main."
@@ -1829,10 +1827,10 @@
     "story": "`src/profile.py` has three changes in it: a validation fix, a wording update for the profile page, and a cleanup you haven't finished. Next to it, `notes/profile-todo.md` is still full of your reminders.\n\nOnly the validation fix is ready for Sage to review.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `src/profile.py`, `notes/profile-todo.md`.",
     "real_world_context": "The validation change is ready, but copy and cleanup edits are still in progress. A focused patch keeps that unfinished work and the notes file out of the commit.",
-    "task": "Stage __only__ the profile validation fix and commit it with the message `Fix profile validation`. Leave The copy, cleanup, and notes out of the commit and finish on `main`.",
+    "task": "Stage __only__ the profile validation fix and commit it with the message `Fix profile validation`. Leave the copy, cleanup, and notes out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix profile validation” exists on main.",
+      "Create a commit named \"Fix profile validation\" on main.",
       "It contains only the profile validation fix.",
       "The copy, cleanup, and notes are not committed and still in the working folder.",
       "Finish on main."
@@ -1874,10 +1872,10 @@
     "story": "Over the afternoon you changed `src/payment.py` three ways: a rounding fix, some added logging, and a comment you reworded. `tmp/payment-scratch.txt` is also in your folder from your test calculations. Raven's rule is one reason per commit, so you're stopping before you save any of it.\n\nOnly the rounding fix belongs to the bug report.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `src/payment.py`, `tmp/payment-scratch.txt`.",
     "real_world_context": "A payment rounding bug should be reviewed independently of logging and comments. Selecting its hunk also leaves the scratch file outside the saved change.",
-    "task": "Stage __only__ the payment rounding fix and commit it with the message `Fix payment rounding`. Leave The logging, comment edit, and scratch file out of the commit and finish on `main`.",
+    "task": "Stage __only__ the payment rounding fix and commit it with the message `Fix payment rounding`. Leave the logging, comment edit, and scratch file out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix payment rounding” exists on main.",
+      "Create a commit named \"Fix payment rounding\" on main.",
       "It contains only the payment rounding fix.",
       "The logging, comment edit, and scratch file are not committed and still in the working folder.",
       "Finish on main."
@@ -1919,10 +1917,10 @@
     "story": "`src/dashboard.js` has three changes: the filter logic you fixed, a theme update you were trying out, and some `console.log` lines left from debugging. `notes/dashboard-ideas.md` is still in the folder too. Finn needs the filter fix for tomorrow's demo, but the theme and the logging aren't something he should have to review.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `src/dashboard.js`, `notes/dashboard-ideas.md`.",
     "real_world_context": "The filter fix, theme work, and console output share a file but serve different purposes. Partial staging isolates the functional correction for review.",
-    "task": "Stage __only__ the dashboard filter fix and commit it with the message `Fix dashboard filter`. Leave The theme work, console output, and notes out of the commit and finish on `main`.",
+    "task": "Stage __only__ the dashboard filter fix and commit it with the message `Fix dashboard filter`. Leave the theme work, console output, and notes out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix dashboard filter” exists on main.",
+      "Create a commit named \"Fix dashboard filter\" on main.",
       "It contains only the dashboard filter fix.",
       "The theme work, console output, and notes are not committed and still in the working folder.",
       "Finish on main."
@@ -1964,10 +1962,10 @@
     "story": "Your group deploys its project from `terraform/main.tf`.\n\nIn one sitting you updated the network configuration and also started trying out some experimental feature flags, so both changes sit in the same file. `terraform/debug.txt` is in the folder too. Raven reviews the network change tomorrow, and she doesn't want to wonder what the flags are for.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `terraform/main.tf`, `terraform/debug.txt`.",
     "real_world_context": "Network configuration and experimental feature flags share a Terraform file. Saving only the network hunk keeps unapproved flags and debug material out of the infrastructure change.",
-    "task": "Stage __only__ the network configuration hunk and commit it with the message `Update network Terraform configuration`. Leave The experimental flags and debug file out of the commit and finish on `main`.",
+    "task": "Stage __only__ the network configuration hunk and commit it with the message `Update network Terraform configuration`. Leave the experimental flags and debug file out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Update network Terraform configuration” exists on main.",
+      "Create a commit named \"Update network Terraform configuration\" on main.",
       "It contains only the network configuration hunk.",
       "The experimental flags and debug file are not committed and still in the working folder.",
       "Finish on main."
@@ -2009,10 +2007,10 @@
     "story": "Your validation fix touched two files, `src/auth.py` and `tests/test_auth.py`, and in each one there's also unfinished work: a refactor in the code and a cleanup in the tests. `notes/auth-debug.md` is still around from debugging. Maeve wants one commit that shows the fix and the test that proves it, and nothing else.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `src/auth.py`, `tests/test_auth.py`, `notes/auth-debug.md`.",
     "real_world_context": "A validation fix is meaningful alongside its matching test. Partial staging can take those two hunks across files without sweeping in the refactor, cleanup, or debug notes.",
-    "task": "Stage __only__ the auth validation fix and matching test and commit it with the message `Fix auth validation and add its test`. Leave The refactor, test cleanup, and debug notes out of the commit and finish on `main`.",
+    "task": "Stage __only__ the auth validation fix and matching test and commit it with the message `Fix auth validation and add its test`. Leave the refactor, test cleanup, and debug notes out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix auth validation and add its test” exists on main.",
+      "Create a commit named \"Fix auth validation and add its test\" on main.",
       "It contains only the auth validation fix and matching test.",
       "The refactor, test cleanup, and debug notes are not committed and still in the working folder.",
       "Finish on main."
@@ -2059,10 +2057,10 @@
     "story": "The ranking change touched `src/search.py` and `tests/test_search.py`, and each file also carries something unrelated: cleanup in the code, a fixture tidy-up in the tests.\n\nA `tmp/search-output.txt` file is lying around from a test run. Sage is going to cite this commit as the one that fixed ranking, so it should contain exactly that.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `src/search.py`, `tests/test_search.py`, `tmp/search-output.txt`.",
     "real_world_context": "The ranking logic and its test should be reviewed together. The unrelated cleanup, fixture edits, and temporary output can remain outside this commit.",
-    "task": "Stage __only__ the search ranking fix and matching test and commit it with the message `Fix search ranking and add its test`. Leave The cleanup, fixture edits, and temporary output out of the commit and finish on `main`.",
+    "task": "Stage __only__ the search ranking fix and matching test and commit it with the message `Fix search ranking and add its test`. Leave the cleanup, fixture edits, and temporary output out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix search ranking and add its test” exists on main.",
+      "Create a commit named \"Fix search ranking and add its test\" on main.",
       "It contains only the search ranking fix and matching test.",
       "The cleanup, fixture edits, and temporary output are not committed and still in the working folder.",
       "Finish on main."
@@ -2109,10 +2107,10 @@
     "story": "Fixing the export date format meant changing `src/export.py` and `tests/test_export.py`.\n\nEach file also has changes that don't belong to the fix: logging in the code and a cleanup in the tests. `notes/export-followup.md` is waiting beside them. Raven wants a commit that tells the story of the format fix and nothing else.",
     "starting_point": "You are on `main`; local branches include `main`; working files include `src/export.py`, `tests/test_export.py`, `notes/export-followup.md`.",
     "real_world_context": "The export formatting fix and its test form one change. Selecting their hunks keeps extra logging, test cleanup, and follow-up notes for later.",
-    "task": "Stage __only__ the export formatting fix and matching test and commit it with the message `Fix export formatting and add its test`. Leave The logging, test cleanup, and follow-up notes out of the commit and finish on `main`.",
+    "task": "Stage __only__ the export formatting fix and matching test and commit it with the message `Fix export formatting and add its test`. Leave the logging, test cleanup, and follow-up notes out of the commit and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "A commit with the message “Fix export formatting and add its test” exists on main.",
+      "Create a commit named \"Fix export formatting and add its test\" on main.",
       "It contains only the export formatting fix and matching test.",
       "The logging, test cleanup, and follow-up notes are not committed and still in the working folder.",
       "Finish on main."
@@ -2162,7 +2160,7 @@
     "task": "Change the latest local commit message to `Initial commit`. Keep its files as they are and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "The latest commit's message is now “Initial commit”.",
+      "Correct the latest commit's message to \"Initial commit\".",
       "The files in that commit are unchanged.",
       "No extra commit was created.",
       "Finish on main."
@@ -2200,7 +2198,7 @@
     "task": "Include `src/logout.py` in the latest local commit while keeping its message `Add auth module`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "src/logout.py is part of the latest commit.",
+      "Add src/logout.py to the latest commit.",
       "The latest commit's message is still “Add auth module”.",
       "No extra commit was created (the amended commit replaced the old one).",
       "No uncommitted changes remain.",
@@ -2244,7 +2242,7 @@
     "task": "Change the latest local commit message to `Clarify login copy`. Keep its files as they are and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "The latest commit's message is now “Clarify login copy”.",
+      "Change the latest commit's message to \"Clarify login copy\".",
       "The files in that commit are unchanged.",
       "No extra commit was created.",
       "Finish on main."
@@ -2282,7 +2280,7 @@
     "task": "Change the latest local commit message to `Clarify setup requirements`. Keep its files as they are and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "The latest commit's message is now “Clarify setup requirements”.",
+      "Change the latest commit's message to \"Clarify setup requirements\".",
       "The files in that commit are unchanged.",
       "No extra commit was created.",
       "Finish on main."
@@ -2320,7 +2318,7 @@
     "task": "Change the latest local commit message to `Adjust navbar spacing`. Keep its files as they are and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "The latest commit's message is now “Adjust navbar spacing”.",
+      "Change the latest commit's message to \"Adjust navbar spacing\".",
       "The files in that commit are unchanged.",
       "No extra commit was created.",
       "Finish on main."
@@ -2358,8 +2356,8 @@
     "task": "Include `docs/CHANGELOG.md` in the latest local commit and change its message to `Add parser feature and update changelog`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "docs/CHANGELOG.md is part of the latest commit.",
-      "The latest commit's message is now “Add parser feature and update changelog”.",
+      "Add docs/CHANGELOG.md to the latest commit.",
+      "Change the latest commit's message to \"Add parser feature and update changelog\".",
       "No extra commit was created (the amended commit replaced the old one).",
       "No uncommitted changes remain.",
       "Finish on main."
@@ -2402,7 +2400,7 @@
     "task": "Include `styles/profile-card.css` in the latest local commit while keeping its message `Update profile card layout`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "styles/profile-card.css is part of the latest commit.",
+      "Add styles/profile-card.css to the latest commit.",
       "The latest commit's message is still “Update profile card layout”.",
       "No extra commit was created (the amended commit replaced the old one).",
       "No uncommitted changes remain.",
@@ -2446,7 +2444,7 @@
     "task": "Include `docs/export.md` in the latest local commit while keeping its message `Document export flow update`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "docs/export.md is part of the latest commit.",
+      "Add docs/export.md to the latest commit.",
       "The latest commit's message is still “Document export flow update”.",
       "No extra commit was created (the amended commit replaced the old one).",
       "No uncommitted changes remain.",
@@ -2490,7 +2488,7 @@
     "task": "Include `templates/search.html` in the latest local commit while keeping its message `Refine search results view`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "templates/search.html is part of the latest commit.",
+      "Add templates/search.html to the latest commit.",
       "The latest commit's message is still “Refine search results view”.",
       "No extra commit was created (the amended commit replaced the old one).",
       "No uncommitted changes remain.",
@@ -2534,7 +2532,7 @@
     "task": "Change the latest local commit message to `Update Terraform staging environment configuration`. Keep its files as they are and finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "The latest commit's message is now “Update Terraform staging environment configuration”.",
+      "Change the latest commit's message to \"Update Terraform staging environment configuration\".",
       "The files in that commit are unchanged.",
       "No extra commit was created.",
       "Finish on main."
@@ -2572,8 +2570,8 @@
     "task": "Include `styles/profile-layout.css` in the latest local commit and change its message to `Polish profile card layout`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "styles/profile-layout.css is part of the latest commit.",
-      "The latest commit's message is now “Polish profile card layout”.",
+      "Add styles/profile-layout.css to the latest commit.",
+      "Change the latest commit's message to \"Polish profile card layout\".",
       "No extra commit was created (the amended commit replaced the old one).",
       "No uncommitted changes remain.",
       "Finish on main."
@@ -2616,8 +2614,8 @@
     "task": "Include `tests/test_auth.py` in the latest local commit and change its message to `Add auth validation coverage`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "tests/test_auth.py is part of the latest commit.",
-      "The latest commit's message is now “Add auth validation coverage”.",
+      "Add tests/test_auth.py to the latest commit.",
+      "Change the latest commit's message to \"Add auth validation coverage\".",
       "No extra commit was created (the amended commit replaced the old one).",
       "No uncommitted changes remain.",
       "Finish on main."
@@ -2660,8 +2658,8 @@
     "task": "Include `docs/export.md` in the latest local commit and change its message to `Document export validation behavior`. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "docs/export.md is part of the latest commit.",
-      "The latest commit's message is now “Document export validation behavior”.",
+      "Add docs/export.md to the latest commit.",
+      "Change the latest commit's message to \"Document export validation behavior\".",
       "No extra commit was created (the amended commit replaced the old one).",
       "No uncommitted changes remain.",
       "Finish on main."
@@ -2707,7 +2705,7 @@
       "notes.txt is no longer staged, and its edits are still in the working folder.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Notes.txt` is unstaged with the edits kept. You are on `main`, and nothing was committed.",
+    "expected_result": "`notes.txt` is unstaged with the edits kept. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -2741,10 +2739,10 @@
     "task": "Discard the working-tree changes in `config.py` and restore the committed version. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "config.py is back to its committed version (its edits are gone).",
+      "Discard the edits in config.py, restoring it to its committed version.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Config.py` was restored to the committed version. You are on `main`, and nothing was committed.",
+    "expected_result": "`config.py` was restored to the committed version. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -2783,7 +2781,7 @@
       "src/app.py is no longer staged, and its edits are still in the working folder.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Src/app.py` is unstaged with the edits kept. You are on `main`, and nothing was committed.",
+    "expected_result": "`src/app.py` is unstaged with the edits kept. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -2820,7 +2818,7 @@
       "docs/guide.md is no longer staged, and its edits are still in the working folder.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Docs/guide.md` is unstaged with the edits kept. You are on `main`, and nothing was committed.",
+    "expected_result": "`docs/guide.md` is unstaged with the edits kept. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -2857,7 +2855,7 @@
       "styles/site.css is no longer staged, and its edits are still in the working folder.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Styles/site.css` is unstaged with the edits kept. You are on `main`, and nothing was committed.",
+    "expected_result": "`styles/site.css` is unstaged with the edits kept. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -2892,10 +2890,10 @@
     "required_files": [],
     "objective_checks": [
       "experimental.py is no longer staged, and its edits are still in the working folder.",
-      "README.md is back to its committed version (its edits are gone).",
+      "Discard the edits in README.md, restoring it to its committed version.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Experimental.py` is unstaged with the edits kept; `readme.md` was restored to the committed version. You are on `main`, and nothing was committed.",
+    "expected_result": "`experimental.py` is unstaged with the edits kept; `README.md` was restored to the committed version. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -2938,10 +2936,10 @@
     "required_files": [],
     "objective_checks": [
       "src/app.py is no longer staged, and its edits are still in the working folder.",
-      "debug.log is back to its committed version (its edits are gone).",
+      "Discard the edits in debug.log, restoring it to its committed version.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Src/app.py` is unstaged with the edits kept; `debug.log` was restored to the committed version. You are on `main`, and nothing was committed.",
+    "expected_result": "`src/app.py` is unstaged with the edits kept; `debug.log` was restored to the committed version. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -2984,10 +2982,10 @@
     "required_files": [],
     "objective_checks": [
       "docs/guide.md is no longer staged, and its edits are still in the working folder.",
-      "tmp/scratch.txt is back to its committed version (its edits are gone).",
+      "Discard the edits in tmp/scratch.txt, restoring it to its committed version.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Docs/guide.md` is unstaged with the edits kept; `tmp/scratch.txt` was restored to the committed version. You are on `main`, and nothing was committed.",
+    "expected_result": "`docs/guide.md` is unstaged with the edits kept; `tmp/scratch.txt` was restored to the committed version. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -3030,10 +3028,10 @@
     "required_files": [],
     "objective_checks": [
       "styles/site.css is no longer staged, and its edits are still in the working folder.",
-      "dist/site.css is back to its committed version (its edits are gone).",
+      "Discard the edits in dist/site.css, restoring it to its committed version.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Styles/site.css` is unstaged with the edits kept; `dist/site.css` was restored to the committed version. You are on `main`, and nothing was committed.",
+    "expected_result": "`styles/site.css` is unstaged with the edits kept; `dist/site.css` was restored to the committed version. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -3077,10 +3075,10 @@
     "objective_checks": [
       "debug.log is no longer staged, and its edits are still in the working folder.",
       "scratch/notes.txt is no longer staged, and its edits are still in the working folder.",
-      "api/experimental.py is back to its committed version (its edits are gone).",
+      "Discard the edits in api/experimental.py, restoring it to its committed version.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Debug.log`, `scratch/notes.txt` are unstaged with the edits kept; `api/experimental.py` was restored to the committed version. You are on `main`, and nothing was committed.",
+    "expected_result": "`debug.log`, `scratch/notes.txt` are unstaged with the edits kept; `api/experimental.py` was restored to the committed version. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -3125,10 +3123,10 @@
     "objective_checks": [
       "src/profile-card.js is no longer staged, and its edits are still in the working folder.",
       "notes/profile-ideas.md is no longer staged, and its edits are still in the working folder.",
-      "debug/profile.log is back to its committed version (its edits are gone).",
+      "Discard the edits in debug/profile.log, restoring it to its committed version.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Src/profile-card.js`, `notes/profile-ideas.md` are unstaged with the edits kept; `debug/profile.log` was restored to the committed version. You are on `main`, and nothing was committed.",
+    "expected_result": "`src/profile-card.js`, `notes/profile-ideas.md` are unstaged with the edits kept; `debug/profile.log` was restored to the committed version. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -3173,10 +3171,10 @@
     "objective_checks": [
       "src/export.py is no longer staged, and its edits are still in the working folder.",
       "notes/export-plan.md is no longer staged, and its edits are still in the working folder.",
-      "tmp/export-output.txt is back to its committed version (its edits are gone).",
+      "Discard the edits in tmp/export-output.txt, restoring it to its committed version.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Src/export.py`, `notes/export-plan.md` are unstaged with the edits kept; `tmp/export-output.txt` was restored to the committed version. You are on `main`, and nothing was committed.",
+    "expected_result": "`src/export.py`, `notes/export-plan.md` are unstaged with the edits kept; `tmp/export-output.txt` was restored to the committed version. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -3221,10 +3219,10 @@
     "objective_checks": [
       "src/search.js is no longer staged, and its edits are still in the working folder.",
       "notes/search.md is no longer staged, and its edits are still in the working folder.",
-      "debug/search.log is back to its committed version (its edits are gone).",
+      "Discard the edits in debug/search.log, restoring it to its committed version.",
       "No other file was changed, and you finish on main."
     ],
-    "expected_result": "`Src/search.js`, `notes/search.md` are unstaged with the edits kept; `debug/search.log` was restored to the committed version. You are on `main`, and nothing was committed.",
+    "expected_result": "`src/search.js`, `notes/search.md` are unstaged with the edits kept; `debug/search.log` was restored to the committed version. You are on `main`, and nothing was committed.",
     "answer_key": [
       {
         "kind": "command",
@@ -3267,7 +3265,7 @@
     "task": "Create `feature/auth` from the current tip of `main` and switch to it. Finish on `feature/auth`.",
     "required_files": [],
     "objective_checks": [
-      "Branch feature/auth exists and starts at the latest commit of main.",
+      "Create feature/auth from the latest commit of main.",
       "feature/auth is checked out."
     ],
     "expected_result": "`feature/auth` exists, starts where `main` is now, and is checked out.",
@@ -3302,7 +3300,7 @@
     "task": "Create `bugfix/login` from the current tip of `main` and switch to it. Finish on `bugfix/login`.",
     "required_files": [],
     "objective_checks": [
-      "Branch bugfix/login exists and starts at the latest commit of main.",
+      "Create bugfix/login from the latest commit of main.",
       "bugfix/login is checked out."
     ],
     "expected_result": "`bugfix/login` exists, starts where `main` is now, and is checked out.",
@@ -3337,7 +3335,7 @@
     "task": "Create `experiment/ui` from the current tip of `main` and switch to it. Finish on `experiment/ui`.",
     "required_files": [],
     "objective_checks": [
-      "Branch experiment/ui exists and starts at the latest commit of main.",
+      "Create experiment/ui from the latest commit of main.",
       "experiment/ui is checked out."
     ],
     "expected_result": "`experiment/ui` exists, starts where `main` is now, and is checked out.",
@@ -3372,7 +3370,7 @@
     "task": "Create `feature/database-models` from the current tip of `main` and switch to it. Finish on `feature/database-models`.",
     "required_files": [],
     "objective_checks": [
-      "Branch feature/database-models exists and starts at the latest commit of main.",
+      "Create feature/database-models from the latest commit of main.",
       "feature/database-models is checked out."
     ],
     "expected_result": "`feature/database-models` exists, starts where `main` is now, and is checked out.",
@@ -3407,7 +3405,7 @@
     "task": "Create `hotfix/session-timeout` from the current tip of `main` and switch to it. Finish on `hotfix/session-timeout`.",
     "required_files": [],
     "objective_checks": [
-      "Branch hotfix/session-timeout exists and starts at the latest commit of main.",
+      "Create hotfix/session-timeout from the latest commit of main.",
       "hotfix/session-timeout is checked out."
     ],
     "expected_result": "`hotfix/session-timeout` exists, starts where `main` is now, and is checked out.",
@@ -3442,7 +3440,7 @@
     "task": "Create `feature/payments` and `feature/payments-tests`, both from the current tip of `main`. Finish on `feature/payments`.",
     "required_files": [],
     "objective_checks": [
-      "Branch feature/payments exists and starts at the latest commit of main.",
+      "Create feature/payments from the latest commit of main.",
       "Branch feature/payments-tests exists at the same commit.",
       "feature/payments is checked out."
     ],
@@ -3485,7 +3483,7 @@
     "task": "Create `feature/notifications` and `feature/notifications-docs`, both from the current tip of `main`. Finish on `feature/notifications`.",
     "required_files": [],
     "objective_checks": [
-      "Branch feature/notifications exists and starts at the latest commit of main.",
+      "Create feature/notifications from the latest commit of main.",
       "Branch feature/notifications-docs exists at the same commit.",
       "feature/notifications is checked out."
     ],
@@ -3527,7 +3525,7 @@
     "task": "Create `feature/export` and `feature/export-docs`, both from the current tip of `main`. Finish on `feature/export`.",
     "required_files": [],
     "objective_checks": [
-      "Branch feature/export exists and starts at the latest commit of main.",
+      "Create feature/export from the latest commit of main.",
       "Branch feature/export-docs exists at the same commit.",
       "feature/export is checked out."
     ],
@@ -3569,7 +3567,7 @@
     "task": "Create `feature/docs-update` from the current tip of `develop` and switch to it. Finish on `feature/docs-update`.",
     "required_files": [],
     "objective_checks": [
-      "Branch feature/docs-update exists and starts at the latest commit of develop.",
+      "Create feature/docs-update from the latest commit of develop.",
       "feature/docs-update is checked out."
     ],
     "expected_result": "`feature/docs-update` exists, starts where `develop` is now, and is checked out.",
@@ -3604,7 +3602,7 @@
     "task": "Create `hotfix/critical` at the older `c1` commit, __rather than at the current `main` tip__, and finish on that branch.",
     "required_files": [],
     "objective_checks": [
-      "Branch hotfix/critical exists and points to commit c1 (not the tip of main).",
+      "Create hotfix/critical at commit c1 (not the tip of main).",
       "hotfix/critical is checked out."
     ],
     "expected_result": "`hotfix/critical` points to `c1` and is checked out; `main` did not move.",
@@ -3640,8 +3638,8 @@
     "task": "Create `saved-work` at the commit you are currently viewing and finish on that branch.",
     "required_files": [],
     "objective_checks": [
-      "Branch saved-work exists at the commit you are viewing.",
-      "saved-work is checked out (HEAD is no longer detached)."
+      "Create saved-work at the commit you are viewing.",
+      "Switch to saved-work."
     ],
     "expected_result": "`saved-work` points to the commit you were viewing and is checked out.",
     "answer_key": [
@@ -3676,7 +3674,7 @@
     "task": "Create `feature/workspace` from the current tip of `main` (__not `develop`__) and switch to it. Finish on `feature/workspace`.",
     "required_files": [],
     "objective_checks": [
-      "Branch feature/workspace exists and starts at the latest commit of main (develop's extra commits are not included).",
+      "Create feature/workspace from the latest commit of main (develop's extra commits are not included).",
       "feature/workspace is checked out."
     ],
     "expected_result": "`feature/workspace` starts at `main`'s tip, without `develop`'s extra commits, and is checked out.",
@@ -3698,8 +3696,7 @@
       "NOT accepted: creating the branch while on develop with no start point (it would include develop's commits)."
     ],
     "evaluation": [
-      "`feature/workspace` = tip of `main`; HEAD on `feature/workspace`; `develop` and `main` unchanged.",
-      "Minimum counted commands: 1 · Maximum counted commands: 8 (proposed)"
+      "`feature/workspace` = tip of `main`; HEAD on `feature/workspace`; `develop` and `main` unchanged."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
@@ -3715,10 +3712,10 @@
     "task": "Create `review/v1-snapshot` at the detached commit you are viewing, then return to `main`.\n\n**Keep the review branch.**",
     "required_files": [],
     "objective_checks": [
-      "Create or keep branch review/v1-snapshot.",
-      "Finish on main."
+      "Create review/v1-snapshot at the commit you were viewing (the detached HEAD position).",
+      "main is checked out and unchanged."
     ],
-    "expected_result": "The older commit has a named review branch, and you are back on `main`. 2.2 Branch Naming Conventions",
+    "expected_result": "The older commit has a named review branch, and you are back on `main`.",
     "answer_key": [
       {
         "kind": "command",
@@ -3757,7 +3754,7 @@
     "task": "Follow the stated naming convention to create `PROJ-418/password-reset` from the current `main` commit, then switch to it.",
     "required_files": [],
     "objective_checks": [
-      "Branch PROJ-418/password-reset exists, created from the current main commit.",
+      "Create PROJ-418/password-reset from the current main commit.",
       "PROJ-418/password-reset is checked out."
     ],
     "expected_result": "`PROJ-418/password-reset` exists at `main`'s commit and is checked out.",
@@ -3792,7 +3789,7 @@
     "task": "Follow the stated naming convention to create `feature/shopping-cart` from the current `main` commit, then switch to it.",
     "required_files": [],
     "objective_checks": [
-      "Branch feature/shopping-cart exists, created from the current main commit.",
+      "Create feature/shopping-cart from the current main commit.",
       "feature/shopping-cart is checked out."
     ],
     "expected_result": "`feature/shopping-cart` exists at `main`'s commit and is checked out.",
@@ -3827,7 +3824,7 @@
     "task": "Follow the stated naming convention to create `jdelacruz/fix-parser-edge-case` from the current `main` commit, then switch to it.",
     "required_files": [],
     "objective_checks": [
-      "Branch jdelacruz/fix-parser-edge-case exists, created from the current main commit.",
+      "Create jdelacruz/fix-parser-edge-case from the current main commit.",
       "jdelacruz/fix-parser-edge-case is checked out."
     ],
     "expected_result": "`jdelacruz/fix-parser-edge-case` exists at `main`'s commit and is checked out.",
@@ -3862,7 +3859,7 @@
     "task": "Follow the stated naming convention to create `feature/jm/database-models` from the current `main` commit, then switch to it.",
     "required_files": [],
     "objective_checks": [
-      "Branch feature/jm/database-models exists, created from the current main commit.",
+      "Create feature/jm/database-models from the current main commit.",
       "feature/jm/database-models is checked out."
     ],
     "expected_result": "`feature/jm/database-models` exists at `main`'s commit and is checked out.",
@@ -3897,7 +3894,7 @@
     "task": "Follow the stated naming convention to create `client/55-contact-form-redesign` from the current `main` commit, then switch to it.",
     "required_files": [],
     "objective_checks": [
-      "Branch client/55-contact-form-redesign exists, created from the current main commit.",
+      "Create client/55-contact-form-redesign from the current main commit.",
       "client/55-contact-form-redesign is checked out."
     ],
     "expected_result": "`client/55-contact-form-redesign` exists at `main`'s commit and is checked out.",
@@ -3932,7 +3929,7 @@
     "task": "Follow the stated naming convention to create `PROJ-512/email-notification` from the current `main` commit, then switch to it.",
     "required_files": [],
     "objective_checks": [
-      "Branch PROJ-512/email-notification exists, created from the current main commit.",
+      "Create PROJ-512/email-notification from the current main commit.",
       "PROJ-512/email-notification is checked out."
     ],
     "expected_result": "`PROJ-512/email-notification` exists at `main`'s commit and is checked out.",
@@ -3967,7 +3964,7 @@
     "task": "Follow the stated naming convention to create `bugfix/login-redirect` from the current `main` commit, then switch to it.",
     "required_files": [],
     "objective_checks": [
-      "Branch bugfix/login-redirect exists, created from the current main commit.",
+      "Create bugfix/login-redirect from the current main commit.",
       "bugfix/login-redirect is checked out."
     ],
     "expected_result": "`bugfix/login-redirect` exists at `main`'s commit and is checked out.",
@@ -4002,7 +3999,7 @@
     "task": "Follow the stated naming convention to create `infra/api-gateway/log-rotation` from the current `main` commit, then switch to it.",
     "required_files": [],
     "objective_checks": [
-      "Branch infra/api-gateway/log-rotation exists, created from the current main commit.",
+      "Create infra/api-gateway/log-rotation from the current main commit.",
       "infra/api-gateway/log-rotation is checked out."
     ],
     "expected_result": "`infra/api-gateway/log-rotation` exists at `main`'s commit and is checked out.",
@@ -4037,7 +4034,7 @@
     "task": "Follow the stated naming convention to create `fix/tokenizer-crash` from the current `main` commit, then switch to it.",
     "required_files": [],
     "objective_checks": [
-      "Branch fix/tokenizer-crash exists, created from the current main commit.",
+      "Create fix/tokenizer-crash from the current main commit.",
       "fix/tokenizer-crash is checked out."
     ],
     "expected_result": "`fix/tokenizer-crash` exists at `main`'s commit and is checked out.",
@@ -4072,7 +4069,7 @@
     "task": "Remove the incorrectly named local branch `myFix`. Create `fix/renderer-memory-leak` from the current `main` commit and finish on the new branch.",
     "required_files": [],
     "objective_checks": [
-      "Branch fix/renderer-memory-leak exists, created from the current main commit.",
+      "Create fix/renderer-memory-leak from the current main commit.",
       "The wrongly named branch myFix no longer exists.",
       "fix/renderer-memory-leak is checked out."
     ],
@@ -4101,8 +4098,7 @@
     ],
     "not_accepted": [],
     "evaluation": [
-      "`fix/renderer-memory-leak` = tip of `main`; `myFix` absent; HEAD on `fix/renderer-memory-leak`.",
-      "Minimum counted commands: 2 · Maximum counted commands: 8 (proposed)"
+      "`fix/renderer-memory-leak` = tip of `main`; `myFix` absent; HEAD on `fix/renderer-memory-leak`."
     ],
     "minimum_counted_commands": 2,
     "maximum_counted_commands": 8,
@@ -4118,7 +4114,7 @@
     "task": "Remove the incorrectly named local branch `auth-update`. Create `PROJ-301/auth-module-update` from the current `main` commit and finish on the new branch.",
     "required_files": [],
     "objective_checks": [
-      "Branch PROJ-301/auth-module-update exists, created from the current main commit.",
+      "Create PROJ-301/auth-module-update from the current main commit.",
       "The wrongly named branch auth-update no longer exists.",
       "PROJ-301/auth-module-update is checked out."
     ],
@@ -4147,8 +4143,7 @@
     ],
     "not_accepted": [],
     "evaluation": [
-      "`PROJ-301/auth-module-update` = tip of `main`; `auth-update` absent; HEAD on `PROJ-301/auth-module-update`.",
-      "Minimum counted commands: 2 · Maximum counted commands: 8 (proposed)"
+      "`PROJ-301/auth-module-update` = tip of `main`; `auth-update` absent; HEAD on `PROJ-301/auth-module-update`."
     ],
     "minimum_counted_commands": 2,
     "maximum_counted_commands": 8,
@@ -4164,7 +4159,7 @@
     "task": "Remove the incorrectly named local branch `fix/cart-total`. Create `bugfix/cart-total` from the current `main` commit and finish on the new branch.",
     "required_files": [],
     "objective_checks": [
-      "Branch bugfix/cart-total exists, created from the current main commit.",
+      "Create bugfix/cart-total from the current main commit.",
       "The wrongly named branch fix/cart-total no longer exists.",
       "bugfix/cart-total is checked out."
     ],
@@ -4193,8 +4188,7 @@
     ],
     "not_accepted": [],
     "evaluation": [
-      "`bugfix/cart-total` = tip of `main`; `fix/cart-total` absent; HEAD on `bugfix/cart-total`.",
-      "Minimum counted commands: 2 · Maximum counted commands: 8 (proposed)"
+      "`bugfix/cart-total` = tip of `main`; `fix/cart-total` absent; HEAD on `bugfix/cart-total`."
     ],
     "minimum_counted_commands": 2,
     "maximum_counted_commands": 8,
@@ -4210,7 +4204,7 @@
     "task": "Remove the incorrectly named local branch `test/LoginFlow`. Create `test/login-flow` from the current `main` commit and finish on the new branch.",
     "required_files": [],
     "objective_checks": [
-      "Branch test/login-flow exists, created from the current main commit.",
+      "Create test/login-flow from the current main commit.",
       "The wrongly named branch test/LoginFlow no longer exists.",
       "test/login-flow is checked out."
     ],
@@ -4239,8 +4233,7 @@
     ],
     "not_accepted": [],
     "evaluation": [
-      "`test/login-flow` = tip of `main`; `test/LoginFlow` absent; HEAD on `test/login-flow`.",
-      "Minimum counted commands: 2 · Maximum counted commands: 8 (proposed)"
+      "`test/login-flow` = tip of `main`; `test/LoginFlow` absent; HEAD on `test/login-flow`."
     ],
     "minimum_counted_commands": 2,
     "maximum_counted_commands": 8,
@@ -4256,7 +4249,7 @@
     "task": "Save the unfinished edits in a stash, then switch to `main`. Leave the working folder clean; keep the stash for later.",
     "required_files": [],
     "objective_checks": [
-      "The unfinished edits are saved in the stash (the stash list has one entry).",
+      "Save your unfinished edits to the stash.",
       "main is checked out.",
       "The working folder is clean."
     ],
@@ -4298,7 +4291,7 @@
     "task": "Save the unfinished edits in a stash, then switch to `develop`. Leave the working folder clean; keep the stash for later.",
     "required_files": [],
     "objective_checks": [
-      "The unfinished edits are saved in the stash (the stash list has one entry).",
+      "Save your unfinished edits to the stash.",
       "develop is checked out.",
       "The working folder is clean."
     ],
@@ -4340,7 +4333,7 @@
     "task": "Save the unfinished edits in a stash, then switch to `release/v2`. Leave the working folder clean; keep the stash for later.",
     "required_files": [],
     "objective_checks": [
-      "The unfinished edits are saved in the stash (the stash list has one entry).",
+      "Save your unfinished edits to the stash.",
       "release/v2 is checked out.",
       "The working folder is clean."
     ],
@@ -4382,7 +4375,7 @@
     "task": "Save the unfinished edits in a stash, then switch to `review/groupmate-branch`. Leave the working folder clean; keep the stash for later.",
     "required_files": [],
     "objective_checks": [
-      "The unfinished edits are saved in the stash (the stash list has one entry).",
+      "Save your unfinished edits to the stash.",
       "review/groupmate-branch is checked out.",
       "The working folder is clean."
     ],
@@ -4424,7 +4417,7 @@
     "task": "Save the unfinished edits in a stash, then switch to `release/stable`. Leave the working folder clean; keep the stash for later.",
     "required_files": [],
     "objective_checks": [
-      "The unfinished edits are saved in the stash (the stash list has one entry).",
+      "Save your unfinished edits to the stash.",
       "release/stable is checked out.",
       "The working folder is clean."
     ],
@@ -4466,7 +4459,7 @@
     "task": "Stash the unfinished edits, visit `main`, return to `feature/payments`, and restore the edits to the working folder. Finish on `feature/payments`.",
     "required_files": [],
     "objective_checks": [
-      "The unfinished edits are back in the working folder on feature/payments.",
+      "Restore your stashed edits to the working folder on feature/payments.",
       "The stash is empty again (the entry was removed when restored).",
       "feature/payments is checked out."
     ],
@@ -4518,7 +4511,7 @@
     "task": "Stash the unfinished edits, visit `hotfix/fix-tax`, return to `feature/orders`, and restore the edits to the working folder. Finish on `feature/orders`.",
     "required_files": [],
     "objective_checks": [
-      "The unfinished edits are back in the working folder on feature/orders.",
+      "Restore your stashed edits to the working folder on feature/orders.",
       "The stash is empty again (the entry was removed when restored).",
       "feature/orders is checked out."
     ],
@@ -4571,7 +4564,7 @@
     "task": "Stash the unfinished edits, visit `release/v2`, return to `feature/analytics`, and restore the edits to the working folder. Finish on `feature/analytics`.",
     "required_files": [],
     "objective_checks": [
-      "The unfinished edits are back in the working folder on feature/analytics.",
+      "Restore your stashed edits to the working folder on feature/analytics.",
       "The stash is empty again (the entry was removed when restored).",
       "feature/analytics is checked out."
     ],
@@ -4624,7 +4617,7 @@
     "task": "Stash the unfinished edits, visit `hotfix/tax-fix`, return to `feature/billing`, and restore the edits to the working folder. Finish on `feature/billing`.",
     "required_files": [],
     "objective_checks": [
-      "The unfinished edits are back in the working folder on feature/billing.",
+      "Restore your stashed edits to the working folder on feature/billing.",
       "The stash is empty again (the entry was removed when restored).",
       "feature/billing is checked out."
     ],
@@ -4839,7 +4832,7 @@
     "required_files": [],
     "objective_checks": [
       "Only the newest stash entry was discarded.",
-      "The older stash's edits are back in the working folder.",
+      "Restore the older stash's edits to the working folder.",
       "The stash list is empty.",
       "feature/lexer is checked out."
     ],
@@ -4884,8 +4877,8 @@
     "task": "Publish the committed local `feature/auth` to `origin` for teammates to access.",
     "required_files": [],
     "objective_checks": [
-      "origin now has the branch feature/auth with your commits.",
-      "Your local branch and files are unchanged."
+      "Publish feature/auth to origin.",
+      "The local branch feature/auth still exists and retains its commits."
     ],
     "expected_result": "`origin/feature/auth` exists and contains your committed work. Teammates can fetch it.",
     "answer_key": [
@@ -4920,8 +4913,8 @@
     "task": "Publish the committed local `feature/orders` to `origin` for teammates to access.",
     "required_files": [],
     "objective_checks": [
-      "origin now has the branch feature/orders with your commits.",
-      "Your local branch and files are unchanged."
+      "Publish feature/orders to origin.",
+      "The local branch feature/orders still exists and retains its commits."
     ],
     "expected_result": "`origin/feature/orders` exists and contains your committed work. Teammates can fetch it.",
     "answer_key": [
@@ -4955,8 +4948,8 @@
     "task": "Publish the committed local `feature/parser` to `origin` for teammates to access.",
     "required_files": [],
     "objective_checks": [
-      "origin now has the branch feature/parser with your commits.",
-      "Your local branch and files are unchanged."
+      "Publish feature/parser to origin.",
+      "The local branch feature/parser still exists and retains its commits."
     ],
     "expected_result": "`origin/feature/parser` exists and contains your committed work. Teammates can fetch it.",
     "answer_key": [
@@ -4990,8 +4983,8 @@
     "task": "Publish the committed local `feature/user-auth` to `origin` for teammates to access.",
     "required_files": [],
     "objective_checks": [
-      "origin now has the branch feature/user-auth with your commits.",
-      "Your local branch and files are unchanged."
+      "Publish feature/user-auth to origin.",
+      "The local branch feature/user-auth still exists and retains its commits."
     ],
     "expected_result": "`origin/feature/user-auth` exists and contains your committed work. Teammates can fetch it.",
     "answer_key": [
@@ -5025,8 +5018,8 @@
     "task": "Publish the committed local `feature/client-landing` to `origin` for teammates to access.",
     "required_files": [],
     "objective_checks": [
-      "origin now has the branch feature/client-landing with your commits.",
-      "Your local branch and files are unchanged."
+      "Publish feature/client-landing to origin.",
+      "The local branch feature/client-landing still exists and retains its commits."
     ],
     "expected_result": "`origin/feature/client-landing` exists and contains your committed work. Teammates can fetch it.",
     "answer_key": [
@@ -5060,7 +5053,7 @@
     "task": "Publish `feature/auth` to `origin` and set the corresponding remote branch as its upstream.",
     "required_files": [],
     "objective_checks": [
-      "origin now has the branch feature/auth with your commits.",
+      "Publish feature/auth to origin.",
       "Local feature/auth tracks origin/feature/auth (upstream is set)."
     ],
     "expected_result": "`origin/feature/auth` exists, and your local `feature/auth` is linked to it so later pushes and pulls need no extra names.",
@@ -5095,7 +5088,7 @@
     "task": "Publish `feature/orders` to `origin` and set the corresponding remote branch as its upstream.",
     "required_files": [],
     "objective_checks": [
-      "origin now has the branch feature/orders with your commits.",
+      "Publish feature/orders to origin.",
       "Local feature/orders tracks origin/feature/orders (upstream is set)."
     ],
     "expected_result": "`origin/feature/orders` exists, and your local `feature/orders` is linked to it so later pushes and pulls need no extra names.",
@@ -5130,7 +5123,7 @@
     "task": "Publish `feature/parser` to `origin` and set the corresponding remote branch as its upstream.",
     "required_files": [],
     "objective_checks": [
-      "origin now has the branch feature/parser with your commits.",
+      "Publish feature/parser to origin.",
       "Local feature/parser tracks origin/feature/parser (upstream is set)."
     ],
     "expected_result": "`origin/feature/parser` exists, and your local `feature/parser` is linked to it so later pushes and pulls need no extra names.",
@@ -5165,7 +5158,7 @@
     "task": "Publish `feature/v2-migration-guide` to `origin` and set the corresponding remote branch as its upstream.",
     "required_files": [],
     "objective_checks": [
-      "origin now has the branch feature/v2-migration-guide with your commits.",
+      "Publish feature/v2-migration-guide to origin.",
       "Local feature/v2-migration-guide tracks origin/feature/v2-migration-guide (upstream is set)."
     ],
     "expected_result": "`origin/feature/v2-migration-guide` exists, and your local `feature/v2-migration-guide` is linked to it so later pushes and pulls need no extra names.",
@@ -5201,7 +5194,7 @@
     "required_files": [],
     "objective_checks": [
       "origin/feature/auth now has your rewritten history.",
-      "The update used a guarded (checked) force, not an unconditional one.",
+      "The force push used --force-with-lease, not plain --force (command-history check).",
       "feature/auth is still the current branch."
     ],
     "expected_result": "`origin/feature/auth` matches your rewritten local branch, and the update was guarded against overwriting newer remote work.",
@@ -5222,8 +5215,7 @@
       "`git push origin feature/auth --force-with-lease`, `--force-with-lease=feature/auth`, `--force-with-lease=feature/auth:<expected-commit>`. NOT accepted: `-f`, `--force`, `+feature/auth` (unconditional overwrite)."
     ],
     "evaluation": [
-      "`origin/feature/auth` = local `feature/auth`; the push command contained a lease option, not a bare force (`-f`/`--force`/`+ref` fail with a hint about teammates' work).",
-      "Minimum counted commands: 1 · Maximum counted commands: 8 (proposed)"
+      "`origin/feature/auth` = local `feature/auth`; the push command contained a lease option, not a bare force (`-f`/`--force`/`+ref` fail with a hint about teammates' work)."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
@@ -5240,7 +5232,7 @@
     "required_files": [],
     "objective_checks": [
       "origin/feature/orders now has your rewritten history.",
-      "The update used a guarded (checked) force, not an unconditional one.",
+      "The force push used --force-with-lease, not plain --force (command-history check).",
       "feature/orders is still the current branch."
     ],
     "expected_result": "`origin/feature/orders` matches your rewritten local branch, and the update was guarded against overwriting newer remote work.",
@@ -5261,8 +5253,7 @@
       "`git push origin feature/orders --force-with-lease`, `--force-with-lease=feature/orders`, `--force-with-lease=feature/orders:<expected-commit>`. NOT accepted: `-f`, `--force`, `+feature/orders` (unconditional overwrite)."
     ],
     "evaluation": [
-      "`origin/feature/orders` = local `feature/orders`; the push command contained a lease option, not a bare force (`-f`/`--force`/`+ref` fail with a hint about teammates' work).",
-      "Minimum counted commands: 1 · Maximum counted commands: 8 (proposed)"
+      "`origin/feature/orders` = local `feature/orders`; the push command contained a lease option, not a bare force (`-f`/`--force`/`+ref` fail with a hint about teammates' work)."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
@@ -5279,7 +5270,7 @@
     "required_files": [],
     "objective_checks": [
       "origin/feature/parser now has your rewritten history.",
-      "The update used a guarded (checked) force, not an unconditional one.",
+      "The force push used --force-with-lease, not plain --force (command-history check).",
       "feature/parser is still the current branch."
     ],
     "expected_result": "`origin/feature/parser` matches your rewritten local branch, and the update was guarded against overwriting newer remote work.",
@@ -5300,8 +5291,7 @@
       "`git push origin feature/parser --force-with-lease`, `--force-with-lease=feature/parser`, `--force-with-lease=feature/parser:<expected-commit>`. NOT accepted: `-f`, `--force`, `+feature/parser` (unconditional overwrite)."
     ],
     "evaluation": [
-      "`origin/feature/parser` = local `feature/parser`; the push command contained a lease option, not a bare force (`-f`/`--force`/`+ref` fail with a hint about teammates' work).",
-      "Minimum counted commands: 1 · Maximum counted commands: 8 (proposed)"
+      "`origin/feature/parser` = local `feature/parser`; the push command contained a lease option, not a bare force (`-f`/`--force`/`+ref` fail with a hint about teammates' work)."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
@@ -5318,7 +5308,7 @@
     "required_files": [],
     "objective_checks": [
       "origin/feature/pipeline-config now has your rewritten history.",
-      "The update used a guarded (checked) force, not an unconditional one.",
+      "The force push used --force-with-lease, not plain --force (command-history check).",
       "feature/pipeline-config is still the current branch."
     ],
     "expected_result": "`origin/feature/pipeline-config` matches your rewritten local branch, and the update was guarded against overwriting newer remote work.",
@@ -5339,8 +5329,7 @@
       "`git push origin feature/pipeline-config --force-with-lease`, `--force-with-lease=feature/pipeline-config`, `--force-with-lease=feature/pipeline-config:<expected-commit>`. NOT accepted: `-f`, `--force`, `+feature/pipeline-config` (unconditional overwrite)."
     ],
     "evaluation": [
-      "`origin/feature/pipeline-config` = local `feature/pipeline-config`; the push command contained a lease option, not a bare force (`-f`/`--force`/`+ref` fail with a hint about teammates' work).",
-      "Minimum counted commands: 1 · Maximum counted commands: 8 (proposed)"
+      "`origin/feature/pipeline-config` = local `feature/pipeline-config`; the push command contained a lease option, not a bare force (`-f`/`--force`/`+ref` fail with a hint about teammates' work)."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
@@ -5356,7 +5345,7 @@
     "task": "Update your remote tracking information from `origin` so you can see the latest `origin/main`.\n\n**Do not integrate it into your local branch yet.**",
     "required_files": [],
     "objective_checks": [
-      "origin/main (your remote-tracking record) is up to date with the server.",
+      "Fetch the latest changes from the server so origin/main is up to date.",
       "Your local main and your working files did not change."
     ],
     "expected_result": "`origin/main` now shows what is on the server. Your own `main` and your files are exactly as they were.",
@@ -5392,7 +5381,7 @@
     "task": "Update your remote tracking information from `origin` so you can see the latest `origin/feature/auth`.\n\n**Do not integrate it into your local branch yet.**",
     "required_files": [],
     "objective_checks": [
-      "origin/feature/auth (your remote-tracking record) is up to date with the server.",
+      "Fetch the latest changes from the server so origin/feature/auth is up to date.",
       "Your local feature/auth and your working files did not change."
     ],
     "expected_result": "`origin/feature/auth` now shows what is on the server. Your own `feature/auth` and your files are exactly as they were.",
@@ -5428,7 +5417,7 @@
     "task": "Update your remote tracking information from `origin` so you can see the latest `origin/develop`.\n\n**Do not integrate it into your local branch yet.**",
     "required_files": [],
     "objective_checks": [
-      "origin/develop (your remote-tracking record) is up to date with the server.",
+      "Fetch the latest changes from the server so origin/develop is up to date.",
       "Your local develop and your working files did not change."
     ],
     "expected_result": "`origin/develop` now shows what is on the server. Your own `develop` and your files are exactly as they were.",
@@ -5464,7 +5453,7 @@
     "task": "Update your remote tracking information from `origin` so you can see the latest `origin/feature/models`.\n\n**Do not integrate it into your local branch yet.**",
     "required_files": [],
     "objective_checks": [
-      "origin/feature/models (your remote-tracking record) is up to date with the server.",
+      "Fetch the latest changes from the server so origin/feature/models is up to date.",
       "Your local feature/models and your working files did not change."
     ],
     "expected_result": "`origin/feature/models` now shows what is on the server. Your own `feature/models` and your files are exactly as they were.",
@@ -5500,7 +5489,7 @@
     "task": "Update your remote tracking information from `origin` so you can see the latest `origin/release/v2`.\n\n**Do not integrate it into your local branch yet.**",
     "required_files": [],
     "objective_checks": [
-      "origin/release/v2 (your remote-tracking record) is up to date with the server.",
+      "Fetch the latest changes from the server so origin/release/v2 is up to date.",
       "Your local release/v2 and your working files did not change."
     ],
     "expected_result": "`origin/release/v2` now shows what is on the server. Your own `release/v2` and your files are exactly as they were.",
@@ -5536,7 +5525,7 @@
     "task": "Bring the latest `origin/main` commits into your current local `main` branch.",
     "required_files": [],
     "objective_checks": [
-      "Your local main now contains the newest commits from origin/main.",
+      "Pull the newest commits from origin/main into main.",
       "main is checked out."
     ],
     "expected_result": "Your local `main` has caught up with the server.",
@@ -5572,7 +5561,7 @@
     "task": "Bring the latest `origin/feature/auth` commits into your current local `feature/auth` branch.",
     "required_files": [],
     "objective_checks": [
-      "Your local feature/auth now contains the newest commits from origin/feature/auth.",
+      "Pull the newest commits from origin/feature/auth into feature/auth.",
       "feature/auth is checked out."
     ],
     "expected_result": "Your local `feature/auth` has caught up with the server.",
@@ -5608,7 +5597,7 @@
     "task": "Bring the latest `origin/develop` commits into your current local `develop` branch.",
     "required_files": [],
     "objective_checks": [
-      "Your local develop now contains the newest commits from origin/develop.",
+      "Pull the newest commits from origin/develop into develop.",
       "develop is checked out."
     ],
     "expected_result": "Your local `develop` has caught up with the server.",
@@ -5643,7 +5632,7 @@
     "task": "Bring the latest `origin/staging` commits into your current local `staging` branch.",
     "required_files": [],
     "objective_checks": [
-      "Your local staging now contains the newest commits from origin/staging.",
+      "Pull the newest commits from origin/staging into staging.",
       "staging is checked out."
     ],
     "expected_result": "Your local `staging` has caught up with the server.",
@@ -5678,8 +5667,8 @@
     "task": "A teammate has pushed new commits to `main`. Look at *exactly* what is new on `origin` before it joins your branch, then make your local `main` include it.",
     "required_files": [],
     "objective_checks": [
-      "The incoming commits on origin/main were reviewed before being merged (command-history check).",
-      "Your local main now contains the newest origin/main commits.",
+      "The incoming commits on origin/main were inspected before the merge (command-history check).",
+      "Bring the newest origin/main commits into main.",
       "main is checked out."
     ],
     "expected_result": "You saw what was coming, and your local `main` now includes it.",
@@ -5726,8 +5715,8 @@
     "task": "A teammate has pushed new commits to `feature/auth`. Look at *exactly* what is new on `origin` before it joins your branch, then make your local `feature/auth` include it.",
     "required_files": [],
     "objective_checks": [
-      "The incoming commits on origin/feature/auth were reviewed before being merged (command-history check).",
-      "Your local feature/auth now contains the newest origin/feature/auth commits.",
+      "The incoming commits on origin/feature/auth were inspected before the merge (command-history check).",
+      "Bring the newest origin/feature/auth commits into feature/auth.",
       "feature/auth is checked out."
     ],
     "expected_result": "You saw what was coming, and your local `feature/auth` now includes it.",
@@ -5774,8 +5763,8 @@
     "task": "A teammate has pushed new commits to `develop`. Look at *exactly* what is new on `origin` before it joins your branch, then make your local `develop` include it.",
     "required_files": [],
     "objective_checks": [
-      "The incoming commits on origin/develop were reviewed before being merged (command-history check).",
-      "Your local develop now contains the newest origin/develop commits.",
+      "The incoming commits on origin/develop were inspected before the merge (command-history check).",
+      "Bring the newest origin/develop commits into develop.",
       "develop is checked out."
     ],
     "expected_result": "You saw what was coming, and your local `develop` now includes it.",
@@ -5822,8 +5811,8 @@
     "task": "A teammate has pushed new commits to `release/next`. Look at *exactly* what is new on `origin` before it joins your branch, then make your local `release/next` include it.",
     "required_files": [],
     "objective_checks": [
-      "The incoming commits on origin/release/next were reviewed before being merged (command-history check).",
-      "Your local release/next now contains the newest origin/release/next commits.",
+      "The incoming commits on origin/release/next were inspected before the merge (command-history check).",
+      "Bring the newest origin/release/next commits into release/next.",
       "release/next is checked out."
     ],
     "expected_result": "You saw what was coming, and your local `release/next` now includes it.",
@@ -5871,7 +5860,7 @@
     "required_files": [],
     "objective_checks": [
       "feature/auth now contains both the teammate's commits and your own.",
-      "origin/feature/auth has been updated with the combined work.",
+      "Push the combined history to origin/feature/auth.",
       "feature/auth is checked out."
     ],
     "expected_result": "`feature/auth` holds the teammate's commits and yours together, and `origin/feature/auth` has the same combined history.",
@@ -5913,7 +5902,7 @@
     "required_files": [],
     "objective_checks": [
       "feature/payments now contains both the teammate's commits and your own.",
-      "origin/feature/payments has been updated with the combined work.",
+      "Push the combined history to origin/feature/payments.",
       "feature/payments is checked out."
     ],
     "expected_result": "`feature/payments` holds the teammate's commits and yours together, and `origin/feature/payments` has the same combined history.",
@@ -5955,7 +5944,7 @@
     "required_files": [],
     "objective_checks": [
       "hotfix/critical now contains both the teammate's commits and your own.",
-      "origin/hotfix/critical has been updated with the combined work.",
+      "Push the combined history to origin/hotfix/critical.",
       "hotfix/critical is checked out."
     ],
     "expected_result": "`hotfix/critical` holds the teammate's commits and yours together, and `origin/hotfix/critical` has the same combined history.",
@@ -5997,7 +5986,7 @@
     "required_files": [],
     "objective_checks": [
       "feature/ui-layout now contains both the teammate's commits and your own.",
-      "origin/feature/ui-layout has been updated with the combined work.",
+      "Push the combined history to origin/feature/ui-layout.",
       "feature/ui-layout is checked out."
     ],
     "expected_result": "`feature/ui-layout` holds the teammate's commits and yours together, and `origin/feature/ui-layout` has the same combined history.",
@@ -6039,7 +6028,7 @@
     "required_files": [],
     "objective_checks": [
       "main now contains both the teammate's commits and your own.",
-      "origin/main has been updated with the combined work.",
+      "Push the combined history to origin/main.",
       "main is checked out."
     ],
     "expected_result": "`main` holds the teammate's commits and yours together, and `origin/main` has the same combined history.",
@@ -6080,9 +6069,9 @@
     "task": "Fetch from `origin`, merge `origin/feature/auth` into your current `feature/auth` branch, then push the combined result.",
     "required_files": [],
     "objective_checks": [
-      "The remote work was downloaded and merged in separate steps (not with pull).",
+      "The remote work was fetched and then merged in separate steps (command-history check).",
       "feature/auth now contains both the teammate's commits and your own.",
-      "origin/feature/auth has been updated with the combined work.",
+      "Push the combined history to origin/feature/auth.",
       "feature/auth is checked out."
     ],
     "expected_result": "`feature/auth` holds the teammate's commits and yours together, and `origin/feature/auth` has the same combined history.",
@@ -6128,9 +6117,9 @@
     "task": "Fetch from `origin`, merge `origin/feature/payments` into your current `feature/payments` branch, then push the combined result.",
     "required_files": [],
     "objective_checks": [
-      "The remote work was downloaded and merged in separate steps (not with pull).",
+      "The remote work was fetched and then merged in separate steps (command-history check).",
       "feature/payments now contains both the teammate's commits and your own.",
-      "origin/feature/payments has been updated with the combined work.",
+      "Push the combined history to origin/feature/payments.",
       "feature/payments is checked out."
     ],
     "expected_result": "`feature/payments` holds the teammate's commits and yours together, and `origin/feature/payments` has the same combined history.",
@@ -6176,9 +6165,9 @@
     "task": "Fetch from `origin`, merge `origin/hotfix/critical` into your current `hotfix/critical` branch, then push the combined result.",
     "required_files": [],
     "objective_checks": [
-      "The remote work was downloaded and merged in separate steps (not with pull).",
+      "The remote work was fetched and then merged in separate steps (command-history check).",
       "hotfix/critical now contains both the teammate's commits and your own.",
-      "origin/hotfix/critical has been updated with the combined work.",
+      "Push the combined history to origin/hotfix/critical.",
       "hotfix/critical is checked out."
     ],
     "expected_result": "`hotfix/critical` holds the teammate's commits and yours together, and `origin/hotfix/critical` has the same combined history.",
@@ -6224,9 +6213,9 @@
     "task": "Fetch from `origin`, merge `origin/feature/test-runner-v2` into your current `feature/test-runner-v2` branch, then push the combined result.",
     "required_files": [],
     "objective_checks": [
-      "The remote work was downloaded and merged in separate steps (not with pull).",
+      "The remote work was fetched and then merged in separate steps (command-history check).",
       "feature/test-runner-v2 now contains both the teammate's commits and your own.",
-      "origin/feature/test-runner-v2 has been updated with the combined work.",
+      "Push the combined history to origin/feature/test-runner-v2.",
       "feature/test-runner-v2 is checked out."
     ],
     "expected_result": "`feature/test-runner-v2` holds the teammate's commits and yours together, and `origin/feature/test-runner-v2` has the same combined history.",
@@ -6641,7 +6630,7 @@
     "difficulty": "easy",
     "label": "Fast-forward merge feature/contact-form into integration",
     "story": "A freelancer finishes the contact form and asks Sage to check it in the combined preview. `feature/contact-form` continues directly from `integration`, with no conflicting line of work. You are on `integration`, the branch used for that preview.\n\n“Bring it in so I can click through the whole site,” Sage says. Merge the completed feature into the current branch. A fast forward can carry the contact form commits into the preview.",
-    "starting_point": "You are on integration; available local branches: integration, `feature/contact-form`.",
+    "starting_point": "You are on `integration`; available local branches: `integration`, `feature/contact-form`.",
     "real_world_context": "The completed contact form branch can advance integration directly when the histories have not diverged.",
     "task": "Merge `feature/contact-form` into the current `integration` branch. A fast forward is acceptable; finish on `integration`.",
     "required_files": [],
@@ -6650,7 +6639,7 @@
       "History stays a straight line (no new merge commit).",
       "integration is checked out."
     ],
-    "expected_result": "integration moved forward to `feature/contact-form`'s latest commit in a straight line, with no merge commit.",
+    "expected_result": "`integration` moved forward to `feature/contact-form`'s latest commit in a straight line, with no merge commit.",
     "answer_key": [
       {
         "kind": "command",
@@ -7130,7 +7119,7 @@
     "difficulty": "easy",
     "label": "Squash-merge feature/report-generator into integration",
     "story": "Your capstone group has three rough commits on `feature/report-generator`, including one called “try again.” Raven approves the finished report module but asks for a single clean entry in the `integration` branch before submission.\n\nYou are already on `integration`. “Future us will thank present us for a readable history,” she says. Squash the feature’s combined changes into the current branch and commit once with the message `Add report generator module`.",
-    "starting_point": "You are on integration; available local branches: integration, `feature/report-generator`.",
+    "starting_point": "You are on `integration`; available local branches: `integration`, `feature/report-generator`.",
     "real_world_context": "One clear report generator commit makes the group submission easier to review than its three intermediate drafts.",
     "task": "Squash the changes from `feature/report-generator` into your current `integration` branch. Commit with the exact message `Add report generator module`.",
     "required_files": [],
@@ -7140,7 +7129,7 @@
       "integration is checked out.",
       "The working folder is clean."
     ],
-    "expected_result": "integration gained one new commit, “`Add report generator module`”, holding the combined changes of `feature/report-generator`. Its draft commits did not come along.",
+    "expected_result": "`integration` gained one new commit, “`Add report generator module`”, holding the combined changes of `feature/report-generator`. Its draft commits did not come along.",
     "answer_key": [
       {
         "kind": "command",
@@ -7221,7 +7210,7 @@
     "task": "Fetch from `origin`, then squash the changes from `origin/feature/auth` into your current `main` branch. Commit with the exact message `Add auth feature`.",
     "required_files": [],
     "objective_checks": [
-      "origin/feature/auth was downloaded from origin before the squash.",
+      "origin/feature/auth was fetched from origin before the squash (command-history check).",
       "main has one new commit named “Add auth feature” containing all of origin/feature/auth's changes.",
       "origin/feature/auth's individual draft commits were not copied into main.",
       "main is checked out.",
@@ -7270,7 +7259,7 @@
     "task": "Fetch from `origin`, then squash the changes from `origin/feature/orders` into your current `develop` branch. Commit with the exact message `Add orders feature`.",
     "required_files": [],
     "objective_checks": [
-      "origin/feature/orders was downloaded from origin before the squash.",
+      "origin/feature/orders was fetched from origin before the squash (command-history check).",
       "develop has one new commit named “Add orders feature” containing all of origin/feature/orders's changes.",
       "origin/feature/orders's individual draft commits were not copied into develop.",
       "develop is checked out.",
@@ -7319,7 +7308,7 @@
     "task": "Fetch from `origin`, then squash the changes from `origin/feature/parser` into your current `release/v2` branch. Commit with the exact message `Add parser feature`.",
     "required_files": [],
     "objective_checks": [
-      "origin/feature/parser was downloaded from origin before the squash.",
+      "origin/feature/parser was fetched from origin before the squash (command-history check).",
       "release/v2 has one new commit named “Add parser feature” containing all of origin/feature/parser's changes.",
       "origin/feature/parser's individual draft commits were not copied into release/v2.",
       "release/v2 is checked out.",
@@ -7368,7 +7357,7 @@
     "task": "Fetch from `origin`, then squash the changes from `origin/feature/gdpr-export` into your current `staging` branch. Commit with the exact message `Add GDPR data export endpoint`.",
     "required_files": [],
     "objective_checks": [
-      "origin/feature/gdpr-export was downloaded from origin before the squash.",
+      "origin/feature/gdpr-export was fetched from origin before the squash (command-history check).",
       "staging has one new commit named “Add GDPR data export endpoint” containing all of origin/feature/gdpr-export's changes.",
       "origin/feature/gdpr-export's individual draft commits were not copied into staging.",
       "staging is checked out.",
@@ -7419,7 +7408,7 @@
     "required_files": [],
     "objective_checks": [
       "main has one new commit named “Add auth feature” containing all of feature/auth's changes.",
-      "The local branch feature/auth no longer exists.",
+      "Delete the local feature/auth branch.",
       "main is checked out.",
       "The working folder is clean."
     ],
@@ -7468,7 +7457,7 @@
     "required_files": [],
     "objective_checks": [
       "develop has one new commit named “Add orders feature” containing all of feature/orders's changes.",
-      "The local branch feature/orders no longer exists.",
+      "Delete the local feature/orders branch.",
       "develop is checked out.",
       "The working folder is clean."
     ],
@@ -7517,7 +7506,7 @@
     "required_files": [],
     "objective_checks": [
       "release/v2 has one new commit named “Add parser feature” containing all of feature/parser's changes.",
-      "The local branch feature/parser no longer exists.",
+      "Delete the local feature/parser branch.",
       "release/v2 is checked out.",
       "The working folder is clean."
     ],
@@ -7566,7 +7555,7 @@
     "required_files": [],
     "objective_checks": [
       "main has one new commit named “Add log rotation configuration” containing all of feature/log-rotation's changes.",
-      "The local branch feature/log-rotation no longer exists.",
+      "Delete the local feature/log-rotation branch.",
       "main is checked out.",
       "The working folder is clean."
     ],
@@ -7615,7 +7604,7 @@
     "task": "Delete the merged `feature/auth` branch from `origin`. Keep the local branch.",
     "required_files": [],
     "objective_checks": [
-      "origin no longer has the branch feature/auth.",
+      "Delete feature/auth from origin.",
       "Your local feature/auth branch still exists."
     ],
     "expected_result": "`feature/auth` is gone from the server. Your local copy is still there.",
@@ -7650,7 +7639,7 @@
     "task": "Delete the merged `feature/orders` branch from `origin`. Keep the local branch.",
     "required_files": [],
     "objective_checks": [
-      "origin no longer has the branch feature/orders.",
+      "Delete feature/orders from origin.",
       "Your local feature/orders branch still exists."
     ],
     "expected_result": "`feature/orders` is gone from the server. Your local copy is still there.",
@@ -7685,7 +7674,7 @@
     "task": "Delete the merged `feature/parser` branch from `origin`. Keep the local branch.",
     "required_files": [],
     "objective_checks": [
-      "origin no longer has the branch feature/parser.",
+      "Delete feature/parser from origin.",
       "Your local feature/parser branch still exists."
     ],
     "expected_result": "`feature/parser` is gone from the server. Your local copy is still there.",
@@ -7720,7 +7709,7 @@
     "task": "Delete the merged `feature/group-auth` branch from `origin`. Keep the local branch.",
     "required_files": [],
     "objective_checks": [
-      "origin no longer has the branch feature/group-auth.",
+      "Delete feature/group-auth from origin.",
       "Your local feature/group-auth branch still exists."
     ],
     "expected_result": "`feature/group-auth` is gone from the server. Your local copy is still there.",
@@ -7755,7 +7744,7 @@
     "task": "Delete the merged `feature/sprint12-compliance` branch from `origin`. Keep the local branch.",
     "required_files": [],
     "objective_checks": [
-      "origin no longer has the branch feature/sprint12-compliance.",
+      "Delete feature/sprint12-compliance from origin.",
       "Your local feature/sprint12-compliance branch still exists."
     ],
     "expected_result": "`feature/sprint12-compliance` is gone from the server. Your local copy is still there.",
@@ -7790,7 +7779,7 @@
     "task": "Refresh remote tracking information from `origin` and remove the stale `origin/feature/auth` record. Keep your local `feature/auth` branch.",
     "required_files": [],
     "objective_checks": [
-      "The stale record origin/feature/auth is removed from your repository.",
+      "Prune the stale origin/feature/auth remote-tracking ref.",
       "Your local feature/auth branch still exists."
     ],
     "expected_result": "The outdated `origin/feature/auth` name is gone. Your own `feature/auth` branch is untouched.",
@@ -7826,7 +7815,7 @@
     "task": "Refresh remote tracking information from `origin` and remove the stale `origin/feature/orders` record. Keep your local `feature/orders` branch.",
     "required_files": [],
     "objective_checks": [
-      "The stale record origin/feature/orders is removed from your repository.",
+      "Prune the stale origin/feature/orders remote-tracking ref.",
       "Your local feature/orders branch still exists."
     ],
     "expected_result": "The outdated `origin/feature/orders` name is gone. Your own `feature/orders` branch is untouched.",
@@ -7862,7 +7851,7 @@
     "task": "Refresh remote tracking information from `origin` and remove the stale `origin/feature/parser` record. Keep your local `feature/parser` branch.",
     "required_files": [],
     "objective_checks": [
-      "The stale record origin/feature/parser is removed from your repository.",
+      "Prune the stale origin/feature/parser remote-tracking ref.",
       "Your local feature/parser branch still exists."
     ],
     "expected_result": "The outdated `origin/feature/parser` name is gone. Your own `feature/parser` branch is untouched.",
@@ -7898,7 +7887,7 @@
     "task": "Refresh remote tracking information from `origin` and remove the stale `origin/feature/old-landing` record. Keep your local `feature/old-landing` branch.",
     "required_files": [],
     "objective_checks": [
-      "The stale record origin/feature/old-landing is removed from your repository.",
+      "Prune the stale origin/feature/old-landing remote-tracking ref.",
       "Your local feature/old-landing branch still exists."
     ],
     "expected_result": "The outdated `origin/feature/old-landing` name is gone. Your own `feature/old-landing` branch is untouched.",
@@ -7934,8 +7923,8 @@
     "task": "The `feature/auth` branch has been merged, so retire it everywhere: remove it from `origin` and remove your local copy, but __only through a route that would refuse to delete unmerged work__. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "origin no longer has feature/auth.",
-      "The local branch feature/auth no longer exists.",
+      "Delete feature/auth from origin.",
+      "Delete the local feature/auth branch.",
       "main is checked out."
     ],
     "expected_result": "`feature/auth` is gone from the server and from your repository.",
@@ -7977,8 +7966,8 @@
     "task": "The `feature/orders` branch has been merged, so retire it everywhere: remove it from `origin` and remove your local copy, but __only through a route that would refuse to delete unmerged work__. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "origin no longer has feature/orders.",
-      "The local branch feature/orders no longer exists.",
+      "Delete feature/orders from origin.",
+      "Delete the local feature/orders branch.",
       "main is checked out."
     ],
     "expected_result": "`feature/orders` is gone from the server and from your repository.",
@@ -8020,8 +8009,8 @@
     "task": "The `feature/parser` branch has been merged, so retire it everywhere: remove it from `origin` and remove your local copy, but __only through a route that would refuse to delete unmerged work__. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "origin no longer has feature/parser.",
-      "The local branch feature/parser no longer exists.",
+      "Delete feature/parser from origin.",
+      "Delete the local feature/parser branch.",
       "main is checked out."
     ],
     "expected_result": "`feature/parser` is gone from the server and from your repository.",
@@ -8063,8 +8052,8 @@
     "task": "The `feature/oss-contribution` branch has been merged, so retire it everywhere: remove it from `origin` and remove your local copy, but __only through a route that would refuse to delete unmerged work__. Finish on `main`.",
     "required_files": [],
     "objective_checks": [
-      "origin no longer has feature/oss-contribution.",
-      "The local branch feature/oss-contribution no longer exists.",
+      "Delete feature/oss-contribution from origin.",
+      "Delete the local feature/oss-contribution branch.",
       "main is checked out."
     ],
     "expected_result": "`feature/oss-contribution` is gone from the server and from your repository.",
@@ -8113,7 +8102,7 @@
     "objective_checks": [
       "src/auth.js contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/auth-timeout.",
+      "Complete the merge: main has a merge commit joining feature/auth-timeout.",
       "main is checked out and the working folder is clean."
     ],
     "expected_result": "`src/auth.js` holds the agreed content, the conflict is gone, and the finished merge is recorded on `main`.",
@@ -8181,7 +8170,7 @@
     "objective_checks": [
       "src/profile.tsx contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/profile-copy.",
+      "Complete the merge: main has a merge commit joining feature/profile-copy.",
       "main is checked out and the working folder is clean."
     ],
     "expected_result": "`src/profile.tsx` holds the agreed content, the conflict is gone, and the finished merge is recorded on `main`.",
@@ -8249,7 +8238,7 @@
     "objective_checks": [
       "src/billing.py contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/regional-currency.",
+      "Complete the merge: main has a merge commit joining feature/regional-currency.",
       "main is checked out and the working folder is clean."
     ],
     "expected_result": "`src/billing.py` holds the agreed content, the conflict is gone, and the finished merge is recorded on `main`.",
@@ -8317,7 +8306,7 @@
     "objective_checks": [
       "src/config.py contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/debug-config.",
+      "Complete the merge: main has a merge commit joining feature/debug-config.",
       "main is checked out and the working folder is clean."
     ],
     "expected_result": "`src/config.py` holds the agreed content, the conflict is gone, and the finished merge is recorded on `main`.",
@@ -8385,7 +8374,7 @@
     "objective_checks": [
       "src/components/Navbar.tsx contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/navbar-rebrand.",
+      "Complete the merge: main has a merge commit joining feature/navbar-rebrand.",
       "main is checked out and the working folder is clean."
     ],
     "expected_result": "`src/components/Navbar.tsx` holds the agreed content, the conflict is gone, and the finished merge is recorded on `main`.",
@@ -8453,7 +8442,7 @@
     "objective_checks": [
       "src/routes.ts contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/routes.",
+      "Complete the merge: main has a merge commit joining feature/routes.",
       "main is checked out and the working folder is clean."
     ],
     "expected_result": "`src/routes.ts` holds the agreed content, the conflict is gone, and the finished merge is recorded on `main`.",
@@ -8521,7 +8510,7 @@
     "objective_checks": [
       "src/policy.yml contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/policy.",
+      "Complete the merge: main has a merge commit joining feature/policy.",
       "main is checked out and the working folder is clean."
     ],
     "expected_result": "`src/policy.yml` holds the agreed content, the conflict is gone, and the finished merge is recorded on `main`.",
@@ -8589,7 +8578,7 @@
     "objective_checks": [
       "config/gateway.yml contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/gateway.",
+      "Complete the merge: main has a merge commit joining feature/gateway.",
       "main is checked out and the working folder is clean."
     ],
     "expected_result": "`config/gateway.yml` holds the agreed content, the conflict is gone, and the finished merge is recorded on `main`.",
@@ -8657,7 +8646,7 @@
     "objective_checks": [
       "src/pricing.rb contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/pricing.",
+      "Complete the merge: main has a merge commit joining feature/pricing.",
       "main is checked out and the working folder is clean."
     ],
     "expected_result": "`src/pricing.rb` holds the agreed content, the conflict is gone, and the finished merge is recorded on `main`.",
@@ -8725,7 +8714,7 @@
     "objective_checks": [
       "schema/orders.sql contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/schema.",
+      "Complete the merge: main has a merge commit joining feature/schema.",
       "main is checked out and the working folder is clean."
     ],
     "expected_result": "`schema/orders.sql` holds the agreed content, the conflict is gone, and the finished merge is recorded on `main`.",
@@ -8793,7 +8782,7 @@
     "objective_checks": [
       "db/migrations/001_users.sql contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/migration.",
+      "Complete the merge: main has a merge commit joining feature/migration.",
       "main is checked out and the working folder is clean."
     ],
     "expected_result": "`db/migrations/001_users.sql` holds the agreed content, the conflict is gone, and the finished merge is recorded on `main`.",
@@ -8913,8 +8902,7 @@
     ],
     "evaluation": [
       "No ancestor of HEAD is a commit from `feature/legacy-help`; tip is a 2-parent merge of `feature/help-center`; `src/routes.ts` equals the required content; clean tree.",
-      "Process: the first merge must have been cancelled (no merge commit that includes the legacy branch).",
-      "Minimum counted commands: 4 · Maximum counted commands: 8 (proposed)"
+      "Process: the first merge must have been cancelled (no merge commit that includes the legacy branch)."
     ],
     "minimum_counted_commands": 4,
     "maximum_counted_commands": 8,
@@ -8937,7 +8925,7 @@
     "objective_checks": [
       "src/cache.py contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/cache-ttl.",
+      "Complete the merge: main has a merge commit joining feature/cache-ttl.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -8982,8 +8970,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/cache-ttl`; `src/cache.py` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 3 · Maximum counted commands: 12 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 12,
@@ -9006,7 +8993,7 @@
     "objective_checks": [
       "src/mailer.py contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/mail-footer.",
+      "Complete the merge: main has a merge commit joining feature/mail-footer.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -9051,8 +9038,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/mail-footer`; `src/mailer.py` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 3 · Maximum counted commands: 12 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 12,
@@ -9075,7 +9061,7 @@
     "objective_checks": [
       "src/limits.js contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/upload-limit.",
+      "Complete the merge: main has a merge commit joining feature/upload-limit.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -9120,8 +9106,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/upload-limit`; `src/limits.js` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 3 · Maximum counted commands: 12 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 12,
@@ -9144,7 +9129,7 @@
     "objective_checks": [
       "config/app.ini contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/app-locale.",
+      "Complete the merge: main has a merge commit joining feature/app-locale.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -9189,8 +9174,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/app-locale`; `config/app.ini` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 3 · Maximum counted commands: 12 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 12,
@@ -9213,7 +9197,7 @@
     "objective_checks": [
       "src/labels.ts contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/labels-fil.",
+      "Complete the merge: main has a merge commit joining feature/labels-fil.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -9258,8 +9242,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/labels-fil`; `src/labels.ts` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 3 · Maximum counted commands: 12 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 12,
@@ -9287,7 +9270,7 @@
       "src/checkout.js contains exactly the required lines.",
       "src/receipt.js contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/checkout-copy.",
+      "Complete the merge: main has a merge commit joining feature/checkout-copy.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -9344,8 +9327,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/checkout-copy`; `src/checkout.js` equals the required content; `src/receipt.js` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 3 · Maximum counted commands: 10 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 10,
@@ -9373,7 +9355,7 @@
       "config/limits.yml contains exactly the required lines.",
       "config/cors.yml contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/api-limits.",
+      "Complete the merge: main has a merge commit joining feature/api-limits.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -9430,8 +9412,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/api-limits`; `config/limits.yml` equals the required content; `config/cors.yml` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 3 · Maximum counted commands: 10 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 10,
@@ -9459,7 +9440,7 @@
       "schema/books.sql contains exactly the required lines.",
       "schema/authors.sql contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/db-rename.",
+      "Complete the merge: main has a merge commit joining feature/db-rename.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -9516,8 +9497,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/db-rename`; `schema/books.sql` equals the required content; `schema/authors.sql` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 3 · Maximum counted commands: 10 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 10,
@@ -9545,7 +9525,7 @@
       "docs/setup.md contains exactly the required lines.",
       "docs/usage.md contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/docs-sync.",
+      "Complete the merge: main has a merge commit joining feature/docs-sync.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -9602,8 +9582,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/docs-sync`; `docs/setup.md` equals the required content; `docs/usage.md` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 3 · Maximum counted commands: 10 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 10,
@@ -9624,10 +9603,10 @@
       }
     ],
     "objective_checks": [
-      "Git is configured to use meld as its merge tool.",
+      "Configure meld as the Git merge tool.",
       "src/prices.py contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/pricing-v2.",
+      "Complete the merge: main has a merge commit joining feature/pricing-v2.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -9679,8 +9658,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/pricing-v2`; `src/prices.py` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 4 · Maximum counted commands: 8 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 4,
     "maximum_counted_commands": 8,
@@ -9704,7 +9682,7 @@
       "docs/CHANGELOG.md keeps both new entries exactly as Git merged them (it was not edited by hand).",
       "src/version.py contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/release-notes.",
+      "Complete the merge: main has a merge commit joining feature/release-notes.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -9749,8 +9727,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/release-notes`; `src/version.py` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 3 · Maximum counted commands: 8 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 8,
@@ -9773,7 +9750,7 @@
     "objective_checks": [
       "src/i18n.json contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/i18n-refresh.",
+      "Complete the merge: main has a merge commit joining feature/i18n-refresh.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -9819,8 +9796,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/i18n-refresh`; `src/i18n.json` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 3 · Maximum counted commands: 8 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 8,
@@ -9844,7 +9820,7 @@
       "No src/auth.js.orig (or any other backup file) exists in the folder or in the commit.",
       "src/auth.js contains exactly the required lines.",
       "No conflict markers remain in any file.",
-      "The merge is complete: main has a merge commit joining feature/auth-timeout.",
+      "Complete the merge: main has a merge commit joining feature/auth-timeout.",
       "The merge tool was used to resolve the conflict (process check).",
       "main is checked out and the working folder is clean."
     ],
@@ -9895,8 +9871,7 @@
     "not_accepted": [],
     "evaluation": [
       "HEAD on `main`; tip is a 2-parent merge of `feature/auth-timeout`; `src/auth.js` equals the required content; no markers; clean tree.",
-      "Process: `git mergetool` ran during the conflict.",
-      "Minimum counted commands: 4 · Maximum counted commands: 8 (proposed)"
+      "Process: `git mergetool` ran during the conflict."
     ],
     "minimum_counted_commands": 4,
     "maximum_counted_commands": 8,
@@ -9912,7 +9887,7 @@
     "task": "Apply only the changes from commit `c1` to your current `release-1.0` branch as a new commit.",
     "required_files": [],
     "objective_checks": [
-      "release-1.0 has a new commit that carries the changes of c1.",
+      "Copy c1's changes onto release-1.0.",
       "Unrelated commits from the other branch were not copied.",
       "release-1.0 is checked out."
     ],
@@ -9949,7 +9924,7 @@
     "task": "Apply only the changes from commit `c1` to your current `release-1.1` branch as a new commit.",
     "required_files": [],
     "objective_checks": [
-      "release-1.1 has a new commit that carries the changes of c1.",
+      "Copy c1's changes onto release-1.1.",
       "Unrelated commits from the other branch were not copied.",
       "release-1.1 is checked out."
     ],
@@ -9986,7 +9961,7 @@
     "task": "Apply only the changes from commit `c1` to your current `release-2.0` branch as a new commit.",
     "required_files": [],
     "objective_checks": [
-      "release-2.0 has a new commit that carries the changes of c1.",
+      "Copy c1's changes onto release-2.0.",
       "Unrelated commits from the other branch were not copied.",
       "release-2.0 is checked out."
     ],
@@ -10023,7 +9998,7 @@
     "task": "Apply only the changes from commit `c1` to your current `release-1.2` branch as a new commit.",
     "required_files": [],
     "objective_checks": [
-      "release-1.2 has a new commit that carries the changes of c1.",
+      "Copy c1's changes onto release-1.2.",
       "Unrelated commits from the other branch were not copied.",
       "release-1.2 is checked out."
     ],
@@ -10060,7 +10035,7 @@
     "task": "Apply only the changes from commit `c1` to your current `release-2.1` branch as a new commit.",
     "required_files": [],
     "objective_checks": [
-      "release-2.1 has a new commit that carries the changes of c1.",
+      "Copy c1's changes onto release-2.1.",
       "Unrelated commits from the other branch were not copied.",
       "release-2.1 is checked out."
     ],
@@ -10097,7 +10072,7 @@
     "task": "Apply the changes of `c1` and then `c2` to your current `release-1.0` branch as two new commits, keeping their order.\n\n**Leave the rest of `main` behind.**",
     "required_files": [],
     "objective_checks": [
-      "release-1.0 has two new commits, carrying c1's changes first and c2's changes second.",
+      "Copy c1's changes and then c2's changes onto release-1.0, in order.",
       "No other commit from main was copied.",
       "release-1.0 is checked out."
     ],
@@ -10141,7 +10116,7 @@
     "task": "Apply __only__ the newest commit of `feature/invoice-rounding` to your current `release-1.1` branch as a new commit.",
     "required_files": [],
     "objective_checks": [
-      "release-1.1 has one new commit carrying the changes of the newest commit on feature/invoice-rounding.",
+      "Copy only the newest commit of feature/invoice-rounding onto release-1.1.",
       "The older commits of feature/invoice-rounding were not copied.",
       "release-1.1 is checked out."
     ],
@@ -10162,8 +10137,7 @@
     ],
     "not_accepted": [],
     "evaluation": [
-      "`release-1.1` +1 commit whose diff equals the tip commit of `feature/invoice-rounding`; HEAD on `release-1.1`.",
-      "Minimum counted commands: 1 · Maximum counted commands: 10 (proposed)"
+      "`release-1.1` +1 commit whose diff equals the tip commit of `feature/invoice-rounding`; HEAD on `release-1.1`."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 10,
@@ -10303,8 +10277,7 @@
     ],
     "not_accepted": [],
     "evaluation": [
-      "`release-2.0` +1 commit; `src/export.py` equals the required content; no CHERRY_PICK_HEAD; clean tree; HEAD on `release-2.0`.",
-      "Minimum counted commands: 3 · Maximum counted commands: 8 (proposed)"
+      "`release-2.0` +1 commit; `src/export.py` equals the required content; no CHERRY_PICK_HEAD; clean tree; HEAD on `release-2.0`."
     ],
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 8,
@@ -10343,8 +10316,7 @@
       "`git cherry-pick --quit` is NOT accepted: it leaves the staged changes behind."
     ],
     "evaluation": [
-      "No CHERRY_PICK_HEAD; `release-abort` at the original commit; index and working tree clean.",
-      "Minimum counted commands: 1 · Maximum counted commands: 8 (proposed)"
+      "No CHERRY_PICK_HEAD; `release-abort` at the original commit; index and working tree clean."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
@@ -10360,7 +10332,7 @@
     "task": "Apply only `c1` to `release-finalize` as a new commit whose message records which commit it was copied from.",
     "required_files": [],
     "objective_checks": [
-      "release-finalize has one new commit carrying c1's changes.",
+      "Copy c1's changes onto release-finalize.",
       "The new commit’s message says which commit it was copied from (the original commit ID).",
       "No unrelated commits were copied.",
       "release-finalize is checked out."
@@ -10398,8 +10370,8 @@
     "task": "Apply only the changes of `c1` to `release-1.2` and to `release-1.1`, as a new commit on each. Finish on `release-1.1`.",
     "required_files": [],
     "objective_checks": [
-      "release-1.2 has a new commit carrying c1's changes.",
-      "release-1.1 has a new commit carrying c1's changes.",
+      "Copy c1's changes onto release-1.2.",
+      "Copy c1's changes onto release-1.1.",
       "main is unchanged.",
       "release-1.1 is checked out."
     ],
@@ -10451,7 +10423,7 @@
     "task": "Recover the commit that was `main`’s tip before the reset onto a new branch named `recovery/e1`, and switch to it. Leave `main` where the reset left it.",
     "required_files": [],
     "objective_checks": [
-      "recovery/e1 exists and points to the former tip of main.",
+      "Create recovery/e1 pointing at the former tip of main.",
       "main still points to its reset position.",
       "recovery/e1 is checked out and the working folder is clean."
     ],
@@ -10498,7 +10470,7 @@
     "task": "Recover the commit that was `main`’s tip before the reset onto a new branch named `recovery/e2`, and switch to it. Leave `main` where the reset left it.",
     "required_files": [],
     "objective_checks": [
-      "recovery/e2 exists and points to the former tip of main.",
+      "Create recovery/e2 pointing at the former tip of main.",
       "main still points to its reset position.",
       "recovery/e2 is checked out and the working folder is clean."
     ],
@@ -10545,7 +10517,7 @@
     "task": "Recover the commit that was `main`’s tip before the reset onto a new branch named `recovery/e3`, and switch to it. Leave `main` where the reset left it.",
     "required_files": [],
     "objective_checks": [
-      "recovery/e3 exists and points to the former tip of main.",
+      "Create recovery/e3 pointing at the former tip of main.",
       "main still points to its reset position.",
       "recovery/e3 is checked out and the working folder is clean."
     ],
@@ -10592,7 +10564,7 @@
     "task": "Recover the commit that was `main`’s tip before the reset onto a new branch named `recovery/e4`, and switch to it. Leave `main` where the reset left it.",
     "required_files": [],
     "objective_checks": [
-      "recovery/e4 exists and points to the former tip of main.",
+      "Create recovery/e4 pointing at the former tip of main.",
       "main still points to its reset position.",
       "recovery/e4 is checked out and the working folder is clean."
     ],
@@ -10639,7 +10611,7 @@
     "task": "Recover the commit that was `main`’s tip before the reset onto a new branch named `recovery/e5`, and switch to it. Leave `main` where the reset left it.",
     "required_files": [],
     "objective_checks": [
-      "recovery/e5 exists and points to the former tip of main.",
+      "Create recovery/e5 pointing at the former tip of main.",
       "main still points to its reset position.",
       "recovery/e5 is checked out and the working folder is clean."
     ],
@@ -10686,7 +10658,7 @@
     "task": "Recover the commit that was `main`’s tip before the reset onto a new branch named `recovery/m1`, and switch to it. Leave `main` where the reset left it.",
     "required_files": [],
     "objective_checks": [
-      "recovery/m1 exists and points to the former tip of main.",
+      "Create recovery/m1 pointing at the former tip of main.",
       "main still points to its reset position.",
       "recovery/m1 is checked out and the working folder is clean."
     ],
@@ -10734,7 +10706,7 @@
     "task": "Recover the commit that was `main`’s tip before the reset onto a new branch named `recovery/m2`, and switch to it. Leave `main` where the reset left it.",
     "required_files": [],
     "objective_checks": [
-      "recovery/m2 exists and points to the former tip of main.",
+      "Create recovery/m2 pointing at the former tip of main.",
       "main still points to its reset position.",
       "recovery/m2 is checked out and the working folder is clean."
     ],
@@ -10782,7 +10754,7 @@
     "task": "Recover the commit that was `main`’s tip before the reset onto a new branch named `recovery/m3`, and switch to it. Leave `main` where the reset left it.",
     "required_files": [],
     "objective_checks": [
-      "recovery/m3 exists and points to the former tip of main.",
+      "Create recovery/m3 pointing at the former tip of main.",
       "main still points to its reset position.",
       "recovery/m3 is checked out and the working folder is clean."
     ],
@@ -10830,7 +10802,7 @@
     "task": "Recover the commit that was `main`’s tip before the reset onto a new branch named `recovery/m4`, and switch to it. Leave `main` where the reset left it.",
     "required_files": [],
     "objective_checks": [
-      "recovery/m4 exists and points to the former tip of main.",
+      "Create recovery/m4 pointing at the former tip of main.",
       "main still points to its reset position.",
       "recovery/m4 is checked out and the working folder is clean."
     ],
@@ -10878,7 +10850,7 @@
     "task": "Recover the commit that was `main`’s tip before the reset onto a new branch named `recovery/m5`, and switch to it. Leave `main` where the reset left it.",
     "required_files": [],
     "objective_checks": [
-      "recovery/m5 exists and points to the former tip of main.",
+      "Create recovery/m5 pointing at the former tip of main.",
       "main still points to its reset position.",
       "recovery/m5 is checked out and the working folder is clean."
     ],
@@ -10926,7 +10898,7 @@
     "task": "Find the lost work among the old positions in the reflog. Recover the commit containing the borrower search fix on a new branch named `recovery/h1`, then switch to that branch. Reject the candidate containing an abandoned search experiment.\n\n**Leave `main` at its reset position and keep the working tree clean.**",
     "required_files": [],
     "objective_checks": [
-      "recovery/h1 exists and points to the commit containing the borrower search fix.",
+      "Create recovery/h1 pointing at the commit with the borrower search fix.",
       "The other candidate (containing an abandoned search experiment) was not recovered.",
       "main still points to its reset position.",
       "recovery/h1 is checked out and the working folder is clean."
@@ -10965,8 +10937,7 @@
     "not_accepted": [],
     "evaluation": [
       "`recovery/h1` = the c3 commit (the borrower search fix); `main` unchanged; HEAD on `recovery/h1`; clean tree.",
-      "Process: both candidates were inspected (`git show`) before the branch was created.",
-      "Minimum counted commands: 1 · Maximum counted commands: 8 (proposed)"
+      "Process: both candidates were inspected (`git show`) before the branch was created."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
@@ -10982,7 +10953,7 @@
     "task": "Find the lost work among the old positions in the reflog. Recover the commit containing the completed borrowing report on a new branch named `recovery/h2`, then switch to that branch. Reject the candidate containing an earlier draft of the report.\n\n**Leave `main` at its reset position and keep the working tree clean.**",
     "required_files": [],
     "objective_checks": [
-      "recovery/h2 exists and points to the commit containing the completed borrowing report.",
+      "Create recovery/h2 pointing at the commit with the completed borrowing report.",
       "The other candidate (containing an earlier draft of the report) was not recovered.",
       "main still points to its reset position.",
       "recovery/h2 is checked out and the working folder is clean."
@@ -11021,8 +10992,7 @@
     "not_accepted": [],
     "evaluation": [
       "`recovery/h2` = the c3 commit (the completed borrowing report); `main` unchanged; HEAD on `recovery/h2`; clean tree.",
-      "Process: both candidates were inspected (`git show`) before the branch was created.",
-      "Minimum counted commands: 1 · Maximum counted commands: 8 (proposed)"
+      "Process: both candidates were inspected (`git show`) before the branch was created."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
@@ -11038,7 +11008,7 @@
     "task": "Find the lost work among the old positions in the reflog. Recover the commit containing the validation fix and its passing test on a new branch named `recovery/h3`, then switch to that branch. Reject the candidate containing a cleanup that does not include the validation fix.\n\n**Leave `main` at its reset position and keep the working tree clean.**",
     "required_files": [],
     "objective_checks": [
-      "recovery/h3 exists and points to the commit containing the validation fix and its passing test.",
+      "Create recovery/h3 pointing at the commit with the validation fix and its passing test.",
       "The other candidate (containing a cleanup that does not include the validation fix) was not recovered.",
       "main still points to its reset position.",
       "recovery/h3 is checked out and the working folder is clean."
@@ -11077,8 +11047,7 @@
     "not_accepted": [],
     "evaluation": [
       "`recovery/h3` = the c3 commit (the validation fix and its passing test); `main` unchanged; HEAD on `recovery/h3`; clean tree.",
-      "Process: both candidates were inspected (`git show`) before the branch was created.",
-      "Minimum counted commands: 1 · Maximum counted commands: 8 (proposed)"
+      "Process: both candidates were inspected (`git show`) before the branch was created."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
@@ -11094,7 +11063,7 @@
     "task": "Find the lost work among the old positions in the reflog. Recover the commit containing the working export before the failed merge on a new branch named `recovery/h4`, then switch to that branch. Reject the candidate containing the failed merge result.\n\n**Leave `main` at its reset position and keep the working tree clean.**",
     "required_files": [],
     "objective_checks": [
-      "recovery/h4 exists and points to the commit containing the working export before the failed merge.",
+      "Create recovery/h4 pointing at the commit with the working export before the failed merge.",
       "The other candidate (containing the failed merge result) was not recovered.",
       "main still points to its reset position.",
       "recovery/h4 is checked out and the working folder is clean."
@@ -11133,8 +11102,7 @@
     "not_accepted": [],
     "evaluation": [
       "`recovery/h4` = the c3 commit (the working export before the failed merge); `main` unchanged; HEAD on `recovery/h4`; clean tree.",
-      "Process: both candidates were inspected (`git show`) before the branch was created.",
-      "Minimum counted commands: 1 · Maximum counted commands: 8 (proposed)"
+      "Process: both candidates were inspected (`git show`) before the branch was created."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
@@ -11150,7 +11118,7 @@
     "task": "Find the lost work among the old positions in the reflog. Recover the commit containing the final login timeout fix on a new branch named `recovery/h5`, then switch to that branch. Reject the candidate containing a temporary debugging change.\n\n**Leave `main` at its reset position and keep the working tree clean.**",
     "required_files": [],
     "objective_checks": [
-      "recovery/h5 exists and points to the commit containing the final login timeout fix.",
+      "Create recovery/h5 pointing at the commit with the final login timeout fix.",
       "The other candidate (containing a temporary debugging change) was not recovered.",
       "main still points to its reset position.",
       "recovery/h5 is checked out and the working folder is clean."
@@ -11189,8 +11157,7 @@
     "not_accepted": [],
     "evaluation": [
       "`recovery/h5` = the c3 commit (the final login timeout fix); `main` unchanged; HEAD on `recovery/h5`; clean tree.",
-      "Process: both candidates were inspected (`git show`) before the branch was created.",
-      "Minimum counted commands: 1 · Maximum counted commands: 8 (proposed)"
+      "Process: both candidates were inspected (`git show`) before the branch was created."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 8,
@@ -11208,7 +11175,7 @@
     "objective_checks": [
       "main has one new commit that reverses c3; c3 itself is still in history.",
       "Later unrelated work is untouched.",
-      "origin/main matches local main.",
+      "Push the result to origin/main.",
       "main is checked out; no revert is unfinished."
     ],
     "expected_result": "The change in `c3` is reversed by a new commit on `main`, history was not rewritten, and the correction is on `origin`.",
@@ -11254,7 +11221,7 @@
     "objective_checks": [
       "main has one new commit that reverses c2; c2 itself is still in history.",
       "Later unrelated work is untouched.",
-      "origin/main matches local main.",
+      "Push the result to origin/main.",
       "main is checked out; no revert is unfinished."
     ],
     "expected_result": "The change in `c2` is reversed by a new commit on `main`, history was not rewritten, and the correction is on `origin`.",
@@ -11300,7 +11267,7 @@
     "objective_checks": [
       "main has one new commit that reverses c4; c4 itself is still in history.",
       "Later unrelated work is untouched.",
-      "origin/main matches local main.",
+      "Push the result to origin/main.",
       "main is checked out; no revert is unfinished."
     ],
     "expected_result": "The change in `c4` is reversed by a new commit on `main`, history was not rewritten, and the correction is on `origin`.",
@@ -11344,10 +11311,10 @@
     "task": "Inspect the history and commit `c2` to confirm the cause. Revert that commit on `main` and push the new corrective commit to `origin`.",
     "required_files": [],
     "objective_checks": [
-      "The faulty change is identified and checked first.",
+      "Inspect the history to identify the faulty commit before reverting (command-history check).",
       "main has one new commit that reverses c2; c2 itself is still in history.",
       "Later unrelated work is untouched.",
-      "origin/main matches local main.",
+      "Push the result to origin/main.",
       "main is checked out; no revert is unfinished."
     ],
     "expected_result": "The change in `c2` is reversed by a new commit on `main`, history was not rewritten, and the correction is on `origin`.",
@@ -11401,10 +11368,10 @@
     "task": "Inspect the history and commit `c2` to confirm the cause. Revert that commit on `main` and push the new corrective commit to `origin`.",
     "required_files": [],
     "objective_checks": [
-      "The faulty change is identified and checked first.",
+      "Inspect the history to identify the faulty commit before reverting (command-history check).",
       "main has one new commit that reverses c2; c2 itself is still in history.",
       "Later unrelated work is untouched.",
-      "origin/main matches local main.",
+      "Push the result to origin/main.",
       "main is checked out; no revert is unfinished."
     ],
     "expected_result": "The change in `c2` is reversed by a new commit on `main`, history was not rewritten, and the correction is on `origin`.",
@@ -11458,10 +11425,10 @@
     "task": "Inspect the history and commit `c1` to confirm the cause. Revert that commit on `main` and push the new corrective commit to `origin`.",
     "required_files": [],
     "objective_checks": [
-      "The faulty change is identified and checked first.",
+      "Inspect the history to identify the faulty commit before reverting (command-history check).",
       "main has one new commit that reverses c1; c1 itself is still in history.",
       "Later unrelated work is untouched.",
-      "origin/main matches local main.",
+      "Push the result to origin/main.",
       "main is checked out; no revert is unfinished."
     ],
     "expected_result": "The change in `c1` is reversed by a new commit on `main`, history was not rewritten, and the correction is on `origin`.",
@@ -11515,9 +11482,9 @@
     "task": "Undo the faulty changes `c3` and `c1` with a separate corrective commit for each, newest first, keeping all unrelated work. Then publish the corrected `main` to `origin` once.",
     "required_files": [],
     "objective_checks": [
-      "Each of c3, c1 has its own revert commit on main, newest first.",
+      "Revert c3 and then c1 on main, each in its own commit, newest first.",
       "The unrelated commits between and after them are untouched.",
-      "origin/main matches local main after one push.",
+      "Push the result to origin/main.",
       "main is checked out; no revert is unfinished."
     ],
     "expected_result": "Both faulty changes are reversed by two new commits, the unrelated work remains, and the corrected history is on `origin`.",
@@ -11566,9 +11533,9 @@
     "task": "Undo the faulty changes `c3` and `c1` with a separate corrective commit for each, newest first, keeping all unrelated work. Then publish the corrected `main` to `origin` once.",
     "required_files": [],
     "objective_checks": [
-      "Each of c3, c1 has its own revert commit on main, newest first.",
+      "Revert c3 and then c1 on main, each in its own commit, newest first.",
       "The unrelated commits between and after them are untouched.",
-      "origin/main matches local main after one push.",
+      "Push the result to origin/main.",
       "main is checked out; no revert is unfinished."
     ],
     "expected_result": "Both faulty changes are reversed by two new commits, the unrelated work remains, and the corrected history is on `origin`.",
@@ -11617,9 +11584,9 @@
     "task": "Undo the faulty changes `c4` and `c2` with a separate corrective commit for each, newest first, keeping all unrelated work. Then publish the corrected `main` to `origin` once.",
     "required_files": [],
     "objective_checks": [
-      "Each of c4, c2 has its own revert commit on main, newest first.",
+      "Revert c4 and then c2 on main, each in its own commit, newest first.",
       "The unrelated commits between and after them are untouched.",
-      "origin/main matches local main after one push.",
+      "Push the result to origin/main.",
       "main is checked out; no revert is unfinished."
     ],
     "expected_result": "Both faulty changes are reversed by two new commits, the unrelated work remains, and the corrected history is on `origin`.",
@@ -11668,7 +11635,7 @@
     "task": "Rebase the current feature branch onto `main`, then inspect the complete commit graph to verify the order. Finish with clean working files.",
     "required_files": [],
     "objective_checks": [
-      "feature/recovery now sits on top of main with all its commits.",
+      "Rebase feature/recovery onto main.",
       "No rebase is in progress.",
       "feature/recovery is checked out and the working folder is clean."
     ],
@@ -11710,7 +11677,7 @@
     "task": "Rebase the current feature branch onto `main`, then inspect the complete commit graph to verify the order. Finish with clean working files.",
     "required_files": [],
     "objective_checks": [
-      "feature/search-filters now sits on top of main with all its commits.",
+      "Rebase feature/search-filters onto main.",
       "No rebase is in progress.",
       "feature/search-filters is checked out and the working folder is clean."
     ],
@@ -11752,7 +11719,7 @@
     "task": "Rebase the current feature branch onto `main`, then inspect the complete commit graph to verify the order. Finish with clean working files.",
     "required_files": [],
     "objective_checks": [
-      "feature/cli-flags now sits on top of main with all its commits.",
+      "Rebase feature/cli-flags onto main.",
       "No rebase is in progress.",
       "feature/cli-flags is checked out and the working folder is clean."
     ],
@@ -11794,7 +11761,7 @@
     "task": "Inspect the graph, then replay only the commits unique to `fix/footer-typo` after `feature/checkout-redesign` onto `main`. Finish on `fix/footer-typo` with clean working files.",
     "required_files": [],
     "objective_checks": [
-      "fix/footer-typo contains only its own commits, now on top of main.",
+      "Rebase fix/footer-typo directly onto main, leaving out its parent branch's commits.",
       "The unapproved parent branch’s commits are not in fix/footer-typo.",
       "No rebase is in progress.",
       "fix/footer-typo is checked out and the working folder is clean."
@@ -11837,7 +11804,7 @@
     "task": "Inspect the graph, then replay only the commits unique to `hotfix/login-timeout` after `release/2.0-beta` onto `main`. Finish on `hotfix/login-timeout` with clean working files.",
     "required_files": [],
     "objective_checks": [
-      "hotfix/login-timeout contains only its own commits, now on top of main.",
+      "Rebase hotfix/login-timeout directly onto main, leaving out its parent branch's commits.",
       "The unapproved parent branch’s commits are not in hotfix/login-timeout.",
       "No rebase is in progress.",
       "hotfix/login-timeout is checked out and the working folder is clean."
@@ -11903,8 +11870,7 @@
       "`git rebase --quit` is NOT accepted: it leaves the half-rewritten branch behind."
     ],
     "evaluation": [
-      "No rebase state; `feature/export-pdf` at its original tip; clean tree; HEAD on `feature/export-pdf`.",
-      "Minimum counted commands: 1 · Maximum counted commands: 10 (proposed)"
+      "No rebase state; `feature/export-pdf` at its original tip; clean tree; HEAD on `feature/export-pdf`."
     ],
     "minimum_counted_commands": 1,
     "maximum_counted_commands": 10,
@@ -11920,7 +11886,7 @@
     "task": "Bring the complete feature back, including the commit that went missing, and place the whole branch on top of current `main`. Finish with clean working files.",
     "required_files": [],
     "objective_checks": [
-      "feature/cli-flags sits on top of main and contains all its original commits, including the one that went missing.",
+      "Rebase feature/cli-flags onto main, recovering the one that went missing in the process.",
       "No rebase is in progress.",
       "feature/cli-flags is checked out and the working folder is clean."
     ],
@@ -11970,7 +11936,7 @@
     "task": "Bring back the complete hotfix, including its missing test commit, and place the whole branch on top of current `main`. Finish with clean working files.",
     "required_files": [],
     "objective_checks": [
-      "hotfix/export-csv sits on top of main and contains all its original commits, including the one that went missing.",
+      "Rebase hotfix/export-csv onto main, recovering the one that went missing in the process.",
       "No rebase is in progress.",
       "hotfix/export-csv is checked out and the working folder is clean."
     ],
@@ -12028,7 +11994,7 @@
       "src/limiter.py contains exactly the required lines.",
       "No conflict markers remain.",
       "No rebase is still in progress.",
-      "feature/rate-limits sits on top of main with all of its commits.",
+      "Rebase feature/rate-limits onto main.",
       "feature/rate-limits is checked out and the working folder is clean."
     ],
     "expected_result": "The rebase is complete, the conflict is resolved, and `feature/rate-limits` sits on `main` with all its commits.",
@@ -12069,8 +12035,7 @@
       "`git rebase --skip` is NOT accepted: it drops the conflicting commit and loses work."
     ],
     "evaluation": [
-      "No rebase state; `main` is an ancestor of HEAD; all original feature commits present (by patch); `src/limiter.py` equals required; clean tree.",
-      "Minimum counted commands: 2 · Maximum counted commands: 8 (proposed)"
+      "No rebase state; `main` is an ancestor of HEAD; all original feature commits present (by patch); `src/limiter.py` equals required; clean tree."
     ],
     "minimum_counted_commands": 2,
     "maximum_counted_commands": 8,

@@ -43,12 +43,14 @@ REQUIRED_README_SNIPPETS = [
     "npm run api:type-adoption-check",
 ]
 
-# Checked-in solution references and the UI design reference library.
+# Checked-in solution references introduced with the scoring and alternatives audit.
 ALLOWED_DOC_ENTRIES = {
     "goals",
     "designs",
     "git-solution-audit.md",
     "taught-vs-alternative-solutions.md",
+    # Generated scenario export; regenerated via scripts/generate_scenario_md.py.
+    "SEEDED_SCENARIOS.md",
 }
 
 STALE_DOC_SNIPPETS = [

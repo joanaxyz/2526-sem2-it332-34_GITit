@@ -31,8 +31,8 @@ Make `services/billing-api`, and __only__ that folder, a Git repository whose fi
 
 **Objective Checklist**
 
-- [ ] services/billing-api is a repository; the workspace and its other folders are not.
-- [ ] The current branch is trunk.
+- [ ] Initialize services/billing-api as a Git repository, leaving the workspace and other folders untouched.
+- [ ] Set trunk as the initial branch.
 - [ ] Nothing is staged or committed.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -79,8 +79,8 @@ Make `courses/git-basics`, and __only__ that folder, a Git repository with `main
 
 **Objective Checklist**
 
-- [ ] courses/git-basics is a repository; the workspace and its other folders are not.
-- [ ] The current branch is main.
+- [ ] Initialize courses/git-basics as a Git repository, leaving the workspace and other folders untouched.
+- [ ] Set main as the initial branch.
 - [ ] Nothing is staged or committed.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -127,7 +127,7 @@ Turn the current folder into a Git repository.
 
 **Objective Checklist**
 
-- [ ] The current folder is a Git repository.
+- [ ] Initialize the current folder as a Git repository.
 - [ ] notes.md is still there and untracked.
 - [ ] Nothing is staged and no commit exists.
 
@@ -172,7 +172,7 @@ Turn the current folder into a Git repository.
 
 **Objective Checklist**
 
-- [ ] The current folder is a Git repository.
+- [ ] Initialize the current folder as a Git repository.
 - [ ] recipes.md is still there and untracked.
 - [ ] Nothing is staged and no commit exists.
 
@@ -219,7 +219,7 @@ Create a repository in a new `site-assets` folder with `main` as its first branc
 
 **Objective Checklist**
 
-- [ ] site-assets is a Git repository on main.
+- [ ] Initialize site-assets as a Git repository on main.
 - [ ] The workspace itself is not a repository.
 - [ ] design/logo.svg is still in place, and nothing is staged or committed.
 
@@ -266,7 +266,7 @@ Make the existing `sketches` folder a Git repository with `main` as its first br
 
 **Objective Checklist**
 
-- [ ] sketches is a Git repository on main.
+- [ ] Initialize sketches as a Git repository on main.
 - [ ] ideas.md and palette.txt are unchanged and untracked.
 - [ ] Nothing is staged and no commit exists.
 
@@ -311,7 +311,7 @@ Clone `git@example.test:security/audit-rules.git` over SSH into a folder named `
 
 **Objective Checklist**
 
-- [ ] A copy of audit-rules exists in rules-review.
+- [ ] Clone audit-rules into the rules-review folder.
 - [ ] The default branch (main) is checked out.
 - [ ] Exactly the last two commits were downloaded (history depth of 2).
 - [ ] origin points to the SSH address given in the task.
@@ -356,7 +356,7 @@ Clone the remote repository from `https://example.test/design/style-guide.git`.
 
 **Objective Checklist**
 
-- [ ] A local repository exists with origin pointing at the style guide.
+- [ ] Clone the style guide repository.
 - [ ] main matches origin/main.
 - [ ] The working folder is clean.
 
@@ -398,7 +398,7 @@ Clone `https://example.test/docs/handbook.git` into a local folder named `handbo
 
 **Objective Checklist**
 
-- [ ] The repository is in handbook-draft.
+- [ ] Clone the repository into the handbook-draft folder.
 - [ ] The current branch is draft, matching origin/draft.
 - [ ] The working folder is clean.
 
@@ -440,7 +440,7 @@ Clone the remote repository from `https://example.test/design/icon-set.git` usin
 
 **Objective Checklist**
 
-- [ ] The repository is cloned with origin pointing at the icon set.
+- [ ] Clone the icon set repository.
 - [ ] main matches origin/main.
 - [ ] Only one commit of history was copied.
 
@@ -486,8 +486,8 @@ Make `portfolio` a Git repository on `main`, then commit `index.html` and `style
 
 **Objective Checklist**
 
-- [ ] portfolio is a Git repository on main.
-- [ ] A commit named “Initial portfolio” contains index.html and styles.css.
+- [ ] Initialize portfolio as a Git repository on main.
+- [ ] Create a commit named "Initial portfolio" containing index.html and styles.css.
 - [ ] notes.txt is not committed and is still in the folder.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -535,8 +535,8 @@ Make `recipes` a Git repository on `main`, then commit `recipes.md` and `shoppin
 
 **Objective Checklist**
 
-- [ ] recipes is a Git repository on main.
-- [ ] A commit named “Start recipe notes” contains recipes.md and shopping.md.
+- [ ] Initialize recipes as a Git repository on main.
+- [ ] Create a commit named "Start recipe notes" containing recipes.md and shopping.md.
 - [ ] draft.txt is not committed and is still in the folder.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -582,7 +582,7 @@ Stage `CHANGELOG.md`, `setup.py` and `src/version.py`, then create a commit with
 
 **Objective Checklist**
 
-- [ ] The latest commit on main is "Prepare 1.2 release".
+- [ ] Create a commit named "Prepare 1.2 release" on main.
 - [ ] It contains all three files.
 - [ ] Nothing is left staged.
 
@@ -629,7 +629,7 @@ Commit the rounding fix from `src/cart.py` together with the whole of `tests/tes
 
 **Objective Checklist**
 
-- [ ] A commit named “Fix cart total rounding” exists on main.
+- [ ] Create a commit named "Fix cart total rounding" on main.
 - [ ] It contains the rounding fix and tests/test_cart.py.
 - [ ] The debug print is not committed and is still in src/cart.py.
 
@@ -680,7 +680,7 @@ Commit the quoting fix from `src/export.py` together with the whole of `docs/exp
 
 **Objective Checklist**
 
-- [ ] A commit named “Fix CSV quoting” exists on main.
+- [ ] Create a commit named "Fix CSV quoting" on main.
 - [ ] It contains the quoting fix and the docs/export.md changes.
 - [ ] The experimental flag is not committed and is still in src/export.py.
 
@@ -729,8 +729,8 @@ Make two commits on `main`. First commit __only__ the expiry fix with the messag
 
 **Objective Checklist**
 
-- [ ] “Fix token expiry check” is a commit with only the expiry fix.
-- [ ] “Tidy API logging” comes right after it, with the tidy-up.
+- [ ] Create a commit named "Fix token expiry check" containing only the expiry fix.
+- [ ] Create a commit named "Tidy API logging" immediately after, containing the tidy-up.
 - [ ] Nothing is left uncommitted, and you finish on main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -779,8 +779,8 @@ Make two commits on `main`. First commit __only__ the focus-trap fix with the me
 
 **Objective Checklist**
 
-- [ ] “Fix menu focus trap” is a commit with only the focus-trap fix.
-- [ ] “Rename menu helpers” comes right after it, with the renames.
+- [ ] Create a commit named "Fix menu focus trap" containing only the focus-trap fix.
+- [ ] Create a commit named "Rename menu helpers" immediately after, containing the renames.
 - [ ] Nothing is left uncommitted, and you finish on main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -831,7 +831,7 @@ Add __only__ the missing guard hunk from `src/checkout.py` to the latest commit,
 
 **Objective Checklist**
 
-- [ ] The latest commit is still named “Validate checkout totals” and now includes the guard.
+- [ ] Add the guard to the latest commit, keeping its name "Validate checkout totals".
 - [ ] No extra commit was created (the amended commit replaced the old one).
 - [ ] The debug hunk is not committed and is still in src/checkout.py.
 
@@ -880,7 +880,7 @@ Add __only__ the missing ranking hunk from `src/search.py` to the latest commit,
 
 **Objective Checklist**
 
-- [ ] The latest commit is still named “Rank exact matches first” and now includes the ranking change.
+- [ ] Add the ranking change to the latest commit, keeping its name "Rank exact matches first".
 - [ ] No extra commit was created (the amended commit replaced the old one).
 - [ ] The logging hunk is not committed and is still in src/search.py.
 
@@ -927,8 +927,8 @@ Rename the latest commit to `Add rate limiter`, then commit `docs/limits.md` sep
 
 **Objective Checklist**
 
-- [ ] The limiter commit is now named “Add rate limiter” and does not contain the docs.
-- [ ] “Document rate limits” comes right after it, with docs/limits.md.
+- [ ] Rename the latest commit to "Add rate limiter".
+- [ ] Create a commit named "Document rate limits" immediately after, containing docs/limits.md.
 - [ ] Nothing is left uncommitted, and you finish on main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -975,8 +975,8 @@ Rename the latest commit to `Document install steps`, then commit `docs/faq.md` 
 
 **Objective Checklist**
 
-- [ ] The guide commit is now named “Document install steps” and does not contain the FAQ.
-- [ ] “Add install FAQ” comes right after it, with docs/faq.md.
+- [ ] Rename the latest commit to "Document install steps".
+- [ ] Create a commit named "Add install FAQ" immediately after, containing docs/faq.md.
 - [ ] Nothing is left uncommitted, and you finish on main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -1023,8 +1023,8 @@ Discard your edits to `styles/theme.css` and restore its committed version. Fini
 
 **Objective Checklist**
 
-- [ ] styles/theme.css is back to its committed version (its edits are gone).
-- [ ] No commit was created, and you finish on main.
+- [ ] Discard the edits in styles/theme.css, restoring it to its committed version.
+- [ ] No other file was changed, and you finish on main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -1068,7 +1068,7 @@ Unstage `notes/todo.md` while keeping its edits, then commit the login fix with 
 
 **Objective Checklist**
 
-- [ ] A commit named “Fix login redirect” contains the src/login.py fix.
+- [ ] Create a commit named "Fix login redirect" containing the src/login.py fix.
 - [ ] notes/todo.md is not in that commit.
 - [ ] Your edits to notes/todo.md are still in the working folder, unstaged.
 
@@ -1116,7 +1116,7 @@ Unstage `scratch/ideas.txt` while keeping its edits, then commit the badge fix w
 
 **Objective Checklist**
 
-- [ ] A commit named “Fix cart badge count” contains the src/cart_badge.js fix.
+- [ ] Create a commit named "Fix cart badge count" containing the src/cart_badge.js fix.
 - [ ] scratch/ideas.txt is not in that commit.
 - [ ] Your edits to scratch/ideas.txt are still in the working folder, unstaged.
 
@@ -1166,9 +1166,9 @@ Unstage `debug.log` (keep it in the folder), discard the edits to `tmp/output.tx
 
 **Objective Checklist**
 
-- [ ] A commit named “Fix report totals” contains only the totals fix.
+- [ ] Create a commit named "Fix report totals" containing only the totals fix.
 - [ ] debug.log is not committed and is still in the folder.
-- [ ] tmp/output.txt is back to its committed version.
+- [ ] Discard the edits in tmp/output.txt, restoring it to its committed version.
 - [ ] The experiment is not committed and is still in src/report.py.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -1219,9 +1219,9 @@ Unstage `notes/invoice-ideas.md` (keep it in the folder), discard the edits to `
 
 **Objective Checklist**
 
-- [ ] A commit named “Fix invoice due date” contains only the due-date fix.
+- [ ] Create a commit named "Fix invoice due date" containing only the due-date fix.
 - [ ] notes/invoice-ideas.md is not committed and is still in the folder.
-- [ ] build/invoice.html is back to its committed version.
+- [ ] Discard the edits in build/invoice.html, restoring it to its committed version.
 - [ ] The refactor is not committed and is still in src/invoice.py.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -1368,7 +1368,7 @@ Keep the spike commit on a new branch named `archive/spike-results`, then finish
 
 **Objective Checklist**
 
-- [ ] archive/spike-results points at the spike commit.
+- [ ] Save the spike commit as archive/spike-results.
 - [ ] develop is checked out and unchanged.
 - [ ] main is unchanged.
 
@@ -1413,8 +1413,8 @@ Create `docs/faq` from the current tip of `main` and switch to it, then switch b
 
 **Objective Checklist**
 
-- [ ] docs/faq exists at main's current commit.
-- [ ] You finish on main.
+- [ ] Create docs/faq from the current commit of main.
+- [ ] Return to main.
 - [ ] Nothing changed on main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -1456,8 +1456,8 @@ Create `feature/rate-limit` from the current tip of `main` and switch to it, the
 
 **Objective Checklist**
 
-- [ ] feature/rate-limit exists at main's current commit.
-- [ ] You finish on main.
+- [ ] Create feature/rate-limit from the current commit of main.
+- [ ] Return to main.
 - [ ] Nothing changed on main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -1501,7 +1501,7 @@ Create `release/1.0` at the "Release 1.0 snapshot" commit. **Stay on `main` and 
 
 **Objective Checklist**
 
-- [ ] release/1.0 points at the "Release 1.0 snapshot" commit.
+- [ ] Create release/1.0 at the "Release 1.0 snapshot" commit.
 - [ ] You are still on main, and main has not moved.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -1545,7 +1545,7 @@ Create `audit/q3` at the "Q3 audit sign-off" commit. **Stay on `main` and leave 
 
 **Objective Checklist**
 
-- [ ] audit/q3 points at the "Q3 audit sign-off" commit.
+- [ ] Create audit/q3 at the "Q3 audit sign-off" commit.
 - [ ] You are still on main, and main has not moved.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -1589,7 +1589,7 @@ Delete the local branch `fix/readme-typo` now that its work is on `main`.
 
 **Objective Checklist**
 
-- [ ] fix/readme-typo no longer exists.
+- [ ] Delete the local fix/readme-typo branch.
 - [ ] main still holds the typo fix.
 - [ ] main is checked out.
 
@@ -1635,7 +1635,7 @@ Delete the local branch `spike/old-search`.
 
 **Objective Checklist**
 
-- [ ] spike/old-search no longer exists.
+- [ ] Delete the local spike/old-search branch.
 - [ ] main still holds the merged work.
 - [ ] main is checked out.
 
@@ -1682,7 +1682,7 @@ Discard the stray edit in `debug.log`. Then create `fix/parser-unicode`, switch 
 **Objective Checklist**
 
 - [ ] fix/parser-unicode is checked out and has one new commit, Handle unicode identifiers.
-- [ ] That commit contains the parser fix and the original debug.log.
+- [ ] Include the parser fix and the original debug.log in that commit.
 - [ ] main has not moved.
 - [ ] The working folder is clean.
 
@@ -1781,7 +1781,7 @@ Delete the local branches that are already merged into `main`.
 
 **Objective Checklist**
 
-- [ ] feature/login-copy and fix/footer-link are gone.
+- [ ] Delete the local feature/login-copy and fix/footer-link branches.
 - [ ] spike/dark-mode still exists at its commit.
 - [ ] main has not moved, and you are on main.
 
@@ -1826,7 +1826,7 @@ Delete the local branches that are already merged into `main`.
 
 **Objective Checklist**
 
-- [ ] release/1.4 and hotfix/1.4.1 are gone.
+- [ ] Delete the local release/1.4 and hotfix/1.4.1 branches.
 - [ ] experiment/new-nav still exists at its commit.
 - [ ] main has not moved, and you are on main.
 
@@ -2064,7 +2064,7 @@ Visit `release/v4` without carrying your edits along, then return to `feature/se
 
 **Objective Checklist**
 
-- [ ] You visited release/v4 and finished on feature/search.
+- [ ] Visit release/v4 and return to feature/search (command-history check).
 - [ ] The working folder is clean and no commit was made.
 - [ ] The stash holds one entry with the search draft.
 
@@ -2108,7 +2108,7 @@ Visit `hotfix/tax` without carrying your edits along, then return to `feature/bi
 
 **Objective Checklist**
 
-- [ ] You visited hotfix/tax and finished on feature/billing.
+- [ ] Visit hotfix/tax and return to feature/billing (command-history check).
 - [ ] The working folder is clean and no commit was made.
 - [ ] The stash holds one entry with the billing draft.
 
@@ -2250,7 +2250,8 @@ Change the last commit's message to `Add retry to API client`, then update `orig
 
 **Objective Checklist**
 
-- [ ] The last commit is now Add retry to API client, with the same changes.
+- [ ] Amend the most recent commit to rename it to "Add retry to API client".
+- [ ] The force push used --force-with-lease, not plain --force (command-history check).
 - [ ] origin/feature/api-retry matches your local branch.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -2296,7 +2297,8 @@ Change the last commit's message to `Document SSO setup`, then update `origin`'s
 
 **Objective Checklist**
 
-- [ ] The last commit is now Document SSO setup, with the same changes.
+- [ ] Amend the most recent commit to rename it to "Document SSO setup".
+- [ ] The force push used --force-with-lease, not plain --force (command-history check).
 - [ ] origin/docs/sso matches your local branch.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -2536,7 +2538,7 @@ Unstage `notes/draft.md` and keep its edits. Commit `docs/setup.md` with the mes
 
 - [ ] Your commit Document local setup contains docs/setup.md and not your notes.
 - [ ] main merges Sage's contributor guide with your commit.
-- [ ] origin/main matches your main.
+- [ ] Push the result to origin/main.
 - [ ] notes/draft.md still has your edits, uncommitted.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -2586,7 +2588,7 @@ Unstage `scratch/payload.json` and keep its edits. Commit `src/health.py` with t
 
 - [ ] Your commit Add health check contains src/health.py and not the scratch file.
 - [ ] develop merges Finn's docs with your commit.
-- [ ] origin/develop matches your develop.
+- [ ] Push the result to origin/develop.
 - [ ] scratch/payload.json still has your edits, uncommitted.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -2823,8 +2825,8 @@ Merge `feature/search` into `main` with a merge commit, push `main` to `origin`,
 **Objective Checklist**
 
 - [ ] main's latest commit is a merge that brings in the search page.
-- [ ] origin/main matches your main.
-- [ ] feature/search no longer exists locally.
+- [ ] Push the result to origin/main.
+- [ ] Delete the local feature/search branch.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -2870,8 +2872,8 @@ Merge `hotfix/billing-rounding` into `release/v2` with a merge commit, push `rel
 **Objective Checklist**
 
 - [ ] release/v2's latest commit is a merge that brings in the fix.
-- [ ] origin/release/v2 matches your release/v2.
-- [ ] hotfix/billing-rounding no longer exists locally.
+- [ ] Push the result to origin/release/v2.
+- [ ] Delete the local hotfix/billing-rounding branch.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -3013,7 +3015,7 @@ Switch to `main`, bring `feature/cli-colors` in as one commit with the message `
 **Objective Checklist**
 
 - [ ] main has exactly one new commit, Add CLI colors, and it is not a merge commit.
-- [ ] feature/cli-colors no longer exists.
+- [ ] Delete the local feature/cli-colors branch.
 - [ ] main is checked out, and the working folder is clean.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -3061,7 +3063,7 @@ Switch to `develop`, bring `feature/toast-ui` in as one commit with the message 
 **Objective Checklist**
 
 - [ ] develop has exactly one new commit, Add toast notifications, and it is not a merge commit.
-- [ ] feature/toast-ui no longer exists.
+- [ ] Delete the local feature/toast-ui branch.
 - [ ] develop is checked out, and the working folder is clean.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -3206,7 +3208,7 @@ Merge `feature/search` into `main` with a merge commit, push `main` to `origin`,
 **Objective Checklist**
 
 - [ ] main's latest commit is a merge that brings in the search page.
-- [ ] origin/main matches your main.
+- [ ] Push the result to origin/main.
 - [ ] origin no longer has feature/search; your local feature/search still exists.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -3256,7 +3258,7 @@ Merge `feature/billing` into `main` with a merge commit, push `main` to `origin`
 **Objective Checklist**
 
 - [ ] main's latest commit is a merge that brings in the billing summary.
-- [ ] origin/main matches your main.
+- [ ] Push the result to origin/main.
 - [ ] origin no longer has feature/billing; your local feature/billing still exists.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -3306,7 +3308,7 @@ Fetch from `origin`, merge `origin/feature/release-notes` into `main` with a mer
 **Objective Checklist**
 
 - [ ] main's latest commit is a merge that brings in Raven's final release notes.
-- [ ] origin/main matches your main.
+- [ ] Push the result to origin/main.
 - [ ] origin/feature/release-notes and origin/feature/old-banner are gone from your remote-tracking refs.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -3356,7 +3358,7 @@ Fetch from `origin`, merge `origin/feature/payments-v2` into `main` with a merge
 **Objective Checklist**
 
 - [ ] main's latest commit is a merge that brings in the final payments work.
-- [ ] origin/main matches your main.
+- [ ] Push the result to origin/main.
 - [ ] origin/feature/payments-v2 and origin/feature/legacy-checkout are gone from your remote-tracking refs.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -3403,7 +3405,7 @@ Delete `docs/old-faq` from `origin`, then remove the stale `origin/feature/old-b
 
 **Objective Checklist**
 
-- [ ] docs/old-faq no longer exists on origin.
+- [ ] Delete docs/old-faq from origin.
 - [ ] origin/feature/old-banner is gone from your copy.
 - [ ] main is unchanged.
 
@@ -3446,7 +3448,7 @@ Delete `feature/v1-api` from `origin`, then remove the stale `origin/spike/graph
 
 **Objective Checklist**
 
-- [ ] feature/v1-api no longer exists on origin.
+- [ ] Delete feature/v1-api from origin.
 - [ ] origin/spike/graphql is gone from your copy.
 - [ ] main is unchanged.
 
@@ -3860,7 +3862,7 @@ Your monthly invoice is ready.
 
 **Objective Checklist**
 
-- [ ] The repository's merge tool is meld.
+- [ ] Configure meld as the Git merge tool.
 - [ ] main has a merge commit with feature/billing-copy as a parent.
 - [ ] src/billing_copy.txt contains exactly the required content.
 
@@ -4058,7 +4060,7 @@ Apply `c2` to `release-2.4` as a new commit whose message records the commit it 
 
 **Objective Checklist**
 
-- [ ] release-2.4 has one new commit with the retry fix.
+- [ ] Cherry-pick the retry fix onto release-2.4.
 - [ ] Its message includes "cherry picked from commit c2".
 - [ ] main's groundwork did not come along, and main is unchanged.
 
@@ -4215,6 +4217,7 @@ Apply `c2` and `c3` to `release-1.2` without committing either, then commit them
 
 - [ ] release-1.2 has exactly one new commit, Backport login fixes.
 - [ ] It contains both fixes and none of main's feature work.
+- [ ] release-1.2 is checked out and no cherry-pick is in progress.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -4262,6 +4265,7 @@ Apply `c1` and `c4` to `release-3.1` without committing either, then commit them
 
 - [ ] release-3.1 has exactly one new commit, Backport tax fixes.
 - [ ] It contains both fixes and none of the unfinished feature.
+- [ ] release-3.1 is checked out and no cherry-pick is in progress.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -4305,7 +4309,7 @@ Apply `c3` to `release-2.1` and to `release-2.0`, each as a new commit. Finish o
 
 **Objective Checklist**
 
-- [ ] release-2.1 and release-2.0 each have one new commit with the session fix.
+- [ ] Cherry-pick the session fix onto release-2.1 and release-2.0.
 - [ ] Neither release received main's other commits.
 - [ ] release-2.0 is checked out, and main is unchanged.
 
@@ -4482,7 +4486,7 @@ On `release-2.2`, apply the two auth fixes from `main` without committing either
 
 **Objective Checklist**
 
-- [ ] release-2.2 has one new commit "Backport auth fixes" on top of its old tip.
+- [ ] Cherry-pick the fixes onto release-2.2 as a single commit named "Backport auth fixes".
 - [ ] It carries both auth fixes and none of main's feature work.
 - [ ] main is unchanged, and you finish on release-2.2.
 
@@ -4528,7 +4532,7 @@ On `release-3.0`, apply the two export fixes from `main` without committing eith
 
 **Objective Checklist**
 
-- [ ] release-3.0 has one new commit "Backport export fixes" on top of its old tip.
+- [ ] Cherry-pick the fixes onto release-3.0 as a single commit named "Backport export fixes".
 - [ ] It carries both export fixes and none of main's feature work.
 - [ ] main is unchanged, and you finish on release-3.0.
 
@@ -4888,7 +4892,7 @@ Bring `main` up to date with `origin`, undo `c3` with a new commit, and push `ma
 
 - [ ] main includes Raven's FAQ commit.
 - [ ] A new commit undoes Switch docs theme, and c3 is still in the history.
-- [ ] origin/main matches your main.
+- [ ] Push the result to origin/main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -4936,7 +4940,7 @@ Bring `main` up to date with `origin`, undo `c4` with a new commit, and push `ma
 
 - [ ] main includes Finn's health endpoint commit.
 - [ ] A new commit undoes Rename the orders endpoint, and c4 is still in the history.
-- [ ] origin/main matches your main.
+- [ ] Push the result to origin/main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -5084,7 +5088,7 @@ Change `c4`'s message to `Add order export`, undo `c2` with a new commit, and pu
 
 - [ ] The order export commit is now named Add order export and still sits on c3.
 - [ ] A new commit undoes Break checkout, and c2 and c3 are still in the history.
-- [ ] origin/main matches your main.
+- [ ] Push the result to origin/main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -5132,7 +5136,7 @@ Change `c4`'s message to `Add RSS feed`, undo `c3` with a new commit, and push `
 
 - [ ] The feed commit is now named Add RSS feed and still sits on c3.
 - [ ] A new commit undoes Shorten feed item IDs, and c3 is still in the history.
-- [ ] origin/main matches your main.
+- [ ] Push the result to origin/main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -5823,7 +5827,7 @@ Make `field-log` a Git repository on `main`. Commit `notes.md` and `readings.csv
 
 **Objective Checklist**
 
-- [ ] field-log is a Git repository on main.
+- [ ] Initialize field-log as a Git repository on main.
 - [ ] The first commit, “Start field log”, holds notes.md and readings.csv but not README.md.
 - [ ] The second commit, “Add field log guide”, adds README.md.
 - [ ] scratch.txt is not committed and is still in the folder.
@@ -5876,7 +5880,7 @@ Make `quiz-app` a Git repository on `main`. Commit `index.html` and `quiz.js` wi
 
 **Objective Checklist**
 
-- [ ] quiz-app is a Git repository on main.
+- [ ] Initialize quiz-app as a Git repository on main.
 - [ ] The first commit, “Start quiz app”, holds index.html and quiz.js but not README.md.
 - [ ] The second commit, “Add quiz setup notes”, adds README.md.
 - [ ] todo.txt is not committed and is still in the folder.
@@ -5929,7 +5933,7 @@ Unstage `notes.txt` (keep it), then complete the latest commit with `templates/s
 
 **Objective Checklist**
 
-- [ ] The latest commit is still named “Add search page” and now includes templates/search.html and the ranking change.
+- [ ] Add templates/search.html and the ranking change to the latest commit, keeping its name "Add search page".
 - [ ] No extra commit was created (the amended commit replaced the old one).
 - [ ] notes.txt and the debug hunk are not committed and are still in the working folder.
 
@@ -5980,7 +5984,7 @@ Unstage `scratch.md` (keep it), then complete the latest commit with `docs/uploa
 
 **Objective Checklist**
 
-- [ ] The latest commit is still named “Add file upload” and now includes docs/upload.md and the size-limit change.
+- [ ] Add docs/upload.md and the size-limit change to the latest commit, keeping its name "Add file upload".
 - [ ] No extra commit was created (the amended commit replaced the old one).
 - [ ] scratch.md and the debug hunk are not committed and are still in the working folder.
 
@@ -6031,9 +6035,9 @@ Rename the latest commit to `Add export` __without adding anything to it__, disc
 
 **Objective Checklist**
 
-- [ ] The export commit is now named “Add export” and contains no log or docs.
-- [ ] “Fix export headers” comes right after it, with the header fix and docs/export.md.
-- [ ] cache/report.json is back to its committed version.
+- [ ] Rename the commit to "Add export", removing log or docs from it.
+- [ ] Create a commit named "Fix export headers" immediately after, containing the header fix and docs/export.
+- [ ] Discard the edits in cache/report.json, restoring it to its committed version.
 - [ ] tmp/run.log and the debug hunk are not committed and are still in the working folder.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -6085,9 +6089,9 @@ Rename the latest commit to `Add billing` __without adding anything to it__, dis
 
 **Objective Checklist**
 
-- [ ] The billing commit is now named “Add billing” and contains no log or docs.
-- [ ] “Fix billing tax” comes right after it, with the tax fix and docs/billing.md.
-- [ ] cache/invoices.json is back to its committed version.
+- [ ] Rename the commit to "Add billing", removing log or docs from it.
+- [ ] Create a commit named "Fix billing tax" immediately after, containing the tax fix and docs/billing.
+- [ ] Discard the edits in cache/invoices.json, restoring it to its committed version.
 - [ ] logs/billing.log and the debug hunk are not committed and are still in the working folder.
 
 **Answer Key (STAFF ONLY, never shown to students)**
@@ -6334,8 +6338,8 @@ Update `main` from `origin`, land `feature/filters` on it as one commit with the
 **Objective Checklist**
 
 - [ ] main has one new commit, “Add search filters”, with the filters and the updated changelog.
-- [ ] origin/main matches main.
-- [ ] feature/filters no longer exists locally or on origin.
+- [ ] Push the result to origin/main.
+- [ ] Delete feature/filters both locally and from origin.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -6386,8 +6390,8 @@ Update `main` from `origin`, land `feature/export` on it as one commit with the 
 **Objective Checklist**
 
 - [ ] main has one new commit, “Add CSV export”, with the export and the updated changelog.
-- [ ] origin/main matches main.
-- [ ] feature/export no longer exists locally or on origin.
+- [ ] Push the result to origin/main.
+- [ ] Delete feature/export both locally and from origin.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -6927,7 +6931,7 @@ Remove the local experiment from `main`, reverse the published banner commit wit
 
 - [ ] “Try banner animation” is no longer on main.
 - [ ] “Add discount banner” is still in history, and a new commit reverses it.
-- [ ] origin/main matches main.
+- [ ] Push the result to origin/main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
@@ -6975,7 +6979,7 @@ Remove the local experiment from `main`, reverse the published alert commit with
 
 - [ ] “Experiment with alert sounds” is no longer on main.
 - [ ] “Page on every warning” is still in history, and a new commit reverses it.
-- [ ] origin/main matches main.
+- [ ] Push the result to origin/main.
 
 **Answer Key (STAFF ONLY, never shown to students)**
 
