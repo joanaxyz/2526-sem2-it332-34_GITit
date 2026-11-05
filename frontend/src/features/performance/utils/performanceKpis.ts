@@ -48,14 +48,14 @@ export const KPIS = [
     why: 'Shows unsuccessful attempts needed for mastery. The contributing tier count matters; Module 4 retains its approved maximum of 3.',
   },
   {
-    key: 'rta', label: 'Transfer checkpoints cleared',
-    explanation: 'Your first attempt on a reserved unfamiliar repository or goal, after practice. Its first result is preserved even if you practice again.',
-    scope: 'Modules 3–4 · reserved unseen transfer checkpoints',
-    emptyHint: 'Measured on unseen transfer checkpoints in Modules 3–4. Requires reserved content and complete exposure evidence.',
+    key: 'rta', label: 'Changed retries cleared',
+    explanation: 'First retries after a failed run where the starting repository or target state changed. Only completed or failed first retries count.',
+    scope: 'Modules 3–4 · first structurally changed retries after failure',
+    emptyHint: 'Complete or fail a first retry on a structurally changed scenario in Modules 3–4.',
     abbr: 'RTA', name: 'Retry Transfer Accuracy', target: 65, up: true, pct: true,
-    formula: 'Novel checkpoints cleared on first run ÷ Novel checkpoints assessed × 100',
-    why: 'Measures transfer after practice, including learners who never failed. Formal studies include all assigned valid checkpoints at cutoff; unavailable novelty evidence is missing.',
-    tooltip: 'A content-author review and durable exposure history establish novelty. A different variant ID alone is insufficient.',
+    formula: 'Successful eligible first retries ÷ Eligible completed or failed first retries × 100',
+    why: 'Measures recovery on a changed problem after failure. Later retries in the same failure streak, retries on identical states, replays, transfer checkpoints and unfinished runs are excluded.',
+    tooltip: 'The initial repository state or target state must differ from the failed run’s variant. A different variant ID alone is insufficient.',
   },
 ] as const satisfies readonly { key: Exclude<keyof ApiSchemas['PerformanceKpiSet'], 'retry_success_rate' | 'rtr'>; [field: string]: unknown }[]
 
@@ -115,8 +115,8 @@ const EVIDENCE: Record<EvidenceKey, { some: (n: number, d: number) => string; no
     none: 'No mastered tiers yet',
   },
   rta: {
-    some: (n, d) => `${n.toLocaleString()} of ${counted(d, 'transfer checkpoint', 'transfer checkpoints')} cleared first time`,
-    none: 'No assessed transfer checkpoints yet',
+    some: (n, d) => `${n.toLocaleString()} of ${counted(d, 'eligible first retry', 'eligible first retries')} succeeded`,
+    none: 'No eligible first retries yet',
   },
   retry_success_rate: {
     some: (n, d) => `${n.toLocaleString()} of ${counted(d, 'recovery retry', 'recovery retries')} succeeded`,

@@ -74,7 +74,7 @@ describe('LearnerKpiPanel', () => {
     expect(tile('CAR')).toHaveTextContent('22 score points across 125 scored scenarios')
     expect(tile('HLCR')).toHaveTextContent('3 of 4 hard tiers mastered')
     expect(tile('ARC')).toHaveTextContent('1 unsuccessful attempt across 10 mastered tiers')
-    expect(tile('RTA')).toHaveTextContent('1 of 2 transfer checkpoints cleared first time')
+    expect(tile('RTA')).toHaveTextContent('1 of 2 eligible first retries succeeded')
   })
 
   it('adds the supplementary rate as a By module column', () => {

@@ -270,8 +270,11 @@ commands and fixed-cohort evaluation workflow are documented in
 CAR averages each scenario's command efficiency against a validated reference on
 the learner's latest clear of content they had not cleared before (replays
 included), with `car_first` from each scenario's first such clear as its learner-facing starting point; ARC
-counts unsuccessful attempts before mastery; RTA preserves the first result on
-reserved unseen transfer checkpoints in Modules 3–4. The supplementary Retry
+counts unsuccessful attempts before mastery; RTA counts successful eligible first
+retries on structurally changed variants after failure in Modules 3–4. Later
+retries in the same failure streak, replays and reserved transfer runs are excluded.
+New studies version this retry policy; existing study manifests retain their
+recorded checkpoint policy. The supplementary Retry
 Success Rate counts concluded recovery retries after actual unsuccessful attempts.
 Its deprecated `rtr` response alias has no current UI consumer.
 

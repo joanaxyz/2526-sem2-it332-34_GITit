@@ -119,7 +119,7 @@ function KpiSummaryTable({ diagnostics }: {
       <p className="mt-2 text-xs text-muted-foreground px-3 pb-2">
         Green = target met · Red = target missed · (n) = contributing learners for cohort means.
         Individual records count required tiers (SCR/HLCR), scored scenarios (CAR), mastered tiers (ARC),
-        or transfer checkpoints (RTA). Hover a value for evidence · -- = no data
+        or eligible first retries (RTA). Hover a value for evidence · -- = no data
       </p>
     </div>
   )
@@ -226,7 +226,7 @@ export function AdminAnalyticsPage() {
               <span>Retry transfer accuracy</span>
             </header>
             <strong className="admin-diagnostic-value">{formatPercent(diagnostics.kpis.rta)}</strong>
-            <p>First attempts on reserved unseen transfer checkpoints (Modules 3-4).</p>
+            <p>First retries after failure on structurally changed scenarios (Modules 3–4).</p>
             <small>{kpiEvidence('rta', diagnostics.kpis.rta)}</small>
             <ModuleRows modules={diagnostics.modules} metric="rta" />
           </article>

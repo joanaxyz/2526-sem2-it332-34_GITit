@@ -179,6 +179,25 @@ def test_failed_only_activity_is_data_and_retries_do_not_expand_tiers(tier, djan
     assert client.get(f"/api/admin/users/{user.id}/kpis/").json()["has_data"] is True
 
 
+@pytest.mark.parametrize(
+    "started_at,ended_at,expected",
+    [
+        (utc(2026, 10, 5), utc(2026, 10, 5), 100),
+        (utc(2026, 9, 29), utc(2026, 10, 5), None),
+        (utc(2026, 10, 5), utc(2026, 10, 11), None),
+    ],
+)
+def test_rta_range_uses_retry_start_and_excludes_outcomes_after_end(
+    tier, django_user_model, started_at, ended_at, expected
+):
+    _, player = _player(django_user_model, "rta-range")
+    failed = _run(player, tier, "a", SESSION_STATUS_FAILED, started_at=utc(2026, 9, 28))
+    retry = _run(player, tier, "b", SESSION_STATUS_COMPLETED, prior=failed, started_at=started_at)
+    AdventureLevelTierRun.objects.filter(pk=retry.pk).update(ended_at=ended_at)
+    report = MetricsService().admin_player_performance_summary(player=player, kpi_range=OCT_1_TO_10)
+    assert report["kpis"]["rta"]["value"] == expected
+
+
 def test_range_selects_starts_but_excludes_assessments_ending_after_cutoff(tier, django_user_model):
     from progress.models import AdventureLevelTierCompletion, KpiCheckpoint
 

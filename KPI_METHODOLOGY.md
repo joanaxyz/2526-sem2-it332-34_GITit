@@ -17,8 +17,8 @@ Let:
 | T | Validated reference number of counted commands for the scored variant | run `ref_count` |
 | A | Actual counted commands on the scored clear | `actual_count(run)` |
 | F | Failed or meaningfully abandoned attempts before first mastery | `failures`, checkpoint `retries` |
-| C | Eligible novel transfer checkpoints assessed live, or assigned in a study | transfer records |
-| P | Transfer checkpoints cleared on their first run | transfer `passed` |
+| C | Eligible completed or failed first retries on structurally changed variants | `rta_total` |
+| P | Those eligible first retries that completed | `rta_wins` |
 
 | Official KPI | Formula | Target |
 | --- | --- | --- |
@@ -36,8 +36,9 @@ that no shorter Git solution exists. A successful shorter solution receives
 
 For example, `failure → success → failure → success → success` masters a tier
 of three scenarios. If those clears use 3, 3 and 4 commands against reference 3,
-and the first transfer checkpoint succeeds: SCR 100%, CAR 91.67%, HLCR 100% when
-hard, ARC 2, RTA 100%. The preceding successful repetitions do not add retries.
+the resulting scores are SCR 100%, CAR 91.67%, HLCR 100% when hard and ARC 2.
+RTA is 100% if both first retries use structurally changed variants; it is null
+if neither retry changes structure. Successful repetitions do not add retries.
 
 ## Command assessment and references
 
@@ -77,7 +78,19 @@ states, objective, solution, workspace edits, diagnostic policy, action limit an
 counting policy version. A run snapshots this evidence at launch; content drift during
 play invalidates its assessment reference.
 
-## Transfer and exposure
+## Retry transfer accuracy
+
+RTA restores the original retry-based calculation from commit `6968759`. An
+eligible retry directly follows a failed run in Modules 3–4, and that failed
+run must not itself directly follow another failed run. The retry's variant
+must have a different `initial_state` or `target_state` from the failed run's
+variant. A different ID or label alone is insufficient. Only completed or
+failed retries enter the denominator; completed retries enter the numerator.
+Later retries in the same failure streak, continue-after-success runs,
+same-structure retries, replays, reserved transfer runs, abandoned retries and
+unfinished runs do not count. No eligible retries yields null, never 0%.
+
+## Reserved checkpoints and exposure
 
 Authors explicitly reserve a variant with a written explanation of the
 meaningful repository or goal difference. Reserved variants are excluded from
@@ -86,7 +99,7 @@ Canonical repository fingerprints screen equivalent content; the authored
 review remains necessary to judge the educational difference.
 
 After mastery, an eligible learner receives an assigned transfer checkpoint.
-Home Progress offers an explicit start/resume link under RTA. It uses the
+Home Progress offers an explicit start/resume link. It uses the
 existing tier workspace with no expected-state answer or command guide. Its
 first run is kept separately from practice mastery, rewards and replay scores.
 Duplicate starts resume that run; abandonment records failure even when no
@@ -96,8 +109,9 @@ Every launch records durable `KpiExposure`, including empty discarded practice
 launches. Previously seen IDs or canonical states are ineligible. Existing
 histories may contain deleted launches: legacy progress has
 `exposure_complete = false` and cannot certify novelty. Use a fresh study cohort
-or newly designed assessment content with complete exposure evidence; do not
-reinterpret old changed retries as transfer checkpoints.
+or newly designed assessment content with complete exposure evidence. Reserved
+checkpoints remain separate practice evidence and do not contribute to live RTA
+or RTA in new studies.
 
 ## Live progress and formal studies
 
@@ -110,7 +124,7 @@ The rule applies to mastered and unmastered tiers alike, so it does not filter
 out failures. Mastery is dated by its first clear, never by a later best-score
 replay. Live CAR uses fresh clears whose run kept a valid reference, replays
 included; a cleared scenario without one counts in `samples.car_missing`. Live
-RTA uses concluded valid transfer checkpoints.
+RTA uses eligible first retries as defined above.
 Pending transfer checkpoints and unavailable evidence are reported separately.
 ARC includes only mastered tiers, with their contributing count shown.
 
@@ -124,11 +138,17 @@ Its versioned manifest fixes participant IDs, tier requirements, accepted
 reference hashes, reserved transfer variants, positive module weights and an
 aware cutoff timestamp. Adding curriculum later does not change its denominator.
 
+New studies record policy `mastery-kpis-v3-retry-rta` and use the same retry RTA
+eligibility as live reports, with outcomes limited to the cutoff. No eligible
+retry remains null, including an unattempted assignment. Existing manifests
+retain their original checkpoint policy; frozen reports are never recomputed.
+
 At cutoff, only terminal run evidence at or before the cutoff can establish
 mastery or score CAR. Study CAR scores every assigned scenario by its latest
 fresh clear before cutoff, replays included, against the manifest reference; an
 assigned scenario without a valid clear scores zero. Valid failed, unfinished or
-unattempted assignments score zero for completion/CAR/transfer. If a reseed
+unattempted assignments score zero for completion/CAR. Existing checkpoint-policy
+studies also score valid unattempted transfer assignments zero. If a reseed
 changed the tier's scenarios or assigned variants, its CAR is missing evidence. Missing or invalid reference/novelty evidence stays
 unscored and is counted separately; it is never fabricated as success or failure.
 ARC remains null without a mastered tier. An unavailable assigned variant is

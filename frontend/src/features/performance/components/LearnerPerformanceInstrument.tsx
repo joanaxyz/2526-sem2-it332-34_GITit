@@ -244,7 +244,7 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
                 {point.run_id ? 'Resume' : 'Start'} transfer checkpoint: {point.title}
               </Link>
             </li>)}
-          </ul> : <p>{KPIS.find((metric) => metric.key === 'rta')!.emptyHint}</p>}
+          </ul> : <p>No available transfer checkpoints yet.</p>}
         </details> : null}
         <details className="performance-calculation" key={selected}>
           <summary>Module {selected} retry recovery · supplementary</summary>

@@ -24,7 +24,7 @@ describe('kpiEvidence', () => {
     ['hlcr', rate(1, 4), '1 of 4 hard tiers mastered'],
     ['arc', rate(1, 10), '1 unsuccessful attempt across 10 mastered tiers'],
     ['arc', rate(5, 1), '5 unsuccessful attempts across 1 mastered tier'],
-    ['rta', rate(2, 3), '2 of 3 transfer checkpoints cleared first time'],
+    ['rta', rate(2, 3), '2 of 3 eligible first retries succeeded'],
     ['retry_success_rate', rate(4, 5), '4 of 5 recovery retries succeeded'],
   ] as const)('%s %o reads "%s"', (key, value, text) => {
     expect(kpiEvidence(key, value)).toBe(text)
@@ -34,7 +34,7 @@ describe('kpiEvidence', () => {
     ['scr', 'No attempted required tiers yet'],
     ['car', 'No scored scenarios yet'],
     ['arc', 'No mastered tiers yet'],
-    ['rta', 'No assessed transfer checkpoints yet'],
+    ['rta', 'No eligible first retries yet'],
   ] as const)('names the missing unit for %s', (key, text) => {
     expect(kpiEvidence(key, rate(0, 0))).toBe(text)
   })

@@ -25,7 +25,7 @@ from testing.kpi_fixtures import bundle, end, routes, start, variant
 
 
 @pytest.mark.django_db
-def test_five_kpis_use_one_mastery_record_and_preserve_first_transfer(django_user_model):
+def test_mastery_kpis_and_checkpoints_preserve_separate_evidence(django_user_model):
     player, tier, scenario, variants = bundle(django_user_model)
     prior = None
     for passed in (False, True, False, True):
@@ -88,7 +88,7 @@ def test_five_kpis_use_one_mastery_record_and_preserve_first_transfer(django_use
         "car": 91.67,
         "hlcr": 100,
         "arc": 2,
-        "rta": 100,
+        "rta": None,
     }
     assert report["kpis"]["car_first"] == report["kpis"]["car"]
     assert report["samples"]["car_scored"] == 3
@@ -197,7 +197,7 @@ def test_failed_transfer_cannot_be_erased_even_by_empty_restart(django_user_mode
     with pytest.raises(Locked):
         start(player, tier, transfer=True)
     end(start(player, tier))
-    assert MetricsService().performance_summary(player=player)["kpis"]["rta"]["value"] == 0
+    assert MetricsService().performance_summary(player=player)["kpis"]["rta"]["value"] is None
 
 
 @pytest.mark.django_db

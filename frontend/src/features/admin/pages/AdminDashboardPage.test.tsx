@@ -453,7 +453,7 @@ describe('AdminDashboardPage denominator labels', () => {
     expect(kpiCard('CAR')).toHaveTextContent('22 score points across 125 scored scenarios')
     expect(kpiCard('HLCR')).toHaveTextContent('1 of 4 hard tiers mastered')
     expect(kpiCard('ARC')).toHaveTextContent('1 unsuccessful attempt across 10 mastered tiers')
-    expect(kpiCard('RTA')).toHaveTextContent('1 of 2 transfer checkpoints cleared first time')
+    expect(kpiCard('RTA')).toHaveTextContent('1 of 2 eligible first retries succeeded')
     expect(kpiCard('CAR')).not.toHaveTextContent('sessions')
   })
 })

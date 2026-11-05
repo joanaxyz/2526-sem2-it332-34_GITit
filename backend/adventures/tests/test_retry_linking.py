@@ -93,7 +93,7 @@ def _structurally_different(first, second):
     return a.initial_state != b.initial_state or a.target_state != b.target_state
 
 
-def test_fresh_start_after_a_failure_is_linked_but_is_not_a_transfer_checkpoint(tiers, player):
+def test_fresh_start_after_a_failure_counts_as_a_changed_first_retry(tiers, player):
     tier, _ = tiers
     failed = _end(_level_page_start(player, tier), SESSION_STATUS_FAILED)
 
@@ -107,7 +107,7 @@ def test_fresh_start_after_a_failure_is_linked_but_is_not_a_transfer_checkpoint(
 
     _end(retry, SESSION_STATUS_COMPLETED)
     rta = MetricsService().performance_summary(player=player)["kpis"]["rta"]
-    assert rta == {"value": None, "numerator": 0, "denominator": 0}
+    assert rta == {"value": 100, "numerator": 1, "denominator": 1}
 
 
 def test_linked_fresh_start_matches_what_the_retry_button_gives(tiers, player, django_user_model):
