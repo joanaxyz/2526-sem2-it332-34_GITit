@@ -6130,6 +6130,10 @@
                     "username": {
                         "type": "string"
                     },
+                    "companion_slug": {
+                        "type": "string",
+                        "nullable": true
+                    },
                     "value": {
                         "type": "integer"
                     },
@@ -6138,6 +6142,7 @@
                     }
                 },
                 "required": [
+                    "companion_slug",
                     "is_you",
                     "rank",
                     "username",

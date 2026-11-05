@@ -101,7 +101,7 @@ export type ApiSchemas = {
   "GuideHome": { "chapter_number": number; "difficulty": string; "level_title": string; "scenario_title": string }
   "IntroductionComplete": { "token": string }
   "Key7e0Enum": "shop-purchases"
-  "LeaderboardEntry": { "is_you": boolean; "rank": number; "username": string; "value": number }
+  "LeaderboardEntry": { "companion_slug": string | null; "is_you": boolean; "rank": number; "username": string; "value": number }
   "LeaderboardResponse": { "category": string; "entries": Array<ApiSchemas["LeaderboardEntry"]>; "you": ApiSchemas["LeaderboardYou"] }
   "LeaderboardYou": { "hidden": boolean; "rank": number | null; "value": number }
   "LearnedSkillResponse": { "base_command": string; "chapter_id"?: number | null; "chapter_number": number; "chapter_title": string; "id": number; "knowledge"?: Array<ApiSchemas["CommandKnowledgeResponse"]>; "learned_at": string; "slug": string; "summary": string; "title": string }

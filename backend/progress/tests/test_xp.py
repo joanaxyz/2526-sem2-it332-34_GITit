@@ -18,6 +18,7 @@ from progress.serializers import LeaderboardResponseSerializer
 from progress.services import MetricsService
 from progress.services.leaderboard import TOP_ENTRIES, leaderboard
 from progress.xp import XP_PER_STAR, XpService, award_tier_xp
+from shop.models import PlayerLoadout
 from testing.kpi_fixtures import bundle, end, start
 
 
@@ -217,7 +218,7 @@ def test_a_learner_without_a_score_is_not_listed(django_user_model):
 
 
 @pytest.mark.django_db
-def test_leaderboard_endpoint_returns_usernames_only_and_rejects_unknown_categories(
+def test_leaderboard_endpoint_returns_public_identity_only_and_rejects_unknown_categories(
     django_user_model,
 ):
     user = django_user_model.objects.create_user(username="api", email="private@example.com")
@@ -229,9 +230,44 @@ def test_leaderboard_endpoint_returns_usernames_only_and_rejects_unknown_categor
 
     assert response.status_code == 200
     assert LeaderboardResponseSerializer(data=response.json()).is_valid(raise_exception=True)
-    assert set(response.json()["entries"][0]) == {"rank", "username", "value", "is_you"}
+    assert set(response.json()["entries"][0]) == {
+        "rank",
+        "username",
+        "companion_slug",
+        "value",
+        "is_you",
+    }
     assert "private@example.com" not in response.content.decode()
     assert client.get("/api/progress/leaderboard/?category=mastery").status_code == 400
+
+
+@pytest.mark.django_db
+def test_board_avatars_follow_equipped_companions_without_per_player_queries(
+    django_user_model, django_assert_num_queries
+):
+    equipped = _learner(django_user_model, "equipped")
+    unequipped = _learner(django_user_model, "unequipped")
+    missing_loadout = _learner(django_user_model, "missing")
+    PlayerLoadout.objects.update_or_create(
+        player=equipped, defaults={"active_companion_slug": "white"}
+    )
+    PlayerLoadout.objects.update_or_create(
+        player=unequipped, defaults={"active_companion_slug": None}
+    )
+    PlayerLoadout.objects.filter(player=missing_loadout).delete()
+    for player in (equipped, unequipped, missing_loadout):
+        _give_xp(player, 100)
+
+    with django_assert_num_queries(4):
+        board = leaderboard(player=equipped)
+
+    assert {row["username"]: row["companion_slug"] for row in board["entries"]} == {
+        "equipped": "white",
+        "unequipped": None,
+        "missing": None,
+    }
+    PlayerLoadout.objects.filter(player=equipped).update(active_companion_slug="black")
+    assert leaderboard(player=equipped)["entries"][0]["companion_slug"] == "black"
 
 
 @pytest.mark.django_db

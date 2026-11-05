@@ -167,6 +167,7 @@ class DashboardSummaryResponseSerializer(serializers.Serializer):
 class LeaderboardEntrySerializer(serializers.Serializer):
     rank = serializers.IntegerField()
     username = serializers.CharField()
+    companion_slug = serializers.CharField(allow_null=True)
     value = serializers.IntegerField()
     is_you = serializers.BooleanField()
 

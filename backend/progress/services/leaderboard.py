@@ -1,8 +1,8 @@
 """The learner leaderboard: one all-time ranking per category.
 
-Only usernames leave this module. KPIs and checkpoint results are deliberately
-not categories: ranking them would invite gaming the evaluation and show who
-failed a checkpoint.
+Only public usernames and equipped companion slugs leave this module. KPIs and
+checkpoint results are deliberately not categories: ranking them would invite
+gaming the evaluation and show who failed a checkpoint.
 """
 
 from __future__ import annotations
@@ -96,17 +96,19 @@ def leaderboard(*, player, category: str = DEFAULT_CATEGORY) -> dict:
     scores = SCORES[category](listed | {player.id})
     own_value = scores.get(player.id, (0, 0))[0]
     ranked = _ranked({key: score for key, score in scores.items() if key in listed})
-    usernames = dict(
-        Player.objects.filter(id__in=[row[1] for row in ranked[:TOP_ENTRIES]]).values_list(
-            "id", "user__username"
-        )
-    )
+    players = {
+        player_id: (username, companion_slug)
+        for player_id, username, companion_slug in Player.objects.filter(
+            id__in=[row[1] for row in ranked[:TOP_ENTRIES]]
+        ).values_list("id", "user__username", "loadout__active_companion_slug")
+    }
     return {
         "category": category,
         "entries": [
             {
                 "rank": rank,
-                "username": usernames[player_id],
+                "username": players[player_id][0],
+                "companion_slug": players[player_id][1],
                 "value": value,
                 "is_you": player_id == player.id,
             }
