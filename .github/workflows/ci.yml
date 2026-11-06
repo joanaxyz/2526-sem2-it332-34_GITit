@@ -149,7 +149,7 @@ jobs:
         run: npm ci
       - name: Generated target replay guard
         run: python scripts/check_generated_targets_current.py
-      # The default pytest job has no Node, so these replays skip there.
+      # Keep an explicit replay gate alongside the full PostgreSQL suite.
       - name: Solution replays
         working-directory: backend
         run: pytest -q curriculum/tests/test_module_4_variants.py progress/tests/test_kpi_references.py curriculum/tests/test_solution_audit.py
@@ -196,8 +196,18 @@ jobs:
           python-version: "3.13"
           cache: pip
           cache-dependency-path: backend/requirements*.txt
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
       - name: Install backend dependencies
         run: pip install -r backend/requirements-dev.txt
+      # Checkpoint/API proofs replay the actual browser engine before submitting
+      # its states to Django; Node alone does not provide its Vite dependencies.
+      - name: Install frontend replay dependencies
+        working-directory: frontend
+        run: npm ci
       - name: Python dependency audit
         run: pip-audit -r backend/requirements.txt
       - name: Migration drift check

@@ -11,6 +11,7 @@ from django.core import signing
 from django.core.cache import cache
 from rest_framework.test import APIClient
 
+from curriculum.seed_data.scenario_bank import extension_scenario_bank, scenario_bank
 from tutoring.models import PendingCommandIntroduction
 from tutoring.payloads import teaching_payload
 from tutoring.services.answer_guard import guard_for_cases, guard_for_variant
@@ -69,8 +70,16 @@ def brief(case_id):
 
 def test_every_seed_task_is_recognized_without_reading_solution_fields():
     rows = documents()
-    assert len(rows) == 405
-    assert len({row["id"] for row in rows}) == 405
+    expected_ids = {
+        f"{name}:{case_id}"
+        for name, bank in (
+            ("scenario_bank", scenario_bank()),
+            ("scenario_bank_extension", extension_scenario_bank()),
+        )
+        for case_id in bank
+    }
+    assert {row["id"] for row in rows} == expected_ids
+    assert len(rows) == len(expected_ids)
     assert all(set(row) == {"id", "text", "task"} for row in rows)
     for row in rows:
         for task in (row["task"], copied(row["task"])):
