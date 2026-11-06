@@ -10543,6 +10543,194 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
+  "cherry-transfer-mixed-commit-v2": {
+    "branches": {
+      "main": "c2",
+      "release/private": "c4"
+    },
+    "cherry_pick_in_progress": true,
+    "cherry_pick_original_head": "c3",
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "export-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "config/export.ini": {
+            "after": "telemetry = off",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/export.py": {
+            "after": "delimiter = ','",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "config/export.ini": "added",
+          "src/export.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "export-v1",
+          "config/export.ini": "telemetry = off",
+          "src/export.py": "delimiter = ','"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "development",
+            "before": "export-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Prepare development",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "development",
+          "config/export.ini": "telemetry = off",
+          "src/export.py": "delimiter = ','"
+        }
+      },
+      {
+        "changes": {
+          "config/export.ini": {
+            "after": "telemetry = on",
+            "before": "telemetry = off",
+            "change_type": "modified"
+          },
+          "src/export.py": {
+            "after": "delimiter = ';'",
+            "before": "delimiter = ','",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/export.ini": "modified",
+          "src/export.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Fix CSV separator and enable telemetry",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "development",
+          "config/export.ini": "telemetry = on",
+          "src/export.py": "delimiter = ';'"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "private-release",
+            "before": "export-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Prepare private release",
+        "order": 3,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "private-release",
+          "config/export.ini": "telemetry = off",
+          "src/export.py": "delimiter = ','"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "config/export.ini": {
+            "after": "telemetry = off",
+            "before": "telemetry = off",
+            "change_type": "modified"
+          },
+          "src/export.py": {
+            "after": "delimiter = ';'",
+            "before": "delimiter = ','",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/export.ini": "modified",
+          "src/export.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Backport CSV delimiter fix",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "private-release",
+          "config/export.ini": "telemetry = off",
+          "src/export.py": "delimiter = ';'"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "release/private",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_cherry_pick_no_commit": true,
+    "last_cherry_pick_source": "c2",
+    "last_workspace_file_written": "config/export.ini",
+    "operation_metadata": {
+      "cherry_pick_in_progress": true,
+      "cherry_pick_original_head": "c3",
+      "last_cherry_pick_no_commit": true,
+      "last_cherry_pick_source": "c2",
+      "last_workspace_file_written": "config/export.ini"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
   "cherry-transfer-release-backport": {
     "branches": {
       "main": "c6",
@@ -25224,6 +25412,155 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
+  "manual-transfer-stale-index-v2": {
+    "branches": {
+      "feature/checkout-tax": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "checkout-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/checkout.py": {
+            "after": "FEE = 5\nTAX = 0",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/checkout.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "checkout-v1",
+          "src/checkout.py": "FEE = 5\nTAX = 0"
+        }
+      },
+      {
+        "changes": {
+          "src/checkout.py": {
+            "after": "FEE = 4\nTAX = 0",
+            "before": "FEE = 5\nTAX = 0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/checkout.py": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Lower the fee",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "checkout-v1",
+          "src/checkout.py": "FEE = 4\nTAX = 0"
+        }
+      },
+      {
+        "changes": {
+          "docs/checkout.md": {
+            "after": "Checkout now includes tax.",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/checkout.py": {
+            "after": "FEE = 5\nTAX = 0.12",
+            "before": "FEE = 5\nTAX = 0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "docs/checkout.md": "added",
+          "src/checkout.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Add checkout tax",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "checkout-v1",
+          "docs/checkout.md": "Checkout now includes tax.",
+          "src/checkout.py": "FEE = 5\nTAX = 0.12"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "docs/checkout.md": {
+            "after": "Checkout now includes tax.",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/checkout.py": {
+            "after": "FEE = 4\nTAX = 0.12",
+            "before": "FEE = 4\nTAX = 0",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "docs/checkout.md": "added",
+          "src/checkout.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'branch'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "checkout-v1",
+          "docs/checkout.md": "Checkout now includes tax.",
+          "src/checkout.py": "FEE = 4\nTAX = 0.12"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_created_commit": "c3",
+    "operation_metadata": {
+      "last_merge_created_commit": "c3"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
   "merge-easy-cap-docs": {
     "branches": {
       "docs/readme-update": "c2",
@@ -28859,6 +29196,197 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
+  "mergetool-transfer-clean-guide-v2": {
+    "branches": {
+      "feature/queued-mail": "c2",
+      "main": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "mailer-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "config/retry.ini": {
+            "after": "RETRIES = 2\nMODE = sync",
+            "before": null,
+            "change_type": "added"
+          },
+          "docs/usage.txt": {
+            "after": "retries=2",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "config/retry.ini": "added",
+          "docs/usage.txt": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Common base",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "mailer-v1",
+          "config/retry.ini": "RETRIES = 2\nMODE = sync",
+          "docs/usage.txt": "retries=2"
+        }
+      },
+      {
+        "changes": {
+          "config/retry.ini": {
+            "after": "RETRIES = 4\nMODE = sync",
+            "before": "RETRIES = 2\nMODE = sync",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/retry.ini": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Increase retry allowance",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "mailer-v1",
+          "config/retry.ini": "RETRIES = 4\nMODE = sync",
+          "docs/usage.txt": "retries=2"
+        }
+      },
+      {
+        "changes": {
+          "config/retry.ini": {
+            "after": "RETRIES = 2\nMODE = queued",
+            "before": "RETRIES = 2\nMODE = sync",
+            "change_type": "modified"
+          },
+          "docs/usage.txt": {
+            "after": "retries=2\nmode=queued",
+            "before": "retries=2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/retry.ini": "modified",
+          "docs/usage.txt": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Queue outgoing mail",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "mailer-v1",
+          "config/retry.ini": "RETRIES = 2\nMODE = queued",
+          "docs/usage.txt": "retries=2\nmode=queued"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "config/retry.ini": {
+            "after": "RETRIES = 4\nMODE = queued",
+            "before": "RETRIES = 4\nMODE = sync",
+            "change_type": "modified"
+          },
+          "docs/usage.txt": {
+            "after": "retries=4\nmode=queued",
+            "before": "retries=2",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/retry.ini": "modified",
+          "docs/usage.txt": "modified"
+        },
+        "id": "c3",
+        "is_merge": true,
+        "message": "Merge branch 'feature/queued-mail'",
+        "order": 3,
+        "parents": [
+          "c1",
+          "c2"
+        ],
+        "tree": {
+          "README.md": "mailer-v1",
+          "config/retry.ini": "RETRIES = 4\nMODE = queued",
+          "docs/usage.txt": "retries=4\nmode=queued"
+        }
+      }
+    ],
+    "config": {
+      "merge.tool": "meld",
+      "mergetool.keepBackup": "false"
+    },
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_merge_branch": "feature/queued-mail",
+    "last_merge_conflict_paths": [
+      "config/retry.ini"
+    ],
+    "last_merge_conflicted": true,
+    "last_merge_created_commit": "c3",
+    "last_merge_target": "c2",
+    "last_mergetool_opened": true,
+    "last_mergetool_paths": [
+      "config/retry.ini"
+    ],
+    "last_mergetool_resolved_paths": [
+      "config/retry.ini"
+    ],
+    "last_mergetool_tool": "meld",
+    "last_workspace_file_written": "docs/usage.txt",
+    "operation_metadata": {
+      "last_merge_branch": "feature/queued-mail",
+      "last_merge_conflict_paths": [
+        "config/retry.ini"
+      ],
+      "last_merge_conflicted": true,
+      "last_merge_created_commit": "c3",
+      "last_merge_target": "c2",
+      "last_mergetool_opened": true,
+      "last_mergetool_paths": [
+        "config/retry.ini"
+      ],
+      "last_mergetool_resolved_paths": [
+        "config/retry.ini"
+      ],
+      "last_mergetool_tool": "meld",
+      "last_workspace_file_written": "docs/usage.txt"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
   "mergetool-transfer-pricing-refresh": {
     "branches": {
       "feature/pricing-refresh": "c2",
@@ -29069,6 +29597,140 @@ TARGET_STATES = json.loads(r"""
     "reflog": [
       {
         "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c3"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
+  "naming-transfer-preserve-before-cleanup": {
+    "branches": {
+      "feature/active": "c4",
+      "fix/parser": "c3",
+      "main": "c2"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "parser-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/parser.py": "added"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Land completed parser setup",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "parser-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/parser.py": {
+            "after": "parser-quoted-fix",
+            "before": "parser-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/parser.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Fix quoted parser input",
+        "order": 2,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "parser-quoted-fix"
+        }
+      },
+      {
+        "changes": {
+          "src/tokenizer.py": {
+            "after": "tokenizer-draft",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/tokenizer.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Start active tokenizer work",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/parser.py": "parser-v1",
+          "src/tokenizer.py": "tokenizer-draft"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "fix/parser",
+      "target": "c3",
+      "type": "branch"
+    },
+    "last_branch_created": "fix/parser",
+    "last_branch_deleted": "fix/merged",
+    "last_switch_branch": "fix/parser",
+    "last_switched_to": "fix/parser",
+    "operation_metadata": {
+      "last_branch_created": "fix/parser",
+      "last_branch_deleted": "fix/merged",
+      "last_switch_branch": "fix/parser",
+      "last_switched_to": "fix/parser"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "checkout: moving from scratch to fix/parser",
         "ref": "HEAD@{0}",
         "target": "c3"
       }
@@ -38088,6 +38750,688 @@ TARGET_STATES = json.loads(r"""
     },
     "working_tree": {}
   },
+  "rebase-transfer-invoices-v2": {
+    "branches": {
+      "feature/invoices": "c11",
+      "main": "c1",
+      "spike/heatmap": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/charts.js": {
+            "after": "charts-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/charts.js": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/charts.js": {
+            "after": "charts-main",
+            "before": "charts-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/charts.js": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Upgrade chart defaults",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-main"
+        }
+      },
+      {
+        "changes": {
+          "src/charts.js": {
+            "after": "charts-spike",
+            "before": "charts-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/charts.js": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Spike: heatmap",
+        "order": 2,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike"
+        }
+      },
+      {
+        "changes": {
+          "src/spike.css": {
+            "after": "spike-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/spike.css": "added"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Spike: tune heatmap",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike",
+          "src/spike.css": "spike-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/invoices.py": {
+            "after": "invoices-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/invoices.py": "added"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Start invoices",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike",
+          "src/invoices.py": "invoices-v1",
+          "src/spike.css": "spike-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/tax_lines.py": {
+            "after": "tax-lines-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/tax_lines.py": "added"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Add tax lines",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike",
+          "src/invoices.py": "invoices-v1",
+          "src/spike.css": "spike-v1",
+          "src/tax_lines.py": "tax-lines-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/invoices.py": {
+            "after": "invoices-v2",
+            "before": "invoices-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/invoices.py": "modified"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Finish invoices",
+        "order": 6,
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike",
+          "src/invoices.py": "invoices-v2",
+          "src/spike.css": "spike-v1",
+          "src/tax_lines.py": "tax-lines-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/invoices.py": {
+            "after": "invoices-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/invoices.py": "added"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Start invoices",
+        "order": 7,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike",
+          "src/invoices.py": "invoices-v1",
+          "src/spike.css": "spike-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/invoices.py": {
+            "after": "invoices-v2",
+            "before": "invoices-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/invoices.py": "modified"
+        },
+        "id": "c8",
+        "is_merge": false,
+        "message": "Finish invoices",
+        "order": 8,
+        "parents": [
+          "c7"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-spike",
+          "src/invoices.py": "invoices-v2",
+          "src/spike.css": "spike-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/invoices.py": {
+            "after": "invoices-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/invoices.py": "added"
+        },
+        "id": "c9",
+        "is_merge": false,
+        "message": "Start invoices",
+        "order": 9,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-main",
+          "src/invoices.py": "invoices-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/tax_lines.py": {
+            "after": "tax-lines-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/tax_lines.py": "added"
+        },
+        "id": "c10",
+        "is_merge": false,
+        "message": "Add tax lines",
+        "order": 10,
+        "parents": [
+          "c9"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-main",
+          "src/invoices.py": "invoices-v1",
+          "src/tax_lines.py": "tax-lines-v1"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/invoices.py": {
+            "after": "invoices-v2",
+            "before": "invoices-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/invoices.py": "modified"
+        },
+        "id": "c11",
+        "is_merge": false,
+        "message": "Finish invoices",
+        "order": 11,
+        "parents": [
+          "c10"
+        ],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/charts.js": "charts-main",
+          "src/invoices.py": "invoices-v2",
+          "src/tax_lines.py": "tax-lines-v1"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": true,
+    "force_with_lease": true,
+    "head": {
+      "name": "feature/invoices",
+      "target": "c11",
+      "type": "branch"
+    },
+    "last_push_branch": "feature/invoices",
+    "last_push_commit": "c11",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/feature/invoices",
+    "last_rebase_aborted": true,
+    "last_rebase_interactive": false,
+    "last_rebase_new_head": "c11",
+    "last_rebase_onto": "c1",
+    "last_rebase_replayed_commits": [
+      "c9",
+      "c10",
+      "c11"
+    ],
+    "last_rebase_target": "main",
+    "last_rebase_upstream": "c3",
+    "last_reset_mode": "hard",
+    "last_reset_previous_head": "c8",
+    "last_reset_target": "c6",
+    "last_reset_target_expr": "c6",
+    "merge_abort_state": {
+      "branches": {
+        "feature/invoices": "c8",
+        "main": "c1",
+        "spike/heatmap": "c3"
+      },
+      "commits": [
+        {
+          "changes": {
+            "README.md": {
+              "after": "readme-v1",
+              "before": null,
+              "change_type": "added"
+            },
+            "src/charts.js": {
+              "after": "charts-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "README.md": "added",
+            "src/charts.js": "added"
+          },
+          "id": "c0",
+          "is_merge": false,
+          "message": "Project baseline",
+          "order": 0,
+          "parents": [],
+          "tree": {
+            "README.md": "readme-v1",
+            "src/charts.js": "charts-v1"
+          }
+        },
+        {
+          "changes": {
+            "src/charts.js": {
+              "after": "charts-main",
+              "before": "charts-v1",
+              "change_type": "modified"
+            }
+          },
+          "files": {
+            "src/charts.js": "modified"
+          },
+          "id": "c1",
+          "is_merge": false,
+          "message": "Upgrade chart defaults",
+          "order": 1,
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "src/charts.js": "charts-main"
+          }
+        },
+        {
+          "changes": {
+            "src/charts.js": {
+              "after": "charts-spike",
+              "before": "charts-v1",
+              "change_type": "modified"
+            }
+          },
+          "files": {
+            "src/charts.js": "modified"
+          },
+          "id": "c2",
+          "is_merge": false,
+          "message": "Spike: heatmap",
+          "order": 2,
+          "parents": [
+            "c0"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "src/charts.js": "charts-spike"
+          }
+        },
+        {
+          "changes": {
+            "src/spike.css": {
+              "after": "spike-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/spike.css": "added"
+          },
+          "id": "c3",
+          "is_merge": false,
+          "message": "Spike: tune heatmap",
+          "order": 3,
+          "parents": [
+            "c2"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "src/charts.js": "charts-spike",
+            "src/spike.css": "spike-v1"
+          }
+        },
+        {
+          "changes": {
+            "src/invoices.py": {
+              "after": "invoices-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/invoices.py": "added"
+          },
+          "id": "c4",
+          "is_merge": false,
+          "message": "Start invoices",
+          "order": 4,
+          "parents": [
+            "c3"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "src/charts.js": "charts-spike",
+            "src/invoices.py": "invoices-v1",
+            "src/spike.css": "spike-v1"
+          }
+        },
+        {
+          "changes": {
+            "src/tax_lines.py": {
+              "after": "tax-lines-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/tax_lines.py": "added"
+          },
+          "id": "c5",
+          "is_merge": false,
+          "message": "Add tax lines",
+          "order": 5,
+          "parents": [
+            "c4"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "src/charts.js": "charts-spike",
+            "src/invoices.py": "invoices-v1",
+            "src/spike.css": "spike-v1",
+            "src/tax_lines.py": "tax-lines-v1"
+          }
+        },
+        {
+          "changes": {
+            "src/invoices.py": {
+              "after": "invoices-v2",
+              "before": "invoices-v1",
+              "change_type": "modified"
+            }
+          },
+          "files": {
+            "src/invoices.py": "modified"
+          },
+          "id": "c6",
+          "is_merge": false,
+          "message": "Finish invoices",
+          "order": 6,
+          "parents": [
+            "c5"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "src/charts.js": "charts-spike",
+            "src/invoices.py": "invoices-v2",
+            "src/spike.css": "spike-v1",
+            "src/tax_lines.py": "tax-lines-v1"
+          }
+        },
+        {
+          "changes": {
+            "src/invoices.py": {
+              "after": "invoices-v1",
+              "before": null,
+              "change_type": "added"
+            }
+          },
+          "files": {
+            "src/invoices.py": "added"
+          },
+          "id": "c7",
+          "is_merge": false,
+          "message": "Start invoices",
+          "order": 7,
+          "parents": [
+            "c3"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "src/charts.js": "charts-spike",
+            "src/invoices.py": "invoices-v1",
+            "src/spike.css": "spike-v1"
+          }
+        },
+        {
+          "changes": {
+            "src/invoices.py": {
+              "after": "invoices-v2",
+              "before": "invoices-v1",
+              "change_type": "modified"
+            }
+          },
+          "files": {
+            "src/invoices.py": "modified"
+          },
+          "id": "c8",
+          "is_merge": false,
+          "message": "Finish invoices",
+          "order": 8,
+          "parents": [
+            "c7"
+          ],
+          "tree": {
+            "README.md": "readme-v1",
+            "src/charts.js": "charts-spike",
+            "src/invoices.py": "invoices-v2",
+            "src/spike.css": "spike-v1"
+          }
+        }
+      ],
+      "conflict_details": {},
+      "conflicts": [],
+      "head": {
+        "name": "feature/invoices",
+        "target": "c8",
+        "type": "branch"
+      },
+      "last_rebase_aborted": true,
+      "operation_metadata": {
+        "last_rebase_aborted": true
+      },
+      "partial_hunks": {},
+      "reflog": [
+        {
+          "action": "commit: Finish invoices",
+          "commit": "c6",
+          "ref": "feature/invoices"
+        },
+        {
+          "action": "rebase (finish): refs/heads/feature/invoices onto c3",
+          "commit": "c8",
+          "ref": "feature/invoices"
+        }
+      ],
+      "remote_branches": {
+        "origin/feature/invoices": "c6",
+        "origin/main": "c1"
+      },
+      "remote_tags": {},
+      "remotes": {
+        "origin": "https://example.test/team/invoices.git"
+      },
+      "replaced_commits": {},
+      "repository_initialized": true,
+      "staging": {},
+      "stash_stack": [],
+      "tags": {},
+      "upstream_tracking": {
+        "feature/invoices": "origin/feature/invoices",
+        "main": "origin/main"
+      },
+      "working_tree": {}
+    },
+    "operation_metadata": {
+      "force_push_with_lease": true,
+      "force_with_lease": true,
+      "last_push_branch": "feature/invoices",
+      "last_push_commit": "c11",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/feature/invoices",
+      "last_rebase_aborted": true,
+      "last_rebase_interactive": false,
+      "last_rebase_new_head": "c11",
+      "last_rebase_onto": "c1",
+      "last_rebase_replayed_commits": [
+        "c9",
+        "c10",
+        "c11"
+      ],
+      "last_rebase_target": "main",
+      "last_rebase_upstream": "c3",
+      "last_reset_mode": "hard",
+      "last_reset_previous_head": "c8",
+      "last_reset_target": "c6",
+      "last_reset_target_expr": "c6"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit: Finish invoices",
+        "commit": "c6",
+        "ref": "feature/invoices"
+      },
+      {
+        "action": "rebase (finish): refs/heads/feature/invoices onto c3",
+        "commit": "c8",
+        "ref": "feature/invoices"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{2}",
+        "target": "c6"
+      },
+      {
+        "message": "reset: moving to c6",
+        "ref": "HEAD@{3}",
+        "target": "c6"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{4}",
+        "target": "c11"
+      }
+    ],
+    "remote_branches": {
+      "origin/feature/invoices": "c11",
+      "origin/main": "c1"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/team/invoices.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "feature/invoices": "origin/feature/invoices",
+      "main": "origin/main"
+    },
+    "working_tree": {}
+  },
   "rec-easy-cap-ui": {
     "branches": {
       "feature/ui-layout": "c0"
@@ -40659,6 +42003,184 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {}
   },
+  "reflog-transfer-two-destinations-v2": {
+    "branches": {
+      "main": "c4",
+      "recovery/report-redesign": "c3"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/report.py": {
+            "after": "report-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/report.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "readme-v1",
+          "src/report.py": "report-v1"
+        }
+      },
+      {
+        "changes": {
+          "README.md": {
+            "after": "readme-v2",
+            "before": "readme-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "README.md": "modified"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Prepare the sprint",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "src/report.py": "report-v1"
+        }
+      },
+      {
+        "changes": {
+          "src/report.py": {
+            "after": "report-final",
+            "before": "report-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/report.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Finish the borrowing report",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "src/report.py": "report-final"
+        }
+      },
+      {
+        "changes": {
+          "src/report.py": {
+            "after": "report-redesign",
+            "before": "report-final",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/report.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Redesign the report layout",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "src/report.py": "report-redesign"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/report.py": {
+            "after": "report-final",
+            "before": "report-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/report.py": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Finish the borrowing report",
+        "order": 4,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "readme-v2",
+          "src/report.py": "report-final"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c4",
+      "type": "branch"
+    },
+    "last_branch_created": "recovery/report-redesign",
+    "last_cherry_pick_created_commit": "c4",
+    "last_cherry_pick_no_commit": false,
+    "last_cherry_pick_source": "c2",
+    "operation_metadata": {
+      "last_branch_created": "recovery/report-redesign",
+      "last_cherry_pick_created_commit": "c4",
+      "last_cherry_pick_no_commit": false,
+      "last_cherry_pick_source": "c2"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "action": "commit: Finish the borrowing report",
+        "commit": "c2",
+        "ref": "main"
+      },
+      {
+        "action": "commit: Redesign the report layout",
+        "commit": "c3",
+        "ref": "main"
+      },
+      {
+        "action": "reset: moving to HEAD~2",
+        "commit": "c1",
+        "ref": "main"
+      },
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{3}",
+        "target": "c4"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {}
+  },
   "restore-easy-discard": {
     "branches": {
       "main": "c1"
@@ -41961,6 +43483,266 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {},
     "working_tree": {
       "notes/todo.md": "notes/todo.md-draft-v2"
+    }
+  },
+  "restore-transfer-contaminated-index": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "private-api-readme",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/api.py": {
+            "after": "request-totals-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "tests/test_api.py": {
+            "after": "request-tests-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "tmp/output.txt": {
+            "after": "approved-output",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/api.py": "added",
+          "tests/test_api.py": "added",
+          "tmp/output.txt": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Approved request baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "private-api-readme",
+          "src/api.py": "request-totals-v1",
+          "tests/test_api.py": "request-tests-v1",
+          "tmp/output.txt": "approved-output"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/api.py": {
+            "after": {
+              "hunks": [
+                "request-totals-fix-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": "request-totals-v1",
+            "change_type": "modified"
+          },
+          "tests/test_api.py": {
+            "after": "request-test-v2",
+            "before": "request-tests-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/api.py": "modified",
+          "tests/test_api.py": "modified"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Fix request totals",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "private-api-readme",
+          "src/api.py": {
+            "hunks": [
+              "request-totals-fix-hunk"
+            ],
+            "status": "partial"
+          },
+          "tests/test_api.py": "request-test-v2",
+          "tmp/output.txt": "approved-output"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/api.py": {
+        "leftover_hunks": [
+          "request-experiment-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/api.py": {
+        "hunks": [
+          "request-experiment-hunk"
+        ],
+        "status": "modified"
+      }
+    }
+  },
+  "restore-transfer-contaminated-index-v2": {
+    "branches": {
+      "main": "c0"
+    },
+    "commits": [
+      {
+        "changes": {
+          "README.md": {
+            "after": "private-api-readme",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/api.py": {
+            "after": "request-totals-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "tests/test_api.py": {
+            "after": "request-tests-v1",
+            "before": null,
+            "change_type": "added"
+          },
+          "tmp/output.txt": {
+            "after": "approved-output",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "README.md": "added",
+          "src/api.py": "added",
+          "tests/test_api.py": "added",
+          "tmp/output.txt": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Approved request baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "README.md": "private-api-readme",
+          "src/api.py": "request-totals-v1",
+          "tests/test_api.py": "request-tests-v1",
+          "tmp/output.txt": "approved-output"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/api.py": {
+            "after": {
+              "hunks": [
+                "request-totals-fix-hunk"
+              ],
+              "status": "partial"
+            },
+            "before": "request-totals-v1",
+            "change_type": "modified"
+          },
+          "tests/test_api.py": {
+            "after": "request-test-v2",
+            "before": "request-tests-v1",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/api.py": "modified",
+          "tests/test_api.py": "modified"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Fix request totals",
+        "order": 1,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "README.md": "private-api-readme",
+          "src/api.py": {
+            "hunks": [
+              "request-totals-fix-hunk"
+            ],
+            "status": "partial"
+          },
+          "tests/test_api.py": "request-test-v2",
+          "tmp/output.txt": "approved-output"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "head": {
+      "name": "main",
+      "target": "c0",
+      "type": "branch"
+    },
+    "operation_metadata": {},
+    "partial_hunks": {
+      "src/api.py": {
+        "leftover_hunks": [
+          "request-experiment-hunk"
+        ],
+        "target_hunks": []
+      }
+    },
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c0"
+      }
+    ],
+    "remote_branches": {},
+    "remote_tags": {},
+    "remotes": {},
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {},
+    "working_tree": {
+      "src/api.py": {
+        "hunks": [
+          "request-experiment-hunk"
+        ],
+        "status": "modified"
+      }
     }
   },
   "revert-easy-pull-then-revert-api": {
@@ -43460,6 +45242,279 @@ TARGET_STATES = json.loads(r"""
     "upstream_tracking": {
       "main": "origin/main",
       "release/2.1": "origin/release/2.1"
+    },
+    "working_tree": {}
+  },
+  "revert-transfer-returned-regression-v2": {
+    "branches": {
+      "main": "c7"
+    },
+    "commits": [
+      {
+        "changes": {
+          "config/rounding.ini": {
+            "after": "rounding = standard",
+            "before": null,
+            "change_type": "added"
+          },
+          "src/tax.py": {
+            "after": "tax_line = visible",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "config/rounding.ini": "added",
+          "src/tax.py": "added"
+        },
+        "id": "c0",
+        "is_merge": false,
+        "message": "Project baseline",
+        "order": 0,
+        "parents": [],
+        "tree": {
+          "config/rounding.ini": "rounding = standard",
+          "src/tax.py": "tax_line = visible"
+        }
+      },
+      {
+        "changes": {
+          "src/invoices.py": {
+            "after": "invoices-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "src/invoices.py": "added"
+        },
+        "id": "c1",
+        "is_merge": false,
+        "message": "Add invoices",
+        "order": 1,
+        "parents": [
+          "c0"
+        ],
+        "tree": {
+          "config/rounding.ini": "rounding = standard",
+          "src/invoices.py": "invoices-v1",
+          "src/tax.py": "tax_line = visible"
+        }
+      },
+      {
+        "changes": {
+          "config/rounding.ini": {
+            "after": "rounding = down",
+            "before": "rounding = standard",
+            "change_type": "modified"
+          },
+          "src/tax.py": {
+            "after": "tax_line = hidden",
+            "before": "tax_line = visible",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/rounding.ini": "modified",
+          "src/tax.py": "modified"
+        },
+        "id": "c2",
+        "is_merge": false,
+        "message": "Hide tax line and round totals down",
+        "order": 2,
+        "parents": [
+          "c1"
+        ],
+        "tree": {
+          "config/rounding.ini": "rounding = down",
+          "src/invoices.py": "invoices-v1",
+          "src/tax.py": "tax_line = hidden"
+        }
+      },
+      {
+        "changes": {
+          "config/rounding.ini": {
+            "after": "rounding = standard",
+            "before": "rounding = down",
+            "change_type": "modified"
+          },
+          "src/tax.py": {
+            "after": "tax_line = visible",
+            "before": "tax_line = hidden",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/rounding.ini": "modified",
+          "src/tax.py": "modified"
+        },
+        "id": "c3",
+        "is_merge": false,
+        "message": "Revert \"Hide tax line and round totals down\"",
+        "order": 3,
+        "parents": [
+          "c2"
+        ],
+        "tree": {
+          "config/rounding.ini": "rounding = standard",
+          "src/invoices.py": "invoices-v1",
+          "src/tax.py": "tax_line = visible"
+        }
+      },
+      {
+        "changes": {
+          "config/rounding.ini": {
+            "after": "rounding = bankers",
+            "before": "rounding = standard",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "config/rounding.ini": "modified"
+        },
+        "id": "c4",
+        "is_merge": false,
+        "message": "Approve bankers rounding",
+        "order": 4,
+        "parents": [
+          "c3"
+        ],
+        "tree": {
+          "config/rounding.ini": "rounding = bankers",
+          "src/invoices.py": "invoices-v1",
+          "src/tax.py": "tax_line = visible"
+        }
+      },
+      {
+        "changes": {
+          "src/tax.py": {
+            "after": "tax_line = hidden",
+            "before": "tax_line = visible",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/tax.py": "modified"
+        },
+        "id": "c5",
+        "is_merge": false,
+        "message": "Refresh statement layout",
+        "order": 5,
+        "parents": [
+          "c4"
+        ],
+        "tree": {
+          "config/rounding.ini": "rounding = bankers",
+          "src/invoices.py": "invoices-v1",
+          "src/tax.py": "tax_line = hidden"
+        }
+      },
+      {
+        "changes": {
+          "docs/export.md": {
+            "after": "export-guide-v1",
+            "before": null,
+            "change_type": "added"
+          }
+        },
+        "files": {
+          "docs/export.md": "added"
+        },
+        "id": "c6",
+        "is_merge": false,
+        "message": "Add export guide",
+        "order": 6,
+        "parents": [
+          "c5"
+        ],
+        "tree": {
+          "config/rounding.ini": "rounding = bankers",
+          "docs/export.md": "export-guide-v1",
+          "src/invoices.py": "invoices-v1",
+          "src/tax.py": "tax_line = hidden"
+        }
+      },
+      {
+        "author": "GIT it",
+        "changes": {
+          "src/tax.py": {
+            "after": "tax_line = visible",
+            "before": "tax_line = hidden",
+            "change_type": "modified"
+          }
+        },
+        "files": {
+          "src/tax.py": "modified"
+        },
+        "id": "c7",
+        "is_merge": false,
+        "message": "Revert \"Refresh statement layout\"",
+        "order": 7,
+        "parents": [
+          "c6"
+        ],
+        "tree": {
+          "config/rounding.ini": "rounding = bankers",
+          "docs/export.md": "export-guide-v1",
+          "src/invoices.py": "invoices-v1",
+          "src/tax.py": "tax_line = visible"
+        }
+      }
+    ],
+    "conflict_details": {},
+    "conflicts": [],
+    "force_push_with_lease": false,
+    "force_with_lease": false,
+    "head": {
+      "name": "main",
+      "target": "c7",
+      "type": "branch"
+    },
+    "last_push_branch": "main",
+    "last_push_commit": "c7",
+    "last_push_remote": "origin",
+    "last_push_remote_branch": "origin/main",
+    "last_revert_created_commit": "c7",
+    "last_revert_no_edit": false,
+    "last_revert_source": "c5",
+    "operation_metadata": {
+      "force_push_with_lease": false,
+      "force_with_lease": false,
+      "last_push_branch": "main",
+      "last_push_commit": "c7",
+      "last_push_remote": "origin",
+      "last_push_remote_branch": "origin/main",
+      "last_revert_created_commit": "c7",
+      "last_revert_no_edit": false,
+      "last_revert_source": "c5"
+    },
+    "partial_hunks": {},
+    "reflog": [
+      {
+        "message": "move HEAD",
+        "ref": "HEAD@{0}",
+        "target": "c7"
+      },
+      {
+        "message": "revert: c5",
+        "ref": "HEAD@{1}",
+        "target": "c7"
+      }
+    ],
+    "remote_branches": {
+      "origin/main": "c7"
+    },
+    "remote_tags": {},
+    "remotes": {
+      "origin": "https://example.test/team/statement-regression.git"
+    },
+    "replaced_commits": {},
+    "repository_initialized": true,
+    "staging": {},
+    "stash_stack": [],
+    "tags": {},
+    "upstream_tracking": {
+      "main": "origin/main"
     },
     "working_tree": {}
   },

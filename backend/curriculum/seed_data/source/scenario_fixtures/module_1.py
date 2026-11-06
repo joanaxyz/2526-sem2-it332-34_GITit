@@ -1,4 +1,4 @@
-"""Module 1 planned scenarios: repository foundations (levels 1.1-1.6)."""
+"""Module 1 practice and reserved transfer fixtures (levels 1.1-1.6)."""
 
 from __future__ import annotations
 
@@ -137,9 +137,7 @@ def _hunk_plus_file(
     }
 
 
-def _split_commits(
-    *, path: str, first: tuple[str, str], second: tuple[str, str]
-) -> dict[str, Any]:
+def _split_commits(*, path: str, first: tuple[str, str], second: tuple[str, str]) -> dict[str, Any]:
     (first_hunk, first_message), (second_hunk, second_message) = first, second
     return {
         "initial_state": repo(
@@ -589,3 +587,65 @@ FIXTURES: dict[str, dict[str, Any]] = {
         message="Fix invoice due date",
     ),
 }
+
+
+def _transfer_contaminated_index() -> dict[str, Any]:
+    source = "src/api.py"
+    fix, experiment = "request-totals-fix-hunk", "request-experiment-hunk"
+    baseline = {
+        "README.md": "private-api-readme",
+        source: "request-totals-v1",
+        "tests/test_api.py": "request-tests-v1",
+        "tmp/output.txt": "approved-output",
+    }
+    return {
+        "initial_state": repo(
+            commits=[commit("c1", "Approved request baseline", [], baseline)],
+            branches={"main": "c1"},
+            staging={
+                source: hunks(fix, experiment),
+                "tests/test_api.py": modified("request-test-v2"),
+            },
+            working_tree={"tmp/output.txt": modified("throwaway-output")},
+            partial_hunks={source: {"target_hunks": [fix], "leftover_hunks": [experiment]}},
+        ),
+        "state_requirements": {
+            "head_branch": "main",
+            "staging_empty": True,
+            "working_tree_contains": [source],
+            "working_tree_absent": ["tmp/output.txt", "tests/test_api.py"],
+            "rules": [
+                {"type": "commit_count_equals", "count": 2},
+                tip(
+                    "main",
+                    parent_equals="c1",
+                    message_equals="Fix request totals",
+                    tree_contains={
+                        "README.md": baseline["README.md"],
+                        "tests/test_api.py": "request-test-v2",
+                        "tmp/output.txt": baseline["tmp/output.txt"],
+                    },
+                    changes_include_tokens=[fix],
+                    changes_exclude_tokens=[experiment],
+                    changes_exclude=["README.md", "tmp/output.txt"],
+                ),
+                {"type": "partial_hunks_left_in_working_tree", "paths": {source: [experiment]}},
+                {"type": "working_tree_matches_exact_paths", "paths": [source]},
+            ],
+        },
+    }
+
+
+FIXTURES["restore-transfer-contaminated-index"] = _transfer_contaminated_index()
+
+
+def _transfer_contaminated_index_v2() -> dict[str, Any]:
+    case = _transfer_contaminated_index()
+    goal = next(
+        rule for rule in case["state_requirements"]["rules"] if rule["type"] == "branch_tip_commit"
+    )
+    goal["changes_match_exact_paths"] = ["src/api.py", "tests/test_api.py"]
+    return case
+
+
+FIXTURES["restore-transfer-contaminated-index-v2"] = _transfer_contaminated_index_v2()

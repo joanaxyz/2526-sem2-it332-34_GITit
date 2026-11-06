@@ -245,7 +245,7 @@ def test_new_study_uses_checkpoint_policy(django_user_model, monkeypatch):
     study = create_study(
         slug="existing-checkpoint-policy", player_ids=[player.id], tier_ids=[tier.id], cutoff=cutoff
     )
-    assert study.manifest["policy"] == "mastery-kpis-v2"
+    assert study.manifest["policy"] == "mastery-kpis-v4-all-module-transfer"
     monkeypatch.setattr(
         "progress.services.studies.timezone.now", lambda: cutoff + timedelta(seconds=1)
     )

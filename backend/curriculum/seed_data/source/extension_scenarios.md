@@ -7101,3 +7101,542 @@ Minimum counted commands: 3 · Maximum counted commands: 8
 
 - HEAD on `feature/coupons` with 4 commits; history contains `c2`, excludes `c1`; tree has the coupons file and main's `src/app.py`.
 - No rebase in progress; `origin/feature/coupons` = the branch; clean tree.
+
+
+### 3.1.19 Finish the corrected resolution, not the old staged copy · Hard
+
+**Variant ID:** `manual-transfer-stale-index-v2`
+
+**Story**
+The checkout merge is ready to finish and no conflict markers remain. A teammate staged a resolution that kept the old fee, then corrected the working file after staging it. The checkout guide was merged correctly.
+
+Sage approved the working copy: the fee stays at 4 and tax is 0.12. The staged copy still has fee 5. **Keep the merged guide and the approved fee.**
+
+**Starting point:** On `main`, a merge of `feature/checkout-tax` is still in progress. The staged checkout differs from the corrected working checkout.
+
+**Real-World Context**
+A conflict-free working file is not necessarily the version that the next commit records. The index can hold an earlier resolution.
+
+**Your Task**
+Complete the merge with its prepared message, recording `FEE = 4` and `TAX = 0.12` and keeping `docs/checkout.md` unchanged.
+
+**Objective Checklist**
+
+- [ ] Complete a merge commit on main with feature/checkout-tax as a parent.
+- [ ] Record FEE = 4 and TAX = 0.12 in the committed checkout.
+- [ ] Preserve the checkout guide and leave nothing staged or uncommitted.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git add src/checkout.py`
+
+2. `git commit --no-edit`
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- Stage the corrected file with `git add -- src/checkout.py`; `git merge --continue` may finish a correctly staged merge.
+
+**Not accepted**
+
+- Committing the earlier staged fee of 5.
+- Discarding the corrected working copy or losing the merged guide.
+
+**Expected Result**
+The merge records the approved working resolution and the existing guide.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 6
+
+- main has a merge commit with feature/checkout-tax as a parent.
+- The committed checkout has FEE = 4 and TAX = 0.12.
+- The checkout guide is preserved and no changes remain staged or uncommitted.
+
+
+### 3.2.17 Resolve the conflict and repair the clean merge · Hard
+
+**Variant ID:** `mergetool-transfer-clean-guide-v2`
+
+**Story**
+`main` raised the mail retry allowance from 2 to 4. The queued-mail branch changes the delivery mode and updates its usage guide, but the guide still says 2 retries.
+
+The policy file will conflict; the guide will merge cleanly. **A clean merge does not make the guide correct.** Meld is already configured with backups disabled.
+
+**Starting point:** On `main`, before merging `feature/queued-mail`. Complete the Manual Conflict Resolution Hard tier before this optional checkpoint.
+
+**Real-World Context**
+Git detects conflicting edits, not agreement between documentation and policy. An automatically merged file can still need a deliberate correction.
+
+**Your Task**
+Merge `feature/queued-mail`. Resolve the policy conflict using the configured merge tool, retaining 4 retries and queued delivery. Make the cleanly merged usage guide agree with that policy, then finish the merge with its prepared message.
+
+**Required resolved file content**
+
+`config/retry.ini`
+
+```
+RETRIES = 4
+MODE = queued
+```
+
+`docs/usage.txt`
+
+```
+retries=4
+mode=queued
+```
+
+**Objective Checklist**
+
+- [ ] Complete a merge commit on main with feature/queued-mail as a parent.
+- [ ] Record 4 retries and queued delivery in the committed policy.
+- [ ] Update the usage guide to agree with the policy and leave the tree and index clean.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git merge feature/queued-mail`
+
+2. `git mergetool`
+
+3. In the simulator's file editor, set `config/retry.ini` to exactly:
+
+   ```
+   RETRIES = 4
+   MODE = queued
+   ```
+
+4. In the simulator's file editor, set `docs/usage.txt` to exactly:
+
+   ```
+   retries=4
+   mode=queued
+   ```
+
+5. `git add docs/usage.txt`
+
+6. `git commit --no-edit`
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- After using the tool, stage the corrected guide with `git add -- docs/usage.txt` or another supported pathspec.
+
+**Not accepted**
+
+- Finishing after resolving only the marked conflict.
+- Editing the guide without staging its correction.
+- Resolving everything manually without demonstrating the explicitly required merge tool.
+
+**Expected Result**
+The actual conflict is resolved and the automatically merged guide agrees with the final policy.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 4 · Maximum counted commands: 8
+
+- main has a merge commit with feature/queued-mail as a parent.
+- The committed policy keeps 4 retries and queued delivery.
+- The committed usage guide agrees with the policy; the tree and index are clean.
+
+
+### 3.3.25 Backport the fix without its bundled policy change · Hard
+
+**Variant ID:** `cherry-transfer-mixed-commit-v2`
+
+**Story**
+The private release needs the CSV separator fix from the development commit that also enabled export telemetry. Telemetry must remain off in this release.
+
+Both changes are in the same source commit, so selecting the correct commit is not enough. **Keep the release policy and its README.**
+
+**Starting point:** On `release/private` at its private-release baseline. The development change is on `main`.
+
+**Real-World Context**
+A useful commit can bundle a change that is inappropriate for another release. Review its staged effect before creating the release commit.
+
+**Your Task**
+Bring only the CSV delimiter fix from `c2` onto `release/private`, with the commit message `Backport CSV delimiter fix`. Keep telemetry off, preserve the private-release README, and leave `main` unchanged.
+
+**Required resolved file content**
+
+`config/export.ini`
+
+```
+telemetry = off
+```
+
+**Objective Checklist**
+
+- [ ] Create one new release commit with the requested message and delimiter fix.
+- [ ] Keep telemetry off and the private-release README unchanged.
+- [ ] Leave main unchanged and finish with a clean release tree and index.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git cherry-pick --no-commit c2`
+
+2. In the simulator's file editor, set `config/export.ini` to exactly:
+
+   ```
+   telemetry = off
+   ```
+
+3. `git add config/export.ini`
+
+4. `git commit -m "Backport CSV delimiter fix"`
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- Use the supported `-n` spelling for the no-commit pick; stage the reviewed policy with an equivalent pathspec.
+
+**Not accepted**
+
+- Cherry-picking the whole commit and keeping telemetry on.
+- Editing telemetry back to off but committing the stale staged copy.
+- Changing main or including its development README in the release.
+
+**Expected Result**
+The release gets the delimiter fix while its own policy and README remain intact.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 3 · Maximum counted commands: 7
+
+- The release has one new commit with the requested message and delimiter fix.
+- Telemetry remains off and the private-release README is unchanged.
+- main is unchanged; the release tree and index are clean.
+
+
+### 4.1.21 Recover the report and preserve the redesign separately · Hard
+
+**Variant ID:** `reflog-transfer-two-destinations-v2`
+
+**Story**
+A reset left `main` before the finished borrowing report. Two later commits are still in the reflog: one completes that report, and the next redesigns it.
+
+Sage wants the completed report on `main`, but the redesign kept separately for later. **Neither piece of lost work should disappear.**
+
+**Starting point:** On `main` at its reset position, with the report and redesign discoverable in the reflog.
+
+**Real-World Context**
+Recovering work includes deciding where each version belongs. A later experiment may be worth preserving without making it the active result.
+
+**Your Task**
+Find and inspect the two lost versions. Keep the redesign on `recovery/report-redesign`, and restore the completed report onto `main` without bringing the redesign into main. Finish on `main`.
+
+**Objective Checklist**
+
+- [ ] Preserve the lost redesign commit on recovery/report-redesign.
+- [ ] Restore the completed report on main while excluding the redesign.
+- [ ] Finish on main with a clean tree and index.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git reflog`
+
+2. `git show c2`
+
+3. `git show c3`
+
+4. `git branch recovery/report-redesign c3`
+
+5. `git cherry-pick c2`
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- After preserving the redesign, a supported fast-forward of main to the report commit also satisfies the same repository goal.
+
+**Not accepted**
+
+- Recovering just one version while leaving main at its reset position.
+- Making the redesign the active main result.
+- Using the completed report commit for the redesign branch.
+
+**Expected Result**
+The completed report is active on main and the redesign is preserved separately.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 7
+
+- recovery/report-redesign preserves the lost redesign commit.
+- main contains the completed report and excludes the redesign.
+- The tree and index are clean and HEAD is on main.
+
+
+### 4.2.17 Find the regression that returned after a revert · Hard
+
+**Variant ID:** `revert-transfer-returned-regression-v2`
+
+**Story**
+The statement tax line has disappeared again. An older commit hid it and changed rounding, but that commit was already reverted. The team subsequently approved bankers rounding, then published a layout update and an export guide.
+
+Sage needs the tax line back while keeping the approved rounding and guide. **Do not undo the old fault a second time and erase newer good work.**
+
+**Starting point:** On published `main`, with origin up to date and no local changes.
+
+**Real-World Context**
+A repeated symptom does not prove that the original commit is still responsible. Inspect the later history before choosing a corrective revert.
+
+**Your Task**
+Find which later published change brought the missing tax line back. Reverse that regression with a new corrective commit and publish `main`, preserving bankers rounding, invoices and the export guide.
+
+**Objective Checklist**
+
+- [ ] Restore the tax line while preserving bankers rounding, invoices and the export guide.
+- [ ] Preserve main's published history and add one corrective revert commit.
+- [ ] Publish the corrected main to origin/main and leave the tree and index clean.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git log --oneline`
+
+2. `git show c2`
+
+3. `git show c5`
+
+4. `git revert c5`
+
+5. `git push`
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- Use optional inspections in any useful order; a supported explicit `git push origin main` publishes the same correction.
+
+**Not accepted**
+
+- Reverting the original already-reversed change and losing bankers rounding.
+- Resetting away published history.
+- Undoing the later guide instead of the regression.
+
+**Expected Result**
+The recurrence is reversed without undoing later correct improvements or rewriting published history.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 6
+
+- The tax line is visible while bankers rounding, invoices and the export guide are preserved.
+- main keeps its published history and adds one corrective revert commit.
+- origin/main matches main; the tree and index are clean.
+
+
+### 4.3.21 Recover the complete branch before selecting what to replay · Hard
+
+**Variant ID:** `rebase-transfer-invoices-v2`
+
+**Story**
+An earlier rebase of `feature/invoices` lost its tax-lines commit. A second rebase onto `main` is now stopped on a conflict from the unrelated `spike/heatmap` history the branch was originally based on.
+
+The last pushed tip still has all three invoice commits. **Recovering that tip and choosing the correct replay boundary are both necessary.**
+
+**Starting point:** On feature/invoices in a stopped rebase; the previous pushed tip is discoverable in the reflog.
+
+**Real-World Context**
+Aborting only returns to the state before the current rebase. It does not repair work lost in an earlier rewrite.
+
+**Your Task**
+Cancel the current rebase and recover the complete version last pushed. Put only the invoice branch's own three commits on current `main`, excluding the spike, then update `origin` safely without overwriting work you have not seen.
+
+**Objective Checklist**
+
+- [ ] Base the invoice branch on current main and retain all three of its own commits.
+- [ ] Exclude spike history and its file while preserving the spike branch.
+- [ ] Publish the repaired branch so origin matches it, and finish without a rebase or uncommitted work.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git rebase --abort`
+
+2. `git reflog`
+
+3. `git reset --hard c6`
+
+4. `git rebase --onto main spike/heatmap feature/invoices`
+
+5. `git push --force-with-lease origin feature/invoices`
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- Inspect before or after the abort; an equivalent supported explicit lease spelling is acceptable.
+
+**Not accepted**
+
+- Aborting and selectively rebasing the incomplete tip without recovering the lost tax-lines commit.
+- Recovering the correct tip but replaying the unrelated spike with an ordinary rebase.
+- Publishing with unguarded force, including a raw force flag combined with a lease flag.
+
+**Expected Result**
+The complete invoice work is based directly on main, with the spike excluded and a verified guarded publish.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 4 · Maximum counted commands: 8
+
+- The invoice branch contains all three of its own commits on main.
+- Spike history and its file are excluded; the spike branch is preserved.
+- origin matches the repaired branch; no rebase or uncommitted work remains.
+
+
+### 1.6.19 Separate a fix from an experiment already in the index · Hard
+
+**Variant ID:** `restore-transfer-contaminated-index`
+
+**Story**
+A teammate staged all of `src/api.py`: the request-totals fix and an experiment that is not approved. The companion test in `tests/test_api.py` is staged correctly. A separate generated output file has an unwanted local edit.
+
+The source has no unstaged changes yet. **Choosing a patch from the working tree will not remove an experiment that is already staged.** Keep that experiment as uncommitted work while delivering the approved fix and test.
+
+**Starting point:** On `main`, with the mixed source and correct test staged; `tmp/output.txt` has an unstaged throwaway edit.
+
+**Real-World Context**
+The index is the next commit's snapshot. A clean unstaged diff does not mean the index contains only the changes you intend to deliver.
+
+**Your Task**
+Repair the source's staged selection and make one commit named `Fix request totals` containing only the request-totals fix and its already-staged test. Keep the source experiment uncommitted and unchanged. Discard the local change to `tmp/output.txt`, preserving its committed content and the README.
+
+**Objective Checklist**
+
+- [ ] One new commit contains the totals fix and companion test, excluding the source experiment.
+- [ ] The experiment remains in the working tree; nothing remains staged.
+- [ ] The output file and README retain their committed content; no other local changes remain.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git restore --staged src/api.py`
+
+2. `git add -p src/api.py`
+
+3. `git restore tmp/output.txt`
+
+4. `git commit -m "Fix request totals"`
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- A supported path reset can unstage the source before selecting its wanted patch.
+- Equivalent supported index/editor recovery is accepted when the same committed and uncommitted work is preserved.
+
+**Not accepted**
+
+- Patch-staging the source without first repairing the contaminated index, then committing the still-staged experiment.
+- Restaging the whole source and committing both changes.
+- Discarding the source experiment or omitting the correctly staged companion test.
+
+**Expected Result**
+The approved fix and test form one commit, the experiment survives uncommitted, and the generated output is restored.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 4 · Maximum counted commands: 8
+
+- The commit is a direct child of the approved baseline and records the required message, fix and test.
+- The experiment is excluded from the commit and preserved as the only working-tree change.
+- The output and README are unchanged and the index is empty.
+
+
+### 2.2.20 Prepare the parser branch for review · Hard
+
+**Variant ID:** `naming-transfer-preserve-before-cleanup`
+
+**Story**
+The current branch, `scratch`, contains a parser fix that has never been merged into `main`. The team needs that work under `fix/parser`. A separate `fix/merged` branch is already included in main, while `feature/active` contains another teammate's unfinished work.
+
+**Starting point:** On clean `scratch` at its unique parser-fix commit. Main, the completed branch and the active sibling point to different snapshots.
+
+**Real-World Context**
+Branch names help the team route a change to its review and track which branches are still active.
+
+**Your Task**
+Keep all work from the current `scratch` branch under the compliant name `fix/parser`. Remove `scratch` and the completed `fix/merged` branch. Preserve `main` and `feature/active` exactly where they are, create no commits, and finish on clean `fix/parser`.
+
+**Objective Checklist**
+
+- [ ] Preserve the original scratch tip on fix/parser, including its unique parser fix.
+- [ ] Remove scratch and fix/merged while keeping main and feature/active at their original tips.
+- [ ] Finish on clean fix/parser without adding commits or leaving staged changes.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git switch -c fix/parser`
+
+2. `git branch -d scratch`
+
+3. `git branch -d fix/merged`
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- Rename the current branch to fix/parser and remove the completed branch. The shorter supported route preserves the same work.
+- Any supported equivalent reference-preserving ordering is accepted.
+
+**Not accepted**
+
+- Removing scratch and creating fix/parser from main, losing the unique parser fix.
+- Removing the unfinished feature/active branch.
+- Moving main to the parser-fix tip instead of preserving its existing position.
+
+**Expected Result**
+The parser fix survives under the compliant name, obsolete names are removed, and unrelated branch tips remain unchanged.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 2 · Maximum counted commands: 7
+
+- fix/parser points to the original unique scratch commit.
+- Main and the active sibling keep their original tips; obsolete names are absent.
+- No commits are added, the index/tree are clean, and HEAD is on fix/parser.
+
+
+### 1.6.20 Deliver the approved request fix · Hard
+
+**Variant ID:** `restore-transfer-contaminated-index-v2`
+
+**Story**
+
+A teammate staged all of `src/api.py`: the request-totals fix and an experiment that is not approved. The companion test in `tests/test_api.py` is staged correctly. A separate generated output file has an unwanted local edit.
+
+The team has approved the totals fix and its companion test for this delivery. The experiment is still being explored.
+
+**Starting point:** On `main`, with the mixed source and correct test staged; `tmp/output.txt` has an unstaged throwaway edit.
+
+**Real-World Context**
+
+The release needs a focused fix and a reproducible test. Ongoing experimental work belongs to a later delivery.
+
+**Your Task**
+Make one commit named `Fix request totals` containing only the request-totals fix and its already-staged test. Keep the source experiment uncommitted and unchanged. Discard the local change to `tmp/output.txt`, preserving its committed content and the README.
+
+**Objective Checklist**
+
+- [ ] Create one commit containing only the totals fix and companion test, excluding the source experiment.
+- [ ] Keep the experiment unchanged and uncommitted, and leave nothing staged.
+- [ ] Restore the output file to its committed content, preserve the README, and leave no other local changes.
+
+**Answer Key (STAFF ONLY, never shown to students)**
+
+1. `git restore --staged src/api.py`
+
+2. `git add -p src/api.py`
+
+3. `git restore tmp/output.txt`
+
+4. `git commit -m "Fix request totals"`
+
+**Accepted Alternatives (STAFF ONLY)**
+
+- A supported path reset can unstage the source before selecting its wanted patch.
+- Equivalent supported index/editor recovery is accepted when the same committed and uncommitted work is preserved.
+
+**Not accepted**
+
+- Patch-staging the source without first repairing the contaminated index, then committing the still-staged experiment.
+- Restaging the whole source and committing both changes.
+- Discarding the source experiment or omitting the correctly staged companion test.
+
+**Expected Result**
+The approved fix and test form one commit, the experiment survives uncommitted, and the generated output is restored.
+
+**Evaluation (STAFF ONLY)**
+
+Minimum counted commands: 4 · Maximum counted commands: 8
+
+- The commit is a direct child of the approved baseline and records the required message, fix and test.
+- The experiment is excluded from the commit and preserved as the only working-tree change.
+- The output and README are unchanged and the index is empty.

@@ -88,7 +88,9 @@ function stagePatch(state: MutableRepositoryState, paths: string[]) {
   state.staging ??= {}
   const stagedPaths: string[] = []
   for (const path of selected) {
-    if (!(path in state.working_tree) && !(path in state.partial_hunks)) continue
+    // Patch staging selects the unstaged diff. Authored hunk metadata alone
+    // must never remove content that is already in the index.
+    if (!(path in state.working_tree)) continue
     if (entryStatus(state.working_tree[path]) === 'ignored') continue
     const authored = state.partial_hunks[path]
     let targetHunks: RepositoryValue[]

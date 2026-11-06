@@ -44,7 +44,11 @@ from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES, GATE_MA
 from curriculum.seed_data.source.scenario_fixtures import extension_case
 from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN, ScenarioSpec
 from curriculum.seed_data.source.scenario_plan.types import SPIRAL
-from curriculum.seed_data.source.transfer_checkpoints import TRANSFER_CHECKPOINTS
+from curriculum.seed_data.source.transfer_checkpoints import (
+    RETIRED_TRANSFER_CHECKPOINTS,
+    RETIRED_TRANSFER_PARAMETERS,
+    TRANSFER_CHECKPOINTS,
+)
 from curriculum.seed_data.spec_helpers import required_commit_message_details
 from tutoring.services.forms import catalog_forms, forms_used_by
 from tutoring.services.homes import assign_guide_homes
@@ -13287,6 +13291,17 @@ class Command(BaseCommand):
         from curriculum.services.techniques import required_techniques, technique_label
 
         techniques = required_techniques(case["case_id"])
+        checkpoint = next(
+            (c for c in TRANSFER_CHECKPOINTS.values() if c["case_id"] == case["case_id"]), None
+        )
+        transfer_parameters = (
+            {
+                "transfer_revision": 2,
+                "transfer_prerequisites": list(checkpoint.get("prerequisites", ())),
+            }
+            if checkpoint
+            else RETIRED_TRANSFER_PARAMETERS.get(case["case_id"], {})
+        )
         efficient, generous, maximum = thresholds(
             max(
                 revised["minimum_counted_commands"],
@@ -13318,6 +13333,7 @@ class Command(BaseCommand):
             "case_id": case["case_id"],
             "semantic_key": case["case_id"],
             "parameter_context": {
+                **transfer_parameters,
                 "scenario_number": revised["scenario_number"],
                 "difficulty": difficulty,
                 "minimum_counted_commands": efficient,
@@ -13539,4 +13555,17 @@ class Command(BaseCommand):
                 "transfer_note": checkpoint["note"],
             },
         )
-        return [case_id]
+        preserved = []
+        retired_ids = [
+            key for key, slug in RETIRED_TRANSFER_CHECKPOINTS.items() if slug == level.slug
+        ]
+        for variant in scenario.variants.filter(slug__in=retired_ids, is_transfer=True):
+            # Preserve every hashed field and note. Existing points/studies pin
+            # this version; the metadata marker only prevents new selection.
+            params = {**(variant.parameter_context or {}), "retired_transfer": True}
+            if variant.parameter_context != params or not variant.is_published:
+                variant.parameter_context = params
+                variant.is_published = True
+                variant.save(update_fields=["parameter_context", "is_published"])
+            preserved.append(variant.slug)
+        return [case_id, *preserved]

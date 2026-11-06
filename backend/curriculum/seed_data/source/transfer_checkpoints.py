@@ -1,37 +1,77 @@
-"""Each Module 3-4 level's transfer checkpoint, the RTA task that closes the level.
+"""Current assessment decisions and preserved versions of transfer checkpoints.
 
-Seeding reserves the case on the first scenario of the level's Hard tier, so it
-never appears in practice, retries, replays or drills. Unlike the scenario's own
-variants, a checkpoint is not a reskin: it composes what the level taught into a
-route no practice variant uses, and its note records that difference (see
-KPI_METHODOLOGY.md, "Transfer and exposure").
+Novelty is a changed repository decision, not a longer answer key. The outcome
+suite proves the intended dependency and accepts state-equivalent Git routes.
+Retired IDs stay available only to learners/studies already pinned to them.
 """
 
 from __future__ import annotations
 
-TRANSFER_CHECKPOINTS: dict[str, dict[str, str]] = {
+from typing import NotRequired, TypedDict
+
+
+class TransferCheckpointSpec(TypedDict):
+    case_id: str
+    note: str
+    prerequisites: NotRequired[tuple[str, ...]]
+
+
+TRANSFER_CHECKPOINTS: dict[str, TransferCheckpointSpec] = {
+    "unstaging-and-discarding-changes": {
+        "case_id": "restore-transfer-contaminated-index-v2",
+        "note": "Practice unstages a separate draft before selecting source changes. Here wanted and unwanted source hunks are already staged together: repair that index entry before selecting, while retaining the correctly staged test.",
+    },
+    "branch-naming-and-housekeeping": {
+        "case_id": "naming-transfer-preserve-before-cleanup",
+        "note": "Practice replaces a disposable bad name at main's tip. Here the badly named branch has unique unmerged work: its own tip must survive under the compliant name before cleanup.",
+    },
     "resolving-conflicts-manually": {
-        "case_id": "manual-transfer-checkout-v2",
-        "note": "Practice settles one conflicted file; this abandons a wrong merge, then settles two files in the right one.",
+        "case_id": "manual-transfer-stale-index-v2",
+        "note": "Practice stages a fresh resolution. Here the staged resolution is stale: a corrected working copy must replace it before the merge is committed.",
     },
     "using-a-merge-tool": {
-        "case_id": "mergetool-transfer-pricing-refresh",
-        "note": "Practice starts with a tool configured and one conflict; this sets the tool up from nothing, then settles two conflicted files beside a clean auto-merge.",
+        "case_id": "mergetool-transfer-clean-guide-v2",
+        "note": "Practice finishes marked conflicts. Here the clean auto-merged guide is inconsistent with the resolved policy and needs a separate staged correction; tool-only completion is insufficient.",
+        "prerequisites": ("resolving-conflicts-manually",),
     },
     "cherry-picking-commits": {
-        "case_id": "cherry-transfer-release-backport",
-        "note": "Practice uses one picking technique per task; this clears a wrong pick, traces a conflicting fix, then folds two more fixes into one commit.",
+        "case_id": "cherry-transfer-mixed-commit-v2",
+        "note": "Practice selects whole commits. Here one source commit bundles a wanted fix and a forbidden release-policy change; its staged effect must be reviewed before committing.",
     },
     "recovering-from-hard-resets": {
-        "case_id": "reflog-transfer-report-rollback",
-        "note": "Practice recovers one commit; this gives two lost commits different fates, a safe branch for one and a hard reset of main to the other.",
+        "case_id": "reflog-transfer-two-destinations-v2",
+        "note": "Practice recovers one wanted candidate. Here both lost commits must survive with different destinations: the completed report on main and the redesign on a separate branch.",
     },
     "reversing-pushed-commits-safely": {
-        "case_id": "revert-transfer-statements",
-        "note": "Practice separates or lightly pairs these moves; this rewrites one unpublished commit, then reverses two published ones in order, in one publish.",
+        "case_id": "revert-transfer-returned-regression-v2",
+        "note": "Practice reverses a faulty published change. Here the old fault was already reversed; undoing it again destroys a newer correct improvement, so the later recurrence must be identified.",
     },
     "completing-rebase-recovery-sequences": {
-        "case_id": "rebase-transfer-invoices",
-        "note": "Practice repairs one rebase mistake; this aborts a rebase, restores the pushed tip from the reflog, replays with --onto and publishes safely.",
+        "case_id": "rebase-transfer-invoices-v2",
+        "note": "Aborting returns to an already-incomplete branch. The correct old tip must be recovered before selective replay; recovery without the correct boundary brings the spike back.",
+    },
+}
+
+
+# Compatibility data, never fresh assignment candidates. Keep authored content
+# and audit coverage while pinned checkpoints/studies can still read/play it.
+RETIRED_TRANSFER_CHECKPOINTS: dict[str, str] = {
+    "manual-transfer-checkout-v2": "resolving-conflicts-manually",
+    "mergetool-transfer-pricing-refresh": "using-a-merge-tool",
+    "cherry-transfer-release-backport": "cherry-picking-commits",
+    "reflog-transfer-report-rollback": "recovering-from-hard-resets",
+    "revert-transfer-statements": "reversing-pushed-commits-safely",
+    "rebase-transfer-invoices": "completing-rebase-recovery-sequences",
+    "restore-transfer-contaminated-index": "unstaging-and-discarding-changes",
+}
+
+
+# Retired revision-2 cases need their original hash-bound source parameters when
+# reconstructed for audits or compatibility tests. Existing seeded rows remain
+# untouched by retirement; legacy pre-revision-2 cases retain their old shape.
+RETIRED_TRANSFER_PARAMETERS: dict[str, dict] = {
+    "restore-transfer-contaminated-index": {
+        "transfer_revision": 2,
+        "transfer_prerequisites": [],
     },
 }

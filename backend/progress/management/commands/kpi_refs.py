@@ -48,13 +48,17 @@ class Command(BaseCommand):
                 tier = variant.scenario.tier
                 first = tier.scenarios.filter(is_published=True).order_by("sort_order", "id")[0]
                 if (
-                    not transfer_expected(tier.adventure_level.chapter.number, tier.difficulty)
+                    not transfer_expected(
+                        tier.adventure_level.chapter.number,
+                        tier.difficulty,
+                        tier.adventure_level.slug,
+                    )
                     or variant.scenario_id != first.id
                     or not ordinary.exists()
                     or any(state_key(v) == state_key(variant) for v in ordinary)
                 ):
                     raise CommandError(
-                        "Transfer needs the first scenario of a Module 3–4 Hard tier, "
+                        "Transfer needs the first scenario of an eligible Hard tier, "
                         "a distinct repository/goal, and ordinary practice content."
                     )
                 variant.is_transfer = True

@@ -6545,7 +6545,7 @@
                                 "$ref": "#/components/schemas/RateMetric"
                             }
                         ],
-                        "description": "Retry Transfer Accuracy (Modules 3-4): successful first attempts on reserved, unseen transfer checkpoints over concluded checkpoints. Formal studies include unattempted assignments."
+                        "description": "Retry Transfer Accuracy (selected Hard levels in Modules 1-4): successful first attempts on reserved, unseen transfer checkpoints over concluded checkpoints. Formal studies include unattempted assignments."
                     },
                     "retry_success_rate": {
                         "allOf": [
@@ -6614,7 +6614,7 @@
                                 "$ref": "#/components/schemas/RateMetric"
                             }
                         ],
-                        "description": "Retry Transfer Accuracy (Modules 3-4): successful first attempts on reserved, unseen transfer checkpoints over concluded checkpoints. Formal studies include unattempted assignments."
+                        "description": "Retry Transfer Accuracy (selected Hard levels in Modules 1-4): successful first attempts on reserved, unseen transfer checkpoints over concluded checkpoints. Formal studies include unattempted assignments."
                     },
                     "retry_success_rate": {
                         "allOf": [

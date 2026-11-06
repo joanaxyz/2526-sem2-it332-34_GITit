@@ -23,18 +23,24 @@ def digest(value) -> str:
 
 
 def ref_hash(variant) -> str:
-    return digest(
-        {
-            "policy": POLICY,
-            "initial": variant.initial_state,
-            "target": variant.target_state,
-            "spec": variant.evaluation_spec,
-            "commands": variant.solution_commands,
-            "files": variant.solution_workspace_files,
-            "diagnostics": variant.assess_diag,
-            "action_limit": command_budget(variant)[1],
+    evidence = {
+        "policy": POLICY,
+        "initial": variant.initial_state,
+        "target": variant.target_state,
+        "spec": variant.evaluation_spec,
+        "commands": variant.solution_commands,
+        "files": variant.solution_workspace_files,
+        "diagnostics": variant.assess_diag,
+        "action_limit": command_budget(variant)[1],
+    }
+    params = variant.parameter_context if isinstance(variant.parameter_context, dict) else {}
+    if params.get("transfer_revision") == 2:
+        evidence["transfer_requirements"] = {
+            "revision": 2,
+            "prerequisites": params.get("transfer_prerequisites", []),
+            "techniques": params.get("required_techniques", []),
         }
-    )
+    return digest(evidence)
 
 
 def valid_ref(variant) -> int | None:

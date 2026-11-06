@@ -48,11 +48,46 @@ Each scenario has one role:
 | transfer | Hard: unfamiliar state or distractors, known forms only. |
 
 The `transfer` role is a practice scenario. It is not an RTA transfer checkpoint: those
-are separate extension scenarios, one per Module 3–4 level, listed with their authored
+are separate extension scenarios in selected levels, listed with their authored
 difference in `seed_data/source/transfer_checkpoints.py`. Seeding reserves each on the
 first scenario of the level's Hard tier, outside the plan's `variants`. A checkpoint must
-compose the level into a route no practice variant of that level uses, with moves already
-practised (`curriculum/tests/test_transfer_checkpoints.py`).
+never appear in `CHALLENGE_GATES` or be seeded as a challenge-trial variant; this
+excludes both current and retired checkpoint IDs. A checkpoint must
+change a repository decision or dependency compared with both practice and its gate:
+an extra command, repeated file or longer answer key does not establish transfer.
+The initial M1/M2 selection is 1.6 index recovery/partial selection and 2.2 branch
+preservation/housekeeping; all Module 3–4 levels remain covered. Do not add one case
+per level as a quota. Keep `progress.objectives.transfer_expected` aligned with the
+reviewed roster; unselected tiers must not become missing assessment evidence.
+Use forms guaranteed by the level's mandatory practice or explicitly declared completed
+prerequisite levels. The revised merge-tool checkpoint requires Manual Conflict Resolution
+Hard before assignment. Finishing that prerequisite later refreshes an already-mastered
+dependent tier's offer. Formal study enrollment must include the prerequisite or use
+learners who already mastered it.
+
+`curriculum/tests/test_transfer_checkpoint_outcomes.py` proves each current reference,
+supported equivalent, rejected initial state and meaningful incomplete approach through
+the browser engine, backend verifier and production completion evaluator. Keep state-equivalent
+solutions valid; command-sequence uniqueness is not a grading rule. Explicit tool or guarded
+publish requirements use backend-verified technique evidence, never browser claims or an
+answer-key whitelist.
+
+When a task permits changes to only named files, use the opt-in
+`branch_tip_commit.changes_match_exact_paths` condition to constrain that commit's
+changed paths exactly. It rejects unrelated additions, edits and deletions while
+leaving the learner free to choose an equivalent Git workflow. An explicitly empty
+list requires no changed paths; omitting the condition adds no constraint.
+
+Publish a substantial assessment revision under a new case ID. The retired-ID registry
+retains authored cases for compatibility auditing. Seeding keeps already-existing retired
+variants reserved and published without rewriting their content or reference; it does not
+create them on a fresh database. New learners/studies select only current variants.
+Existing assignments, active runs, first results and study manifests remain pinned to their
+original version. An applicable unfrozen study reserves its version even before mastery
+creates a checkpoint row. First assignment honors that prospective pin; conflicting
+versions across overlapping studies are rejected at enrollment, with no fallback to a
+replacement if an old pin becomes unavailable. Revision-2 reference hashes also bind required techniques and prerequisites;
+adding the retirement marker alone leaves a legacy hash unchanged.
 
 The scenario grammar (`curriculum/tests/test_scenario_plan_invariants.py` checks all of
 it with the real guide resolver):

@@ -33,7 +33,10 @@ from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES
 from curriculum.seed_data.source.scenario_fixtures import SCENARIO_FIXTURES, extension_case
 from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN
 from curriculum.seed_data.source.scenario_plan.types import DEBUT
-from curriculum.seed_data.source.transfer_checkpoints import TRANSFER_CHECKPOINTS
+from curriculum.seed_data.source.transfer_checkpoints import (
+    RETIRED_TRANSFER_CHECKPOINTS,
+    TRANSFER_CHECKPOINTS,
+)
 from tutoring.services.forms import command_family, resolve_form
 from tutoring.services.techniques import techniques_in
 
@@ -237,6 +240,12 @@ def test_every_scenario_is_placed_exactly_once():
     placed: dict[str, str] = {}
     placed.update(
         {c["case_id"]: f"{level} checkpoint" for level, c in TRANSFER_CHECKPOINTS.items()}
+    )
+    placed.update(
+        {
+            case_id: f"{level} retired checkpoint"
+            for case_id, level in RETIRED_TRANSFER_CHECKPOINTS.items()
+        }
     )
     problems = []
     for scenario in _walk():

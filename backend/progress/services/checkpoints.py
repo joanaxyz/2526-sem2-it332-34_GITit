@@ -9,12 +9,19 @@ from common.constants import (
     SESSION_STATUS_COMPLETED,
     SESSION_STATUS_FAILED,
 )
-from progress.models import KpiCheckpoint, KpiExposure
+from progress.models import AdventureLevelTierCompletion, KpiCheckpoint, KpiExposure
 from progress.objectives import transfer_expected
 from progress.wallet import WalletService
 from progress.xp import XpService
 
 from .references import ref_hash, state_key, valid_ref
+from .transfer_policy import (
+    completed_practice_levels,
+    is_current_transfer,
+    practice_ready,
+    prerequisite_levels,
+    study_transfer_pins,
+)
 
 # Paid in GitCoins and XP alike. A first-run clear earns the full reward; a
 # learner who missed it can still earn the smaller one by clearing it in practice.
@@ -88,14 +95,51 @@ def record_mastery(run) -> None:
         },
     )
     assign_transfer(player=run.player, tier=run.tier)
+    if run.tier.difficulty == "hard":
+        # A learner may master a dependent level first. Finishing its explicitly
+        # required practice later must make the existing Hard completion usable.
+        for completion in (
+            AdventureLevelTierCompletion.objects.filter(
+                player_id=run.player_id,
+                tier__difficulty="hard",
+                tier__adventure_level__chapter_id=run.tier.adventure_level.chapter_id,
+            )
+            .exclude(tier_id=run.tier_id)
+            .select_related("tier__adventure_level__chapter")
+        ):
+            assign_transfer(player=run.player, tier=completion.tier)
 
 
 def assign_transfer(*, player, tier):
-    if not transfer_expected(tier.adventure_level.chapter.number, tier.difficulty):
-        return None
     existing = KpiCheckpoint.objects.filter(player=player, tier=tier, kind="transfer").first()
     if existing is not None:
         return existing
+    variant = eligible_transfer_variant(player=player, tier=tier)
+    if variant is None:
+        return None
+    checkpoint, _ = KpiCheckpoint.objects.get_or_create(
+        player=player,
+        tier=tier,
+        kind=KpiCheckpoint.Kind.TRANSFER,
+        defaults={
+            "variant": variant,
+            "ref_count": variant.ref_count,
+            "ref_hash": variant.ref_hash,
+        },
+    )
+    return checkpoint
+
+
+def eligible_transfer_variant(*, player, tier):
+    """Read-only eligibility shared by live assignment and backfill preview."""
+    pins = study_transfer_pins([player.id], [tier.id])[player.id, tier.id]
+    if len(pins) > 1:
+        # Preserve mastery without arbitrarily choosing a conflicting version.
+        return None
+    if not pins and not transfer_expected(
+        tier.adventure_level.chapter.number, tier.difficulty, tier.adventure_level.slug
+    ):
+        return None
     # Any legacy exposure gap prevents a claim of novelty. New cohorts have
     # complete tracking from their first launch; old histories are not guessed.
     progress = AdventureLevelTierProgress.objects.filter(player=player, tier=tier).first()
@@ -115,10 +159,16 @@ def assign_transfer(*, player, tier):
     scenario = tier.scenarios.filter(is_published=True).order_by("sort_order", "id").first()
     if scenario is None:
         return None
+    pinned = next(iter(pins), None)
     for variant in scenario.variants.filter(
         is_published=True,
         is_transfer=True,
     ).order_by("id"):
+        if pinned:
+            if (variant.id, variant.ref_hash, variant.ref_count) != pinned:
+                continue
+        elif not is_current_transfer(variant):
+            continue
         if (
             not variant.transfer_note.strip()
             or valid_ref(variant) is None
@@ -126,17 +176,11 @@ def assign_transfer(*, player, tier):
             or state_key(variant) in seen
         ):
             continue
-        checkpoint, _ = KpiCheckpoint.objects.get_or_create(
-            player=player,
-            tier=tier,
-            kind=KpiCheckpoint.Kind.TRANSFER,
-            defaults={
-                "variant": variant,
-                "ref_count": variant.ref_count,
-                "ref_hash": variant.ref_hash,
-            },
-        )
-        return checkpoint
+        if prerequisite_levels(variant) and not practice_ready(
+            variant, completed_practice_levels([player.id])[player.id]
+        ):
+            continue
+        return variant
     return None
 
 

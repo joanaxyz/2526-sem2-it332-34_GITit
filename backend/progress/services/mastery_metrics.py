@@ -6,7 +6,7 @@ from datetime import timedelta
 from django.db.models import Count, Max, Q
 from django.utils import timezone
 
-from adventures.models import AdventureLevelTierRun
+from adventures.models import AdventureLevelTierRun, AdventureLevelTierScenarioVariant
 from common.constants import (
     COMMAND_DIAGNOSTIC,
     SESSION_STATUS_ABANDONED,
@@ -248,6 +248,29 @@ def live_records(runs, *, end_before=None):
         if not end_before or at < end_before:
             mastery[key] = at
     from .checkpoints import transfer_ready as checkpoint_ready
+    from .transfer_policy import (
+        completed_practice_levels,
+        is_current_transfer,
+        practice_ready,
+        study_transfer_pins,
+    )
+
+    # Missing prerequisite practice is not missing assessment evidence. Bulk
+    # reads keep cohort reporting independent of the number of tier records.
+    current_variants = defaultdict(list)
+    for variant in (
+        AdventureLevelTierScenarioVariant.objects.filter(
+            scenario__tier_id__in=tiers, is_transfer=True, is_published=True
+        )
+        .only(
+            "scenario_id", "is_transfer", "is_published", "parameter_context", "scenario__tier_id"
+        )
+        .select_related("scenario")
+    ):
+        if is_current_transfer(variant):
+            current_variants[variant.scenario.tier_id].append(variant)
+    completed_levels = completed_practice_levels(players, before=end_before)
+    study_pins = study_transfer_pins(players, tiers)
 
     seen = defaultdict(set)
     if any(p.kind == "transfer" and p.ended_at is None for p in points.values()):
@@ -323,11 +346,23 @@ def live_records(runs, *, end_before=None):
                     and not checkpoint_ready(transfer, seen=seen[player_id])
                 )
                 or bool(
-                    transfer_expected(
-                        row["tier__adventure_level__chapter__number"], row["tier__difficulty"]
+                    (
+                        transfer_expected(
+                            row["tier__adventure_level__chapter__number"],
+                            row["tier__difficulty"],
+                            row["tier__adventure_level__slug"],
+                        )
+                        or study_pins[player_id, tier_id]
                     )
                     and at
                     and not transfer
+                    and (
+                        not current_variants[tier_id]
+                        or any(
+                            practice_ready(v, completed_levels[player_id])
+                            for v in current_variants[tier_id]
+                        )
+                    )
                 ),
                 "retry_total": len(retries),
                 "retry_wins": sum(r["status"] == SESSION_STATUS_COMPLETED for r in retries),
@@ -357,7 +392,7 @@ def samples(records):
         "transfer_missing": sum(
             r.get(
                 "transfer_missing",
-                transfer_expected(r["module"], r["difficulty"])
+                transfer_expected(r["module"], r["difficulty"], r.get("slug"))
                 and r["mastered"]
                 and not r.get("transfer_assigned", False),
             )

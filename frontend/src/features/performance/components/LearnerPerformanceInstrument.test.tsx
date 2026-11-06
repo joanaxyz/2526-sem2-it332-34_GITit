@@ -72,8 +72,8 @@ describe('learner learning objectives', () => {
     expect(screen.getByRole('tab', { name: 'Module 3' })).toHaveAttribute('aria-selected', 'true')
     expect(screen.getByTestId('location')).toHaveTextContent('?view=progress&range=week#learning-module-3')
     fireEvent.change(measure, { target: { value: 'rta' } })
-    expect(within(tabs).getByRole('tab', { name: 'Module 1' })).toHaveTextContent('Not applicable')
-    expect(within(tabs).getByRole('tab', { name: 'Module 2' })).toHaveTextContent('Not applicable')
+    expect(within(tabs).getByRole('tab', { name: 'Module 1' })).toHaveTextContent('Not measured yet')
+    expect(within(tabs).getByRole('tab', { name: 'Module 2' })).toHaveTextContent('Not measured yet')
     expect(within(tabs).getByRole('tab', { name: 'Module 4' })).toHaveTextContent('100%')
     expect(within(tabs).getByRole('tab', { name: 'Module 1' })).not.toHaveTextContent('0%')
   })
@@ -264,19 +264,24 @@ describe('learner learning objectives', () => {
     expect(objective('SO 4.5')).toHaveTextContent('Not measured yet')
   })
 
-  it('keeps measured zero visible and limits transfer KPIs to Modules 3–4', () => {
+  it('shows early-module transfer results with narrow coverage and preserves measured zero', () => {
     const data = structuredClone(emptyPerformanceFixture)
     data.modules[0].hlcr = { value: 0, numerator: 0, denominator: 2 }
     data.modules[0].arc = { value: 0, numerator: 0, denominator: 2 }
+    data.modules[0].rta = { value: 0, numerator: 0, denominator: 1 }
+    data.modules[1].rta = { value: 100, numerator: 1, denominator: 1 }
     renderRecord(data)
     expect(objective('SO 1.7')).toHaveTextContent('0%')
     expect(objective('SO 1.7')).toHaveAttribute('data-state', 'miss')
     expect(objective('SO 1.8')).toHaveTextContent('0.00')
     expect(objective('SO 1.8')).toHaveAttribute('data-state', 'met')
-    for (const number of [1, 2]) {
-      selectModule(number)
-      expect(within(screen.getByRole('group', { name: `Module ${number} KPIs` })).queryByText('Retry Transfer Accuracy')).not.toBeInTheDocument()
-    }
+    expect(moduleMetric(1, 'Retry Transfer Accuracy')).toHaveTextContent('0%')
+    expect(screen.getByText(/One checkpoint assesses index recovery/)).toBeInTheDocument()
+    fireEvent.click(screen.getByText('Module 1 evidence'))
+    expect(screen.getByText('0 of 1 transfer checkpoint cleared first time')).toBeInTheDocument()
+    selectModule(2)
+    expect(moduleMetric(2, 'Retry Transfer Accuracy')).toHaveTextContent('100%')
+    expect(screen.getByText(/One checkpoint assesses branch preservation/)).toBeInTheDocument()
     selectModule(3)
     expect(moduleMetric(3, 'Retry Transfer Accuracy')).toHaveTextContent('Not measured yet')
   })
@@ -303,9 +308,9 @@ describe('learner learning objectives', () => {
     ]
     renderRecord(data)
     selectModule(3)
-    fireEvent.click(screen.getByText('Transfer checkpoints · Modules 3–4'))
+    fireEvent.click(screen.getByText('Transfer checkpoints · Modules 1–4'))
     expect(screen.getByRole('link', { name: /Start transfer checkpoint/ })).toHaveAttribute('href', '/adventure-level-tiers/9/runs?transfer=1')
     expect(screen.getByRole('link', { name: /Resume transfer checkpoint/ })).toHaveAttribute('href', '/adventure-tier-runs/42')
-    expect(screen.getByText(/1 pending · 2 mastered Hard tiers without eligible transfer evidence/)).toBeInTheDocument()
+    expect(screen.getByText(/1 pending · 2 mastered eligible Hard tiers without transfer evidence/)).toBeInTheDocument()
   })
 })

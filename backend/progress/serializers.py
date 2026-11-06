@@ -17,7 +17,7 @@ class DashboardKpiSetSerializer(serializers.Serializer):
 
 
 RTA_HELP_TEXT = (
-    "Retry Transfer Accuracy (Modules 3-4): successful first attempts on reserved, "
+    "Retry Transfer Accuracy (selected Hard levels in Modules 1-4): successful first attempts on reserved, "
     "unseen transfer checkpoints over concluded checkpoints. Formal studies include unattempted assignments."
 )
 CAR_HELP_TEXT = (

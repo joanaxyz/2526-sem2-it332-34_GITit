@@ -1,4 +1,4 @@
-"""Module 2 planned scenarios: branching and collaboration (levels 2.1-2.9)."""
+"""Module 2 practice and reserved transfer fixtures (levels 2.1-2.9)."""
 
 from __future__ import annotations
 
@@ -21,7 +21,12 @@ BASE = {"README.md": "readme-v1"}
 
 
 def _stash_entry(path: str, content: str, message: str) -> dict[str, Any]:
-    return {"working_tree": {path: modified(content)}, "staging": {}, "conflicts": [], "message": message}
+    return {
+        "working_tree": {path: modified(content)},
+        "staging": {},
+        "conflicts": [],
+        "message": message,
+    }
 
 
 # ---------------------------------------------------------------------------
@@ -50,7 +55,10 @@ def _detached_save_and_return() -> dict[str, Any]:
             commit("c1", "Project baseline", [], base),
             commit("c2", "Cache search results", ["c1"], {**base, "src/cache.py": "cache-v1"}),
             commit(
-                "c3", "Spike: trigram search index", ["c1"], {**base, "src/search.py": "search-trigram"}
+                "c3",
+                "Spike: trigram search index",
+                ["c1"],
+                {**base, "src/search.py": "search-trigram"},
             ),
         ],
         branches={"main": "c1", "develop": "c2"},
@@ -205,7 +213,9 @@ def _two_stashes() -> dict[str, Any]:
             # stash@{1} is the real work; stash@{0} (last) is the abandoned experiment.
             stash_stack=[
                 _stash_entry(real, "reports-monthly-totals", f"WIP on {branch}: monthly totals"),
-                _stash_entry(chart, "chart-neon-experiment", f"WIP on {branch}: neon chart colours"),
+                _stash_entry(
+                    chart, "chart-neon-experiment", f"WIP on {branch}: neon chart colours"
+                ),
             ],
         ),
         "state_requirements": {
@@ -213,8 +223,14 @@ def _two_stashes() -> dict[str, Any]:
             "staging_empty": True,
             "working_tree_contains": [real],
             "rules": [
-                {"type": "working_tree_contains_tokens", "paths": {real: ["reports-monthly-totals"]}},
-                {"type": "working_tree_excludes_tokens", "paths": {chart: ["chart-neon-experiment"]}},
+                {
+                    "type": "working_tree_contains_tokens",
+                    "paths": {real: ["reports-monthly-totals"]},
+                },
+                {
+                    "type": "working_tree_excludes_tokens",
+                    "paths": {chart: ["chart-neon-experiment"]},
+                },
                 {"type": "stash_stack_empty"},
             ],
         },
@@ -286,7 +302,12 @@ def _branch_commit_publish(*, name: str, path: str, branch: str, message: str) -
         "state_requirements": clean(
             branch,
             points_to("main", "c1"),
-            tip(branch, message_equals=message, parent_equals="c1", tree_contains={path: f"{path}-v1"}),
+            tip(
+                branch,
+                message_equals=message,
+                parent_equals="c1",
+                tree_contains={path: f"{path}-v1"},
+            ),
             matches_origin(branch),
             upstream_tracking={branch: f"origin/{branch}"},
         ),
@@ -312,7 +333,9 @@ def _amend_then_lease(
         ),
         "state_requirements": clean(
             branch,
-            tip(branch, message_equals=right, parent_equals="c1", tree_contains={path: f"{path}-v1"}),
+            tip(
+                branch, message_equals=right, parent_equals="c1", tree_contains={path: f"{path}-v1"}
+            ),
             {"type": "branch_history_excludes", "branch": branch, "commits": ["c2"]},
             matches_origin(branch),
         ),
@@ -349,7 +372,9 @@ def _update_then_branch(*, name: str, branch: str, path: str, teammate: str) -> 
     }
 
 
-def _stash_pull_pop(*, name: str, branch: str, path: str, wip: str, teammate: str) -> dict[str, Any]:
+def _stash_pull_pop(
+    *, name: str, branch: str, path: str, wip: str, teammate: str
+) -> dict[str, Any]:
     base = {**BASE, path: f"{path}-v1"}
     return {
         "initial_state": repo(
@@ -421,7 +446,10 @@ def _commit_then_reconcile(
                     },
                 ),
                 tip(f"{branch}~1", message_equals=message, parent_equals="c1"),
-                {"type": "working_tree_contains_tokens", "paths": {scratch: [f"{scratch}-draft-2"]}},
+                {
+                    "type": "working_tree_contains_tokens",
+                    "paths": {scratch: [f"{scratch}-draft-2"]},
+                },
                 matches_origin(branch),
             ],
         },
@@ -447,7 +475,12 @@ def _commit_then_land(*, branch: str, target: str, path: str, message: str) -> d
         "state_requirements": clean(
             target,
             tip(target, is_merge=True, parent_equals="c1", tree_contains={path: f"{path}-v1"}),
-            tip(branch, message_equals=message, parent_equals="c2", tree_contains={path: f"{path}-v1"}),
+            tip(
+                branch,
+                message_equals=message,
+                parent_equals="c2",
+                tree_contains={path: f"{path}-v1"},
+            ),
         ),
     }
 
@@ -463,7 +496,9 @@ def _land_publish_tidy(
             ],
             branches={target: "c1", branch: "c2"},
             head=branch,
-            **origin(name, branches={f"origin/{target}": "c1"}, tracking={target: f"origin/{target}"}),
+            **origin(
+                name, branches={f"origin/{target}": "c1"}, tracking={target: f"origin/{target}"}
+            ),
         ),
         "state_requirements": clean(
             target,
@@ -483,7 +518,9 @@ def _wip_branch(path: str, drafts: int) -> list[dict]:
     commits = [commit("c1", "Project baseline", [], BASE)]
     for index in range(2, drafts + 2):
         content = f"{path}-v1" if index == drafts + 1 else f"{path}-draft-{index - 1}"
-        commits.append(commit(f"c{index}", f"WIP {index - 1}", [f"c{index - 1}"], {**BASE, path: content}))
+        commits.append(
+            commit(f"c{index}", f"WIP {index - 1}", [f"c{index - 1}"], {**BASE, path: content})
+        )
     return commits
 
 
@@ -495,11 +532,18 @@ def _squash_publish(
             commits=_wip_branch(path, drafts),
             branches={target: "c1", branch: f"c{drafts + 1}"},
             head=target,
-            **origin(name, branches={f"origin/{target}": "c1"}, tracking={target: f"origin/{target}"}),
+            **origin(
+                name, branches={f"origin/{target}": "c1"}, tracking={target: f"origin/{target}"}
+            ),
         ),
         "state_requirements": clean(
             target,
-            tip(target, message_equals=message, parent_equals="c1", tree_contains={path: f"{path}-v1"}),
+            tip(
+                target,
+                message_equals=message,
+                parent_equals="c1",
+                tree_contains={path: f"{path}-v1"},
+            ),
             {"type": "commit_count_on_branch_equals", "branch": target, "count": 2},
             matches_origin(target),
         ),
@@ -513,7 +557,12 @@ def _switch_squash_cleanup(*, branch: str, target: str, path: str, message: str)
         ),
         "state_requirements": clean(
             target,
-            tip(target, message_equals=message, parent_equals="c1", tree_contains={path: f"{path}-v1"}),
+            tip(
+                target,
+                message_equals=message,
+                parent_equals="c1",
+                tree_contains={path: f"{path}-v1"},
+            ),
             {"type": "commit_count_on_branch_equals", "branch": target, "count": 2},
             branch_absent=[branch],
         ),
@@ -692,10 +741,16 @@ FIXTURES: dict[str, dict[str, Any]] = {
     ),
     # 2.3
     "stash-easy-pop-search": _pop_one(
-        branch="feature/search", path="src/search.py", wip="search-ranking-wip", message="Start search page"
+        branch="feature/search",
+        path="src/search.py",
+        wip="search-ranking-wip",
+        message="Start search page",
     ),
     "stash-easy-pop-profile": _pop_one(
-        branch="feature/profile", path="src/profile.py", wip="profile-avatar-wip", message="Start profile page"
+        branch="feature/profile",
+        path="src/profile.py",
+        wip="profile-avatar-wip",
+        message="Start profile page",
     ),
     "stash-hard-two-stashes-reports": _two_stashes(),
     "stash-hard-cancelled-experiment": _cancelled_experiment(),
@@ -710,7 +765,10 @@ FIXTURES: dict[str, dict[str, Any]] = {
     ),
     # 2.4
     "push-medium-branch-commit-publish-search": _branch_commit_publish(
-        name="shop-web", path="src/filters.js", branch="feature/search-filters", message="Add search filters"
+        name="shop-web",
+        path="src/filters.js",
+        branch="feature/search-filters",
+        message="Add search filters",
     ),
     "push-medium-branch-commit-publish-invoices": _branch_commit_publish(
         name="billing-api",
@@ -734,10 +792,16 @@ FIXTURES: dict[str, dict[str, Any]] = {
     ),
     # 2.5
     "pull-medium-update-then-branch-ui": _update_then_branch(
-        name="shop-web", branch="feature/dark-mode", path="src/theme.css", teammate="Tidy theme colours"
+        name="shop-web",
+        branch="feature/dark-mode",
+        path="src/theme.css",
+        teammate="Tidy theme colours",
     ),
     "pull-medium-update-then-branch-api": _update_then_branch(
-        name="billing-api", branch="feature/webhooks", path="src/events.py", teammate="Add event registry"
+        name="billing-api",
+        branch="feature/webhooks",
+        path="src/events.py",
+        teammate="Add event registry",
     ),
     "pull-hard-stash-pull-pop-docs": _stash_pull_pop(
         name="handbook",
@@ -828,7 +892,10 @@ FIXTURES: dict[str, dict[str, Any]] = {
         branch="feature/cli-colors", target="main", path="src/colors.py", message="Add CLI colors"
     ),
     "squash-hard-switch-squash-cleanup-ui": _switch_squash_cleanup(
-        branch="feature/toast-ui", target="develop", path="src/toast.js", message="Add toast notifications"
+        branch="feature/toast-ui",
+        target="develop",
+        path="src/toast.js",
+        message="Add toast notifications",
     ),
     "squash-hard-remote-publish-tidy-search": _squash_remote_publish_tidy(
         name="shop-web", branch="feature/search", path="src/search.js", message="Add search"
@@ -841,7 +908,10 @@ FIXTURES: dict[str, dict[str, Any]] = {
         name="shop-web", branch="feature/search", path="src/search.js", message="Add search page"
     ),
     "rb-medium-land-and-retire-billing": _land_and_retire_remote(
-        name="billing-api", branch="feature/billing", path="src/billing.py", message="Add billing summary"
+        name="billing-api",
+        branch="feature/billing",
+        path="src/billing.py",
+        message="Add billing summary",
     ),
     "rb-hard-capstone-release-notes": _capstone(
         name="handbook",
@@ -862,3 +932,40 @@ FIXTURES: dict[str, dict[str, Any]] = {
         name="api-service", branch="feature/v1-api", stale="spike/graphql"
     ),
 }
+
+
+def _transfer_preserve_before_cleanup() -> dict[str, Any]:
+    main_tree = {**BASE, "src/parser.py": "parser-v1"}
+    return {
+        "initial_state": repo(
+            commits=[
+                commit("c1", "Project baseline", [], BASE),
+                commit("c2", "Land completed parser setup", ["c1"], main_tree),
+                commit(
+                    "c3",
+                    "Fix quoted parser input",
+                    ["c2"],
+                    {**main_tree, "src/parser.py": "parser-quoted-fix"},
+                ),
+                commit(
+                    "c4",
+                    "Start active tokenizer work",
+                    ["c2"],
+                    {**main_tree, "src/tokenizer.py": "tokenizer-draft"},
+                ),
+            ],
+            branches={"main": "c2", "scratch": "c3", "fix/merged": "c1", "feature/active": "c4"},
+            head="scratch",
+        ),
+        "state_requirements": clean(
+            "fix/parser",
+            points_to("fix/parser", "c3"),
+            points_to("main", "c2"),
+            points_to("feature/active", "c4"),
+            {"type": "commit_count_equals", "count": 4},
+            branch_absent=["scratch", "fix/merged"],
+        ),
+    }
+
+
+FIXTURES["naming-transfer-preserve-before-cleanup"] = _transfer_preserve_before_cleanup()

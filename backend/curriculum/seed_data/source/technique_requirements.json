@@ -23,6 +23,9 @@
   "cherry-medium-conflict-continue-auth": [
     "cherry-pick"
   ],
+  "cherry-transfer-mixed-commit-v2": [
+    "cherry-pick"
+  ],
   "gate3-easy-merge-then-backport-banner": [
     "merge"
   ],
@@ -158,6 +161,9 @@
   "mergetool-medium-docs-sync": [
     "merge"
   ],
+  "mergetool-transfer-clean-guide-v2": [
+    "mergetool"
+  ],
   "rb-hard-capstone-payments": [
     "merge"
   ],
@@ -191,8 +197,14 @@
   "rebase-hard-reset-rebase-lease-cli": [
     "rebase"
   ],
+  "rebase-transfer-invoices-v2": [
+    "push:force-with-lease"
+  ],
   "rec-med-qa-testrunner": [
     "merge"
+  ],
+  "revert-transfer-returned-regression-v2": [
+    "revert"
   ],
   "rm6": [
     "revert"

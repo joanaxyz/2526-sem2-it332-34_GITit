@@ -30,9 +30,9 @@ class StagingVerificationMixin:
                     "execution.next_state does not match the submitted git add --patch command."
                 )
             for path in selected:
-                if path not in (expected.get("working_tree") or {}) and path not in (
-                    expected.get("partial_hunks") or {}
-                ):
+                # Hunk metadata describes choices, not an unstaged diff. A
+                # staged-only path cannot have its index rewritten by add -p.
+                if path not in (expected.get("working_tree") or {}):
                     continue
                 if (
                     self.normalizer.entry_status((expected.get("working_tree") or {}).get(path))

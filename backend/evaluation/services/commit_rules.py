@@ -14,6 +14,7 @@ class StateCommitRuleMixin:
             ("commit_message_contains", {"text": rule.get("message_contains")}),
             ("commit_changes_include", {"paths": rule.get("changes_include")}),
             ("commit_changes_exclude", {"paths": rule.get("changes_exclude")}),
+            ("commit_changes_match_exact_paths", {"paths": rule.get("changes_match_exact_paths")}),
             ("commit_changes_include_tokens", {"tokens": rule.get("changes_include_tokens")}),
             ("commit_changes_exclude_tokens", {"tokens": rule.get("changes_exclude_tokens")}),
             (
@@ -33,7 +34,10 @@ class StateCommitRuleMixin:
         if rule.get("is_not_merge") is True and len(commit.get("parents", [])) > 1:
             return False, "Commit is a merge commit."
         for rule_type, payload in checks:
-            if all(value in (None, [], {}) for value in payload.values()):
+            if rule_type == "commit_changes_match_exact_paths":
+                if "changes_match_exact_paths" not in rule:
+                    continue
+            elif all(value in (None, [], {}) for value in payload.values()):
                 continue
             passed, reason = self._check_commit_rule(
                 rule_type,
@@ -84,6 +88,15 @@ class StateCommitRuleMixin:
                 "Commit changes exclude forbidden paths."
                 if not present
                 else f"Commit unexpectedly changed {present}.",
+            )
+        if rule_type == "commit_changes_match_exact_paths":
+            expected = set(as_list(rule.get("paths")))
+            changed = set(self._changed_paths(commit))
+            return (
+                changed == expected,
+                "Commit changed exactly the approved paths."
+                if changed == expected
+                else f"Commit changed paths {sorted(changed)}, expected {sorted(expected)}.",
             )
         if rule_type == "commit_changes_include_tokens":
             return self._token_rule_for_payload(

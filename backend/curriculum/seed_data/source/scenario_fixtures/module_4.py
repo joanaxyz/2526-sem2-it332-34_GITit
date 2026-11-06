@@ -14,6 +14,7 @@ from curriculum.seed_data.source.scenario_fixtures.shapes import (
     tip,
 )
 
+
 def _chain(specs: list[tuple[str, str, str | None, dict[str, str]]]) -> list[dict]:
     """Commits from (id, message, parent, changed files): each tree builds on its parent's."""
     trees: dict[str, dict[str, str]] = {}
@@ -254,7 +255,12 @@ def _amend_then_revert(
             "main",
             *_reverted(bad_id, "main", bad),
             {"type": "branch_history_excludes", "branch": "main", "commits": ["c4"]},
-            tip("main~1", message_equals=right, parent_equals="c3", tree_contains={local_path: f"{local_path}-v1"}),
+            tip(
+                "main~1",
+                message_equals=right,
+                parent_equals="c3",
+                tree_contains={local_path: f"{local_path}-v1"},
+            ),
             tip("main", tree_contains={path: f"{path}-v1", local_path: f"{local_path}-v1"}),
             {"type": "branch_history_contains", "branch": "main", "commits": ["c3", bad_id]},
             matches_origin("main"),
@@ -398,7 +404,12 @@ def _reset_rebase_lease(
     rebased_first, rebased_last = ("c4", "c5") if tip_id == "c6" else ("c4", "c6")
     commits = _chain(
         [
-            ("c0", "Project baseline", None, {"README.md": "readme-v1", "docs/usage.md": "usage-v1"}),
+            (
+                "c0",
+                "Project baseline",
+                None,
+                {"README.md": "readme-v1", "docs/usage.md": "usage-v1"},
+            ),
             ("c1", "Fix typo in usage docs", "c0", {"docs/usage.md": "usage-v2"}),
             ("c2", kept, "c0", {"src/kept.py": "kept-v1"}),
             ("c3", dropped, "c2", {"src/dropped.py": "dropped-v1"}),
@@ -415,7 +426,11 @@ def _reset_rebase_lease(
             head=branch,
             reflog=[
                 {"ref": branch, "commit": tip_id, "action": f"commit: {last}"},
-                {"ref": branch, "commit": rebased_last, "action": f"rebase (finish): refs/heads/{branch} onto c1"},
+                {
+                    "ref": branch,
+                    "commit": rebased_last,
+                    "action": f"rebase (finish): refs/heads/{branch} onto c1",
+                },
             ],
             **origin(
                 name,
@@ -454,7 +469,12 @@ def _reset_rebase_lease(
 def _report_rollback() -> dict[str, Any]:
     commits = _chain(
         [
-            ("c0", "Project baseline", None, {"README.md": "readme-v1", "src/report.py": "report-v1"}),
+            (
+                "c0",
+                "Project baseline",
+                None,
+                {"README.md": "readme-v1", "src/report.py": "report-v1"},
+            ),
             ("c1", "Prepare the sprint", "c0", {"README.md": "readme-v2"}),
             ("c2", "Finish the borrowing report", "c1", {"src/report.py": "report-final"}),
             ("c3", "Redesign the report layout", "c2", {"src/report.py": "report-redesign"}),
@@ -482,7 +502,12 @@ def _statements_cleanup() -> dict[str, Any]:
     rounding, tax_line, right = "Round totals down", "Hide the tax line", "Add statement export"
     commits = _chain(
         [
-            ("c0", "Initial commit", None, {"README.md": "readme-v1", "src/totals.py": "totals-v1", "src/tax.py": "tax-v1"}),
+            (
+                "c0",
+                "Initial commit",
+                None,
+                {"README.md": "readme-v1", "src/totals.py": "totals-v1", "src/tax.py": "tax-v1"},
+            ),
             ("c1", "Add invoices", "c0", {"src/invoices.py": "invoices-v1"}),
             ("c2", rounding, "c1", {"src/totals.py": "totals-broken"}),
             ("c3", "Add receipts", "c2", {"src/receipts.py": "receipts-v1"}),
@@ -495,7 +520,9 @@ def _statements_cleanup() -> dict[str, Any]:
         "initial_state": repo(
             commits=commits,
             branches={"main": "c6"},
-            **origin("statements", branches={"origin/main": "c5"}, tracking={"main": "origin/main"}),
+            **origin(
+                "statements", branches={"origin/main": "c5"}, tracking={"main": "origin/main"}
+            ),
         ),
         "state_requirements": clean(
             "main",
@@ -544,7 +571,11 @@ def _invoices_rescue() -> dict[str, Any]:
             path=shared,
             reflog=[
                 {"ref": branch, "commit": "c6", "action": "commit: Finish invoices"},
-                {"ref": branch, "commit": "c8", "action": f"rebase (finish): refs/heads/{branch} onto c3"},
+                {
+                    "ref": branch,
+                    "commit": "c8",
+                    "action": f"rebase (finish): refs/heads/{branch} onto c3",
+                },
             ],
             **origin(
                 "invoices",
@@ -745,8 +776,90 @@ FIXTURES: dict[str, dict[str, Any]] = {
         last="Wire limiter into API",
         tip_id="c5",
     ),
-    # Transfer checkpoints
+    # Retired checkpoint versions remain executable for pinned assignments.
     "reflog-transfer-report-rollback": _report_rollback(),
     "revert-transfer-statements": _statements_cleanup(),
     "rebase-transfer-invoices": _invoices_rescue(),
 }
+
+
+def _two_recovery_destinations() -> dict[str, Any]:
+    case = _report_rollback()
+    case["state_requirements"] = clean(
+        "main",
+        points_to("recovery/report-redesign", "c3"),
+        tip(
+            "main",
+            parent_equals="c1",
+            tree_contains={"src/report.py": "report-final", "README.md": "readme-v2"},
+        ),
+        {"type": "branch_history_excludes", "branch": "main", "commits": ["c3"]},
+        {"type": "commit_count_on_branch_equals", "branch": "main", "count": 3},
+    )
+    return case
+
+
+def _returned_regression() -> dict[str, Any]:
+    tax, rounding = "src/tax.py", "config/rounding.ini"
+    commits = _chain(
+        [
+            (
+                "c0",
+                "Project baseline",
+                None,
+                {tax: "tax_line = visible", rounding: "rounding = standard"},
+            ),
+            ("c1", "Add invoices", "c0", {"src/invoices.py": "invoices-v1"}),
+            (
+                "c2",
+                "Hide tax line and round totals down",
+                "c1",
+                {tax: "tax_line = hidden", rounding: "rounding = down"},
+            ),
+            (
+                "c3",
+                'Revert "Hide tax line and round totals down"',
+                "c2",
+                {tax: "tax_line = visible", rounding: "rounding = standard"},
+            ),
+            ("c4", "Approve bankers rounding", "c3", {rounding: "rounding = bankers"}),
+            ("c5", "Refresh statement layout", "c4", {tax: "tax_line = hidden"}),
+            ("c6", "Add export guide", "c5", {"docs/export.md": "export-guide-v1"}),
+        ]
+    )
+    return {
+        "initial_state": repo(
+            commits=commits,
+            branches={"main": "c6"},
+            **origin(
+                "statement-regression",
+                branches={"origin/main": "c6"},
+                tracking={"main": "origin/main"},
+            ),
+        ),
+        "state_requirements": clean(
+            "main",
+            *_reverted("c5", "main", "Refresh statement layout"),
+            tip(
+                "main",
+                parent_equals="c6",
+                tree_contains={
+                    tax: "tax_line = visible",
+                    rounding: "rounding = bankers",
+                    "docs/export.md": "export-guide-v1",
+                    "src/invoices.py": "invoices-v1",
+                },
+            ),
+            {"type": "commit_count_on_branch_equals", "branch": "main", "count": 8},
+            matches_origin("main"),
+        ),
+    }
+
+
+FIXTURES.update(
+    {
+        "reflog-transfer-two-destinations-v2": _two_recovery_destinations(),
+        "revert-transfer-returned-regression-v2": _returned_regression(),
+        "rebase-transfer-invoices-v2": _invoices_rescue(),
+    }
+)

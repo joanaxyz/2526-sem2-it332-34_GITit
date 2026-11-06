@@ -10,7 +10,10 @@ from functools import cache
 from curriculum.seed_data.scenario_bank import extension_scenario_bank, scenario_bank
 from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES
 from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN
-from curriculum.seed_data.source.transfer_checkpoints import TRANSFER_CHECKPOINTS
+from curriculum.seed_data.source.transfer_checkpoints import (
+    RETIRED_TRANSFER_CHECKPOINTS,
+    TRANSFER_CHECKPOINTS,
+)
 
 
 def published_cases():
@@ -49,6 +52,14 @@ def published_cases():
                     "level": gate["slug"],
                     "difficulty": difficulty,
                 }
+    for case_id, level in RETIRED_TRANSFER_CHECKPOINTS.items():
+        placements[case_id] = {
+            "surface": "story",
+            "level": level,
+            "difficulty": "hard",
+            "scenario": MODULE_SCENARIO_PLAN[level]["hard"][0].slug,
+            "retired": True,
+        }
     return {
         key: (pool.get(key) or extension_case(key), placement)
         for key, placement in placements.items()

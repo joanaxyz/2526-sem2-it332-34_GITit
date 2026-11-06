@@ -7534,5 +7534,567 @@
     "minimum_counted_commands": 3,
     "maximum_counted_commands": 8,
     "seed_notes": []
+  },
+  "manual-transfer-stale-index-v2": {
+    "scenario_number": "3.1.19",
+    "difficulty": "hard",
+    "label": "Finish the corrected resolution, not the old staged copy",
+    "story": "The checkout merge is ready to finish and no conflict markers remain. A teammate staged a resolution that kept the old fee, then corrected the working file after staging it. The checkout guide was merged correctly.\n\nSage approved the working copy: the fee stays at 4 and tax is 0.12. The staged copy still has fee 5. **Keep the merged guide and the approved fee.**",
+    "starting_point": "On `main`, a merge of `feature/checkout-tax` is still in progress. The staged checkout differs from the corrected working checkout.",
+    "real_world_context": "A conflict-free working file is not necessarily the version that the next commit records. The index can hold an earlier resolution.",
+    "task": "Complete the merge with its prepared message, recording `FEE = 4` and `TAX = 0.12` and keeping `docs/checkout.md` unchanged.",
+    "required_files": [],
+    "objective_checks": [
+      "Complete a merge commit on main with feature/checkout-tax as a parent.",
+      "Record FEE = 4 and TAX = 0.12 in the committed checkout.",
+      "Preserve the checkout guide and leave nothing staged or uncommitted."
+    ],
+    "expected_result": "The merge records the approved working resolution and the existing guide.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git add src/checkout.py"
+      },
+      {
+        "kind": "command",
+        "command": "git commit --no-edit"
+      }
+    ],
+    "solution_commands": [
+      "git add src/checkout.py",
+      "git commit --no-edit"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "Stage the corrected file with `git add -- src/checkout.py`; `git merge --continue` may finish a correctly staged merge."
+    ],
+    "not_accepted": [
+      "Committing the earlier staged fee of 5.",
+      "Discarding the corrected working copy or losing the merged guide."
+    ],
+    "evaluation": [
+      "main has a merge commit with feature/checkout-tax as a parent.",
+      "The committed checkout has FEE = 4 and TAX = 0.12.",
+      "The checkout guide is preserved and no changes remain staged or uncommitted."
+    ],
+    "minimum_counted_commands": 2,
+    "maximum_counted_commands": 6,
+    "seed_notes": []
+  },
+  "mergetool-transfer-clean-guide-v2": {
+    "scenario_number": "3.2.17",
+    "difficulty": "hard",
+    "label": "Resolve the conflict and repair the clean merge",
+    "story": "`main` raised the mail retry allowance from 2 to 4. The queued-mail branch changes the delivery mode and updates its usage guide, but the guide still says 2 retries.\n\nThe policy file will conflict; the guide will merge cleanly. **A clean merge does not make the guide correct.** Meld is already configured with backups disabled.",
+    "starting_point": "On `main`, before merging `feature/queued-mail`. Complete the Manual Conflict Resolution Hard tier before this optional checkpoint.",
+    "real_world_context": "Git detects conflicting edits, not agreement between documentation and policy. An automatically merged file can still need a deliberate correction.",
+    "task": "Merge `feature/queued-mail`. Resolve the policy conflict using the configured merge tool, retaining 4 retries and queued delivery. Make the cleanly merged usage guide agree with that policy, then finish the merge with its prepared message.",
+    "required_files": [
+      {
+        "path": "config/retry.ini",
+        "content": "RETRIES = 4\nMODE = queued"
+      },
+      {
+        "path": "docs/usage.txt",
+        "content": "retries=4\nmode=queued"
+      }
+    ],
+    "objective_checks": [
+      "Complete a merge commit on main with feature/queued-mail as a parent.",
+      "Record 4 retries and queued delivery in the committed policy.",
+      "Update the usage guide to agree with the policy and leave the tree and index clean."
+    ],
+    "expected_result": "The actual conflict is resolved and the automatically merged guide agrees with the final policy.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git merge feature/queued-mail"
+      },
+      {
+        "kind": "command",
+        "command": "git mergetool"
+      },
+      {
+        "kind": "file_edit",
+        "path": "config/retry.ini",
+        "content": "RETRIES = 4\nMODE = queued",
+        "after_command_index": 2
+      },
+      {
+        "kind": "file_edit",
+        "path": "docs/usage.txt",
+        "content": "retries=4\nmode=queued",
+        "after_command_index": 2
+      },
+      {
+        "kind": "command",
+        "command": "git add docs/usage.txt"
+      },
+      {
+        "kind": "command",
+        "command": "git commit --no-edit"
+      }
+    ],
+    "solution_commands": [
+      "git merge feature/queued-mail",
+      "git mergetool",
+      "git add docs/usage.txt",
+      "git commit --no-edit"
+    ],
+    "solution_workspace_files": [
+      {
+        "mode": "write",
+        "path": "config/retry.ini",
+        "content": "RETRIES = 4\nMODE = queued",
+        "after_command_index": 2
+      },
+      {
+        "mode": "write",
+        "path": "docs/usage.txt",
+        "content": "retries=4\nmode=queued",
+        "after_command_index": 2
+      }
+    ],
+    "accepted_alternatives": [
+      "After using the tool, stage the corrected guide with `git add -- docs/usage.txt` or another supported pathspec."
+    ],
+    "not_accepted": [
+      "Finishing after resolving only the marked conflict.",
+      "Editing the guide without staging its correction.",
+      "Resolving everything manually without demonstrating the explicitly required merge tool."
+    ],
+    "evaluation": [
+      "main has a merge commit with feature/queued-mail as a parent.",
+      "The committed policy keeps 4 retries and queued delivery.",
+      "The committed usage guide agrees with the policy; the tree and index are clean."
+    ],
+    "minimum_counted_commands": 4,
+    "maximum_counted_commands": 8,
+    "seed_notes": []
+  },
+  "cherry-transfer-mixed-commit-v2": {
+    "scenario_number": "3.3.25",
+    "difficulty": "hard",
+    "label": "Backport the fix without its bundled policy change",
+    "story": "The private release needs the CSV separator fix from the development commit that also enabled export telemetry. Telemetry must remain off in this release.\n\nBoth changes are in the same source commit, so selecting the correct commit is not enough. **Keep the release policy and its README.**",
+    "starting_point": "On `release/private` at its private-release baseline. The development change is on `main`.",
+    "real_world_context": "A useful commit can bundle a change that is inappropriate for another release. Review its staged effect before creating the release commit.",
+    "task": "Bring only the CSV delimiter fix from `c2` onto `release/private`, with the commit message `Backport CSV delimiter fix`. Keep telemetry off, preserve the private-release README, and leave `main` unchanged.",
+    "required_files": [
+      {
+        "path": "config/export.ini",
+        "content": "telemetry = off"
+      }
+    ],
+    "objective_checks": [
+      "Create one new release commit with the requested message and delimiter fix.",
+      "Keep telemetry off and the private-release README unchanged.",
+      "Leave main unchanged and finish with a clean release tree and index."
+    ],
+    "expected_result": "The release gets the delimiter fix while its own policy and README remain intact.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git cherry-pick --no-commit c2"
+      },
+      {
+        "kind": "file_edit",
+        "path": "config/export.ini",
+        "content": "telemetry = off",
+        "after_command_index": 1
+      },
+      {
+        "kind": "command",
+        "command": "git add config/export.ini"
+      },
+      {
+        "kind": "command",
+        "command": "git commit -m \"Backport CSV delimiter fix\""
+      }
+    ],
+    "solution_commands": [
+      "git cherry-pick --no-commit c2",
+      "git add config/export.ini",
+      "git commit -m \"Backport CSV delimiter fix\""
+    ],
+    "solution_workspace_files": [
+      {
+        "mode": "write",
+        "path": "config/export.ini",
+        "content": "telemetry = off",
+        "after_command_index": 1
+      }
+    ],
+    "accepted_alternatives": [
+      "Use the supported `-n` spelling for the no-commit pick; stage the reviewed policy with an equivalent pathspec."
+    ],
+    "not_accepted": [
+      "Cherry-picking the whole commit and keeping telemetry on.",
+      "Editing telemetry back to off but committing the stale staged copy.",
+      "Changing main or including its development README in the release."
+    ],
+    "evaluation": [
+      "The release has one new commit with the requested message and delimiter fix.",
+      "Telemetry remains off and the private-release README is unchanged.",
+      "main is unchanged; the release tree and index are clean."
+    ],
+    "minimum_counted_commands": 3,
+    "maximum_counted_commands": 7,
+    "seed_notes": []
+  },
+  "reflog-transfer-two-destinations-v2": {
+    "scenario_number": "4.1.21",
+    "difficulty": "hard",
+    "label": "Recover the report and preserve the redesign separately",
+    "story": "A reset left `main` before the finished borrowing report. Two later commits are still in the reflog: one completes that report, and the next redesigns it.\n\nSage wants the completed report on `main`, but the redesign kept separately for later. **Neither piece of lost work should disappear.**",
+    "starting_point": "On `main` at its reset position, with the report and redesign discoverable in the reflog.",
+    "real_world_context": "Recovering work includes deciding where each version belongs. A later experiment may be worth preserving without making it the active result.",
+    "task": "Find and inspect the two lost versions. Keep the redesign on `recovery/report-redesign`, and restore the completed report onto `main` without bringing the redesign into main. Finish on `main`.",
+    "required_files": [],
+    "objective_checks": [
+      "Preserve the lost redesign commit on recovery/report-redesign.",
+      "Restore the completed report on main while excluding the redesign.",
+      "Finish on main with a clean tree and index."
+    ],
+    "expected_result": "The completed report is active on main and the redesign is preserved separately.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git reflog"
+      },
+      {
+        "kind": "command",
+        "command": "git show c2"
+      },
+      {
+        "kind": "command",
+        "command": "git show c3"
+      },
+      {
+        "kind": "command",
+        "command": "git branch recovery/report-redesign c3"
+      },
+      {
+        "kind": "command",
+        "command": "git cherry-pick c2"
+      }
+    ],
+    "solution_commands": [
+      "git reflog",
+      "git show c2",
+      "git show c3",
+      "git branch recovery/report-redesign c3",
+      "git cherry-pick c2"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "After preserving the redesign, a supported fast-forward of main to the report commit also satisfies the same repository goal."
+    ],
+    "not_accepted": [
+      "Recovering just one version while leaving main at its reset position.",
+      "Making the redesign the active main result.",
+      "Using the completed report commit for the redesign branch."
+    ],
+    "evaluation": [
+      "recovery/report-redesign preserves the lost redesign commit.",
+      "main contains the completed report and excludes the redesign.",
+      "The tree and index are clean and HEAD is on main."
+    ],
+    "minimum_counted_commands": 2,
+    "maximum_counted_commands": 7,
+    "seed_notes": []
+  },
+  "revert-transfer-returned-regression-v2": {
+    "scenario_number": "4.2.17",
+    "difficulty": "hard",
+    "label": "Find the regression that returned after a revert",
+    "story": "The statement tax line has disappeared again. An older commit hid it and changed rounding, but that commit was already reverted. The team subsequently approved bankers rounding, then published a layout update and an export guide.\n\nSage needs the tax line back while keeping the approved rounding and guide. **Do not undo the old fault a second time and erase newer good work.**",
+    "starting_point": "On published `main`, with origin up to date and no local changes.",
+    "real_world_context": "A repeated symptom does not prove that the original commit is still responsible. Inspect the later history before choosing a corrective revert.",
+    "task": "Find which later published change brought the missing tax line back. Reverse that regression with a new corrective commit and publish `main`, preserving bankers rounding, invoices and the export guide.",
+    "required_files": [],
+    "objective_checks": [
+      "Restore the tax line while preserving bankers rounding, invoices and the export guide.",
+      "Preserve main's published history and add one corrective revert commit.",
+      "Publish the corrected main to origin/main and leave the tree and index clean."
+    ],
+    "expected_result": "The recurrence is reversed without undoing later correct improvements or rewriting published history.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git log --oneline"
+      },
+      {
+        "kind": "command",
+        "command": "git show c2"
+      },
+      {
+        "kind": "command",
+        "command": "git show c5"
+      },
+      {
+        "kind": "command",
+        "command": "git revert c5"
+      },
+      {
+        "kind": "command",
+        "command": "git push"
+      }
+    ],
+    "solution_commands": [
+      "git log --oneline",
+      "git show c2",
+      "git show c5",
+      "git revert c5",
+      "git push"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "Use optional inspections in any useful order; a supported explicit `git push origin main` publishes the same correction."
+    ],
+    "not_accepted": [
+      "Reverting the original already-reversed change and losing bankers rounding.",
+      "Resetting away published history.",
+      "Undoing the later guide instead of the regression."
+    ],
+    "evaluation": [
+      "The tax line is visible while bankers rounding, invoices and the export guide are preserved.",
+      "main keeps its published history and adds one corrective revert commit.",
+      "origin/main matches main; the tree and index are clean."
+    ],
+    "minimum_counted_commands": 2,
+    "maximum_counted_commands": 6,
+    "seed_notes": []
+  },
+  "rebase-transfer-invoices-v2": {
+    "scenario_number": "4.3.21",
+    "difficulty": "hard",
+    "label": "Recover the complete branch before selecting what to replay",
+    "story": "An earlier rebase of `feature/invoices` lost its tax-lines commit. A second rebase onto `main` is now stopped on a conflict from the unrelated `spike/heatmap` history the branch was originally based on.\n\nThe last pushed tip still has all three invoice commits. **Recovering that tip and choosing the correct replay boundary are both necessary.**",
+    "starting_point": "On feature/invoices in a stopped rebase; the previous pushed tip is discoverable in the reflog.",
+    "real_world_context": "Aborting only returns to the state before the current rebase. It does not repair work lost in an earlier rewrite.",
+    "task": "Cancel the current rebase and recover the complete version last pushed. Put only the invoice branch's own three commits on current `main`, excluding the spike, then update `origin` safely without overwriting work you have not seen.",
+    "required_files": [],
+    "objective_checks": [
+      "Base the invoice branch on current main and retain all three of its own commits.",
+      "Exclude spike history and its file while preserving the spike branch.",
+      "Publish the repaired branch so origin matches it, and finish without a rebase or uncommitted work."
+    ],
+    "expected_result": "The complete invoice work is based directly on main, with the spike excluded and a verified guarded publish.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git rebase --abort"
+      },
+      {
+        "kind": "command",
+        "command": "git reflog"
+      },
+      {
+        "kind": "command",
+        "command": "git reset --hard c6"
+      },
+      {
+        "kind": "command",
+        "command": "git rebase --onto main spike/heatmap feature/invoices"
+      },
+      {
+        "kind": "command",
+        "command": "git push --force-with-lease origin feature/invoices"
+      }
+    ],
+    "solution_commands": [
+      "git rebase --abort",
+      "git reflog",
+      "git reset --hard c6",
+      "git rebase --onto main spike/heatmap feature/invoices",
+      "git push --force-with-lease origin feature/invoices"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "Inspect before or after the abort; an equivalent supported explicit lease spelling is acceptable."
+    ],
+    "not_accepted": [
+      "Aborting and selectively rebasing the incomplete tip without recovering the lost tax-lines commit.",
+      "Recovering the correct tip but replaying the unrelated spike with an ordinary rebase.",
+      "Publishing with unguarded force, including a raw force flag combined with a lease flag."
+    ],
+    "evaluation": [
+      "The invoice branch contains all three of its own commits on main.",
+      "Spike history and its file are excluded; the spike branch is preserved.",
+      "origin matches the repaired branch; no rebase or uncommitted work remains."
+    ],
+    "minimum_counted_commands": 4,
+    "maximum_counted_commands": 8,
+    "seed_notes": []
+  },
+  "restore-transfer-contaminated-index": {
+    "scenario_number": "1.6.19",
+    "difficulty": "hard",
+    "label": "Separate a fix from an experiment already in the index",
+    "story": "A teammate staged all of `src/api.py`: the request-totals fix and an experiment that is not approved. The companion test in `tests/test_api.py` is staged correctly. A separate generated output file has an unwanted local edit.\n\nThe source has no unstaged changes yet. **Choosing a patch from the working tree will not remove an experiment that is already staged.** Keep that experiment as uncommitted work while delivering the approved fix and test.",
+    "starting_point": "On `main`, with the mixed source and correct test staged; `tmp/output.txt` has an unstaged throwaway edit.",
+    "real_world_context": "The index is the next commit's snapshot. A clean unstaged diff does not mean the index contains only the changes you intend to deliver.",
+    "task": "Repair the source's staged selection and make one commit named `Fix request totals` containing only the request-totals fix and its already-staged test. Keep the source experiment uncommitted and unchanged. Discard the local change to `tmp/output.txt`, preserving its committed content and the README.",
+    "required_files": [],
+    "objective_checks": [
+      "One new commit contains the totals fix and companion test, excluding the source experiment.",
+      "The experiment remains in the working tree; nothing remains staged.",
+      "The output file and README retain their committed content; no other local changes remain."
+    ],
+    "expected_result": "The approved fix and test form one commit, the experiment survives uncommitted, and the generated output is restored.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git restore --staged src/api.py"
+      },
+      {
+        "kind": "command",
+        "command": "git add -p src/api.py"
+      },
+      {
+        "kind": "command",
+        "command": "git restore tmp/output.txt"
+      },
+      {
+        "kind": "command",
+        "command": "git commit -m \"Fix request totals\""
+      }
+    ],
+    "solution_commands": [
+      "git restore --staged src/api.py",
+      "git add -p src/api.py",
+      "git restore tmp/output.txt",
+      "git commit -m \"Fix request totals\""
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "A supported path reset can unstage the source before selecting its wanted patch.",
+      "Equivalent supported index/editor recovery is accepted when the same committed and uncommitted work is preserved."
+    ],
+    "not_accepted": [
+      "Patch-staging the source without first repairing the contaminated index, then committing the still-staged experiment.",
+      "Restaging the whole source and committing both changes.",
+      "Discarding the source experiment or omitting the correctly staged companion test."
+    ],
+    "evaluation": [
+      "The commit is a direct child of the approved baseline and records the required message, fix and test.",
+      "The experiment is excluded from the commit and preserved as the only working-tree change.",
+      "The output and README are unchanged and the index is empty."
+    ],
+    "minimum_counted_commands": 4,
+    "maximum_counted_commands": 8,
+    "seed_notes": []
+  },
+  "naming-transfer-preserve-before-cleanup": {
+    "scenario_number": "2.2.20",
+    "difficulty": "hard",
+    "label": "Prepare the parser branch for review",
+    "story": "The current branch, `scratch`, contains a parser fix that has never been merged into `main`. The team needs that work under `fix/parser`. A separate `fix/merged` branch is already included in main, while `feature/active` contains another teammate's unfinished work.",
+    "starting_point": "On clean `scratch` at its unique parser-fix commit. Main, the completed branch and the active sibling point to different snapshots.",
+    "real_world_context": "Branch names help the team route a change to its review and track which branches are still active.",
+    "task": "Keep all work from the current `scratch` branch under the compliant name `fix/parser`. Remove `scratch` and the completed `fix/merged` branch. Preserve `main` and `feature/active` exactly where they are, create no commits, and finish on clean `fix/parser`.",
+    "required_files": [],
+    "objective_checks": [
+      "Preserve the original scratch tip on fix/parser, including its unique parser fix.",
+      "Remove scratch and fix/merged while keeping main and feature/active at their original tips.",
+      "Finish on clean fix/parser without adding commits or leaving staged changes."
+    ],
+    "expected_result": "The parser fix survives under the compliant name, obsolete names are removed, and unrelated branch tips remain unchanged.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git switch -c fix/parser"
+      },
+      {
+        "kind": "command",
+        "command": "git branch -d scratch"
+      },
+      {
+        "kind": "command",
+        "command": "git branch -d fix/merged"
+      }
+    ],
+    "solution_commands": [
+      "git switch -c fix/parser",
+      "git branch -d scratch",
+      "git branch -d fix/merged"
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "Rename the current branch to fix/parser and remove the completed branch. The shorter supported route preserves the same work.",
+      "Any supported equivalent reference-preserving ordering is accepted."
+    ],
+    "not_accepted": [
+      "Removing scratch and creating fix/parser from main, losing the unique parser fix.",
+      "Removing the unfinished feature/active branch.",
+      "Moving main to the parser-fix tip instead of preserving its existing position."
+    ],
+    "evaluation": [
+      "fix/parser points to the original unique scratch commit.",
+      "Main and the active sibling keep their original tips; obsolete names are absent.",
+      "No commits are added, the index/tree are clean, and HEAD is on fix/parser."
+    ],
+    "minimum_counted_commands": 2,
+    "maximum_counted_commands": 7,
+    "seed_notes": []
+  },
+  "restore-transfer-contaminated-index-v2": {
+    "scenario_number": "1.6.20",
+    "difficulty": "hard",
+    "label": "Deliver the approved request fix",
+    "story": "A teammate staged all of `src/api.py`: the request-totals fix and an experiment that is not approved. The companion test in `tests/test_api.py` is staged correctly. A separate generated output file has an unwanted local edit.\n\nThe team has approved the totals fix and its companion test for this delivery. The experiment is still being explored.",
+    "starting_point": "On `main`, with the mixed source and correct test staged; `tmp/output.txt` has an unstaged throwaway edit.",
+    "real_world_context": "The release needs a focused fix and a reproducible test. Ongoing experimental work belongs to a later delivery.",
+    "task": "Make one commit named `Fix request totals` containing only the request-totals fix and its already-staged test. Keep the source experiment uncommitted and unchanged. Discard the local change to `tmp/output.txt`, preserving its committed content and the README.",
+    "required_files": [],
+    "objective_checks": [
+      "Create one commit containing only the totals fix and companion test, excluding the source experiment.",
+      "Keep the experiment unchanged and uncommitted, and leave nothing staged.",
+      "Restore the output file to its committed content, preserve the README, and leave no other local changes."
+    ],
+    "expected_result": "The approved fix and test form one commit, the experiment survives uncommitted, and the generated output is restored.",
+    "answer_key": [
+      {
+        "kind": "command",
+        "command": "git restore --staged src/api.py"
+      },
+      {
+        "kind": "command",
+        "command": "git add -p src/api.py"
+      },
+      {
+        "kind": "command",
+        "command": "git restore tmp/output.txt"
+      },
+      {
+        "kind": "command",
+        "command": "git commit -m \"Fix request totals\""
+      }
+    ],
+    "solution_commands": [
+      "git restore --staged src/api.py",
+      "git add -p src/api.py",
+      "git restore tmp/output.txt",
+      "git commit -m \"Fix request totals\""
+    ],
+    "solution_workspace_files": [],
+    "accepted_alternatives": [
+      "A supported path reset can unstage the source before selecting its wanted patch.",
+      "Equivalent supported index/editor recovery is accepted when the same committed and uncommitted work is preserved."
+    ],
+    "not_accepted": [
+      "Patch-staging the source without first repairing the contaminated index, then committing the still-staged experiment.",
+      "Restaging the whole source and committing both changes.",
+      "Discarding the source experiment or omitting the correctly staged companion test."
+    ],
+    "evaluation": [
+      "The commit is a direct child of the approved baseline and records the required message, fix and test.",
+      "The experiment is excluded from the commit and preserved as the only working-tree change.",
+      "The output and README are unchanged and the index is empty."
+    ],
+    "minimum_counted_commands": 4,
+    "maximum_counted_commands": 8,
+    "seed_notes": []
   }
 }

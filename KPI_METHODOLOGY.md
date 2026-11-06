@@ -26,7 +26,7 @@ Let:
 | CAR — Command Accuracy Rate | Mean over scenarios of `100 × min(1, T / max(1, A))` | ≥70% |
 | HLCR — Hard-Level Completion Rate | `100 × mastered H / assigned-or-attempted H` | ≥70%; Module 4 ≥65% |
 | ARC — Average Retry Count | `sum(F for mastered tiers) / M` | ≤2; Module 4 ≤3 |
-| RTA — Retry Transfer Accuracy | `100 × P / C` | ≥65%, Modules 3–4 only |
+| RTA — Retry Transfer Accuracy | `100 × P / C` | ≥65%, selected Hard levels in Modules 1–4 |
 
 CAR's approved name is retained. Its operational meaning is **benchmark-relative
 command efficiency**, not the percentage of individual commands that were
@@ -80,18 +80,47 @@ play invalidates its assessment reference.
 ## Transfer and exposure
 
 Authors explicitly reserve a variant with a written explanation of the
-meaningful repository or goal difference. The six official checkpoints are
+meaningful repository or goal difference. The current checkpoints are
 purpose-written in `curriculum/seed_data/source/transfer_checkpoints.py`, and
-seeding reserves them: each composes what its level taught into a route no
-practice variant in that level uses, with only moves already practised.
+seeding reserves them. Each assesses a changed repository decision or dependency
+using practised skills; a longer answer key or another file alone is insufficient.
+The outcome suite exercises supported equivalents and meaningful incomplete routes,
+alongside frontend replay and backend verification. Explicit merge-tool and guarded-push
+requirements read verified operations, not client metadata.
 Reserved variants are excluded from
 normal practice selection. A new variant ID alone does not establish transfer.
 Canonical repository fingerprints screen equivalent content; the authored
 review remains necessary to judge the educational difference.
 
-A transfer checkpoint closes a level: only the Hard tiers of Modules 3–4 carry
-one, reserved in the tier's first scenario (`kpi_refs --reserve` enforces both).
+A transfer checkpoint closes a selected level, reserved in its Hard tier's first
+scenario (`kpi_refs --reserve` enforces both). Module 1 currently assesses Unstaging
+and Discarding Changes; Module 2 assesses Branch Naming and Housekeeping. Every
+Module 3–4 level has a checkpoint. Unselected levels do not create missing evidence.
+The early-module sample measures index recovery/partial selection and branch
+preservation/housekeeping respectively; one individual result is 0% or 100%, not
+comprehensive evidence of all module skills. Reports show the contributing count.
 Reserved variants never appear in practice, retries, replays or drills.
+
+Existing mastered tiers can receive an offer through `assign_transfer_checkpoints
+--modules 1 2` (read-only preview) and the same command with `--apply`. The command
+uses the live eligibility selector, requires actual mastery, preserves existing
+assignments and exposure gaps, and is idempotent. It never fabricates exposure.
+
+The current merge-tool checkpoint additionally requires mastery of Manual Conflict
+Resolution Hard, which teaches the clean-file staging needed alongside tool resolution.
+Assignment waits for that practice; completing it later also checks already-mastered
+dependent tiers. Waiting for a declared prerequisite is not missing assessment evidence.
+Formal studies include that prerequisite Hard tier unless participants have already
+mastered it before enrollment.
+
+Substantial revisions use new case IDs. Already-existing retired variants remain reserved
+and playable for their pinned assignments and studies; new assignment/enrollment excludes
+them except when first assignment must honor an existing active study's prospective pin.
+A fresh seed creates only current versions. Conflicting versions in overlapping studies
+are rejected at enrollment; an unavailable pinned version remains missing rather than
+silently switching tasks. Existing first results are never
+replaced with another scored attempt on the revision. Version-2 references bind declared
+prerequisites and required techniques; legacy references retain their original hash policy.
 
 After mastery, an eligible learner receives an assigned transfer checkpoint.
 The cleared screen and the mascot offer it at once, and Home Progress keeps a
@@ -139,9 +168,13 @@ Its versioned manifest fixes participant IDs, tier requirements, accepted
 reference hashes, reserved transfer variants, positive module weights and an
 aware cutoff timestamp. Adding curriculum later does not change its denominator.
 
-New studies use checkpoint policy `mastery-kpis-v2`. Existing studies recorded
-with retry-based policy `mastery-kpis-v3-retry-rta` retain their original
-first structurally changed retry calculation when frozen or exported.
+New studies use `mastery-kpis-v4-all-module-transfer`, snapshotting expected
+transfer per assigned tier and reserving only eligible checkpoints. Their RTA
+module scope comes from those fixed expectations. Existing checkpoint-policy
+`mastery-kpis-v2` studies retain Modules 3–4 expectations and weighting; existing
+`mastery-kpis-v3-retry-rta` studies retain the first structurally changed retry
+calculation in Modules 3–4. This applies to unfrozen studies too. Frozen reports
+return their saved result unchanged.
 
 At cutoff, only terminal run evidence at or before the cutoff can establish
 mastery or score CAR. Study CAR scores every assigned scenario by its latest
@@ -154,7 +187,8 @@ ARC remains null without a mastered tier. An unavailable assigned variant is
 reported as missing assessment evidence.
 
 Each participant's module scores are calculated first. Predefined weights are
-then normalized over the KPI's applicable assigned modules (RTA only 3–4; HLCR
+then normalized over the KPI's applicable assigned modules (RTA uses the manifest's
+expected checkpoint modules, or Modules 3–4 for historical policies; HLCR
 only modules with assigned hard tiers). An applicable module missing a score
 makes that participant's overall KPI null. Cohort values average the observed
 participant scores and report the contributing sample. Missing participants

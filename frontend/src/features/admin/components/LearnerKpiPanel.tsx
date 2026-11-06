@@ -1,7 +1,7 @@
 import { CheckCircle2, XCircle } from 'lucide-react'
 
 import type { KpiRate, UserKpisResponse } from '@/features/admin/api/adminApi'
-import { KPIS, SUPPLEMENTARY_KPI, type KpiKey } from '@/features/performance/utils/performanceKpis'
+import { EARLY_TRANSFER_COVERAGE, KPIS, SUPPLEMENTARY_KPI, type KpiKey } from '@/features/performance/utils/performanceKpis'
 import { formatMetricValue, kpiEvidence, metricStatus } from '@/features/performance/utils/performanceKpis'
 import { metricTargetStatus } from '@/features/performance/utils/performanceKpis'
 import { moduleTarget } from '@/features/admin/utils/kpiCatalogue'
@@ -68,6 +68,7 @@ export function LearnerKpiPanel({ kpis, modules }: { kpis: Kpis; modules: Module
       {modules.length > 0 && (
         <div className="kp-mod-wrap">
           <p className="kp-mod-label">By module</p>
+          {modules.filter((mod) => EARLY_TRANSFER_COVERAGE[mod.number]).map((mod) => <p className="kp-mod-scope" key={mod.number}>M{mod.number}: {EARLY_TRANSFER_COVERAGE[mod.number]} One first result is 0% or 100%.</p>)}
           <table className="kp-mod-table">
             <thead>
               <tr>

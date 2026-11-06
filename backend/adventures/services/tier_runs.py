@@ -287,6 +287,16 @@ class AdventureLevelTierRunService:
                 source_entry_point=source_entry_point,
             )
         variant = checkpoint.variant
+        from progress.services.transfer_policy import (
+            completed_practice_levels,
+            practice_ready,
+            prerequisite_levels,
+        )
+
+        if prerequisite_levels(variant) and not practice_ready(
+            variant, completed_practice_levels([player.id])[player.id]
+        ):
+            raise Locked("Complete this checkpoint's required practice before starting it.")
         active = self._active_run(player=player, tier=tier, for_update=True)
         if active:
             self.discard(run=active)

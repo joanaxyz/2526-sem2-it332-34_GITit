@@ -47,6 +47,18 @@ def techniques_for_command(command, *, previous_state=None):
         index += 1
     if family == "commit":
         return {"amend"} if "--amend" in flags else set()
+    if family == "mergetool":
+        return {"mergetool"}
+    if family == "push":
+        # The verifier treats a raw force flag as overriding a lease. Never
+        # certify that combination as guarded publication.
+        if flags & {"--force", "-f"}:
+            return set()
+        return (
+            {"push:force-with-lease"}
+            if any(f == "--force-with-lease" or f.startswith("--force-with-lease=") for f in flags)
+            else set()
+        )
     if family not in {"merge", "rebase", "cherry-pick", "revert"}:
         return set()
     for action in ("abort", "continue", "skip"):

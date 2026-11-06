@@ -72,9 +72,6 @@ class MetricsService:
     LEARNER_CURRICULUM_STORY_SLUG = "arcane-spire"
     PERFORMANCE_STORY_SLUG = LEARNER_CURRICULUM_STORY_SLUG
     PERFORMANCE_MODULE_NUMBERS = (1, 2, 3, 4)
-    # RTA measures transfer to structurally changed scenarios; it is defined
-    # for the conflict-resolution and recovery modules only.
-    RTA_MODULE_NUMBERS = (3, 4)
 
     def performance_summary(self, *, player) -> dict:
         return self._performance_summary_for_runs(

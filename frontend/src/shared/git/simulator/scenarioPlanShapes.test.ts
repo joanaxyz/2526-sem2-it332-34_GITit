@@ -52,6 +52,24 @@ function remoteMain(overrides: Partial<MutableRepositoryState> = {}) {
 }
 
 describe('scenario plan scenario shapes', () => {
+  it('keeps a staged-only file intact until its changes are unstaged for patch selection', () => {
+    const staged = state({
+      commits: [{ id: 'c1', message: 'Base', parents: [], tree: { 'src/api.py': 'baseline' } }],
+      branches: { main: 'c1' },
+      staging: { 'src/api.py': { status: 'modified', hunks: ['fix', 'experiment'] } },
+      partial_hunks: { 'src/api.py': { target_hunks: ['fix'], leftover_hunks: ['experiment'] } },
+    })
+    const noDiff = executeGitCommand(staged, 'git add -p src/api.py')
+    expect(noDiff.processed).toBe(true)
+    expect(noDiff.next_state.staging).toEqual(staged.staging)
+    expect(noDiff.next_state.working_tree).toEqual({})
+
+    const { state: selected, results } = run(staged, ['git restore --staged src/api.py', 'git add -p src/api.py'])
+    expect(results.every((result) => result.processed)).toBe(true)
+    expect(selected.staging['src/api.py']).toEqual({ status: 'partial', hunks: ['fix'] })
+    expect(selected.working_tree['src/api.py']).toEqual({ status: 'modified', hunks: ['experiment'] })
+  })
+
   it('rejects a plain push of rewritten history and accepts a lease or force (state-only grading)', () => {
     const rewritten = state({
       commits: [

@@ -11,7 +11,10 @@ from curriculum.seed_data.scenario_runtime import DISPLACED_REVISED_CASE_IDS, UN
 from curriculum.seed_data.source.challenge_gates import CHALLENGE_GATES
 from curriculum.seed_data.source.scenario_fixtures import extension_case
 from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN
-from curriculum.seed_data.source.transfer_checkpoints import TRANSFER_CHECKPOINTS
+from curriculum.seed_data.source.transfer_checkpoints import (
+    RETIRED_TRANSFER_CHECKPOINTS,
+    TRANSFER_CHECKPOINTS,
+)
 from evaluation.services.rule_builders import rules_from_state_requirements
 from evaluation.services.state_based import StateBasedEvaluator
 
@@ -133,6 +136,7 @@ def _published_cases() -> dict[str, dict]:
         for case_id in scenario.variants
     ]
     case_ids += [checkpoint["case_id"] for checkpoint in TRANSFER_CHECKPOINTS.values()]
+    case_ids += list(RETIRED_TRANSFER_CHECKPOINTS)
     case_ids += [
         case_id
         for gate in CHALLENGE_GATES.values()

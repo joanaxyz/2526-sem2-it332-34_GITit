@@ -32,6 +32,14 @@ from .mastery_metrics import (
     scenario_car,
 )
 from .references import state_key, valid_ref
+from .transfer_policy import (
+    ALL_MODULE_TRANSFER_POLICY,
+    completed_practice_levels,
+    is_current_transfer,
+    prerequisite_levels,
+    reference_identity,
+    study_transfer_pins,
+)
 
 
 def _reference(variant):
@@ -104,7 +112,13 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
             "Enroll before participants encounter their assigned tiers; use a new cohort."
         )
     specs = []
+    completed_levels = completed_practice_levels(player_ids)
+    assigned_levels = {t.adventure_level.slug for t in tiers if t.difficulty == "hard"}
+    existing_pins = study_transfer_pins(player_ids, [t.id for t in tiers])
     for tier in tiers:
+        expected_transfer = transfer_expected(
+            tier.adventure_level.chapter.number, tier.difficulty, tier.adventure_level.slug
+        )
         scenarios = list(tier.scenarios.filter(is_published=True).order_by("sort_order", "id"))
         if not scenarios:
             raise ValidationError(f"Tier {tier.id} has no published exercise.")
@@ -123,10 +137,29 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
             (
                 v
                 for v in variants
-                if v.is_transfer and v.transfer_note.strip() and v.scenario_id == scenarios[0].id
+                if expected_transfer
+                and is_current_transfer(v)
+                and v.transfer_note.strip()
+                and v.scenario_id == scenarios[0].id
             ),
             None,
         )
+        selected_ref = reference_identity(_reference(transfer)) if transfer else None
+        if any(
+            existing_pins[player.id, tier.id]
+            and existing_pins[player.id, tier.id] != {selected_ref}
+            for player in players
+        ):
+            raise ValidationError(
+                "A participant already has an active study assignment for a different transfer version."
+            )
+        if transfer and any(
+            not prerequisite_levels(transfer) <= (assigned_levels | completed_levels[player.id])
+            for player in players
+        ):
+            raise ValidationError(
+                "Include the transfer checkpoint's prerequisite Hard tiers, or complete them before enrollment."
+            )
         if transfer and any(state_key(v) == state_key(transfer) for v in ordinary):
             raise ValidationError(
                 "A transfer checkpoint must differ from ordinary practice content."
@@ -151,6 +184,7 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
                 "required": len(scenarios),
                 "variants": [_reference(v) for v in ordinary],
                 "transfer": _reference(transfer) if transfer else None,
+                "transfer_expected": expected_transfer,
                 "transfer_missing": missing,
             }
         )
@@ -170,9 +204,17 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
             "tiers": specs,
             "weights": weights,
             "assigned_at": timezone.now().isoformat(),
-            "policy": "mastery-kpis-v2",
+            "policy": ALL_MODULE_TRANSFER_POLICY,
         },
     )
+
+
+def _expected_transfer(spec, policy):
+    if policy == ALL_MODULE_TRANSFER_POLICY:
+        return spec["transfer_expected"]
+    # Historical v2 checkpoint and v3 retry studies keep their original scope,
+    # even when they were enrolled before this extension and are still open.
+    return spec["module"] in (3, 4) and spec["difficulty"] == "hard"
 
 
 def _records(study):
@@ -277,12 +319,9 @@ def _records(study):
                 unscored = 0
             checkpoint = transfers.get((player_id, tier_id))
             transfer_ref = spec["transfer"]
+            expected_transfer = _expected_transfer(spec, manifest["policy"])
             transfer = None
-            if (
-                spec["module"] in (3, 4)
-                and transfer_ref
-                and player_id not in spec["transfer_missing"]
-            ):
+            if expected_transfer and transfer_ref and player_id not in spec["transfer_missing"]:
                 variant = content.get(transfer_ref["id"])
                 usable = bool(
                     _available(variant, transfer_ref)
@@ -331,13 +370,15 @@ def _records(study):
                     )
                     if mastery
                     else 0,
-                    "transfer_assigned": transfer_ref is not None
+                    "transfer_assigned": (
+                        expected_transfer or manifest["policy"] != ALL_MODULE_TRANSFER_POLICY
+                    )
+                    and transfer_ref is not None
                     and player_id not in spec["transfer_missing"],
                     "attempted": bool(attempts),
                     "invalid_runs": len(ended) - len(valid),
                     "car_missing": unscored,
-                    "transfer_missing": transfer_expected(spec["module"], spec["difficulty"])
-                    and transfer is None,
+                    "transfer_missing": expected_transfer and transfer is None,
                     "mastery_run": mastery.id if mastery else None,
                     "transfer_run": checkpoint.run_id if checkpoint else None,
                     **(retry_transfers[player_id, tier_id] if retry_transfers is not None else {}),
@@ -346,14 +387,14 @@ def _records(study):
     return records
 
 
-def _weighted(records, weights):
+def _weighted(records, weights, *, rta_modules=(3, 4)):
     modules = {r["module"] for r in records}
     by_module = {n: rates([r for r in records if r["module"] == n]) for n in modules}
     result = {}
     for key in KEYS:
         if key in ("retry_success_rate", "car_first"):
             continue  # Formal study evaluates the five official KPIs only.
-        eligible = {n for n in modules if key != "rta" or n in (3, 4)}
+        eligible = {n for n in modules if key != "rta" or n in rta_modules}
         if key == "hlcr":
             eligible = {
                 n
@@ -394,13 +435,22 @@ def freeze_study(study):
         .values_list("id", flat=True)
     )
     records = _records(study)
+    rta_modules = (
+        {
+            spec["module"]
+            for spec in study.manifest["tiers"]
+            if _expected_transfer(spec, study.manifest["policy"])
+        }
+        if study.manifest["policy"] == ALL_MODULE_TRANSFER_POLICY
+        else (3, 4)
+    )
     participants = []
     for player_id in study.manifest["players"]:
         own = [r for r in records if r["player_id"] == player_id]
         participants.append(
             {
                 "player_id": player_id,
-                "kpis": _weighted(own, study.manifest["weights"]),
+                "kpis": _weighted(own, study.manifest["weights"], rta_modules=rta_modules),
                 "coverage": samples(own),
                 "unattempted": sum(not r["attempted"] for r in own),
             }

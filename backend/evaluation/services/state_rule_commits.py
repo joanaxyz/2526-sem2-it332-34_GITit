@@ -7,6 +7,7 @@ SUPPORTED_RULE_TYPES = frozenset(
         "commit_changes_exclude",
         "commit_changes_exclude_tokens",
         "commit_changes_include",
+        "commit_changes_match_exact_paths",
         "commit_changes_include_tokens",
         "commit_count_equals",
         "commit_count_on_branch_equals",
@@ -57,6 +58,7 @@ def check_commit_state_rule(
     if rule_type in {
         "commit_message_contains",
         "commit_changes_include",
+        "commit_changes_match_exact_paths",
         "commit_changes_exclude",
         "commit_changes_include_tokens",
         "commit_changes_exclude_tokens",

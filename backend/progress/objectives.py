@@ -44,6 +44,19 @@ SO_CAR_LEVELS: dict[str, tuple[str, ...]] = {
 }
 
 
-def transfer_expected(module, difficulty):
-    """A transfer checkpoint closes a level: its Hard tier, in Modules 3-4 only."""
-    return module in (3, 4) and difficulty == "hard"
+EARLY_TRANSFER_LEVELS = {
+    1: "unstaging-and-discarding-changes",
+    2: "branch-naming-and-housekeeping",
+}
+
+
+def transfer_expected(module, difficulty, level_slug=None):
+    """Only authored levels expect evidence; early modules have narrow coverage.
+
+    Every level in Modules 3–4 has a checkpoint. Modules 1–2 deliberately assess
+    selected decisions, so another mastered Hard tier is not missing evidence.
+    """
+    return difficulty == "hard" and (
+        module in (3, 4)
+        or (module in EARLY_TRANSFER_LEVELS and level_slug == EARLY_TRANSFER_LEVELS[module])
+    )

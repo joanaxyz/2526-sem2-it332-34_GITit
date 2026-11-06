@@ -8,6 +8,7 @@ from curriculum.seed_data.source.scenario_fixtures.shapes import (
     clean,
     commit,
     matches_origin,
+    modified,
     origin,
     points_to,
     repo,
@@ -432,7 +433,12 @@ def _checkout_two_files() -> dict[str, Any]:
     base = {"README.md": "readme-v1", first: "FEE = 5", second: "FREE_OVER = 100"}
     commits = [
         commit("c0", "Common base", [], base),
-        commit("c1", "Lower the fee and shipping limit", ["c0"], {**base, first: "FEE = 4", second: "FREE_OVER = 80"}),
+        commit(
+            "c1",
+            "Lower the fee and shipping limit",
+            ["c0"],
+            {**base, first: "FEE = 4", second: "FREE_OVER = 80"},
+        ),
         commit("c2", "Checkout v1 fee", ["c0"], {**base, first: "FEE = 6"}),
         commit(
             "c3",
@@ -466,7 +472,9 @@ def _pricing_refresh() -> dict[str, Any]:
     base = {"README.md": "readme-v1", first: "BASE = 10", second: "MEMBER = 0.05"}
     commits = [
         commit("c0", "Common base", [], base),
-        commit("c1", "Main pricing update", ["c0"], {**base, first: "BASE = 9", second: "MEMBER = 0.1"}),
+        commit(
+            "c1", "Main pricing update", ["c0"], {**base, first: "BASE = 9", second: "MEMBER = 0.1"}
+        ),
         commit(
             "c2",
             "Pricing refresh",
@@ -480,7 +488,9 @@ def _pricing_refresh() -> dict[str, Any]:
         ),
     ]
     return {
-        "initial_state": repo(commits=commits, branches={"main": "c1", "feature/pricing-refresh": "c2"}),
+        "initial_state": repo(
+            commits=commits, branches={"main": "c1", "feature/pricing-refresh": "c2"}
+        ),
         "state_requirements": clean(
             "main",
             {"type": "commit_is_merge", "branch": "main"},
@@ -503,7 +513,12 @@ def _pricing_refresh() -> dict[str, Any]:
 def _release_backport() -> dict[str, Any]:
     path, totals, labels = "src/export.py", "src/report_totals.py", "src/report_labels.py"
     right, message = "Use semicolons in CSV export", "Backport report fixes"
-    base = {"README.md": "readme-v1", path: "return to_csv(rows)", totals: "totals-v1", labels: "labels-v1"}
+    base = {
+        "README.md": "readme-v1",
+        path: "return to_csv(rows)",
+        totals: "totals-v1",
+        labels: "labels-v1",
+    }
     main = {**base, "README.md": "readme-main"}
     streamed = {**main, path: "return stream_csv(rows)"}
     fixed = {**main, path: "return to_csv(rows, delimiter=';')"}
@@ -511,7 +526,9 @@ def _release_backport() -> dict[str, Any]:
         commit("c0", "Baseline", [], base),
         commit("c1", "Main groundwork", ["c0"], main),
         commit("c2", "Try a streaming export format", ["c1"], streamed),
-        commit("c3", "Prepare release-1.6", ["c0"], {**base, path: "return to_csv(rows, header=True)"}),
+        commit(
+            "c3", "Prepare release-1.6", ["c0"], {**base, path: "return to_csv(rows, header=True)"}
+        ),
         commit("c4", right, ["c2"], fixed),
         commit("c5", "Fix report totals", ["c4"], {**fixed, totals: "totals-fixed"}),
         commit(
@@ -654,8 +671,142 @@ FIXTURES: dict[str, dict[str, Any]] = {
             "resolved": "email = form.email.strip().lower()",
         },
     ),
-    # Transfer checkpoints
+    # Retired checkpoint versions remain executable for pinned assignments.
     "manual-transfer-checkout-v2": _checkout_two_files(),
     "mergetool-transfer-pricing-refresh": _pricing_refresh(),
     "cherry-transfer-release-backport": _release_backport(),
 }
+
+
+def _stale_merge_index() -> dict[str, Any]:
+    path, guide = "src/checkout.py", "docs/checkout.md"
+    base = {path: "FEE = 5\nTAX = 0", "README.md": "checkout-v1"}
+    commits = [
+        commit("c0", "Common base", [], base),
+        commit("c1", "Lower the fee", ["c0"], {**base, path: "FEE = 4\nTAX = 0"}),
+        commit(
+            "c2",
+            "Add checkout tax",
+            ["c0"],
+            {**base, path: "FEE = 5\nTAX = 0.12", guide: "Checkout now includes tax."},
+        ),
+    ]
+    before = repo(commits=commits, branches={"main": "c1", "feature/checkout-tax": "c2"})
+    return {
+        "initial_state": repo(
+            commits=commits,
+            branches=before["branches"],
+            staging={
+                path: modified("FEE = 5\nTAX = 0.12"),
+                guide: {"status": "added", "content": "Checkout now includes tax."},
+            },
+            working_tree={path: modified("FEE = 4\nTAX = 0.12")},
+            merge_parent="c2",
+            merge_abort_state=before,
+        ),
+        "state_requirements": clean(
+            "main",
+            {"type": "commit_is_merge", "branch": "main"},
+            {"type": "commit_has_parent", "branch": "main", "parent": "c2"},
+            tip(
+                "main",
+                tree_contains={path: "FEE = 4\nTAX = 0.12", guide: "Checkout now includes tax."},
+            ),
+            conflict_free=True,
+        ),
+    }
+
+
+def _clean_merge_guide() -> dict[str, Any]:
+    policy, guide = "config/retry.ini", "docs/usage.txt"
+    base = {policy: "RETRIES = 2\nMODE = sync", guide: "retries=2", "README.md": "mailer-v1"}
+    return {
+        "initial_state": repo(
+            commits=[
+                commit("c0", "Common base", [], base),
+                commit(
+                    "c1",
+                    "Increase retry allowance",
+                    ["c0"],
+                    {**base, policy: "RETRIES = 4\nMODE = sync"},
+                ),
+                commit(
+                    "c2",
+                    "Queue outgoing mail",
+                    ["c0"],
+                    {**base, policy: "RETRIES = 2\nMODE = queued", guide: "retries=2\nmode=queued"},
+                ),
+            ],
+            branches={"main": "c1", "feature/queued-mail": "c2"},
+            config={"merge.tool": "meld", "mergetool.keepBackup": "false"},
+        ),
+        "state_requirements": clean(
+            "main",
+            {"type": "commit_is_merge", "branch": "main"},
+            {"type": "commit_has_parent", "branch": "main", "parent": "c2"},
+            tip(
+                "main",
+                tree_contains={
+                    policy: "RETRIES = 4\nMODE = queued",
+                    guide: "retries=4\nmode=queued",
+                },
+            ),
+            conflict_free=True,
+        ),
+    }
+
+
+def _mixed_backport() -> dict[str, Any]:
+    path, policy = "src/export.py", "config/export.ini"
+    base = {path: "delimiter = ','", policy: "telemetry = off", "README.md": "export-v1"}
+    return {
+        "initial_state": repo(
+            commits=[
+                commit("c0", "Common base", [], base),
+                commit("c1", "Prepare development", ["c0"], {**base, "README.md": "development"}),
+                commit(
+                    "c2",
+                    "Fix CSV separator and enable telemetry",
+                    ["c1"],
+                    {
+                        **base,
+                        "README.md": "development",
+                        path: "delimiter = ';'",
+                        policy: "telemetry = on",
+                    },
+                ),
+                commit(
+                    "c3",
+                    "Prepare private release",
+                    ["c0"],
+                    {**base, "README.md": "private-release"},
+                ),
+            ],
+            branches={"main": "c2", "release/private": "c3"},
+            head="release/private",
+        ),
+        "state_requirements": clean(
+            "release/private",
+            tip(
+                "release/private",
+                parent_equals="c3",
+                message_equals="Backport CSV delimiter fix",
+                tree_contains={
+                    path: "delimiter = ';'",
+                    policy: "telemetry = off",
+                    "README.md": "private-release",
+                },
+            ),
+            {"type": "commit_count_on_branch_equals", "branch": "release/private", "count": 3},
+            points_to("main", "c2"),
+        ),
+    }
+
+
+FIXTURES.update(
+    {
+        "manual-transfer-stale-index-v2": _stale_merge_index(),
+        "mergetool-transfer-clean-guide-v2": _clean_merge_guide(),
+        "cherry-transfer-mixed-commit-v2": _mixed_backport(),
+    }
+)
