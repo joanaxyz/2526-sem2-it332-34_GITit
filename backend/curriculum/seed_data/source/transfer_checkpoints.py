@@ -17,14 +17,6 @@ class TransferCheckpointSpec(TypedDict):
 
 
 TRANSFER_CHECKPOINTS: dict[str, TransferCheckpointSpec] = {
-    "unstaging-and-discarding-changes": {
-        "case_id": "restore-transfer-contaminated-index-v2",
-        "note": "Practice unstages a separate draft before selecting source changes. Here wanted and unwanted source hunks are already staged together: repair that index entry before selecting, while retaining the correctly staged test.",
-    },
-    "branch-naming-and-housekeeping": {
-        "case_id": "naming-transfer-preserve-before-cleanup",
-        "note": "Practice replaces a disposable bad name at main's tip. Here the badly named branch has unique unmerged work: its own tip must survive under the compliant name before cleanup.",
-    },
     "resolving-conflicts-manually": {
         "case_id": "manual-transfer-stale-index-v2",
         "note": "Practice stages a fresh resolution. Here the staged resolution is stale: a corrected working copy must replace it before the merge is committed.",
@@ -62,16 +54,4 @@ RETIRED_TRANSFER_CHECKPOINTS: dict[str, str] = {
     "reflog-transfer-report-rollback": "recovering-from-hard-resets",
     "revert-transfer-statements": "reversing-pushed-commits-safely",
     "rebase-transfer-invoices": "completing-rebase-recovery-sequences",
-    "restore-transfer-contaminated-index": "unstaging-and-discarding-changes",
-}
-
-
-# Retired revision-2 cases need their original hash-bound source parameters when
-# reconstructed for audits or compatibility tests. Existing seeded rows remain
-# untouched by retirement; legacy pre-revision-2 cases retain their old shape.
-RETIRED_TRANSFER_PARAMETERS: dict[str, dict] = {
-    "restore-transfer-contaminated-index": {
-        "transfer_revision": 2,
-        "transfer_prerequisites": [],
-    },
 }

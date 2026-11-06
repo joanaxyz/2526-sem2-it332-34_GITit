@@ -16,7 +16,7 @@ class Command(BaseCommand):
     help = "Preview eligible mastered tiers; --apply creates their first transfer assignment."
 
     def add_arguments(self, parser):
-        parser.add_argument("--modules", nargs="+", type=int, choices=(1, 2, 3, 4), default=[1, 2])
+        parser.add_argument("--modules", nargs="+", type=int, choices=(3, 4), default=[3, 4])
         parser.add_argument("--players", nargs="+", type=int)
         parser.add_argument("--apply", action="store_true")
 
@@ -53,9 +53,7 @@ class Command(BaseCommand):
                 # Match launch/enrollment locking before reading exposure or pins.
                 Player.objects.select_for_update().get(pk=player.pk)
             if (
-                not transfer_expected(
-                    tier.adventure_level.chapter.number, tier.difficulty, tier.adventure_level.slug
-                )
+                not transfer_expected(tier.adventure_level.chapter.number, tier.difficulty)
                 and not study_transfer_pins([player.id], [tier.id])[player.id, tier.id]
             ):
                 counts["unselected"] += 1

@@ -46,7 +46,6 @@ from curriculum.seed_data.source.scenario_plan import MODULE_SCENARIO_PLAN, Scen
 from curriculum.seed_data.source.scenario_plan.types import SPIRAL
 from curriculum.seed_data.source.transfer_checkpoints import (
     RETIRED_TRANSFER_CHECKPOINTS,
-    RETIRED_TRANSFER_PARAMETERS,
     TRANSFER_CHECKPOINTS,
 )
 from curriculum.seed_data.spec_helpers import required_commit_message_details
@@ -13300,7 +13299,7 @@ class Command(BaseCommand):
                 "transfer_prerequisites": list(checkpoint.get("prerequisites", ())),
             }
             if checkpoint
-            else RETIRED_TRANSFER_PARAMETERS.get(case["case_id"], {})
+            else {}
         )
         efficient, generous, maximum = thresholds(
             max(

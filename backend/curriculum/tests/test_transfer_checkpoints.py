@@ -20,8 +20,6 @@ from curriculum.seed_data.source.transfer_checkpoints import (
 from progress.services.references import state_key, valid_ref
 
 LEVEL_NUMBERS = {
-    "unstaging-and-discarding-changes": "1.6",
-    "branch-naming-and-housekeeping": "2.2",
     "resolving-conflicts-manually": "3.1",
     "using-a-merge-tool": "3.2",
     "cherry-picking-commits": "3.3",

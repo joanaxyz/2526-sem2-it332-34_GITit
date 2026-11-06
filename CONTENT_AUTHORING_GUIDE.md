@@ -48,17 +48,15 @@ Each scenario has one role:
 | transfer | Hard: unfamiliar state or distractors, known forms only. |
 
 The `transfer` role is a practice scenario. It is not an RTA transfer checkpoint: those
-are separate extension scenarios in selected levels, listed with their authored
+are separate extension scenarios, one per Module 3–4 level, listed with their authored
 difference in `seed_data/source/transfer_checkpoints.py`. Seeding reserves each on the
 first scenario of the level's Hard tier, outside the plan's `variants`. A checkpoint must
 never appear in `CHALLENGE_GATES` or be seeded as a challenge-trial variant; this
 excludes both current and retired checkpoint IDs. A checkpoint must
 change a repository decision or dependency compared with both practice and its gate:
 an extra command, repeated file or longer answer key does not establish transfer.
-The initial M1/M2 selection is 1.6 index recovery/partial selection and 2.2 branch
-preservation/housekeeping; all Module 3–4 levels remain covered. Do not add one case
-per level as a quota. Keep `progress.objectives.transfer_expected` aligned with the
-reviewed roster; unselected tiers must not become missing assessment evidence.
+Modules 1–2 carry no checkpoints. Keep `progress.objectives.transfer_expected` aligned
+with the reviewed roster.
 Use forms guaranteed by the level's mandatory practice or explicitly declared completed
 prerequisite levels. The revised merge-tool checkpoint requires Manual Conflict Resolution
 Hard before assignment. Finishing that prerequisite later refreshes an already-mastered

@@ -350,7 +350,6 @@ def live_records(runs, *, end_before=None):
                         transfer_expected(
                             row["tier__adventure_level__chapter__number"],
                             row["tier__difficulty"],
-                            row["tier__adventure_level__slug"],
                         )
                         or study_pins[player_id, tier_id]
                     )
@@ -392,7 +391,7 @@ def samples(records):
         "transfer_missing": sum(
             r.get(
                 "transfer_missing",
-                transfer_expected(r["module"], r["difficulty"], r.get("slug"))
+                transfer_expected(r["module"], r["difficulty"])
                 and r["mastered"]
                 and not r.get("transfer_assigned", False),
             )

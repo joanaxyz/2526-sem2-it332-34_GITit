@@ -33,7 +33,7 @@ from .mastery_metrics import (
 )
 from .references import state_key, valid_ref
 from .transfer_policy import (
-    ALL_MODULE_TRANSFER_POLICY,
+    CHECKPOINT_STUDY_POLICY,
     completed_practice_levels,
     is_current_transfer,
     prerequisite_levels,
@@ -116,9 +116,7 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
     assigned_levels = {t.adventure_level.slug for t in tiers if t.difficulty == "hard"}
     existing_pins = study_transfer_pins(player_ids, [t.id for t in tiers])
     for tier in tiers:
-        expected_transfer = transfer_expected(
-            tier.adventure_level.chapter.number, tier.difficulty, tier.adventure_level.slug
-        )
+        expected_transfer = transfer_expected(tier.adventure_level.chapter.number, tier.difficulty)
         scenarios = list(tier.scenarios.filter(is_published=True).order_by("sort_order", "id"))
         if not scenarios:
             raise ValidationError(f"Tier {tier.id} has no published exercise.")
@@ -184,7 +182,6 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
                 "required": len(scenarios),
                 "variants": [_reference(v) for v in ordinary],
                 "transfer": _reference(transfer) if transfer else None,
-                "transfer_expected": expected_transfer,
                 "transfer_missing": missing,
             }
         )
@@ -204,17 +201,9 @@ def create_study(*, slug, player_ids, tier_ids, cutoff, weights=None):
             "tiers": specs,
             "weights": weights,
             "assigned_at": timezone.now().isoformat(),
-            "policy": ALL_MODULE_TRANSFER_POLICY,
+            "policy": CHECKPOINT_STUDY_POLICY,
         },
     )
-
-
-def _expected_transfer(spec, policy):
-    if policy == ALL_MODULE_TRANSFER_POLICY:
-        return spec["transfer_expected"]
-    # Historical v2 checkpoint and v3 retry studies keep their original scope,
-    # even when they were enrolled before this extension and are still open.
-    return spec["module"] in (3, 4) and spec["difficulty"] == "hard"
 
 
 def _records(study):
@@ -319,7 +308,7 @@ def _records(study):
                 unscored = 0
             checkpoint = transfers.get((player_id, tier_id))
             transfer_ref = spec["transfer"]
-            expected_transfer = _expected_transfer(spec, manifest["policy"])
+            expected_transfer = transfer_expected(spec["module"], spec["difficulty"])
             transfer = None
             if expected_transfer and transfer_ref and player_id not in spec["transfer_missing"]:
                 variant = content.get(transfer_ref["id"])
@@ -370,10 +359,7 @@ def _records(study):
                     )
                     if mastery
                     else 0,
-                    "transfer_assigned": (
-                        expected_transfer or manifest["policy"] != ALL_MODULE_TRANSFER_POLICY
-                    )
-                    and transfer_ref is not None
+                    "transfer_assigned": transfer_ref is not None
                     and player_id not in spec["transfer_missing"],
                     "attempted": bool(attempts),
                     "invalid_runs": len(ended) - len(valid),
@@ -387,14 +373,14 @@ def _records(study):
     return records
 
 
-def _weighted(records, weights, *, rta_modules=(3, 4)):
+def _weighted(records, weights):
     modules = {r["module"] for r in records}
     by_module = {n: rates([r for r in records if r["module"] == n]) for n in modules}
     result = {}
     for key in KEYS:
         if key in ("retry_success_rate", "car_first"):
             continue  # Formal study evaluates the five official KPIs only.
-        eligible = {n for n in modules if key != "rta" or n in rta_modules}
+        eligible = {n for n in modules if key != "rta" or n in (3, 4)}
         if key == "hlcr":
             eligible = {
                 n
@@ -435,22 +421,13 @@ def freeze_study(study):
         .values_list("id", flat=True)
     )
     records = _records(study)
-    rta_modules = (
-        {
-            spec["module"]
-            for spec in study.manifest["tiers"]
-            if _expected_transfer(spec, study.manifest["policy"])
-        }
-        if study.manifest["policy"] == ALL_MODULE_TRANSFER_POLICY
-        else (3, 4)
-    )
     participants = []
     for player_id in study.manifest["players"]:
         own = [r for r in records if r["player_id"] == player_id]
         participants.append(
             {
                 "player_id": player_id,
-                "kpis": _weighted(own, study.manifest["weights"], rta_modules=rta_modules),
+                "kpis": _weighted(own, study.manifest["weights"]),
                 "coverage": samples(own),
                 "unattempted": sum(not r["attempted"] for r in own),
             }

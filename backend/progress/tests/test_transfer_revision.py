@@ -174,9 +174,8 @@ def test_old_unfrozen_study_keeps_its_original_reference_after_cutover(
 
 
 @pytest.mark.django_db
-@pytest.mark.parametrize("study_policy", ["mastery-kpis-v2", "mastery-kpis-v4-all-module-transfer"])
 def test_prospective_old_study_gets_its_pinned_checkpoint_after_mastery(
-    django_user_model, monkeypatch, study_policy
+    django_user_model, monkeypatch
 ):
     call_command("seed_curriculum", verbosity=0)
     tier = AdventureLevelTier.objects.get(
@@ -192,7 +191,6 @@ def test_prospective_old_study_gets_its_pinned_checkpoint_after_mastery(
     )
     # Reproduce the already-saved manifest from before the content cutover.
     original_ref = {"id": old.id, "hash": old.ref_hash, "count": old.ref_count}
-    study.manifest["policy"] = study_policy
     study.manifest["tiers"][0]["transfer"] = original_ref
     study.save(update_fields=["manifest"])
     call_command("seed_curriculum", verbosity=0)
@@ -421,66 +419,3 @@ def test_new_reference_hash_binds_assessment_requirements_but_legacy_retirement_
     revised = ref_hash(old)
     old.parameter_context["required_techniques"] = ["mergetool"]
     assert ref_hash(old) != revised
-
-
-@pytest.mark.django_db
-def test_tightened_index_version_preserves_original_revision_two_assignments(django_user_model):
-    call_command("seed_curriculum", verbosity=0)
-    tier = AdventureLevelTier.objects.get(
-        adventure_level__slug="unstaging-and-discarding-changes", difficulty="hard"
-    )
-    old = legacy_variant(tier, "restore-transfer-contaminated-index")
-    baseline_hash = "c2b016e51f4fea1f02bb8d49217f05a68a03472b1dfa2c6d97faf1c1a5b66264"
-    assert old.ref_hash == baseline_hash
-    assert old.parameter_context["transfer_revision"] == 2
-    old_context = copy.deepcopy(old.scenario_context)
-    old_spec = copy.deepcopy(old.evaluation_spec)
-    learners = []
-    for status in ("pending", "active", "concluded"):
-        learner = player(django_user_model, f"index-{status}")
-        AdventureLevelTierCompletion.objects.create(player=learner, tier=tier)
-        point = KpiCheckpoint.objects.create(
-            player=learner,
-            tier=tier,
-            kind="transfer",
-            variant=old,
-            ref_hash=old.ref_hash,
-            ref_count=old.ref_count,
-        )
-        run = start(learner, tier, transfer=True) if status != "pending" else None
-        if status == "concluded":
-            end(run, passed=False)
-        learners.append((status, learner, point, run))
-    call_command("seed_curriculum", verbosity=0)
-    old.refresh_from_db()
-    assert old.evaluation_spec == old_spec and old.scenario_context == old_context
-    assert old.ref_hash == ref_hash(old) == baseline_hash
-    assert old.parameter_context["retired_transfer"] is True
-    current = AdventureLevelTierScenarioVariant.objects.get(
-        case_id="restore-transfer-contaminated-index-v2"
-    )
-    assert current.ref_hash != old.ref_hash
-    evidence = {
-        "legacy_hash": old.ref_hash,
-        "current_hash": current.ref_hash,
-        "legacy_retired": True,
-        "legacy_content_unchanged": True,
-        "assignments": [],
-    }
-    for status, learner, point, run in learners:
-        resumed = start(learner, tier, transfer=True)
-        point.refresh_from_db()
-        assert resumed.selected_variant_id == old.id and point.variant_id == old.id
-        if status == "active":
-            assert resumed.id == run.id
-        if status == "concluded":
-            assert resumed.is_replay and point.run_id == run.id and point.passed is False
-        evidence["assignments"].append(
-            {
-                "status": status,
-                "variant": resumed.selected_variant.slug,
-                "original_first_failure_preserved": status == "concluded" and point.passed is False,
-            }
-        )
-    if destination := os.environ.get("TIGHTENING_CUTOVER_EVIDENCE_PATH"):
-        Path(destination).write_text(json.dumps(evidence, indent=2), encoding="utf-8")

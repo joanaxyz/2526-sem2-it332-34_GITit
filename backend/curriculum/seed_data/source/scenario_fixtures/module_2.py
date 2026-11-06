@@ -1,4 +1,4 @@
-"""Module 2 practice and reserved transfer fixtures (levels 2.1-2.9)."""
+"""Module 2 planned scenarios: branching and collaboration (levels 2.1-2.9)."""
 
 from __future__ import annotations
 
@@ -932,40 +932,3 @@ FIXTURES: dict[str, dict[str, Any]] = {
         name="api-service", branch="feature/v1-api", stale="spike/graphql"
     ),
 }
-
-
-def _transfer_preserve_before_cleanup() -> dict[str, Any]:
-    main_tree = {**BASE, "src/parser.py": "parser-v1"}
-    return {
-        "initial_state": repo(
-            commits=[
-                commit("c1", "Project baseline", [], BASE),
-                commit("c2", "Land completed parser setup", ["c1"], main_tree),
-                commit(
-                    "c3",
-                    "Fix quoted parser input",
-                    ["c2"],
-                    {**main_tree, "src/parser.py": "parser-quoted-fix"},
-                ),
-                commit(
-                    "c4",
-                    "Start active tokenizer work",
-                    ["c2"],
-                    {**main_tree, "src/tokenizer.py": "tokenizer-draft"},
-                ),
-            ],
-            branches={"main": "c2", "scratch": "c3", "fix/merged": "c1", "feature/active": "c4"},
-            head="scratch",
-        ),
-        "state_requirements": clean(
-            "fix/parser",
-            points_to("fix/parser", "c3"),
-            points_to("main", "c2"),
-            points_to("feature/active", "c4"),
-            {"type": "commit_count_equals", "count": 4},
-            branch_absent=["scratch", "fix/merged"],
-        ),
-    }
-
-
-FIXTURES["naming-transfer-preserve-before-cleanup"] = _transfer_preserve_before_cleanup()

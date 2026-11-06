@@ -25,7 +25,7 @@ def test_failure_retry_does_not_implicitly_become_transfer(db, django_user_model
 
 
 @pytest.mark.parametrize("module", [1, 2])
-def test_unselected_early_module_levels_do_not_expect_transfer(db, django_user_model, module):
+def test_transfer_is_limited_to_modules_3_4(db, django_user_model, module):
     player, tier, _, _ = bundle(django_user_model, required=1, module=module)
     end(start(player, tier))
     assert not KpiCheckpoint.objects.filter(player=player, kind="transfer").exists()

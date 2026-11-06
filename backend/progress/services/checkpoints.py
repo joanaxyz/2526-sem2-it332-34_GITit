@@ -136,9 +136,7 @@ def eligible_transfer_variant(*, player, tier):
     if len(pins) > 1:
         # Preserve mastery without arbitrarily choosing a conflicting version.
         return None
-    if not pins and not transfer_expected(
-        tier.adventure_level.chapter.number, tier.difficulty, tier.adventure_level.slug
-    ):
+    if not pins and not transfer_expected(tier.adventure_level.chapter.number, tier.difficulty):
         return None
     # Any legacy exposure gap prevents a claim of novelty. New cohorts have
     # complete tracking from their first launch; old histories are not guessed.

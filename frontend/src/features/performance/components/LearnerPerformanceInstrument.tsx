@@ -3,7 +3,7 @@ import { Check, ChevronDown } from 'lucide-react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 import {
-  EARLY_TRANSFER_COVERAGE, EMPTY_RATE, KPIS, SUPPLEMENTARY_KPI, carStartingPoint, formatKpi, kpiEvidence, metricTargetStatus,
+  EMPTY_RATE, KPIS, SUPPLEMENTARY_KPI, carStartingPoint, formatKpi, kpiEvidence, metricTargetStatus,
   type KpiKey, type Status,
 } from '@/features/performance/utils/performanceKpis'
 import { GO_SCR_TARGET, MODULES, moduleTarget } from '@/features/performance/utils/learningObjectives'
@@ -66,7 +66,7 @@ function MetricReading({ metric, rate, target, overall = false, start }: {
     <div className="objective-metric-foot"><Goal metric={metric} target={target} /><StatusBadge status={status} /></div>
     {metric === 'arc' ? <span className="objective-metric-direction">Lower is better</span> : null}
     {startingPoint ? <span className="objective-metric-direction">{startingPoint}</span> : null}
-    {overall && metric === 'rta' ? <span className="objective-metric-direction">Selected checkpoints · Modules 1–4</span> : null}
+    {overall && metric === 'rta' ? <span className="objective-metric-direction">Modules 3–4</span> : null}
   </div>
 }
 
@@ -148,6 +148,7 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
         <div className="objective-module-tabs" role="tablist" aria-label="Learning modules">
           {MODULES.map((module) => {
             const rate = data.modules.find((item) => item.number === module.num)?.[comparison] ?? EMPTY_RATE
+            const applicable = comparison !== 'rta' || module.num >= 3
             const status = metricTargetStatus(rate, moduleTarget(comparison, module.num), KPIS.find((item) => item.key === comparison)!.up)
             return <button
               key={module.num} type="button" role="tab" id={`${id}-module-${module.num}`}
@@ -161,10 +162,10 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
               <span className="objective-tab-title">{module.title}</span>
               <span className="objective-tab-result" id={`${id}-comparison-${module.num}`}>
                 <span className="sr-only">{metricName(comparison)}: </span>
-                <strong>{formatKpi(comparison, rate)}</strong>
-                <span>{STATUS_TEXT[status]}</span>
+                <strong>{applicable ? formatKpi(comparison, rate) : '—'}</strong>
+                <span>{applicable ? STATUS_TEXT[status] : 'Not applicable'}</span>
               </span>
-              <MeasurementRail metric={comparison} rate={rate} target={moduleTarget(comparison, module.num)} scaleMax={comparisonCeiling} compact />
+              {applicable ? <MeasurementRail metric={comparison} rate={rate} target={moduleTarget(comparison, module.num)} scaleMax={comparisonCeiling} compact /> : <span className="measurement-rail measurement-rail--unavailable" aria-hidden="true" />}
             </button>
           })}
         </div>
@@ -173,7 +174,7 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
       {MODULES.map((module) => {
         const results = data.modules.find((item) => item.number === module.num)
         const rateFor = (key: KpiKey) => results?.[key] ?? EMPTY_RATE
-        const metrics = KPIS
+        const metrics = KPIS.filter((item) => item.key !== 'rta' || module.num >= 3)
         return (
           <section className="learning-module" role="tabpanel" tabIndex={0} hidden={selected !== module.num}
             id={`learning-module-${module.num}`} key={module.num} aria-labelledby={`${id}-module-${module.num}`}>
@@ -193,7 +194,6 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
                 {metrics.map((metric) => <MetricReading key={metric.key} metric={metric.key} rate={rateFor(metric.key)} target={metric.key === 'scr' ? GO_SCR_TARGET : moduleTarget(metric.key, module.num)} start={results?.car_first} />)}
               </div>
               <MetricEvidence rates={metrics.map(({ key }) => ({ key, rate: rateFor(key) }))} label={`Module ${module.num} evidence`} />
-              {EARLY_TRANSFER_COVERAGE[module.num] ? <p className="record-comparison-direction">{EARLY_TRANSFER_COVERAGE[module.num]} RTA reflects this skill sample; one result is 0% or 100%.</p> : null}
 
               <div className="specific-objectives-heading"><h4>Specific objectives</h4><span>CAR by objective · other measures by module</span></div>
               <div className="objective-ledger-heading" aria-hidden="true">
@@ -250,11 +250,11 @@ export function LearnerPerformanceInstrument({ data }: { data: PerformanceSummar
           <p>{data.samples.car_missing} cleared scenarios lack validated command evidence and remain unscored.</p>
           <p>{data.samples.in_progress_tiers} opened tiers are in progress and not counted yet.</p>
         </details>
-        <details className="performance-calculation">
-          <summary>Transfer checkpoints · Modules 1–4</summary>
-          <p>All modules · {data.samples.transfer_pending} pending · {data.samples.transfer_missing} mastered eligible Hard tiers without transfer evidence</p>
+        {selected >= 3 ? <details className="performance-calculation">
+          <summary>Transfer checkpoints · Modules 3–4</summary>
+          <p>Modules 3–4 · {data.samples.transfer_pending} pending · {data.samples.transfer_missing} mastered Hard tiers without eligible transfer evidence</p>
           <p>{KPIS.find((metric) => metric.key === 'rta')!.emptyHint}</p>
-        </details>
+        </details> : null}
         <details className="performance-calculation" key={selected}>
           <summary>Module {selected} retry recovery · supplementary</summary>
           <p>{formatKpi('retry_success_rate', recovery)} · {kpiEvidence('retry_success_rate', recovery)}</p>

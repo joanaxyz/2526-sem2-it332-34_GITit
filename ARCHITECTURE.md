@@ -271,7 +271,7 @@ CAR averages each scenario's command efficiency against a validated reference on
 the learner's latest clear of content they had not cleared before (replays
 included), with `car_first` from each scenario's first such clear as its learner-facing starting point; ARC
 counts unsuccessful attempts before mastery; RTA preserves the first result on
-reserved unseen transfer checkpoints in selected Hard levels across Modules 1–4. The supplementary Retry
+reserved unseen transfer checkpoints in Modules 3–4. The supplementary Retry
 Success Rate counts concluded recovery retries after actual unsuccessful attempts.
 Its deprecated `rtr` response alias has no current UI consumer.
 
@@ -279,8 +279,7 @@ Its deprecated `rtr` response alias has no current UI consumer.
 completion pointers. Runs snapshot validated reference counts and content hashes.
 `KpiExposure` records every presentation, including discarded empty launches;
 legacy incomplete exposure histories cannot establish transfer novelty. Only
-Live eligibility belongs to `progress.objectives.transfer_expected`: selected 1.6/2.2
-Hard tiers and all Module 3–4 Hard tiers expect a checkpoint; run
+Module 3–4 Hard tiers expect a transfer checkpoint (`progress.objectives.transfer_expected`); run
 payloads carry `transfer_checkpoint` so the outcome screen can offer a ready one,
 and level payloads carry its state so a row appears under the Hard tier once assigned.
 Explicit transfer starts use the existing access-checked tier-start route, bypass
@@ -302,9 +301,8 @@ The deterministic outcome suite verifies repository decisions and production tec
 evidence instead of using reference-command uniqueness as proof of transfer.
 The read-only eligible-variant selector also serves `assign_transfer_checkpoints`
 dry-run/apply backfill for existing mastery, retaining exposure and prospective pin checks.
-New `mastery-kpis-v4-all-module-transfer` studies snapshot per-tier expected transfer;
-historical v2 checkpoint and v3 retry policies keep their original Modules 3–4 scope,
-including before freeze. Prospective checkpoint pinning recognizes v2 and v4.
+New studies use the `mastery-kpis-v2` checkpoint policy; historical v3 retry studies keep
+their original calculation. Prospective checkpoint pinning recognizes v2.
 
 Learner, Admin aggregate and Admin per-player reads share formulas. Admin excludes
 staff and averages participant scores; date filters select Manila-time starts,

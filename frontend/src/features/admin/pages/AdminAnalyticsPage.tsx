@@ -26,7 +26,7 @@ type RateMetricLike = { value: number | null; numerator: number; denominator: nu
 const ALL_KPI_META = KPIS.map((kpi) => ({
   key: kpi.key, label: kpi.abbr, full: 'longName' in kpi ? kpi.longName : kpi.name, target: kpi.target,
   higherIsBetter: kpi.up, unit: kpi.pct ? '%' : '', format: kpi.pct ? 'percent' : 'decimal',
-  modules: kpi.key === 'rta' ? '1–4 (selected Hard levels)' : kpi.key === 'hlcr' ? '1–3 (≥65% M4)' : kpi.key === 'arc' ? '1–3 (≤3 M4)' : '1–4',
+  modules: kpi.key === 'rta' ? '3–4' : kpi.key === 'hlcr' ? '1–3 (≥65% M4)' : kpi.key === 'arc' ? '1–3 (≤3 M4)' : '1–4',
 }))
 
 function fmtRate(value: number | null, format: string): string {
@@ -226,7 +226,7 @@ export function AdminAnalyticsPage() {
               <span>Retry transfer accuracy</span>
             </header>
             <strong className="admin-diagnostic-value">{formatPercent(diagnostics.kpis.rta)}</strong>
-            <p>First attempts on reserved unseen checkpoints in Modules 1–4. Module 1 samples index recovery and partial selection; Module 2 samples branch preservation and housekeeping. Each has one checkpoint, so an individual result is 0% or 100%.</p>
+            <p>First attempts on reserved unseen transfer checkpoints (Modules 3-4).</p>
             <small>{kpiEvidence('rta', diagnostics.kpis.rta)}</small>
             <ModuleRows modules={diagnostics.modules} metric="rta" />
           </article>

@@ -50,8 +50,8 @@ export const KPIS = [
   {
     key: 'rta', label: 'Transfer checkpoints cleared',
     explanation: 'Your first attempt on a reserved unfamiliar repository or goal, after practice. Its first result is preserved even if you practice again.',
-    scope: 'Modules 1–4 · reserved unseen checkpoints after selected Hard tiers',
-    emptyHint: 'Clear Unstaging and Discarding Hard (Module 1), Branch Naming and Housekeeping Hard (Module 2), or a Hard tier in Modules 3–4. An unseen checkpoint and complete exposure evidence are required.',
+    scope: 'Modules 3–4 · reserved unseen checkpoint after each Hard tier',
+    emptyHint: 'Clear a Hard tier in Modules 3–4 to unlock its unseen transfer checkpoint. Requires reserved content and complete exposure evidence.',
     abbr: 'RTA', name: 'Retry Transfer Accuracy', target: 65, up: true, pct: true,
     formula: 'Novel checkpoints cleared on first run ÷ Novel checkpoints assessed × 100',
     why: 'Measures transfer after practice, including learners who never failed. Formal studies include all assigned valid checkpoints at cutoff; unavailable novelty evidence is missing.',
@@ -78,11 +78,6 @@ export const SUPPLEMENTARY_KPI = {
 export type CardKpi = (typeof KPIS)[number] | typeof SUPPLEMENTARY_KPI
 
 export const EMPTY_RATE: Rate = { value: null, numerator: 0, denominator: 0 }
-
-export const EARLY_TRANSFER_COVERAGE: Partial<Record<number, string>> = {
-  1: 'One checkpoint assesses index recovery and partial selection.',
-  2: 'One checkpoint assesses branch preservation and housekeeping.',
-}
 
 export function getModuleRate(mod: PerformanceModule, key: KpiKey): Rate {
   if (key === 'scr') return mod.scr

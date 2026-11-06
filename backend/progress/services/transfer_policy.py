@@ -9,9 +9,9 @@ from collections import defaultdict
 from django.utils import timezone
 
 from progress.models import AdventureLevelTierCompletion, KpiCheckpoint, KpiStudy
+from progress.objectives import transfer_expected
 
-ALL_MODULE_TRANSFER_POLICY = "mastery-kpis-v4-all-module-transfer"
-CHECKPOINT_STUDY_POLICIES = frozenset({"mastery-kpis-v2", ALL_MODULE_TRANSFER_POLICY})
+CHECKPOINT_STUDY_POLICY = "mastery-kpis-v2"
 
 
 def is_current_transfer(variant):
@@ -64,17 +64,13 @@ def study_transfer_pins(player_ids, tier_ids):
     for manifest in KpiStudy.objects.filter(
         frozen_at__isnull=True, cutoff__gte=timezone.now()
     ).values_list("manifest", flat=True):
-        if manifest.get("policy") not in CHECKPOINT_STUDY_POLICIES:
+        if manifest.get("policy") != CHECKPOINT_STUDY_POLICY:
             continue
         enrolled = players & set(manifest["players"])
         if not enrolled:
             continue
         for spec in manifest["tiers"]:
-            expected = (
-                spec["transfer_expected"]
-                if manifest["policy"] == ALL_MODULE_TRANSFER_POLICY
-                else spec["module"] in (3, 4) and spec["difficulty"] == "hard"
-            )
+            expected = transfer_expected(spec["module"], spec["difficulty"])
             if expected and spec["id"] in tiers and spec.get("transfer"):
                 for player_id in enrolled:
                     pins[player_id, spec["id"]].add(reference_identity(spec["transfer"]))
