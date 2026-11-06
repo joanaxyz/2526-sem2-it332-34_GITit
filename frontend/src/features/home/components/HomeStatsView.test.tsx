@@ -261,7 +261,7 @@ describe('HomeStatsView contract', () => {
     expect(within(story as HTMLElement).getByText('--')).toBeInTheDocument()
     expect(within(story as HTMLElement).getByText('No runs yet')).toBeInTheDocument()
     const signals = await screen.findByRole('group', { name: 'Module 1 KPIs' })
-    expect(within(signals).getAllByText('Not measured yet')).toHaveLength(4)
+    expect(within(signals).getAllByText('Not measured yet')).toHaveLength(5)
     progress.unmount()
 
     const achievements = renderView('achievements', emptyHomeFixture, emptyStatsFixture)
