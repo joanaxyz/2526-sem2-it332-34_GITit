@@ -94,6 +94,32 @@ class TestShellReplay:
         assert "src/a.log" not in state["working_tree"]
         assert state["working_tree"]["src/keep.txt"] == {"status": "untracked", "content": ""}
 
+    def test_rm_rf_git_deletes_the_repository_and_keeps_files_untracked(self):
+        state = RepositoryStateNormalizer().normalize(
+            {**repo(), "staging": {"notes.md": {"status": "added", "content": "draft"}}}
+        )
+        removed, exit_codes = replay(["rm -rf .git"], state=state)
+        assert exit_codes == [0]
+        assert removed["repository_initialized"] is False
+        assert removed["commits"] == []
+        assert removed["branches"] == {}
+        assert removed["staging"] == {}
+        assert removed["working_tree"] == {
+            "README.md": {"status": "untracked", "content": "hello\n"},
+            "notes.md": {"status": "untracked", "content": "draft"},
+            "src/app.py": {"status": "untracked", "content": "app"},
+            "src/util.py": {"status": "untracked", "content": "util"},
+        }
+
+    def test_git_folder_follows_shell_semantics(self):
+        _, exit_codes = replay(["rm .git", "rmdir .git", "rm -rf .git/HEAD"])
+        assert exit_codes == [1, 1, 1]
+        from_subfolder, exit_codes = replay(["rm -r ../.git"], cwd="src")
+        assert exit_codes == [0]
+        assert from_subfolder["repository_initialized"] is False
+        _, exit_codes = replay(["rm -rf .git", "rm -rf .git", "rm -r .git"])
+        assert exit_codes == [0, 0, 1]
+
     def test_missing_working_directory_falls_back_to_nearest_folder(self):
         state, _ = replay(["touch here.txt"], cwd="gone/deeper")
         assert "here.txt" in state["working_tree"]
@@ -114,6 +140,17 @@ class TestShellSubmission:
         execution = submit(repo(), "rm missing.txt", exit_code=0)
         assert execution.result.exit_code == 1
         assert execution.state_mutated is False
+
+    def test_refused_file_command_is_not_replayed(self):
+        payload = frontend_execution_payload(
+            "touch notes.md", repo(), processed=False, command_family="touch", exit_code=1
+        )
+        execution = ClientCommandExecutionService().from_payload(
+            repository_state=repo(), command="touch notes.md", execution=payload
+        )
+        assert "notes.md" not in execution.next_state["working_tree"]
+        assert execution.state_mutated is False
+        assert execution.classification == COMMAND_DIAGNOSTIC
 
     def test_read_only_commands_are_free_diagnostics(self):
         execution = submit(repo(), "ls -a src", diagnostic=True, cwd="src")

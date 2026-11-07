@@ -3,9 +3,11 @@ import {
   createWorkspaceDirectory,
   createWorkspaceFile,
   deleteWorkspaceFile,
+  removeGitDirectory,
   renameWorkspaceFile,
   writeWorkspaceFile,
 } from '@/shared/git/simulator/workspaceFiles'
+import { isInsideGitDirectory, resolveShellPath } from '@/shared/git/simulator/shell/syntax'
 import { descendantPaths, directoryEntries, pathKind } from '@/shared/git/simulator/workspaceTree'
 import {
   baseName,
@@ -97,6 +99,12 @@ export function rmdir(run: ShellRun, args: string[]) {
   if (!parsed.operands.length) return fail(run, 'rmdir: missing operand')
   for (const operand of parsed.operands) {
     const prefix = `rmdir: failed to remove '${operand}'`
+    const gitPath = gitDirectoryPath(run, operand)
+    if (gitPath !== null) {
+      if (!run.state.repository_initialized) fail(run, `${prefix}: No such file or directory`)
+      else fail(run, `${prefix}: ${gitPath === '.git' ? 'Directory not empty' : 'only the whole .git folder can be removed'}`)
+      continue
+    }
     const target = resolveOperand(run, operand)
     if ('error' in target) {
       fail(run, `${prefix}: ${target.error}`)
@@ -132,6 +140,11 @@ export function rm(run: ShellRun, args: string[]) {
       fail(run, `rm: refusing to remove '.' or '..' directory: skipping '${operand}'`)
       continue
     }
+    const gitPath = gitDirectoryPath(run, operand)
+    if (gitPath !== null) {
+      removeGitPath(run, prefix, gitPath, recursive, force)
+      continue
+    }
     const target = resolveOperand(run, operand)
     if ('error' in target) {
       fail(run, `${prefix}: ${target.error}`)
@@ -152,6 +165,23 @@ export function rm(run: ShellRun, args: string[]) {
     }
     mutate(run, prefix, (state) => deleteWorkspaceFile(state, { path: target.path }))
   }
+}
+
+/** `.git` or a path inside it, as typed from the working directory; `null` otherwise. */
+function gitDirectoryPath(run: ShellRun, operand: string) {
+  const path = resolveShellPath(run.cwd, operand)
+  return path !== null && isInsideGitDirectory(path) ? path : null
+}
+
+/** `rm -r .git` un-initializes the repository; files inside `.git` are not modelled one by one. */
+function removeGitPath(run: ShellRun, prefix: string, path: string, recursive: boolean, force: boolean) {
+  if (!run.state.repository_initialized) {
+    if (!force) fail(run, `${prefix}: No such file or directory`)
+    return
+  }
+  if (path !== '.git') return fail(run, `${prefix}: only the whole .git folder can be removed`)
+  if (!recursive) return fail(run, `${prefix}: Is a directory`)
+  run.state = removeGitDirectory(run.state)
 }
 
 type Transfer = { operand: string; path: string; kind: 'file' | 'directory'; target: string; targetDisplay: string }

@@ -22,7 +22,7 @@ function linesAfterClear(lines: TerminalLine[]) {
 export function TerminalPanel({
   lines,
   prompt,
-  cwd,
+  location,
   disabled,
   runDisabled,
   processing,
@@ -33,8 +33,8 @@ export function TerminalPanel({
 }: {
   lines: TerminalLine[]
   prompt: string
-  /** Terminal working directory relative to the project root (`''` at the root). */
-  cwd?: string
+  /** Folder the terminal stands in, shown after the user (e.g. `my-repo/src`). */
+  location?: string
   disabled?: boolean
   runDisabled?: boolean
   processing?: boolean
@@ -90,7 +90,7 @@ export function TerminalPanel({
     <CommandInput
       ref={commandInputRef}
       prompt={prompt}
-      cwd={cwd}
+      location={location}
       disabled={disabled}
       runDisabled={runDisabled}
       processing={processing}

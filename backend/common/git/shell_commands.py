@@ -6,6 +6,7 @@ File-changing ones (``touch``, ``mkdir``, ``rm``,
 ``mv``, ``cp`` and ``echo``/``cat`` redirection) are replayed here from the
 persisted state through the same trusted workspace-file helpers the Project
 Files endpoints use, so the backend owns the resulting working copy.
+``rm -r .git`` deletes the repository itself and leaves the files on disk.
 """
 
 from __future__ import annotations
@@ -27,6 +28,7 @@ from common.git.workspace_files import (
     create_workspace_directory,
     create_workspace_file,
     delete_workspace_file,
+    remove_git_directory,
     rename_workspace_file,
     write_workspace_file,
 )
@@ -235,6 +237,9 @@ def _rmdir(run: _ShellRun, args: list[str]) -> None:
     if not parsed[1]:
         run.fail("rmdir: missing operand")
     for operand in parsed[1]:
+        if _git_directory_path(run, operand) is not None:
+            run.fail(f"rmdir: {operand}")
+            continue
         path = run.resolve(operand)
         if path is None:
             continue
@@ -256,6 +261,10 @@ def _rm(run: _ShellRun, args: list[str]) -> None:
         if _base_name(operand) in {".", ".."}:
             run.fail(f"rm: refusing to remove {operand}")
             continue
+        git_path = _git_directory_path(run, operand)
+        if git_path is not None:
+            _remove_git_path(run, operand, git_path, flags)
+            continue
         path = run.resolve(operand)
         if path is None:
             continue
@@ -271,6 +280,29 @@ def _rm(run: _ShellRun, args: list[str]) -> None:
             run.fail(f"rm: {operand}: Is a directory")
             continue
         run.mutate(lambda state, path=path: delete_workspace_file(state, path=path))
+
+
+def _git_directory_path(run: _ShellRun, operand: str) -> str | None:
+    """``.git`` or a path inside it, as typed from the working directory."""
+
+    path = resolve_shell_path(run.cwd, operand)
+    return path if path is not None and is_inside_git_directory(path) else None
+
+
+def _remove_git_path(run: _ShellRun, operand: str, path: str, flags: set[str]) -> None:
+    """``rm -r .git`` un-initializes the repository; files inside it are not modelled."""
+
+    if not run.state.get("repository_initialized", True):
+        if "force" not in flags:
+            run.fail(f"rm: {operand}: No such file or directory")
+        return
+    if path != ".git":
+        run.fail(f"rm: {operand}: only the whole .git folder can be removed")
+        return
+    if "recursive" not in flags:
+        run.fail(f"rm: {operand}: Is a directory")
+        return
+    run.mutate(remove_git_directory)
 
 
 def _plan_transfers(run: _ShellRun, operands: list[str], *, copy: bool, recursive: bool):

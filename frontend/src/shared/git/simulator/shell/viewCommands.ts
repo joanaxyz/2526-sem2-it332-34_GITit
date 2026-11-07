@@ -3,40 +3,45 @@ import {
   fail,
   fileContent,
   parseFlags,
+  projectFolder,
   resolveOperand,
+  resolveViewOperand,
   type ShellRun,
+  type ViewTarget,
 } from '@/shared/git/simulator/shell/context'
 import { redirectOutput } from '@/shared/git/simulator/shell/fileCommands'
-import { repositoryFolderName } from '@/shared/level/utils/gitDirectory'
 
-/** Read-only shell commands, plus `cd`, which only moves the terminal. */
-
-function workingDirectoryLabel(projectName: string, cwd: string) {
-  return `/workspace/${projectName}${cwd ? `/${cwd}` : ''}`
-}
+/**
+ * Read-only shell commands, plus `cd`, which only moves the terminal. The
+ * project folder sits in `/workspace`; the terminal can stand there too, which
+ * is where `git init <dir>` and `git clone` leave it until the learner `cd`s in.
+ */
 
 export function pwd(run: ShellRun) {
   // Same folder the Project Files root shows: a named clone/init destination
   // replaces the level's project folder.
-  run.out.push(workingDirectoryLabel(repositoryFolderName(run.state, run.projectName), run.cwd))
+  if (run.outside) return run.out.push('/workspace')
+  run.out.push(`/workspace/${projectFolder(run)}${run.cwd ? `/${run.cwd}` : ''}`)
 }
 
-export function cd(run: ShellRun, args: string[], enterableNames: string[]) {
+export function cd(run: ShellRun, args: string[]) {
   if (args.length > 1) return fail(run, 'cd: too many arguments')
   const operand = args[0] ?? '~'
   if (operand === '-') return fail(run, 'cd: OLDPWD not set')
-  const target = resolveOperand(run, operand)
+  const target = resolveViewOperand(run, operand)
   if ('error' in target) return fail(run, `cd: ${operand}: ${target.error}`)
+  if ('workspace' in target) {
+    run.outside = true
+    run.cwd = ''
+    return
+  }
   const kind = pathKind(run.state, target.path)
   if (kind === 'directory') {
+    run.outside = false
     run.cwd = target.path
     return
   }
-  if (kind === 'file') return fail(run, `cd: ${operand}: Not a directory`)
-  // `git clone <url> <dir>` / `git init <dir>` then `cd <dir>`: the simulator's
-  // project root already is that folder, so entering it keeps you at the root.
-  if (!run.cwd && enterableNames.includes(operand.replace(/\/+$/, ''))) return
-  fail(run, `cd: ${operand}: No such file or directory`)
+  fail(run, `cd: ${operand}: ${kind === 'file' ? 'Not a directory' : 'No such file or directory'}`)
 }
 
 const LS_FLAGS = { a: 'all', A: 'almost-all', l: 'long', '1': 'one', F: 'classify', '--all': 'all' }
@@ -50,11 +55,16 @@ export function ls(run: ShellRun, args: string[]) {
   const { flags } = parsed
   const operands = parsed.operands.length ? parsed.operands : ['.']
   const files: string[] = []
-  const directories: Array<{ operand: string; path: string }> = []
+  // `path: null` is the workspace folder above the project.
+  const directories: Array<{ operand: string; path: string | null }> = []
   for (const operand of operands) {
-    const target = resolveOperand(run, operand)
+    const target = resolveViewOperand(run, operand)
     if ('error' in target) {
       fail(run, `ls: cannot access '${operand}': ${target.error}`, 2)
+      continue
+    }
+    if ('workspace' in target) {
+      directories.push({ operand, path: null })
       continue
     }
     const kind = pathKind(run.state, target.path)
@@ -75,7 +85,8 @@ export function ls(run: ShellRun, args: string[]) {
   if (text) run.out.push(text)
 }
 
-function listingNames(run: ShellRun, path: string, flags: Set<string>) {
+function listingNames(run: ShellRun, path: string | null, flags: Set<string>) {
+  if (path === null) return [...(flags.has('all') ? ['./', '../'] : []), `${projectFolder(run)}/`]
   const showHidden = flags.has('all') || flags.has('almost-all')
   const names = directoryEntries(run.state, path)
     .filter((entry) => showHidden || !entry.name.startsWith('.'))
@@ -98,9 +109,10 @@ export function tree(run: ShellRun, args: string[]) {
   const parsed = parseFlags(run, 'tree', args, { a: 'all' })
   if (!parsed) return
   const operand = parsed.operands[0] ?? '.'
-  const target = resolveOperand(run, operand)
+  const target = resolveViewOperand(run, operand)
   if ('error' in target) return fail(run, `tree: ${operand}: ${target.error}`)
-  const kind = pathKind(run.state, target.path)
+  const path = 'workspace' in target ? '' : target.path
+  const kind = pathKind(run.state, path)
   if (kind !== 'directory') {
     return fail(run, `tree: ${operand}: ${kind === 'file' ? 'Not a directory' : 'No such file or directory'}`)
   }
@@ -121,7 +133,14 @@ export function tree(run: ShellRun, args: string[]) {
       }
     })
   }
-  walk(target.path, '')
+  if ('workspace' in target) {
+    // From /workspace the project folder is the only entry.
+    lines.push(`└── ${projectFolder(run)}`)
+    counts.directories += 1
+    walk('', '    ')
+  } else {
+    walk(path, '')
+  }
   const directoryWord = counts.directories === 1 ? 'directory' : 'directories'
   const fileWord = counts.files === 1 ? 'file' : 'files'
   lines.push('', `${counts.directories} ${directoryWord}, ${counts.files} ${fileWord}`)
@@ -134,9 +153,15 @@ export function cat(run: ShellRun, args: string[], redirect: { append: boolean; 
   if (!parsed.operands.length) return fail(run, 'cat: reading from the keyboard is not supported; name a file')
   const chunks: string[] = []
   for (const operand of parsed.operands) {
-    const target = resolveOperand(run, operand)
+    // `cat a > b` is replayed by the backend, so it resolves like the file
+    // commands; a plain `cat` can also read from the workspace folder.
+    const target: ViewTarget = redirect ? resolveOperand(run, operand) : resolveViewOperand(run, operand)
     if ('error' in target) {
       fail(run, `cat: ${operand}: ${target.error}`)
+      continue
+    }
+    if ('workspace' in target) {
+      fail(run, `cat: ${operand}: Is a directory`)
       continue
     }
     const kind = pathKind(run.state, target.path)

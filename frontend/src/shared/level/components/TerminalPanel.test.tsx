@@ -23,13 +23,13 @@ describe('TerminalPanel', () => {
     expect(screen.getByText('README.md src/', { normalizer: (text) => text.replace(/\s+/g, ' ') })).toBeInTheDocument()
   })
 
-  it('shows the working directory in the live prompt only when inside a folder', () => {
+  it('shows the folder the terminal stands in after the user', () => {
     const { rerender } = render(<TerminalPanel lines={[]} prompt="learner" onCommand={vi.fn()} />)
-    expect(screen.queryByText('~/src/utils')).not.toBeInTheDocument()
+    expect(screen.getByLabelText('Git command')).toBeInTheDocument()
 
-    rerender(<TerminalPanel lines={[]} prompt="learner" cwd="src/utils" onCommand={vi.fn()} />)
-    expect(screen.getByText('~/src/utils')).toBeInTheDocument()
-    expect(screen.getByLabelText('Git command in ~/src/utils')).toBeInTheDocument()
+    rerender(<TerminalPanel lines={[]} prompt="learner" location="demo/src/utils" onCommand={vi.fn()} />)
+    expect(screen.getByText('demo/src/utils')).toBeInTheDocument()
+    expect(screen.getByLabelText('Git command')).toHaveAccessibleDescription('demo/src/utils')
   })
 
   it('keeps the prompt immediately after the output, with Paste in the title bar', () => {

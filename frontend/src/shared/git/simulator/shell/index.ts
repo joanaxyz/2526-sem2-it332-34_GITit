@@ -1,7 +1,7 @@
 import { normalizeState } from '@/shared/git/simulator/state'
 import type { MutableRepositoryState } from '@/shared/git/simulator/types'
 import { parentPath, pathKind } from '@/shared/git/simulator/workspaceTree'
-import { fail, type ShellRun } from '@/shared/git/simulator/shell/context'
+import { fail, projectFolder, type ShellRun } from '@/shared/git/simulator/shell/context'
 import { cp, mkdir, mv, rm, rmdir, touch } from '@/shared/git/simulator/shell/fileCommands'
 import {
   ShellSyntaxError,
@@ -20,17 +20,21 @@ const READ_ONLY_PROGRAMS = new Set(['pwd', 'ls', 'cd', 'tree', 'cat', 'echo', 'c
 const FILE_PROGRAMS = new Set(['touch', 'mkdir', 'rmdir', 'rm', 'mv', 'cp'])
 const REDIRECTABLE_PROGRAMS = new Set(['echo', 'cat'])
 
-export type ShellContext = { cwd?: string; projectName?: string }
+/** `outside`: the terminal stands in `/workspace`, one level above the project folder. */
+export type ShellContext = { cwd?: string; outside?: boolean; projectName?: string }
 
 export type ShellExecution = {
   program: string
   state: MutableRepositoryState
   cwd: string
+  outside: boolean
   stdout: string
   stderr: string
   exitCode: number
   /** True when the command may change the working copy (and so is replayed by the backend). */
   changesFiles: boolean
+  /** True when a file edit was not run because it was typed from the (unsimulated) workspace folder. */
+  refused: boolean
 }
 
 /** The shell program a command starts with, or `null` for git and unknown programs. */
@@ -60,7 +64,8 @@ export function executeShellCommand(
   const state = normalizeState(repositoryState)
   const run: ShellRun = {
     state,
-    cwd: effectiveCwd(state, context.cwd ?? ''),
+    cwd: context.outside ? '' : effectiveCwd(state, context.cwd ?? ''),
+    outside: Boolean(context.outside),
     projectName: context.projectName || 'project',
     out: [],
     err: [],
@@ -74,16 +79,26 @@ export function executeShellCommand(
     if (!(error instanceof ShellSyntaxError)) throw error
     fail(run, `bash: ${error.message}`, 2)
   }
-  if (invocation) runProgram(run, invocation)
+  // Only the project folder is simulated, so a file edit typed from the
+  // workspace folder above it is refused instead of guessed at.
+  const refused = Boolean(invocation && run.outside && changesFiles(invocation))
+  if (invocation && refused) {
+    const folder = projectFolder(run)
+    fail(run, `${invocation.program}: not run: this terminal only edits files inside ${folder}/ (run 'cd ${folder}' first)`)
+  } else if (invocation) {
+    runProgram(run, invocation)
+  }
 
   return {
     program: shellProgram(command) ?? '',
     state: run.state,
-    cwd: effectiveCwd(run.state, run.cwd),
+    cwd: run.outside ? '' : effectiveCwd(run.state, run.cwd),
+    outside: run.outside,
     stdout: run.out.join('\n'),
     stderr: run.err.join('\n'),
     exitCode: run.exitCode,
     changesFiles: changesFiles(invocation),
+    refused,
   }
 }
 
@@ -92,12 +107,15 @@ function runProgram(run: ShellRun, invocation: ShellInvocation) {
   if (redirect && !REDIRECTABLE_PROGRAMS.has(program)) {
     return fail(run, `bash: output redirection is only supported for echo and cat in this terminal`)
   }
-  const args = expandShellWords(run.state, run.cwd, invocation.args)
+  // Globs match project paths, so from the workspace folder they stay literal.
+  const args = run.outside
+    ? invocation.args.map((word) => word.text)
+    : expandShellWords(run.state, run.cwd, invocation.args)
   switch (program) {
     case 'pwd':
       return pwd(run)
     case 'cd':
-      return cd(run, args, enterableNames(run))
+      return cd(run, args)
     case 'ls':
       return ls(run, args)
     case 'tree':
@@ -121,11 +139,4 @@ function runProgram(run: ShellRun, invocation: ShellInvocation) {
     case 'cp':
       return cp(run, args)
   }
-}
-
-function enterableNames(run: ShellRun) {
-  const metadata = run.state.operation_metadata ?? {}
-  return [run.projectName, metadata.last_clone_directory, metadata.last_init_directory].filter(
-    (name): name is string => typeof name === 'string' && name.length > 0,
-  )
 }

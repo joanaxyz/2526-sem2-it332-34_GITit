@@ -251,7 +251,10 @@ class ClientCommandExecutionService:
         )
         classification, increment = CommandCountClassifier().classify(
             command=command,
-            processed=result.processed,
+            # A shell command the terminal refused to run (a file edit typed
+            # from the workspace folder above the project) costs what any
+            # failed shell command costs, not an unrecognised-input miss.
+            processed=result.processed or is_shell,
             # Shell commands never spend the git command budget, including the
             # file-changing ones, which match free Project Files edits.
             diagnostic=(result.diagnostic or is_shell)

@@ -165,15 +165,17 @@ describe('executeGitCommand', () => {
     expect(result.next_state.commits).toEqual([])
   })
 
-  it('treats cd into the project folder itself as a diagnostic no-op', () => {
+  it('treats cd into the project folder from the workspace above it as a diagnostic', () => {
     const state = baseState({
       commits: [{ id: 'c0', message: 'base', parents: [], tree: { 'README.md': 'x' } }],
       branches: { main: 'c0' },
       head: { type: 'branch', name: 'main', target: 'c0' },
       working_tree: { 'README.md': { status: 'modified', content: 'y' } },
     })
-    const result = executeGitCommand(state, 'cd project')
+    const entered = executeTerminalCommand(state, 'cd project', { outside: true })
+    const result = entered.execution
 
+    expect(entered.outside).toBe(false)
     expect(result.processed).toBe(true)
     expect(result.exit_code).toBe(0)
     expect(result.diagnostic).toBe(true)
@@ -181,6 +183,9 @@ describe('executeGitCommand', () => {
     expect(result.next_state.commits.map((c) => c.id)).toEqual(['c0'])
     expect(result.next_state.branches).toEqual({ main: 'c0' })
     expect(Object.keys(result.next_state.working_tree)).toEqual(['README.md'])
+
+    // Already inside it, there is no `project` folder to enter, like a real shell.
+    expect(executeGitCommand(state, 'cd project').output).toBe('cd: project: No such file or directory')
   })
 
   it('runs shell folder commands before a repository exists', () => {
