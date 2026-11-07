@@ -1,8 +1,8 @@
-import { ArrowRight, Flag, Lightbulb, MapPin, Target } from 'lucide-react'
 import { useEffect, useId, useRef } from 'react'
 
 import { Modal } from '@/shared/components/Modal'
 import { ScenarioInline } from '@/shared/level/components/ScenarioInline'
+import { GuideCharacterPortrait } from '@/shared/mascot/GuideCharacterPortrait'
 
 function StoryParagraphs({ text }: { text: string }) {
   return text.trim().split(/\n\s*\n/).filter(Boolean).map((paragraph, index) => (
@@ -63,25 +63,40 @@ export function WorkspaceStoryModal({
       overlayClassName="tier-story-overlay"
       contentClassName="tier-story-modal__body"
     >
-      <div className="tier-story-modal__reading" onClick={(event) => {
+      <div className="tier-story-modal__topbar" aria-hidden="true">
+        <span className="tier-story-modal__badge">Mission Briefing</span>
+      </div>
+
+      <div className="tier-story-modal__layout" onClick={(event) => {
         // Selecting a path or passage should not dismiss the briefing.
         if (window.getSelection()?.toString().trim()) event.stopPropagation()
       }}>
-        <header className="tier-story-modal__header">
-          <p className="tier-story-modal__eyebrow">Mission briefing</p>
-          <p className="tier-story-modal__title" aria-hidden="true">{title}</p>
-        </header>
 
-        {taskText ? (
-          <section className="tier-story-modal__mission" aria-labelledby={`${headingId}-task`}>
-            <h3 id={`${headingId}-task`} className="tier-story-modal__heading"><Target aria-hidden="true" />Your task</h3>
-            <StoryParagraphs text={taskText} />
-          </section>
-        ) : null}
+        {/* Left — Guide character */}
+        <div className="tier-story-modal__character" aria-hidden="true">
+          <GuideCharacterPortrait
+            className="tier-story-modal__portrait"
+            alt=""
+            width={200}
+            height={250}
+          />
+        </div>
 
-        <div className={`tier-story-modal__spread${introText ? ' has-story' : ''}${startingPointText || result ? ' has-reference' : ''}`}>
+        {/* Center — title + task + situation */}
+        <div className="tier-story-modal__center">
+          <header className="tier-story-modal__header">
+            <p className="tier-story-modal__title" aria-hidden="true">{title}</p>
+          </header>
+
+          {taskText ? (
+            <section className="tier-story-modal__panel tier-story-modal__mission" aria-labelledby={`${headingId}-task`}>
+              <h3 id={`${headingId}-task`} className="tier-story-modal__heading">Your task</h3>
+              <StoryParagraphs text={taskText} />
+            </section>
+          ) : null}
+
           {introText ? (
-            <section className="tier-story-modal__story" aria-labelledby={`${headingId}-situation`}>
+            <section className="tier-story-modal__panel tier-story-modal__story" aria-labelledby={`${headingId}-situation`}>
               <h3 id={`${headingId}-situation`} className="tier-story-modal__heading">The situation</h3>
               <div className="tier-story-modal__prose">
                 <StoryParagraphs text={introText} />
@@ -89,38 +104,36 @@ export function WorkspaceStoryModal({
             </section>
           ) : null}
 
-          {startingPointText || result ? (
-            <div className="tier-story-modal__reference">
-              {startingPointText ? (
-                <section aria-labelledby={`${headingId}-starting-point`}>
-                  <h3 id={`${headingId}-starting-point`} className="tier-story-modal__heading"><MapPin aria-hidden="true" />Starting point</h3>
-                  <StoryParagraphs text={startingPointText} />
-                </section>
-              ) : null}
-              {result ? (
-                <section aria-labelledby={`${headingId}-expected-result`}>
-                  <h3 id={`${headingId}-expected-result`} className="tier-story-modal__heading"><Flag aria-hidden="true" />Expected result</h3>
-                  <StoryParagraphs text={result} />
-                </section>
-              ) : null}
-            </div>
-          ) : null}
+          {hasStory ? null : <p className="tier-story-modal__empty">No story is available for this level.</p>}
         </div>
 
-        {context ? (
-          <section className="tier-story-modal__context" aria-labelledby={`${headingId}-context`}>
-            <h3 id={`${headingId}-context`} className="tier-story-modal__heading"><Lightbulb aria-hidden="true" />Why this matters</h3>
-            <StoryParagraphs text={context} />
-          </section>
+        {/* Right — reference panels */}
+        {(startingPointText || result || context) ? (
+          <div className="tier-story-modal__right">
+            {startingPointText ? (
+              <section className="tier-story-modal__panel" aria-labelledby={`${headingId}-starting-point`}>
+                <h3 id={`${headingId}-starting-point`} className="tier-story-modal__heading">Starting point</h3>
+                <StoryParagraphs text={startingPointText} />
+              </section>
+            ) : null}
+            {result ? (
+              <section className="tier-story-modal__panel" aria-labelledby={`${headingId}-expected-result`}>
+                <h3 id={`${headingId}-expected-result`} className="tier-story-modal__heading">Expected result</h3>
+                <StoryParagraphs text={result} />
+              </section>
+            ) : null}
+            {context ? (
+              <section className="tier-story-modal__panel tier-story-modal__context" aria-labelledby={`${headingId}-context`}>
+                <h3 id={`${headingId}-context`} className="tier-story-modal__heading">Why this matters</h3>
+                <StoryParagraphs text={context} />
+              </section>
+            ) : null}
+          </div>
         ) : null}
-        {hasStory ? null : <p className="tier-story-modal__empty">No story is available for this level.</p>}
       </div>
 
       <footer className="tier-story-modal__footer">
-        <p className="tier-story-modal__continue">
-          Click anywhere to begin <ArrowRight aria-hidden="true" />
-        </p>
-        <span className="tier-story-modal__keyboard">or press <kbd>Enter</kbd></span>
+        <p className="tier-story-modal__continue">Begin Mission</p>
       </footer>
     </Modal>
   )

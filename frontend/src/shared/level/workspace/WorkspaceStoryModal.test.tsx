@@ -29,7 +29,7 @@ describe('WorkspaceStoryModal', () => {
     expect(follows(screen.getByText(story.intro), startingPoint)).toBe(true)
     expect(follows(startingPoint, expectedResult)).toBe(true)
     expect(follows(expectedResult, context)).toBe(true)
-    expect(follows(context, screen.getByText(/click anywhere to begin/i))).toBe(true)
+    expect(follows(context, screen.getByText(/begin mission/i))).toBe(true)
     expect(screen.queryByRole('button')).not.toBeInTheDocument()
     expect(within(task).getByText(story.task).tagName).toBe('P')
     expect(within(startingPoint).getByText(story.startingPoint).tagName).toBe('P')
@@ -44,7 +44,7 @@ describe('WorkspaceStoryModal', () => {
     const dialog = screen.getByRole('dialog')
     if (action === 'backdrop') fireEvent.click(dialog)
     else if (action === 'story') fireEvent.click(screen.getByText(story.intro))
-    else if (action === 'hint') fireEvent.click(screen.getByText(/click anywhere to begin/i))
+    else if (action === 'hint') fireEvent.click(screen.getByText(/begin mission/i))
     else fireEvent.keyDown(dialog, {
       key: action === 'space' ? ' ' : action === 'escape' ? 'Escape' : 'Enter',
       ctrlKey: action === 'ctrl', metaKey: action === 'meta',
