@@ -142,6 +142,62 @@ export function deleteWorkspaceFile(repositoryState: MutableRepositoryState, { p
   return normalizeState(nextState)
 }
 
+/** In-progress operation state that lives inside `.git` (MERGE_HEAD, rebase-merge/, ...). */
+const GIT_DIRECTORY_KEYS = [
+  'repository_root',
+  'merge_parent',
+  'merge_abort_state',
+  'rebase_state',
+  'cherry_pick_in_progress',
+  'cherry_pick_original_head',
+  'cherry_pick_source',
+  'cherry_pick_message',
+] as const
+
+/**
+ * Delete the `.git` folder (`rm -rf .git`). The folder stops being a
+ * repository: history, branches, tags, remotes, stashes and the index go with
+ * it, and every file on disk stays exactly as it was, now plain untracked
+ * content. `git init` afterwards starts a fresh repository around them.
+ */
+export function removeGitDirectory(repositoryState: MutableRepositoryState) {
+  const state = normalizeState(clone(repositoryState))
+  const workingTree: Record<string, RepositoryValue> = {}
+  for (const [path, entry] of Object.entries(visibleProjectTree(state, true))) {
+    const status = entryStatus(entry)
+    if (isDeleteMarker(status)) continue
+    workingTree[path] = {
+      status: status === 'ignored' ? 'ignored' : 'untracked',
+      content: entryContent(entry),
+    }
+  }
+  for (const key of GIT_DIRECTORY_KEYS) delete state[key]
+  Object.assign(state, {
+    repository_initialized: false,
+    commits: [],
+    branches: {},
+    head: { type: 'branch', name: 'main', target: null },
+    staging: {},
+    working_tree: workingTree,
+    conflicts: [],
+    conflict_details: {},
+    remotes: {},
+    remote_branches: {},
+    upstream_tracking: {},
+    tags: {},
+    remote_tags: {},
+    stash_stack: [],
+    reflog: [],
+    partial_hunks: {},
+    replaced_commits: {},
+  })
+  setOperationMetadata(state, {
+    last_workspace_file_deleted: '.git',
+    last_workspace_file_deleted_paths: [],
+  })
+  return normalizeState(state)
+}
+
 /**
  * Rename or move a file or folder (with everything inside it). The source's
  * containing folder stays on disk, and empty folders move along.

@@ -6,7 +6,7 @@ import { executeTerminalCommand } from '@/shared/git/simulator/engine'
 import { snapshot } from '@/shared/git/simulator/state'
 import type { MutableRepositoryState } from '@/shared/git/simulator/types'
 import { withClientRunRevision } from '@/shared/level/commandExecution'
-import { setTerminalCwd, terminalCwd } from '@/shared/level-runtime/terminalCwd'
+import { setTerminalLocation, terminalLocation, type TerminalLocation } from '@/shared/level-runtime/terminalCwd'
 import { nextEphemeralStepId, stripEphemeralSteps } from '@/shared/level/terminalSteps'
 import type { CommandExecutionPayload, RepositorySnapshot, TerminalStep } from '@/shared/level/types'
 
@@ -18,7 +18,7 @@ type OptimisticCommandSession<TStep extends TerminalStep> = {
   projectName?: string
 }
 
-type MutationContext<TRun> = { previous?: TRun; previousCwd?: string }
+type MutationContext<TRun> = { previous?: TRun; previousLocation?: TerminalLocation }
 
 /** A command already simulated, shown and sent before the mutation started. */
 type PreparedCommand<TRun, TResponse> = {
@@ -55,14 +55,15 @@ export function useOptimisticGitCommand<TRun, TStep extends TerminalStep, TRespo
   const pendingExecutionRef = useRef<CommandExecutionPayload | null>(null)
   const preparedRef = useRef<PreparedCommand<TRun, TResponse> | null>(null)
 
-  // Runs the command in the terminal's working directory and moves the
-  // terminal there right away; `onError` restores the previous folder.
+  // Runs the command where the terminal stands and moves the terminal right
+  // away; `onError` restores the previous location.
   function runInTerminal(session: OptimisticCommandSession<TStep>, command: string) {
+    const location = terminalLocation(config.queryKey)
     const terminal = executeTerminalCommand(session.repositoryState, command, {
-      cwd: terminalCwd(config.queryKey),
+      ...location,
       projectName: session.projectName,
     })
-    setTerminalCwd(config.queryKey, terminal.cwd)
+    setTerminalLocation(config.queryKey, terminal)
     return withClientRunRevision(terminal.execution, session.revision)
   }
 
@@ -95,14 +96,14 @@ export function useOptimisticGitCommand<TRun, TStep extends TerminalStep, TRespo
     const previous = queryClient.getQueryData<TRun>(config.queryKey)
     const session = previous ? config.readSession(previous) : null
     if (!previous || !session) return null
-    const previousCwd = terminalCwd(config.queryKey)
+    const previousLocation = terminalLocation(config.queryKey)
     const execution = runInTerminal(session, command)
     pendingExecutionRef.current = execution
     const request = config.submit(command, execution)
     // The mutation awaits this request; mark it handled until it does.
     request.catch(() => undefined)
     showOptimisticState(previous, session, command, execution)
-    return { execution, request, context: { previous, previousCwd } }
+    return { execution, request, context: { previous, previousLocation } }
   }
 
   const mutation = useMutation<TResponse, unknown, string, MutationContext<TRun>>({
@@ -122,14 +123,14 @@ export function useOptimisticGitCommand<TRun, TStep extends TerminalStep, TRespo
       if (prepared) return prepared.context
       await queryClient.cancelQueries({ queryKey: config.queryKey })
       const previous = queryClient.getQueryData<TRun>(config.queryKey)
-      const previousCwd = terminalCwd(config.queryKey)
+      const previousLocation = terminalLocation(config.queryKey)
       const session = previous ? config.readSession(previous) : null
-      if (!previous || !session) return { previous, previousCwd }
+      if (!previous || !session) return { previous, previousLocation }
 
       const execution = runInTerminal(session, command)
       pendingExecutionRef.current = execution
       showOptimisticState(previous, session, command, execution)
-      return { previous, previousCwd }
+      return { previous, previousLocation }
     },
     onSuccess: (response, _command, context) => {
       pendingExecutionRef.current = null
@@ -137,7 +138,7 @@ export function useOptimisticGitCommand<TRun, TStep extends TerminalStep, TRespo
     },
     onError: (error, command, context) => {
       pendingExecutionRef.current = null
-      if (context?.previousCwd !== undefined) setTerminalCwd(config.queryKey, context.previousCwd)
+      if (context?.previousLocation) setTerminalLocation(config.queryKey, context.previousLocation)
       const previous = context?.previous
       const session = previous ? config.readSession(previous) : null
       if (!previous || !session) return

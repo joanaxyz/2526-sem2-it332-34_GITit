@@ -22,6 +22,7 @@ import {
 } from '@/shared/git/simulator/types'
 import { normalizeState } from '@/shared/git/simulator/state'
 import { rebaseGitPathspecs } from '@/shared/git/simulator/gitPathspecs'
+import { pathKind } from '@/shared/git/simulator/workspaceTree'
 import {
   effectiveCwd,
   executeShellCommand,
@@ -35,6 +36,8 @@ export type TerminalExecution = {
   execution: CommandExecutionPayload
   /** Working directory after the command (project-relative, `''` is the root). */
   cwd: string
+  /** True when the terminal now stands in the workspace folder above the project. */
+  outside: boolean
 }
 
 /**
@@ -42,6 +45,11 @@ export type TerminalExecution = {
  * `mkdir`, ...) or a git command. `context.cwd` is the terminal's working
  * directory; git pathspecs are read relative to it like real git. The payload
  * carries the directory the command ran in so the backend can replay it.
+ *
+ * `context.outside` means the learner stands in the workspace folder above the
+ * project, where `git init <dir>` and `git clone` leave them until they `cd`
+ * in. Git still runs against the project there (authored scenarios clone and
+ * keep going), so this only changes what the shell shows and allows.
  */
 export function executeTerminalCommand(
   repositoryState: MutableRepositoryState,
@@ -49,13 +57,16 @@ export function executeTerminalCommand(
   context: TerminalContext = {},
 ): TerminalExecution {
   const state = normalizeState(repositoryState)
-  const cwd = effectiveCwd(state, context.cwd ?? '')
+  const outside = Boolean(context.outside)
+  const cwd = outside ? '' : effectiveCwd(state, context.cwd ?? '')
   const withCwd = (execution: CommandExecutionPayload) => (cwd ? { ...execution, cwd } : execution)
 
   if (shellProgram(command)) {
-    const shell = executeShellCommand(state, command, { ...context, cwd })
+    const shell = executeShellCommand(state, command, { ...context, cwd, outside })
     const execution = result({
-      processed: true,
+      // A file edit the simulator cannot place (outside the project folder)
+      // is not run, so the backend has nothing to replay.
+      processed: !shell.refused,
       state: shell.state,
       output: [shell.stdout, shell.stderr].filter(Boolean).join('\n'),
       normalizedCommand: collapseWhitespace(command),
@@ -68,13 +79,34 @@ export function executeTerminalCommand(
       diagnostic: !shell.changesFiles,
       diagnosticMetadata: shell.program === 'cd' ? ['changed_directory'] : [],
     })
-    return { execution: withCwd(execution), cwd: shell.cwd }
+    return { execution: withCwd(execution), cwd: shell.cwd, outside: shell.outside }
   }
 
   const rootCommand = rebaseGitPathspecs(command, cwd)
   const execution = runGitCommand(state, rootCommand)
   if (rootCommand !== command) execution.normalized_command = normalizedGitCommand(command)
-  return { execution: withCwd(execution), cwd }
+  if (createdNamedRepositoryFolder(state, execution)) return { execution: withCwd(execution), cwd: '', outside: true }
+  return { execution: withCwd(execution), cwd, outside }
+}
+
+/**
+ * `git init <dir>` and `git clone <url> [<dir>]` create the repository in a new
+ * folder and leave the shell where it was, one level above it. The simulator
+ * shows that new folder as the project, so the terminal moves to the workspace
+ * above it. `git init` on a folder already inside the project stays put: that
+ * repository really is a subfolder.
+ */
+function createdNamedRepositoryFolder(before: MutableRepositoryState, execution: CommandExecutionPayload) {
+  if (!execution.processed || execution.exit_code !== 0) return false
+  if (execution.command_family === 'clone') return true
+  if (execution.command_family !== 'init') return false
+  const metadata = execution.next_state.operation_metadata
+  const directory = metadata && typeof metadata === 'object' && !Array.isArray(metadata)
+    ? metadata.last_init_directory
+    : null
+  if (typeof directory !== 'string') return false
+  const folder = directory.replace(/\/+$/, '')
+  return folder !== '' && folder !== '.' && pathKind(before, folder) !== 'directory'
 }
 
 export function executeGitCommand(

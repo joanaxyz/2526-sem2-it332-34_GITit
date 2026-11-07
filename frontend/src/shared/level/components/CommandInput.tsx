@@ -1,4 +1,4 @@
-import { useEffect, useImperativeHandle, useRef, useState } from 'react'
+import { useEffect, useId, useImperativeHandle, useRef, useState } from 'react'
 import type { FormEvent, KeyboardEvent, Ref } from 'react'
 
 export type CommandInputHandle = { paste: () => Promise<void> }
@@ -6,7 +6,7 @@ export type CommandInputHandle = { paste: () => Promise<void> }
 export function CommandInput({
   ref,
   prompt,
-  cwd,
+  location,
   disabled,
   runDisabled,
   processing,
@@ -14,8 +14,8 @@ export function CommandInput({
 }: {
   ref?: Ref<CommandInputHandle>
   prompt: string
-  /** Working directory shown after the user, as `~/<folder>` (`~` is the project root). */
-  cwd?: string
+  /** Folder the terminal stands in, shown after the user (e.g. `my-repo/src`). */
+  location?: string
   disabled?: boolean
   runDisabled?: boolean
   processing?: boolean
@@ -26,6 +26,7 @@ export function CommandInput({
   const [cursor, setCursor] = useState<number | null>(null)
   const [pasteStatus, setPasteStatus] = useState<'idle' | 'pasted' | 'empty' | 'unavailable'>('idle')
   const inputRef = useRef<HTMLInputElement>(null)
+  const locationId = useId()
   const pasteResetTimerRef = useRef<number | null>(null)
 
   useEffect(() => {
@@ -130,13 +131,15 @@ export function CommandInput({
     >
       <span className="command-input-prompt" aria-hidden="true">
         <span>{prompt}</span>
-        {cwd ? <em className="command-input-cwd">~/{cwd}</em> : null}
+        {location ? <em id={locationId} className="command-input-cwd">{location}</em> : null}
         <small>$ </small>
       </span>
       <input
         ref={inputRef}
         data-command-input
-        aria-label={cwd ? `Git command in ~/${cwd}` : 'Git command'}
+        aria-label="Git command"
+        // The folder is a description, so the input keeps one name as you `cd`.
+        aria-describedby={location ? locationId : undefined}
         className="command-input-field"
         value={value}
         onChange={(event) => setValue(event.target.value)}

@@ -25,17 +25,30 @@ function repo(overrides: Partial<MutableRepositoryState> = {}): MutableRepositor
   }
 }
 
-/** Run commands in order, threading state and cwd like the terminal does. */
+/** Run commands in order, threading state and location like the terminal does. */
 function session(commands: string[], start = repo()) {
   let state = start
   let cwd = ''
+  let outside = false
   const executions = commands.map((command) => {
-    const terminal = executeTerminalCommand(state, command, { cwd, projectName: 'demo' })
+    const terminal = executeTerminalCommand(state, command, { cwd, outside, projectName: 'demo' })
     state = terminal.execution.next_state
     cwd = terminal.cwd
+    outside = terminal.outside
     return terminal.execution
   })
-  return { state, cwd, executions, last: executions.at(-1)! }
+  return { state, cwd, outside, executions, last: executions.at(-1)! }
+}
+
+function emptyFolder(overrides: Partial<MutableRepositoryState> = {}) {
+  return repo({
+    repository_initialized: false,
+    commits: [],
+    branches: {},
+    head: { type: 'branch', name: 'main', target: null },
+    working_tree: { 'recipes.md': { status: 'untracked', content: 'soup\n' } },
+    ...overrides,
+  })
 }
 
 describe('workspace shell', () => {
@@ -50,7 +63,7 @@ describe('workspace shell', () => {
     const { cwd, executions } = session(['cd src', 'pwd', 'cd ..', 'pwd'])
     expect(executions.map((execution) => execution.output)).toEqual(['', '/workspace/demo/src', '', '/workspace/demo'])
     expect(cwd).toBe('')
-    expect(session(['cd ..']).last.output).toBe('cd: ..: outside the project folder')
+    expect(session(['cd ..', 'cd ..']).last.output).toBe('cd: ..: outside the project folder')
     expect(session(['cd README.md']).last.output).toBe('cd: README.md: Not a directory')
   })
 
@@ -164,10 +177,74 @@ describe('workspace shell', () => {
     expect(named.state.staging).toEqual({})
   })
 
-  it('enters the folder a clone just created from the project root', () => {
-    const cloned = session(['cd demo', 'pwd'])
-    expect(cloned.executions.map((execution) => execution.exit_code)).toEqual([0, 0])
-    expect(cloned.last.output).toBe('/workspace/demo')
+  it('steps up into the workspace folder and back into the project', () => {
+    const { executions, outside } = session(['cd ..', 'pwd', 'ls', 'ls -a', 'tree', 'cat demo/README.md', 'cd demo/src', 'pwd'])
+    expect(executions.map((execution) => execution.output)).toEqual([
+      '',
+      '/workspace',
+      'demo/',
+      './  ../  demo/',
+      ['.', '└── demo', '    ├── README.md', '    └── src', '        ├── app.ts', '        └── util.ts', '', '2 directories, 3 files'].join('\n'),
+      'hello',
+      '',
+      '/workspace/demo/src',
+    ])
+    expect(outside).toBe(false)
+    expect(session(['cd demo']).last.output).toBe('cd: demo: No such file or directory')
+    expect(session(['cd ../demo', 'pwd']).last.output).toBe('/workspace/demo')
+    expect(session(['cd /workspace', 'cd missing']).last.output).toBe('cd: missing: No such file or directory')
+  })
+
+  it('leaves the learner above a folder made by git init <dir> until they cd in, like a real shell', () => {
+    const { executions, outside } = session(['git init df', 'pwd', 'ls', 'cd df', 'pwd', 'cd df'], emptyFolder())
+    expect(executions.map((execution) => [execution.exit_code, execution.output])).toEqual([
+      [0, 'Initialized empty Git repository in df/.git/'],
+      [0, '/workspace'],
+      [0, 'df/'],
+      [0, ''],
+      [0, '/workspace/df'],
+      [1, 'cd: df: No such file or directory'],
+    ])
+    expect(outside).toBe(false)
+    expect(session(['git init'], emptyFolder()).outside).toBe(false)
+  })
+
+  it('refuses file edits from the workspace folder instead of guessing where they go', () => {
+    const { state, last } = session(['git init df', 'touch notes.md'], emptyFolder())
+    expect(last).toMatchObject({ processed: false, diagnostic: false, command_family: 'touch', exit_code: 1 })
+    expect(last.output).toBe("touch: not run: this terminal only edits files inside df/ (run 'cd df' first)")
+    expect(state.working_tree['notes.md']).toBeUndefined()
+  })
+
+  it('deletes the repository with rm -rf .git and keeps every file as untracked', () => {
+    const edited = session(['echo draft > notes.md', 'git add notes.md', 'rm -rf .git'])
+    expect(edited.last).toMatchObject({ processed: true, diagnostic: false, exit_code: 0, output: '' })
+    expect(edited.state.repository_initialized).toBe(false)
+    expect(edited.state.commits).toEqual([])
+    expect(edited.state.branches).toEqual({})
+    expect(edited.state.staging).toEqual({})
+    expect(edited.state.working_tree).toEqual({
+      '.gitignore': { status: 'untracked', content: '*.log\n' },
+      'README.md': { status: 'untracked', content: 'hello\n' },
+      'notes.md': { status: 'untracked', content: 'draft\n' },
+      'src/app.ts': { status: 'untracked', content: 'app' },
+      'src/util.ts': { status: 'untracked', content: 'util' },
+    })
+
+    const after = session(['rm -rf .git', 'ls -a', 'git status', 'git init', 'git status'])
+    expect(after.executions[1].output).toBe('./  ../  .gitignore  README.md  src/')
+    expect(after.executions[2].output).toContain('not a git repository')
+    expect(after.executions[3].output).toBe('Initialized empty Git repository')
+    expect(after.last.output).toContain('Untracked files')
+  })
+
+  it('treats .git like a real folder for rm and rmdir', () => {
+    expect(session(['rm .git']).last.output).toBe("rm: cannot remove '.git': Is a directory")
+    expect(session(['rmdir .git']).last.output).toBe("rmdir: failed to remove '.git': Directory not empty")
+    expect(session(['rm -rf .git/HEAD']).last.output).toBe("rm: cannot remove '.git/HEAD': only the whole .git folder can be removed")
+    expect(session(['cd src', 'rm -r ../.git']).state.repository_initialized).toBe(false)
+    expect(session(['rm -rf .git', 'rm -rf .git']).last).toMatchObject({ exit_code: 0, output: '' })
+    expect(session(['rm -rf .git', 'rm -r .git']).last.output).toBe("rm: cannot remove '.git': No such file or directory")
   })
 
   it('names the working directory after a named clone destination', () => {

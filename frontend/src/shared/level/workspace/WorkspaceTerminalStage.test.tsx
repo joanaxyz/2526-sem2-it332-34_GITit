@@ -1,11 +1,12 @@
-import { cleanup, render, screen } from '@testing-library/react'
+import { act, cleanup, render, screen } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { setTerminalLocation } from '@/shared/level-runtime/terminalCwd'
 import type { WorkspaceRun } from '@/shared/level/workspace/types'
 
 import { WorkspaceTerminalStage } from './WorkspaceTerminalStage'
 
-const scene = { runQueryKey: ['tier-run', 1] }
+const scene = { runQueryKey: ['tier-run', 1], rootName: 'demo' }
 
 function makeRun(): WorkspaceRun {
   return {
@@ -29,7 +30,10 @@ function makeRun(): WorkspaceRun {
   } as unknown as WorkspaceRun
 }
 
-afterEach(cleanup)
+afterEach(() => {
+  cleanup()
+  setTerminalLocation(scene.runQueryKey, { cwd: '', outside: false })
+})
 
 describe('WorkspaceTerminalStage', () => {
   it('keeps command-guide navigation out of the terminal title bar', () => {
@@ -81,6 +85,30 @@ describe('WorkspaceTerminalStage', () => {
       />,
     )
     expect(screen.getByRole('log')).toContainElement(screen.getByLabelText('Git command'))
+    expect(screen.getByLabelText('Git command')).toHaveAccessibleDescription('demo')
     expect(document.querySelector('.terminal-input-dock')).toBeNull()
+  })
+
+  it('names the repository folder in the prompt, and the workspace above it once the learner leaves', () => {
+    const run = makeRun()
+    run.repository_state = {
+      ...run.repository_state,
+      operation_metadata: { last_init_directory: 'df' },
+    }
+    render(
+      <WorkspaceTerminalStage
+        run={run}
+        scene={scene}
+        lines={[]}
+        prompt="learner"
+        mutationPending={false}
+        dagAnimating={false}
+        battleAnimating={false}
+        onCommand={vi.fn()}
+      />,
+    )
+    expect(screen.getByLabelText('Git command')).toHaveAccessibleDescription('df')
+    act(() => setTerminalLocation(scene.runQueryKey, { cwd: '', outside: true }))
+    expect(screen.getByLabelText('Git command')).toHaveAccessibleDescription('workspace')
   })
 })
