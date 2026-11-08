@@ -59,11 +59,11 @@ services:
       # DJANGO_TRUST_PROXY_HEADERS below turns on USE_X_FORWARDED_HOST, and
       # Vercel forwards the Vercel domain in X-Forwarded-Host, so once the
       # SPA is live APPEND the Vercel hostname here, comma separated:
-      #   git-it-app-czpy.onrender.com,your-project.vercel.app
+      #   git-it-app.onrender.com,your-project.vercel.app
       # Hostnames only. A scheme or a trailing slash never matches and makes
       # Django reject every request with DisallowedHost.
       - key: DJANGO_ALLOWED_HOSTS
-        value: git-it-app-czpy.onrender.com,git-it-34.vercel.app
+        value: git-it-app.onrender.com,git-it-34.vercel.app
 
       # Password-reset links. Render no longer serves the SPA, so point this
       # at the Vercel origin once it exists. Must be an https:// origin or
