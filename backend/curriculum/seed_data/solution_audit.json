@@ -146,15 +146,14 @@
       "level": "initializing-a-local-repository",
       "difficulty": "easy",
       "scenario": "track-this-folder",
-      "objective": "Initialize the current directory as a Git repository, explicitly choosing `main` as its initial branch during initialization.\n\n**Do not stage files or create a commit.**",
+      "objective": "Make the current folder a Git repository with `main` as its current branch.\n\nYou may choose the branch during initialization or rename it afterward. Re-running `git init` is safe, but its initial-branch option does not rename an existing branch.\n\n**Do not stage files or create a commit.**",
       "documented_alternatives": [
         "Pattern: `git init -b main`. Equivalent syntax: `git init --initial-branch=main` or `git init --initial-branch main`. Option order does not matter; the current folder may be written explicitly as `.`. Not accepted: `git init --bare`, a different branch name or capitalization (`Main`), initializing another folder, staging or committing files.",
-        "Explicit initial-branch selection is required when creating this repository. Not accepted: `git init` alone, initializing on another branch and renaming it to main, or reinitializing an existing repository with an initial-branch option.",
+        "`git init` or `git init .` is accepted when the default branch is already `main`.",
+        "Initializing on another branch and then using `git branch -m main` is accepted. Re-running `git init` is accepted when the repository is already on `main`; an initial-branch option on reinitialization does not rename an existing branch.",
         "Common patterns that apply: P19."
       ],
-      "required_techniques": [
-        "init:initial-branch:main"
-      ],
+      "required_techniques": [],
       "routes": [
         {
           "name": "authored",
@@ -191,6 +190,45 @@
           "accepted": true,
           "gaps": [],
           "status": "accepted"
+        },
+        {
+          "name": "documented-1-5",
+          "kind": "syntax",
+          "commands": [
+            "git init"
+          ],
+          "files": [],
+          "counted_commands": 1,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "documented-1-6",
+          "kind": "syntax",
+          "commands": [
+            "git init ."
+          ],
+          "files": [],
+          "counted_commands": 1,
+          "accepted": true,
+          "gaps": [],
+          "status": "accepted"
+        },
+        {
+          "name": "documented-1-7",
+          "kind": "workflow",
+          "commands": [
+            "git branch -m main"
+          ],
+          "files": [],
+          "counted_commands": 1,
+          "accepted": false,
+          "gaps": [
+            "repository_initialized is False.",
+            "The repository is at None, expected '.'."
+          ],
+          "status": "objective_or_technique_mismatch"
         }
       ],
       "rejected_approaches": [

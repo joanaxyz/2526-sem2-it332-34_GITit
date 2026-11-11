@@ -60,8 +60,8 @@ def test_initial_branch_evidence_requires_verified_creation_and_the_correct_valu
     }
 
 
-def test_initial_branch_requirement_is_scoped_to_the_teaching_variant():
-    assert required_techniques("init-easy-current-empty") == [TECHNIQUE]
+def test_initialization_tasks_grade_the_resulting_repository_state():
+    assert required_techniques("init-easy-current-empty") == []
     assert required_techniques("init-easy-plain-notes") == []
     assert required_techniques("init-easy-trunk-branch") == []
     assert technique_label(TECHNIQUE) == "git init -b main"

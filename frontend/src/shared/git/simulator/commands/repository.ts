@@ -7,16 +7,17 @@ import { SimulatorCommandError, type CommandOutcome, type MutableRepositoryState
 export function gitInit(state: MutableRepositoryState, parsed: ParsedGitCommand): CommandOutcome {
   const reinitialized = Boolean(state.repository_initialized)
   const branchValues = optionValues(parsed, '-b', '--initial-branch')
-  const branch = String(branchValues.at(-1) ?? headBranch(state) ?? 'main')
+  // Git ignores --initial-branch when the repository already exists.
+  const branch = String((reinitialized ? headBranch(state) : branchValues.at(-1)) ?? headBranch(state) ?? 'main')
   const directory = parsed.args[0] ?? null
   const quiet = hasOption(parsed, '-q') || hasOption(parsed, '--quiet')
   state.repository_initialized = true
   // Where the repository's .git lives, from the project root: graded as state.
-  if (!reinitialized) state.repository_root = directory ?? '.'
-  state.head = { type: 'branch', name: branch, target: state.branches?.[branch] ?? null }
-  state.branches ??= {}
-  state.branches[branch] ??= null
   if (!reinitialized) {
+    state.repository_root = directory ?? '.'
+    state.head = { type: 'branch', name: branch, target: state.branches?.[branch] ?? null }
+    state.branches ??= {}
+    state.branches[branch] ??= null
     state.commits = []
     state.staging = {}
     // `git init` only adds the .git metadata; existing files stay in place as

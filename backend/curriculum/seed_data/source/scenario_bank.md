@@ -20,14 +20,16 @@ Teams often begin with an ordinary folder. Initializing it gives Git a place to 
 
 **Your Task**
 
-Initialize the current directory as a Git repository, explicitly choosing `main` as its initial branch during initialization.
+Make the current folder a Git repository with `main` as its current branch.
+
+You may choose the branch during initialization or rename it afterward. Re-running `git init` is safe, but its initial-branch option does not rename an existing branch.
 
 **Do not stage files or create a commit.**
 
 **Objective Checklist**
 
 - [ ] Initialize the current folder as a Git repository.
-- [ ] Set main as the initial branch during initialization.
+- [ ] The current branch is main.
 - [ ] Nothing is staged and no commit exists.
 
 **Answer Key**
@@ -37,12 +39,13 @@ Initialize the current directory as a Git repository, explicitly choosing `main`
 **Accepted Alternatives**
 
 - Pattern: `git init -b main`. Equivalent syntax: `git init --initial-branch=main` or `git init --initial-branch main`. Option order does not matter; the current folder may be written explicitly as `.`. Not accepted: `git init --bare`, a different branch name or capitalization (`Main`), initializing another folder, staging or committing files.
-- Explicit initial-branch selection is required when creating this repository. Not accepted: `git init` alone, initializing on another branch and renaming it to main, or reinitializing an existing repository with an initial-branch option.
+- `git init` or `git init .` is accepted when the default branch is already `main`.
+- Initializing on another branch and then using `git branch -m main` is accepted. Re-running `git init` is accepted when the repository is already on `main`; an initial-branch option on reinitialization does not rename an existing branch.
 - Common patterns that apply: P19.
 
 **Not accepted**
 
-- Plain `git init` creates a valid repository but does not demonstrate choosing its initial branch. Start a fresh attempt and explicitly choose main during initialization.
+- Leaving the repository on a branch other than `main`, initializing another folder, staging files, or creating a commit.
 
 **Expected Result**
 
@@ -50,7 +53,7 @@ The current folder is now a repository on `main`. It has no commits and nothing 
 
 **Evaluation**
 
-- Repository at `.`; HEAD on `main`; 0 commits; nothing staged; backend-verified repository creation explicitly selected main as the initial branch.
+- Repository at `.`; HEAD on `main`; 0 commits; nothing staged.
 - Minimum counted commands: 1 · Maximum counted commands: 12
 
 ---

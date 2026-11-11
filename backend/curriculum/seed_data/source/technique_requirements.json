@@ -50,9 +50,6 @@
   "gate4-hard-move-branch-onto-main-receipts": [
     "rebase"
   ],
-  "init-easy-current-empty": [
-    "init:initial-branch:main"
-  ],
   "manual-easy-auth-copy": [
     "merge"
   ],

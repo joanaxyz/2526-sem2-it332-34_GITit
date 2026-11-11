@@ -17,27 +17,26 @@ from simulator.services import parse_git_command
 class InitCloneRemoteVerificationMixin:
     def _verify_init(self, *, command: str, previous_state: dict, next_state: dict) -> None:
         parts = parse_git_command(command) or []
+        reinitialized = bool(previous_state.get("repository_initialized"))
         branch = (
-            self._option_value(parts, "-b", "--initial-branch")
+            (None if reinitialized else self._option_value(parts, "-b", "--initial-branch"))
             or self._head_branch(previous_state)
             or "main"
         )
         args = self._pathspecs(parts, value_options={"-b", "--initial-branch"})
         directory = args[0] if args else None
         quiet = "-q" in parts or "--quiet" in parts
-        reinitialized = bool(previous_state.get("repository_initialized"))
         expected = copy.deepcopy(previous_state)
         expected["repository_initialized"] = True
         if not reinitialized:
             expected["repository_root"] = directory if directory is not None else "."
-        expected["head"] = {
-            "type": "branch",
-            "name": branch,
-            "target": (expected.get("branches") or {}).get(branch),
-        }
-        expected.setdefault("branches", {})
-        expected["branches"].setdefault(branch, None)
-        if not reinitialized:
+            expected["head"] = {
+                "type": "branch",
+                "name": branch,
+                "target": (expected.get("branches") or {}).get(branch),
+            }
+            expected.setdefault("branches", {})
+            expected["branches"].setdefault(branch, None)
             # Match the browser simulator: Git metadata starts empty, while
             # existing workspace files remain available to stage later.
             expected["commits"] = []

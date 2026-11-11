@@ -115,6 +115,25 @@ describe('executeGitCommand', () => {
     })
   })
 
+  it.each([
+    { type: 'branch', name: 'trunk', target: 'c0' },
+    { type: 'detached', target: 'c0' },
+  ] as const)('reinitialization preserves HEAD and history with an initial-branch option: %o', (head) => {
+    const state = normalizeState(baseState({
+      head,
+      branches: { trunk: 'c0' },
+      commits: [{ id: 'c0', message: 'base', parents: [], tree: {} }],
+      repository_root: '.',
+    }))
+    const result = executeGitCommand(state, 'git init -b main')
+    expect(result.exit_code).toBe(0)
+    expect(result.next_state.head).toEqual(state.head)
+    expect(result.next_state.branches).toEqual(state.branches)
+    expect(result.next_state.commits).toEqual(state.commits)
+    expect(result.next_state.repository_root).toBe('.')
+    expect(result.next_state.operation_metadata?.last_init_reinitialized).toBe(true)
+  })
+
   it('marks diagnostic commands without mutating repository state', () => {
     const state = baseState({
       commits: [

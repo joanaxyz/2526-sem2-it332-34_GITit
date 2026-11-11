@@ -1,6 +1,6 @@
 # Taught vs. accepted alternative Git solutions
 
-This reference covers **311 published variants** with **832 distinct accepted alternative routes**, grouped by gameplay mode and level.
+This reference covers **311 published variants** with **834 distinct accepted alternative routes**, grouped by gameplay mode and level.
 
 Source: the checked-in executable audit (`backend/curriculum/seed_data/solution_audit.json`). The taught solution below is the authored example for that exact variant. Alternatives include both equivalent syntax and different workflows.
 
@@ -108,11 +108,11 @@ git init -b main
 
 **Objective**
 
-Initialize the current directory as a Git repository, explicitly choosing `main` as its initial branch during initialization.
+Make the current folder a Git repository with `main` as its current branch.
+
+You may choose the branch during initialization or rename it afterward. Re-running `git init` is safe, but its initial-branch option does not rename an existing branch.
 
 **Do not stage files or create a commit.**
-
-**Required technique:** `git init -b main` (or `--initial-branch`) when the repository is created. Plain `git init`, renaming the branch afterwards, or reinitializing does not complete this variant.
 
 **Taught / authored example — 1 counted command**
 
@@ -130,6 +130,18 @@ git init --initial-branch main
 
 ```sh
 git init --initial-branch=main
+```
+
+**Accepted alternative 3 (syntax) — 1 counted command**
+
+```sh
+git init
+```
+
+**Accepted alternative 4 (syntax) — 1 counted command**
+
+```sh
+git init .
 ```
 
 ### init-easy-trunk-branch

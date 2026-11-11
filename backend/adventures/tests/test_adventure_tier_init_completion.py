@@ -1,9 +1,12 @@
 import json
 import shutil
 from copy import deepcopy
+from importlib import import_module
 from pathlib import Path
+from types import SimpleNamespace
 
 import pytest
+from django.apps import apps
 from django.core.management import call_command
 from rest_framework.test import APIClient
 
@@ -218,7 +221,7 @@ def test_git_init_completes_tier_persists_progress_and_unlocks_medium(db, django
     or not (Path(__file__).resolve().parents[3] / "frontend" / "node_modules").exists(),
     reason="Requires the frontend simulator and Node for real command payloads.",
 )
-def test_seeded_initial_branch_task_requires_explicit_main_creation(db, django_user_model):
+def test_seeded_init_task_accepts_state_equivalent_setup_and_recovery(db, django_user_model):
     from adventures.tests.test_adventure_start_access import make_player
 
     call_command("seed_curriculum", verbosity=0)
@@ -230,16 +233,25 @@ def test_seeded_initial_branch_task_requires_explicit_main_creation(db, django_u
         case_id="init-easy-current-empty"
     )
     technique = "init:initial-branch:main"
-    assert branch_variant.parameter_context["required_techniques"] == [technique]
+    canonical_context = deepcopy(branch_variant.scenario_context)
+    assert branch_variant.parameter_context["required_techniques"] == []
     assert first_variant.parameter_context["required_techniques"] == []
     routes = {
-        "bare": (["git init"], False),
+        "bare": (["git init"], True),
         "short": (["git init -b main"], True),
         "long-equals": (["git init --initial-branch=main"], True),
         "long-space": (["git init --initial-branch main"], True),
         "explicit-current-directory": (["git init -b main ."], True),
-        "wrong-branch-then-rename": (["git init -b trunk", "git branch -m main"], False),
-        "reinitialize": (["git init", "git init -b main"], False),
+        "wrong-branch-then-rename": (["git init -b trunk", "git branch -m main"], True),
+        "wrong-branch": (["git init -b trunk"], False),
+        "reinitialize-wrong-branch": (["git init -b trunk", "git init -b main"], False),
+        "reinitialize-then-rename": (
+            ["git init -b trunk", "git init -b main", "git branch -m main"],
+            True,
+        ),
+        "wrong-directory": (["git init -b main another-folder"], False),
+        "legacy-reinitialize": (["git init", "git init -b main"], True),
+        "legacy-no-op-reinitialize": (["git init", "git init", "git init -b main"], True),
     }
     specs = {
         name: {
@@ -275,6 +287,30 @@ def test_seeded_initial_branch_task_requires_explicit_main_creation(db, django_u
             assert response.status_code == 200, response.content
             payload = response.json()
             assert payload["exit_code"] == 0, payload
+            if (name == "legacy-reinitialize" and index == 0) or (
+                name == "legacy-no-op-reinitialize" and index == 1
+            ):
+                assert not payload["command_outcome"]["solved"]
+                run.refresh_from_db()
+                before = (run.repository_state, run.total_attempts, run.counted_action_total)
+                migration = import_module("adventures.migrations.0020_init_state_based_completion")
+                migration.allow_state_based_init(
+                    apps, SimpleNamespace(connection=SimpleNamespace(alias="default"))
+                )
+                run.refresh_from_db()
+                branch_variant.refresh_from_db()
+                assert run.required_techniques == []
+                assert run.status == "started"
+                assert (
+                    run.repository_state,
+                    run.total_attempts,
+                    run.counted_action_total,
+                ) == before
+                assert branch_variant.parameter_context["required_techniques"] == []
+                assert branch_variant.scenario_context == canonical_context
+            if name == "legacy-no-op-reinitialize" and index == 2:
+                assert step["execution"]["next_state"] == step["ready"]
+                assert payload["command_outcome"]["solved"]
         return payload
 
     for name, (commands, solved) in routes.items():
@@ -297,20 +333,29 @@ def test_seeded_initial_branch_task_requires_explicit_main_creation(db, django_u
         assert started.status_code == 201, started.content
         run = AdventureLevelTierRun.objects.get(pk=started.json()["id"])
         assert run.selected_variant_id == branch_variant.id
-        assert run.required_techniques == [technique]
-        assert "Required technique: git init -b main." in started.json()["scenario_context"]["task"]
+        assert run.required_techniques == []
+        assert "Required technique:" not in started.json()["scenario_context"]["task"]
+        assert (
+            "The current branch is main." in started.json()["scenario_context"]["objective_checks"]
+        )
+        if name in {"legacy-reinitialize", "legacy-no-op-reinitialize"}:
+            run.required_techniques = [technique]
+            run.save(update_fields=["required_techniques"])
+            branch_variant.parameter_context["required_techniques"] = [technique]
+            branch_variant.scenario_context["task"] = "Old first-initialization-only objective."
+            branch_variant.scenario_context["objective_checks"] = ["Choose main during creation."]
+            branch_variant.save(update_fields=["parameter_context", "scenario_context"])
 
         result = submit_replay(client, run, name)
         run.refresh_from_db()
         assert result["command_outcome"]["solved"] is solved, result
         assert run.status == ("completed" if solved else "started")
-        assert (technique in run.verified_techniques) is solved
-        assert run.repository_state["head"]["name"] == "main"
-        if not solved:
-            assert (
-                "Use the required technique: git init -b main."
-                in result["step"]["contextual_feedback"]
-            )
+        if solved:
+            assert run.repository_state["head"]["name"] == "main"
+        if name == "short":
+            historical_run = run
+            historical_run.required_techniques = [technique]
+            historical_run.save(update_fields=["required_techniques"])
         evidence.append(
             {
                 "commands": commands,
@@ -321,4 +366,7 @@ def test_seeded_initial_branch_task_requires_explicit_main_creation(db, django_u
             }
         )
 
-    print("Initial-branch API evidence: " + json.dumps(evidence))
+    historical_run.refresh_from_db()
+    assert historical_run.status == "completed"
+    assert historical_run.required_techniques == [technique]
+    print("State-based init API evidence: " + json.dumps(evidence))
