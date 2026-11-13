@@ -15,6 +15,8 @@ export type RankTier = {
   /** Roman numeral shown in crests and pills ("IV"). */
   numeral: string
   name: string
+  /** What this XP rank represents in the learner's Git journey. */
+  description: string
   minXp: number
   /** Tier accent and optional RGB token for CSS rgba() vars. */
   color: string
@@ -22,12 +24,12 @@ export type RankTier = {
 }
 
 export const RANK_TIERS: RankTier[] = [
-  { rank: 1, numeral: 'I', name: 'Peasant', minXp: 0, color: 'rgb(var(--theme-spark-rgb))', colorRgb: '125, 211, 252' },
-  { rank: 2, numeral: 'II', name: 'Squire', minXp: 500, color: 'hsl(var(--success))', colorRgb: '52, 211, 153' },
-  { rank: 3, numeral: 'III', name: 'Knight', minXp: 1500, color: 'hsl(var(--primary))', colorRgb: 'var(--theme-primary-rgb)' },
-  { rank: 4, numeral: 'IV', name: 'Baron', minXp: 3000, color: 'rgb(var(--theme-challenge-rgb))', colorRgb: '167, 139, 250' },
-  { rank: 5, numeral: 'V', name: 'Duke', minXp: 4500, color: 'rgb(var(--theme-challenge-rgb))', colorRgb: '244, 114, 182' },
-  { rank: 6, numeral: 'VI', name: 'King', minXp: 5400, color: 'rgb(var(--theme-spark-rgb))', colorRgb: '251, 191, 36' },
+  { rank: 1, numeral: 'I', name: 'Peasant', description: 'New to Git; learning repository basics.', minXp: 0, color: 'rgb(var(--theme-spark-rgb))', colorRgb: '125, 211, 252' },
+  { rank: 2, numeral: 'II', name: 'Squire', description: 'Practicing staging and commits.', minXp: 500, color: 'hsl(var(--success))', colorRgb: '52, 211, 153' },
+  { rank: 3, numeral: 'III', name: 'Knight', description: 'Building confidence with branches.', minXp: 1500, color: 'hsl(var(--primary))', colorRgb: 'var(--theme-primary-rgb)' },
+  { rank: 4, numeral: 'IV', name: 'Baron', description: 'Learning merges and conflict resolution.', minXp: 3000, color: 'rgb(var(--theme-challenge-rgb))', colorRgb: '167, 139, 250' },
+  { rank: 5, numeral: 'V', name: 'Duke', description: 'Coordinating work through remotes.', minXp: 4500, color: 'rgb(var(--theme-challenge-rgb))', colorRgb: '244, 114, 182' },
+  { rank: 6, numeral: 'VI', name: 'King', description: 'Applying Git across unfamiliar workflows.', minXp: 5400, color: 'rgb(var(--theme-spark-rgb))', colorRgb: '251, 191, 36' },
 ]
 
 export type RankInfo = {

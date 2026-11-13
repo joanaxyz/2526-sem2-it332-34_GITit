@@ -82,14 +82,21 @@ describe('ChallengeOutcomeModal', () => {
     expect(screen.queryByText('Jump to a level')).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Continue' })).not.toBeInTheDocument()
     expect(screen.queryByRole('button', { name: 'Close modal' })).not.toBeInTheDocument()
-    expect(screen.getByText('Click anywhere to continue')).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Back to Map' })).toBeInTheDocument()
+    expect(screen.getByText('Star rules and run details')).toBeInTheDocument()
   })
 
-  it('closes on a click anywhere', () => {
+  it('keeps the result open while using its controls and closes with Escape', () => {
     const close = vi.fn()
-    render(<ChallengeOutcomeModal open run={run} onClose={close} onBackToMap={vi.fn()} />)
+    const backToMap = vi.fn()
+    render(<ChallengeOutcomeModal open run={run} onClose={close} onBackToMap={backToMap} onRetry={vi.fn()} />)
 
     fireEvent.click(screen.getByText('Repository Basecamp'))
+    fireEvent.click(screen.getByRole('button', { name: 'Play again' }))
+    expect(close).not.toHaveBeenCalled()
+    fireEvent.click(screen.getByRole('button', { name: 'Back to Map' }))
+    expect(backToMap).toHaveBeenCalledOnce()
+    fireEvent.keyDown(document, { key: 'Escape' })
     expect(close).toHaveBeenCalledOnce()
   })
 
@@ -103,6 +110,14 @@ describe('ChallengeOutcomeModal', () => {
     expect(nextLevel).toHaveBeenCalledOnce()
     expect(challengeOutcomeNextStep({ run, onBackToMap: vi.fn(), onNextLevel: nextLevel, isStartingNextLevel: true }))
       .toMatchObject({ pending: true, pendingPrompt: 'Opening the next trial…' })
+  })
+
+  it('shows the next trial as the primary result action', () => {
+    const nextLevel = vi.fn()
+    render(<ChallengeOutcomeModal open run={run} onClose={vi.fn()} onBackToMap={vi.fn()} onNextDifficulty={nextLevel} onRetry={vi.fn()} />)
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to medium trial' }))
+    expect(nextLevel).toHaveBeenCalledOnce()
+    expect(screen.getByRole('button', { name: 'Play again' })).toBeInTheDocument()
   })
 
   it('renders failed challenges as game over', () => {
@@ -127,7 +142,7 @@ describe('ChallengeOutcomeModal', () => {
     expect(screen.getByText('Attempt limit reached')).toBeInTheDocument()
     expect(screen.getByText('Challenge gate')).toBeInTheDocument()
     expect(screen.getByText('Repository Basecamp')).toBeInTheDocument()
-    expect(screen.getByRole('button', { name: /start fresh variant/i })).toBeInTheDocument()
+    expect(screen.getByRole('button', { name: 'Try again' })).toBeInTheDocument()
     expect(screen.queryByRole('img', { name: 'You Won' })).not.toBeInTheDocument()
   })
 

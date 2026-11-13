@@ -76,8 +76,10 @@ describe('ordered scenario outcomes', () => {
     // A partial clear does not claim the tier is complete.
     const props = shown.mock.calls.at(-1)?.[0]
     expect(props).toMatchObject({ title: 'Scenario complete' })
-    render(<>{props?.badges}</>)
-    expect(screen.getByText('Easy scenario 1 of 2')).toBeInTheDocument()
+    expect(props?.badges).toBeNull()
+    render(<>{props?.progress}</>)
+    expect(screen.getByRole('heading', { name: 'Easy scenarios' })).toBeInTheDocument()
+    expect(screen.queryByText('Easy scenario 1 of 2')).not.toBeInTheDocument()
     expect(screen.queryByText('Easy complete')).not.toBeInTheDocument()
   })
 
@@ -104,6 +106,12 @@ describe('ordered scenario outcomes', () => {
     expect(step?.prompt).toBe('Click me to continue to the Medium tier!')
     step?.onSelect()
     expect(nextLevel).toHaveBeenCalledOnce()
+
+    render(<TierOutcomeModal open run={run} onClose={vi.fn()} onBackToMap={vi.fn()} onNextDifficulty={nextLevel} onRetry={vi.fn()} />)
+    render(<>{shown.mock.calls.at(-1)?.[0].footerActions}</>)
+    fireEvent.click(screen.getByRole('button', { name: 'Continue to Medium' }))
+    expect(nextLevel).toHaveBeenCalledTimes(2)
+    expect(screen.getByRole('button', { name: 'Play again' })).toBeInTheDocument()
   })
 
   it('offers a retry after a failed run', () => {
@@ -113,6 +121,44 @@ describe('ordered scenario outcomes', () => {
     expect(step?.prompt).toBe('Click me to try again!')
     step?.onSelect()
     expect(retry).toHaveBeenCalledOnce()
+  })
+
+  it.each([
+    { difficulty: 'easy', completed: 1, total: 2, cleared: false, expected: '1 of 2 cleared · 1 more to unlock Medium' },
+    { difficulty: 'easy', completed: 2, total: 2, cleared: true, expected: '2 of 2 cleared · Medium unlocked' },
+    { difficulty: 'medium', completed: 1, total: 3, cleared: false, expected: '1 of 3 cleared · 2 more to unlock Hard' },
+    { difficulty: 'medium', completed: 3, total: 3, cleared: true, expected: '3 of 3 cleared · Hard unlocked' },
+    { difficulty: 'hard', completed: 1, total: 2, cleared: false, expected: '1 of 2 cleared · 1 more to finish Hard' },
+    { difficulty: 'hard', completed: 2, total: 2, cleared: true, expected: '2 of 2 cleared · Hard tier complete' },
+  ] as const)('shows the current $difficulty scenario stepper', ({ difficulty, completed, total, cleared, expected }) => {
+    const run = clearedScenario({
+      difficulty,
+      progress: { completed, total, cleared, next_scenario: cleared ? null : { index: completed + 1, slug: 'next', title: 'Next' } },
+    })
+    render(<TierOutcomeModal open run={run} onClose={vi.fn()} onBackToMap={vi.fn()} />)
+    render(<>{shown.mock.calls.at(-1)?.[0].progress}</>)
+    expect(screen.getByText(expected)).toBeInTheDocument()
+    const stepper = screen.getByRole('region', { name: `${difficulty[0].toUpperCase()}${difficulty.slice(1)} scenario progress` })
+    expect(stepper).toContainElement(screen.getByRole('heading', { name: `${difficulty[0].toUpperCase()}${difficulty.slice(1)} scenarios` }))
+    expect(stepper.querySelectorAll('.is-cleared')).toHaveLength(completed)
+    expect(stepper.querySelectorAll('li')).toHaveLength(total)
+  })
+
+  it.each([
+    { difficulty: 'easy', suffix: 'unlock Medium' },
+    { difficulty: 'medium', suffix: 'unlock Hard' },
+    { difficulty: 'hard', suffix: 'finish Hard' },
+  ] as const)('keeps saved $difficulty progress visible after a failure or replay', ({ difficulty, suffix }) => {
+    const progress = { completed: 1, total: 2, cleared: false, next_scenario: null }
+    for (const overrides of [{ status: 'failed' }, { replay: true }] as const) {
+      const run = clearedScenario({ ...overrides, difficulty, progress })
+      render(<TierOutcomeModal open run={run} onClose={vi.fn()} onBackToMap={vi.fn()} />)
+      render(<>{shown.mock.calls.at(-1)?.[0].progress}</>)
+      expect(screen.getByText(`1 of 2 cleared · 1 more to ${suffix}`)).toBeInTheDocument()
+      expect(screen.getByRole('listitem', { name: 'Scenario 1 cleared' })).toBeInTheDocument()
+      expect(screen.getByRole('listitem', { name: 'Scenario 2 remaining' })).toBeInTheDocument()
+      cleanup()
+    }
   })
 
   it('returns to the map after the final difficulty', () => {

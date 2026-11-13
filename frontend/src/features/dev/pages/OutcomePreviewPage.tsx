@@ -17,10 +17,10 @@ function previewMode(value: string | null): PreviewMode {
 
 // Explicit server-shaped grade fixtures; production scoring stays on the API.
 const scoreFixtures: Record<number, StarBreakdown> = {
-  0: { stars: 0, available_stars: 0, counted_commands: 5, command_target: 2, graded_under_previous_rules: false, retry_count: 0, criteria: [
+  0: { stars: 0, available_stars: 0, counted_commands: 5, command_target: 2, generous_target: 4, maximum_commands: 5, scoring_policy_version: 2, graded_under_previous_rules: false, retry_count: 0, criteria: [
     { key: 'clear', state: 'missed', reason: 'not_cleared' },
-    { key: 'command_target', state: 'missed', reason: 'not_cleared' },
-    { key: 'retry_allowance', state: 'missed', reason: 'not_cleared' },
+    { key: 'generous_target', state: 'missed', reason: 'not_cleared' },
+    { key: 'efficient_target', state: 'missed', reason: 'not_cleared' },
   ] },
   1: { stars: 1, available_stars: 1, counted_commands: 3, command_target: 2, graded_under_previous_rules: false, retry_count: 0, criteria: [
     { key: 'clear', state: 'earned', reason: null },
@@ -32,10 +32,10 @@ const scoreFixtures: Record<number, StarBreakdown> = {
     { key: 'command_target', state: 'earned', reason: null },
     { key: 'retry_allowance', state: 'missed', reason: 'retry_allowance_exceeded' },
   ] },
-  3: { stars: 3, available_stars: 3, counted_commands: 2, command_target: 2, graded_under_previous_rules: false, retry_count: 0, criteria: [
+  3: { stars: 3, available_stars: 3, counted_commands: 2, command_target: 2, generous_target: 4, maximum_commands: 5, scoring_policy_version: 2, graded_under_previous_rules: false, retry_count: 0, criteria: [
     { key: 'clear', state: 'earned', reason: null },
-    { key: 'command_target', state: 'earned', reason: null },
-    { key: 'retry_allowance', state: 'earned', reason: null },
+    { key: 'generous_target', state: 'earned', reason: null },
+    { key: 'efficient_target', state: 'earned', reason: null },
   ] },
 }
 
@@ -181,6 +181,7 @@ function OutcomePreviewPage() {
         onClose={() => setOpen(false)}
         onBackToMap={() => setMode('challenge-win')}
         onRetry={() => setReplay(value => value + 1)}
+        onNextDifficulty={() => setOpen(false)}
       />
     </div>
   )

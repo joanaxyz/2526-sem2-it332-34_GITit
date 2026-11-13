@@ -101,7 +101,7 @@
   grid-template-columns: 2.1rem minmax(0, 1fr) auto;
   align-items: center;
   gap: 0.55rem;
-  min-height: 2.3rem;
+  min-height: 3.7rem;
   border-bottom: 1px solid rgba(var(--theme-primary-rgb), 0.1);
   padding: 0.2rem 0.1rem;
 }
@@ -111,17 +111,22 @@
   background: linear-gradient(90deg, rgba(var(--theme-primary-rgb), 0.14), transparent 78%);
 }
 
-.home-rank-list div.is-active span {
+.home-rank-list div.is-active .home-rank-list-copy strong {
   color: #f6fbff;
   font-weight: 800;
 }
 
-.home-rank-list span {
+.home-rank-list .home-rank-list-copy {
+  display: grid;
+  gap: 0.1rem;
+  min-width: 0;
   overflow: hidden;
   color: rgba(218, 229, 247, 0.72);
   text-overflow: ellipsis;
-  white-space: nowrap;
 }
+.home-rank-list .home-rank-list-copy strong { font-size: 0.875rem; }
+.home-rank-list .home-rank-list-copy small { font-size: 0.6875rem; line-height: 1.2; white-space: normal; }
+.home-rank-list .home-rank-list-copy small:last-child { color: rgb(var(--theme-primary-rgb)); }
 
 .home-rank-list svg {
   width: 1rem;

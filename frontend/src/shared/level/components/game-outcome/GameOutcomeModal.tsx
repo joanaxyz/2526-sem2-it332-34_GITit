@@ -29,8 +29,8 @@ export type GameOutcomeStat = {
 /**
  * Shared game result overlay for challenge and adventure run endings. Feature
  * wrappers own outcome state and copy; this component owns the visual chrome.
- * A click anywhere dismisses it; the run's next step then waits on the
- * workspace's OutcomeNextStepMascot.
+ * The outcome and next action stay in the first view. Score details are
+ * available on demand below the actions.
  */
 export function GameOutcomeModal({
   open,
@@ -47,6 +47,7 @@ export function GameOutcomeModal({
   message,
   note,
   stats,
+  progress,
   children,
   headerActions,
   footerActions,
@@ -71,7 +72,9 @@ export function GameOutcomeModal({
   /** Optional emphasised aside under the message. */
   note?: ReactNode
   stats?: GameOutcomeStat[]
-  /** Surface-specific score explanation, before supplementary stats. */
+  /** Compact chapter or scenario progress, always visible. */
+  progress?: ReactNode
+  /** Surface-specific score explanation, inside the expandable details. */
   children?: ReactNode
   /** Icon-button actions rendered in the top-right header cluster. */
   headerActions?: ReactNode
@@ -94,7 +97,6 @@ export function GameOutcomeModal({
       overlayClassName="game-outcome-backdrop"
       contentClassName="p-0"
       hideHeader
-      dismissOnClick
       onClose={onClose}
     >
       <div className={cn('game-outcome relative overflow-hidden', isFailed ? 'is-failure' : 'is-success')}>
@@ -133,33 +135,29 @@ export function GameOutcomeModal({
               </p>
             ) : null}
 
+            {progress ? <div className="game-outcome-progress">{progress}</div> : null}
+
             {badges ? <div className="game-outcome-badges">{badges}</div> : null}
             {message ? <p className="game-outcome-message">{message}</p> : null}
             {note ? <p className="game-outcome-note">{note}</p> : null}
           </div>
 
-          <div className="game-outcome-details">
-            {children}
-
-            {stats && stats.length ? (
-              <div className="game-outcome-stat-grid">
-                {stats.map((stat, index) => (
-                  <GameOutcomeStatTile
-                    key={stat.label}
-                    {...stat}
-                    accentColor={stat.accentColor ?? defaultAccent}
-                    animationDelay={160 + index * 60}
-                  />
-                ))}
-              </div>
-            ) : null}
-
-          </div>
         </div>
         {footerActions ? <div className="game-outcome-footer-actions">{footerActions}</div> : null}
-        <p className="game-outcome-hint text-center">
-          Click anywhere to continue<span className="sr-only">, or press Enter, Space, or Escape.</span>
-        </p>
+        {(children || stats?.length) ? <details className="game-outcome-more">
+          <summary>Star rules and run details</summary>
+          <div className="game-outcome-details">
+            {children}
+            {stats?.length ? <div className="game-outcome-stat-grid">
+              {stats.map((stat, index) => <GameOutcomeStatTile
+                key={stat.label}
+                {...stat}
+                accentColor={stat.accentColor ?? defaultAccent}
+                animationDelay={160 + index * 60}
+              />)}
+            </div> : null}
+          </div>
+        </details> : null}
       </div>
     </Modal>
   )

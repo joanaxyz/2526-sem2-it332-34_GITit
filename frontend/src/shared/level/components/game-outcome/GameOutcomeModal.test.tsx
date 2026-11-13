@@ -109,12 +109,14 @@ describe('GameOutcomeModal star artwork', () => {
 })
 
 describe('GameOutcomeModal dismissal', () => {
-  it('has no close button and closes on a click anywhere', () => {
+  it('keeps the result open during content clicks and closes with Escape', () => {
     const close = vi.fn()
     render(<GameOutcomeModal open onClose={close} title="Run result" icon={Star} headline="Run complete" message="Your result" />)
 
     expect(screen.queryByRole('button', { name: 'Close modal' })).not.toBeInTheDocument()
     fireEvent.click(screen.getByText('Your result'))
+    expect(close).not.toHaveBeenCalled()
+    fireEvent.keyDown(document, { key: 'Escape' })
     expect(close).toHaveBeenCalledOnce()
   })
 
@@ -125,12 +127,25 @@ describe('GameOutcomeModal dismissal', () => {
 
     fireEvent.keyDown(screen.getByRole('button', { name: 'Back to Map' }), { key: 'Enter' })
     expect(close).not.toHaveBeenCalled()
-    fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Enter' })
+    fireEvent.keyDown(document, { key: 'Escape' })
     expect(close).toHaveBeenCalledOnce()
   })
 })
 
-it('places the next action below results without dismissing the modal', () => {
+it('places scenario progress directly after the level title', () => {
+  render(<GameOutcomeModal open onClose={() => {}} title="Result" icon={Star}
+    headline="Scenario cleared" message={null}
+    level={{ label: 'Level 1', title: 'Initializing Repositories' }}
+    progress={<div>Scenario stepper</div>}
+    badges={<span>Hard</span>} />)
+  const level = screen.getByText('Initializing Repositories')
+  const progress = screen.getByText('Scenario stepper')
+  const badge = screen.getByText('Hard')
+  expect(level.compareDocumentPosition(progress) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(progress.compareDocumentPosition(badge) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+})
+
+it('places the next action before expandable details without dismissing the modal', () => {
   const next = vi.fn()
   const close = vi.fn()
   render(<GameOutcomeModal open onClose={close} title="Result" icon={Star} headline="Cleared" message={null}
@@ -138,8 +153,10 @@ it('places the next action below results without dismissing the modal', () => {
     <section>Score details</section>
   </GameOutcomeModal>)
   const details = screen.getByText('Score details')
+  const disclosure = screen.getByText('Star rules and run details')
   const button = screen.getByRole('button', { name: 'Next scenario' })
-  expect(details.compareDocumentPosition(button) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(button.compareDocumentPosition(disclosure) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy()
+  expect(details.closest('details')).not.toHaveAttribute('open')
   fireEvent.click(button)
   expect(next).toHaveBeenCalledOnce()
   expect(close).not.toHaveBeenCalled()

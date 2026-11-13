@@ -53,7 +53,7 @@ export function HomeProfilePanel({
         <div className="home-profile-rank" data-onboarding="profile-rank">
           <RankBadge tier={rank.tier} className="home-rank-badge--profile" />
           <div>
-            <span>Rank {rank.tier.numeral}</span>
+            <span>{rank.tier.name}</span>
             <div className="ref-meter" aria-label={`${rank.progressPct}% toward the next rank`}>
               <span style={{ width: `${rank.progressPct}%` }} />
             </div>
@@ -94,7 +94,7 @@ export function HomeProfilePanel({
             return (
               <div className={state === 'current' ? 'is-active' : ''} key={tier.name}>
                 <RankBadge tier={tier} className="home-rank-badge--list" />
-                <span>{tier.name}</span>
+                <span className="home-rank-list-copy"><strong>{tier.name}</strong><small>{tier.description}</small><small>{tier.minXp.toLocaleString()} XP to reach</small></span>
                 {state === 'locked' ? <Lock aria-hidden="true" /> : null}
                 {state === 'cleared' ? <Check aria-hidden="true" /> : null}
               </div>

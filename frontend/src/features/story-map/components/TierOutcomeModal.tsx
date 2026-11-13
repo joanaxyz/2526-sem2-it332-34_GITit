@@ -1,5 +1,5 @@
 import { CommandComparison } from '@/shared/level/components/CommandComparison'
-import { ArrowRight, Gem, Map, RefreshCcw, Repeat2, RotateCcw, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, XCircle } from 'lucide-react'
+import { ArrowRight, Gem, RefreshCcw, Repeat2, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, XCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
 
@@ -12,6 +12,7 @@ import { GitCoinIcon } from '@/shared/wallet/components/GitCoinIcon'
 import { difficultyLabel, tierOutcomeState } from '@/features/story-map/components/tierOutcome'
 import { TRANSFER_REWARD } from '@/shared/level/transferCheckpoint'
 import { StarScoreChecklist } from '@/shared/level/components/StarScoreChecklist'
+import { TierScenarioStepper } from './TierScenarioStepper'
 
 /** Mirrors ChallengeOutcomeModal. Tiers have no sibling-level navigator - a
  * tier's only lateral move is next_difficulty (easy -> medium -> hard), which
@@ -22,6 +23,7 @@ export function TierOutcomeModal({
   onClose,
   onBackToMap,
   onRetry,
+  onNextDifficulty,
   onContinue,
   onTransfer,
 }: {
@@ -31,6 +33,7 @@ export function TierOutcomeModal({
   onBackToMap: () => void
   onContinue?: () => void
   onRetry?: () => void
+  onNextDifficulty?: () => void
   onTransfer?: () => void
 }) {
   const { isFailed, isReplay, isTransfer, canAdvance, isPartialClear } = tierOutcomeState(run)
@@ -120,9 +123,13 @@ export function TierOutcomeModal({
     },
   ]
 
+  const hasBadges = isTransfer || isFailed || isReplay || Boolean(
+    run.rewards?.coins_awarded || run.rewards?.xp_awarded || (!isReplay && run.rewards?.chapter_chests_awarded.length),
+  )
+
   const badges = (
     <>
-      <Badge
+      {isTransfer || isFailed ? <Badge
         variant={isFailed ? 'secondary' : 'default'}
         className="game-outcome-badge"
         style={{ animationDelay: '60ms' } as CSSProperties}
@@ -130,10 +137,8 @@ export function TierOutcomeModal({
         {isFailed ? <TriangleAlert className="size-3.5" aria-hidden="true" /> : null}
         {isTransfer
           ? 'Transfer checkpoint'
-          : isPartialClear && nextScenario
-            ? `${difficultyLabel(run)} scenario ${run.scenario.index ?? nextScenario.index - 1} of ${run.scenario.total}`
-            : `${difficultyLabel(run)} ${isFailed ? 'failed' : 'complete'}`}
-      </Badge>
+          : `${difficultyLabel(run)}${isFailed ? ' failed' : run.progress.cleared ? ' complete' : ''}`}
+      </Badge> : null}
       {isReplay ? (
         <Badge
           variant="secondary"
@@ -165,30 +170,20 @@ export function TierOutcomeModal({
     </>
   )
 
-  const headerActions = (
-    <>
-      {onRetry && !isTransfer ? (
-        <button
-          type="button"
-          className="game-outcome-header-btn"
-          onClick={onRetry}
-          aria-label={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
-          title={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
-        >
-          <RotateCcw className="size-3.5" />
-        </button>
-      ) : null}
-      <button
-        type="button"
-        className="game-outcome-header-btn"
-        onClick={onBackToMap}
-        aria-label="Back to Map"
-        title="Back to Map"
-      >
-        <Map className="size-3.5" />
-      </button>
-    </>
-  )
+  const primaryAction = hasNextScenario ? { label: `Next: ${nextScenario?.title}`, action: onContinue }
+    : transferReady ? { label: 'Take transfer checkpoint', action: onTransfer }
+    : canAdvance && onNextDifficulty && run.next_difficulty
+      ? { label: `Continue to ${difficultyLabel({ ...run, difficulty: run.next_difficulty.difficulty })}`, action: onNextDifficulty }
+      : isFailed && onRetry ? { label: 'Try again', action: onRetry }
+      : null
+
+  const footerActions = <>
+    {primaryAction?.action ? <Button type="button" size="lg" className="outcome-next-button" onClick={primaryAction.action}>
+      {primaryAction.label}<ArrowRight className="size-4" aria-hidden="true" />
+    </Button> : null}
+    {!isFailed && onRetry && !isTransfer ? <Button type="button" variant="outline" size="lg" onClick={onRetry}>Play again</Button> : null}
+    <Button type="button" variant={primaryAction ? 'outline' : 'default'} size="lg" onClick={onBackToMap}>Back to Map</Button>
+  </>
 
   return (
     <GameOutcomeModal
@@ -201,28 +196,12 @@ export function TierOutcomeModal({
       stars={isTransfer ? undefined : run.stars}
       showStars={!isTransfer}
       level={{ label: `Level ${run.tier.adventure_level_number}`, title: run.tier.adventure_level_title }}
-      badges={badges}
+      badges={hasBadges ? badges : null}
       headline={headline}
       message={hasNextScenario ? null : transferReady ? `${message} A transfer checkpoint is ready: one unfamiliar problem with no hints, worth +${TRANSFER_REWARD} GitCoins and +${TRANSFER_REWARD} XP if you clear it on your first run. Take it now, or later from this level or Progress.` : message}
-      footerActions={hasNextScenario && nextScenario ? (
-        <Button type="button" size="lg" className="outcome-next-button" onClick={(event) => {
-          event.stopPropagation()
-          onContinue?.()
-        }}>
-          <span>Next: {nextScenario.title}</span>
-          <ArrowRight className="size-4" aria-hidden="true" />
-        </Button>
-      ) : transferReady ? (
-        <Button type="button" size="lg" className="outcome-next-button" onClick={(event) => {
-          event.stopPropagation()
-          onTransfer?.()
-        }}>
-          <span>Take transfer checkpoint</span>
-          <ArrowRight className="size-4" aria-hidden="true" />
-        </Button>
-      ) : null}
+      footerActions={footerActions}
       stats={stats}
-      headerActions={headerActions}
+      progress={!isTransfer && run.progress.total > 0 ? <TierScenarioStepper run={run} /> : undefined}
     >
       {!isTransfer && !isFailed ? <CommandComparison comparison={run.command_comparison} /> : null}
       {!isTransfer && run.star_breakdown ? (

@@ -333,6 +333,7 @@ export function TierWorkspace() {
         }}
         onBackToMap={() => navigate(mapUrlForRun(run))}
         onRetry={retryRun}
+        onNextDifficulty={run.next_difficulty ? () => startNextLevel(run.next_difficulty!.id) : undefined}
         onTransfer={openTransfer}
       />
       {nextStep ? <OutcomeNextStepMascot key={run.id} step={nextStep} /> : null}
