@@ -240,6 +240,7 @@ export function ChallengeWorkspace() {
         }}
         onBackToMap={() => navigate(mapUrlForRun(run))}
         onRetry={playAgain}
+        onNextDifficulty={run.next_difficulty ? () => startLevelMutation.mutate(run.next_difficulty!.id) : undefined}
         isRetrying={isReplaying}
       />
       {nextStep ? <OutcomeNextStepMascot key={run.id} step={nextStep} /> : null}

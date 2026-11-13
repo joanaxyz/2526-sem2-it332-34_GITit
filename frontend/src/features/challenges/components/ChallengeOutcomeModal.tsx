@@ -1,5 +1,5 @@
 import { CommandComparison } from '@/shared/level/components/CommandComparison'
-import { Map, RefreshCcw, Repeat2, RotateCcw, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, XCircle } from 'lucide-react'
+import { ArrowRight, RefreshCcw, Repeat2, ScanSearch, Sparkles, SquareTerminal, TriangleAlert, XCircle } from 'lucide-react'
 import { useEffect } from 'react'
 import type { CSSProperties } from 'react'
 
@@ -7,6 +7,7 @@ import type { ChallengeRun } from '@/features/challenges/types'
 import { canAdvanceFrom, difficultyLabel } from '@/features/challenges/components/challengeOutcome'
 import { GameOutcomeModal } from '@/shared/level/components/game-outcome/GameOutcomeModal'
 import { Badge } from '@/shared/components/Badge'
+import { Button } from '@/shared/components/Button'
 import { playGameOverSound, playVictorySound } from '@/shared/audio/battleAudio'
 import { StarScoreChecklist } from '@/shared/level/components/StarScoreChecklist'
 
@@ -16,6 +17,7 @@ export function ChallengeOutcomeModal({
   onClose,
   onBackToMap,
   onRetry,
+  onNextDifficulty,
   isRetrying = false,
 }: {
   open: boolean
@@ -23,6 +25,7 @@ export function ChallengeOutcomeModal({
   onClose: () => void
   onBackToMap: () => void
   onRetry?: () => void
+  onNextDifficulty?: () => void
   isRetrying?: boolean
 }) {
   const isFailed = run.status === 'failed'
@@ -119,32 +122,16 @@ export function ChallengeOutcomeModal({
     </>
   )
 
-  const headerActions = (
-    <>
-      {onRetry ? (
-        <button
-          type="button"
-          className="game-outcome-header-btn"
-          disabled={isRetrying}
-          onClick={onRetry}
-          aria-label={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
-          title={isReplay ? 'Play again' : isFailed ? 'Start fresh variant' : 'Play again'}
-        >
-          <RotateCcw className="size-3.5" />
-        </button>
-      ) : null}
-      <button
-        type="button"
-        className="game-outcome-header-btn"
-        disabled={isRetrying}
-        onClick={onBackToMap}
-        aria-label="Back to Map"
-        title="Back to Map"
-      >
-        <Map className="size-3.5" />
-      </button>
-    </>
-  )
+  const primaryAction = canAdvance && onNextDifficulty && run.next_difficulty
+    ? { label: `Continue to ${run.next_difficulty.difficulty} trial`, action: onNextDifficulty }
+    : isFailed && onRetry ? { label: 'Try again', action: onRetry } : null
+  const footerActions = <>
+    {primaryAction ? <Button type="button" size="lg" className="outcome-next-button" disabled={isRetrying} onClick={primaryAction.action}>
+      {primaryAction.label}<ArrowRight className="size-4" aria-hidden="true" />
+    </Button> : null}
+    {!isFailed && onRetry ? <Button type="button" variant="outline" size="lg" disabled={isRetrying} onClick={onRetry}>Play again</Button> : null}
+    <Button type="button" variant={primaryAction ? 'outline' : 'default'} size="lg" disabled={isRetrying} onClick={onBackToMap}>Back to Map</Button>
+  </>
 
   return (
     <GameOutcomeModal
@@ -160,7 +147,7 @@ export function ChallengeOutcomeModal({
       headline={headline}
       message={message}
       stats={stats}
-      headerActions={headerActions}
+      footerActions={footerActions}
     >
       {!isFailed ? <CommandComparison comparison={run.command_comparison} /> : null}
       {run.star_breakdown ? <StarScoreChecklist variant="result" breakdown={run.star_breakdown} savedStars={run.completion?.stars} /> : null}
