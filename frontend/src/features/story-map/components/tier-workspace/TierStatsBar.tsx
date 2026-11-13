@@ -34,7 +34,7 @@ export function TierStatsBar({ run, repoGraph }: { run: TierRun; repoGraph?: Rep
       label: 'Stars',
       icon: StarSolidIcon,
       iconClass: 'tier-stat-icon--amber',
-      value: <span data-tour-target="star-budget"><StarTriplet count={run.status === 'started' ? run.star_breakdown?.available_stars ?? 0 : run.stars} breakdown={run.star_breakdown} active={run.status === 'started'} savedStars={run.completion?.stars} multiScenario={run.scenario.total > 1} /></span>,
+      value: <span data-tour-target="star-budget"><StarTriplet runId={run.id} count={run.status === 'started' ? run.star_breakdown?.available_stars ?? 0 : run.stars} breakdown={run.star_breakdown} active={run.status === 'started'} savedStars={run.completion?.stars} multiScenario={run.scenario.total > 1} /></span>,
     },
     {
       label: 'Commands',

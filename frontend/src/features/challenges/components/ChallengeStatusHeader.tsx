@@ -21,7 +21,7 @@ function challengeStats(run: ChallengeRun): WorkspaceStat[] {
       label: run.status === 'started' ? 'Stars on clear' : 'Stars',
       icon: StarSolidIcon,
       iconClass: 'tier-stat-icon--amber',
-      value: <StarTriplet count={run.status === 'started' ? run.star_breakdown?.available_stars ?? 0 : run.stars} mode="challenge" breakdown={run.star_breakdown} active={run.status === 'started'} savedStars={run.completion?.stars} />,
+      value: <StarTriplet runId={run.id} count={run.status === 'started' ? run.star_breakdown?.available_stars ?? 0 : run.stars} mode="challenge" breakdown={run.star_breakdown} active={run.status === 'started'} savedStars={run.completion?.stars} />,
     },
     {
       label: 'Commands',
