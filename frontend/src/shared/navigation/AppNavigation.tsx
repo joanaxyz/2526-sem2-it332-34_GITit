@@ -138,7 +138,7 @@ function ProfileDropdown({
   const playerLoadout = usePlayerLoadout()
   const initials = getInitials(user.username)
   const displayName = user.username || 'Adventurer'
-  const rankLabel = rank ? `Rank ${rank.tier.numeral}` : 'Rank --'
+  const rankLabel = rank?.tier.name ?? 'Rank loading'
   const avatarSrc = playerLoadout.hasCompanion
     ? playerLoadout.companion.sprites.avatar?.src ??
       playerLoadout.companion.sprites.portrait?.src ??

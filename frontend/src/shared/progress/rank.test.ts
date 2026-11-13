@@ -3,6 +3,16 @@ import { describe, expect, it } from 'vitest'
 import { RANK_TIERS, rankForXp, rankProgressLabel } from '@/shared/progress/rank'
 
 describe('rankForXp', () => {
+  it('defines the Git learning stage for every named rank', () => {
+    expect(RANK_TIERS.map(({ name, description }) => [name, description])).toEqual([
+      ['Peasant', 'New to Git; learning repository basics.'],
+      ['Squire', 'Practicing staging and commits.'],
+      ['Knight', 'Building confidence with branches.'],
+      ['Baron', 'Learning merges and conflict resolution.'],
+      ['Duke', 'Coordinating work through remotes.'],
+      ['King', 'Applying Git across unfamiliar workflows.'],
+    ])
+  })
   it.each([
     [0, 'Peasant'],
     [499, 'Peasant'],
