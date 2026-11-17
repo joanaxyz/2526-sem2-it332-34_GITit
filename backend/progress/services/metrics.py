@@ -182,7 +182,15 @@ class MetricsService:
             "modules": modules,
             "samples": samples(records),
             "transfers": transfers,
+            **self._cohort_activity(records, cohort=cohort),
         }
+
+    def _cohort_activity(self, records, *, cohort):
+        if not cohort:
+            return {}
+        from .learning_activity import module_activity
+
+        return {"module_activity": module_activity(records, self.PERFORMANCE_MODULE_NUMBERS)}
 
     def dashboard_summary(self, *, player) -> dict:
         runs = self._runebound_runs(player=player)

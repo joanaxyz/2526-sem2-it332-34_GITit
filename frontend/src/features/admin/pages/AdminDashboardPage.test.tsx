@@ -1,5 +1,5 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
 import type { ApiSchemas } from '@/shared/api/generated/apiTypes'
@@ -84,6 +84,108 @@ function kpiCard(abbr: string) {
   return card as HTMLElement
 }
 
+describe('Learning analytics overview', () => {
+  afterEach(() => { cleanup(); vi.clearAllMocks() })
+
+  it.each([
+    [2, 1, 'within the allowed maximum'],
+    [3, 1, 'exceeds the allowed maximum'],
+    [null, 0, 'not enough eligible evidence'],
+  ] as const)('interprets ARC %s using its lower-is-better target', async (value, denominator, message) => {
+    const base = analyticsFixture()
+    renderPage(analyticsFixture({ kpis: { ...base.runebound_performance.kpis, arc: { value, numerator: value ?? 0, denominator } } }))
+    await screen.findByText('KPI Overview')
+    fireEvent.click(screen.getByRole('button', { name: 'ARC metric details' }))
+    const dialog = screen.getByRole('dialog', { name: 'KPI Reference' })
+    expect(dialog).toHaveTextContent('Why we measure it')
+    expect(dialog).toHaveTextContent(message)
+  })
+
+  it('opens the selected metric in the shared reference dialog and closes with Escape', async () => {
+    renderPage(analyticsFixture())
+    await screen.findByText('KPI Overview')
+    fireEvent.click(screen.getByRole('button', { name: 'CAR metric details' }))
+    const dialog = screen.getByRole('dialog', { name: 'KPI Reference' })
+    expect(within(dialog).getByRole('heading', { name: 'Command Accuracy Rate' })).toBeInTheDocument()
+    fireEvent.change(within(dialog).getByLabelText('Metric'), { target: { value: 'scr' } })
+    expect(within(dialog).getByRole('heading', { name: 'Scenario Completion Rate' })).toBeInTheDocument()
+    expect(dialog).toHaveTextContent('2 of 4 required tiers mastered')
+    fireEvent.keyDown(document, { key: 'Escape' })
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.body.style.overflow).not.toBe('hidden')
+    fireEvent.click(screen.getByRole('button', { name: 'CAR metric details' }))
+    const reopenedDialog = screen.getByRole('dialog', { name: 'KPI Reference' })
+    fireEvent.click(within(reopenedDialog).getByRole('heading', { name: 'Command Accuracy Rate' }))
+    expect(reopenedDialog).toBeInTheDocument()
+    fireEvent.click(reopenedDialog)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.body.style.overflow).not.toBe('hidden')
+  })
+
+  it('keeps missing objectives in totals and requires both conditions for attainment', async () => {
+    renderPage(analyticsFixture({ modules: [moduleRow(3, {
+      scr: { value: 80, numerator: 4, denominator: 5 },
+      rta: { value: 70, numerator: 7, denominator: 10 },
+      arc: NONE,
+    })] }))
+    const summary = await screen.findByRole('region', { name: 'Research Objectives Met' })
+    expect(summary).toHaveTextContent('1 / 33')
+    expect(within(summary).getByRole('progressbar', { name: 'Specific objectives met' })).toHaveAttribute('value', '0')
+    expect(within(summary).getByRole('progressbar', { name: 'General objectives met' })).toHaveAttribute('max', '4')
+  })
+
+  it('filters objective rows and preserves both module-specific targets', async () => {
+    renderPage(analyticsFixture())
+    await screen.findByRole('heading', { name: 'Lesson Performance' })
+    fireEvent.change(screen.getByLabelText('Module'), { target: { value: '4' } })
+    const table = within(screen.getByRole('region', { name: 'Specific objective results' })).getByRole('table')
+    expect(within(table).getAllByRole('row')).toHaveLength(6)
+    const row = within(table).getByText('Reduced Trial-and-Error Recovery').closest('tr')!
+    expect(row).toHaveTextContent('RTA')
+    expect(row).toHaveTextContent('≥65%')
+    expect(row).toHaveTextContent('ARC')
+    expect(row).toHaveTextContent('≤3')
+    fireEvent.change(screen.getByLabelText('Status'), { target: { value: 'met' } })
+    expect(table).toHaveTextContent('No objectives match these filters.')
+  })
+
+  it('does not invent transfer results for Modules 1–2 or participation by module', async () => {
+    renderPage(analyticsFixture())
+    await screen.findByLabelText('KPI')
+    fireEvent.change(screen.getByLabelText('KPI'), { target: { value: 'rta' } })
+    const chart = screen.getByRole('group', { name: 'Retry Transfer Accuracy by module' })
+    expect(within(chart).getAllByText('Not applicable')).toHaveLength(2)
+    expect(within(chart).getAllByText('No evidence')).toHaveLength(2)
+    expect(screen.getByRole('region', { name: 'Learners per Module' })).toHaveTextContent('Per-module activity was not returned')
+    fireEvent.click(screen.getByText('About trends'))
+    expect(screen.getByRole('button', { name: 'Trend' })).toBeDisabled()
+  })
+
+  it('uses module participant counts independently of KPI denominators and switches difficulty measures', async () => {
+    renderPage(analyticsFixture({ module_activity: [1, 2, 3, 4].map(number => ({
+      number, participants: number * 3,
+      difficulties: [
+        { difficulty: 'easy', attempted_tiers: 12, mastered_tiers: 7, in_progress_tiers: 2 },
+        { difficulty: 'medium', attempted_tiers: 6, mastered_tiers: 3, in_progress_tiers: 1 },
+        { difficulty: 'hard', attempted_tiers: 2, mastered_tiers: 0, in_progress_tiers: 0 },
+      ],
+    })) }))
+    await screen.findByRole('group', { name: 'Unique learners by module' })
+    expect(screen.getByLabelText('Module 1: 3 unique learners')).toBeInTheDocument()
+    expect(screen.getByLabelText('Module 4: 12 unique learners')).toBeInTheDocument()
+    fireEvent.click(screen.getByRole('button', { name: 'How learners are counted' }))
+    const explanation = screen.getByRole('dialog', { name: 'How learners are counted' })
+    expect(explanation).toHaveTextContent('Each learner is counted once per module')
+    fireEvent.click(explanation)
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(screen.getByRole('group', { name: 'Attempted learner tiers by difficulty' })).toHaveTextContent('Module 1: easy 12, medium 6, hard 2')
+    expect(document.querySelector('.la-difficulty-segment.is-easy')).toHaveStyle({ width: '60%' })
+    fireEvent.change(screen.getByLabelText('Difficulty measure'), { target: { value: 'mastered_tiers' } })
+    expect(screen.getByRole('group', { name: 'Mastered learner tiers by difficulty' })).toHaveTextContent('Module 1: easy 7, medium 3, hard 0')
+    expect(document.querySelector('.la-difficulty-segment.is-easy')).toHaveStyle({ width: '35%' })
+  })
+})
+
 describe('AdminDashboardPage overall SCR', () => {
   afterEach(() => {
     cleanup()
@@ -152,7 +254,7 @@ const OFFICIAL_SOS: Record<number, string[]> = {
 
 async function openModule(number: number) {
   await screen.findByText('KPI Overview')
-  const trigger = screen.getByText(`M${number}`).closest('button')!
+  const trigger = screen.getByRole('button', { name: new RegExp(`^M${number} `) })
   if (trigger.getAttribute('aria-expanded') !== 'true') fireEvent.click(trigger)
 }
 
@@ -278,86 +380,17 @@ describe('AdminDashboardPage specific objectives', () => {
   })
 })
 
-describe('AdminDashboardPage date range', () => {
-  afterEach(() => {
-    cleanup()
-    vi.clearAllMocks()
-  })
+describe('AdminDashboardPage all-time results', () => {
+  afterEach(() => { cleanup(); vi.clearAllMocks() })
 
-  function renderEchoingRange() {
-    // The API echoes the range it applied, as the backend does.
-    vi.mocked(adminApi.analytics).mockImplementation(async (range) => ({
-      ...analyticsFixture(),
-      kpi_range: {
-        start_date: range?.startDate ?? null,
-        end_date: range?.endDate ?? null,
-        timezone: 'Asia/Manila',
-      },
-    }))
-    vi.mocked(adminApi.overview).mockReturnValue(new Promise(() => {}))
-    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } })
-    render(
-      <QueryClientProvider client={queryClient}>
-        <AdminDashboardPage />
-      </QueryClientProvider>,
-    )
-  }
-
-  function rangeGroup() {
-    return screen.getByRole('group', { name: 'KPI date range' })
-  }
-
-  it('defaults to all time and says so', async () => {
-    renderEchoingRange()
-
+  it('requests all-time analytics without a date filter', async () => {
+    renderPage(analyticsFixture())
     await screen.findByText('KPI Overview')
     expect(adminApi.analytics).toHaveBeenCalledWith({ startDate: null, endDate: null })
-    expect(rangeGroup()).toHaveTextContent('Showing All time')
-    expect(rangeGroup()).toHaveTextContent('Philippine time (UTC+8)')
-    expect(screen.getByRole('button', { name: 'All time' })).toBeDisabled()
-  })
-
-  it('refetches for a chosen range, labels it, and resets to all time', async () => {
-    renderEchoingRange()
-    await screen.findByText('KPI Overview')
-
-    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-10-01' } })
-    fireEvent.change(screen.getByLabelText('To'), { target: { value: '2026-10-10' } })
-
-    await waitFor(() =>
-      expect(adminApi.analytics).toHaveBeenLastCalledWith({
-        startDate: '2026-10-01',
-        endDate: '2026-10-10',
-      }),
-    )
-    await waitFor(() =>
-      expect(rangeGroup()).toHaveTextContent('Showing Oct 1, 2026 – Oct 10, 2026'),
-    )
-
-    fireEvent.click(screen.getByRole('button', { name: 'All time' }))
-
-    await waitFor(() => expect(rangeGroup()).toHaveTextContent('Showing All time'))
-    expect(adminApi.analytics).toHaveBeenLastCalledWith({ startDate: null, endDate: null })
-  })
-
-  it('ignores an end date before the start date', async () => {
-    renderEchoingRange()
-    await screen.findByText('KPI Overview')
-
-    fireEvent.change(screen.getByLabelText('From'), { target: { value: '2026-10-10' } })
-    await waitFor(() =>
-      expect(adminApi.analytics).toHaveBeenLastCalledWith({ startDate: '2026-10-10', endDate: null }),
-    )
-    fireEvent.change(screen.getByLabelText('To'), { target: { value: '2026-10-01' } })
-
-    expect(adminApi.analytics).not.toHaveBeenCalledWith({
-      startDate: '2026-10-10',
-      endDate: '2026-10-01',
-    })
+    expect(screen.queryByRole('group', { name: 'KPI date range' })).not.toBeInTheDocument()
+    expect(screen.getByText(/Five research metrics/)).toHaveTextContent('All time')
   })
 })
-
-
 describe('AdminDashboardPage supplementary retry success rate', () => {
   afterEach(() => {
     cleanup()

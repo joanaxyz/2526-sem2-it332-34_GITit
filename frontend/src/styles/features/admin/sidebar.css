@@ -1,0 +1,15 @@
+.adm-root.adm-sidebar-layout { display: grid; grid-template-columns: 184px minmax(0, 1fr); min-height: 100vh; --a-bg: #041322; }
+.adm-sidebar { position: sticky; top: 0; height: 100dvh; background: radial-gradient(ellipse at bottom, #073151, #031321 70%); border-right: 1px solid #17516e; padding: 1.2rem .65rem; }
+.adm-sidebar-brand { display: grid; justify-items: center; gap: .5rem; padding: 0 .5rem 1.5rem; }
+.adm-sidebar-brand img { width: 142px; height: 75px; object-fit: contain; }
+.adm-sidebar-brand .adm-brand-eyebrow { color: #72edff; border-color: #17516e; font-size: 11px; }
+.adm-sidebar-nav { display: flex; flex-direction: column; gap: .4rem; }
+.adm-sidebar-link { display: flex; align-items: center; gap: .7rem; min-height: 44px; padding: .7rem .8rem; border: 1px solid transparent; border-radius: 8px; color: #bfd6e9; text-decoration: none; font-size: var(--text-sm); font-weight: 600; }
+.adm-sidebar-link svg { width: 20px; height: 20px; flex-shrink: 0; }
+.adm-sidebar-link:hover { background: #12334a; color: white; }.adm-sidebar-link.is-active { border-color: #197096; background: linear-gradient(90deg, #07506b99, #08273b); color: #f2fcff; box-shadow: inset 3px 0 #2be1f1; }.adm-sidebar-link.is-active svg { color: #31e5f2; }
+.adm-sidebar-back { margin-top: 1rem; border-top-color: #214258; border-radius: 0; font-weight: 500; }
+.adm-sidebar-link:focus-visible { outline: 2px solid #44e4f1; outline-offset: 2px; }
+.adm-sidebar-layout .adm-main { min-width: 0; min-height: 100vh; background: radial-gradient(ellipse at top right, #0a2940, #041322 65%); }
+.adm-sidebar-layout .adm-content { width: auto; max-width: 1600px; margin: 0 auto; padding: 0 1.4rem 1.5rem; }
+@media (max-width: 1000px) { .adm-root.adm-sidebar-layout { grid-template-columns: 154px minmax(0, 1fr); }.adm-sidebar-brand img { width: 120px; }.adm-sidebar-link { padding: .65rem .4rem; font-size: 12px; gap: .5rem; }.adm-sidebar-layout .adm-content { padding-inline: 1rem; } }
+@media (max-width: 600px) { .adm-root.adm-sidebar-layout { grid-template-columns: 94px minmax(0, 1fr); }.adm-sidebar { padding: .7rem .3rem; }.adm-sidebar-brand { padding: 0 0 1rem; }.adm-sidebar-brand img { width: 82px; height: 48px; }.adm-sidebar-brand .adm-brand-eyebrow { font-size: 8px; padding: .2rem; letter-spacing: .03em; }.adm-sidebar-link { flex-direction: column; text-align: center; gap: .3rem; font-size: 10px; }.adm-sidebar-layout .adm-content { padding-inline: .65rem; } }

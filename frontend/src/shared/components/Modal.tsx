@@ -18,6 +18,7 @@ export function Modal({
   overlayClassName,
   hideHeader = false,
   dismissOnClick = false,
+  dismissOnBackdropClick = false,
 }: {
   open: boolean
   title: string
@@ -28,6 +29,7 @@ export function Modal({
   overlayClassName?: string
   hideHeader?: boolean
   dismissOnClick?: boolean
+  dismissOnBackdropClick?: boolean
 }) {
   const titleId = useId()
   const dialogRef = useRef<HTMLDivElement | null>(null)
@@ -67,7 +69,9 @@ export function Modal({
       aria-modal="true"
       className={cn('app-modal-overlay', overlayClassName)}
       role="dialog"
-      onClick={dismissOnClick ? onClose : undefined}
+      onClick={(event) => {
+        if (dismissOnClick || (dismissOnBackdropClick && event.target === event.currentTarget)) onClose()
+      }}
       onKeyDown={dismissOnClick ? (event) => {
         if (event.key !== 'Enter' && event.key !== ' ') return
         // Controls inside the dialog keep their own Enter/Space activation.

@@ -3596,7 +3596,7 @@
                         "pattern": "^[-a-zA-Z0-9_]+$"
                     },
                     "difficulty": {
-                        "$ref": "#/components/schemas/DifficultyEnum"
+                        "$ref": "#/components/schemas/DifficultyDbcEnum"
                     },
                     "prerequisite_story": {
                         "allOf": [
@@ -3697,7 +3697,7 @@
                     "difficulty": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/DifficultyEnum"
+                                "$ref": "#/components/schemas/DifficultyDbcEnum"
                             }
                         ],
                         "default": "beginner"
@@ -5630,7 +5630,7 @@
                     "detail"
                 ]
             },
-            "DifficultyEnum": {
+            "DifficultyDbcEnum": {
                 "enum": [
                     "beginner",
                     "intermediate",
@@ -6316,6 +6316,65 @@
                     "password"
                 ]
             },
+            "ModuleActivity": {
+                "type": "object",
+                "properties": {
+                    "number": {
+                        "type": "integer"
+                    },
+                    "participants": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Distinct learners with scoped required-tier records, including in-progress tiers."
+                    },
+                    "difficulties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ModuleDifficultyActivity"
+                        }
+                    }
+                },
+                "required": [
+                    "difficulties",
+                    "number",
+                    "participants"
+                ]
+            },
+            "ModuleDifficultyActivity": {
+                "type": "object",
+                "properties": {
+                    "difficulty": {
+                        "$ref": "#/components/schemas/ModuleDifficultyActivityDifficultyEnum"
+                    },
+                    "attempted_tiers": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "mastered_tiers": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "in_progress_tiers": {
+                        "type": "integer",
+                        "minimum": 0
+                    }
+                },
+                "required": [
+                    "attempted_tiers",
+                    "difficulty",
+                    "in_progress_tiers",
+                    "mastered_tiers"
+                ]
+            },
+            "ModuleDifficultyActivityDifficultyEnum": {
+                "enum": [
+                    "easy",
+                    "medium",
+                    "hard"
+                ],
+                "type": "string",
+                "description": "* `easy` - easy\n* `medium` - medium\n* `hard` - hard"
+            },
             "MotionModeEnum": {
                 "enum": [
                     "system",
@@ -6484,7 +6543,7 @@
                         "pattern": "^[-a-zA-Z0-9_]+$"
                     },
                     "difficulty": {
-                        "$ref": "#/components/schemas/DifficultyEnum"
+                        "$ref": "#/components/schemas/DifficultyDbcEnum"
                     },
                     "prerequisite_story": {
                         "type": "integer",
@@ -6730,6 +6789,13 @@
                         "items": {
                             "$ref": "#/components/schemas/TransferCheckpoint"
                         }
+                    },
+                    "module_activity": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ModuleActivity"
+                        },
+                        "description": "Admin cohort only. Unique participants and learner-tier counts, not KPI denominators."
                     }
                 },
                 "required": [
@@ -7331,7 +7397,7 @@
                     "difficulty": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/DifficultyEnum"
+                                "$ref": "#/components/schemas/DifficultyDbcEnum"
                             }
                         ],
                         "readOnly": true
