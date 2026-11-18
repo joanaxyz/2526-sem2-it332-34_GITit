@@ -302,7 +302,7 @@ export function AppTopbar() {
   return (
     <header className="app-topbar" data-scrolled={scrolled ? 'true' : undefined}>
       <NavLink to="/home" aria-label="GIT it! home" className="app-brand">
-        <img className="app-brand-logo" src={gitLogoImage} alt="" width={1431} height={623} />
+        <img className="app-brand-logo" src={gitLogoImage} alt="" width={1935} height={858} />
       </NavLink>
 
       <CurrentUserPrimaryNav

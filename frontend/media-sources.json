@@ -1255,9 +1255,9 @@
     "targetSha256": "a2ea9f799da1afb717694c044c71d809dad9cce61fabe2f069a04eab033a9517"
   },
   "src/assets/images/git-it-logo-new.png": {
-    "sourceSha256": "02e95ceb15b2e1b2aa21f4e0897982aa03f34782a2a838f1074d64e9cf10cd13",
+    "sourceSha256": "dff8212f4a5fcae7fc41bc536ac5dae2d9e666b648826cf14ba2526f5308cbc7",
     "target": "src/assets/images/git-it-logo-new.lossless.webp",
-    "targetSha256": "df9e1af24924bc6c03deb06c524731b74c9a975745b5492625370002ad7a9b0a"
+    "targetSha256": "92c55b5effc1328843c72a47406ae3e78560afafff0a31fbca6cf117455d5838"
   },
   "src/assets/images/hard_icon.png": {
     "sourceSha256": "98d305d9a2de6563efd37f75d7101240583e742f28b284549c44d754f5a9ebdd",
