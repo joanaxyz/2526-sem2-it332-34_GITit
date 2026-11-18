@@ -3627,7 +3627,7 @@
                         "pattern": "^[-a-zA-Z0-9_]+$"
                     },
                     "difficulty": {
-                        "$ref": "#/components/schemas/DifficultyDbcEnum"
+                        "$ref": "#/components/schemas/DifficultyEnum"
                     },
                     "prerequisite_story": {
                         "allOf": [
@@ -3728,7 +3728,7 @@
                     "difficulty": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/DifficultyDbcEnum"
+                                "$ref": "#/components/schemas/DifficultyEnum"
                             }
                         ],
                         "default": "beginner"
@@ -5661,7 +5661,7 @@
                     "detail"
                 ]
             },
-            "DifficultyDbcEnum": {
+            "DifficultyEnum": {
                 "enum": [
                     "beginner",
                     "intermediate",
@@ -6574,7 +6574,7 @@
                         "pattern": "^[-a-zA-Z0-9_]+$"
                     },
                     "difficulty": {
-                        "$ref": "#/components/schemas/DifficultyDbcEnum"
+                        "$ref": "#/components/schemas/DifficultyEnum"
                     },
                     "prerequisite_story": {
                         "type": "integer",
@@ -7428,7 +7428,7 @@
                     "difficulty": {
                         "allOf": [
                             {
-                                "$ref": "#/components/schemas/DifficultyDbcEnum"
+                                "$ref": "#/components/schemas/DifficultyEnum"
                             }
                         ],
                         "readOnly": true

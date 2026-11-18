@@ -28,9 +28,9 @@ export type ApiSchemas = {
   "AdminRunBreakdown": { "by_status": { [key: string]: number }; "passed": number; "total": number }
   "AdminRuns": { "adventure": ApiSchemas["AdminRunBreakdown"]; "by_status": { [key: string]: number }; "challenge": ApiSchemas["AdminRunBreakdown"]; "passed": number; "total": number }
   "AdminSettingsResponse": { "feature_flags": Array<ApiSchemas["AdminFeatureFlag"]> }
-  "AdminStory": { "chapter_count": number; "difficulty": ApiSchemas["DifficultyDbcEnum"]; "id": number; "is_published": boolean; "management_source": string; "prerequisite_story": ApiSchemas["AdminStoryPrerequisite"] | null; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }
+  "AdminStory": { "chapter_count": number; "difficulty": ApiSchemas["DifficultyEnum"]; "id": number; "is_published": boolean; "management_source": string; "prerequisite_story": ApiSchemas["AdminStoryPrerequisite"] | null; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }
   "AdminStoryAnalytics": { "adventure_runs": number; "challenge_runs": number; "passed": number; "runs": number; "slug": string; "title": string }
-  "AdminStoryCreateRequest": { "difficulty"?: ApiSchemas["DifficultyDbcEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "slug": string; "sort_order"?: number; "summary"?: string; "title": string; "world_slug": string }
+  "AdminStoryCreateRequest": { "difficulty"?: ApiSchemas["DifficultyEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "slug": string; "sort_order"?: number; "summary"?: string; "title": string; "world_slug": string }
   "AdminStoryListResponse": { "results": Array<ApiSchemas["AdminStory"]>; "world_options": Array<string> }
   "AdminStoryPrerequisite": { "id": number; "slug": string; "title": string }
   "AdminTransaction": { "amount": number; "created_at": string; "id": number; "reason": string; "user_id": number; "username": string }
@@ -79,7 +79,7 @@ export type ApiSchemas = {
   "DashboardRetryTrend": { "attempts": number; "label": string; "level_title": string; "retries": number }
   "DashboardSummaryResponse": { "chapter_kpis": { [key: string]: ApiSchemas["DashboardKpiSet"] }; "completed_stories": Array<string>; "completed_story_slug": string | null; "counts": ApiSchemas["DashboardCounts"]; "kpis": ApiSchemas["DashboardKpiSet"]; "perfect_clears": number; "retry_trends": Array<ApiSchemas["DashboardRetryTrend"]>; "xp": number }
   "DetailResponse": { "detail": string }
-  "DifficultyDbcEnum": "beginner" | "intermediate" | "advanced"
+  "DifficultyEnum": "beginner" | "intermediate" | "advanced"
   "DrillBlank": { "answer": string; "index": number; "options": Array<ApiSchemas["DrillChoice"]> }
   "DrillCard": { "bank": Array<string>; "base_command": string; "blank": ApiSchemas["DrillBlank"] | null; "command": string; "command_choices": Array<ApiSchemas["DrillChoice"]>; "intent": string; "intent_choices": Array<ApiSchemas["DrillChoice"]>; "key": string; "summary": string; "tokens": Array<string> }
   "DrillChoice": { "gloss": string; "value": string }
@@ -120,7 +120,7 @@ export type ApiSchemas = {
   "PasswordResetRequest": { "email": string }
   "PatchedAccountUpdate": { "email"?: string; "username"?: string }
   "PatchedAdminChapterUpdateRequest": { "battle_stage"?: { [key: string]: JsonValue }; "description"?: string; "is_playable"?: boolean; "is_published"?: boolean; "number"?: number; "sort_order"?: number; "title"?: string }
-  "PatchedAdminStoryUpdateRequest": { "difficulty"?: ApiSchemas["DifficultyDbcEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "sort_order"?: number; "summary"?: string; "title"?: string; "world_slug"?: string }
+  "PatchedAdminStoryUpdateRequest": { "difficulty"?: ApiSchemas["DifficultyEnum"]; "is_published"?: boolean; "prerequisite_story"?: number | null; "sort_order"?: number; "summary"?: string; "title"?: string; "world_slug"?: string }
   "PatchedPlayerPreferences": { "leaderboard_visible"?: boolean; "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
   "PerformanceKpiSet": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "car_first": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"] }
   "PerformanceModule": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "car_first": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "number": number; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"]; "title": string }
@@ -155,7 +155,7 @@ export type ApiSchemas = {
   "StatsScopedCount": { "scope": string; "value": number }
   "StatsSummaryResponse": { "activity_trend": Array<ApiSchemas["StatsTrendPoint"]>; "activity_window": ApiSchemas["ActivityWindowEnum"]; "headline": ApiSchemas["StatsHeadline"] }
   "StatsTrendPoint": { "commands_run": number; "date": string; "levels_completed": number }
-  "Story": { "completed": boolean; "difficulty": ApiSchemas["DifficultyDbcEnum"]; "id": number; "is_published": boolean; "lock_reason": string; "locked": boolean; "prerequisite_story": ApiSchemas["StoryPrerequisite"] | null; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }
+  "Story": { "completed": boolean; "difficulty": ApiSchemas["DifficultyEnum"]; "id": number; "is_published": boolean; "lock_reason": string; "locked": boolean; "prerequisite_story": ApiSchemas["StoryPrerequisite"] | null; "slug": string; "sort_order": number; "summary": string; "title": string; "world_slug": string }
   "StoryPrerequisite": { "completed": boolean; "slug": string; "title": string }
   "SurfaceEnum": "home" | "command_guide"
   "SyntaxPart": { "text": string; "token": string }

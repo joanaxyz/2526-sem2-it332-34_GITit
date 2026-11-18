@@ -17,6 +17,7 @@ ROOT = Path(__file__).resolve().parents[2]
 FAST_GATES = [
     "check_legacy_terms.py",
     "check_architecture_boundaries.py",
+    "check_evidence_objectives.py",
     "check_css_architecture.py",
     "check_seed_targets.py",
     "check_api_contract.py",

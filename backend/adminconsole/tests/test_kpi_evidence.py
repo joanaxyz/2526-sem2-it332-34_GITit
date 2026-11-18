@@ -1,6 +1,4 @@
-import re
 from io import BytesIO
-from pathlib import Path
 from xml.etree import ElementTree as ET
 from zipfile import ZipFile
 
@@ -8,7 +6,7 @@ import pytest
 from rest_framework.test import APIClient
 
 from adminconsole.services.evidence_xlsx import workbook
-from adminconsole.services.kpi_evidence import METRICS, OBJECTIVES, build_evidence
+from adminconsole.services.kpi_evidence import METRICS, build_evidence
 from progress.services import MetricsService
 from progress.tests.test_kpi_scope import _player, _run, utc
 from progress.tests.test_kpi_scope import tier as tier
@@ -27,24 +25,7 @@ def test_strings_are_never_formulas():
         assert "=HYPERLINK" in sheet
 
 
-def test_objective_mapping_matches_ui():
-    source = (
-        Path(__file__).resolve().parents[3]
-        / "frontend/src/features/performance/utils/learningObjectives.ts"
-    ).read_text(encoding="utf-8")
-    matches = re.findall(
-        r"id: '(SO \d+\.\d+)',\s+title: '([^']+)',\s+metrics: \[([^\]]+)\]", source
-    )
-    assert len(matches) == len(OBJECTIVES) == 29
-    for (code, title, metrics), objective in zip(matches, OBJECTIVES, strict=True):
-        assert (code, title) == (objective["id"], objective["title"])
-        assert [
-            (k, int(t or 70), k != "arc")
-            for k, t in re.findall(r"(car|hlcr|arc|rta)\((\d*)\)", metrics)
-        ] == [(c["key"], c["target"], c["up"]) for c in objective["metrics"]]
-
-
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_export_matches_live_metrics_and_filter(django_user_model, tier):  # noqa: F811 -- imported pytest fixture
     user, player = _player(django_user_model, "included")
     _, staff = _player(django_user_model, "staff", staff=True)
@@ -64,7 +45,7 @@ def test_export_matches_live_metrics_and_filter(django_user_model, tier):  # noq
         assert len(module_root.findall(".//{*}row")) == 2
 
 
-@pytest.mark.django_db
+@pytest.mark.django_db(transaction=True)
 def test_permissions_and_private_empty_evidence(django_user_model):
     client = APIClient()
     url = "/api/admin/users/kpi-evidence/"
