@@ -43,12 +43,14 @@ REQUIRED_README_SNIPPETS = [
     "npm run api:type-adoption-check",
 ]
 
-# Checked-in solution references introduced with the scoring and alternatives audit.
+# Approved supporting references; root documents remain the architectural source of truth.
 ALLOWED_DOC_ENTRIES = {
     "goals",
     "designs",
     "git-solution-audit.md",
     "taught-vs-alternative-solutions.md",
+    # Admin export usage, privacy guarantees, and validation steps.
+    "KPI_EVIDENCE_EXPORT.md",
     # Generated scenario export; regenerated via scripts/generate_scenario_md.py.
     "SEEDED_SCENARIOS.md",
 }
