@@ -595,6 +595,37 @@
                 }
             }
         },
+        "/api/admin/users/kpi-evidence/": {
+            "get": {
+                "operationId": "admin_users_kpi_evidence_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/adventure-level-tiers/{tier_id}/runs/": {
             "post": {
                 "operationId": "adventure_level_tiers_runs_create",

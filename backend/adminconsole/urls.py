@@ -1,4 +1,5 @@
 from django.urls import path
+from adminconsole.views.evidence import AdminKpiEvidenceAPIView
 
 from adminconsole.views import (
     AdminAnalyticsAPIView,
@@ -17,6 +18,7 @@ from adminconsole.views import (
 )
 
 urlpatterns = [
+    path("users/kpi-evidence/", AdminKpiEvidenceAPIView.as_view(), name="admin-kpi-evidence"),
     path("overview/", AdminOverviewAPIView.as_view(), name="admin-overview"),
     path("users/", AdminUserListAPIView.as_view(), name="admin-user-list"),
     path("users/<int:user_id>/", AdminUserDetailAPIView.as_view(), name="admin-user-detail"),

@@ -24,6 +24,18 @@ export function AdminUsersPage() {
   const [query,    setQuery]    = useState('')
   const [search,   setSearch]   = useState('')
   const [selected, setSelected] = useState<number | null>(null)
+  const evidence = useMutation({
+    mutationFn: () => adminApi.exportEvidence(search),
+    onSuccess: blob => {
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
+      link.download = `GITit_Learner_KPI_Evidence_${date}.xlsx`
+      link.click()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    },
+  })
 
   const users = useQuery({
     queryKey: queryKeys.adminUsers(search),
@@ -76,7 +88,12 @@ export function AdminUsersPage() {
           )}
         </div>
         <Button type="submit" variant="outline" size="sm">Search</Button>
+        <Button type="button" variant="outline" size="sm" disabled={evidence.isPending} onClick={() => evidence.mutate()}>
+          {evidence.isPending ? 'Preparing export...' : 'Export KPI Evidence (.xlsx)'}
+        </Button>
       </form>
+      <p className="lu-sub">Export: all non-staff learners{search ? ' matching the applied search' : ''}, including accounts beyond the directory limit. All-time live practice at download time.</p>
+      {evidence.isError && <p role="alert">Could not export KPI evidence. Please try again.</p>}
 
       {/* ── body: table + drawer ── */}
       <div className={`lu-body ${selected != null ? 'has-drawer' : ''}`}>

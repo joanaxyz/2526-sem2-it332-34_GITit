@@ -1,0 +1,360 @@
+﻿[
+    {
+        "module":  1,
+        "title":  "Initializing Repositories",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 1.1"
+    },
+    {
+        "module":  1,
+        "title":  "Cloning Remote Repositories",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 1.2"
+    },
+    {
+        "module":  1,
+        "title":  "Staging and Committing",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 1.3"
+    },
+    {
+        "module":  1,
+        "title":  "Partial Staging",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 1.4"
+    },
+    {
+        "module":  1,
+        "title":  "Amending Commits",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 1.5"
+    },
+    {
+        "module":  1,
+        "title":  "Unstaging and Discarding Changes",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 1.6"
+    },
+    {
+        "module":  1,
+        "title":  "Independent Local Repository Management",
+        "metrics":  [
+                        {
+                            "key":  "hlcr",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 1.7"
+    },
+    {
+        "module":  1,
+        "title":  "Efficient Repository-State Reasoning",
+        "metrics":  [
+                        {
+                            "key":  "arc",
+                            "target":  2,
+                            "up":  false
+                        }
+                    ],
+        "id":  "SO 1.8"
+    },
+    {
+        "module":  2,
+        "title":  "Creating and Switching Branches",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 2.1"
+    },
+    {
+        "module":  2,
+        "title":  "Branch Naming Conventions and Housekeeping",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 2.2"
+    },
+    {
+        "module":  2,
+        "title":  "Stashing Work in Progress",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 2.3"
+    },
+    {
+        "module":  2,
+        "title":  "Pushing to a Remote",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 2.4"
+    },
+    {
+        "module":  2,
+        "title":  "Fetching and Pulling from a Remote",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 2.5"
+    },
+    {
+        "module":  2,
+        "title":  "Reconciling Diverged Local and Remote Histories",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 2.6"
+    },
+    {
+        "module":  2,
+        "title":  "Completing Branch Merges",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 2.7"
+    },
+    {
+        "module":  2,
+        "title":  "Squash Merging",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 2.8"
+    },
+    {
+        "module":  2,
+        "title":  "Deleting and Recovering Remote Branches",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 2.9"
+    },
+    {
+        "module":  2,
+        "title":  "Independent Branch and Collaboration Management",
+        "metrics":  [
+                        {
+                            "key":  "hlcr",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 2.10"
+    },
+    {
+        "module":  2,
+        "title":  "Reduced Trial-and-Error Branching",
+        "metrics":  [
+                        {
+                            "key":  "arc",
+                            "target":  2,
+                            "up":  false
+                        }
+                    ],
+        "id":  "SO 2.11"
+    },
+    {
+        "module":  3,
+        "title":  "Resolving Merge Conflicts Manually",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 3.1"
+    },
+    {
+        "module":  3,
+        "title":  "Resolving Conflicts Using a Merge Tool",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 3.2"
+    },
+    {
+        "module":  3,
+        "title":  "Cherry-Picking Commits",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 3.3"
+    },
+    {
+        "module":  3,
+        "title":  "Independent Conflict Resolution",
+        "metrics":  [
+                        {
+                            "key":  "hlcr",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 3.4"
+    },
+    {
+        "module":  3,
+        "title":  "Transferable Conflict-Resolution Reasoning",
+        "metrics":  [
+                        {
+                            "key":  "rta",
+                            "target":  65,
+                            "up":  true
+                        },
+                        {
+                            "key":  "arc",
+                            "target":  2,
+                            "up":  false
+                        }
+                    ],
+        "id":  "SO 3.5"
+    },
+    {
+        "module":  4,
+        "title":  "Recovering from Hard Resets",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 4.1"
+    },
+    {
+        "module":  4,
+        "title":  "Reversing Pushed Commits Safely",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 4.2"
+    },
+    {
+        "module":  4,
+        "title":  "Completing Rebase Recovery Sequences",
+        "metrics":  [
+                        {
+                            "key":  "car",
+                            "target":  70,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 4.3"
+    },
+    {
+        "module":  4,
+        "title":  "Independent Recovery Operations",
+        "metrics":  [
+                        {
+                            "key":  "hlcr",
+                            "target":  65,
+                            "up":  true
+                        }
+                    ],
+        "id":  "SO 4.4"
+    },
+    {
+        "module":  4,
+        "title":  "Reduced Trial-and-Error Recovery",
+        "metrics":  [
+                        {
+                            "key":  "rta",
+                            "target":  65,
+                            "up":  true
+                        },
+                        {
+                            "key":  "arc",
+                            "target":  3,
+                            "up":  false
+                        }
+                    ],
+        "id":  "SO 4.5"
+    }
+]
