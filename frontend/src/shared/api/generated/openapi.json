@@ -595,6 +595,37 @@
                 }
             }
         },
+        "/api/admin/users/kpi-evidence/": {
+            "get": {
+                "operationId": "admin_users_kpi_evidence_retrieve",
+                "parameters": [
+                    {
+                        "in": "query",
+                        "name": "q",
+                        "schema": {
+                            "type": "string",
+                            "maxLength": 255
+                        }
+                    }
+                ],
+                "tags": [
+                    "admin"
+                ],
+                "responses": {
+                    "200": {
+                        "content": {
+                            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+                                "schema": {
+                                    "type": "string",
+                                    "format": "binary"
+                                }
+                            }
+                        },
+                        "description": ""
+                    }
+                }
+            }
+        },
         "/api/adventure-level-tiers/{tier_id}/runs/": {
             "post": {
                 "operationId": "adventure_level_tiers_runs_create",
@@ -6316,6 +6347,65 @@
                     "password"
                 ]
             },
+            "ModuleActivity": {
+                "type": "object",
+                "properties": {
+                    "number": {
+                        "type": "integer"
+                    },
+                    "participants": {
+                        "type": "integer",
+                        "minimum": 0,
+                        "description": "Distinct learners with scoped required-tier records, including in-progress tiers."
+                    },
+                    "difficulties": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ModuleDifficultyActivity"
+                        }
+                    }
+                },
+                "required": [
+                    "difficulties",
+                    "number",
+                    "participants"
+                ]
+            },
+            "ModuleDifficultyActivity": {
+                "type": "object",
+                "properties": {
+                    "difficulty": {
+                        "$ref": "#/components/schemas/ModuleDifficultyActivityDifficultyEnum"
+                    },
+                    "attempted_tiers": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "mastered_tiers": {
+                        "type": "integer",
+                        "minimum": 0
+                    },
+                    "in_progress_tiers": {
+                        "type": "integer",
+                        "minimum": 0
+                    }
+                },
+                "required": [
+                    "attempted_tiers",
+                    "difficulty",
+                    "in_progress_tiers",
+                    "mastered_tiers"
+                ]
+            },
+            "ModuleDifficultyActivityDifficultyEnum": {
+                "enum": [
+                    "easy",
+                    "medium",
+                    "hard"
+                ],
+                "type": "string",
+                "description": "* `easy` - easy\n* `medium` - medium\n* `hard` - hard"
+            },
             "MotionModeEnum": {
                 "enum": [
                     "system",
@@ -6730,6 +6820,13 @@
                         "items": {
                             "$ref": "#/components/schemas/TransferCheckpoint"
                         }
+                    },
+                    "module_activity": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/ModuleActivity"
+                        },
+                        "description": "Admin cohort only. Unique participants and learner-tier counts, not KPI denominators."
                     }
                 },
                 "required": [

@@ -110,6 +110,32 @@ def _staff_client(django_user_model):
     return client
 
 
+@pytest.mark.django_db
+def test_module_activity_obeys_scope_and_deduplicates_runs(tier, django_user_model):
+    _, learner = _player(django_user_model, "activity-learner")
+    _, other = _player(django_user_model, "activity-other")
+    _, staff = _player(django_user_model, "activity-staff", staff=True)
+    # Oct 1 midnight Manila is Sep 30 16:00 UTC, inclusive.
+    _run(learner, tier, "a", SESSION_STATUS_FAILED, started_at=utc(2026, 9, 30, 16))
+    _run(learner, tier, "a", SESSION_STATUS_FAILED, started_at=utc(2026, 10, 2))
+    _run(staff, tier, "a", SESSION_STATUS_FAILED, started_at=utc(2026, 10, 2))
+    _run(other, tier, "a", SESSION_STATUS_FAILED, started_at=utc(2026, 9, 30, 15, 59))
+    _run(other, tier, "a", SESSION_STATUS_FAILED, started_at=utc(2026, 10, 10, 16))
+    replay = _run(other, tier, "a", SESSION_STATUS_FAILED, started_at=utc(2026, 10, 2))
+    AdventureLevelTierRun.objects.filter(pk=replay.pk).update(is_replay=True)
+    transfer = _run(other, tier, "a", SESSION_STATUS_FAILED, started_at=utc(2026, 10, 2))
+    AdventureLevelTierRun.objects.filter(pk=transfer.pk).update(is_transfer=True)
+    response = _staff_client(django_user_model).get(
+        "/api/admin/analytics/", {"start_date": "2026-10-01", "end_date": "2026-10-10"}
+    )
+    assert response.status_code == 200
+    activity = response.data["runebound_performance"]["module_activity"]
+    assert [row["participants"] for row in activity] == [0, 0, 1, 0]
+    assert activity[2]["difficulties"][2]["attempted_tiers"] == 1
+    # No new activity fields leak into the learner-facing response.
+    assert "module_activity" not in MetricsService().performance_summary(player=learner)
+
+
 def test_range_converts_manila_days_to_utc():
     assert OCT_1_TO_10.start_at.astimezone(UTC) == utc(2026, 9, 30, 16)
     assert OCT_1_TO_10.end_before.astimezone(UTC) == utc(2026, 10, 10, 16)

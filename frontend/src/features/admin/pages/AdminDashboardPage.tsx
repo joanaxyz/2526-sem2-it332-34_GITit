@@ -1,18 +1,17 @@
-import { keepPreviousData, useQuery } from '@tanstack/react-query'
-import { Activity, BookOpen, CheckCircle2, ChevronDown, Minus, X, XCircle } from 'lucide-react'
+import { LearningAnalytics } from '@/features/admin/components/LearningAnalytics'
+import { soMetricRate, soStatus, type SoData } from '@/features/admin/utils/objectiveEvaluation'
+import '@/styles/features/admin/learning-analytics.css'
+import { useQuery } from '@tanstack/react-query'
+import { BookOpen, CheckCircle2, ChevronDown, Info, Minus, X, XCircle } from 'lucide-react'
 import { useState } from 'react'
 
 import { adminApi } from '@/features/admin/api/adminApi'
-import { KpiRangePicker } from '@/features/admin/components/KpiRangePicker'
 import { SupplementaryRetryModuleRow } from '@/features/admin/components/SupplementaryRetryRate'
-import type { KpiDateRange } from '@/features/admin/types'
 import {
-  EMPTY_RATE,
   GO_SCR_TARGET,
   KPIS,
   MODULES,
   SUPPLEMENTARY_KPI,
-  getModuleRate,
   type CardKpi,
   type Rate,
   type SoMetric,
@@ -24,6 +23,7 @@ import { ALL_TIME } from '@/features/admin/utils/kpiRange'
 import type { PerformanceModule } from '@/features/performance/types'
 import { queryKeys } from '@/shared/api/queryKeys'
 import { ErrorState } from '@/shared/components/ErrorState'
+import { Modal } from '@/shared/components/Modal'
 import { LoadingScreen } from '@/shared/components/LoadingScreen'
 
 // ─── helpers ──────────────────────────────────────────────────────────────────
@@ -31,36 +31,8 @@ function status(r: Rate, target: number, up: boolean): Status {
   return metricTargetStatus(r, target, up)
 }
 
-// A multi-metric SO misses if any metric misses, is met only when every metric
-// is met, and otherwise has no verdict yet.
-function combinedStatus(statuses: Status[]): Status {
-  if (statuses.includes('miss')) return 'miss'
-  if (statuses.length > 0 && statuses.every(st => st === 'met')) return 'met'
-  return 'none'
-}
-
-// CAR is measured per SO (from the SO-to-level mapping); every other KPI is
-// measured per module.
-type SoData = { module: PerformanceModule | undefined; objectives: Record<string, Rate> }
-
-function soMetricRate(metric: SoMetric, so: SpecificObjective, data: SoData): Rate {
-  if (metric.kpi === 'car') return data.objectives[so.id] ?? EMPTY_RATE
-  return data.module ? getModuleRate(data.module, metric.kpi) : EMPTY_RATE
-}
-
-function soStatus(so: SpecificObjective, data: SoData): Status {
-  return combinedStatus(so.metrics.map(m => status(soMetricRate(m, so, data), m.target, m.up)))
-}
-
 function fmtRate(r: Rate, pct: boolean): string {
   return formatMetricValue(r.value, pct)
-}
-
-function barW(r: Rate, target: number, up: boolean): number {
-  if (r.value === null) return 0
-  if (up) return Math.min(100, (r.value / target) * 100)
-  const max = target * 3
-  return Math.max(0, 100 - Math.min(100, ((r.value - target) / (max - target)) * 100))
 }
 
 function StatusIcon({ s }: { s: Status }) {
@@ -70,7 +42,7 @@ function StatusIcon({ s }: { s: Status }) {
 }
 
 // ─── KPI card ─────────────────────────────────────────────────────────────────
-function KpiCard({ kpi, rate }: { kpi: CardKpi; rate: Rate | undefined }) {
+function KpiCard({ kpi, rate, onDetails }: { kpi: CardKpi; rate: Rate | undefined; onDetails: () => void }) {
   const r: Rate = rate ?? { value: null, numerator: 0, denominator: 0 }
   // The supplementary indicator has no target: no status, bar or target line.
   const target = 'target' in kpi ? { value: kpi.target, up: kpi.up } : null
@@ -85,36 +57,16 @@ function KpiCard({ kpi, rate }: { kpi: CardKpi; rate: Rate | undefined }) {
       title={'tooltip' in kpi ? kpi.tooltip : undefined}
     >
       <div className="dk-kpi-top">
-        <span className="dk-kpi-abbr">{kpi.abbr}</span>
-        {target
-          ? <span className={`dk-kpi-dot ${stateClass}`} aria-hidden="true" />
-          : <span className="dk-kpi-tag">No target</span>}
+        <p className="dk-kpi-name">{'longName' in kpi ? kpi.longName : kpi.name}</p>
+        <button className="dk-kpi-info" type="button" aria-label={`${kpi.abbr} metric details`} onClick={onDetails}><Info aria-hidden="true" /></button>
       </div>
-
-      <div className={`dk-kpi-value ${valClass}`}>
-        {fmtRate(r, kpi.pct)}
-      </div>
-
-      {target && (
-        <>
-          <div className="dk-kpi-target">
-            Target: {target.up ? '≥' : '≤'}{target.value}{kpi.pct ? '%' : ''}
-          </div>
-          <KpiBar rate={r} target={target.value} up={target.up} stateClass={stateClass} />
-        </>
-      )}
-
-      <p className="dk-kpi-name">{kpi.name}</p>
-      <p className="dk-kpi-evidence">{kpiEvidence(kpi.key, r)}</p>
-    </div>
-  )
-}
-
-function KpiBar({ rate, target, up, stateClass }: { rate: Rate; target: number; up: boolean; stateClass: string }) {
-  const bw = barW(rate, target, up)
-  return (
-    <div className="dk-kpi-bar" role="progressbar" aria-valuenow={bw} aria-valuemin={0} aria-valuemax={100}>
-      <div className={`dk-kpi-bar-fill ${stateClass}`} style={{ width: `${bw}%` }} />
+      <span className="dk-kpi-abbr">{kpi.abbr}</span>
+      <div className={`dk-kpi-value ${valClass}`}>{fmtRate(r, kpi.pct)}</div>
+      {target ? <div className="dk-kpi-footer">
+        <span className="dk-kpi-target">Target: {target.up ? '≥' : '≤'}{target.value}{kpi.pct ? '%' : ''}</span>
+        <span className={`la-status is-${s}`}>{s === 'met' ? 'Met' : s === 'miss' ? 'Not met' : 'No evidence'}</span>
+      </div> : <span className="dk-kpi-tag">Supplementary · No target</span>}
+      <span className="la-sr-only">{kpi.name}. {kpiEvidence(kpi.key, r)}</span>
     </div>
   )
 }
@@ -134,28 +86,69 @@ function KpiRefButton({ open, onToggle }: { open: boolean; onToggle: () => void 
   )
 }
 
-function KpiRefPanel() {
-  return (
-    <div className="dk-ref-panel" role="region" aria-label="KPI formulas and insights">
-      {KPIS.map(kpi => (
-        <div key={kpi.key} className="dk-ref-entry">
-          <div className="dk-ref-e-head">
-            <span className="dk-ref-e-abbr">{kpi.abbr}</span>
-            <span className="dk-ref-e-target">{kpi.up ? '≥' : '≤'}{kpi.target}{kpi.pct ? '%' : ''}</span>
-          </div>
-          <p className="dk-ref-e-name">{kpi.name}</p>
-          <p className="dk-ref-e-why">{kpi.why}</p>
-          <div className="dk-ref-e-formula">
-            <span>Formula</span>
-            <code>{kpi.formula}</code>
-          </div>
-        </div>
-      ))}
-    </div>
-  )
+const KPI_MEANING: Record<CardKpi['key'], { purpose: string; met: string; miss: string }> = {
+  scr: {
+    purpose: 'Shows whether learners can finish the required Git practice. A tier is completed when all its required scenarios are cleared, even if several attempts were needed.',
+    met: 'Learners are completing enough of the assessed practice to meet the research target. This supports successful task completion across the required Git exercises.',
+    miss: 'Completion is below the research target. Review the module results to identify where learners may need more practice or support.',
+  },
+  car: {
+    purpose: 'Shows how efficiently learners use Git commands to solve new problems, compared with a validated solution. Efficient command use helps indicate that learners can choose appropriate steps.',
+    met: 'Learners meet the target for command efficiency on scored scenarios. Their solutions use commands efficiently enough relative to the validated references.',
+    miss: 'Command efficiency is below the research target. Learners may reach the solution while using extra commands, suggesting a need to practise planning the Git steps.',
+  },
+  hlcr: {
+    purpose: 'Shows whether learners can complete the harder Git tasks. This helps assess how well they handle more demanding work beyond the easier exercises.',
+    met: 'Learners meet the target for completing assessed Hard tiers. This supports their ability to handle the more challenging Git tasks in the system.',
+    miss: 'Hard-tier completion is below the research target. Learners may need further practice with complex Git tasks.',
+  },
+  arc: {
+    purpose: 'Shows how many unsuccessful attempts learners need before completing a tier. Fewer retries can suggest more deliberate problem solving and less trial and error.',
+    met: 'The average retry count is within the allowed maximum. Learners who completed tiers generally needed few unsuccessful attempts to reach completion.',
+    miss: 'The average retry count exceeds the allowed maximum. Learners who completed tiers needed more unsuccessful attempts than intended, suggesting room to strengthen their problem-solving approach.',
+  },
+  rta: {
+    purpose: 'Shows whether learners can apply what they practised to an unfamiliar Git problem. Success on a new repository or goal helps assess whether their skills transfer beyond familiar exercises.',
+    met: 'Learners meet the target for clearing eligible unfamiliar checkpoints on the first attempt. This supports their ability to apply practised Git skills to new problems.',
+    miss: 'First-attempt success on unfamiliar checkpoints is below the target. Learners may benefit from practising a wider variety of Git problems.',
+  },
+  retry_success_rate: {
+    purpose: 'Shows how often a retry after a failed run succeeds. This helps describe how learners recover from mistakes during Git practice.',
+    met: 'Higher values mean a larger share of concluded recovery retries succeeded. This supplementary measure adds context to the five research KPIs and has no attainment target.',
+    miss: '',
+  },
 }
 
-// ─── SO row ───────────────────────────────────────────────────────────────────
+function KpiRefPanel({ selected, rates, onSelect, onClose }: {
+  selected: CardKpi; rates: Record<string, Rate>; onSelect: (kpi: CardKpi) => void; onClose: () => void
+}) {
+  const rate = rates[selected.key]
+  const meaning = KPI_MEANING[selected.key]
+  const verdict = 'target' in selected ? status(rate, selected.target, selected.up) : null
+  const interpretation = rate.value === null || rate.denominator === 0
+    ? 'There is not enough eligible evidence to interpret this result yet.'
+    : verdict === 'miss' ? meaning.miss : meaning.met
+  return <Modal open title="KPI Reference" onClose={onClose} dismissOnBackdropClick overlayClassName="dk-reference-overlay" className="dk-reference-drawer">
+    <label className="dk-reference-selector">Metric
+      <select value={selected.key} onChange={event => onSelect([...KPIS, SUPPLEMENTARY_KPI].find(kpi => kpi.key === event.target.value)!)}>
+        {[...KPIS, SUPPLEMENTARY_KPI].map(kpi => <option key={kpi.key} value={kpi.key}>{kpi.abbr} — {kpi.name}</option>)}
+      </select>
+    </label>
+    <h3>{selected.name}</h3>
+    <div className="dk-reference-value">{fmtRate(rates[selected.key], selected.pct)}<span>{'target' in selected ? `Target ${selected.up ? '≥' : '≤'}${selected.target}${selected.pct ? '%' : ''}` : 'Supplementary · No target'}</span></div>
+    <p>{kpiEvidence(selected.key, rates[selected.key])}</p>
+    <section className="dk-reference-meaning"><h4>Why we measure it</h4><p>{meaning.purpose}</p>
+      <h4>What this result suggests</h4><p>{interpretation}</p>
+    </section>
+    <div className="dk-reference-formula"><h4>Formula</h4><code>{selected.formula}</code></div>
+    {'tooltip' in selected && <p>{selected.tooltip}</p>}
+    <section className="dk-reference-method"><h4>Reporting methodology</h4>
+      <p>{'why' in selected ? selected.why : selected.explanation}</p>
+      <p>Live practice results give each contributing learner equal weight. Staff are excluded. CAR includes eligible fresh-content replays. Overall KPIs use learner scores, rather than averages of module results. Formal studies use frozen assignments.</p>
+      <p>Interpretations describe the contributing learners as a group. A target being met can coexist with individual learners needing support. Read the five KPIs together to assess different aspects of Git performance. Establishing learning gains requires the study evaluation evidence.</p>
+    </section>
+  </Modal>
+}
 function SoMetricCell({ metric, so, data }: { metric: SoMetric; so: SpecificObjective; data: SoData }) {
   const kpiMeta = KPIS.find(k => k.key === metric.kpi)!
   const r = soMetricRate(metric, so, data)
@@ -199,7 +192,7 @@ function SoRow({ so, data }: { so: SpecificObjective; data: SoData }) {
 
 // ─── module accordion ─────────────────────────────────────────────────────────
 function ModuleAccordion({ modules, objectives }: { modules: PerformanceModule[]; objectives: Record<string, Rate> }) {
-  const [open, setOpen] = useState<number | null>(1)
+  const [open, setOpen] = useState<number | null>(null)
 
   return (
     <div className="dk-modules">
@@ -217,7 +210,7 @@ function ModuleAccordion({ modules, objectives }: { modules: PerformanceModule[]
         // tally all objectives
         const allStatuses: Status[] = [goS, ...mod.sos.map(so => soStatus(so, soData))]
         const met   = allStatuses.filter(s => s === 'met').length
-        const total = allStatuses.filter(s => s !== 'none').length
+        const total = allStatuses.length
 
         const badgeClass = total === 0 ? 'none' : met === total ? 'all' : met > 0 ? 'partial' : 'none'
 
@@ -244,7 +237,7 @@ function ModuleAccordion({ modules, objectives }: { modules: PerformanceModule[]
             </button>
 
             {isOpen && (
-              <div className="dk-mod-body">
+              <div className="dk-mod-body" tabIndex={0} role="region" aria-label={`Module ${mod.num} detailed results`}>
 
                 {/* General Objective */}
                 <div className="dk-go">
@@ -284,13 +277,10 @@ function ModuleAccordion({ modules, objectives }: { modules: PerformanceModule[]
 
 // ─── page ─────────────────────────────────────────────────────────────────────
 export function AdminDashboardPage() {
-  const [refOpen, setRefOpen] = useState(false)
-  const [range, setRange] = useState<KpiDateRange>(ALL_TIME)
+  const [selectedKpi, setSelectedKpi] = useState<CardKpi | null>(null)
   const analytics = useQuery({
-    queryKey: queryKeys.adminAnalyticsRange(range.startDate, range.endDate),
-    queryFn: () => adminApi.analytics(range),
-    // Keep the current numbers on screen while a new range loads.
-    placeholderData: keepPreviousData,
+    queryKey: queryKeys.adminAnalyticsRange(null, null),
+    queryFn: () => adminApi.analytics(ALL_TIME),
   })
   const overview  = useQuery({ queryKey: queryKeys.adminOverview,  queryFn: adminApi.overview  })
 
@@ -318,23 +308,19 @@ export function AdminDashboardPage() {
   }).length
 
   return (
-    <div className="dk-page">
+    <div className="dk-page dk-analytics">
 
       {/* ── page header ── */}
-      <div className="dk-header">
+      <div className="dk-header dk-overview-header">
         <div className="dk-header-left">
           <p className="dk-eyebrow">
-            <Activity aria-hidden="true" />
-            Arcane Spire · Modules 1–4 · replays and staff excluded
+            Arcane Spire · Modules 1–4
           </p>
           <h1 className="dk-title">KPI Overview</h1>
-          <p className="dk-subtitle">
-            Live practice objectives — equally weighted learner scores. Formal studies use frozen assignments.
-          </p>
         </div>
 
         <div className="dk-stats">
-          <div className="dk-stat">
+          <div className="dk-stat dk-stat-primary">
             <span className="dk-stat-value">
               {metCount}<span>/{KPIS.length}</span>
             </span>
@@ -347,43 +333,45 @@ export function AdminDashboardPage() {
           </div>
           <div className="dk-stat">
             <span className="dk-stat-value">{data.active_learners_30d}</span>
-            <span className="dk-stat-label">active 30d</span>
+            <span className="dk-stat-label" title="Active learners across all activity in the last 30 days">active · 30 days</span>
           </div>
           {overview.data && (
             <div className="dk-stat">
               <span className="dk-stat-value">{overview.data.users.total}</span>
-              <span className="dk-stat-label">registered</span>
+              <span className="dk-stat-label" title="All registered users, across all time">registered</span>
             </div>
           )}
         </div>
       </div>
 
-      <KpiRangePicker value={range} applied={data.kpi_range} onChange={setRange} />
+      {analytics.isFetching && <p className="la-update" role="status">Updating analytics…</p>}
 
       {/* ── KPI cards ── */}
       <div className="dk-section">
         <div className="dk-section-head">
           <div>
-            <h2 className="dk-section-title">Overall — All Learners</h2>
-            <p className="dk-section-sub">Aggregate across Modules 1–4</p>
+            <h2 className="dk-section-title">Overall KPI Results</h2>
+            <p className="dk-section-sub">Five research metrics across Modules 1–4 · All time</p>
           </div>
-          <KpiRefButton open={refOpen} onToggle={() => setRefOpen(v => !v)} />
+          <KpiRefButton open={selectedKpi !== null} onToggle={() => setSelectedKpi(KPIS[0])} />
         </div>
-        {refOpen && <KpiRefPanel />}
+        {selectedKpi && <KpiRefPanel selected={selectedKpi} rates={{ ...byKey, retry_success_rate: diag.kpis.retry_success_rate }} onSelect={setSelectedKpi} onClose={() => setSelectedKpi(null)} />}
         <div className="dk-kpi-grid">
           {KPIS.map(kpi => (
-            <KpiCard key={kpi.key} kpi={kpi} rate={byKey[kpi.key]} />
+            <KpiCard key={kpi.key} kpi={kpi} rate={byKey[kpi.key]} onDetails={() => setSelectedKpi(kpi)} />
           ))}
-          <KpiCard kpi={SUPPLEMENTARY_KPI} rate={diag.kpis.retry_success_rate} />
+          <KpiCard kpi={SUPPLEMENTARY_KPI} rate={diag.kpis.retry_success_rate} onDetails={() => setSelectedKpi(SUPPLEMENTARY_KPI)} />
         </div>
       </div>
+
+      <LearningAnalytics summary={diag} objectives={data.objectives} />
 
       {/* ── module breakdown ── */}
       <div className="dk-section">
         <div className="dk-section-head">
           <div>
-            <h2 className="dk-section-title">Breakdown by Module</h2>
-            <p className="dk-section-sub">General Objective + Specific Objectives SO 1.1 – SO 4.5</p>
+            <h2 className="dk-section-title">Detailed Module Results</h2>
+            <p className="dk-section-sub">Open a module to review its research objectives and results.</p>
           </div>
         </div>
         <ModuleAccordion modules={diag.modules} objectives={data.objectives} />

@@ -61,7 +61,7 @@ export function WorkspaceStatusHeader({
       </button>
 
       <a className="gameplay-header-brand" href="/home" aria-label="GIT it! home">
-        <img src={gitLogoImage} alt="" width={1431} height={623} />
+        <img src={gitLogoImage} alt="" width={1935} height={858} />
       </a>
 
       <div className="gameplay-header-mission" aria-label={missionLabel}>

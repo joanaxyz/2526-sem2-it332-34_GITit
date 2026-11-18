@@ -1,5 +1,5 @@
 import type { KpiDateRange } from '@/features/admin/types'
-import { apiOperationRequest } from '@/shared/api/httpClient'
+import { apiOperationRequest, apiRequest } from '@/shared/api/httpClient'
 import type {
   ApiRequestBody,
   ApiSchemas,
@@ -26,6 +26,9 @@ function kpiRangeQuery(range?: KpiDateRange) {
 }
 
 export const adminApi = {
+  exportEvidence(query: string) {
+    return apiRequest<Blob>(`/admin/users/kpi-evidence/?q=${encodeURIComponent(query)}`)
+  },
   overview() {
     return apiOperationRequest('admin_overview_retrieve', '/admin/overview/')
   },

@@ -470,6 +470,11 @@ SPECTACULAR_SETTINGS = {
     "DESCRIPTION": "Student-facing Git scenario level API.",
     "VERSION": env("API_VERSION"),
     "ENUM_NAME_OVERRIDES": {
+        "DifficultyEnum": [
+            ("beginner", "Beginner"),
+            ("intermediate", "Intermediate"),
+            ("advanced", "Advanced"),
+        ],
         "EmailVerificationRequiredCodeEnum": ["email_unverified"],
     },
 }

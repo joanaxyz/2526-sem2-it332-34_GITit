@@ -44,6 +44,7 @@ jobs:
         run: |
           python ../scripts/check_legacy_terms.py
           python ../scripts/check_architecture_boundaries.py
+          python ../scripts/check_evidence_objectives.py
           python ../scripts/check_css_architecture.py
           python ../scripts/check_ui_typography.py
           python ../scripts/check_seed_targets.py

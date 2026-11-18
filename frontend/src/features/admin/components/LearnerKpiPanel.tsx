@@ -49,7 +49,7 @@ export function LearnerKpiPanel({ kpis, modules }: { kpis: Kpis; modules: Module
               <span className="kp-cell-abbr">{m.abbr}</span>
               <strong className={`kp-cell-val kp-val--${s}`}>{fmtKpi(r, m.pct)}</strong>
               <span className="kp-cell-target">{m.up ? '≥' : '≤'}{m.target}{m.pct ? '%' : ''}</span>
-              <span className="kp-cell-evidence">{kpiEvidence(key, r)}</span>
+              <span className="kp-cell-name">{m.name}</span><span className="kp-cell-status">{s === 'met' ? 'Target met' : s === 'miss' ? 'Target not met' : 'No evidence'}</span><span className="kp-cell-evidence">{kpiEvidence(key, r)}</span>
               <span className={`kp-cell-icon kp-icon--${s}`} aria-hidden="true">
                 {s === 'met'  ? <CheckCircle2 /> : s === 'miss' ? <XCircle /> : null}
               </span>

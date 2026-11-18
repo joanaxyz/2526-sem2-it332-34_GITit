@@ -4,6 +4,7 @@ import {
   ChevronDown,
   Search,
   UserX,
+  Users,
   X,
 } from 'lucide-react'
 import { useState } from 'react'
@@ -23,6 +24,18 @@ export function AdminUsersPage() {
   const [query,    setQuery]    = useState('')
   const [search,   setSearch]   = useState('')
   const [selected, setSelected] = useState<number | null>(null)
+  const evidence = useMutation({
+    mutationFn: () => adminApi.exportEvidence(search),
+    onSuccess: blob => {
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      const date = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Manila', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date())
+      link.download = `GITit_Learner_KPI_Evidence_${date}.xlsx`
+      link.click()
+      setTimeout(() => URL.revokeObjectURL(url), 1000)
+    },
+  })
 
   const users = useQuery({
     queryKey: queryKeys.adminUsers(search),
@@ -39,12 +52,12 @@ export function AdminUsersPage() {
       {/* ── page header ── */}
       <div className="lu-header">
         <div>
-          <h1 className="lu-title">Learners</h1>
+          <p className="lu-eyebrow">LEARNER MANAGEMENT</p><h1 className="lu-title">Learners</h1>
           <p className="lu-sub">Search accounts · inspect individual KPI performance</p>
         </div>
         {users.data && (
           <span className="lu-count">
-            {users.data.results.length} {search ? 'results' : 'total'}
+            <Users aria-hidden="true" />{users.data.results.length} {search ? 'results' : 'total'}
           </span>
         )}
       </div>
@@ -52,11 +65,12 @@ export function AdminUsersPage() {
       {/* ── search ── */}
       <form
         className="lu-search"
-        onSubmit={e => { e.preventDefault(); setSearch(query.trim()) }}
+        onSubmit={e => { e.preventDefault(); setSearch(query.trim()); setSelected(null) }}
       >
         <div className="lu-search-wrap">
           <Search className="lu-search-icon" aria-hidden="true" />
           <input
+            aria-label="Search learners by username or email"
             value={query}
             onChange={e => setQuery(e.target.value)}
             placeholder="Search by username or email…"
@@ -74,13 +88,20 @@ export function AdminUsersPage() {
           )}
         </div>
         <Button type="submit" variant="outline" size="sm">Search</Button>
+        <Button type="button" variant="outline" size="sm" disabled={evidence.isPending} onClick={() => evidence.mutate()}>
+          {evidence.isPending ? 'Preparing export...' : 'Export KPI Evidence (.xlsx)'}
+        </Button>
       </form>
+      <p className="lu-sub">Export: all non-staff learners{search ? ' matching the applied search' : ''}, including accounts beyond the directory limit. All-time live practice at download time.</p>
+      {evidence.isError && <p role="alert">Could not export KPI evidence. Please try again.</p>}
 
       {/* ── body: table + drawer ── */}
       <div className={`lu-body ${selected != null ? 'has-drawer' : ''}`}>
 
         {/* table panel */}
         <div className="lu-table-panel">
+          <div className="lu-panel-heading"><Users aria-hidden="true" /><div><h2>Learner directory</h2><p>Select a learner to explore their performance.</p></div></div>
+          <div className="lu-table-scroll">
           {users.isPending ? (
             <LoadingState label="Loading learners" variant="panel" />
           ) : users.isError ? (
@@ -108,7 +129,7 @@ export function AdminUsersPage() {
                     onClick={() => selectUser(u.id)}
                     role="button"
                     tabIndex={0}
-                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') selectUser(u.id) }}
+                    onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectUser(u.id) } }}
                     aria-pressed={selected === u.id}
                   >
                     <td>
@@ -136,6 +157,7 @@ export function AdminUsersPage() {
               </tbody>
             </table>
           )}
+          </div>
         </div>
 
         {/* drawer */}
@@ -149,6 +171,7 @@ export function AdminUsersPage() {
               <X aria-hidden="true" />
             </button>
             <LearnerDetail
+              key={selected}
               userId={selected}
               onChanged={() => qc.invalidateQueries({ queryKey: queryKeys.adminUsers(search) })}
               onDeleted={() => {

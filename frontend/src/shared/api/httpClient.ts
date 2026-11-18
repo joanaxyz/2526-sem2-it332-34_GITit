@@ -67,6 +67,7 @@ function defaultApiBaseUrl() {
 async function parseResponse(response: Response) {
   if (response.status === 204) return null
   const contentType = response.headers.get('content-type')
+  if (response.ok && contentType?.includes('application/vnd.openxmlformats-officedocument.spreadsheetml.sheet')) return response.blob()
   if (contentType?.includes('application/json')) return response.json()
   return response.text()
 }

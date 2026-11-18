@@ -20,7 +20,7 @@ export function RouteErrorPage() {
     <main className="route-error">
       <header className="route-error__header">
         <a className="route-error__brand" href="/" aria-label="GIT it! home">
-          <img src={gitLogoImage} alt="" width={1431} height={623} />
+          <img src={gitLogoImage} alt="" width={1935} height={858} />
         </a>
       </header>
 

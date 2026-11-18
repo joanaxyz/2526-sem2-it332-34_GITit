@@ -43,6 +43,10 @@ describe('AdminLayout access boundary', () => {
     expect(screen.getByText('Admin dashboard content')).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Learners' })).toBeInTheDocument()
     expect(screen.getByRole('link', { name: 'Back to app' })).toBeInTheDocument()
+    expect(screen.getAllByRole('link')).toHaveLength(3)
+    expect(screen.getByRole('link', { name: 'KPI Overview' })).toHaveAttribute('href', '/admin')
+    expect(screen.getByRole('link', { name: 'Learners' })).toHaveAttribute('href', '/admin/users')
+    expect(screen.getByRole('link', { name: 'Back to app' })).toHaveAttribute('href', '/home')
   })
 
   it('redirects signed-out users to login', () => {

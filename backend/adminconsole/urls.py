@@ -15,8 +15,10 @@ from adminconsole.views import (
     AdminUserKpisAPIView,
     AdminUserListAPIView,
 )
+from adminconsole.views.evidence import AdminKpiEvidenceAPIView
 
 urlpatterns = [
+    path("users/kpi-evidence/", AdminKpiEvidenceAPIView.as_view(), name="admin-kpi-evidence"),
     path("overview/", AdminOverviewAPIView.as_view(), name="admin-overview"),
     path("users/", AdminUserListAPIView.as_view(), name="admin-user-list"),
     path("users/<int:user_id>/", AdminUserDetailAPIView.as_view(), name="admin-user-detail"),

@@ -108,6 +108,9 @@ export type ApiSchemas = {
   "LearnedSkillsResponse": { "results": Array<ApiSchemas["LearnedSkillResponse"]> }
   "LevelDrillPlanResponse": { "available": boolean; "cards": Array<ApiSchemas["DrillCard"]>; "level": ApiSchemas["DrillLevel"]; "progress": ApiSchemas["DrillProgress"]; "resume": ApiSchemas["DrillResume"] | null; "sequence": ApiSchemas["DrillSequence"] | null }
   "Login": { "identifier": string; "password": string }
+  "ModuleActivity": { "difficulties": Array<ApiSchemas["ModuleDifficultyActivity"]>; "number": number; "participants": number }
+  "ModuleDifficultyActivity": { "attempted_tiers": number; "difficulty": ApiSchemas["ModuleDifficultyActivityDifficultyEnum"]; "in_progress_tiers": number; "mastered_tiers": number }
+  "ModuleDifficultyActivityDifficultyEnum": "easy" | "medium" | "hard"
   "MotionModeEnum": "system" | "reduced" | "full"
   "NullEnum": null
   "OAuthTicketExchange": { "ticket": string }
@@ -122,7 +125,7 @@ export type ApiSchemas = {
   "PerformanceKpiSet": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "car_first": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"] }
   "PerformanceModule": { "arc": ApiSchemas["RateMetric"]; "car": ApiSchemas["RateMetric"]; "car_first": ApiSchemas["RateMetric"]; "hlcr": ApiSchemas["RateMetric"]; "number": number; "retry_success_rate": ApiSchemas["RateMetric"]; "rta": ApiSchemas["RateMetric"]; "rtr"?: ApiSchemas["RateMetric"]; "scr": ApiSchemas["RateMetric"]; "title": string }
   "PerformanceSamples": { "attempted_tiers": number; "car_missing": number; "car_scored": number; "in_progress_tiers": number; "mastered_tiers": number; "mastery_missing": number; "participants": number; "transfer_assigned": number; "transfer_missing": number; "transfer_pending": number }
-  "PerformanceSummaryResponse": { "completed_sessions": number; "kpis": ApiSchemas["PerformanceKpiSet"]; "modules": Array<ApiSchemas["PerformanceModule"]>; "objectives": { [key: string]: ApiSchemas["RateMetric"] }; "samples": ApiSchemas["PerformanceSamples"]; "transfers": Array<ApiSchemas["TransferCheckpoint"]> }
+  "PerformanceSummaryResponse": { "completed_sessions": number; "kpis": ApiSchemas["PerformanceKpiSet"]; "module_activity"?: Array<ApiSchemas["ModuleActivity"]>; "modules": Array<ApiSchemas["PerformanceModule"]>; "objectives": { [key: string]: ApiSchemas["RateMetric"] }; "samples": ApiSchemas["PerformanceSamples"]; "transfers": Array<ApiSchemas["TransferCheckpoint"]> }
   "PhaseEnum": "introduction" | "feedback"
   "PlayerPreferences": { "leaderboard_visible"?: boolean; "motion_mode"?: ApiSchemas["MotionModeEnum"]; "onboarding_phase"?: ApiSchemas["OnboardingPhaseEnum"] }
   "RateMetric": { "denominator": number; "numerator": number; "unit"?: ApiSchemas["UnitEnum"]; "value": number | null }
@@ -188,6 +191,7 @@ export type ApiPath =
   | "/api/admin/stories/"
   | "/api/admin/stories/{story_id}/"
   | "/api/admin/users/"
+  | "/api/admin/users/kpi-evidence/"
   | "/api/admin/users/{user_id}/"
   | "/api/admin/users/{user_id}/actions/"
   | "/api/admin/users/{user_id}/kpis/"
@@ -258,6 +262,7 @@ export type ApiMethodByPath = {
   "/api/admin/stories/": "GET" | "POST"
   "/api/admin/stories/{story_id}/": "PATCH"
   "/api/admin/users/": "GET"
+  "/api/admin/users/kpi-evidence/": "GET"
   "/api/admin/users/{user_id}/": "DELETE" | "GET"
   "/api/admin/users/{user_id}/actions/": "POST"
   "/api/admin/users/{user_id}/kpis/": "GET"
@@ -330,6 +335,7 @@ export const apiOperations = {
   admin_stories_create: { method: "POST", path: "/api/admin/stories/", operationId: "admin_stories_create", tags: ["admin"] },
   admin_stories_partial_update: { method: "PATCH", path: "/api/admin/stories/{story_id}/", operationId: "admin_stories_partial_update", tags: ["admin"] },
   admin_users_retrieve: { method: "GET", path: "/api/admin/users/", operationId: "admin_users_retrieve", tags: ["admin"] },
+  admin_users_kpi_evidence_retrieve: { method: "GET", path: "/api/admin/users/kpi-evidence/", operationId: "admin_users_kpi_evidence_retrieve", tags: ["admin"] },
   admin_users_destroy: { method: "DELETE", path: "/api/admin/users/{user_id}/", operationId: "admin_users_destroy", tags: ["admin"] },
   admin_users_retrieve_2: { method: "GET", path: "/api/admin/users/{user_id}/", operationId: "admin_users_retrieve_2", tags: ["admin"] },
   admin_users_actions_create: { method: "POST", path: "/api/admin/users/{user_id}/actions/", operationId: "admin_users_actions_create", tags: ["admin"] },
@@ -418,6 +424,7 @@ export type ApiRequestBodyByOperation = {
   admin_stories_create: ApiSchemas["AdminStoryCreateRequest"]
   admin_stories_partial_update: ApiSchemas["PatchedAdminStoryUpdateRequest"]
   admin_users_retrieve: null
+  admin_users_kpi_evidence_retrieve: null
   admin_users_destroy: null
   admin_users_retrieve_2: null
   admin_users_actions_create: ApiSchemas["AdminUserActionRequest"]
@@ -503,6 +510,7 @@ export type ApiResponseBodyByOperation = {
   admin_stories_create: ApiSchemas["AdminStory"]
   admin_stories_partial_update: ApiSchemas["AdminStory"]
   admin_users_retrieve: ApiSchemas["AdminUserListResponse"]
+  admin_users_kpi_evidence_retrieve: string
   admin_users_destroy: null
   admin_users_retrieve_2: ApiSchemas["AdminUserDetail"]
   admin_users_actions_create: ApiSchemas["AdminUserDetail"]

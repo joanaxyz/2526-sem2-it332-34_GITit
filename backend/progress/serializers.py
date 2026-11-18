@@ -87,6 +87,22 @@ class PerformanceSamplesSerializer(serializers.Serializer):
     transfer_missing = serializers.IntegerField()
 
 
+class ModuleDifficultyActivitySerializer(serializers.Serializer):
+    difficulty = serializers.ChoiceField(choices=["easy", "medium", "hard"])
+    attempted_tiers = serializers.IntegerField(min_value=0)
+    mastered_tiers = serializers.IntegerField(min_value=0)
+    in_progress_tiers = serializers.IntegerField(min_value=0)
+
+
+class ModuleActivitySerializer(serializers.Serializer):
+    number = serializers.IntegerField()
+    participants = serializers.IntegerField(
+        min_value=0,
+        help_text="Distinct learners with scoped required-tier records, including in-progress tiers.",
+    )
+    difficulties = ModuleDifficultyActivitySerializer(many=True)
+
+
 class PerformanceSummaryResponseSerializer(serializers.Serializer):
     objectives = serializers.DictField(
         child=RateMetricSerializer(),
@@ -97,6 +113,11 @@ class PerformanceSummaryResponseSerializer(serializers.Serializer):
     modules = PerformanceModuleSerializer(many=True)
     samples = PerformanceSamplesSerializer()
     transfers = TransferCheckpointSerializer(many=True)
+    module_activity = ModuleActivitySerializer(
+        many=True,
+        required=False,
+        help_text="Admin cohort only. Unique participants and learner-tier counts, not KPI denominators.",
+    )
 
 
 class DashboardCountsSerializer(serializers.Serializer):
