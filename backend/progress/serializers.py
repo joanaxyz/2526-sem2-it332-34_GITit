@@ -114,7 +114,8 @@ class PerformanceSummaryResponseSerializer(serializers.Serializer):
     samples = PerformanceSamplesSerializer()
     transfers = TransferCheckpointSerializer(many=True)
     module_activity = ModuleActivitySerializer(
-        many=True, required=False,
+        many=True,
+        required=False,
         help_text="Admin cohort only. Unique participants and learner-tier counts, not KPI denominators.",
     )
 

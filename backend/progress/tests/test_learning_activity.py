@@ -4,16 +4,27 @@ from progress.services.learning_activity import module_activity
 
 
 def record(player, tier, module, difficulty, *, mastered=False, in_progress=False):
-    return dict(player_id=player, tier_id=tier, module=module, difficulty=difficulty,
-                mastered=mastered, in_progress=in_progress, car_scores=[], car_missing=0,
-                transfer=None)
+    return dict(
+        player_id=player,
+        tier_id=tier,
+        module=module,
+        difficulty=difficulty,
+        mastered=mastered,
+        in_progress=in_progress,
+        car_scores=[],
+        car_missing=0,
+        transfer=None,
+    )
 
 
 def test_participants_are_distinct_per_module_and_difficulty_counts_are_not_learners():
-    records = [record(1, 1, 1, "easy", mastered=True),
-               record(1, 2, 1, "medium"), record(2, 2, 1, "medium"),
-               record(2, 3, 1, "hard", in_progress=True),
-               record(1, 4, 2, "easy", mastered=True)]
+    records = [
+        record(1, 1, 1, "easy", mastered=True),
+        record(1, 2, 1, "medium"),
+        record(2, 2, 1, "medium"),
+        record(2, 3, 1, "hard", in_progress=True),
+        record(1, 4, 2, "easy", mastered=True),
+    ]
     first, second, third, fourth = module_activity(records, (1, 2, 3, 4))
     assert first["participants"] == 2
     assert second["participants"] == 1  # Same learner can participate in both.

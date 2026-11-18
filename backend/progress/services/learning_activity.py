@@ -17,15 +17,19 @@ def module_activity(records, module_numbers):
         difficulties = []
         for difficulty in ("easy", "medium", "hard"):
             counts = samples([record for record in scoped if record["difficulty"] == difficulty])
-            difficulties.append({
-                "difficulty": difficulty,
-                "attempted_tiers": counts["attempted_tiers"],
-                "mastered_tiers": counts["mastered_tiers"],
-                "in_progress_tiers": counts["in_progress_tiers"],
-            })
-        result.append({
-            "number": number,
-            "participants": len({record["player_id"] for record in scoped}),
-            "difficulties": difficulties,
-        })
+            difficulties.append(
+                {
+                    "difficulty": difficulty,
+                    "attempted_tiers": counts["attempted_tiers"],
+                    "mastered_tiers": counts["mastered_tiers"],
+                    "in_progress_tiers": counts["in_progress_tiers"],
+                }
+            )
+        result.append(
+            {
+                "number": number,
+                "participants": len({record["player_id"] for record in scoped}),
+                "difficulties": difficulties,
+            }
+        )
     return result

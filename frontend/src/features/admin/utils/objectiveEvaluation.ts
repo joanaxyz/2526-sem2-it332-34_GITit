@@ -4,7 +4,7 @@ import { metricTargetStatus } from '@/features/performance/utils/performanceKpis
 
 // A multi-metric SO misses if any metric misses, is met only when every metric
 // is met, and otherwise has no verdict yet.
-export function combinedStatus(statuses: Status[]): Status {
+function combinedStatus(statuses: Status[]): Status {
   if (statuses.includes('miss')) return 'miss'
   if (statuses.length > 0 && statuses.every(st => st === 'met')) return 'met'
   return 'none'
